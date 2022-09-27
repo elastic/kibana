@@ -115,7 +115,7 @@ export const useFetchIndex = (
   const { addError, addWarning } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
-    (iNames) => {
+    (iNames: string[]) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);

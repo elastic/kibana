@@ -7,6 +7,7 @@
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Switch, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -26,7 +27,7 @@ interface CspAppDeps {
   params: AppMountParameters;
 }
 
-export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
+export const TestProvider: FC<PropsWithChildren<Partial<CspAppDeps>>> = ({
   core = coreMock.createStart(),
   deps = {
     data: dataPluginMock.createStartContract(),

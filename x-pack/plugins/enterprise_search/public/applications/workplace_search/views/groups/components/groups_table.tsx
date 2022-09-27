@@ -82,6 +82,7 @@ export const GroupsTable: React.FC<{}> = () => {
           <EuiTableHeaderCell>{SOURCES_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell align="right">{ACTIONS_HEADER}</EuiTableHeaderCell>
         </EuiTableHeader>
+        {/* @ts-expect-error update types */}
         <EuiTableBody>
           {groups.map((group, index) => (
             <GroupRow key={index} {...group} />

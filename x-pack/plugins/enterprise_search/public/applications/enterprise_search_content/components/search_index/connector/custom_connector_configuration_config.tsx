@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const ConnectorConfigurationConfig: React.FC = () => {
+export const ConnectorConfigurationConfig: FC<PropsWithChildren> = () => {
   return (
     <ConnectorConfigurationConfig>
       <EuiText size="s">

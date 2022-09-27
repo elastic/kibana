@@ -305,7 +305,7 @@ export const percentileOperation: OperationDefinition<
         defaultMessage: 'Percentile',
       });
     const onChange = useCallback(
-      (value) => {
+      (value?: string) => {
         if (
           !isValidNumber(value, true, 99, 1) ||
           Number(value) === currentColumn.params.percentile
@@ -340,7 +340,8 @@ export const percentileOperation: OperationDefinition<
     const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
 
     const handleInputChange = useCallback(
-      (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
+      (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>
+        handleInputChangeWithoutValidation(String(e.currentTarget.value)),
       [handleInputChangeWithoutValidation]
     );
 

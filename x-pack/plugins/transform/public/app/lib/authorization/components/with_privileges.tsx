@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useContext, FC } from 'react';
-
+import React, { useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -105,7 +105,7 @@ const MissingClusterPrivileges: FC<MissingClusterPrivilegesProps> = ({
   </EuiFlexGroup>
 );
 
-export const PrivilegesWrapper: FC<{ privileges: string | string[] }> = ({
+export const PrivilegesWrapper: FC<PropsWithChildren<{ privileges: string | string[] }>> = ({
   children,
   privileges,
 }) => (

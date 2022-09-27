@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import ReactDOM from 'react-dom';
+import React, { FC, PropsWithChildren } from 'react';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -25,9 +25,9 @@ interface MountSectionParams {
   title: string;
 }
 
-const RedirectToHomeIfUnauthorized: FC<{
+const RedirectToHomeIfUnauthorized: FC<PropsWithChildren<{
   applications: ApplicationStart;
-}> = ({ applications, children }) => {
+}>> = ({ applications, children }) => {
   const allowed = applications.capabilities?.management?.kibana?.tags ?? false;
   if (!allowed) {
     applications.navigateToApp('home');
@@ -50,7 +50,9 @@ export const mountSection = async ({
   const assignableTypes = await assignmentService.getAssignableTypes();
   coreStart.chrome.docTitle.change(title);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
         <RedirectToHomeIfUnauthorized applications={coreStart.application}>
@@ -66,11 +68,10 @@ export const mountSection = async ({
         </RedirectToHomeIfUnauthorized>
       </KibanaThemeProvider>
     </I18nProvider>,
-    element
   );
 
   return () => {
     coreStart.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Route, Router, useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
@@ -87,7 +87,9 @@ export const roleMappingsManagementApp = Object.freeze({
           );
         };
 
-        render(
+        const root = createRoot(element);
+
+        root.render(
           <KibanaContextProvider services={core}>
             <core.i18n.Context>
               <KibanaThemeProvider theme$={theme$}>
@@ -117,12 +119,11 @@ export const roleMappingsManagementApp = Object.freeze({
                 </Router>
               </KibanaThemeProvider>
             </core.i18n.Context>
-          </KibanaContextProvider>,
-          element
+          </KibanaContextProvider>
         );
 
         return () => {
-          unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     } as RegisterManagementAppArgs;

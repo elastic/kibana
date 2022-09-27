@@ -26,12 +26,14 @@ export const FormattedDurationTooltipContent = React.memo<{
     {tooltipTitle != null ? <P data-test-subj="title">{tooltipTitle}</P> : null}
     <P data-test-subj="humanized">{getHumanizedDuration(maybeDurationNanoseconds)}</P>
     <P data-test-subj="raw-value">
-      <FormattedMessage
-        id="xpack.securitySolution.formattedDuration.tooltipLabel"
-        defaultMessage="raw"
-      />
-      {': '}
-      {maybeDurationNanoseconds}
+      <>
+        <FormattedMessage
+          id="xpack.securitySolution.formattedDuration.tooltipLabel"
+          defaultMessage="raw"
+        />
+        {': '}
+        {maybeDurationNanoseconds}
+      </>
     </P>
   </>
 ));

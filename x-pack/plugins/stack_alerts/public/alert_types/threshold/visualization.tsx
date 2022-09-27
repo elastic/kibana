@@ -262,6 +262,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           <Fragment />
         )}
         {alertVisualizationDataKeys.length ? (
+          // @ts-expect-error update types
           <Chart size={['100%', 200]} renderer="canvas">
             <Settings
               theme={[customTheme(), chartsTheme]}

@@ -37,6 +37,7 @@ export const MetaEnginesSchemaTable: React.FC = () => {
         <EuiTableHeaderCell>{ENGINES_TITLE}</EuiTableHeaderCell>
         <EuiTableHeaderCell align="right">{FIELD_TYPE}</EuiTableHeaderCell>
       </EuiTableHeader>
+      {/* @ts-expect-error update types */}
       <EuiTableBody>
         <EuiTableRow>
           <EuiTableRowCell>

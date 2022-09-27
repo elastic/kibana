@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import SemVer from 'semver/classes/semver';
 
 import { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
@@ -35,6 +35,7 @@ export const renderApp = (
     return () => undefined;
   }
 
+  const root = createRoot(elem);
   const { i18n, docLinks, notifications, application, executionContext, overlays } = core;
   const { Context: I18nContext } = i18n;
   const { services, history, setBreadcrumbs, uiSettings, kibanaVersion, theme$ } = dependencies;
@@ -61,7 +62,7 @@ export const renderApp = (
     executionContext,
   };
 
-  render(
+  root.render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaReactContextProvider>
@@ -78,12 +79,11 @@ export const renderApp = (
           </Provider>
         </KibanaReactContextProvider>
       </KibanaThemeProvider>
-    </I18nContext>,
-    elem
+    </I18nContext>
   );
 
   return () => {
-    unmountComponentAtNode(elem);
+    root.unmount();
   };
 };
 

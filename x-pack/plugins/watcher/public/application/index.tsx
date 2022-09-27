@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { SavedObjectsClientContract, CoreTheme } from '@kbn/core/public';
 
@@ -23,20 +23,20 @@ interface BootDeps extends AppDeps {
 
 export const renderApp = (bootDeps: BootDeps) => {
   const { I18nContext, element, savedObjects, theme$, ...appDeps } = bootDeps;
+  const root = createRoot(element);
 
   setHttpClient(appDeps.http);
   setSavedObjectsClient(savedObjects);
 
-  render(
+  root.render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <App {...appDeps} />
       </KibanaThemeProvider>
-    </I18nContext>,
-    element
+    </I18nContext>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

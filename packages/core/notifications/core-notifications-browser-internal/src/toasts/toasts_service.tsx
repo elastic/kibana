@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -31,6 +32,7 @@ interface StartDeps {
 export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
+  private root?: Root;
 
   public setup({ uiSettings }: SetupDeps) {
     this.api = new ToastsApi({ uiSettings });
@@ -40,15 +42,15 @@ export class ToastsService {
   public start({ i18n, overlays, theme, targetDomElement }: StartDeps) {
     this.api!.start({ overlays, i18n });
     this.targetDomElement = targetDomElement;
+    this.root = createRoot(targetDomElement);
 
-    render(
+    this.root.render(
       <CoreContextProvider i18n={i18n} theme={theme}>
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}
         />
-      </CoreContextProvider>,
-      targetDomElement
+      </CoreContextProvider>
     );
 
     return this.api!;
@@ -56,7 +58,7 @@ export class ToastsService {
 
   public stop() {
     if (this.targetDomElement) {
-      unmountComponentAtNode(this.targetDomElement);
+      this.root?.unmount();
       this.targetDomElement.textContent = '';
     }
   }

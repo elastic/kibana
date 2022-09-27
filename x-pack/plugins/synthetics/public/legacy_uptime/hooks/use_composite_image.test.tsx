@@ -6,7 +6,7 @@
  */
 
 import * as redux from 'react-redux';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { ScreenshotRefImageData } from '../../../common/runtime_types';
 import { ScreenshotBlockCache } from '../state/reducers/synthetics';
 import { shouldCompose, useCompositeImage } from './use_composite_image';
@@ -183,7 +183,7 @@ describe('use composite image', () => {
 
     it('composes when all required blocks are loaded', async () => {
       const onComposeImageSuccess = jest.fn();
-      const { waitFor } = renderHook(() => useCompositeImage(imgRef, onComposeImageSuccess));
+      renderHook(() => useCompositeImage(imgRef, onComposeImageSuccess));
 
       expect(selectorSpy).toHaveBeenCalled();
       expect(composeSpy).toHaveBeenCalledTimes(1);

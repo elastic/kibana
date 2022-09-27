@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';
 import { GuidedOnboardingExampleApp } from './components/app';
@@ -17,14 +17,15 @@ export const renderApp = (
   { guidedOnboarding }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <GuidedOnboardingExampleApp
       notifications={notifications}
       guidedOnboarding={guidedOnboarding}
       history={history}
-    />,
-    element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

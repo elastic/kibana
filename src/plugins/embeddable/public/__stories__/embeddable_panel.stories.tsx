@@ -15,7 +15,7 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { ReplaySubject } from 'rxjs';
 import { ThemeContext } from '@emotion/react';
 import { DecoratorFn, Meta } from '@storybook/react';
@@ -254,9 +254,10 @@ export function DefaultWithCustomError({ message, ...props }: DefaultWithErrorPr
   useEffect(
     () =>
       ref.current?.embeddable.setErrorRenderer((node, error) => {
-        render(<EuiEmptyPrompt iconColor="warning" iconType="bug" body={error.message} />, node);
+        const root = createRoot(node);
+        root.render(<EuiEmptyPrompt iconColor="warning" iconType="bug" body={error.message} />);
 
-        return () => unmountComponentAtNode(node);
+        return () => root.unmount();
       }),
     []
   );

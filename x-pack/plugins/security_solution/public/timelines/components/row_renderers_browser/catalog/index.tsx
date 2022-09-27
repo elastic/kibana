@@ -54,7 +54,7 @@ export const renderers: RowRendererOption[] = [
     id: RowRendererId.alerts,
     name: eventRendererNames[RowRendererId.alerts],
     description: i18n.ALERTS_DESCRIPTION,
-    example: AlertsExample,
+    example: <>{AlertsExample}</>,
     searchableDescription: i18n.ALERTS_DESCRIPTION,
   },
   {
@@ -68,7 +68,7 @@ export const renderers: RowRendererOption[] = [
         {i18n.AUDITD_DESCRIPTION_PART1}
       </span>
     ),
-    example: AuditdExample,
+    example: <>{AuditdExample}</>,
     searchableDescription: `${i18n.AUDITD_NAME} ${i18n.AUDITD_DESCRIPTION_PART1}`,
   },
   {
@@ -82,14 +82,14 @@ export const renderers: RowRendererOption[] = [
         {i18n.AUDITD_FILE_DESCRIPTION_PART1}
       </span>
     ),
-    example: AuditdFileExample,
+    example: <>{AuditdFileExample}</>,
     searchableDescription: `${i18n.AUDITD_FILE_NAME} ${i18n.AUDITD_FILE_DESCRIPTION_PART1}`,
   },
   {
     id: RowRendererId.library,
     name: eventRendererNames[RowRendererId.library],
     description: i18n.LIBRARY_DESCRIPTION,
-    example: LibraryExample,
+    example: <>{LibraryExample}</>,
     searchableDescription: i18n.LIBRARY_DESCRIPTION,
   },
   {
@@ -102,14 +102,14 @@ export const renderers: RowRendererOption[] = [
         <p>{i18n.AUTHENTICATION_DESCRIPTION_PART2}</p>
       </div>
     ),
-    example: SystemSecurityEventExample,
+    example: <>{SystemSecurityEventExample}</>,
     searchableDescription: `${i18n.AUTHENTICATION_DESCRIPTION_PART1} ${i18n.AUTHENTICATION_DESCRIPTION_PART2}`,
   },
   {
     id: RowRendererId.system_dns,
     name: eventRendererNames[RowRendererId.system_dns],
     description: i18n.DNS_DESCRIPTION_PART1,
-    example: SystemDnsExample,
+    example: <>{SystemDnsExample}</>,
     searchableDescription: i18n.DNS_DESCRIPTION_PART1,
   },
   {
@@ -122,7 +122,7 @@ export const renderers: RowRendererOption[] = [
         <p>{i18n.FLOW_DESCRIPTION_PART2}</p>
       </div>
     ),
-    example: NetflowExample,
+    example: <>{NetflowExample}</>,
     searchableDescription: `${i18n.FLOW_DESCRIPTION_PART1} ${i18n.FLOW_DESCRIPTION_PART2}`,
   },
   {
@@ -141,7 +141,7 @@ export const renderers: RowRendererOption[] = [
         <p>{i18n.SYSTEM_DESCRIPTION_PART3}</p>
       </div>
     ),
-    example: SystemExample,
+    example: <>{SystemExample}</>,
     searchableDescription: `${i18n.SYSTEM_DESCRIPTION_PART1} ${i18n.SYSTEM_NAME} ${i18n.SYSTEM_DESCRIPTION_PART2} ${i18n.SYSTEM_DESCRIPTION_PART3}`,
   },
   {
@@ -154,28 +154,28 @@ export const renderers: RowRendererOption[] = [
         <p>{i18n.PROCESS_DESCRIPTION_PART2}</p>
       </div>
     ),
-    example: SystemEndgameProcessExample,
+    example: <>{SystemEndgameProcessExample}</>,
     searchableDescription: `${i18n.PROCESS_DESCRIPTION_PART1} ${i18n.PROCESS_DESCRIPTION_PART2}`,
   },
   {
     id: RowRendererId.registry,
     name: eventRendererNames[RowRendererId.registry],
     description: i18n.REGISTRY_DESCRIPTION,
-    example: RegistryExample,
+    example: <>{RegistryExample}</>,
     searchableDescription: i18n.REGISTRY_DESCRIPTION,
   },
   {
     id: RowRendererId.system_fim,
     name: eventRendererNames[RowRendererId.system_fim],
     description: i18n.FIM_DESCRIPTION_PART1,
-    example: SystemFimExample,
+    example: <>{SystemFimExample}</>,
     searchableDescription: i18n.FIM_DESCRIPTION_PART1,
   },
   {
     id: RowRendererId.system_file,
     name: eventRendererNames[RowRendererId.system_file],
     description: i18n.FILE_DESCRIPTION_PART1,
-    example: SystemFileExample,
+    example: <>{SystemFileExample}</>,
     searchableDescription: i18n.FILE_DESCRIPTION_PART1,
   },
   {
@@ -188,7 +188,7 @@ export const renderers: RowRendererOption[] = [
         <p>{i18n.SOCKET_DESCRIPTION_PART2}</p>
       </div>
     ),
-    example: SystemSocketExample,
+    example: <>{SystemSocketExample}</>,
     searchableDescription: `${i18n.SOCKET_DESCRIPTION_PART1} ${i18n.SOCKET_DESCRIPTION_PART2}`,
   },
   {
@@ -203,14 +203,14 @@ export const renderers: RowRendererOption[] = [
         {i18n.SURICATA_DESCRIPTION_PART2}
       </p>
     ),
-    example: SuricataExample,
+    example: <>{SuricataExample}</>,
     searchableDescription: `${i18n.SURICATA_DESCRIPTION_PART1} ${i18n.SURICATA_NAME} ${i18n.SURICATA_DESCRIPTION_PART2}`,
   },
   {
     id: RowRendererId.threat_match,
     name: eventRendererNames[RowRendererId.threat_match],
     description: i18n.THREAT_MATCH_DESCRIPTION,
-    example: ThreatMatchExample,
+    example: <>{ThreatMatchExample}</>,
     searchableDescription: `${i18n.THREAT_MATCH_NAME} ${i18n.THREAT_MATCH_DESCRIPTION}`,
   },
   {
@@ -225,7 +225,7 @@ export const renderers: RowRendererOption[] = [
         {i18n.ZEEK_DESCRIPTION_PART2}
       </p>
     ),
-    example: ZeekExample,
+    example: <>{ZeekExample}</>,
     searchableDescription: `${i18n.ZEEK_DESCRIPTION_PART1} ${i18n.ZEEK_NAME} ${i18n.ZEEK_DESCRIPTION_PART2}`,
   },
 ];

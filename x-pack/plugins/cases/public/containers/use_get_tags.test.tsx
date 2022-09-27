@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -25,11 +24,12 @@ describe('useGetTags', () => {
 
   it('calls getTags api', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
-    const { waitForNextUpdate } = renderHook(() => useGetTags(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    renderHook(() => useGetTags(), {
+      wrapper: TestProviders,
     });
-    await waitForNextUpdate();
-    expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+    await waitFor(() => {
+      expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+    });
   });
 
   it('displays and error toast when an error occurs', async () => {
@@ -39,10 +39,11 @@ describe('useGetTags', () => {
     spyOnGetTags.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
-    const { waitForNextUpdate } = renderHook(() => useGetTags(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    renderHook(() => useGetTags(), {
+      wrapper: TestProviders,
     });
-    await waitForNextUpdate();
-    expect(addError).toBeCalled();
+    await waitFor(() => {
+      expect(addError).toBeCalled();
+    });
   });
 });

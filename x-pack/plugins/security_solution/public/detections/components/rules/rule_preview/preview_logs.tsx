@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 import * as i18n from './translations';
@@ -27,7 +28,7 @@ interface LogAccordionProps {
   isError?: boolean;
 }
 
-const CustomWarning: React.FC<{ message: string }> = ({ message }) => (
+const CustomWarning: FC<{ message: string }> = ({ message }) => (
   <EuiCallOut color={'warning'} iconType="alert" data-test-subj={'preview-abort'}>
     <EuiText>
       <p>{message}</p>
@@ -42,7 +43,7 @@ const addLogs = (
   allLogs: SortedLogs[]
 ) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
-export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
+export const PreviewLogsComponent: FC<PreviewLogsComponentProps> = ({
   logs,
   hasNoiseWarning,
   isAborted,
@@ -73,7 +74,7 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
   );
 };
 
-const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
+const LogAccordion: FC<PropsWithChildren<LogAccordionProps>> = ({ logs, isError, children }) => {
   const firstLog = logs[0];
   if (!(children || firstLog)) return null;
 

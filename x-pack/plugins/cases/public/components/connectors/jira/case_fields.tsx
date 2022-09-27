@@ -124,7 +124,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFiel
   );
 
   const onFieldChange = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       if (key === 'issueType') {
         return onChange({ ...fields, issueType: value, priority: null, parent: null });
       }

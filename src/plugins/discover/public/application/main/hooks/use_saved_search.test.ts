@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { Subject } from 'rxjs';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
@@ -69,7 +69,7 @@ describe('test useSavedSearch', () => {
       });
     });
 
-    const { result, waitForValueToChange } = renderHook(() => {
+    const { result } = renderHook(() => {
       return useSavedSearch({
         initialFetchStatus: FetchStatus.LOADING,
         savedSearch: savedSearchMock,
@@ -83,12 +83,11 @@ describe('test useSavedSearch', () => {
 
     result.current.refetch$.next(undefined);
 
-    await waitForValueToChange(() => {
-      return result.current.data$.main$.value.fetchStatus === 'complete';
+    await waitFor(() => {
+      expect(result.current.data$.main$.value.fetchStatus).toBe('complete');
+      expect(result.current.data$.totalHits$.value.result).toBe(0);
+      expect(result.current.data$.documents$.value.result).toEqual([]);
     });
-
-    expect(result.current.data$.totalHits$.value.result).toBe(0);
-    expect(result.current.data$.documents$.value.result).toEqual([]);
   });
 
   test('reset sets back to initial state', async () => {
@@ -113,7 +112,7 @@ describe('test useSavedSearch', () => {
       });
     });
 
-    const { result, waitForValueToChange } = renderHook(() => {
+    const { result } = renderHook(() => {
       return useSavedSearch({
         initialFetchStatus: FetchStatus.LOADING,
         savedSearch: savedSearchMock,
@@ -127,12 +126,14 @@ describe('test useSavedSearch', () => {
 
     result.current.refetch$.next(undefined);
 
-    await waitForValueToChange(() => {
-      return result.current.data$.main$.value.fetchStatus === FetchStatus.COMPLETE;
+    await waitFor(() => {
+      expect(result.current.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
 
     result.current.reset();
-    expect(result.current.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
+    await waitFor(() => {
+      expect(result.current.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
+    });
   });
 
   test('useSavedSearch returns plain record raw type', async () => {

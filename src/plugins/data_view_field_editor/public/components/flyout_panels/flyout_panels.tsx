@@ -14,6 +14,7 @@ import React, {
   useMemo,
   useLayoutEffect,
 } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
 
 import './flyout_panels.scss';
@@ -56,7 +57,7 @@ export interface Props {
   fixedPanelWidths?: boolean;
 }
 
-export const Panels: React.FC<Props> = ({
+export const Panels: FC<PropsWithChildren<Props>> = ({
   maxWidth,
   flyoutClassName,
   fixedPanelWidths = false,

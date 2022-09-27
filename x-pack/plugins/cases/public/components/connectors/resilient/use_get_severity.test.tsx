@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector } from '../mock';
@@ -22,37 +22,38 @@ describe('useGetSeverity', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetSeverity>(() =>
+      const { result } = renderHook<UseGetSeverity, {}>(() =>
         useGetSeverity({ http, toastNotifications: notifications.toasts })
       );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: true, severity: [] });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: true, severity: [] });
+      });
     });
   });
 
   test('fetch severity', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetSeverity>(() =>
+      const { result } = renderHook<UseGetSeverity, {}>(() =>
         useGetSeverity({ http, toastNotifications: notifications.toasts, connector })
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        severity: [
-          {
-            id: 4,
-            name: 'Low',
-          },
-          {
-            id: 5,
-            name: 'Medium',
-          },
-          {
-            id: 6,
-            name: 'High',
-          },
-        ],
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          severity: [
+            {
+              id: 4,
+              name: 'Low',
+            },
+            {
+              id: 5,
+              name: 'Medium',
+            },
+            {
+              id: 6,
+              name: 'High',
+            },
+          ],
+        });
       });
     });
   });
@@ -64,14 +65,13 @@ describe('useGetSeverity', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetSeverity>(() =>
+      const { result } = renderHook<UseGetSeverity, {}>(() =>
         useGetSeverity({ http, toastNotifications: notifications.toasts, connector })
       );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({ isLoading: false, severity: [] });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: false, severity: [] });
+      });
     });
   });
 });

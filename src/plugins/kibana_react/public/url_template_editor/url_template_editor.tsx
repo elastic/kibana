@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { monaco } from '@kbn/monaco';
 import { Props as CodeEditorProps } from '../code_editor/code_editor';
 import { CodeEditor, HandlebarsLang } from '../code_editor';

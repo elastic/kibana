@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import type { UseControlsReturn } from './use_control';
 import { useControl } from './use_control';
 
 describe('useControl', () => {
   it('init', async () => {
-    const { result } = renderHook<{}, UseControlsReturn>(() => useControl());
+    const { result } = renderHook<UseControlsReturn, {}>(() => useControl());
     expect(result.current.isControlOpen).toBe(false);
   });
 
   it('should open the control', async () => {
-    const { result } = renderHook<{}, UseControlsReturn>(() => useControl());
+    const { result } = renderHook<UseControlsReturn, {}>(() => useControl());
 
     act(() => {
       result.current.openControl();
@@ -26,7 +26,7 @@ describe('useControl', () => {
   });
 
   it('should close the control', async () => {
-    const { result } = renderHook<{}, UseControlsReturn>(() => useControl());
+    const { result } = renderHook<UseControlsReturn, {}>(() => useControl());
 
     act(() => {
       result.current.openControl();

@@ -47,6 +47,7 @@ export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
 }) => {
   return (
     <EuiThemeProvider>
+      {/* @ts-expect-error update types */}
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
         <Settings
           showLegend

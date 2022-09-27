@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { Observable } from 'rxjs';
 
@@ -50,7 +50,8 @@ const renderApp = (
   theme$: Observable<CoreTheme>,
   executionContext: ExecutionContextStart
 ): UnmountCallback => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <Provider store={ccrStore}>
@@ -61,11 +62,9 @@ const renderApp = (
           />
         </Provider>
       </KibanaThemeProvider>
-    </I18nContext>,
-    element
+    </I18nContext>
   );
-
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };
 
 export async function mountApp({

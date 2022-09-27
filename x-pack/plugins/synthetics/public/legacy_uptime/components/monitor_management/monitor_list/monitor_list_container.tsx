@@ -31,7 +31,7 @@ export const MonitorListContainer = ({
   dispatchPageAction: Dispatch<MonitorManagementPageAction>;
 }) => {
   const onPageStateChange = useCallback(
-    (state) => {
+    (state: MonitorManagementListPageState) => {
       dispatchPageAction({ type: 'update', payload: state });
     },
     [dispatchPageAction]

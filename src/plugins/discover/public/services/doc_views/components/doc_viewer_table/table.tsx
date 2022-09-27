@@ -400,6 +400,7 @@ export const DocViewerTable = ({
         <EuiFlexItem grow={false}>
           <EuiTable responsive={false}>
             <EuiTableHeader>{headers}</EuiTableHeader>
+            {/* @ts-expect-error update types */}
             <EuiTableBody>{rowElements}</EuiTableBody>
           </EuiTable>
         </EuiFlexItem>

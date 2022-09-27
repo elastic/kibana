@@ -2812,7 +2812,7 @@ describe('IndexPattern Data Source', () => {
       warnings?.map((item) =>
         isFragment(item)
           ? (item as ReactElement).props.children[0].props.id
-          : (item as ReactElement).props.id
+          : (item as unknown as ReactElement).props.id
       );
 
     it('should return mismatched time shifts', () => {

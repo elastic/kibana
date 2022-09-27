@@ -9,6 +9,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import {
   DragEffects,
   DraggableWrapper,
@@ -20,7 +21,7 @@ import { Provider } from '../../../data_providers/provider';
 import { TokensFlexItem } from '../helpers';
 import { getBeginningTokens } from './suricata_links';
 import { DefaultDraggable } from '../../../../../../common/components/draggables';
-import type { QueryOperator } from '../../../data_providers/data_provider';
+import type { DataProvider, QueryOperator } from '../../../data_providers/data_provider';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 export const SURICATA_SIGNATURE_FIELD_NAME = 'suricata.eve.alert.signature';
@@ -81,7 +82,7 @@ export const DraggableSignatureId = React.memo<{
   );
 
   const render = useCallback(
-    (dataProvider, _, snapshot) =>
+    (dataProvider: DataProvider, _: DraggableProvided | null, snapshot: DraggableStateSnapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />

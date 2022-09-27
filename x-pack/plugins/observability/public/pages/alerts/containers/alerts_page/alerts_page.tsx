@@ -150,14 +150,24 @@ function AlertsPage() {
   };
 
   const onQueryChange = useCallback(
-    ({ dateRange, query }) => {
+    ({
+      dateRange,
+      query,
+    }: {
+      dateRange: {
+        from: string;
+        to: string;
+        mode?: 'absolute' | 'relative' | undefined;
+      };
+      query?: string;
+    }) => {
       if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
         return onRefresh();
       }
       timeFilterService.setTime(dateRange);
       setRangeFrom(dateRange.from);
       setRangeTo(dateRange.to);
-      setKuery(query);
+      setKuery(query!);
       syncAlertStatusFilterStatus(query as string);
     },
     [rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, timeFilterService]

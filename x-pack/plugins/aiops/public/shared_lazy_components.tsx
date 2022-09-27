@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Suspense } from 'react';
-
+import React, { Suspense } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
 import type { ExplainLogRateSpikesAppStateProps } from './components/explain_log_rate_spikes';
 import type { LogCategorizationAppStateProps } from './components/log_categorization';
@@ -15,7 +15,7 @@ const ExplainLogRateSpikesAppStateLazy = React.lazy(
   () => import('./components/explain_log_rate_spikes')
 );
 
-const ExplainLogRateSpikesLazyWrapper: FC = ({ children }) => (
+const ExplainLogRateSpikesLazyWrapper: FC<PropsWithChildren> = ({ children }) => (
   <EuiErrorBoundary>
     <Suspense fallback={<EuiLoadingContent lines={3} />}>{children}</Suspense>
   </EuiErrorBoundary>
@@ -33,7 +33,7 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesAppStateProps> = (prop
 
 const LogCategorizationAppStateLazy = React.lazy(() => import('./components/log_categorization'));
 
-const LogCategorizationLazyWrapper: FC = ({ children }) => (
+const LogCategorizationLazyWrapper: FC<PropsWithChildren> = ({ children }) => (
   <EuiErrorBoundary>
     <Suspense fallback={<EuiLoadingContent lines={3} />}>{children}</Suspense>
   </EuiErrorBoundary>

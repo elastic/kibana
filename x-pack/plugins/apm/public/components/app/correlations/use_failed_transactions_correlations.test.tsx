@@ -8,7 +8,7 @@
 import React, { ReactNode } from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -27,7 +27,7 @@ function wrapper({
   error = false,
 }: {
   children?: ReactNode;
-  error: boolean;
+  error?: boolean;
 }) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>
     jest.fn().mockImplementation(async (pathname) => {
@@ -121,7 +121,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: ({ children }) => wrapper({ children }),
         }
       );
 
@@ -142,7 +142,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: ({ children }) => wrapper({ children }),
         }
       );
 
@@ -160,10 +160,10 @@ describe('useFailedTransactionsCorrelations', () => {
     });
 
     it('should receive partial updates and finish running', async () => {
-      const { result, unmount, waitFor } = renderHook(
+      const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: ({ children }) => wrapper({ children }),
         }
       );
 
@@ -327,10 +327,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
-          initialProps: {
-            error: true,
-          },
+          wrapper: ({ children }) => wrapper({ children, error: true }),
         }
       );
 
@@ -348,10 +345,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
-          initialProps: {
-            error: true,
-          },
+          wrapper: ({ children }) => wrapper({ children, error: true }),
         }
       );
 
@@ -369,13 +363,10 @@ describe('useFailedTransactionsCorrelations', () => {
     });
 
     it('should stop and return an error after more than 100ms', async () => {
-      const { result, unmount, waitFor } = renderHook(
+      const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
-          initialProps: {
-            error: true,
-          },
+          wrapper: ({ children }) => wrapper({ children, error: true }),
         }
       );
 
@@ -398,10 +389,10 @@ describe('useFailedTransactionsCorrelations', () => {
 
   describe('when canceled', () => {
     it('should stop running', async () => {
-      const { result, unmount, waitFor } = renderHook(
+      const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: ({ children }) => wrapper({ children }),
         }
       );
 

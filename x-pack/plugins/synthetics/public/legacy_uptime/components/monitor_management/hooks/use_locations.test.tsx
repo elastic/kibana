@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { MockRedux } from '../../../lib/helper/rtl_helpers';
 import { useLocations } from './use_locations';
 
@@ -21,6 +21,7 @@ describe('useExpViewTimeRange', function () {
   jest.spyOn(reactRedux, 'useDispatch').mockReturnValue(dispatch);
   it('updates lens attributes with report type from storage', async function () {
     renderHook(() => useLocations(), {
+      // @ts-expect-error update types
       wrapper: MockRedux,
     });
 

@@ -302,54 +302,56 @@ export function RuleDetailsPage() {
           : [],
       }}
     >
-      <EuiFlexGroup wrap={true} gutterSize="m">
-        <EuiFlexItem style={{ minWidth: 350 }}>
-          {getRuleStatusPanel({
-            rule,
-            isEditable: hasEditButton,
-            requestRefresh: reloadRule,
-            healthColor: getHealthColor(rule.executionStatus.status),
-            statusMessage,
-          })}
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiFlexItem style={{ minWidth: 350 }}>
-          {getRuleAlertsSummary({
-            rule,
-            filteredRuleTypes,
-          })}
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
-        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
-      </EuiFlexGroup>
+      <>
+        <EuiFlexGroup wrap={true} gutterSize="m">
+          <EuiFlexItem style={{ minWidth: 350 }}>
+            {getRuleStatusPanel({
+              rule,
+              isEditable: hasEditButton,
+              requestRefresh: reloadRule,
+              healthColor: getHealthColor(rule.executionStatus.status),
+              statusMessage,
+            })}
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+          <EuiFlexItem style={{ minWidth: 350 }}>
+            {getRuleAlertsSummary({
+              rule,
+              filteredRuleTypes,
+            })}
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+          {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
+        </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
-      <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />
-      {editFlyoutVisible &&
-        getEditAlertFlyout({
-          initialRule: rule,
-          onClose: () => {
-            setEditFlyoutVisible(false);
-          },
-          onSave: reloadRule,
-        })}
-      <DeleteModalConfirmation
-        onDeleted={() => {
-          setRuleToDelete([]);
-          navigateToUrl(http.basePath.prepend(paths.observability.rules));
-        }}
-        onErrors={() => {
-          setRuleToDelete([]);
-          navigateToUrl(http.basePath.prepend(paths.observability.rules));
-        }}
-        onCancel={() => setRuleToDelete([])}
-        apiDeleteCall={deleteRules}
-        idsToDelete={ruleToDelete}
-        singleTitle={rule.name}
-        multipleTitle={rule.name}
-        setIsLoadingState={() => setIsPageLoading(true)}
-      />
-      {errorRule && toasts.addDanger({ title: errorRule })}
+        <EuiSpacer size="l" />
+        <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />
+        {editFlyoutVisible &&
+          getEditAlertFlyout({
+            initialRule: rule,
+            onClose: () => {
+              setEditFlyoutVisible(false);
+            },
+            onSave: reloadRule,
+          })}
+        <DeleteModalConfirmation
+          onDeleted={() => {
+            setRuleToDelete([]);
+            navigateToUrl(http.basePath.prepend(paths.observability.rules));
+          }}
+          onErrors={() => {
+            setRuleToDelete([]);
+            navigateToUrl(http.basePath.prepend(paths.observability.rules));
+          }}
+          onCancel={() => setRuleToDelete([])}
+          apiDeleteCall={deleteRules}
+          idsToDelete={ruleToDelete}
+          singleTitle={rule.name}
+          multipleTitle={rule.name}
+          setIsLoadingState={() => setIsPageLoading(true)}
+        />
+        {errorRule && toasts.addDanger({ title: errorRule })}
+      </>
     </ObservabilityPageTemplate>
   );
 }

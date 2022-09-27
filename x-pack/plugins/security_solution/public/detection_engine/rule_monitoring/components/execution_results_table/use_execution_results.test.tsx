@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { renderHook, cleanup, waitFor } from '@testing-library/react';
 
 import { useExecutionResults } from './use_execution_results';
 import { useToasts } from '../../../../common/lib/kibana';
@@ -36,7 +37,7 @@ describe('useExecutionResults', () => {
         },
       },
     });
-    const wrapper: React.FC = ({ children }) => (
+    const wrapper: FC<PropsWithChildren> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     return wrapper;
@@ -60,18 +61,18 @@ describe('useExecutionResults', () => {
   it('calls the API via fetchRuleExecutionResults', async () => {
     const fetchRuleExecutionResults = jest.spyOn(api, 'fetchRuleExecutionResults');
 
-    const { waitForNextUpdate } = render();
+    render();
 
-    await waitForNextUpdate();
-
-    expect(fetchRuleExecutionResults).toHaveBeenCalledTimes(1);
-    expect(fetchRuleExecutionResults).toHaveBeenLastCalledWith(
-      expect.objectContaining({ ruleId: SOME_RULE_ID })
-    );
+    await waitFor(() => {
+      expect(fetchRuleExecutionResults).toHaveBeenCalledTimes(1);
+      expect(fetchRuleExecutionResults).toHaveBeenLastCalledWith(
+        expect.objectContaining({ ruleId: SOME_RULE_ID })
+      );
+    });
   });
 
   it('fetches data from the API', async () => {
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -79,39 +80,39 @@ describe('useExecutionResults', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents returns
-    await waitForNextUpdate();
-
-    // It switches to a success state
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isSuccess).toEqual(true);
-    expect(result.current.isError).toEqual(false);
-    expect(result.current.data).toEqual({
-      events: [
-        {
-          duration_ms: 3866,
-          es_search_duration_ms: 1236,
-          execution_uuid: '88d15095-7937-462c-8f21-9763e1387cad',
-          gap_duration_s: 0,
-          indexing_duration_ms: 95,
-          message:
-            "rule executed: siem.queryRule:fb1fc150-a292-11ec-a2cf-c1b28b0392b0: 'Lots of Execution Events'",
-          num_active_alerts: 0,
-          num_errored_actions: 0,
-          num_new_alerts: 0,
-          num_recovered_alerts: 0,
-          num_succeeded_actions: 1,
-          num_triggered_actions: 1,
-          schedule_delay_ms: -127535,
-          search_duration_ms: 1255,
-          security_message: 'succeeded',
-          security_status: 'succeeded',
-          status: 'success',
-          timed_out: false,
-          timestamp: '2022-03-13T06:04:05.838Z',
-          total_search_duration_ms: 0,
-        },
-      ],
-      total: 1,
+    await waitFor(() => {
+      // It switches to a success state
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.isSuccess).toEqual(true);
+      expect(result.current.isError).toEqual(false);
+      expect(result.current.data).toEqual({
+        events: [
+          {
+            duration_ms: 3866,
+            es_search_duration_ms: 1236,
+            execution_uuid: '88d15095-7937-462c-8f21-9763e1387cad',
+            gap_duration_s: 0,
+            indexing_duration_ms: 95,
+            message:
+              "rule executed: siem.queryRule:fb1fc150-a292-11ec-a2cf-c1b28b0392b0: 'Lots of Execution Events'",
+            num_active_alerts: 0,
+            num_errored_actions: 0,
+            num_new_alerts: 0,
+            num_recovered_alerts: 0,
+            num_succeeded_actions: 1,
+            num_triggered_actions: 1,
+            schedule_delay_ms: -127535,
+            search_duration_ms: 1255,
+            security_message: 'succeeded',
+            security_status: 'succeeded',
+            status: 'success',
+            timed_out: false,
+            timestamp: '2022-03-13T06:04:05.838Z',
+            total_search_duration_ms: 0,
+          },
+        ],
+        total: 1,
+      });
     });
   });
 
@@ -119,7 +120,7 @@ describe('useExecutionResults', () => {
     const exception = new Error('Boom!');
     jest.spyOn(api, 'fetchRuleExecutionResults').mockRejectedValue(exception);
 
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -127,18 +128,18 @@ describe('useExecutionResults', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitForNextUpdate();
+    await waitFor(() => {
+      // It switches to an error state
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.isSuccess).toEqual(false);
+      expect(result.current.isError).toEqual(true);
+      expect(result.current.error).toEqual(exception);
 
-    // It switches to an error state
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isSuccess).toEqual(false);
-    expect(result.current.isError).toEqual(true);
-    expect(result.current.error).toEqual(exception);
-
-    // And shows a toast with the caught exception
-    expect(useToasts().addError).toHaveBeenCalledTimes(1);
-    expect(useToasts().addError).toHaveBeenCalledWith(exception, {
-      title: 'Failed to fetch rule execution results',
+      // And shows a toast with the caught exception
+      expect(useToasts().addError).toHaveBeenCalledTimes(1);
+      expect(useToasts().addError).toHaveBeenCalledWith(exception, {
+        title: 'Failed to fetch rule execution results',
+      });
     });
   });
 });

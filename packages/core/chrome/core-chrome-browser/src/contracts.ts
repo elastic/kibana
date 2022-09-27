@@ -34,8 +34,9 @@ import type { ChromeBadge, ChromeUserBanner } from './types';
  * How to set the help dropdown extension:
  * ```tsx
  * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
- *   return () => ReactDOM.unmountComponentAtNode(elem);
+ *   const root = createRoot(elem);
+ *   root.render(<MyHelpComponent />);
+ *   return () => root.unmount();
  * });
  * ```
  *

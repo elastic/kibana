@@ -44,7 +44,7 @@ export const useExplorationDataGrid = (
     [setPageUrlState]
   );
   dataGrid.onChangePage = useCallback(
-    (pageIndex) => {
+    (pageIndex: number) => {
       setPageUrlState({ pageIndex });
     },
     [setPageUrlState]

@@ -7,7 +7,7 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -30,7 +30,9 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
         }))
       );
 
-      ReactDOM.render(
+      const root = createRoot(targetDomElement);
+
+      root.render(
         <I18nContext>
           <KibanaThemeProvider theme$={theme$}>
             <Suspense fallback={<EuiLoadingSpinner />}>
@@ -45,11 +47,10 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
             </Suspense>
           </KibanaThemeProvider>
         </I18nContext>,
-        targetDomElement
       );
 
       return () => {
-        ReactDOM.unmountComponentAtNode(targetDomElement);
+        root.unmount();
       };
     },
   });

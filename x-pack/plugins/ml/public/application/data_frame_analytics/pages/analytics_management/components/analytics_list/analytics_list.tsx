@@ -98,7 +98,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const searchQueryText = pageState.queryText ?? '';
   const setSearchQueryText = useCallback(
-    (value) => {
+    (value: string) => {
       updatePageState({ queryText: value });
     },
     [updatePageState]

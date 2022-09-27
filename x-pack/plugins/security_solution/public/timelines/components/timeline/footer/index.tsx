@@ -20,7 +20,7 @@ import {
   EuiPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -92,10 +92,12 @@ const LoadingPanelContainer = styled.div`
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
 const PopoverRowItems = styled(EuiPopover as unknown as FC)<
-  EuiPopoverProps & {
-    className?: string;
-    id?: string;
-  }
+  PropsWithChildren<
+    EuiPopoverProps & {
+      className?: string;
+      id?: string;
+    }
+  >
 >`
   .euiButtonEmpty__content {
     padding: 0px 0px;
@@ -294,7 +296,7 @@ export const FooterComponent = ({
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   const onChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) =>
+    (itemsChangedPerPage: number) =>
       dispatch(timelineActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage })),
     [dispatch, id]
   );

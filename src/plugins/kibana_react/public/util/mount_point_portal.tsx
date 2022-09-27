@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useRef, useEffect, useState, Component } from 'react';
-import ReactDOM from 'react-dom';
+import type { FC, PropsWithChildren } from 'react';
+import { createPortal } from 'react-dom';
 import { MountPoint } from '@kbn/core/public';
 import { useIfMounted } from './utils';
 
@@ -19,7 +20,10 @@ interface MountPointPortalProps {
 /**
  * Utility component to portal a part of a react application into the provided `MountPoint`.
  */
-export const MountPointPortal: React.FC<MountPointPortalProps> = ({ children, setMountPoint }) => {
+export const MountPointPortal: FC<PropsWithChildren<MountPointPortalProps>> = ({
+  children,
+  setMountPoint,
+}) => {
   // state used to force re-renders when the element changes
   const [shouldRender, setShouldRender] = useState(false);
   const el = useRef<HTMLElement>();
@@ -51,7 +55,7 @@ export const MountPointPortal: React.FC<MountPointPortalProps> = ({ children, se
   }, [setMountPoint]);
 
   if (shouldRender && el.current) {
-    return ReactDOM.createPortal(
+    return createPortal(
       <MountPointPortalErrorBoundary>{children}</MountPointPortalErrorBoundary>,
       el.current
     );
@@ -60,7 +64,7 @@ export const MountPointPortal: React.FC<MountPointPortalProps> = ({ children, se
   }
 };
 
-class MountPointPortalErrorBoundary extends Component<{}, { error?: unknown }> {
+class MountPointPortalErrorBoundary extends Component<PropsWithChildren, { error?: unknown }> {
   state = {
     error: undefined,
   };

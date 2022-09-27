@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useTimefilter } from './use_timefilter';
 
 jest.mock('./kibana_context', () => ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useCreateListIndex } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -25,12 +25,12 @@ describe('useCreateListIndex', () => {
   });
 
   it('invokes Api.createListIndex', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useCreateListIndex());
+    const { result } = renderHook(() => useCreateListIndex());
     act(() => {
       result.current.start({ http: httpMock });
     });
-    await waitForNextUpdate();
-
-    expect(Api.createListIndex).toHaveBeenCalledWith(expect.objectContaining({ http: httpMock }));
+    await waitFor(() => {
+      expect(Api.createListIndex).toHaveBeenCalledWith(expect.objectContaining({ http: httpMock }));
+    });
   });
 });

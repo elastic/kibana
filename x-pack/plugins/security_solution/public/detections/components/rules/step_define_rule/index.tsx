@@ -48,6 +48,7 @@ import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { ThresholdInput } from '../threshold_input';
+import type { FieldHook } from '../../../../shared_imports';
 import {
   Field,
   Form,
@@ -424,7 +425,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, []);
 
   const ThresholdInputChildren = useCallback(
-    ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
+    ({
+      thresholdField,
+      thresholdValue,
+      thresholdCardinalityField,
+      thresholdCardinalityValue,
+    }: Record<string, FieldHook>) => (
       <ThresholdInput
         browserFields={aggFields}
         thresholdField={thresholdField}
@@ -442,7 +448,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   SourcererFlex.displayName = 'SourcererFlex';
 
   const ThreatMatchInputChildren = useCallback(
-    ({ threatMapping }) => (
+    ({ threatMapping }: Record<string, FieldHook>) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
         indexPatterns={indexPattern}

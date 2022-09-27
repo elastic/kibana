@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerExpressionsLanguage } from '.';
 import { PresentationLabsService } from './services/labs';
@@ -14,7 +15,7 @@ import { PresentationLabsService } from './services/labs';
 export interface PresentationUtilPluginSetup {}
 
 export interface PresentationUtilPluginStart {
-  ContextProvider: React.FC;
+  ContextProvider: FC<PropsWithChildren>;
   labsService: PresentationLabsService;
   registerExpressionsLanguage: typeof registerExpressionsLanguage;
 }

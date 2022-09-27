@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { PluginServiceProvider, PluginServiceProviders } from './provider';
 import { PluginServiceProvidersMediator } from './providers_mediator';
 
@@ -55,7 +56,7 @@ export class PluginServiceRegistry<Services, StartParameters = {}> {
 
     // Collect and combine Context.Provider elements from each Service Provider into a single
     // Functional Component.
-    const provider: React.FC = ({ children }) => (
+    const provider: FC<PropsWithChildren> = ({ children }) => (
       <>
         {values.reduceRight((acc, serviceProvider) => {
           return <serviceProvider.Provider>{acc}</serviceProvider.Provider>;

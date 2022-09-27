@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, createContext, useContext } from 'react';
+import React, { FC, PropsWithChildren, createContext, useContext } from 'react';
 
 interface WithoutChat {
   enabled: false;
@@ -29,7 +29,7 @@ export interface CloudServices {
 
 const ServicesContext = createContext<CloudServices>({ chat: { enabled: false } });
 
-export const ServicesProvider: FC<CloudServices> = ({ children, ...services }) => (
+export const ServicesProvider: FC<PropsWithChildren<CloudServices>> = ({ children, ...services }) => (
   <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
 );
 

@@ -100,6 +100,7 @@ describe('AlertsTable', () => {
   };
 
   const AlertsTableWithLocale: React.FunctionComponent<AlertsTableProps> = (props) => (
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <AlertsTable {...props} />
     </IntlProvider>

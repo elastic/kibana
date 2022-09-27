@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import type { FC, PropsWithChildren } from 'react';
+import { createRoot } from 'react-dom/client';
 import { Redirect, Route } from 'react-router-dom';
 import type { RouteProps } from 'react-router-dom';
 
@@ -22,7 +23,7 @@ export interface ProtectedRouteProps extends RouteProps {
   restrictedPath?: string;
 }
 
-export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
+export const ProtectedRoute: FC<PropsWithChildren<ProtectedRouteProps>> = ({
   isAllowed = false,
   restrictedPath = '/',
   ...routeProps
@@ -72,9 +73,11 @@ export function renderApp(
   config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage,
-  UsageTracker: React.FC
+  UsageTracker: FC<PropsWithChildren>
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <UsageTracker>
       <IntegrationsApp
         basepath={appBasePath}
@@ -86,12 +89,11 @@ export function renderApp(
         setHeaderActionMenu={setHeaderActionMenu}
         theme$={theme$}
       />
-    </UsageTracker>,
-    element
+    </UsageTracker>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 }
 

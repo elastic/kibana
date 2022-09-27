@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, type FunctionComponent } from 'react';
+import React, { createContext, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { FileKindsRegistry, getFileKindsRegistry } from '../../common/file_kinds_registry';
 
 export interface FilesContextValue {
@@ -22,7 +23,7 @@ export const useFilesContext = () => {
   return ctx;
 };
 
-export const FilesContext: FunctionComponent = ({ children }) => {
+export const FilesContext: FC<PropsWithChildren> = ({ children }) => {
   return (
     <FilesContextObject.Provider
       value={{

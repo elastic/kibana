@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
@@ -45,18 +46,20 @@ const EmptyContext = () => <></>;
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
  * and no routes defined
  */
-export const IntegrationsAppContext: React.FC<{
-  basepath: string;
-  startServices: FleetStartServices;
-  config: FleetConfigType;
-  history: AppMountParameters['history'];
-  kibanaVersion: string;
-  extensions: UIExtensionsStorage;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
-  /** For testing purposes only */
-  routerHistory?: History<any>; // TODO remove
-}> = memo(
+export const IntegrationsAppContext: FC<
+  PropsWithChildren<{
+    basepath: string;
+    startServices: FleetStartServices;
+    config: FleetConfigType;
+    history: AppMountParameters['history'];
+    kibanaVersion: string;
+    extensions: UIExtensionsStorage;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    theme$: AppMountParameters['theme$'];
+    /** For testing purposes only */
+    routerHistory?: History<any>; // TODO remove
+  }>
+> = memo(
   ({
     children,
     startServices,

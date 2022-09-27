@@ -17,6 +17,7 @@ import {
   LegendPositionConfig,
   LayoutDirection,
   Placement,
+  BrushEndListener,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -117,7 +118,7 @@ export const TimelionVisComponent = ({
     isDateHistogram: true,
   });
 
-  const brushEndListener = useCallback(
+  const brushEndListener = useCallback<BrushEndListener>(
     ({ x }) => {
       if (!x) {
         return;
@@ -195,6 +196,7 @@ export const TimelionVisComponent = ({
           <h4>{title}</h4>
         </EuiTitle>
       )}
+      {/* @ts-expect-error update types */}
       <Chart ref={chartRef} renderer="canvas" size={{ width: '100%' }}>
         <Settings
           debugState={window._echDebugStateFlag ?? false}

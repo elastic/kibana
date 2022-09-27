@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { SecurityPageName } from '../../../app/types';
 import type { AppLinkItems } from '../../links';
 import { TestProviders } from '../../mock';
@@ -39,10 +39,10 @@ jest.mock('../../links', () => ({
 }));
 
 const renderUseAppNavLinks = () =>
-  renderHook<{}, NavLinkItem[]>(() => useAppNavLinks(), { wrapper: TestProviders });
+  renderHook<NavLinkItem[], {}>(() => useAppNavLinks(), { wrapper: TestProviders });
 
 const renderUseAppRootNavLink = (id: SecurityPageName) =>
-  renderHook<{ id: SecurityPageName }, NavLinkItem | undefined>(() => useAppRootNavLink(id), {
+  renderHook<NavLinkItem | undefined, { id: SecurityPageName }>(() => useAppRootNavLink(id), {
     wrapper: TestProviders,
   });
 

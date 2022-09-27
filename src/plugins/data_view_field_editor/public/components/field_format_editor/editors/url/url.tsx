@@ -55,6 +55,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
 > {
   static contextType = contextType;
   static formatId = formatId;
+  declare context: any;
   private get sampleIconPath() {
     const sampleIconPath = `/plugins/dataViewFieldEditor/assets/icons/{{value}}.png`;
     return this.context?.services.http

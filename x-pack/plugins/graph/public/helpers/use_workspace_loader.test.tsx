@@ -11,7 +11,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Workspace } from '../types';
 import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/public';
-import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
+import { renderHook, act, RenderHookOptions } from '@testing-library/react';
 import type { SavedObjectsClientContract } from '@kbn/core/public';
 
 jest.mock('react-router-dom', () => {

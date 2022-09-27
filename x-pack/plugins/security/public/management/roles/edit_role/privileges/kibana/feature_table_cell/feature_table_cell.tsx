@@ -25,6 +25,7 @@ export const FeatureTableCell = ({ feature }: Props) => {
     tooltipElement = (
       <EuiIconTip
         iconProps={{
+          // @ts-expect-error update types
           className: 'eui-alignTop',
         }}
         type={'iInCircle'}

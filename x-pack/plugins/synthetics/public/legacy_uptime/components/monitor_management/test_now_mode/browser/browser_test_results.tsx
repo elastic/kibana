@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import * as React from 'react';
+import React from 'react';
 import { EuiAccordion, EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';

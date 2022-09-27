@@ -210,7 +210,7 @@ exports[`SampleDataCard installed renders without app links 1`] = `
 
 exports[`SampleDataCard not installed renders 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned emotion-euiPanel-grow-m-m-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned css-1yzwxdg-euiPanel-grow-m-m-plain-hasShadow"
   data-test-subj="sampleDataSetCardsample-data-set"
 >
   <div
@@ -229,13 +229,13 @@ exports[`SampleDataCard not installed renders 1`] = `
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiCard__title emotion-euiTitle-s"
+      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
       id="generated-idTitle"
     >
       Sample Data Set
     </span>
     <div
-      class="euiText euiCard__description emotion-euiText-s"
+      class="euiText euiCard__description css-1wxn1gn-euiText-s"
       id="generated-idDescription"
     >
       <p>

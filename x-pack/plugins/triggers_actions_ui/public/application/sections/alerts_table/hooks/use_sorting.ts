@@ -37,7 +37,7 @@ export function useSorting(
     formatGridColumns(defaultSort)
   );
   const onSort = useCallback(
-    (_state) => {
+    (_state: EuiDataGridSorting['columns']) => {
       onSortChange(_state);
       setSortingColumns(_state);
     },

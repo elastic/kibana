@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 /**
  * A component that shows it children with a 300ms delay. This is good for wrapping
@@ -14,7 +15,7 @@ import React, { useEffect, useRef, useState } from 'react';
  * That way we don't show a quick flash of the spinner before the actual content and will only
  * show the spinner once loading takes a bit longer (more than 300ms).
  */
-export const DeferredSpinner: React.FC = ({ children }) => {
+export const DeferredSpinner: FC<PropsWithChildren> = ({ children }) => {
   const timeoutRef = useRef<number>();
   const [showContent, setShowContent] = useState(false);
   useEffect(() => {

@@ -28,7 +28,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
   const rotateLabels = valueAxis.labels.rotate === VERTICAL_ROTATION;
 
   const setValueAxisLabels = useCallback(
-    <T extends keyof ValueAxis['labels']>(paramName: T, value: ValueAxis['labels'][T]) =>
+    <T extends keyof ValueAxis['labels']>(paramName: T, value: string | boolean | number) =>
       setValue('valueAxes', [
         {
           ...valueAxis,
@@ -47,7 +47,10 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
     [setValueAxisLabels]
   );
 
-  const setColor = useCallback((value) => setValueAxisLabels('color', value), [setValueAxisLabels]);
+  const setColor = useCallback(
+    (value: string) => setValueAxisLabels('color', value),
+    [setValueAxisLabels]
+  );
 
   return (
     <EuiPanel paddingSize="s">

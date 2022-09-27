@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
@@ -64,14 +64,9 @@ export const renderApp = (
   { appId, basePath, targetAppId, application }: AppOptions,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(
-    <FooApp
-      appId={appId}
-      targetAppId={targetAppId}
-      basePath={basePath}
-      application={application}
-    />,
-    element
+  const root = createRoot(element);
+  root.render(
+    <FooApp appId={appId} targetAppId={targetAppId} basePath={basePath} application={application} />
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import type { PropsWithChildren } from 'react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import * as api from '../api';
 import { TestProviders } from '../common/mock';
 import { useGetCasesMetrics, UseGetCasesMetrics } from './use_get_cases_metrics';
@@ -22,8 +23,8 @@ describe('useGetCasesMetrics', () => {
   });
 
   it('init', async () => {
-    const { result } = renderHook<string, UseGetCasesMetrics>(() => useGetCasesMetrics(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    const { result } = renderHook<UseGetCasesMetrics, {}>(() => useGetCasesMetrics(), {
+      wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
     });
 
     await act(async () => {
@@ -39,40 +40,36 @@ describe('useGetCasesMetrics', () => {
   it('calls getCasesMetrics api', async () => {
     const spy = jest.spyOn(api, 'getCasesMetrics');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
-        () => useGetCasesMetrics(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+      renderHook<UseGetCasesMetrics, {}>(() => useGetCasesMetrics(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
 
-      await waitForNextUpdate();
-      expect(spy).toBeCalledWith({
-        http: expect.anything(),
-        signal: expect.anything(),
-        query: {
-          features: ['mttr'],
-          owner: [SECURITY_SOLUTION_OWNER],
-        },
+      await waitFor(() => {
+        expect(spy).toBeCalledWith({
+          http: expect.anything(),
+          signal: expect.anything(),
+          query: {
+            features: ['mttr'],
+            owner: [SECURITY_SOLUTION_OWNER],
+          },
+        });
       });
     });
   });
 
   it('fetch cases metrics', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
-        () => useGetCasesMetrics(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<UseGetCasesMetrics, {}>(() => useGetCasesMetrics(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
 
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        mttr: 12,
-        isLoading: false,
-        isError: false,
-        fetchCasesMetrics: result.current.fetchCasesMetrics,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          mttr: 12,
+          isLoading: false,
+          isError: false,
+          fetchCasesMetrics: result.current.fetchCasesMetrics,
+        });
       });
     });
   });
@@ -80,25 +77,22 @@ describe('useGetCasesMetrics', () => {
   it('fetches metrics when fetchCasesMetrics is invoked', async () => {
     const spy = jest.spyOn(api, 'getCasesMetrics');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
-        () => useGetCasesMetrics(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-
-      await waitForNextUpdate();
-      expect(spy).toBeCalledWith({
-        http: expect.anything(),
-        signal: expect.anything(),
-        query: {
-          features: ['mttr'],
-          owner: [SECURITY_SOLUTION_OWNER],
-        },
+      const { result } = renderHook<UseGetCasesMetrics, {}>(() => useGetCasesMetrics(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       });
-      result.current.fetchCasesMetrics();
-      await waitForNextUpdate();
-      expect(spy).toHaveBeenCalledTimes(2);
+
+      await waitFor(() => {
+        expect(spy).toBeCalledWith({
+          http: expect.anything(),
+          signal: expect.anything(),
+          query: {
+            features: ['mttr'],
+            owner: [SECURITY_SOLUTION_OWNER],
+          },
+        });
+        result.current.fetchCasesMetrics();
+        expect(spy).toHaveBeenCalledTimes(2);
+      });
     });
   });
 
@@ -109,19 +103,16 @@ describe('useGetCasesMetrics', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
-        () => useGetCasesMetrics(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        mttr: 0,
-        isLoading: false,
-        isError: true,
-        fetchCasesMetrics: result.current.fetchCasesMetrics,
+      const { result } = renderHook<UseGetCasesMetrics, {}>(() => useGetCasesMetrics(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          mttr: 0,
+          isLoading: false,
+          isError: true,
+          fetchCasesMetrics: result.current.fetchCasesMetrics,
+        });
       });
     });
   });

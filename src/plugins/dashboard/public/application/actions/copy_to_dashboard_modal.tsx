@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { omit } from 'lodash';
 import {
   EuiButton,
@@ -30,7 +31,7 @@ import { DashboardPanelState } from '..';
 import { pluginServices } from '../../services/plugin_services';
 
 interface CopyToDashboardModalProps {
-  PresentationUtilContext: React.FC;
+  PresentationUtilContext: FC<PropsWithChildren>;
   embeddable: IEmbeddable;
   dashboardId?: string;
   closeModal: () => void;

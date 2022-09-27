@@ -14,18 +14,19 @@ first-class applications.
 // my_plugin/public/application.js
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { MyApp } from './componnets';
 
 export function renderApp(context, { element }) {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <MyApp mountContext={context} deps={pluginStart} />,
-    element
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 }
 ```
@@ -221,7 +222,7 @@ a full-featured router and code-splitting. Note that using React or any other
 // my_plugin/public/application.tsx
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route } from 'react-router-dom';
 import loadable from '@loadable/component';
 
@@ -247,15 +248,16 @@ const MyApp = ({ basename }) => (
 );
 
 export function renderApp(context, params) {
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  
+  root.render(
     // `params.appBasePath` would be `/app/my-app` in this example.
     // This exact string is not guaranteed to be stable, always reference the
     // provided value at `params.appBasePath`.
     <MyApp basename={params.appBasePath} />,
-    params.element
   );
 
-  return () => ReactDOM.unmountComponentAtNode(params.element);
+  return () => root.unmount();(params.element);
 }
 ```
 

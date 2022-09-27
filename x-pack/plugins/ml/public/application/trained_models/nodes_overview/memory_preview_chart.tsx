@@ -110,6 +110,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
   };
 
   return (
+    // @ts-expect-error update types
     <Chart size={['100%', 50]}>
       <Settings
         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md

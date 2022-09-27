@@ -87,6 +87,7 @@ export const SchemaErrorsAccordion: React.FC<Props> = ({
               <EuiTableHeaderCell>{ERROR_TABLE_ERROR_HEADER}</EuiTableHeaderCell>
               {generateViewPath && <EuiTableHeaderCell aria-hidden />}
             </EuiTableHeader>
+            {/* @ts-expect-error update types */}
             <EuiTableBody>
               {errors.map((error) => {
                 const { id, error: errorMessage } = error;

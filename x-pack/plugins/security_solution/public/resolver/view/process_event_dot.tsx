@@ -301,7 +301,7 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID, timestamp]);
 
-    const handleClick = useCallback(
+    const handleClick = useCallback<React.MouseEventHandler>(
       (clickEvent) => {
         if (animationTarget.current?.beginElement) {
           animationTarget.current.beginElement();
@@ -320,7 +320,7 @@ const UnstyledProcessEventDot = React.memo(
               time: timestamp(),
             },
           });
-          processDetailNavProps.onClick(clickEvent);
+          processDetailNavProps.onClick(clickEvent as React.MouseEvent<HTMLButtonElement>);
         }
       },
       [animationTarget, dispatch, nodeID, processDetailNavProps, nodeState, timestamp]

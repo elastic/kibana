@@ -85,11 +85,11 @@ export function TooltipSection({
   });
 
   const onFieldSelectChange = useCallback(
-    (choice, index = 0) => {
+    (choice?: FieldOptionValue, index = 0) => {
       const fields = [...localValues];
 
-      if (indexPattern.getFieldByName(choice.field)) {
-        fields[index] = { id: generateId(), value: choice.field };
+      if (indexPattern.getFieldByName(choice?.field!)) {
+        fields[index] = { id: generateId(), value: choice?.field };
 
         // update the layer state
         handleInputChange(fields);

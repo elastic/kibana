@@ -214,7 +214,7 @@ const useCriteriaState = (
   defaultCriterion: PartialCriterionType,
   onUpdateCriteria: (criteria: PartialCountCriteriaType) => void
 ) => {
-  const updateCriterion = useCallback(
+  const updateCriterion = useCallback<CriteriaWrapperProps['updateCriterion']>(
     (idx, criterionParams) => {
       const nextCriteria = criteria.map((criterion, index) => {
         return idx === index ? { ...criterion, ...criterionParams } : criterion;
@@ -230,7 +230,7 @@ const useCriteriaState = (
   }, [criteria, defaultCriterion, onUpdateCriteria]);
 
   const removeCriterion = useCallback(
-    (idx) => {
+    (idx: number) => {
       const nextCriteria = criteria.filter((_criterion, index) => {
         return index !== idx;
       });

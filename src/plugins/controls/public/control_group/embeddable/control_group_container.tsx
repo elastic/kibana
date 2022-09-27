@@ -8,7 +8,8 @@
 
 import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { Filter, uniqFilters } from '@kbn/es-query';
 import { merge, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
@@ -59,6 +60,7 @@ export class ControlGroupContainer extends Container<
 
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
+  private root?: Root;
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
@@ -156,6 +158,7 @@ export class ControlGroupContainer extends Container<
         panelPaddingSize="none"
         data-test-subj="dashboard-controls-menu-button"
       >
+        {/* @ts-expect-error update types */}
         {({ closePopover }: { closePopover: () => void }) => (
           <EuiContextMenuPanel
             items={[
@@ -351,20 +354,20 @@ export class ControlGroupContainer extends Container<
 
   public render(dom: HTMLElement) {
     if (this.domNode) {
-      ReactDOM.unmountComponentAtNode(this.domNode);
+      this.root?.unmount();
     }
     this.domNode = dom;
+    this.root = createRoot(dom);
     const ControlsServicesProvider = pluginServices.getContextProvider();
     const { Wrapper: ControlGroupReduxWrapper } = this.reduxEmbeddableTools;
-    ReactDOM.render(
+    this.root.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <ControlsServicesProvider>
           <ControlGroupReduxWrapper>
             <ControlGroup />
           </ControlGroupReduxWrapper>
         </ControlsServicesProvider>
-      </KibanaThemeProvider>,
-      dom
+      </KibanaThemeProvider>
     );
   }
 
@@ -373,6 +376,6 @@ export class ControlGroupContainer extends Container<
     this.closeAllFlyouts();
     this.subscriptions.unsubscribe();
     this.reduxEmbeddableTools.cleanup();
-    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.domNode) this.root?.unmount();
   }
 }

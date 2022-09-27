@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { ProcessorType } from './map_processor_type_to_form';
+export type { FieldDescriptor, ProcessorType } from './map_processor_type_to_form';
 export { getProcessorDescriptor, mapProcessorTypeToDescriptor } from './map_processor_type_to_form';
 
 export { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from './status_icons';

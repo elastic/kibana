@@ -31,18 +31,21 @@ export const ResultSettingsTable: React.FC = () => {
     <EuiTable className="resultSettingsTable" responsive={false}>
       <ColumnHeaders />
       {!!Object.keys(textResultFields).length && (
+        // @ts-expect-error update types
         <EuiTableBody>
           <TextFieldsHeader />
           <TextFieldsBody />
         </EuiTableBody>
       )}
       {!!Object.keys(nonTextResultFields).length && (
+        // @ts-expect-error update types
         <EuiTableBody className="resultSettingsTable__subHeader">
           <NonTextFieldsHeader />
           <NonTextFieldsBody />
         </EuiTableBody>
       )}
       {!!Object.keys(schemaConflicts).length && (
+        // @ts-expect-error update types
         <EuiTableBody className="resultSettingsTable__subHeader">
           <DisabledFieldsHeader />
           <DisabledFieldsBody />

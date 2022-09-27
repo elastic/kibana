@@ -10,7 +10,8 @@ import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
 import fastIsEqual from 'fast-deep-equal';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -124,6 +125,7 @@ export class MapEmbeddable
   private _prevSyncColors?: boolean;
   private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
+  private _root?: Root;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
   private _controlledBy: string;
@@ -521,13 +523,13 @@ export class MapEmbeddable
       );
 
     const I18nContext = getCoreI18n().Context;
-    render(
+    this._root = createRoot(this._domNode);
+    this._root.render(
       <Provider store={this._savedMap.getStore()}>
         <I18nContext>
           <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
         </I18nContext>
-      </Provider>,
-      this._domNode
+      </Provider>
     );
   }
 
@@ -672,7 +674,7 @@ export class MapEmbeddable
     }
 
     if (this._domNode) {
-      unmountComponentAtNode(this._domNode);
+      this._root?.unmount();
     }
 
     if (this._subscription) {

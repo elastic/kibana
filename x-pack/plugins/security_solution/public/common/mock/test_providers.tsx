@@ -9,6 +9,7 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import type { DropResult, ResponderProvided } from 'react-beautiful-dnd';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -50,7 +51,7 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 const { storage } = createSecuritySolutionStorageMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-export const TestProvidersComponent: React.FC<Props> = ({
+export const TestProvidersComponent: FC<PropsWithChildren<Props>> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
@@ -77,7 +78,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
  * A utility for wrapping children in the providers required to run most tests
  * WITH user privileges provider.
  */
-const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
+const TestProvidersWithPrivilegesComponent: FC<PropsWithChildren<Props>> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),

@@ -39,7 +39,7 @@ function ChartOptions({
   changeValueAxis,
   setParamByIndex,
 }: ChartOptionsParams) {
-  const setChart: SetChart = useCallback(
+  const setChart = useCallback<SetChart>(
     (paramName, value) => {
       setParamByIndex('seriesParams', index, paramName, value);
     },
@@ -47,7 +47,7 @@ function ChartOptions({
   );
 
   const setValueAxis = useCallback(
-    (paramName, value) => {
+    (paramName: 'valueAxis', value: string) => {
       changeValueAxis(index, paramName, value);
     },
     [changeValueAxis, index]

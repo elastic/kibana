@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState, useEffect } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -23,12 +24,14 @@ const hideHistory = i18n.translate('xpack.infra.hideHistory', {
 
 const TRANSITION_MS = 300;
 
-export const BottomDrawer: React.FC<{
-  measureRef: (instance: HTMLElement | null) => void;
-  interval: string;
-  formatter: InfraFormatter;
-  width: number;
-}> = ({ measureRef, width, interval, formatter, children }) => {
+export const BottomDrawer: FC<
+  PropsWithChildren<{
+    measureRef: (instance: HTMLElement | null) => void;
+    interval: string;
+    formatter: InfraFormatter;
+    width: number;
+  }>
+> = ({ measureRef, width, interval, formatter, children }) => {
   const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
 
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));

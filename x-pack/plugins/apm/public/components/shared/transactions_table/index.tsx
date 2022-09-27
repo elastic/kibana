@@ -325,6 +325,7 @@ export function TransactionsTable({
                 }}
               />
 
+              {/* @ts-expect-error update types */}
               <ElasticDocsLink
                 section="/kibana"
                 path="/troubleshooting.html#troubleshooting-too-many-transactions"

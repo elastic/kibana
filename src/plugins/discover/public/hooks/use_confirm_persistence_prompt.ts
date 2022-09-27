@@ -13,6 +13,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 import { showConfirmPanel } from './show_confirm_panel';
 import { persistSavedSearch } from '../application/main/utils/persist_saved_search';
+import { AppState } from '../application/main/services/discover_state';
 
 export const useConfirmPersistencePrompt = (
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>
@@ -91,7 +92,15 @@ export const useConfirmPersistencePrompt = (
   );
 
   const updateSavedSearch = useCallback(
-    ({ savedSearch, dataView, state }) => {
+    ({
+      savedSearch,
+      dataView,
+      state,
+    }: {
+      savedSearch: SavedSearch;
+      dataView: DataView;
+      state: AppState;
+    }) => {
       return persistSavedSearch(savedSearch, {
         dataView,
         onSuccess: (id) => onUpdateSuccess(id, savedSearch),

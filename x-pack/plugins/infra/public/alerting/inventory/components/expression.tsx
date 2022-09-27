@@ -30,6 +30,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { debounce, omit } from 'lodash';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   Comparator,
   FilterQuery,
@@ -103,7 +104,7 @@ export const defaultExpression = {
   },
 } as InventoryMetricConditions;
 
-export const Expressions: React.FC<Props> = (props) => {
+export const Expressions: FC<PropsWithChildren<Props>> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
@@ -120,7 +121,7 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const updateParams = useCallback(
-    (id, e: InventoryMetricConditions) => {
+    (id: number, e: InventoryMetricConditions) => {
       const exp = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       exp[id] = e;
       setRuleParams('criteria', exp);
@@ -432,7 +433,7 @@ const StyledHealth = euiStyled(EuiHealth)`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
+export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
 
@@ -484,8 +485,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const updateThreshold = useCallback(
-    (t) => {
-      if (t.join() !== expression.threshold.join()) {
+    (t?: number[]) => {
+      if (t?.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
       }
     },
@@ -493,8 +494,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const updateWarningThreshold = useCallback(
-    (t) => {
-      if (t.join() !== expression.warningThreshold?.join()) {
+    (t?: number[]) => {
+      if (t?.join() !== expression.warningThreshold?.join()) {
         setRuleParams(expressionId, { ...expression, warningThreshold: t });
       }
     },

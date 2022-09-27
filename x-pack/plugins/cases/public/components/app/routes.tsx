@@ -28,6 +28,7 @@ import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import { casesQueryClient } from '../cases_context/query_client';
 import type { CaseViewProps } from '../case_view/types';
+import { Case } from '../../containers/types';
 
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 
@@ -46,7 +47,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   useReadonlyHeader();
 
   const onCreateCaseSuccess = useCallback(
-    async ({ id }) => navigateToCaseView({ detailName: id }),
+    async ({ id }: Case) => navigateToCaseView({ detailName: id }),
     [navigateToCaseView]
   );
 

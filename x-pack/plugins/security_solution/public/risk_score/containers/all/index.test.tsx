@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useHostRiskScore, useUserRiskScore } from '.';
 import { TestProviders } from '../../../common/mock';
 
@@ -182,7 +182,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
           totalCount: 0,
         },
       });
-      const { result, waitFor } = renderHook(() => fn(), {
+      const { result } = renderHook(() => fn(), {
         wrapper: TestProviders,
       });
       await waitFor(() => {

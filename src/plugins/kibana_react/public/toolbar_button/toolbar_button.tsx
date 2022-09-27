@@ -8,8 +8,9 @@
 
 import './toolbar_button.scss';
 import React from 'react';
+import type { FC } from 'react';
 import classNames from 'classnames';
-import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
+import { EuiButton, EuiButtonProps } from '@elastic/eui';
 
 const groupPositionToClassMap = {
   none: null,
@@ -26,7 +27,8 @@ export const WEIGHTS = ['normal', 'bold'] as Weights[];
 
 export const TOOLBAR_BUTTON_SIZES: Array<EuiButtonProps['size']> = ['s', 'm'];
 
-export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
+export type ToolbarButtonProps = EuiButtonProps & {
+  onClick?: () => void;
   /**
    * Determines prominence
    */
@@ -44,9 +46,10 @@ export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
    */
   groupPosition?: ButtonPositions;
   dataTestSubj?: string;
+  title?: string;
 };
 
-export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
+export const ToolbarButton: FC<ToolbarButtonProps> = ({
   children,
   className,
   fontWeight = 'normal',

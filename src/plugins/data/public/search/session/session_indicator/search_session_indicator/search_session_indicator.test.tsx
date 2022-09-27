@@ -15,6 +15,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SearchSessionState } from '../../../..';
 
 function Container({ children }: { children?: ReactNode }) {
+  // @ts-expect-error update types
   return <IntlProvider locale="en">{children}</IntlProvider>;
 }
 

@@ -175,7 +175,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   }, [setSelectingEndDate]);
 
   const selectStartDT = useCallback(
-    (date, clearEndDT) => {
+    (date: Moment, clearEndDT: boolean) => {
       setStartDT(moment.max(date, minDate));
       if (clearEndDT) {
         setEndDT(null);
@@ -186,7 +186,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
     [setStartDT, setSelectingEndDate, minDate]
   );
   const selectEndDT = useCallback(
-    (date) => {
+    (date: Moment) => {
       setEndDT(date);
       setSelectingEndTime(true);
       setSelectingEndDate(false);
@@ -195,7 +195,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   );
 
   const onSelectFromInline = useCallback(
-    (date) => {
+    (date: Moment) => {
       const dateAsMoment = moment(date);
       const newDateAfterStart =
         !startDT || dateAsMoment.isAfter(startDT) || dateAsMoment.isSame(startDT);

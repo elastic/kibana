@@ -82,7 +82,9 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
         data-test-subj="cloudBackupErrorCallout"
       >
         <p>
-          {error.statusCode} - {error.message}
+          <>
+            {error.statusCode} - {error.message}
+          </>
         </p>
         <EuiButton color="danger" onClick={resendRequest} data-test-subj="cloudBackupRetryButton">
           {i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.retryButton', {
@@ -104,23 +106,25 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
       <EuiFlexItem>
         <EuiText>
           <p>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.overview.cloudBackup.hasSnapshotMessage"
-              defaultMessage="Last snapshot created on {lastBackupTime}."
-              values={{
-                lastBackupTime: (
-                  <>
-                    <FormattedDate
-                      value={lastBackupTime}
-                      year="numeric"
-                      month="long"
-                      day="2-digit"
-                    />{' '}
-                    <FormattedTime value={lastBackupTime} timeZoneName="short" hour12={false} />
-                  </>
-                ),
-              }}
-            />
+            <>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.cloudBackup.hasSnapshotMessage"
+                defaultMessage="Last snapshot created on {lastBackupTime}."
+                values={{
+                  lastBackupTime: (
+                    <>
+                      <FormattedDate
+                        value={lastBackupTime}
+                        year="numeric"
+                        month="long"
+                        day="2-digit"
+                      />{' '}
+                      <FormattedTime value={lastBackupTime} timeZoneName="short" hour12={false} />
+                    </>
+                  ),
+                }}
+              />
+            </>
           </p>
         </EuiText>
       </EuiFlexItem>
@@ -134,9 +138,11 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
       <EuiFlexItem>
         <EuiText>
           <p>
-            {i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.noSnapshotMessage', {
-              defaultMessage: `Your data isn't backed up.`,
-            })}
+            <>
+              {i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.noSnapshotMessage', {
+                defaultMessage: `Your data isn't backed up.`,
+              })}
+            </>
           </p>
         </EuiText>
       </EuiFlexItem>

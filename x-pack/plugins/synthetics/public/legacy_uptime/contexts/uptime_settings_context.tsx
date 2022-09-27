@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { UptimeAppProps } from '../app/uptime_app';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../common/constants';
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
@@ -41,7 +42,10 @@ const defaultContext: UptimeSettingsContextValues = {
 };
 export const UptimeSettingsContext = createContext(defaultContext);
 
-export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ children, ...props }) => {
+export const UptimeSettingsContextProvider: FC<PropsWithChildren<UptimeAppProps>> = ({
+  children,
+  ...props
+}) => {
   const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges, isDev } =
     props;
 

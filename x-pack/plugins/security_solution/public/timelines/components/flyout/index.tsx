@@ -44,7 +44,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
       setFocusOwnership(true);
     }
   }, [show, focusOwnership]);
-  const onOutsideClick = useCallback((event) => {
+  const onOutsideClick: EuiOutsideClickDetector['onClickOutside'] = useCallback((event) => {
     setFocusOwnership(false);
     const classes = event.target.classList;
     if (classes.contains('kbnSearchBar')) {

@@ -26,7 +26,7 @@ export interface ThresholdExpressionProps {
   thresholdComparator: string;
   errors: IErrorObject;
   onChangeSelectedThresholdComparator: (selectedThresholdComparator?: string) => void;
-  onChangeSelectedThreshold: (selectedThreshold?: number[]) => void;
+  onChangeSelectedThreshold: (selectedThreshold: number[]) => void;
   customComparators?: {
     [key: string]: Comparator;
   };
@@ -146,7 +146,7 @@ export const ThresholdExpression = ({
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
                     isInvalid={errors[`threshold${i}`]?.length > 0 || !threshold[i]}
-                    error={errors[`threshold${i}`]}
+                    error={errors[`threshold${i}`] as string[]}
                   >
                     <EuiFieldNumber
                       data-test-subj="alertThresholdInput"

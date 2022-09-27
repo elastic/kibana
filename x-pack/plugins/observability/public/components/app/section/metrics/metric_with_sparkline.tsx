@@ -45,6 +45,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
   return (
     <EuiFlexGroup gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
+        {/* @ts-expect-error update types */}
         <Chart size={{ height: 18, width: 40 }}>
           <Settings theme={theme} showLegend={false} tooltip="none" />
           <AreaSeries

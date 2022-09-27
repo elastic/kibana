@@ -176,7 +176,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     ) : null;
   }, [graphEventId, id, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
-    (inspect, loading, refetch) => {
+    (inspect: inputsModel.InspectQuery, loading: boolean, refetch: inputsModel.Refetch) => {
       dispatch(
         inputsActions.setQuery({ id, inputId: InputsModelId.global, inspect, loading, refetch })
       );

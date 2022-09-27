@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 import { OperatorFieldIds } from '../../../../../../../common/endpoint/types';
@@ -73,7 +74,9 @@ const InputItem = styled.div<{ gridArea: string }>`
   vertical-align: baseline;
 `;
 
-const operatorOptions = (Object.keys(OperatorFieldIds) as OperatorFieldIds[]).map((value) => ({
+const operatorOptions: Array<EuiSuperSelectOption<TrustedAppEntryTypes>> = (
+  Object.keys(OperatorFieldIds) as OperatorFieldIds[]
+).map((value) => ({
   dropdownDisplay: OPERATOR_TITLES[value],
   inputDisplay: OPERATOR_TITLES[value],
   value: value === 'matches' ? 'wildcard' : 'match',
@@ -101,7 +104,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       }
     }, [entry, isVisited, onVisited]);
 
-    const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+    const fieldOptions = useMemo<Array<EuiSuperSelectOption<ConditionEntryField>>>(() => {
       const getDropdownDisplay = (field: ConditionEntryField) => (
         <>
           {CONDITION_FIELD_TITLE[field]}
@@ -140,7 +143,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     );
 
     const handleFieldUpdate = useCallback(
-      (newField) => {
+      (newField: ConditionEntryField) => {
         onChange({ ...entry, field: newField }, entry);
 
         if (entry.value) {
@@ -151,7 +154,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     );
 
     const handleOperatorUpdate = useCallback(
-      (newOperator) => onChange({ ...entry, type: newOperator }, entry),
+      (newOperator: TrustedAppEntryTypes) => onChange({ ...entry, type: newOperator }, entry),
       [entry, onChange]
     );
 
@@ -165,7 +168,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       <InputGroup data-test-subj={dataTestSubj}>
         <InputItem gridArea="field">
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.field}>
-            <EuiSuperSelect
+            <EuiSuperSelect<ConditionEntryField>
               options={fieldOptions}
               valueOfSelected={entry.field}
               onChange={handleFieldUpdate}
@@ -176,7 +179,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
         <InputItem gridArea="operator">
           <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
             {entry.field === ConditionEntryField.PATH ? (
-              <EuiSuperSelect
+              <EuiSuperSelect<TrustedAppEntryTypes>
                 options={operatorOptions}
                 onChange={handleOperatorUpdate}
                 valueOfSelected={entry.type}

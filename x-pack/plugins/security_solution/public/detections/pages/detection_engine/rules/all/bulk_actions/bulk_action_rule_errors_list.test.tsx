@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
@@ -15,8 +15,9 @@ import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants'
 import type { DryRunResult } from './types';
 import { BulkAction } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 
-const Wrapper: FC = ({ children }) => {
+const Wrapper: FC<PropsWithChildren> = ({ children }) => {
   return (
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <>{children}</>
     </IntlProvider>

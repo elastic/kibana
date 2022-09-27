@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS, useGetCases } from './use_get_cases';
 import * as api from './api';
 import { AppMockRenderer, createAppMockRenderer } from '../common/mock';
@@ -28,14 +28,15 @@ describe('useGetCases', () => {
 
   it('calls getCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
-    await waitForNextUpdate();
-    expect(spyOnGetCases).toBeCalledWith({
-      filterOptions: { ...DEFAULT_FILTER_OPTIONS },
-      queryParams: DEFAULT_QUERY_PARAMS,
-      signal: abortCtrl.signal,
+    await waitFor(() => {
+      expect(spyOnGetCases).toBeCalledWith({
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
     });
   });
 
@@ -47,11 +48,12 @@ describe('useGetCases', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

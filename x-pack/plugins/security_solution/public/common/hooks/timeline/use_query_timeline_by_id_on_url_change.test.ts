@@ -8,7 +8,7 @@
 import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { useQueryTimelineByIdOnUrlChange } from './use_query_timeline_by_id_on_url_change';
 import * as urlHelpers from '../../utils/global_query_string/helpers';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 jest.mock('../../../timelines/components/open_timeline/helpers');

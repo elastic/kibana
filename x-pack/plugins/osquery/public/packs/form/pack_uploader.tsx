@@ -6,10 +6,12 @@
  */
 
 import { kebabCase } from 'lodash';
+import type { EuiFilePickerProps } from '@elastic/eui';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PackItem } from '../types';
 
 const SUPPORTED_PACK_EXTENSIONS = ['application/json', 'text/plain'];
 
@@ -24,8 +26,17 @@ const ExamplePackLink = React.memo(() => (
 
 ExamplePackLink.displayName = 'ExamplePackLink';
 
-interface OsqueryPackUploaderProps {
-  onChange: (payload: Record<string, unknown>, packName: string) => void;
+export interface OsqueryPackUploaderProps {
+  onChange: (
+    payload: PackItem & {
+      interval?: string;
+      platform: string;
+      version?: string;
+      snapshot?: boolean;
+      removed?: boolean;
+    },
+    packName: string
+  ) => void;
 }
 
 const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onChange }) => {
@@ -80,9 +91,9 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
     fileReader.readAsText(file);
   };
 
-  const handleInputChange = useCallback(
+  const handleInputChange = useCallback<NonNullable<EuiFilePickerProps['onChange']>>(
     (inputFiles) => {
-      if (!inputFiles.length) {
+      if (!inputFiles?.length) {
         packName.current = '';
 
         return;

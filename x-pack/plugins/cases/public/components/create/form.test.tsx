@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { mount } from 'enzyme';
 import { act, render } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -51,10 +52,9 @@ const casesFormProps: CreateCaseFormProps = {
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
 
-  const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
-    children,
-    testProviderProps = {},
-  }) => {
+  const MockHookWrapperComponent: FC<
+    PropsWithChildren<{ testProviderProps?: Record<string, unknown> }>
+  > = ({ children, testProviderProps = {} }) => {
     const { form } = useForm<FormProps>({
       defaultValue: initialCaseValue,
       options: { stripEmptyFields: false },

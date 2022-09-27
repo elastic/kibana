@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -69,9 +69,10 @@ export const getMetricVisRenderer: (
   reuseDomNode: true,
   render: async (domNode, { visData, visConfig }, handlers) => {
     const { core, plugins } = getStartDeps();
+    const root = createRoot(domNode);
 
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
@@ -90,7 +91,7 @@ export const getMetricVisRenderer: (
       handlers.done();
     };
 
-    render(
+    root.render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <VisualizationContainer
           data-test-subj="legacyMtrVis"
@@ -107,8 +108,7 @@ export const getMetricVisRenderer: (
             filterable={filterable}
           />
         </VisualizationContainer>
-      </KibanaThemeProvider>,
-      domNode
+      </KibanaThemeProvider>
     );
   },
 });

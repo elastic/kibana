@@ -30,7 +30,8 @@ export const UsersContainer = React.memo(() => {
         }) => (
           <UsersDetails
             usersDetailsPagePath={usersDetailsPagePath}
-            detailName={decodeURIComponent(detailName)}
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            detailName={decodeURIComponent(detailName!)}
           />
         )}
       />

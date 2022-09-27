@@ -24,7 +24,7 @@ export interface ChromeNavControl {
  * chrome.navControls.registerLeft({
  *   mount(targetDomElement) {
  *     ReactDOM.mount(<MyControl />, targetDomElement);
- *     return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+ *     return () => root.unmount();(targetDomElement);
  *   }
  * })
  * ```

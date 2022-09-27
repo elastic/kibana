@@ -124,6 +124,7 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
             <EuiTableHeaderCell>{SOURCE}</EuiTableHeaderCell>
             <EuiTableHeaderCell />
           </EuiTableHeader>
+          {/* @ts-expect-error update types */}
           <EuiTableBody>
             {contentSources.map((source, i) => (
               <EuiTableRow key={i}>

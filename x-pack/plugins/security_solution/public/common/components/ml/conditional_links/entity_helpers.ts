@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export const emptyEntity = (entity: string): boolean =>
-  entity.trim() === '' || (entity.startsWith('$') && entity.endsWith('$'));
+export const emptyEntity = (entity?: string): boolean =>
+  !!entity && (entity.trim() === '' || (entity.startsWith('$') && entity.endsWith('$')));
 
-export const multipleEntities = (entity: string): boolean => entity.split(',').length > 1;
+export const multipleEntities = (entity?: string): boolean =>
+  !!entity && entity.split(',').length > 1;
 
-export const getMultipleEntities = (entity: string): string[] => entity.split(',');
+export const getMultipleEntities = (entity?: string): string[] => (entity ? entity.split(',') : []);

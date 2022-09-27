@@ -14,7 +14,7 @@ export interface DefaultSideNavItem {
   label: string;
   href: string;
   onClick?: React.MouseEventHandler;
-  description?: string;
+  description?: React.ReactNode;
   items?: DefaultSideNavItem[];
   categories?: LinkCategories;
   isBeta?: boolean;

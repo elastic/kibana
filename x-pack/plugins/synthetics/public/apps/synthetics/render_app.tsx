@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { SyntheticsAppProps } from './contexts';
@@ -26,6 +26,7 @@ export function renderApp(
   appMountParameters: AppMountParameters,
   isDev: boolean
 ) {
+  const root = createRoot(appMountParameters.element);
   const {
     application: { capabilities },
     chrome: { setBadge, setHelpExtension },
@@ -75,9 +76,7 @@ export function renderApp(
     setBreadcrumbs: core.chrome.setBreadcrumbs,
   };
 
-  ReactDOM.render(<SyntheticsApp {...props} />, appMountParameters.element);
+  root.render(<SyntheticsApp {...props} />);
 
-  return () => {
-    ReactDOM.unmountComponentAtNode(appMountParameters.element);
-  };
+  return () => root.unmount();
 }

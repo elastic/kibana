@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ComponentType } from 'react';
+import type { PropsWithChildren, ComponentType } from 'react';
 import { PageTitle } from './page_title';
 import { PageSubtitle } from './page_subtitle';
 import { PageFooter } from './page_footer';
@@ -22,7 +22,7 @@ const componentType: { [key: string]: Id } = {
   PAGE_FOOTER_COMPONENT: 'advanced_settings_page_footer' as Id,
 };
 
-type RegistryComponent = ComponentType<Record<string, any> | undefined>;
+type RegistryComponent = ComponentType<PropsWithChildren<Record<string, any> | undefined>>;
 
 export class ComponentRegistry {
   static readonly componentType = componentType;

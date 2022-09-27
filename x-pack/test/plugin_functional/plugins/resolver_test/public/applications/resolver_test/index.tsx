@@ -8,7 +8,7 @@
 import { Router } from 'react-router-dom';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { useMemo } from 'react';
 import styled from 'styled-components';
@@ -33,17 +33,18 @@ export function renderApp(
   parameters.element.style.display = 'flex';
   parameters.element.style.flexGrow = '1';
 
-  ReactDOM.render(
+  const root = createRoot(parameters.element);
+
+  root.render(
     <AppRoot
       coreStart={coreStart}
       parameters={parameters}
       resolverPluginSetup={resolverPluginSetup}
-    />,
-    parameters.element
+    />
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(parameters.element);
+    root.unmount();
   };
 }
 

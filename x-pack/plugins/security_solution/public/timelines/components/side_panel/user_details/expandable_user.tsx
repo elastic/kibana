@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import type { Anomaly } from '../../../../common/components/ml/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UserOverview } from '../../../../overview/components/user_overview';
@@ -70,7 +71,7 @@ export const ExpandableUserDetails = ({
   });
 
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: Anomaly, interval: string) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

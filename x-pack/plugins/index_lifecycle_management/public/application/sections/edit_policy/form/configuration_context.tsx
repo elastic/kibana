@@ -6,7 +6,8 @@
  */
 
 import { get } from 'lodash';
-import React, { FunctionComponent, createContext, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { useFormData } from '../../../../shared_imports';
 
@@ -48,7 +49,7 @@ const pathToHotPhaseSearchableSnapshot =
 const pathToColdPhaseSearchableSnapshot =
   'phases.cold.actions.searchable_snapshot.snapshot_repository';
 
-export const ConfigurationProvider: FunctionComponent = ({ children }) => {
+export const ConfigurationProvider: FC<PropsWithChildren> = ({ children }) => {
   const [formData] = useFormData({
     watch: [
       pathToHotPhaseSearchableSnapshot,

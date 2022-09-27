@@ -42,6 +42,7 @@ export const SchemaFieldsTable: React.FC = () => {
           {SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER}
         </EuiTableHeaderCell>
       </EuiTableHeader>
+      {/* @ts-expect-error update types */}
       <EuiTableBody>
         {Object.keys(filteredSchemaFields).map((fieldName) => (
           <EuiTableRow key={fieldName} data-test-subj="SchemaFieldRow">

@@ -14,7 +14,7 @@ export function useFormWrapped<TFieldValues extends FieldValues = FieldValues, T
   const { register, ...restOfForm } = useForm<TFieldValues>(props);
 
   const euiRegister = useCallback(
-    (name, ...registerArgs) => {
+    (name: any, ...registerArgs: any[]) => {
       const { ref, ...restOfRegister } = register(name, ...registerArgs);
 
       return {

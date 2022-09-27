@@ -23,7 +23,7 @@ import { FieldConfig, Form, UseField, useForm } from '../../common/shared_import
 import { Case } from '../../../common/ui/types';
 import { ActionConnector, ConnectorTypeFields, NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
-import { ConnectorFieldsForm } from '../connectors/fields_form';
+import { ConnectorFieldsForm, ConnectorFieldsFormProps } from '../connectors/fields_form';
 import { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
@@ -191,7 +191,7 @@ export const EditConnector = React.memo(
      * initially.
      */
     const onChangeConnector = useCallback(
-      (newConnectorId) => {
+      (newConnectorId: string) => {
         // change connector on dropdown action
         if (currentConnector?.id !== newConnectorId) {
           dispatch({
@@ -207,7 +207,7 @@ export const EditConnector = React.memo(
       [currentConnector, userActions, connectors]
     );
 
-    const onFieldsChange = useCallback(
+    const onFieldsChange = useCallback<ConnectorFieldsFormProps['onChange']>(
       (newFields) => {
         if (!deepEqual(newFields, fields)) {
           dispatch({
@@ -257,8 +257,8 @@ export const EditConnector = React.memo(
       });
     }, [dispatch]);
 
-    const connectorIdConfig = getConnectorsFormValidators({
-      config: schema.connectorId as FieldConfig,
+    const connectorIdConfig: FieldConfig<string> = getConnectorsFormValidators({
+      config: schema.connectorId as FieldConfig<string>,
       connectors,
     });
 

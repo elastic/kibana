@@ -21,6 +21,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { SnoozeSchedule } from '../../../../types';
 import { RuleStatusDropdown, RulesListNotifyBadge } from '../..';
 import {
   ComponentOpts as RuleApis,
@@ -60,11 +61,11 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   const openSnooze = useCallback(() => setIsSnoozeOpen(true), [setIsSnoozeOpen]);
   const closeSnooze = useCallback(() => setIsSnoozeOpen(false), [setIsSnoozeOpen]);
   const onSnoozeRule = useCallback(
-    (snoozeSchedule) => snoozeRule(rule, snoozeSchedule),
+    (snoozeSchedule: SnoozeSchedule) => snoozeRule(rule, snoozeSchedule),
     [rule, snoozeRule]
   );
   const onUnsnoozeRule = useCallback(
-    (scheduleIds) => unsnoozeRule(rule, scheduleIds),
+    (scheduleIds?: string[]) => unsnoozeRule(rule, scheduleIds),
     [rule, unsnoozeRule]
   );
 

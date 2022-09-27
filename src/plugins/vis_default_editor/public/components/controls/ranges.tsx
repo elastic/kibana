@@ -41,7 +41,7 @@ interface RangeValuesModel extends RangeValues {
   id: string;
 }
 
-interface RangesParamEditorProps {
+export interface RangesParamEditorProps {
   'data-test-subj'?: string;
   error?: React.ReactNode;
   value?: RangeValues[];

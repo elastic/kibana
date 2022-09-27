@@ -7,7 +7,7 @@
  */
 
 import { ComponentType, createElement as h } from 'react';
-import { render as renderReact, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { UiComponent, UiComponentInstance } from '@kbn/kibana-utils-plugin/public';
 
 /**
@@ -22,11 +22,11 @@ export const reactToUiComponent =
 
     const render: UiComponentInstance<Props>['render'] = (el, props) => {
       lastEl = el;
-      renderReact(h(ReactComp, props), el);
+      createRoot(el).render(h(ReactComp, props));
     };
 
     const unmount: UiComponentInstance<Props>['unmount'] = () => {
-      if (lastEl) unmountComponentAtNode(lastEl);
+      if (lastEl) createRoot(lastEl).unmount();
     };
 
     const comp: UiComponentInstance<Props> = {

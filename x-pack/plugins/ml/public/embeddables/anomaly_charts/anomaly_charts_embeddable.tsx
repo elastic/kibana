@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
@@ -116,7 +116,7 @@ export class AnomalyChartsEmbeddable extends Embeddable<
     const I18nContext = this.services[0].i18n.Context;
     const theme$ = this.services[0].theme.theme$;
 
-    ReactDOM.render(
+    createRoot(this.node).render(
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...this.services[0] }}>
@@ -136,15 +136,14 @@ export class AnomalyChartsEmbeddable extends Embeddable<
             </Suspense>
           </KibanaContextProvider>
         </KibanaThemeProvider>
-      </I18nContext>,
-      node
+      </I18nContext>
     );
   }
 
   public destroy() {
     super.destroy();
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
   }
 

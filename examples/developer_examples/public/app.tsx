@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import {
   EuiText,
@@ -101,7 +101,7 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
 }
 
 export const renderApp = (props: Props, element: AppMountParameters['element']) => {
-  ReactDOM.render(<DeveloperExamples {...props} />, element);
-
-  return () => ReactDOM.unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(<DeveloperExamples {...props} />);
+  return () => root.unmount();
 };

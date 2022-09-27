@@ -6,8 +6,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import { DraggableWrapper, DragEffects } from '../drag_and_drop/draggable_wrapper';
-import type { QueryOperator } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type {
+  DataProvider,
+  QueryOperator,
+} from '../../../timelines/components/timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
@@ -43,7 +47,7 @@ export const EntityDraggableComponent: React.FC<Props> = ({
   );
 
   const render = useCallback(
-    (dataProvider, _, snapshot) =>
+    (dataProvider: DataProvider, _: DraggableProvided | null, snapshot: DraggableStateSnapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { isEmpty } from 'lodash';
 import { batch } from 'react-redux';
 import { get, isEqual } from 'lodash';
@@ -433,20 +433,19 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
   public render = (node: HTMLElement) => {
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
     const { Wrapper: RangeSliderReduxWrapper } = this.reduxEmbeddableTools;
     this.node = node;
     const ControlsServicesProvider = pluginServices.getContextProvider();
-    ReactDOM.render(
+    createRoot(this.node).render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <ControlsServicesProvider>
           <RangeSliderReduxWrapper>
             <RangeSliderControl />
           </RangeSliderReduxWrapper>
         </ControlsServicesProvider>
-      </KibanaThemeProvider>,
-      node
+      </KibanaThemeProvider>
     );
   };
 

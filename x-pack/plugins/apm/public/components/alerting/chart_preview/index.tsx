@@ -76,6 +76,7 @@ export function ChartPreview({
   return (
     <>
       <EuiSpacer size="m" />
+      {/* @ts-expect-error update types */}
       <Chart size={{ height: 150 }} data-test-subj="ChartPreview">
         <Settings tooltip="none" />
         <LineAnnotation

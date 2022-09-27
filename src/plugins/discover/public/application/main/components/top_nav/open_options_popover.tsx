@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreTheme, I18nStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -125,12 +125,6 @@ export function OptionsPopover(props: OptionsPopoverProps) {
   );
 }
 
-function onClose() {
-  ReactDOM.unmountComponentAtNode(container);
-  document.body.removeChild(container);
-  isOpen = false;
-}
-
 export function openOptionsPopover({
   I18nContext,
   anchorElement,
@@ -142,6 +136,14 @@ export function openOptionsPopover({
   theme$: Observable<CoreTheme>;
   services: DiscoverServices;
 }) {
+  const root = createRoot(container);
+
+  function onClose() {
+    root.unmount();
+    document.body.removeChild(container);
+    isOpen = false;
+  }
+
   if (isOpen) {
     onClose();
     return;
@@ -159,5 +161,5 @@ export function openOptionsPopover({
       </KibanaContextProvider>
     </I18nContext>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 }

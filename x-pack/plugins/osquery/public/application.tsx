@@ -8,7 +8,7 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
@@ -48,7 +48,8 @@ export const renderApp = (
   storage: Storage,
   kibanaVersion: string
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
@@ -71,9 +72,8 @@ export const renderApp = (
           </Router>
         </EuiErrorBoundary>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
-    element
+    </KibanaThemeProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

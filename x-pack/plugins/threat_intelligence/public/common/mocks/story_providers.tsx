@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, VFC } from 'react';
+import React, { ReactNode } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
@@ -49,7 +50,7 @@ export interface StoryProvidersComponentProps {
 
 const securityLayout = {
   getPluginWrapper:
-    (): FC =>
+    (): FC<PropsWithChildren> =>
     ({ children }) =>
       <div>{children}</div>,
 };
@@ -68,7 +69,7 @@ const defaultServices = {
  * Helper functional component used in Storybook stories.
  * Wraps the story with our {@link SecuritySolutionContext} and KibanaReactContext.
  */
-export const StoryProvidersComponent: VFC<StoryProvidersComponentProps> = ({
+export const StoryProvidersComponent: FC<PropsWithChildren<StoryProvidersComponentProps>> = ({
   children,
   kibana = {},
 }) => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
@@ -19,7 +20,7 @@ export interface PageProps {
   title?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
+export const Page: FC<PropsWithChildren<PageProps>> = ({ title = 'Untitled', children }) => {
   return (
     <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
       <EuiPageHeader>

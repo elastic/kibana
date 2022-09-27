@@ -80,6 +80,7 @@ export const StackByComboBox = React.forwardRef(
     ref
   ) => {
     const onChange = useCallback(
+      // @ts-expect-error update types
       (options) => {
         if (options && options.length > 0) {
           onSelect(options[0].value);

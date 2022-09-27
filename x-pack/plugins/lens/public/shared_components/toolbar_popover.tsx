@@ -7,6 +7,7 @@
 
 import './toolbar_popover.scss';
 import React, { useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { EuiIconLegend } from '@kbn/chart-icons';
@@ -41,7 +42,7 @@ export interface ToolbarPopoverProps {
   handleClose?: () => void;
 }
 
-export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
+export const ToolbarPopover: FC<PropsWithChildren<ToolbarPopoverProps>> = ({
   children,
   title,
   type,

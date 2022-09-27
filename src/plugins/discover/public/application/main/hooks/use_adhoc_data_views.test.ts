@@ -8,7 +8,7 @@
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { discoverServiceMock as mockDiscoverServices } from '../../../__mocks__/services';
 import { GetStateReturn } from '../services/discover_state';
 import { useAdHocDataViews } from './use_adhoc_data_views';

@@ -31,6 +31,7 @@ const theme = themeServiceMock.createSetupContract();
 
 test('ScreenCapturePanelContent renders the default view properly', () => {
   const component = mount(
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         reportType="Analytical App"
@@ -50,6 +51,7 @@ test('ScreenCapturePanelContent renders the default view properly', () => {
 
 test('ScreenCapturePanelContent properly renders a view with "canvas" layout option', () => {
   const component = mount(
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         layoutOption="canvas"
@@ -69,6 +71,7 @@ test('ScreenCapturePanelContent properly renders a view with "canvas" layout opt
 
 test('ScreenCapturePanelContent allows POST URL to be copied when objectId is provided', () => {
   const component = mount(
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         layoutOption="canvas"
@@ -89,6 +92,7 @@ test('ScreenCapturePanelContent allows POST URL to be copied when objectId is pr
 
 test('ScreenCapturePanelContent does not allow POST URL to be copied when objectId is not provided', () => {
   const component = mount(
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         layoutOption="canvas"
@@ -108,6 +112,7 @@ test('ScreenCapturePanelContent does not allow POST URL to be copied when object
 
 test('ScreenCapturePanelContent properly renders a view with "print" layout option', () => {
   const component = mount(
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         layoutOption="print"
@@ -127,6 +132,7 @@ test('ScreenCapturePanelContent properly renders a view with "print" layout opti
 
 test('ScreenCapturePanelContent decorated job params are visible in the POST URL', () => {
   const component = mount(
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         objectId="test"

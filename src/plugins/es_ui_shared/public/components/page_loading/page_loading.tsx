@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiEmptyPrompt,
   EuiLoadingSpinner,
@@ -14,7 +15,7 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 
-export const PageLoading: React.FunctionComponent = ({ children }) => {
+export const PageLoading: FC<PropsWithChildren> = ({ children }) => {
   return (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
       <EuiEmptyPrompt

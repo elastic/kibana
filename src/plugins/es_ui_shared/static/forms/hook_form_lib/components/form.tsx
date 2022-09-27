@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, PropsWithChildren } from 'react';
 import { EuiForm } from '@elastic/eui';
 
 import { FormProvider } from '../form_context';
@@ -15,7 +15,7 @@ import { FormHook } from '../types';
 
 export interface Props {
   form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
+  FormWrapper?: React.ComponentType<PropsWithChildren>;
   children: ReactNode | ReactNode[];
   [key: string]: any;
 }

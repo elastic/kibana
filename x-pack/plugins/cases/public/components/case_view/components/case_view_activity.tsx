@@ -14,11 +14,11 @@ import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
-import { CaseSeverity } from '../../../../common/api';
+import { CaseConnector, CaseSeverity } from '../../../../common/api';
 import { useCaseViewNavigation } from '../../../common/navigation';
 import { UseFetchAlertData } from '../../../../common/ui/types';
 import { Case, CaseStatuses } from '../../../../common';
-import { EditConnector } from '../../edit_connector';
+import { EditConnector, EditConnectorProps } from '../../edit_connector';
 import { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
 import { EditTags } from './edit_tags';
@@ -108,7 +108,7 @@ export const CaseViewActivity = ({
   );
 
   const onSubmitTags = useCallback(
-    (newTags) => onUpdateField({ key: 'tags', value: newTags }),
+    (newTags: string[]) => onUpdateField({ key: 'tags', value: newTags }),
     [onUpdateField]
   );
 
@@ -134,7 +134,7 @@ export const CaseViewActivity = ({
     return [connector?.name ?? '', !!connector];
   }, [connectors, caseData.connector]);
 
-  const onSubmitConnector = useCallback(
+  const onSubmitConnector = useCallback<EditConnectorProps['onSubmit']>(
     (connectorId, connectorFields, onError, onSuccess) => {
       const connector = getConnectorById(connectorId, connectors);
       const connectorToUpdate = connector
@@ -143,7 +143,7 @@ export const CaseViewActivity = ({
 
       onUpdateField({
         key: 'connector',
-        value: { ...connectorToUpdate, fields: connectorFields },
+        value: { ...connectorToUpdate, fields: connectorFields } as CaseConnector,
         onSuccess,
         onError,
       });

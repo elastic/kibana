@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import {
   EuiPageBody,
@@ -21,7 +22,7 @@ export interface PageProps {
   title?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
+export const Page: FC<PropsWithChildren<PageProps>> = ({ title = 'Untitled', children }) => {
   return (
     <EuiPageBody>
       <EuiPageHeader>

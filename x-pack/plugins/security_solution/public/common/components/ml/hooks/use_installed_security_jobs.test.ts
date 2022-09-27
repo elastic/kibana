@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -37,51 +37,51 @@ describe('useInstalledSecurityJobs', () => {
     });
 
     it('returns jobs and permissions', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs());
-      await waitForNextUpdate();
-
-      expect(result.current.jobs).toHaveLength(3);
-      expect(result.current.jobs).toEqual(
-        expect.arrayContaining([
-          {
-            awaitingNodeAssignment: false,
-            datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
-            datafeedIndices: ['auditbeat-*'],
-            datafeedState: 'stopped',
-            description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
-            earliestTimestampMs: 1557353420495,
-            groups: ['siem'],
-            hasDatafeed: true,
-            id: 'siem-api-rare_process_linux_ecs',
-            isSingleMetricViewerJob: true,
-            jobState: 'closed',
-            jobTags: {},
-            latestTimestampMs: 1557434782207,
-            memory_status: 'hard_limit',
-            processed_record_count: 582251,
-            bucketSpanSeconds: 900,
-          },
-        ])
-      );
-      expect(result.current.isMlUser).toEqual(true);
-      expect(result.current.isLicensed).toEqual(true);
+      const { result } = renderHook(() => useInstalledSecurityJobs());
+      await waitFor(() => {
+        expect(result.current.jobs).toHaveLength(3);
+        expect(result.current.jobs).toEqual(
+          expect.arrayContaining([
+            {
+              awaitingNodeAssignment: false,
+              datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
+              datafeedIndices: ['auditbeat-*'],
+              datafeedState: 'stopped',
+              description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
+              earliestTimestampMs: 1557353420495,
+              groups: ['siem'],
+              hasDatafeed: true,
+              id: 'siem-api-rare_process_linux_ecs',
+              isSingleMetricViewerJob: true,
+              jobState: 'closed',
+              jobTags: {},
+              latestTimestampMs: 1557434782207,
+              memory_status: 'hard_limit',
+              processed_record_count: 582251,
+              bucketSpanSeconds: 900,
+            },
+          ])
+        );
+        expect(result.current.isMlUser).toEqual(true);
+        expect(result.current.isLicensed).toEqual(true);
+      });
     });
 
     it('filters out non-security jobs', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs());
-      await waitForNextUpdate();
-
-      expect(result.current.jobs.length).toBeGreaterThan(0);
-      expect(result.current.jobs.every(isSecurityJob)).toEqual(true);
+      const { result } = renderHook(() => useInstalledSecurityJobs());
+      await waitFor(() => {
+        expect(result.current.jobs.length).toBeGreaterThan(0);
+        expect(result.current.jobs.every(isSecurityJob)).toEqual(true);
+      });
     });
 
     it('renders a toast error if the ML call fails', async () => {
       (getJobsSummary as jest.Mock).mockRejectedValue('whoops');
-      const { waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs());
-      await waitForNextUpdate();
-
-      expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
-        title: 'Security job fetch failure',
+      renderHook(() => useInstalledSecurityJobs());
+      await waitFor(() => {
+        expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
+          title: 'Security job fetch failure',
+        });
       });
     });
   });

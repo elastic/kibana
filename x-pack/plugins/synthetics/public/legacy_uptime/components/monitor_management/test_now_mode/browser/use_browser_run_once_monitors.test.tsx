@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useBrowserRunOnceMonitors } from './use_browser_run_once_monitors';
 import * as resultHook from './use_browser_run_once_monitors';
 import { WrappedHelper } from '../../../../lib/helper/rtl_helpers';

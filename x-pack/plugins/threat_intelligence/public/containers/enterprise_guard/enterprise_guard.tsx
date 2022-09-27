@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { Paywall } from '../../components/paywall';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSecurityContext } from '../../hooks/use_security_context';
 import { SecuritySolutionPluginTemplateWrapper } from '../security_solution_plugin_template_wrapper';
 
-export const EnterpriseGuard: FC = ({ children }) => {
+export const EnterpriseGuard: FC<PropsWithChildren> = ({ children }) => {
   const { licenseService } = useSecurityContext();
   const {
     services: { http },

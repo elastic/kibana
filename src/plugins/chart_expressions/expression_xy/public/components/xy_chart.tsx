@@ -743,6 +743,7 @@ export function XYChart({
           singleTable,
         }}
       >
+        {/* @ts-expect-error update types */}
         <Chart ref={chartRef}>
           <Settings
             noResults={

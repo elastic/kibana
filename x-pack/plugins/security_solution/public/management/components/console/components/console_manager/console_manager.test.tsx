@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as _renderHook, act } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook as _renderHook, act, waitFor } from '@testing-library/react';
 import { useConsoleManager } from './console_manager';
 import React from 'react';
 import type {
@@ -22,12 +22,11 @@ import {
   getNewConsoleRegistrationMock,
 } from './mocks';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
 import { enterConsoleCommand } from '../../mocks';
 
 describe('When using ConsoleManager', () => {
   describe('and using the ConsoleManagerInterface via the hook', () => {
-    type RenderResultInterface = RenderHookResult<never, ConsoleManagerClient>;
+    type RenderResultInterface = RenderHookResult<ConsoleManagerClient, never>;
 
     let renderHook: () => RenderResultInterface;
     let renderResult: RenderResultInterface;
@@ -179,26 +178,27 @@ describe('When using ConsoleManager', () => {
 
       it('should display the console when `.show()` is called', async () => {
         registeredConsole.show();
-        await renderResult.waitForNextUpdate();
-
-        expect(registeredConsole.isVisible()).toBe(true);
+        await waitFor(() => {
+          expect(registeredConsole.isVisible()).toBe(true);
+        });
       });
 
       it('should hide the console when `.hide()` is called', async () => {
         registeredConsole.show();
-        await renderResult.waitForNextUpdate();
-        expect(registeredConsole.isVisible()).toBe(true);
-
+        await waitFor(() => {
+          expect(registeredConsole.isVisible()).toBe(true);
+        });
         registeredConsole.hide();
-        await renderResult.waitForNextUpdate();
-        expect(registeredConsole.isVisible()).toBe(false);
+        await waitFor(() => {
+          expect(registeredConsole.isVisible()).toBe(false);
+        });
       });
 
       it('should un-register the console when `.terminate() is called', async () => {
         registeredConsole.terminate();
-        await renderResult.waitForNextUpdate();
-
-        expect(renderResult.result.current.getOne(consoleId)).toBeUndefined();
+        await waitFor(() => {
+          expect(renderResult.result.current.getOne(consoleId)).toBeUndefined();
+        });
       });
     });
   });

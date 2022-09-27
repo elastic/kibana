@@ -6,7 +6,7 @@
  */
 
 import type { Unit } from '@kbn/datemath';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
@@ -52,59 +52,59 @@ describe('useEqlPreview', () => {
 
   it('should initiate hook', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useEqlPreview());
-      await waitForNextUpdate();
-
-      expect(result.current[0]).toBeFalsy();
-      expect(typeof result.current[1]).toEqual('function');
-      expect(result.current[2]).toEqual({
-        data: [],
-        inspect: { dsl: [], response: [] },
-        refetch: result.current[2].refetch,
-        totalCount: 0,
+      const { result } = renderHook(() => useEqlPreview());
+      await waitFor(() => {
+        expect(result.current[0]).toBeFalsy();
+        expect(typeof result.current[1]).toEqual('function');
+        expect(result.current[2]).toEqual({
+          data: [],
+          inspect: { dsl: [], response: [] },
+          refetch: result.current[2].refetch,
+          totalCount: 0,
+        });
       });
     });
   });
 
   it('should invoke search with passed in params', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useEqlPreview());
+      const { result } = renderHook(() => useEqlPreview());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        result.current[1](params);
 
-      result.current[1](params);
+        const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
 
-      const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
-
-      expect(mockCalls.length).toEqual(1);
-      expect(mockCalls[0][0].params.body.query).toEqual('file where true');
-      expect(mockCalls[0][0].params.body.filter).toEqual({
-        range: {
-          '@timestamp': {
-            format: 'strict_date_optional_time',
-            gte: '2020-10-04T15:00:54.368707900Z',
-            lte: '2020-10-04T16:00:54.368707900Z',
+        expect(mockCalls.length).toEqual(1);
+        expect(mockCalls[0][0].params.body.query).toEqual('file where true');
+        expect(mockCalls[0][0].params.body.filter).toEqual({
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2020-10-04T15:00:54.368707900Z',
+              lte: '2020-10-04T16:00:54.368707900Z',
+            },
           },
-        },
+        });
+        expect(mockCalls[0][0].params.index).toBe('foo-*,bar-*');
       });
-      expect(mockCalls[0][0].params.index).toBe('foo-*,bar-*');
     });
   });
 
   it('should resolve values after search is invoked', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useEqlPreview());
+      const { result } = renderHook(() => useEqlPreview());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        result.current[1](params);
 
-      result.current[1](params);
-
-      expect(result.current[0]).toBeFalsy();
-      expect(typeof result.current[1]).toEqual('function');
-      expect(result.current[2].totalCount).toEqual(4);
-      expect(result.current[2].data.length).toBeGreaterThan(0);
-      expect(result.current[2].inspect.dsl.length).toBeGreaterThan(0);
-      expect(result.current[2].inspect.response.length).toBeGreaterThan(0);
+        expect(result.current[0]).toBeFalsy();
+        expect(typeof result.current[1]).toEqual('function');
+        expect(result.current[2].totalCount).toEqual(4);
+        expect(result.current[2].data.length).toBeGreaterThan(0);
+        expect(result.current[2].inspect.dsl.length).toBeGreaterThan(0);
+        expect(result.current[2].inspect.response.length).toBeGreaterThan(0);
+      });
     });
   });
 
@@ -113,19 +113,19 @@ describe('useEqlPreview', () => {
       (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
         of(getMockEqlResponse()).pipe(delay(5000))
       );
-      const { result, waitForNextUpdate, unmount } = renderHook(() => useEqlPreview());
+      const { result, unmount } = renderHook(() => useEqlPreview());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        result.current[1](params);
 
-      result.current[1](params);
+        unmount();
 
-      unmount();
-
-      expect(result.current[0]).toBeTruthy();
-      expect(result.current[2].totalCount).toEqual(0);
-      expect(result.current[2].data.length).toEqual(0);
-      expect(result.current[2].inspect.dsl.length).toEqual(0);
-      expect(result.current[2].inspect.response.length).toEqual(0);
+        expect(result.current[0]).toBeTruthy();
+        expect(result.current[2].totalCount).toEqual(0);
+        expect(result.current[2].data.length).toEqual(0);
+        expect(result.current[2].inspect.dsl.length).toEqual(0);
+        expect(result.current[2].inspect.response.length).toEqual(0);
+      });
     });
   });
 
@@ -139,14 +139,14 @@ describe('useEqlPreview', () => {
         })
       );
 
-      const { result, waitForNextUpdate } = renderHook(() => useEqlPreview());
+      const { result } = renderHook(() => useEqlPreview());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        result.current[1](params);
 
-      result.current[1](params);
-
-      expect(result.current[0]).toBeFalsy();
-      expect(addWarningMock.mock.calls[0][0]).toEqual(i18n.EQL_PREVIEW_FETCH_FAILURE);
+        expect(result.current[0]).toBeFalsy();
+        expect(addWarningMock.mock.calls[0][0]).toEqual(i18n.EQL_PREVIEW_FETCH_FAILURE);
+      });
     });
   });
 
@@ -163,14 +163,14 @@ describe('useEqlPreview', () => {
         })
       );
 
-      const { result, waitForNextUpdate } = renderHook(() => useEqlPreview());
+      const { result } = renderHook(() => useEqlPreview());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        result.current[1](params);
 
-      result.current[1](params);
-
-      expect(result.current[2].inspect.dsl.length).toEqual(1);
-      expect(result.current[2].inspect.response.length).toEqual(1);
+        expect(result.current[2].inspect.dsl.length).toEqual(1);
+        expect(result.current[2].inspect.response.length).toEqual(1);
+      });
     });
   });
 
@@ -180,14 +180,14 @@ describe('useEqlPreview', () => {
         throwError('This is an error!')
       );
 
-      const { result, waitForNextUpdate } = renderHook(() => useEqlPreview());
+      const { result } = renderHook(() => useEqlPreview());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        result.current[1](params);
 
-      result.current[1](params);
-
-      expect(result.current[0]).toBeFalsy();
-      expect(addErrorMock.mock.calls[0][0]).toEqual('This is an error!');
+        expect(result.current[0]).toBeFalsy();
+        expect(addErrorMock.mock.calls[0][0]).toEqual('This is an error!');
+      });
     });
   });
 

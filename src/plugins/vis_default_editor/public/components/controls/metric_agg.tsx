@@ -46,7 +46,10 @@ function MetricAggParamEditor({
     [metricAggs, agg.type.name]
   );
   const options = useAvailableOptions(aggFilter, filteredMetrics, DEFAULT_OPTIONS);
-  const onChange = useCallback((ev) => setValue(ev.target.value), [setValue]);
+  const onChange = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
+    (ev) => setValue(ev.target.value),
+    [setValue]
+  );
 
   return (
     <EuiFormRow

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { CountUntil } from '../../../../components/count_until';
 import { Page } from '../../../../components/page';

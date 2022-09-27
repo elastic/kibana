@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useDrilldownManager } from '../context';
 
-export const DrilldownManagerTitle: React.FC = ({ children }) => {
+export const DrilldownManagerTitle: FC<PropsWithChildren> = ({ children }) => {
   const drilldowns = useDrilldownManager();
   React.useEffect(() => {
     drilldowns.setTitle(children);

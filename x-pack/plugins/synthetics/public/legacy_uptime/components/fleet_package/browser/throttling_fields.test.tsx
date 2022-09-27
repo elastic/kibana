@@ -62,6 +62,7 @@ describe('<ThrottlingFields />', () => {
     const policyConfigValues = { ...defaultPolicyConfigValues, ...policyConfigOverrides };
 
     return (
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <BrowserSimpleFieldsContextProvider defaultValues={defaultSimpleFields}>
           <BrowserAdvancedFieldsContextProvider defaultValues={defaultValues}>

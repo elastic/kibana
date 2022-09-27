@@ -11,7 +11,7 @@ import { createInitialState } from './reducer';
 import { mockIndexPattern, mockSourcererState } from '../mock';
 import { useSourcererDataView } from '../containers/sourcerer';
 import { useDeepEqualSelector } from '../hooks/use_selector';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 jest.mock('../hooks/use_selector');
 jest.mock('../lib/kibana', () => ({

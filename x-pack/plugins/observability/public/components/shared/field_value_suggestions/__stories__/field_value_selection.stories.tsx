@@ -28,6 +28,7 @@ export default {
   component: FieldValueSelection,
   decorators: [
     (Story: ComponentType<FieldValueSelectionProps>) => (
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <KibanaReactContext.Provider>
           <FieldValueSelection

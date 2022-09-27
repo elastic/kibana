@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,7 +20,7 @@ export const noCustomAttributesTitle = i18n.translate(
   { defaultMessage: 'No custom attributes defined' }
 );
 
-export const nodeAllocationMigrationGuidance = ({ docLinks }: Props) => (
+export const nodeAllocationMigrationGuidance: FC<Props> = ({ docLinks }) => (
   <FormattedMessage
     id="xpack.indexLifecycleMgmt.editPolicy.defaultToDataNodesDescription"
     defaultMessage="To allocate data to particular data nodes, {roleBasedGuidance} or configure custom node attributes in elasticsearch.yml."

@@ -189,7 +189,10 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     return (
       <div {...rest}>
         <EuiTable responsive={false} tableLayout="auto">
-          <EuiTableBody>{rows}</EuiTableBody>
+          {
+            // @ts-expect-error update types
+            <EuiTableBody>{rows}</EuiTableBody>
+          }
         </EuiTable>
         <EuiSpacer size="m" />
         {this.renderPagination()}

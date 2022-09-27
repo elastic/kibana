@@ -39,6 +39,7 @@ export function ServiceGroupsTour({
             defaultMessage="Learn more in the {docsLink}."
             values={{
               docsLink: (
+                // @ts-expect-error update types
                 <ElasticDocsLink
                   section="/kibana"
                   path="/services.html"

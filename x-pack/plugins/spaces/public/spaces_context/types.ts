@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as React from 'react';
+import type { Consumer, FC, PropsWithChildren } from 'react';
 
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 
@@ -21,8 +21,8 @@ export interface SpacesReactContextValue<Services extends Partial<CoreStart>> {
 
 export interface SpacesReactContext<Services extends Partial<CoreStart>> {
   value: SpacesReactContextValue<Services>;
-  Provider: React.FC;
-  Consumer: React.Consumer<SpacesReactContextValue<Services>>;
+  Provider: FC<PropsWithChildren>;
+  Consumer: Consumer<SpacesReactContextValue<Services>>;
 }
 
 export interface InternalProps {

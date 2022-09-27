@@ -19,7 +19,7 @@ import {
   Capabilities,
   ScopedHistory,
 } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { DataPlugin, DataViewsContract } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -127,12 +127,13 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
       </TableListViewKibanaProvider>
     </KibanaThemeProvider>
   );
-  ReactDOM.render(app, element);
+  const root = createRoot(element);
+  root.render(app);
   element.setAttribute('class', 'gphAppWrapper');
 
   return () => {
     licenseSubscription.unsubscribe();
     unlistenParentHistory();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

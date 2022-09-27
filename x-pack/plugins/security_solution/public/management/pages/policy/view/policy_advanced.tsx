@@ -147,7 +147,7 @@ const PolicyAdvanced = React.memo(
   }) => {
     const dispatch = useDispatch();
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
-    const onChange = useCallback(
+    const onChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
       (event) => {
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);

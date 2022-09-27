@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import React from 'react';
+import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../common/mock';
 import { useGetFeatureIds } from './use_get_feature_ids';
 import * as api from './api';
@@ -24,7 +23,7 @@ describe('useGetFeaturesIds', () => {
   it('inits with empty data', async () => {
     jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
     const { result } = renderHook(() => useGetFeatureIds(['context1']), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -37,7 +36,7 @@ describe('useGetFeaturesIds', () => {
   it('fetches data and returns it correctly', async () => {
     const spy = jest.spyOn(api, 'getFeatureIds');
     const { result } = renderHook(() => useGetFeatureIds(['context1']), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
@@ -59,7 +58,7 @@ describe('useGetFeaturesIds', () => {
     });
 
     const { result } = renderHook(() => useGetFeatureIds(['context1']), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: TestProviders,
     });
 
     expect(result.current.alertFeatureIds).toEqual([]);

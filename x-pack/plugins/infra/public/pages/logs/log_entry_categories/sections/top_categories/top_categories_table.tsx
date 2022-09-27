@@ -50,7 +50,7 @@ export const TopCategoriesTable = euiStyled(
     }, [sortOptions]);
 
     const handleTableChange = useCallback(
-      ({ sort = {} }) => {
+      ({ sort }: any) => {
         changeSortOptions(sort);
       },
       [changeSortOptions]

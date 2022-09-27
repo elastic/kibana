@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { TopAlert } from '../alerts';
 import * as pluginContext from '../../hooks/use_plugin_context';
@@ -64,13 +64,11 @@ describe('useFetchAlertDetail', () => {
 
   it('initially is not loading and does not have data', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, TopAlert | null]>(() =>
-        useFetchAlertDetail(id)
-      );
+      const { result } = renderHook<[boolean, TopAlert | null], {}>(() => useFetchAlertDetail(id));
 
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual([false, null]);
+      await waitFor(() => {
+        expect(result.current).toEqual([false, null]);
+      });
     });
   });
 
@@ -80,26 +78,22 @@ describe('useFetchAlertDetail', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, TopAlert | null]>(() =>
+      const { result } = renderHook<[boolean, TopAlert | null], {}>(() =>
         useFetchAlertDetail('123')
       );
 
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual([false, null]);
+      await waitFor(() => {
+        expect(result.current).toEqual([false, null]);
+      });
     });
   });
 
   it('retrieves the alert data', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, TopAlert | null]>(() =>
-        useFetchAlertDetail(id)
-      );
+      const { result } = renderHook<[boolean, TopAlert | null], {}>(() => useFetchAlertDetail(id));
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toMatchInlineSnapshot(`
+      await waitFor(() => {
+        expect(result.current).toMatchInlineSnapshot(`
         Array [
           false,
           Object {
@@ -144,19 +138,21 @@ describe('useFetchAlertDetail', () => {
           },
         ]
       `);
+      });
     });
   });
 
   it('does not populate the results when the request is canceled', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, unmount } = renderHook<string, [boolean, TopAlert | null]>(
-        () => useFetchAlertDetail('123')
+      const { result, unmount } = renderHook<[boolean, TopAlert | null], {}>(() =>
+        useFetchAlertDetail('123')
       );
 
-      await waitForNextUpdate();
       unmount();
 
-      expect(result.current).toEqual([false, null]);
+      await waitFor(() => {
+        expect(result.current).toEqual([false, null]);
+      });
     });
   });
 });

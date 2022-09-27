@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
 import { Plugin } from 'unified';
 /**
@@ -51,17 +52,17 @@ export const CasesTimelineIntegrationContext = React.createContext<CasesTimeline
   null
 );
 
-export const CasesTimelineIntegrationProvider: React.FC<{
-  timelineIntegration?: CasesTimelineIntegration;
-}> =
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
-  ({ children, timelineIntegration }) => {
-    const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
+export const CasesTimelineIntegrationProvider: FC<
+  PropsWithChildren<{
+    timelineIntegration?: CasesTimelineIntegration;
+  }>
+> = ({ children, timelineIntegration }) => {
+  const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
 
-    return (
-      <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
-        {children}
-      </CasesTimelineIntegrationContext.Provider>
-    );
-  };
+  return (
+    <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
+      {children}
+    </CasesTimelineIntegrationContext.Provider>
+  );
+};
+CasesTimelineIntegrationProvider.displayName = 'CasesTimelineIntegrationProvider';

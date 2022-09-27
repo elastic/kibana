@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import url from 'url';
 import { EuiButtonEmpty } from '@elastic/eui';
 import rison, { RisonValue } from 'rison-node';
@@ -47,7 +48,12 @@ export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Props) => {
   });
 };
 
-export const MLJobLink: React.FC<Props> = ({ basePath, monitorId, dateRange, children }) => {
+export const MLJobLink: FC<PropsWithChildren<Props>> = ({
+  basePath,
+  monitorId,
+  dateRange,
+  children,
+}) => {
   const href = getMLJobLinkHref({ basePath, monitorId, dateRange });
   return <EuiButtonEmpty children={children} size="s" href={href} target="_blank" />;
 };

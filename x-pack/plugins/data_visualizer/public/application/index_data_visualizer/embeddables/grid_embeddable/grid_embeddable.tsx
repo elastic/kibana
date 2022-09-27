@@ -7,7 +7,8 @@
 
 import { Observable, Subject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client'
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
@@ -188,6 +189,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
   DataVisualizerGridEmbeddableOutput
 > {
   private node?: HTMLElement;
+  private root?: Root;
   private reload$ = new Subject<void>();
   public readonly type: string = DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE;
 
@@ -201,11 +203,12 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
 
   public render(node: HTMLElement) {
     super.render(node);
-    this.node = node;
+    this.node = node
+    this.root = createRoot(this.node);
 
     const I18nContext = this.services[0].i18n.Context;
 
-    ReactDOM.render(
+    this.root.render(
       <I18nContext>
         <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
           <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
@@ -219,15 +222,14 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
             </Suspense>
           </KibanaContextProvider>
         </KibanaThemeProvider>
-      </I18nContext>,
-      node
+      </I18nContext>
     );
   }
 
   public destroy() {
     super.destroy();
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      this.root?.unmount();
     }
   }
 

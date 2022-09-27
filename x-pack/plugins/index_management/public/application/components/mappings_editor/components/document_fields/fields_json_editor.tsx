@@ -8,7 +8,7 @@
 import React, { useRef, useCallback } from 'react';
 
 import { useDispatch } from '../../mappings_state_context';
-import { JsonEditor } from '../../shared_imports';
+import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
 
 export interface Props {
   defaultValue: object;
@@ -17,11 +17,11 @@ export interface Props {
 export const DocumentFieldsJsonEditor = ({ defaultValue }: Props) => {
   const dispatch = useDispatch();
   const defaultValueRef = useRef(defaultValue);
-  const onUpdate = useCallback(
+  const onUpdate = useCallback<OnJsonEditorUpdateHandler>(
     ({ data, isValid }) =>
       dispatch({
         type: 'fieldsJsonEditor.update',
-        value: { json: data.format(), isValid },
+        value: { json: data.format(), isValid: !!isValid },
       }),
     [dispatch]
   );

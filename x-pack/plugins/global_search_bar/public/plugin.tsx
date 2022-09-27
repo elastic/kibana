@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -72,7 +72,9 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     theme$: Observable<CoreTheme>;
     trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   }) {
-    ReactDOM.render(
+    const root = createRoot(container);
+
+    root.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
           <SearchBar
@@ -84,10 +86,9 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
             trackUiMetric={trackUiMetric}
           />
         </I18nProvider>
-      </KibanaThemeProvider>,
-      container
+      </KibanaThemeProvider>
     );
 
-    return () => ReactDOM.unmountComponentAtNode(container);
+    return () => root.unmount();
   }
 }

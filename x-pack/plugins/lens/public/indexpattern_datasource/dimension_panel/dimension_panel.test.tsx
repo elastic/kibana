@@ -330,7 +330,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(options).toHaveLength(2);
 
     expect(options![0].label).toEqual('Records');
-    expect(options![1].options!.map(({ label }) => label)).toEqual([
+    expect(options![1].options!.map(({ label }: { label: string }) => label)).toEqual([
       'timestampLabel',
       'bytes',
       'memory',
@@ -355,7 +355,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source']);
+    expect(options![1].options!.map(({ label }: { label: string }) => label)).toEqual([
+      'timestampLabel',
+      'source',
+    ]);
   });
 
   it('should indicate fields which are incompatible for the operation of the current column', () => {
@@ -374,10 +377,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-___records___');
 
     expect(
-      options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'timestampLabel')[0][
+        'data-test-subj'
+      ]
     ).toContain('Incompatible');
     expect(
-      options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'memory')[0][
+        'data-test-subj'
+      ]
     ).not.toContain('Incompatible');
   });
 
@@ -532,7 +539,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-dimension-field"]')!;
-    const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'memory')!;
+    const option = comboBox
+      .prop('options')![1]
+      .options!.find(({ label }: { label: string }) => label === 'memory')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);
@@ -567,7 +576,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-dimension-field"]')!;
-    const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
+    const option = comboBox
+      .prop('options')![1]
+      .options!.find(({ label }: { label: string }) => label === 'source')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);
@@ -893,10 +904,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toContain('Incompatible');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
+        options![1].options!.filter(
+          ({ label }: { label: string }) => label === 'timestampLabel'
+        )[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
-        options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
+        options![1].options!.filter(({ label }: { label: string }) => label === 'source')[0][
+          'data-test-subj'
+        ]
       ).not.toContain('Incompatible');
     });
 
@@ -1034,10 +1049,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toContain('Incompatible');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
+        options![1].options!.filter(
+          ({ label }: { label: string }) => label === 'timestampLabel'
+        )[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
-        options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
+        options![1].options!.filter(({ label }: { label: string }) => label === 'source')[0][
+          'data-test-subj'
+        ]
       ).not.toContain('Incompatible');
     });
 
@@ -1051,7 +1070,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const comboBox = wrapper
         .find(EuiComboBox)
         .filter('[data-test-subj="indexPattern-dimension-field"]')!;
-      const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
+      const option = comboBox
+        .prop('options')![1]
+        .options!.find(({ label }: { label: string }) => label === 'source')!;
 
       act(() => {
         comboBox.prop('onChange')!([option]);
@@ -1859,13 +1880,19 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(options![0]['data-test-subj']).toContain('Incompatible');
 
     expect(
-      options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'timestampLabel')[0][
+        'data-test-subj'
+      ]
     ).toContain('Incompatible');
     expect(
-      options![1].options!.filter(({ label }) => label === 'bytes')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'bytes')[0][
+        'data-test-subj'
+      ]
     ).not.toContain('Incompatible');
     expect(
-      options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'memory')[0][
+        'data-test-subj'
+      ]
     ).not.toContain('Incompatible');
   });
 
@@ -1903,7 +1930,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     const option = comboBox
       .prop('options')![1]
-      .options!.find(({ label }) => label === 'timestampLabel')!;
+      .options!.find(({ label }: { label: string }) => label === 'timestampLabel')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);

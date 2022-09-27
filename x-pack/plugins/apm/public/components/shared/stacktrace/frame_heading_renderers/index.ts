@@ -6,10 +6,11 @@
  */
 
 import { ComponentType } from 'react';
+import type { PropsWithChildren } from 'react';
 import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
 
 export interface FrameHeadingRendererProps {
-  fileDetailComponent: ComponentType;
+  fileDetailComponent: ComponentType<PropsWithChildren>;
   stackframe: Stackframe;
 }
 

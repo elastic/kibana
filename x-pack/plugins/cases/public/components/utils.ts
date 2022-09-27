@@ -39,8 +39,8 @@ export const getConnectorsFormValidators = ({
   config = {},
 }: {
   connectors: CaseActionConnector[];
-  config: FieldConfig;
-}): FieldConfig => ({
+  config: FieldConfig<string>;
+}): FieldConfig<string> => ({
   ...config,
   validations: [
     {

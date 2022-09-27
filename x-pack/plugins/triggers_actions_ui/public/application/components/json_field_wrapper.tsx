@@ -39,7 +39,11 @@ export const JsonFieldWrapper = ({ field, ...rest }: Props) => {
     <span css={styles.editor}>
       <JsonEditorWithMessageVariables
         errors={errorMessage ? [errorMessage] : []}
-        helpText={<p>{helpText}</p>}
+        helpText={
+          <p>
+            <>{helpText}</>
+          </p>
+        }
         inputTargetValue={value}
         label={
           label ??

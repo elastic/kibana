@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { DecoratorFn } from '@storybook/react';
 import { ServicesProvider, CloudServices } from '../public/services';
 
@@ -24,7 +25,7 @@ const services: CloudServices = {
   },
 };
 
-export const getCloudContextProvider: () => React.FC =
+export const getCloudContextProvider: () => FC<PropsWithChildren> =
   () =>
   ({ children }) =>
     <ServicesProvider {...services}>{children}</ServicesProvider>;

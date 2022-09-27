@@ -45,14 +45,19 @@ const getComparatorOptions = (): Array<{
   ];
 };
 
-interface Props {
+export interface ThresholdProps {
   comparator?: Comparator;
   value?: number;
   updateThreshold: (params: Partial<RuleParams['count']>) => void;
   errors: IErrorObject;
 }
 
-export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold, errors }) => {
+export const Threshold: React.FC<ThresholdProps> = ({
+  comparator,
+  value,
+  updateThreshold,
+  errors,
+}) => {
   const [isThresholdPopoverOpen, setThresholdPopoverOpenState] = useState(false);
 
   return (
@@ -91,7 +96,7 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+                <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value as string[]}>
                   <EuiFieldNumber
                     compressed
                     value={value}

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 export const DETAILS_QUERY = 'select * from uptime';
 export const DETAILS_ID = 'test-id';
@@ -38,4 +39,4 @@ export const defaultLiveQueryDetails = {
   },
 } as never;
 
-export const mockCasesContext: React.FC = (props) => <>{props?.children ?? null}</>;
+export const mockCasesContext: FC<PropsWithChildren> = (props) => <>{props?.children ?? null}</>;

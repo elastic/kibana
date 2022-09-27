@@ -35,6 +35,7 @@ const columnHeaders: ColumnHeaderOptions[] = [
     defaultSortDirection: 'desc',
     display: {
       key: null,
+      // @ts-expect-error update types
       ref: null,
       props: {
         children: {
@@ -69,6 +70,7 @@ const columnHeaders: ColumnHeaderOptions[] = [
     defaultSortDirection: 'desc',
     display: {
       key: null,
+      // @ts-expect-error update types
       ref: null,
       props: {
         children: {

@@ -103,7 +103,8 @@ function DiscoverDocumentsComponent({
   });
 
   const onResizeDataGrid = useCallback(
-    (colSettings) => onResize(colSettings, stateContainer, state),
+    (colSettings: { columnId: string; width: number }) =>
+      onResize(colSettings, stateContainer, state),
     [stateContainer, state]
   );
 

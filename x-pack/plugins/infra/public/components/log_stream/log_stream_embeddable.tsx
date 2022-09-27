@@ -8,7 +8,7 @@
 import { Query, Filter } from '@kbn/es-query';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
@@ -45,7 +45,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
 
   public render(node: HTMLElement) {
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
     this.node = node;
 
@@ -56,7 +56,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
     super.destroy();
     this.subscription.unsubscribe();
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
   }
 
@@ -74,7 +74,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
       return;
     }
 
-    ReactDOM.render(
+    createRoot(this.node).render(
       <CoreProviders
         core={this.core}
         plugins={this.pluginDeps}
@@ -93,8 +93,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
             />
           </div>
         </EuiThemeProvider>
-      </CoreProviders>,
-      this.node
+      </CoreProviders>
     );
   }
 }

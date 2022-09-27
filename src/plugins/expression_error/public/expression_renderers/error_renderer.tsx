@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -47,17 +47,18 @@ export const getErrorRenderer =
       config: ErrorRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const root = createRoot(domNode);
+
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaThemeProvider theme$={theme$}>
           <I18nProvider>
             <ErrorComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
           </I18nProvider>
-        </KibanaThemeProvider>,
-        domNode
+        </KibanaThemeProvider>
       );
     },
   });

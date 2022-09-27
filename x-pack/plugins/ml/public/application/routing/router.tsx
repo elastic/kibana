@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, FC } from 'react';
+import React, { useEffect } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useHistory, useLocation, Router, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
@@ -66,7 +67,10 @@ export interface PageDependencies {
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
-export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
+export const PageLoader: FC<PropsWithChildren<{ context: MlContextValue }>> = ({
+  context,
+  children,
+}) => {
   return context === null ? (
     <EuiLoadingContent lines={10} />
   ) : (
@@ -81,7 +85,7 @@ export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children 
  * support legacy bookmarks and as a fallback for unmigrated URLs
  * from other plugins.
  */
-const LegacyHashUrlRedirect: FC = ({ children }) => {
+const LegacyHashUrlRedirect: FC<PropsWithChildren> = ({ children }) => {
   const history = useHistory();
   const location = useLocation();
 

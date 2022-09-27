@@ -66,7 +66,7 @@ export const FieldCodeEditor = ({
   }, []);
 
   const editorDidMount = useCallback(
-    (editor) => {
+    (editor: any) => {
       setEditorCalculatedHeight(editor);
 
       editor.onDidChangeModelContent(() => {

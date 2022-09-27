@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsSetup {
@@ -14,8 +15,8 @@ export interface CustomIntegrationsSetup {
 }
 
 export interface CustomIntegrationsStart {
-  ContextProvider: React.FC;
-  languageClientsUiComponents: Map<string, React.FC>;
+  ContextProvider: FC<PropsWithChildren>;
+  languageClientsUiComponents: Map<string, FC>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

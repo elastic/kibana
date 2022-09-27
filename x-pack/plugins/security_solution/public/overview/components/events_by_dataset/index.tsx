@@ -108,7 +108,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const { navigateToApp } = kibana.services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const goToHostEvents = useCallback(
+  const goToHostEvents = useCallback<React.MouseEventHandler>(
     (ev) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {

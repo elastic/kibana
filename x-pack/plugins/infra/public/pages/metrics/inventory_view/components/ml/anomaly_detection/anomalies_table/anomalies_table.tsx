@@ -305,7 +305,7 @@ export const AnomaliesTable = (props: Props) => {
     setSearch(e.target.value);
   }, []);
 
-  const changeJobType = useCallback((selectedOptions) => {
+  const changeJobType = useCallback((selectedOptions: any) => {
     setSelectedJobType(selectedOptions);
     setJobType(selectedOptions[0].id);
   }, []);

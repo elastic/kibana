@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route, Redirect, RouteChildrenProps } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
@@ -70,7 +70,8 @@ export async function mountManagementSection(
 
   chrome.docTitle.change(title);
 
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <KibanaThemeProvider theme$={params.theme$}>
       <I18nProvider>
         <Router history={params.history}>
@@ -92,11 +93,10 @@ export async function mountManagementSection(
           </Switch>
         </Router>
       </I18nProvider>
-    </KibanaThemeProvider>,
-    params.element
+    </KibanaThemeProvider>
   );
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 }

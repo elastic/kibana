@@ -138,7 +138,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
     },
   });
 
-  const handleMlLinkClick = useCallback(
+  const handleMlLinkClick = useCallback<React.MouseEventHandler>(
     (e) => {
       if (!viewAnomalyInMachineLearningLink || !shouldHandleLinkEvent(e)) return;
       application.navigateToUrl(viewAnomalyInMachineLearningLink);

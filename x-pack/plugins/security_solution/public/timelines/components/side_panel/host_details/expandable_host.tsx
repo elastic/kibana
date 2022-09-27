@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import type { Anomaly } from '../../../../common/components/ml/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -76,7 +77,7 @@ export const ExpandableHostDetails = ({
     startDate: from,
   });
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: Anomaly, interval: string) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

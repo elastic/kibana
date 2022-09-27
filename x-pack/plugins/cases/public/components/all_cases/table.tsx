@@ -71,7 +71,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
-  const navigateToCreateCaseClick = useCallback(
+  const navigateToCreateCaseClick = useCallback<React.MouseEventHandler>(
     (ev) => {
       ev.preventDefault();
       if (goToCreateCase != null) {

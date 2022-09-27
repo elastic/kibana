@@ -24,6 +24,7 @@ import {
   EuiTableRowCell,
   Pager,
   Query,
+  EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { useAppContext } from '../../app_context';
@@ -202,7 +203,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     [sortConfig]
   );
 
-  const handleSearch = useCallback(({ query, error }) => {
+  const handleSearch = useCallback(({ query, error }: EuiSearchBarOnChangeArgs) => {
     if (error) {
       setSearchError(error);
     } else {
@@ -300,6 +301,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
         </EuiTableHeader>
 
         {filteredDeprecations.length === 0 ? (
+          // @ts-expect-error update types
           <EuiTableBody>
             <EuiTableRow data-test-subj="noDeprecationsRow">
               <EuiTableRowCell
@@ -312,6 +314,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             </EuiTableRow>
           </EuiTableBody>
         ) : (
+          // @ts-expect-error update types
           <EuiTableBody>
             {visibleDeprecations.map((deprecation, index) => {
               return (

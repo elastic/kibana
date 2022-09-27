@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -16,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { ConnectorConfigurationForm } from './connector_configuration_form';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
-export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
+export const ConnectorConfigurationConfig: FC<PropsWithChildren> = ({ children }) => {
   const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
   const { setIsEditing } = useActions(ConnectorConfigurationLogic);
 

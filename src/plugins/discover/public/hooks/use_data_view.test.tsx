@@ -8,24 +8,22 @@
 import { useDataView } from './use_data_view';
 import { dataViewMock } from '../__mocks__/data_view';
 import { dataViewsMock } from '../__mocks__/data_views';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 
 describe('Use data view', () => {
   test('returning a valid data view', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useDataView(dataViewsMock, 'the-data-view-id')
-    );
-    await waitForNextUpdate();
-    expect(result.current.dataView).toBe(dataViewMock);
-    expect(result.current.error).toBe(undefined);
+    const { result } = renderHook(() => useDataView(dataViewsMock, 'the-data-view-id'));
+    await waitFor(() => {
+      expect(result.current.dataView).toBe(dataViewMock);
+      expect(result.current.error).toBe(undefined);
+    });
   });
 
   test('returning an error', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useDataView(dataViewsMock, 'invalid-data-view-id')
-    );
-    await waitForNextUpdate();
-    expect(result.current.dataView).toBe(undefined);
-    expect(result.current.error).toBeTruthy();
+    const { result } = renderHook(() => useDataView(dataViewsMock, 'invalid-data-view-id'));
+    await waitFor(() => {
+      expect(result.current.dataView).toBe(undefined);
+      expect(result.current.error).toBeTruthy();
+    });
   });
 });

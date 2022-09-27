@@ -129,7 +129,7 @@ describe('Connectors', () => {
       />,
       {
         // wrapper: TestProviders produces a TS error
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: TestProviders,
       }
     );
 
@@ -140,7 +140,7 @@ describe('Connectors', () => {
   it('does not shows the deprecated callout when the connector is none', async () => {
     render(<Connectors {...props} />, {
       // wrapper: TestProviders produces a TS error
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: TestProviders,
     });
 
     expect(screen.queryByText('Deprecated connector type')).not.toBeInTheDocument();

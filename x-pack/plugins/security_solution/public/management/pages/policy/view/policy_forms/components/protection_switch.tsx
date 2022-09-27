@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useLicense } from '../../../../../../common/hooks/use_license';
@@ -44,7 +45,7 @@ export const ProtectionSwitch = React.memo(
     const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
 
     const handleSwitchChange = useCallback(
-      (event) => {
+      (event: EuiSwitchEvent) => {
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
           if (event.target.checked === false) {

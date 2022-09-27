@@ -7,6 +7,7 @@
 
 import { isArray, isEmpty, pickBy, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -20,7 +21,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { useAllLiveQueries } from './use_all_live_queries';
-import type { SearchHit } from '../../common/search_strategy';
+import type { ActionDetails, SearchHit } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
@@ -59,14 +60,14 @@ const ActionsTableComponent = () => {
     },
   });
 
-  const onTableChange = useCallback(({ page = {} }) => {
+  const onTableChange = useCallback(({ page }: CriteriaWithPagination<SearchHit>) => {
     const { index, size } = page;
 
     setPageIndex(index);
     setPageSize(size);
   }, []);
 
-  const renderQueryColumn = useCallback((_, item) => {
+  const renderQueryColumn = useCallback((_: string, item: { _source: ActionDetails }) => {
     if (item._source.pack_name) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
@@ -80,27 +81,33 @@ const ActionsTableComponent = () => {
 
     return (
       <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {item._source.queries[0].query}
+        {item._source.queries?.[0].query}
       </EuiCodeBlock>
     );
   }, []);
 
-  const renderAgentsColumn = useCallback((_, item) => <>{item.fields.agents?.length ?? 0}</>, []);
+  const renderAgentsColumn = useCallback(
+    (_: string, item: SearchHit) => <>{item?.fields?.agents?.length ?? 0}</>,
+    []
+  );
 
-  const renderCreatedByColumn = useCallback((userId) => (isArray(userId) ? userId[0] : '-'), []);
+  const renderCreatedByColumn = useCallback(
+    (userId: string | string[]) => (isArray(userId) ? userId[0] : '-'),
+    []
+  );
 
   const renderTimestampColumn = useCallback(
-    (_, item) => <>{formatDate(item.fields['@timestamp'][0])}</>,
+    (_: string, item: SearchHit) => <>{formatDate(item?.fields?.['@timestamp'][0])}</>,
     []
   );
 
   const renderActionsColumn = useCallback(
-    (item) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
+    (item: SearchHit) => <ActionTableResultsButton actionId={item?.fields?.action_id[0]} />,
     []
   );
 
   const handlePlayClick = useCallback(
-    (item) => {
+    (item: { _source: ActionDetails }) => {
       const packId = item._source.pack_id;
 
       if (packId) {
@@ -123,9 +130,9 @@ const ActionsTableComponent = () => {
       push('/live_queries/new', {
         form: pickBy(
           {
-            query: item._source.queries[0].query,
-            ecs_mapping: item._source.queries[0].ecs_mapping,
-            savedQueryId: item._source.queries[0].saved_query_id,
+            query: item._source.queries?.[0].query,
+            ecs_mapping: item._source.queries?.[0].ecs_mapping,
+            savedQueryId: item._source.queries?.[0].saved_query_id,
             agentSelection: {
               agents: item._source.agent_ids,
               allAgentsSelected: item._source.agent_all,
@@ -143,7 +150,7 @@ const ActionsTableComponent = () => {
   const existingPackIds = useMemo(() => map(packsData?.data ?? [], 'id'), [packsData]);
 
   const isPlayButtonAvailable = useCallback(
-    (item) => {
+    (item: { fields: ActionDetails }) => {
       if (item.fields.pack_id?.length) {
         return (
           existingPackIds.includes(item.fields.pack_id[0]) &&

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';

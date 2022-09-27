@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { ReactPortal } from 'react';
+import type { FC, PropsWithChildren, ReactPortal } from 'react';
 import React from 'react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender } from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
 import type { AppDeepLink } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as reactRenderHoook } from '@testing-library/react-hooks';
 import type {
-  ReactHooksRenderer,
-  WrapperComponent,
-} from '@testing-library/react-hooks/src/types/react';
+  RenderHookOptions,
+  RenderHookResult,
+  RenderOptions,
+  RenderResult,
+} from '@testing-library/react';
+import { renderHook as reactRenderHoook, waitFor } from '@testing-library/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
 import { ConsoleManager } from '../../../management/components/console';
@@ -97,17 +96,17 @@ export type WaitForReactHookState =
     >
   | false;
 
-type HookRendererFunction<TProps, TResult> = (props: TProps) => TResult;
+type HookRendererFunction<TResult, TProps> = (props: TProps) => TResult;
 
 /**
  * A utility renderer for hooks that return React Query results
  */
 export type ReactQueryHookRenderer<
+  TResult extends UseBaseQueryResult = UseBaseQueryResult,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TProps = any,
-  TResult extends UseBaseQueryResult = UseBaseQueryResult
+  TProps = any
 > = (
-  hookFn: HookRendererFunction<TProps, TResult>,
+  hookFn: HookRendererFunction<TResult, TProps>,
   /**
    * If defined (default is `isSuccess`), the renderer will wait for the given react
    * query response state value to be true
@@ -131,7 +130,7 @@ export interface AppContextTestRender {
    * `AppRootContext`
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  AppWrapper: React.FC<any>;
+  AppWrapper: FC<PropsWithChildren<any>>;
   /**
    * Renders the given UI within the created `AppWrapper` providing the given UI a mocked
    * endpoint runtime context environment
@@ -141,7 +140,8 @@ export interface AppContextTestRender {
   /**
    * Renders a hook within a mocked security solution app context
    */
-  renderHook: ReactHooksRenderer['renderHook'];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  renderHook: any;
 
   /**
    * A helper utility for rendering specifically hooks that wrap ReactQuery
@@ -228,7 +228,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: FC<PropsWithChildren> = ({ children }) => (
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
         <QueryClientProvider client={queryClient}>
@@ -239,31 +239,33 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   );
 
   const render: UiRender = (ui, options) => {
+    // @ts-expect-error update types
     return reactRender(ui, {
       wrapper: AppWrapper,
       ...options,
     });
   };
-
-  const renderHook: ReactHooksRenderer['renderHook'] = <TProps, TResult>(
-    hookFn: HookRendererFunction<TProps, TResult>,
+  const renderHook = <TResult, TProps>(
+    hookFn: HookRendererFunction<TResult, TProps>,
     options: RenderHookOptions<TProps> = {}
-  ): RenderHookResult<TProps, TResult> => {
-    return reactRenderHoook<TProps, TResult>(hookFn, {
+  ): RenderHookResult<TResult, TProps> => {
+    return reactRenderHoook<TResult, TProps>(hookFn, {
+      // @ts-expect-error update types
       wrapper: AppWrapper as WrapperComponent<TProps>,
       ...options,
     });
   };
 
   const renderReactQueryHook: ReactQueryHookRenderer = async <
-    TProps,
-    TResult extends UseBaseQueryResult = UseBaseQueryResult
+    TResult extends UseBaseQueryResult = UseBaseQueryResult,
+    // @ts-expect-error update types
+    TProps
   >(
-    hookFn: HookRendererFunction<TProps, TResult>,
+    hookFn: HookRendererFunction<TResult, TProps>,
     waitForHook: WaitForReactHookState = 'isSuccess',
     options: RenderHookOptions<TProps> = {}
   ) => {
-    const { result: hookResult, waitFor } = renderHook<TProps, TResult>(hookFn, options);
+    const { result: hookResult } = renderHook<TResult, TProps>(hookFn, options);
 
     if (waitForHook) {
       await waitFor(() => {

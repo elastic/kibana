@@ -117,7 +117,11 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
       <EuiFormRow
         label={threatMapping.label}
         labelAppend={threatMapping.labelAppend}
-        helpText={threatMapping.helpText}
+        helpText={
+          typeof threatMapping.helpText === 'function'
+            ? threatMapping.helpText()
+            : threatMapping.helpText
+        }
         error={errorMessage}
         isInvalid={isThreatMappingInvalid}
         fullWidth

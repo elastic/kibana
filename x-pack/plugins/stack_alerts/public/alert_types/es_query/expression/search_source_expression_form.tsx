@@ -110,14 +110,14 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   const onSelectDataView = useCallback(
-    (newDataViewId) =>
+    (newDataViewId: string) =>
       data.dataViews
         .get(newDataViewId)
         .then((newDataView) => dispatch({ type: 'index', payload: newDataView })),
     [data.dataViews]
   );
 
-  const onUpdateFilters = useCallback((newFilters) => {
+  const onUpdateFilters = useCallback((newFilters: Filter[]) => {
     dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
   }, []);
 

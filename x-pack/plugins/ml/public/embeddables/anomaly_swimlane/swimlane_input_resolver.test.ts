@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
@@ -90,7 +90,7 @@ describe('useSwimlaneInputResolver', () => {
   });
 
   test('should fetch jobs only when input job ids have been changed', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSwimlaneInputResolver(
         embeddableInput as Observable<AnomalySwimlaneEmbeddableInput>,
         onInputChange,
@@ -106,14 +106,16 @@ describe('useSwimlaneInputResolver', () => {
     expect(result.current[1]).toBe(undefined);
 
     await act(async () => {
-      await Promise.all([delay(501), waitForNextUpdate()]);
+      await Promise.all([delay(501)]);
     });
 
-    expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
-    expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
+      expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(1);
 
-    expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(1);
-    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(1);
+      expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(1);
+      expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(1);
+    });
 
     await act(async () => {
       embeddableInput.next({
@@ -123,7 +125,7 @@ describe('useSwimlaneInputResolver', () => {
         filters: [],
         query: { language: 'kuery', query: '' },
       });
-      await Promise.all([delay(501), waitForNextUpdate()]);
+      await Promise.all([delay(501)]);
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
@@ -140,14 +142,16 @@ describe('useSwimlaneInputResolver', () => {
         filters: [],
         query: { language: 'kuery', query: '' },
       });
-      await Promise.all([delay(501), waitForNextUpdate()]);
+      await Promise.all([delay(501)]);
     });
 
-    expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
-    expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(3);
+    await waitFor(() => {
+      expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
+      expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(3);
 
-    expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(3);
-    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(3);
+      expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(3);
+      expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(3);
+    });
   });
 
   test('should not complete the observable on error', async () => {

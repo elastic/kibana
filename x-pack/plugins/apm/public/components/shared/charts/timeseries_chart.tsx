@@ -190,6 +190,7 @@ export function TimeseriesChart({
       status={fetchStatus}
       id={id}
     >
+      {/* @ts-expect-error update types */}
       <Chart ref={chartRef} id={id}>
         <Settings
           tooltip={{

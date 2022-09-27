@@ -8,7 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
+import type {
+  DraggingStyle,
+  NotDraggingStyle,
+  DraggableProvided,
+  DraggableStateSnapshot,
+  DroppableProvided,
+} from 'react-beautiful-dnd';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -33,6 +39,7 @@ import { ProviderItemBadge } from './provider_item_badge';
 
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { OnDataProviderEdited } from '../events';
 
 export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
 
@@ -223,7 +230,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       dispatch(timelineActions.updateDataProviderType(payload));
     }, [dataProvider.id, dataProvider.type, dispatch, group, index, timelineId]);
 
-    const handleDataProviderEdited = useCallback(
+    const handleDataProviderEdited = useCallback<OnDataProviderEdited>(
       ({ andProviderId, excluded, field, operator, providerId, value }) =>
         dispatch(
           timelineActions.dataProviderEdited({
@@ -265,7 +272,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     );
 
     const DraggableContent = useCallback(
-      (provided, snapshot) => (
+      (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
@@ -393,7 +400,7 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
     );
 
     const DroppableContent = useCallback(
-      (droppableProvided) => (
+      (droppableProvided: DroppableProvided) => (
         <DroppableContainer
           className={isLastGroup ? EMPTY_PROVIDERS_GROUP_CLASS_NAME : ''}
           ref={droppableProvided.innerRef}

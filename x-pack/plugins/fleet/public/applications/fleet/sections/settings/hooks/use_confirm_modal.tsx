@@ -9,10 +9,11 @@ import { EuiConfirmModal, EuiPortal } from '@elastic/eui';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useState } from 'react';
+import type { FC, PropsWithChildren, ReactNode } from 'react';
 
 interface ModalState {
-  title?: React.ReactNode;
-  description?: React.ReactNode;
+  title?: ReactNode;
+  description?: ReactNode;
   options?: ModalOptions;
   onConfirm: () => void;
   onCancel: () => void;
@@ -31,7 +32,7 @@ export function useConfirmModal() {
   const context = useContext(ModalContext);
 
   const confirm = useCallback(
-    async (title: React.ReactNode, description: React.ReactNode, options?: ModalOptions) => {
+    async (title: ReactNode, description: ReactNode, options?: ModalOptions) => {
       if (context === null) {
         throw new Error('Context need to be provided to use useConfirmModal');
       }
@@ -53,7 +54,7 @@ export function useConfirmModal() {
   };
 }
 
-export function withConfirmModalProvider<T>(WrappedComponent: React.FunctionComponent<T>) {
+export function withConfirmModalProvider<T>(WrappedComponent: FC<T>) {
   return (props: T) => (
     <ConfirmModalProvider>
       <WrappedComponent {...props} />
@@ -61,29 +62,32 @@ export function withConfirmModalProvider<T>(WrappedComponent: React.FunctionComp
   );
 }
 
-export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
+export const ConfirmModalProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [modal, setModal] = useState<ModalState>({
     onCancel: () => {},
     onConfirm: () => {},
   });
 
-  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }) => {
-    setIsVisible(true);
-    setModal({
-      title,
-      description,
-      onConfirm: () => {
-        setIsVisible(false);
-        onConfirm();
-      },
-      onCancel: () => {
-        setIsVisible(false);
-        onCancel();
-      },
-      options,
-    });
-  }, []);
+  const showModal = useCallback<(payload: ModalState) => void>(
+    ({ title, description, onConfirm, onCancel, options }) => {
+      setIsVisible(true);
+      setModal({
+        title,
+        description,
+        onConfirm: () => {
+          setIsVisible(false);
+          onConfirm();
+        },
+        onCancel: () => {
+          setIsVisible(false);
+          onCancel();
+        },
+        options,
+      });
+    },
+    []
+  );
 
   return (
     <ModalContext.Provider value={{ showModal }}>

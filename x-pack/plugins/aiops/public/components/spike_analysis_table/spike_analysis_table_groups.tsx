@@ -9,6 +9,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { sortBy } from 'lodash';
 
 import {
+  CriteriaWithPagination,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -417,9 +418,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     },
   ];
 
-  const onChange = useCallback((tableSettings) => {
+  const onChange = useCallback((tableSettings: CriteriaWithPagination<GroupTableItem>) => {
     const { index, size } = tableSettings.page;
-    const { field, direction } = tableSettings.sort;
+    const { field, direction } = tableSettings.sort!;
 
     setPageIndex(index);
     setPageSize(size);

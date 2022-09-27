@@ -87,18 +87,25 @@ const PacksTableComponent = () => {
   const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(
-    (agentPolicyIds) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
+    (agentPolicyIds: string[]) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
     []
   );
 
   const renderQueries = useCallback(
-    (queries) => <>{(queries && Object.keys(queries).length) ?? 0}</>,
+    (queries: PackSavedObject['attributes']['queries']) => (
+      <>{(queries && Object.keys(queries).length) ?? 0}</>
+    ),
     []
   );
 
-  const renderActive = useCallback((_, item) => <ActiveStateSwitch item={item} />, []);
+  const renderActive = useCallback(
+    (_: boolean, item: PackSavedObject & { policy_ids: string[] }) => (
+      <ActiveStateSwitch item={item} />
+    ),
+    []
+  );
 
-  const renderUpdatedAt = useCallback((updatedAt, item) => {
+  const renderUpdatedAt = useCallback((updatedAt: string, item: PackSavedObject) => {
     if (!updatedAt) return '-';
 
     const updatedBy =
@@ -126,13 +133,13 @@ const PacksTableComponent = () => {
   );
 
   const renderPlayAction = useCallback(
-    (item, enabled) => (
+    (item: PackSavedObject, enabled: boolean) => (
       <EuiButtonIcon iconType="play" onClick={handlePlayClick(item)} isDisabled={!enabled} />
     ),
     [handlePlayClick]
   );
 
-  const columns: Array<EuiBasicTableColumn<PackSavedObject>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<PackSavedObject & { policy_ids: string[] }>> = useMemo(
     () => [
       {
         field: 'attributes.name',
@@ -224,6 +231,7 @@ const PacksTableComponent = () => {
   return (
     <EuiInMemoryTable<PackSavedObject>
       items={data?.data ?? EMPTY_ARRAY}
+      // @ts-expect-error update types
       columns={columns}
       pagination={true}
       sorting={sorting}

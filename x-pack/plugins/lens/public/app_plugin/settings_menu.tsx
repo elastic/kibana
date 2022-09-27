@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { CoreTheme } from '@kbn/core/public';
 import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { Observable } from 'rxjs';
@@ -77,7 +77,7 @@ export function SettingsMenu({
 }
 
 function closeSettingsMenu() {
-  ReactDOM.unmountComponentAtNode(container);
+  createRoot(container).unmount();
   document.body.removeChild(container);
   isMenuOpen = false;
 }
@@ -109,5 +109,5 @@ export function toggleSettingsMenuOpen(props: {
       </KibanaThemeProvider>
     </Provider>
   );
-  ReactDOM.render(element, container);
+  createRoot(container).render(element);
 }

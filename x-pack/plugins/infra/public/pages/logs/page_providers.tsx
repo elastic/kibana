@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
 import { useSourceId } from '../../containers/source_id';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { LogViewProvider } from '../../hooks/use_log_view';
 
-export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
+export const LogsPageProviders: FC<PropsWithChildren> = ({ children }) => {
   const [sourceId] = useSourceId();
   const { services } = useKibanaContextForPlugin();
   return (

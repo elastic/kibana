@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useGetCase } from './use_get_case';
 import * as api from './api';
-import { waitFor } from '@testing-library/dom';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: React.FC<string> = ({ children }) => {
+const wrapper: FC<PropsWithChildren> = ({ children }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -30,17 +30,17 @@ const wrapper: React.FC<string> = ({ children }) => {
 describe('Use get case hook', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'resolveCase');
-    const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
-    await waitForNextUpdate();
-    expect(spy).toHaveBeenCalledWith('case-1', true, expect.any(AbortSignal));
+    renderHook(() => useGetCase('case-1'), { wrapper });
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith('case-1', true, expect.any(AbortSignal));
+    });
   });
 
   it('shows a toast error when the api return an error', async () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
     const spy = jest.spyOn(api, 'resolveCase').mockRejectedValue(new Error("C'est la vie"));
-    const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
-    await waitForNextUpdate();
+    renderHook(() => useGetCase('case-1'), { wrapper });
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith('case-1', true, expect.any(AbortSignal));
       expect(addError).toHaveBeenCalled();

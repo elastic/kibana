@@ -8,6 +8,7 @@
 /* eslint-disable no-console */
 
 import React from 'react';
+import type { ReactElement, ReactNode, FC, PropsWithChildren } from 'react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
@@ -28,7 +29,7 @@ import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_
 import { allCasesPermissions } from './permissions';
 
 interface TestProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   permissions?: CasesPermissions;
   features?: CasesFeatures;
   owner?: string[];
@@ -37,12 +38,12 @@ interface TestProviderProps {
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
   license?: ILicense;
 }
-type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
+type UiRender = (ui: ReactElement, options?: RenderOptions) => RenderResult;
 
 window.scrollTo = jest.fn();
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<TestProviderProps> = ({
+const TestProvidersComponent: FC<PropsWithChildren<TestProviderProps>> = ({
   children,
   features,
   owner = [SECURITY_SOLUTION_OWNER],
@@ -99,7 +100,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: FC<PropsWithChildren>;
 }
 
 export const testQueryClient = new QueryClient({
@@ -143,7 +144,7 @@ export const createAppMockRenderer = ({
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: FC<PropsWithChildren> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>

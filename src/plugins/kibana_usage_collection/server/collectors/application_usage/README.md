@@ -38,15 +38,15 @@ class MyPlugin implements Plugin {
       title, 
       ...,
       mount: async (params: AppMountParameters) => {
-        ReactDOM.render(
+        const root = createRoot(params.element);
+        root.render(
           <ApplicationUsageTrackingProvider> // Set the tracking context provider at the App level
             <I18nProvider>
               <App />
             </I18nProvider>
-          </ApplicationUsageTrackingProvider>,
-          element
+          </ApplicationUsageTrackingProvider>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
   }

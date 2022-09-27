@@ -8,7 +8,7 @@
 import React, { CSSProperties, lazy } from 'react';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -45,11 +45,13 @@ export const getMetricRenderer =
       config: MetricRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const root = createRoot(domNode);
+
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaThemeProvider theme$={theme$}>
           <MetricComponent
             label={config.label}
@@ -58,9 +60,8 @@ export const getMetricRenderer =
             metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
             metricFormat={config.metricFormat}
           />
-        </KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
+        </KibanaThemeProvider>
+        // () => handlers.done()
       );
     },
   });

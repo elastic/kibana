@@ -10,7 +10,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../../id_generator';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
+import { DragDrop, DragDropIdentifier, DragContext, DropHandler } from '../../../../drag_drop';
 
 import {
   Datasource,
@@ -193,7 +193,7 @@ export function EmptyDimensionButton({
     ]
   );
 
-  const handleOnDrop = React.useCallback(
+  const handleOnDrop = React.useCallback<DropHandler>(
     (source, selectedDropType) => onDrop(source, value, selectedDropType),
     [value, onDrop]
   );

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import type { PropsWithChildren } from 'react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useUpdateComment, UseUpdateComment } from './use_update_comment';
 import { basicCase } from './mock';
 import * as api from './api';
@@ -32,8 +33,8 @@ describe('useUpdateComment', () => {
   };
 
   const renderHookUseUpdateComment = () =>
-    renderHook<string, UseUpdateComment>(() => useUpdateComment(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    renderHook<UseUpdateComment, {}>(() => useUpdateComment(), {
+      wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
     });
 
   beforeEach(() => {
@@ -43,12 +44,13 @@ describe('useUpdateComment', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoadingIds: [],
-        isError: false,
-        patchComment: result.current.patchComment,
+      const { result } = renderHookUseUpdateComment();
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoadingIds: [],
+          isError: false,
+          patchComment: result.current.patchComment,
+        });
       });
     });
   });
@@ -57,44 +59,44 @@ describe('useUpdateComment', () => {
     const spyOnPatchComment = jest.spyOn(api, 'patchComment');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-
-      result.current.patchComment(sampleUpdate);
-      await waitForNextUpdate();
-      expect(spyOnPatchComment).toBeCalledWith({
-        caseId: basicCase.id,
-        commentId: basicCase.comments[0].id,
-        commentUpdate: 'updated comment',
-        version: basicCase.comments[0].version,
-        signal: abortCtrl.signal,
-        owner: SECURITY_SOLUTION_OWNER,
+      const { result } = renderHookUseUpdateComment();
+      await waitFor(() => {
+        result.current.patchComment(sampleUpdate);
+        expect(spyOnPatchComment).toBeCalledWith({
+          caseId: basicCase.id,
+          commentId: basicCase.comments[0].id,
+          commentUpdate: 'updated comment',
+          version: basicCase.comments[0].version,
+          signal: abortCtrl.signal,
+          owner: SECURITY_SOLUTION_OWNER,
+        });
       });
     });
   });
 
   it('patch comment', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-      result.current.patchComment(sampleUpdate);
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoadingIds: [],
-        isError: false,
-        patchComment: result.current.patchComment,
+      const { result } = renderHookUseUpdateComment();
+      await waitFor(() => {
+        result.current.patchComment(sampleUpdate);
+        expect(result.current).toEqual({
+          isLoadingIds: [],
+          isError: false,
+          patchComment: result.current.patchComment,
+        });
+        expect(useRefreshCaseViewPage()).toBeCalled();
       });
-      expect(useRefreshCaseViewPage()).toBeCalled();
     });
   });
 
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-      result.current.patchComment(sampleUpdate);
+      const { result } = renderHookUseUpdateComment();
+      await waitFor(() => {
+        result.current.patchComment(sampleUpdate);
 
-      expect(result.current.isLoadingIds).toEqual([basicCase.comments[0].id]);
+        expect(result.current.isLoadingIds).toEqual([basicCase.comments[0].id]);
+      });
     });
   });
 
@@ -105,14 +107,15 @@ describe('useUpdateComment', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-      result.current.patchComment(sampleUpdate);
+      const { result } = renderHookUseUpdateComment();
+      await waitFor(() => {
+        result.current.patchComment(sampleUpdate);
 
-      expect(result.current).toEqual({
-        isLoadingIds: [],
-        isError: true,
-        patchComment: result.current.patchComment,
+        expect(result.current).toEqual({
+          isLoadingIds: [],
+          isError: true,
+          patchComment: result.current.patchComment,
+        });
       });
     });
   });

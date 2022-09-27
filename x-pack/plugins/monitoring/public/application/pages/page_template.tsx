@@ -15,6 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
@@ -40,15 +41,15 @@ export interface TabMenuItem {
   testSubj?: string;
   route: string;
 }
-export interface PageTemplateProps {
+export type PageTemplateProps = PropsWithChildren<{
   title: string;
   pageTitle?: string;
   tabs?: TabMenuItem[];
   getPageData?: () => Promise<void>;
   product?: string;
-}
+}>;
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({
+export const PageTemplate: FC<PageTemplateProps> = ({
   title,
   pageTitle,
   tabs,

@@ -57,7 +57,7 @@ export const LogColumnsConfigurationPanel = React.memo<{
   );
 
   const moveLogColumn = useCallback(
-    (sourceIndex, destinationIndex) => {
+    (sourceIndex: number, destinationIndex: number) => {
       logColumnsFormElement.updateValue((logColumns) => {
         if (destinationIndex >= 0 && sourceIndex <= logColumnsFormElement.value.length - 1) {
           const newLogColumns = [...logColumnsFormElement.value];

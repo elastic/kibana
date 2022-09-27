@@ -8,7 +8,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -92,14 +92,14 @@ export class NewsfeedPublicPlugin
   }
 
   private mount(api: NewsfeedApi, targetDomElement: HTMLElement, theme$: Rx.Observable<CoreTheme>) {
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
           <NewsfeedNavButton newsfeedApi={api} />
         </I18nProvider>
       </KibanaThemeProvider>,
-      targetDomElement
     );
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    return () => root.unmount();
   }
 }

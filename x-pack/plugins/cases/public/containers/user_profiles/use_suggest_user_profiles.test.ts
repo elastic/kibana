@@ -6,7 +6,7 @@
  */
 
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useToasts } from '../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import * as api from './api';
@@ -33,7 +33,7 @@ describe('useSuggestUserProfiles', () => {
   it('calls suggestUserProfiles with correct arguments', async () => {
     const spyOnSuggestUserProfiles = jest.spyOn(api, 'suggestUserProfiles');
 
-    const { result, waitFor } = renderHook(() => useSuggestUserProfiles(props), {
+    const { result } = renderHook(() => useSuggestUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -57,7 +57,7 @@ describe('useSuggestUserProfiles', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { result, waitFor } = renderHook(() => useSuggestUserProfiles(props), {
+    const { result } = renderHook(() => useSuggestUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 

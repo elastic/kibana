@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiPage } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { EuiPageBody } from '@elastic/eui';
@@ -186,7 +186,9 @@ const ActionsExplorer = ({ share }: Props) => {
 };
 
 export const renderApp = (props: Props, { element }: AppMountParameters) => {
-  ReactDOM.render(<ActionsExplorer {...props} />, element);
+  const root = createRoot(element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  root.render(<ActionsExplorer {...props} />);
+
+  return () => root.unmount();
 };

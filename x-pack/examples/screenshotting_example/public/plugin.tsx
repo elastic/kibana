@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { AppNavLinkStatus } from '@kbn/core/public';
@@ -28,14 +28,15 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async ({ element }: AppMountParameters) => {
         const [{ http }] = await getStartServices();
+        const root = createRoot(element);
 
-        ReactDOM.render(
+        root.render(
           <HttpContext.Provider value={http}>
             <App />
           </HttpContext.Provider>,
-          element
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+
+        return () => root.unmount();
       },
     });
 

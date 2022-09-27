@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import type { FC, PropsWithChildren } from 'react';
+import { createRoot } from 'react-dom/client';
 
 import { I18nStart } from '@kbn/core/public';
 
@@ -32,11 +33,12 @@ interface MinimalSaveModalProps {
 export function showSaveModal(
   saveModal: React.ReactElement<MinimalSaveModalProps>,
   I18nContext: I18nStart['Context'],
-  Wrapper?: React.FC
+  Wrapper?: FC<PropsWithChildren>
 ) {
   const container = document.createElement('div');
+  const root = createRoot(container);
   const closeModal = () => {
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
     saveModal.props.onClose?.();
   };
@@ -65,5 +67,5 @@ export function showSaveModal(
     <I18nContext>{element}</I18nContext>
   );
 
-  ReactDOM.render(wrappedElement, container);
+  root.render(wrappedElement);
 }

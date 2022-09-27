@@ -35,7 +35,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     [agentPolicyId, getUrlForApp]
   );
 
-  const liveQueryClick = useCallback(
+  const liveQueryClick = useCallback<React.MouseEventHandler>(
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
@@ -53,7 +53,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     path: `/packs`,
   });
 
-  const packsClick = useCallback(
+  const packsClick = useCallback<React.MouseEventHandler>(
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();

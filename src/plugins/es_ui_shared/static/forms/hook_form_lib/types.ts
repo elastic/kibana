@@ -97,7 +97,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: <
     FieldType = unknown,
-    FormType = FormData,
+    FormType extends FormData = FormData,
     InternalFieldType = FieldType
   >(
     fieldPath: string
@@ -145,7 +145,7 @@ export interface FieldHook<T = unknown, I = T> {
   readonly path: string;
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
-  readonly helpText?: string | ReactNode;
+  readonly helpText?: string | ReactNode | Function | (() => JSX.Element);
   readonly type: string;
   readonly value: I;
   readonly errors: ValidationError[];
@@ -210,7 +210,7 @@ export interface FieldHook<T = unknown, I = T> {
 export interface FieldConfig<T = unknown, FormType extends FormData = FormData, I = T> {
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
-  readonly helpText?: string | ReactNode;
+  readonly helpText?: string | React.ReactElement | ReactNode | Function | (() => JSX.Element);
   readonly type?: string;
   readonly defaultValue?: T;
   readonly validations?: Array<ValidationConfig<FormType, string, I>>;

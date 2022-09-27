@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Route, RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
@@ -105,7 +105,8 @@ const DashboardEmbeddableExplorerApp = ({
 };
 
 export const renderApp = (props: Props, element: AppMountParameters['element']) => {
-  ReactDOM.render(<DashboardEmbeddableExplorerApp {...props} />, element);
+  const root = createRoot(element);
+  root.render(<DashboardEmbeddableExplorerApp {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

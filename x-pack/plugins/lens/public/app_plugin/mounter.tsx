@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { FC, PropsWithChildren, useCallback, useEffect, useState, useMemo } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { History } from 'history';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import {
@@ -120,7 +120,7 @@ export async function mountApp(
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
     attributeService: LensAttributeService;
-    getPresentationUtilContext: () => FC;
+    getPresentationUtilContext: () => FC<PropsWithChildren>;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   }
 ) {
@@ -357,7 +357,9 @@ export async function mountApp(
 
   const PresentationUtilContext = getPresentationUtilContext();
 
-  render(
+  const root = createRoot(params.element);
+
+  root.render(
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <I18nProvider>
         <KibanaContextProvider services={lensServices}>
@@ -377,12 +379,11 @@ export async function mountApp(
           </PresentationUtilContext>
         </KibanaContextProvider>
       </I18nProvider>
-    </KibanaThemeProvider>,
-    params.element
+    </KibanaThemeProvider>
   );
   return () => {
     data.search.session.clear();
-    unmountComponentAtNode(params.element);
+    root.unmount();
     lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());

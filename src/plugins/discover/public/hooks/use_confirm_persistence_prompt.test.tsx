@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
+import type { PropsWithChildren } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
 import { useConfirmPersistencePrompt } from './use_confirm_persistence_prompt';
 
@@ -31,15 +32,15 @@ const mockDataView = {
 describe('useConfirmPersistencePrompt', () => {
   it('should save data view correctly', async () => {
     mockDiscoverServices.dataViews.createAndSave = jest.fn().mockResolvedValue(mockDataView);
-    const hook = renderHook(
-      (d: DataView) => useConfirmPersistencePrompt(() => Promise.resolve(mockDataView)),
-      {
-        initialProps: mockDataView,
-        wrapper: ({ children }) => (
-          <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
-        ),
-      }
-    );
+    const hook = renderHook<
+      ReturnType<typeof useConfirmPersistencePrompt>,
+      PropsWithChildren<DataView>
+    >((d: DataView) => useConfirmPersistencePrompt(() => Promise.resolve(mockDataView)), {
+      initialProps: mockDataView,
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
+      ),
+    });
 
     const result = await hook.result.current.openConfirmSavePrompt(mockDataView);
 
@@ -51,15 +52,15 @@ describe('useConfirmPersistencePrompt', () => {
     mockDiscoverServices.dataViews.createAndSave = jest
       .fn()
       .mockRejectedValue(new Error('failed to save'));
-    const hook = renderHook(
-      (d: DataView) => useConfirmPersistencePrompt(() => Promise.resolve(mockDataView)),
-      {
-        initialProps: mockDataView,
-        wrapper: ({ children }) => (
-          <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
-        ),
-      }
-    );
+    const hook = renderHook<
+      ReturnType<typeof useConfirmPersistencePrompt>,
+      PropsWithChildren<DataView>
+    >((d: DataView) => useConfirmPersistencePrompt(() => Promise.resolve(mockDataView)), {
+      initialProps: mockDataView,
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
+      ),
+    });
 
     try {
       await hook.result.current.openConfirmSavePrompt(mockDataView);

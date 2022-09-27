@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
@@ -68,6 +69,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private subscriptions: Subscription = new Subscription();
   private node?: HTMLElement;
+  private root?: Root;
 
   // Controls services
   private dataViewsService: ControlsDataViewsService;
@@ -380,17 +382,17 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   public render = (node: HTMLElement) => {
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      this.root?.unmount();
     }
     const { Wrapper: OptionsListReduxWrapper } = this.reduxEmbeddableTools;
     this.node = node;
-    ReactDOM.render(
+    this.root = createRoot(node);
+    this.root.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <OptionsListReduxWrapper>
           <OptionsListControl typeaheadSubject={this.typeaheadSubject} />
         </OptionsListReduxWrapper>
       </KibanaThemeProvider>,
-      node
     );
   };
 

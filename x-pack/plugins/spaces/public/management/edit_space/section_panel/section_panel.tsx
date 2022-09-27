@@ -7,7 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { ReactNode } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 import React, { Component, Fragment } from 'react';
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   title: string | ReactNode;
 }
 
-export class SectionPanel extends Component<Props, {}> {
+export class SectionPanel extends Component<PropsWithChildren<Props>, {}> {
   public render() {
     return (
       <EuiPanel hasShadow={false} hasBorder={true}>

@@ -78,6 +78,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
           color="subdued"
           content={EXTERNAL_ATTRIBUTE_TOOLTIP}
           iconProps={{
+            // @ts-expect-error
             className: 'eui-alignTop',
           }}
         />

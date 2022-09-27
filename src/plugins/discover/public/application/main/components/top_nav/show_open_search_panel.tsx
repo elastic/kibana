@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreTheme, I18nStart } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -33,8 +33,9 @@ export function showOpenSearchPanel({
 
   isOpen = true;
   const container = document.createElement('div');
+  const root = createRoot(container);
   const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
     isOpen = false;
   };
@@ -49,5 +50,5 @@ export function showOpenSearchPanel({
       </KibanaContextProvider>
     </I18nContext>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 }

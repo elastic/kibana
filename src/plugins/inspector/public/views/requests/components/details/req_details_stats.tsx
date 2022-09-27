@@ -71,7 +71,10 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
 
     return (
       <EuiTable responsive={false}>
-        <EuiTableBody>{sortedStats.map(this.renderStatRow)}</EuiTableBody>
+        {
+          // @ts-expect-error update types
+          <EuiTableBody>{sortedStats.map(this.renderStatRow)}</EuiTableBody>
+        }
       </EuiTable>
     );
   }

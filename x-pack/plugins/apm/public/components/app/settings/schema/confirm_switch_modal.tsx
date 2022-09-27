@@ -105,6 +105,7 @@ export function ConfirmSwitchModal({
                 .join('\n')}
             </EuiCodeBlock>
             <p>
+              {/* @ts-expect-error update types */}
               <ElasticDocsLink
                 section="/cloud"
                 path="/ec-manage-apm-settings.html"

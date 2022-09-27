@@ -6,9 +6,9 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from 'react-router-dom';
 import type { Observable } from 'rxjs';
 
@@ -49,7 +49,8 @@ export const apiKeysManagementApp = Object.freeze({
           import('./api_keys_api_client'),
         ]);
 
-        render(
+        const root = createRoot(element);
+        root.render(
           <Providers
             services={coreStart}
             theme$={theme$}
@@ -69,12 +70,11 @@ export const apiKeysManagementApp = Object.freeze({
                 apiKeysAPIClient={new APIKeysAPIClient(coreStart.http)}
               />
             </Breadcrumb>
-          </Providers>,
-          element
+          </Providers>
         );
 
         return () => {
-          unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     } as RegisterManagementAppArgs;
@@ -89,7 +89,7 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
   theme$,
   history,

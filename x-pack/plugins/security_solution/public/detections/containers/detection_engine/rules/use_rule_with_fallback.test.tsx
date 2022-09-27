@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { alertsMock8x, alertMockEmptyResults } from '../alerts/mock';
 import type { AlertSearchResponse } from '../alerts/types';
@@ -37,24 +37,24 @@ describe('useRuleWithFallback', () => {
 
   it('should return initial state on mount', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useRuleWithFallback('testRuleId'));
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        error: undefined,
-        isExistingRule: true,
-        loading: false,
-        refresh: expect.any(Function),
-        rule: null,
+      const { result } = renderHook(() => useRuleWithFallback('testRuleId'));
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          error: undefined,
+          isExistingRule: true,
+          loading: false,
+          refresh: expect.any(Function),
+          rule: null,
+        });
       });
     });
   });
 
   it('should return the rule if it exists', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useRuleWithFallback('testRuleId'));
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toMatchInlineSnapshot(`
+      const { result } = renderHook(() => useRuleWithFallback('testRuleId'));
+      await waitFor(() => {
+        expect(result.current).toMatchInlineSnapshot(`
         Object {
           "error": undefined,
           "isExistingRule": true,
@@ -107,19 +107,18 @@ describe('useRuleWithFallback', () => {
           },
         }
       `);
+      });
     });
   });
 
   it("should fallback to fetching rule data from a 7.x signal if the rule doesn't exist", async () => {
     mockNotFoundErrorForRule();
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook((id) => useRuleWithFallback(id), {
+      const { result } = renderHook((id) => useRuleWithFallback(id), {
         initialProps: 'testRuleId',
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toMatchInlineSnapshot(`
+      await waitFor(() => {
+        expect(result.current).toMatchInlineSnapshot(`
         Object {
           "error": [Error: Not found],
           "isExistingRule": false,
@@ -213,6 +212,7 @@ describe('useRuleWithFallback', () => {
           },
         }
       `);
+      });
     });
   });
 
@@ -225,13 +225,11 @@ describe('useRuleWithFallback', () => {
     mockNotFoundErrorForRule();
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook((id) => useRuleWithFallback(id), {
+      const { result } = renderHook((id) => useRuleWithFallback(id), {
         initialProps: 'testRuleId',
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toMatchInlineSnapshot(`
+      await waitFor(() => {
+        expect(result.current).toMatchInlineSnapshot(`
         Object {
           "error": [Error: Not found],
           "isExistingRule": false,
@@ -351,6 +349,7 @@ describe('useRuleWithFallback', () => {
           },
         }
       `);
+      });
     });
     // Reset back to default mock coming from ../alerts/__mocks__/api.ts
     spy.mockRestore();
@@ -365,12 +364,12 @@ describe('useRuleWithFallback', () => {
     mockNotFoundErrorForRule();
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook((id) => useRuleWithFallback(id), {
+      const { result } = renderHook((id) => useRuleWithFallback(id), {
         initialProps: 'testRuleId',
       });
-      await waitForNextUpdate();
-
-      expect(result.current.rule).toBeNull();
+      await waitFor(() => {
+        expect(result.current.rule).toBeNull();
+      });
     });
     // Reset back to default mock coming from ../alerts/__mocks__/api.ts
     spy.mockRestore();

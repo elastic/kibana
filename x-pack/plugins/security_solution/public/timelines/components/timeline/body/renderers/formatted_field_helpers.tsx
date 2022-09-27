@@ -70,7 +70,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const { search } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
 
-  const goToRuleDetails = useCallback(
+  const goToRuleDetails = useCallback<React.MouseEventHandler>(
     (ev) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, RefCallback, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import type { FC, RefCallback, PropsWithChildren } from 'react';
 import PropTypes from 'prop-types';
 import {
   LazyShapeDrawer,
@@ -21,7 +22,9 @@ interface Props {
   shape?: string;
 }
 
-const ShapeDrawer = withSuspense<ShapeDrawerComponentProps, ShapeRef>(LazyShapeDrawer);
+const ShapeDrawer = withSuspense<PropsWithChildren<ShapeDrawerComponentProps>, ShapeRef>(
+  LazyShapeDrawer
+);
 
 function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
   const { minX, minY, width, height } = defaultViewBox;

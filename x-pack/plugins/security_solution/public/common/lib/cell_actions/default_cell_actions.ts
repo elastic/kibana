@@ -17,6 +17,7 @@ export const cellActions: TGridCellAction[] = [
   getFilterOutCellAction,
   getAddToTimelineCellAction,
   getCopyCellAction,
+  // @ts-expect-error update types
   FieldValueCell,
 ];
 

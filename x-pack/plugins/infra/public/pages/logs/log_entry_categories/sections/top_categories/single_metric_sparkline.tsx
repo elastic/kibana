@@ -54,6 +54,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
   );
 
   return (
+    // @ts-expect-error update types
     <Chart size={sparklineSize}>
       <Settings showLegend={false} theme={theme} tooltip={TooltipType.None} xDomain={xDomain} />
       <AreaSeries

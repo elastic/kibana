@@ -8,10 +8,10 @@
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
+import type { RenderOptions, RenderResult, RenderHookResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 
 import { themeServiceMock } from '@kbn/core/public/mocks';
@@ -51,9 +51,9 @@ export interface TestRenderer {
   AppWrapper: React.FC<any>;
   HookWrapper: React.FC<any>;
   render: UiRender;
-  renderHook: <TProps, TResult>(
+  renderHook: <TResult, TProps>(
     callback: (props: TProps) => TResult
-  ) => RenderHookResult<TProps, TResult>;
+  ) => RenderHookResult<TResult, TProps>;
   setHeaderActionMenu: Function;
 }
 
@@ -70,7 +70,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     showDevtoolsRequest: false,
   });
 
-  const HookWrapper = memo(({ children }) => {
+  const HookWrapper = memo<PropsWithChildren>(({ children }) => {
     return (
       <startServices.i18n.Context>
         <Router history={mountHistory}>
@@ -128,7 +128,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
-  const HookWrapper = memo(({ children }) => {
+  const HookWrapper = memo<PropsWithChildren>(({ children }) => {
     return (
       <startServices.i18n.Context>
         <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>

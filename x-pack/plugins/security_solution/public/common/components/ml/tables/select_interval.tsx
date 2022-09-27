@@ -31,7 +31,7 @@ export const SelectInterval: React.FC<{
   interval: string;
   onChange: (interval: string) => void;
 }> = ({ interval, onChange }) => {
-  const onChangeCb = useCallback(
+  const onChangeCb = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
     (e) => {
       onChange(e.target.value);
     },

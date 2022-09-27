@@ -27,7 +27,7 @@ const TabNavigationItemComponent = ({
 }: TabNavigationItemProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
-  const handleClick = useCallback(
+  const handleClick = useCallback<React.MouseEventHandler>(
     (ev) => {
       ev.preventDefault();
       navigateTo({ path: hrefWithSearch });

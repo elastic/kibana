@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Component, CSSProperties, Ref, SVGProps } from 'react';
+import { Component, PropsWithChildren, CSSProperties, Ref, SVGProps } from 'react';
 import { ViewBoxParams } from '../../../common/types';
 import type { ShapeType } from './shape_factory';
 
@@ -94,6 +94,6 @@ export interface ShapeRef {
   getData: () => SvgConfig;
 }
 
-export type ShapeDrawerComponentProps = Omit<ShapeDrawerProps, 'getShape'>;
+export type ShapeDrawerComponentProps = PropsWithChildren<Omit<ShapeDrawerProps, 'getShape'>>;
 
 export type { ShapeType };

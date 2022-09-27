@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { CommentType } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -46,14 +46,13 @@ describe('useCreateAttachments', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
-        useCreateAttachments()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: false,
-        createAttachments: result.current.createAttachments,
+      const { result } = renderHook<UseCreateAttachments, {}>(() => useCreateAttachments());
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          isError: false,
+          createAttachments: result.current.createAttachments,
+        });
       });
     });
   });
@@ -62,10 +61,7 @@ describe('useCreateAttachments', () => {
     const spyOnBulkCreateAttachments = jest.spyOn(api, 'createAttachments');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
-        useCreateAttachments()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<UseCreateAttachments, {}>(() => useCreateAttachments());
 
       result.current.createAttachments({
         caseId: basicCaseId,
@@ -74,13 +70,14 @@ describe('useCreateAttachments', () => {
         updateCase: updateCaseCallback,
       });
 
-      await waitForNextUpdate();
-      expect(spyOnBulkCreateAttachments).toBeCalledWith(
-        attachmentsWithOwner,
-        basicCaseId,
-        abortCtrl.signal
-      );
-      expect(toastErrorMock).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(spyOnBulkCreateAttachments).toBeCalledWith(
+          attachmentsWithOwner,
+          basicCaseId,
+          abortCtrl.signal
+        );
+        expect(toastErrorMock).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -88,10 +85,7 @@ describe('useCreateAttachments', () => {
     const spyOnBulkCreateAttachments = jest.spyOn(api, 'createAttachments');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
-        useCreateAttachments()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<UseCreateAttachments, {}>(() => useCreateAttachments());
 
       result.current.createAttachments({
         caseId: basicCaseId,
@@ -100,23 +94,21 @@ describe('useCreateAttachments', () => {
         updateCase: updateCaseCallback,
       });
 
-      await waitForNextUpdate();
-      expect(spyOnBulkCreateAttachments).toBeCalledWith(
-        attachmentsWithOwner,
-        basicCaseId,
-        abortCtrl.signal
-      );
-      expect(toastErrorMock).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(spyOnBulkCreateAttachments).toBeCalledWith(
+          attachmentsWithOwner,
+          basicCaseId,
+          abortCtrl.signal
+        );
+        expect(toastErrorMock).not.toHaveBeenCalled();
+      });
     });
   });
 
   it('post case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
-        useCreateAttachments()
-      );
+      const { result } = renderHook<UseCreateAttachments, {}>(() => useCreateAttachments());
 
-      await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
         caseOwner: SECURITY_SOLUTION_OWNER,
@@ -124,30 +116,30 @@ describe('useCreateAttachments', () => {
         updateCase: updateCaseCallback,
       });
 
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: false,
-        createAttachments: result.current.createAttachments,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          isError: false,
+          createAttachments: result.current.createAttachments,
+        });
       });
     });
   });
 
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
-        useCreateAttachments()
-      );
+      const { result } = renderHook<UseCreateAttachments, {}>(() => useCreateAttachments());
 
-      await waitForNextUpdate();
-      result.current.createAttachments({
-        caseId: basicCaseId,
-        caseOwner: SECURITY_SOLUTION_OWNER,
-        data: attachmentsWithoutOwner,
-        updateCase: updateCaseCallback,
+      await waitFor(() => {
+        result.current.createAttachments({
+          caseId: basicCaseId,
+          caseOwner: SECURITY_SOLUTION_OWNER,
+          data: attachmentsWithoutOwner,
+          updateCase: updateCaseCallback,
+        });
+
+        expect(result.current.isLoading).toBe(true);
       });
-
-      expect(result.current.isLoading).toBe(true);
     });
   });
 
@@ -158,26 +150,25 @@ describe('useCreateAttachments', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
-        useCreateAttachments()
-      );
+      const { result } = renderHook<UseCreateAttachments, {}>(() => useCreateAttachments());
 
-      await waitForNextUpdate();
-      result.current.createAttachments({
-        caseId: basicCaseId,
-        caseOwner: SECURITY_SOLUTION_OWNER,
-        data: attachmentsWithoutOwner,
-        updateCase: updateCaseCallback,
-      });
+      await waitFor(() => {
+        result.current.createAttachments({
+          caseId: basicCaseId,
+          caseOwner: SECURITY_SOLUTION_OWNER,
+          data: attachmentsWithoutOwner,
+          updateCase: updateCaseCallback,
+        });
 
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: true,
-        createAttachments: result.current.createAttachments,
-      });
+        expect(result.current).toEqual({
+          isLoading: false,
+          isError: true,
+          createAttachments: result.current.createAttachments,
+        });
 
-      expect(toastErrorMock).toHaveBeenCalledWith(expect.any(Error), {
-        title: 'Error fetching data',
+        expect(toastErrorMock).toHaveBeenCalledWith(expect.any(Error), {
+          title: 'Error fetching data',
+        });
       });
     });
   });
@@ -189,22 +180,20 @@ describe('useCreateAttachments', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
-        useCreateAttachments()
-      );
+      const { result } = renderHook<UseCreateAttachments, {}>(() => useCreateAttachments());
 
-      await waitForNextUpdate();
-
-      async function test() {
-        await result.current.createAttachments({
-          caseId: basicCaseId,
-          caseOwner: SECURITY_SOLUTION_OWNER,
-          data: attachmentsWithoutOwner,
-          updateCase: updateCaseCallback,
-          throwOnError: true,
-        });
-      }
-      expect(test()).rejects.toThrowError('This is not possible');
+      await waitFor(() => {
+        async function test() {
+          await result.current.createAttachments({
+            caseId: basicCaseId,
+            caseOwner: SECURITY_SOLUTION_OWNER,
+            data: attachmentsWithoutOwner,
+            updateCase: updateCaseCallback,
+            throwOnError: true,
+          });
+        }
+        expect(test()).rejects.toThrowError('This is not possible');
+      });
     });
   });
 });

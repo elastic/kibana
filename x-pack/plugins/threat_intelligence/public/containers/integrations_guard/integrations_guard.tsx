@@ -7,7 +7,7 @@
 
 import { EuiLoadingLogo } from '@elastic/eui';
 import React from 'react';
-import { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EmptyPage } from '../../modules/empty_page';
 import { useIndicatorsTotalCount } from '../../modules/indicators/hooks/use_indicators_total_count';
 import { SecuritySolutionPluginTemplateWrapper } from '../security_solution_plugin_template_wrapper';
@@ -15,7 +15,7 @@ import { SecuritySolutionPluginTemplateWrapper } from '../security_solution_plug
 /**
  * Renders children only if TI integrations are enabled
  */
-export const IntegrationsGuard: FC = ({ children }) => {
+export const IntegrationsGuard: FC<PropsWithChildren> = ({ children }) => {
   const { count: indicatorsTotalCount, isLoading: isIndicatorsTotalCountLoading } =
     useIndicatorsTotalCount();
 

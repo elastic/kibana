@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiTitle,
   EuiLink,
@@ -42,7 +43,7 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
   }, []);
 
   const isEditDisabled = settings.preconfigured_fields?.includes('fleet_server_hosts') ?? false;
-  const BtnWrapper = useMemo((): React.FunctionComponent => {
+  const BtnWrapper = useMemo((): FC<PropsWithChildren> => {
     if (!isEditDisabled) {
       return ({ children }) => <>{children}</>;
     }

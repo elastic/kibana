@@ -50,6 +50,7 @@ const ScoreChart = ({
   } = useKibana();
 
   return (
+    // @ts-expect-error update types
     <Chart size={{ height: 90, width: 90 }}>
       <Settings
         theme={[

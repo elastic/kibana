@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useColumns } from './use_data_grid_columns';
 import { dataViewMock } from '../__mocks__/data_view';
 import { configMock } from '../__mocks__/config';

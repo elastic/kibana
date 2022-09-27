@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from 'react-router-dom';
 
 import { AppMountParameters } from '@kbn/core/public';
@@ -56,7 +56,9 @@ export const renderApp = (
     </KibanaThemeProvider>
   );
 
-  ReactDOM.render(app, element);
+  const root = createRoot(element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  root.render(app);
+
+  return () => root.unmount();
 };

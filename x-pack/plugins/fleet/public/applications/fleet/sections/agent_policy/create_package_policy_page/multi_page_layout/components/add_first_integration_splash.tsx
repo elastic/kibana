@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,7 +39,7 @@ import { CreatePackagePolicyBottomBar } from '.';
 const CentralTitle = styled('h1')`
   text-align: center;
 `;
-const PaddedCentralTitle: React.FC = ({ children }) => (
+const PaddedCentralTitle: FC<PropsWithChildren> = ({ children }) => (
   <>
     <EuiSpacer size={'s'} />
     <EuiTitle size="l">
@@ -64,7 +66,7 @@ const CenteredEuiImage = (props: EuiImageProps) => (
   </div>
 );
 
-const ResponsiveStepGroup: React.FC = ({ children }) => {
+const ResponsiveStepGroup: FC<PropsWithChildren> = ({ children }) => {
   const isScreenSmall = useIsWithinMaxBreakpoint('s');
 
   return (
@@ -225,23 +227,17 @@ const CenteredLearnMoreLink = () => {
   );
 };
 
-export const AddFirstIntegrationSplashScreen: React.FC<{
-  integrationInfo?: RegistryPolicyTemplate;
-  error?: RequestError | null;
-  packageInfo?: PackageInfo;
-  isLoading: boolean;
-  cancelClickHandler: React.ReactEventHandler;
-  cancelUrl: string;
-  onNext: () => void;
-}> = ({
-  integrationInfo,
-  packageInfo,
-  isLoading,
-  error,
-  cancelUrl,
-  cancelClickHandler,
-  onNext,
-}) => {
+export const AddFirstIntegrationSplashScreen: FC<
+  PropsWithChildren<{
+    integrationInfo?: RegistryPolicyTemplate;
+    error?: RequestError | null;
+    packageInfo?: PackageInfo;
+    isLoading: boolean;
+    cancelClickHandler: React.ReactEventHandler;
+    cancelUrl: string;
+    onNext: () => void;
+  }>
+> = ({ integrationInfo, packageInfo, isLoading, error, cancelUrl, cancelClickHandler, onNext }) => {
   if (error) {
     return (
       <Error

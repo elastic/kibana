@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import {
@@ -51,6 +51,7 @@ export const getRepeatImageRenderer =
       config: RepeatImageRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const root = createRoot(domNode);
       const { elasticOutline } = await getElasticOutline();
       const settings = {
         ...config,
@@ -59,16 +60,15 @@ export const getRepeatImageRenderer =
       };
 
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaThemeProvider theme$={theme$}>
           <I18nProvider>
             <RepeatImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
           </I18nProvider>
-        </KibanaThemeProvider>,
-        domNode
+        </KibanaThemeProvider>
       );
     },
   });

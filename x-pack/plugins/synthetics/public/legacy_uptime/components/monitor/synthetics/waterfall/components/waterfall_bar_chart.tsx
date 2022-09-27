@@ -82,6 +82,7 @@ export const WaterfallBarChart = ({
       chartIndex={index}
       data-test-subj="wfDataOnlyBarChart"
     >
+      {/* @ts-expect-error update types */}
       <Chart className="data-chart">
         <Settings
           showLegend={false}

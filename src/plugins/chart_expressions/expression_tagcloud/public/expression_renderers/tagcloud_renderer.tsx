@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -47,9 +47,10 @@ export const tagcloudRenderer: (
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     const { core, plugins } = getStartDeps();
+    const root = createRoot(domNode);
 
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const renderComplete = () => {
@@ -70,7 +71,7 @@ export const tagcloudRenderer: (
 
     const showNoResult = config.visData.rows.length === 0;
 
-    render(
+    root.render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <I18nProvider>
           <ClassNames>
@@ -94,8 +95,7 @@ export const tagcloudRenderer: (
             )}
           </ClassNames>
         </I18nProvider>
-      </KibanaThemeProvider>,
-      domNode
+      </KibanaThemeProvider>
     );
   },
 });

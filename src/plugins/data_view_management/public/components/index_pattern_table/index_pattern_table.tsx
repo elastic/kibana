@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
@@ -68,7 +69,9 @@ interface DataState {
   hasESData?: boolean;
 }
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent: FC<PropsWithChildren<SpacesContextProps>> = ({ children }) => (
+  <>{children}</>
+);
 
 export const IndexPatternTable = ({
   history,

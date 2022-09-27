@@ -7,7 +7,6 @@
 import { omit } from 'lodash';
 import React, {
   createContext,
-  FunctionComponent,
   useCallback,
   useContext,
   useEffect,
@@ -15,6 +14,7 @@ import React, {
   useState,
   useRef,
 } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { Processor } from '../../../../../common/types';
 
@@ -61,7 +61,7 @@ export interface Props {
   onUpdate: (arg: OnUpdateHandlerArg) => void;
 }
 
-export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
+export const PipelineProcessorsContextProvider: FC<PropsWithChildren<Props>> = ({
   value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
   onUpdate,
   onFlyoutOpen,

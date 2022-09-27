@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useUserInfo, ManageUserInfo } from '.';
 import type { Capabilities } from '@kbn/core/public';
 
@@ -34,13 +34,13 @@ describe('useUserInfo', () => {
     });
   });
   it('returns default state', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUserInfo(), {
+    const { result } = renderHook<ReturnType<typeof useUserInfo>, Parameters<typeof useUserInfo>>(
+      () => useUserInfo(),
+      {
         wrapper: TestProviders,
-      });
-      await waitForNextUpdate();
-
-      expect(result.all).toHaveLength(1);
+      }
+    );
+    await waitFor(() => {
       expect(result.current).toEqual({
         canUserCRUD: null,
         canUserREAD: null,
@@ -56,7 +56,6 @@ describe('useUserInfo', () => {
         signalIndexName: null,
         signalIndexMappingOutdated: null,
       });
-      expect(result.error).toBeUndefined();
     });
   });
 
@@ -75,12 +74,10 @@ describe('useUserInfo', () => {
         </UserPrivilegesProvider>
       </TestProviders>
     );
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useUserInfo(), { wrapper });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    renderHook(() => useUserInfo(), { wrapper });
+    await waitFor(() => {
+      expect(spyOnGetSignalIndex).toHaveBeenCalledTimes(2);
+      expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
     });
-    expect(spyOnGetSignalIndex).toHaveBeenCalledTimes(2);
-    expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
   });
 });

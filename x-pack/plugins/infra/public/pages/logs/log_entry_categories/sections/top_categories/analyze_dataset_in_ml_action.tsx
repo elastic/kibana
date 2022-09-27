@@ -42,7 +42,7 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   });
 
   const handleClick = useCallback(
-    (e) => {
+    (e: any) => {
       if (!viewAnomalyInMachineLearningLink || !shouldHandleLinkEvent(e)) return;
       application.navigateToUrl(viewAnomalyInMachineLearningLink);
     },

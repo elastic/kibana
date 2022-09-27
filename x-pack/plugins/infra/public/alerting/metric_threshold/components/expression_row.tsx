@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   builtInComparators,
@@ -68,7 +69,7 @@ const StyledHealth = euiStyled(EuiHealth)`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
+export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
   const { children, setRuleParams, expression, errors, expressionId, remove, fields, canDelete } =
@@ -120,13 +121,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const convertThreshold = useCallback(
-    (enteredThreshold) =>
+    (enteredThreshold: number[]) =>
       isMetricPct ? enteredThreshold.map((v: number) => pctToDecimal(v)) : enteredThreshold,
     [isMetricPct]
   );
 
   const updateThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: number[]) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
@@ -136,7 +137,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const updateWarningThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: number[]) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.warningThreshold?.join()) {
         setRuleParams(expressionId, { ...expression, warningThreshold: t });
@@ -322,7 +323,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
 const ThresholdElement: React.FC<{
   updateComparator: (c?: string) => void;
-  updateThreshold: (t?: number[]) => void;
+  updateThreshold: (t: number[]) => void;
   threshold: MetricExpression['threshold'];
   isMetricPct: boolean;
   comparator: MetricExpression['comparator'];

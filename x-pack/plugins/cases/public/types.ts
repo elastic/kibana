@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import React, { ReactElement } from 'react';
+import type { FC, ReactElement, PropsWithChildren } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -105,7 +105,7 @@ export interface CasesUiStart {
      * @return {ReactElement<GetCasesProps>}
      */
     getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
-    getCasesContext: () => React.FC<GetCasesContextProps>;
+    getCasesContext: () => FC<PropsWithChildren<GetCasesContextProps>>;
 
     /**
      * Modal to select a case in a list of all owner cases

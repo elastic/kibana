@@ -51,7 +51,7 @@ export const HostsContainer = React.memo(() => (
       }) => (
         <HostDetails
           hostDetailsPagePath={hostDetailsPagePath}
-          detailName={decodeURIComponent(detailName)}
+          detailName={decodeURIComponent(detailName ?? '')}
         />
       )}
     />

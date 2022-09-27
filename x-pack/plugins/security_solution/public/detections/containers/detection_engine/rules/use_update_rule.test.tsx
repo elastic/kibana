@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import type { ReturnUpdateRule } from './use_update_rule';
 import { useUpdateRule } from './use_update_rule';
@@ -25,7 +25,7 @@ describe('useUpdateRule', () => {
   });
 
   test('init', async () => {
-    const { result } = renderHook<unknown, ReturnUpdateRule>(() => useUpdateRule(), {
+    const { result } = renderHook<ReturnUpdateRule, {}>(() => useUpdateRule(), {
       wrapper: TestProviders,
     });
 
@@ -34,31 +34,26 @@ describe('useUpdateRule', () => {
 
   test('saving rule with isLoading === true', async () => {
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook<void, ReturnUpdateRule>(
-        () => useUpdateRule(),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
+      const { result, rerender } = renderHook<ReturnUpdateRule, {}>(() => useUpdateRule(), {
+        wrapper: TestProviders,
+      });
       result.current[1](getUpdateRulesSchemaMock());
       rerender();
-      expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
+      await waitFor(() => {
+        expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
+      });
     });
   });
 
   test('saved rule with isSaved === true', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, ReturnUpdateRule>(
-        () => useUpdateRule(),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<ReturnUpdateRule, {}>(() => useUpdateRule(), {
+        wrapper: TestProviders,
+      });
       result.current[1](getUpdateRulesSchemaMock());
-      await waitForNextUpdate();
-      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+      await waitFor(() => {
+        expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+      });
     });
   });
 });

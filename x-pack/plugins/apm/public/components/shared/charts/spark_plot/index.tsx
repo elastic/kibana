@@ -130,6 +130,7 @@ function SparkPlotItem({
 
   if (hasValidTimeseries(series)) {
     return (
+      // @ts-expect-error update types
       <Chart size={chartSize}>
         <Settings
           theme={[sparkplotChartTheme, ...defaultChartTheme]}

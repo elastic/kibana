@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { act, Simulate } from 'react-dom/test-utils';
 import { useUiSetting$ } from './use_ui_setting';
 import { createKibanaReactContext } from '../context';
@@ -64,11 +64,10 @@ describe('useUiSetting', () => {
     const [core] = mock();
     const { Provider } = createKibanaReactContext(core);
 
-    ReactDOM.render(
+    createRoot(container!).render(
       <Provider>
         <TestConsumer setting="foo" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     const strong = container!.querySelector('strong');
@@ -81,11 +80,10 @@ describe('useUiSetting', () => {
     const [core] = mock();
     const { Provider } = createKibanaReactContext(core);
 
-    ReactDOM.render(
+    createRoot(container!).render(
       <Provider>
         <TestConsumer setting="foo" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     expect(core.uiSettings!.get).toHaveBeenCalledTimes(1);
@@ -113,11 +111,10 @@ describe('useUiSetting$', () => {
     const [core] = mock();
     const { Provider } = createKibanaReactContext(core);
 
-    ReactDOM.render(
+    createRoot(container!).render(
       <Provider>
         <TestConsumerX setting="foo" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     const strong = container!.querySelector('strong');
@@ -130,11 +127,10 @@ describe('useUiSetting$', () => {
     const core = coreMock.createStart();
     const { Provider } = createKibanaReactContext(core);
 
-    ReactDOM.render(
+    createRoot(container!).render(
       <Provider>
         <TestConsumerX setting="non_existing" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     expect(core.uiSettings!.get).toHaveBeenCalledWith('non_existing', 'DEFAULT');
@@ -146,11 +142,10 @@ describe('useUiSetting$', () => {
 
     expect(useObservableSpy).toHaveBeenCalledTimes(0);
 
-    ReactDOM.render(
+    createRoot(container!).render(
       <Provider>
         <TestConsumerX setting="theme:darkMode" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     expect(useObservableSpy).toHaveBeenCalledTimes(1);
@@ -161,11 +156,10 @@ describe('useUiSetting$', () => {
     const [core] = mock();
     const { Provider } = createKibanaReactContext(core);
 
-    ReactDOM.render(
+    createRoot(container!).render(
       <Provider>
         <TestConsumerX setting="a" newValue="c" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     expect(core.uiSettings!.set).toHaveBeenCalledTimes(0);

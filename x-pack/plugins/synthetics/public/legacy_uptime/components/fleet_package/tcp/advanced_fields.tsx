@@ -122,7 +122,7 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFiel
           <EuiFieldText
             value={fields[ConfigKey.REQUEST_SEND_CHECK]}
             onChange={useCallback(
-              (event) =>
+              (event: any) =>
                 handleInputChange({
                   value: event.target.value,
                   configKey: ConfigKey.REQUEST_SEND_CHECK,
@@ -169,7 +169,7 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFiel
           <EuiFieldText
             value={fields[ConfigKey.RESPONSE_RECEIVE_CHECK]}
             onChange={useCallback(
-              (event) =>
+              (event: any) =>
                 handleInputChange({
                   value: event.target.value,
                   configKey: ConfigKey.RESPONSE_RECEIVE_CHECK,

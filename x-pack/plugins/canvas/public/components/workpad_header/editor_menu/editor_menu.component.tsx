@@ -153,6 +153,7 @@ export const EditorMenu: FC<Props> = ({
       panelPaddingSize="none"
       data-test-subj="canvasEditorMenuButton"
     >
+      {/* @ts-expect-error update types */}
       {() => (
         <EuiContextMenu
           initialPanelId={0}

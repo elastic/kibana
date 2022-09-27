@@ -41,7 +41,9 @@ export const ValidationError = memo<
       }
       data-test-subj={getTestId('validationError')}
     >
-      <div data-test-subj={getTestId('validationError-message')}>{store.errorMessage}</div>
+      <div data-test-subj={getTestId('validationError-message')}>
+        <>{store.errorMessage}</>
+      </div>
       <EuiSpacer size="s" />
       <CommandInputUsage commandDef={command.commandDefinition} />
       <ConsoleCodeBlock>

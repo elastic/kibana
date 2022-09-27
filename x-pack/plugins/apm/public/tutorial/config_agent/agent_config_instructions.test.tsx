@@ -11,6 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as getCommands from './commands/get_apm_agent_commands';
 
 function Wrapper({ children }: { children?: ReactNode }) {
+  // @ts-expect-error update types
   return <IntlProvider locale="en">{children}</IntlProvider>;
 }
 

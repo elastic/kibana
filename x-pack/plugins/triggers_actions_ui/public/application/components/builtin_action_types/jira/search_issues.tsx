@@ -19,7 +19,7 @@ interface Props {
   http: HttpSetup;
   toastNotifications: IToasts;
   actionConnector?: ActionConnector;
-  onChange: (parentIssueKey: string) => void;
+  onChange: (parentIssueKey?: string) => void;
 }
 
 const SearchIssuesComponent: React.FC<Props> = ({
@@ -69,7 +69,7 @@ const SearchIssuesComponent: React.FC<Props> = ({
   }, []);
 
   const onChangeComboBox = useCallback(
-    (changedOptions) => {
+    (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedOptions(changedOptions);
       onChange(changedOptions[0].value);
     },

@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
   Embeddable,
@@ -43,6 +44,7 @@ export class TodoEmbeddable extends Embeddable<TodoInput, TodoOutput> {
   public readonly type = TODO_EMBEDDABLE;
   private subscription: Subscription;
   private node?: HTMLElement;
+  private root?: Root;
 
   constructor(initialInput: TodoInput, parent?: IContainer) {
     super(initialInput, getOutput(initialInput), parent);
@@ -57,10 +59,11 @@ export class TodoEmbeddable extends Embeddable<TodoInput, TodoOutput> {
 
   public render(node: HTMLElement) {
     this.node = node;
+    this.root = createRoot(node);
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      this.root?.unmount();
     }
-    ReactDOM.render(<TodoEmbeddableComponent embeddable={this} />, node);
+    this.root.render(<TodoEmbeddableComponent embeddable={this} />);
   }
 
   /**
@@ -72,7 +75,7 @@ export class TodoEmbeddable extends Embeddable<TodoInput, TodoOutput> {
     super.destroy();
     this.subscription.unsubscribe();
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      this.root?.unmount();
     }
   }
 }

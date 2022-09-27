@@ -7,7 +7,7 @@
 
 import { getAlertsPermissions, useGetUserAlertsPermissions } from './use_alert_permission';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 describe('getAlertsPermissions', () => {
   it('returns a fallback when featureId is nullish or missing from capabilities', () => {

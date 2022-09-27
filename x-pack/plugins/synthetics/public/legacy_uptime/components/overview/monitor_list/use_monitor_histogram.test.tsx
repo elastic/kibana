@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useMonitorHistogram } from './use_monitor_histogram';
 import { WrappedHelper } from '../../../../apps/synthetics/utils/testing';
 import * as searchHooks from '@kbn/observability-plugin/public/hooks/use_es_search';

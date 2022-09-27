@@ -16,7 +16,7 @@ import type { Chart } from '@elastic/charts';
 import { parseSyncOptions } from './active_cursor_utils';
 
 import type { ActiveCursor } from './active_cursor';
-import type { ActiveCursorSyncOption } from './types';
+import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
 
 const DEFAULT_DEBOUNCE_TIME = 40;
 
@@ -27,7 +27,7 @@ export const useActiveCursor = (
 ) => {
   const { accessors, isDateHistogram } = parseSyncOptions(syncOptions);
   const handleCursorUpdate = useCallback(
-    (cursor) => {
+    (cursor: ActiveCursorPayload['cursor']) => {
       activeCursor.activeCursor$?.next({
         cursor,
         isDateHistogram,

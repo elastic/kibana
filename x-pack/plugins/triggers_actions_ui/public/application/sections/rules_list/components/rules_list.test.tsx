@@ -356,6 +356,7 @@ describe.skip('Update Api Key', () => {
   it('Updates the Api Key successfully', async () => {
     updateAPIKey.mockResolvedValueOnce(204);
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <RulesList />
       </IntlProvider>
@@ -390,6 +391,7 @@ describe.skip('Update Api Key', () => {
   it('Update API key fails', async () => {
     updateAPIKey.mockRejectedValueOnce(500);
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <RulesList />
       </IntlProvider>

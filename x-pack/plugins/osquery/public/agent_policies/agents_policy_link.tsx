@@ -38,7 +38,7 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
     [getUrlForApp, policyId]
   );
 
-  const handleClick = useCallback(
+  const handleClick = useCallback<React.MouseEventHandler>(
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();

@@ -10,7 +10,7 @@ import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
@@ -355,7 +355,7 @@ export class VisualizeEmbeddable
     }
 
     if (this.warningDomNode) {
-      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
+      createRoot(this.warningDomNode).render(<Warnings warnings={warnings || []} />);
     }
   }
 
@@ -422,13 +422,12 @@ export class VisualizeEmbeddable
     this.domNode = div;
     super.render(this.domNode);
 
-    render(
+    createRoot(this.domNode).render(
       <KibanaThemeProvider theme$={getTheme().theme$}>
         <div className="visChart__spinner">
           <EuiLoadingChart mono size="l" />
         </div>
-      </KibanaThemeProvider>,
-      this.domNode
+      </KibanaThemeProvider>
     );
 
     const expressions = getExpressions();
@@ -505,8 +504,10 @@ export class VisualizeEmbeddable
   }
 
   public renderError(domNode: HTMLElement, error: ErrorLike | string) {
+    const root = createRoot(domNode);
+
     if (isFallbackDataView(this.vis.data.indexPattern)) {
-      render(
+      root.render(
         <VisualizationMissedSavedObjectError
           viewMode={this.input.viewMode ?? ViewMode.VIEW}
           renderMode={this.input.renderMode ?? 'view'}
@@ -515,14 +516,13 @@ export class VisualizeEmbeddable
             savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
           }}
           application={getApplication()}
-        />,
-        domNode
+        />
       );
     } else {
-      render(<VisualizationError error={error} />, domNode);
+      root.render(<VisualizationError error={error} />);
     }
 
-    return () => unmountComponentAtNode(domNode);
+    return () => root.unmount();
   }
 
   public destroy() {

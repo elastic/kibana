@@ -34,6 +34,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         {onSearchableToggle && <EuiTableHeaderCell>{SEARCHABLE_HEADER}</EuiTableHeaderCell>}
         {isOrganization && <EuiTableHeaderCell align="right">{ACTIONS_HEADER}</EuiTableHeaderCell>}
       </EuiTableHeader>
+      {/* @ts-expect-error update types */}
       <EuiTableBody>
         {sources.map((source) => (
           <SourceRow

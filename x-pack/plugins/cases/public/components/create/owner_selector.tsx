@@ -74,7 +74,7 @@ const OwnerSelector = ({
       fullWidth
       isInvalid={isInvalid}
       error={errorMessage}
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       label={field.label}
       labelAppend={field.labelAppend}
     >

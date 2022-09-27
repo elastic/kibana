@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,8 +31,9 @@ export function showCloneModal({ onClone, title }: ShowCloneModalProps) {
   } = pluginServices.getServices();
 
   const container = document.createElement('div');
+  const root = createRoot(container);
   const closeModal = () => {
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
   };
 
@@ -66,5 +67,5 @@ export function showCloneModal({ onClone, title }: ShowCloneModalProps) {
       </KibanaThemeProvider>
     </I18nProvider>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 }

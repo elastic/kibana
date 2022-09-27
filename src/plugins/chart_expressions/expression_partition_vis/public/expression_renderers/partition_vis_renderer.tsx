@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -51,9 +51,10 @@ export const getPartitionVisRenderer: (
   reuseDomNode: true,
   render: async (domNode, { visConfig, visData, visType, syncColors }, handlers) => {
     const { core, plugins } = getStartDeps();
+    const root = createRoot(domNode);
 
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const renderComplete = () => {
@@ -71,7 +72,7 @@ export const getPartitionVisRenderer: (
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
 
-    render(
+    root.render(
       <I18nProvider>
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <div css={partitionVisRenderer}>
@@ -89,8 +90,7 @@ export const getPartitionVisRenderer: (
             />
           </div>
         </KibanaThemeProvider>
-      </I18nProvider>,
-      domNode
+      </I18nProvider>
     );
   },
 });

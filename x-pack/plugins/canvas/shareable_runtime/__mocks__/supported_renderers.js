@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 
 const renderers = [
@@ -34,6 +34,7 @@ export const renderFunctions = renderers.map((fn) => () => ({
   help: fn,
   reuseDomNode: true,
   render: (domNode) => {
-    ReactDOM.render(<div>{fn} mock</div>, domNode);
+    const root = createRoot(domNode);
+    root.render(<div>{fn} mock</div>);
   },
 }));

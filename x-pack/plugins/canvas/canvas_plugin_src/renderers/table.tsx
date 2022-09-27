@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
@@ -34,7 +34,9 @@ export const getTableRenderer =
     reuseDomNode: true,
     render(domNode, config, handlers) {
       const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
-      ReactDOM.render(
+      const root = createRoot(domNode);
+
+      root.render(
         <KibanaThemeProvider theme$={theme$}>
           <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
             <DatatableComponent
@@ -44,11 +46,10 @@ export const getTableRenderer =
               showHeader={showHeader}
             />
           </div>
-        </KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
+        </KibanaThemeProvider>
+        // () => handlers.done()
       );
-      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+      handlers.onDestroy(() => root.unmount());
     },
   });
 

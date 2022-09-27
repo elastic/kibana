@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDom from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -71,23 +71,22 @@ export class ContactCardEmbeddable extends Embeddable<
 
   public render(node: HTMLElement) {
     this.node = node;
-    ReactDom.render(
-      <ContactCardEmbeddableComponent embeddable={this} execTrigger={this.options.execAction} />,
-      node
+    createRoot(node).render(
+      <ContactCardEmbeddableComponent embeddable={this} execTrigger={this.options.execAction} />
     );
   }
 
   public renderError?(node: HTMLElement, error: ErrorLike) {
-    ReactDom.render(<div data-test-subj="error">{error.message}</div>, node);
-
-    return () => ReactDom.unmountComponentAtNode(node);
+    const root = createRoot(node);
+    root.render(<div data-test-subj="error">{error.message}</div>);
+    return () => root.unmount();
   }
 
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();
     if (this.node) {
-      ReactDom.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
   }
 

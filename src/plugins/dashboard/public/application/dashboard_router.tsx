@@ -12,7 +12,7 @@ import { History } from 'history';
 import { Provider } from 'react-redux';
 import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import { parse, ParsedQuery } from 'query-string';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
@@ -230,11 +230,12 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
       iconType: 'glasses',
     });
   }
-  render(app, element);
+  const root = createRoot(element);
+  root.render(app);
   return () => {
     dataStart.search.session.clear();
     unlistenParentHistory();
-    unmountComponentAtNode(element);
+    root.unmount();
     appUnMounted();
   };
 }

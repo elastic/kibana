@@ -113,6 +113,7 @@ export const DonutChart = ({
         {data == null || totalCount == null || totalCount === 0 ? (
           <DonutChartEmpty size={height} />
         ) : (
+          // @ts-expect-error update types
           <Chart size={height}>
             <Settings theme={donutTheme} baseTheme={theme} />
             <Partition

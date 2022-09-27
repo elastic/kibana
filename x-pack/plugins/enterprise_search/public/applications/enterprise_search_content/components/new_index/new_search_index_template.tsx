@@ -6,6 +6,7 @@
  */
 
 import React, { ChangeEvent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -41,7 +42,7 @@ export interface Props {
   type: string;
 }
 
-export const NewSearchIndexTemplate: React.FC<Props> = ({
+export const NewSearchIndexTemplate: FC<PropsWithChildren<Props>> = ({
   children,
   disabled,
   docsUrl,

@@ -75,7 +75,7 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
   );
 
   const connectorIdConfig = getConnectorsFormValidators({
-    config: schema.connectorId as FieldConfig,
+    config: schema.connectorId as FieldConfig<string>,
     connectors,
   });
 

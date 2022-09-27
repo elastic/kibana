@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useState } from 'react';
-
+import type { FC, PropsWithChildren } from 'react';
 const agentFlyoutContext = createContext<
   | {
       isEnrollmentFlyoutOpen: boolean;
@@ -19,7 +19,7 @@ const agentFlyoutContext = createContext<
   | undefined
 >(undefined);
 
-export const FlyoutContextProvider: React.FunctionComponent = ({ children }) => {
+export const FlyoutContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const [isFleetServerFlyoutOpen, setIsFleetServerFlyoutOpen] = useState(false);
 

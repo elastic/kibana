@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector as actionConnector, issues } from '../mock';
@@ -23,7 +23,7 @@ describe('useGetIssues', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIssues>(() =>
+      const { result } = renderHook<UseGetIssues, {}>(() =>
         useGetIssues({
           http,
           toastNotifications: notifications.toasts,
@@ -31,14 +31,15 @@ describe('useGetIssues', () => {
           query: null,
         })
       );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: false, issues: [] });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: false, issues: [] });
+      });
     });
   });
 
   test('fetch issues', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIssues>(() =>
+      const { result } = renderHook<UseGetIssues, {}>(() =>
         useGetIssues({
           http,
           toastNotifications: notifications.toasts,
@@ -46,11 +47,11 @@ describe('useGetIssues', () => {
           query: 'Task',
         })
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        issues,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          issues,
+        });
       });
     });
   });
@@ -62,7 +63,7 @@ describe('useGetIssues', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIssues>(() =>
+      const { result } = renderHook<UseGetIssues, {}>(() =>
         useGetIssues({
           http,
           toastNotifications: notifications.toasts,
@@ -71,10 +72,9 @@ describe('useGetIssues', () => {
         })
       );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({ isLoading: false, issues: [] });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: false, issues: [] });
+      });
     });
   });
 });

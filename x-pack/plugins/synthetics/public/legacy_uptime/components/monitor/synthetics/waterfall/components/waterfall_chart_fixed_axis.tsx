@@ -33,6 +33,7 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
 
   return (
     <WaterfallChartFixedAxisContainer>
+      {/* @ts-expect-error update types */}
       <Chart className="axis-only-chart" data-test-subj="axisOnlyChart">
         <Settings
           showLegend={false}

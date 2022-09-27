@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Route, RouteComponentProps } from 'react-router-dom';
 import { EuiPage, EuiText } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -40,7 +40,8 @@ export const renderApp = (
   deps: any,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<AlertingExampleApp basename={appBasePath} {...deps} />, element);
+  const root = createRoot(element);
+  root.render(<AlertingExampleApp basename={appBasePath} {...deps} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

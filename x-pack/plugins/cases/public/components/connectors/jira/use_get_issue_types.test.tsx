@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector } from '../mock';
@@ -25,17 +25,18 @@ describe('useGetIssueTypes', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
+      const { result } = renderHook<UseGetIssueTypes, {}>(() =>
         useGetIssueTypes({ http, toastNotifications: notifications.toasts, handleIssueType })
       );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: true, issueTypes: [] });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: true, issueTypes: [] });
+      });
     });
   });
 
   test('fetch issue types', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
+      const { result } = renderHook<UseGetIssueTypes, {}>(() =>
         useGetIssueTypes({
           http,
           toastNotifications: notifications.toasts,
@@ -43,27 +44,27 @@ describe('useGetIssueTypes', () => {
           handleIssueType,
         })
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        issueTypes: [
-          {
-            id: '10006',
-            name: 'Task',
-          },
-          {
-            id: '10007',
-            name: 'Bug',
-          },
-        ],
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          issueTypes: [
+            {
+              id: '10006',
+              name: 'Task',
+            },
+            {
+              id: '10007',
+              name: 'Bug',
+            },
+          ],
+        });
       });
     });
   });
 
   test('handleIssueType is called', async () => {
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
+      renderHook<UseGetIssueTypes, {}>(() =>
         useGetIssueTypes({
           http,
           toastNotifications: notifications.toasts,
@@ -72,13 +73,12 @@ describe('useGetIssueTypes', () => {
         })
       );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(handleIssueType).toHaveBeenCalledWith([
-        { text: 'Task', value: '10006' },
-        { text: 'Bug', value: '10007' },
-      ]);
+      await waitFor(() => {
+        expect(handleIssueType).toHaveBeenCalledWith([
+          { text: 'Task', value: '10006' },
+          { text: 'Bug', value: '10007' },
+        ]);
+      });
     });
   });
 
@@ -89,7 +89,7 @@ describe('useGetIssueTypes', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
+      const { result } = renderHook<UseGetIssueTypes, {}>(() =>
         useGetIssueTypes({
           http,
           toastNotifications: notifications.toasts,
@@ -98,10 +98,9 @@ describe('useGetIssueTypes', () => {
         })
       );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({ isLoading: false, issueTypes: [] });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: false, issueTypes: [] });
+      });
     });
   });
 });

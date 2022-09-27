@@ -38,6 +38,7 @@ export function ParamsEditor<TParams = unknown>({
   timeRangeForSuggestionsOverride,
 }: ParamsEditorProps<TParams>) {
   const onParamsChange = useCallback(
+    // @ts-expect-error update types
     (selectedParams) => {
       onHandleParamsChange(selectedParams);
     },
@@ -45,6 +46,7 @@ export function ParamsEditor<TParams = unknown>({
   );
 
   const onParamsUpdate = useCallback(
+    // @ts-expect-error update types
     (value) => {
       onHandleParamsUpdate(value);
     },

@@ -6,7 +6,7 @@
  */
 
 import { scaleLinear } from 'd3-scale';
-import * as React from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntryTime } from '../../../../common/log_entry';

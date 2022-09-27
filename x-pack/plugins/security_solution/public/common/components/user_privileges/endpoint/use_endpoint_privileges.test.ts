@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult, RenderResult } from '@testing-library/react-hooks';
-import { act, renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useEndpointPrivileges } from './use_endpoint_privileges';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
@@ -34,9 +34,9 @@ const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
 describe('When using useEndpointPrivileges hook', () => {
   let authenticatedUser: AuthenticatedUser;
-  let result: RenderResult<EndpointPrivileges>;
+  let result: { current: EndpointPrivileges };
   let unmount: ReturnType<typeof renderHook>['unmount'];
-  let render: () => RenderHookResult<void, EndpointPrivileges>;
+  let render: () => RenderHookResult<EndpointPrivileges, void>;
 
   beforeEach(() => {
     authenticatedUser = securityMock.createMockAuthenticatedUser({

@@ -32,6 +32,7 @@ const services = {
 };
 
 const Template: ComponentStory<typeof QueryBar> = (args) => (
+  // @ts-expect-error update types
   <IntlProvider>
     <KibanaContextProvider services={services}>
       <QueryBar {...args} />{' '}

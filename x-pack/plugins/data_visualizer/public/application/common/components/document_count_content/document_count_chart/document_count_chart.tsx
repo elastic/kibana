@@ -144,6 +144,7 @@ export const DocumentCountChart: FC<Props> = ({
       {loading ? (
         <LoadingSpinner />
       ) : (
+        // @ts-expect-error update types
         <Chart
           size={{
             width: '100%',

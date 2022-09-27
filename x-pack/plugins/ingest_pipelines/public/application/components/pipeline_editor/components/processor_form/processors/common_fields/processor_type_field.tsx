@@ -7,7 +7,7 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, ReactNode } from 'react';
+import React, { FunctionComponent } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
 
@@ -23,7 +23,11 @@ import {
   useKibana,
 } from '../../../../../../../shared_imports';
 
-import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../shared';
+import {
+  FieldDescriptor,
+  getProcessorDescriptor,
+  mapProcessorTypeToDescriptor,
+} from '../../../shared';
 
 const extractProcessorTypesAndLabels = flow(
   Object.entries,
@@ -75,7 +79,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
     <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
         let selectedOptions: ProcessorTypeAndLabel[];
-        let description: string | ReactNode = '';
+        let description: FieldDescriptor['typeDescription'] = '';
 
         if (typeField.value?.length) {
           const type = typeField.value;

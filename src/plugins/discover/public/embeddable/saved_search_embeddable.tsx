@@ -15,7 +15,8 @@ import {
   FilterStateStore,
 } from '@kbn/es-query';
 import React from 'react';
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -108,6 +109,7 @@ export class SavedSearchEmbeddable
   private searchProps?: SearchProps;
 
   private node?: HTMLElement;
+  private root?: Root;
 
   constructor(
     {
@@ -466,7 +468,7 @@ export class SavedSearchEmbeddable
       this.prevSort = this.input.sort;
       this.searchProps = searchProps;
       await this.fetch();
-    } else if (this.searchProps && this.node) {
+    } else if (this.searchProps && this.root) {
       this.searchProps = searchProps;
     }
   }
@@ -497,7 +499,8 @@ export class SavedSearchEmbeddable
       searchProps.dataView &&
       Array.isArray(searchProps.columns)
     ) {
-      ReactDOM.render(
+      this.root = createRoot(domNode);
+      this.root.render(
         <I18nProvider>
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
@@ -512,8 +515,7 @@ export class SavedSearchEmbeddable
               />
             </KibanaContextProvider>
           </KibanaThemeProvider>
-        </I18nProvider>,
-        domNode
+        </I18nProvider>
       );
       return;
     }
@@ -524,15 +526,15 @@ export class SavedSearchEmbeddable
       useLegacyTable,
     };
     if (searchProps.services) {
-      ReactDOM.render(
+      this.root = createRoot(domNode);
+      this.root.render(
         <I18nProvider>
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
               <SavedSearchEmbeddableComponent {...props} />
             </KibanaContextProvider>
           </KibanaThemeProvider>
-        </I18nProvider>,
-        domNode
+        </I18nProvider>
       );
     }
 
@@ -590,7 +592,7 @@ export class SavedSearchEmbeddable
       delete this.searchProps;
     }
     if (this.node) {
-      unmountComponentAtNode(this.node);
+      this.root?.unmount();
     }
     this.subscription?.unsubscribe();
 

@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import {
@@ -48,7 +49,7 @@ export class CustomIntegrationsPlugin
   ): CustomIntegrationsStart {
     const services = servicesFactory({ coreStart, startPlugins });
 
-    const languageClientsUiComponents = new Map<string, React.FC>();
+    const languageClientsUiComponents = new Map<string, FC>();
 
     // Set the language clients components to render in Fleet plugin under Integrations app
     // Export component only if the integration has exportLanguageUiComponent = true
@@ -59,7 +60,7 @@ export class CustomIntegrationsPlugin
         languageClientsUiComponents.set(`language_client.${int.id}`, ReadmeComponent);
       });
 
-    const ContextProvider: React.FC = ({ children }) => (
+    const ContextProvider: FC<PropsWithChildren> = ({ children }) => (
       <CustomIntegrationsServicesProvider {...services}>
         {children}
       </CustomIntegrationsServicesProvider>

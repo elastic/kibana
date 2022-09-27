@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-/* eslint-disable react/display-name */
+import type { PropsWithChildren } from 'react';
+
 /**
  * A component that renders an element with breaking opportunities (`<wbr>`s)
  * spliced into text children at word boundaries.
  */
-export const GeneratedText = React.memo(function ({ children }) {
+export const GeneratedText = React.memo<PropsWithChildren>(function ({ children }) {
   return <>{processedValue()}</>;
 
   function processedValue() {
@@ -37,3 +38,5 @@ export const GeneratedText = React.memo(function ({ children }) {
     });
   }
 });
+
+GeneratedText.displayName = 'GeneratedText';

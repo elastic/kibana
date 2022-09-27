@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useUpdatePolicy } from './use_update_policy';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { validate } from '../validation';
@@ -363,7 +363,7 @@ describe('useBarChartsHooks', () => {
       validate,
       monitorType: DataStream.HTTP,
     };
-    const { result, rerender, waitFor } = renderHook((props) => useUpdatePolicy(props), {
+    const { result, rerender } = renderHook((props) => useUpdatePolicy(props), {
       initialProps,
     });
 
@@ -425,7 +425,7 @@ describe('useBarChartsHooks', () => {
       validate,
       monitorType: DataStream.HTTP,
     };
-    const { rerender, result, waitFor } = renderHook((props) => useUpdatePolicy(props), {
+    const { rerender, result } = renderHook((props) => useUpdatePolicy(props), {
       initialProps,
     });
 
@@ -490,7 +490,7 @@ describe('useBarChartsHooks', () => {
       validate,
       monitorType: DataStream.TCP,
     };
-    const { result, rerender, waitFor } = renderHook((props) => useUpdatePolicy(props), {
+    const { result, rerender } = renderHook((props) => useUpdatePolicy(props), {
       initialProps,
     });
 
@@ -556,7 +556,7 @@ describe('useBarChartsHooks', () => {
       validate,
       monitorType: DataStream.ICMP,
     };
-    const { rerender, result, waitFor } = renderHook((props) => useUpdatePolicy(props), {
+    const { rerender, result } = renderHook((props) => useUpdatePolicy(props), {
       initialProps,
     });
     const config: ICMPFields = {
@@ -610,7 +610,7 @@ describe('useBarChartsHooks', () => {
       monitorType: DataStream.BROWSER,
     };
 
-    const { result, rerender, waitFor } = renderHook((props) => useUpdatePolicy(props), {
+    const { result, rerender } = renderHook((props) => useUpdatePolicy(props), {
       initialProps,
     });
 

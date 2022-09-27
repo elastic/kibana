@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import styled from 'styled-components';
 import type { EuiHealthProps } from '@elastic/eui';
 import { EuiHealth, EuiToolTip } from '@elastic/eui';
@@ -26,7 +27,7 @@ interface HealthTruncateTextProps {
  * @param healthColor - color for EuiHealth component
  * @param tooltipContent - tooltip content
  */
-export const HealthTruncateText: React.FC<HealthTruncateTextProps> = ({
+export const HealthTruncateText: FC<PropsWithChildren<HealthTruncateTextProps>> = ({
   tooltipContent,
   children,
   healthColor,

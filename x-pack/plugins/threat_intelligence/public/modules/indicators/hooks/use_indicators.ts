@@ -158,7 +158,7 @@ export const useIndicators = ({
   );
 
   const onChangeItemsPerPage = useCallback(
-    async (pageSize) => {
+    async (pageSize: number) => {
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
@@ -171,7 +171,7 @@ export const useIndicators = ({
   );
 
   const onChangePage = useCallback(
-    async (pageIndex) => {
+    async (pageIndex: number) => {
       setPagination((currentPagination) => ({ ...currentPagination, pageIndex }));
       loadData(pageIndex * pagination.pageSize, pagination.pageSize);
     },

@@ -129,6 +129,7 @@ export const GroupSourcePrioritization: React.FC = () => {
         <EuiTableHeaderCell>{SOURCE_TABLE_HEADER}</EuiTableHeaderCell>
         <EuiTableHeaderCell align="right">{PRIORITY_TABLE_HEADER}</EuiTableHeaderCell>
       </EuiTableHeader>
+      {/* @ts-expect-error update types */}
       <EuiTableBody>
         {contentSources.map(({ id, name, serviceType }: ContentSource) => (
           <EuiTableRow key={id} data-test-subj="GroupsRow">

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import ReactDOM from 'react-dom';
+import React, { FC, PropsWithChildren } from 'react';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 
@@ -47,7 +47,7 @@ export const renderApp = (
   };
   const productAccess = data.access || noProductAccess;
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren> = ({ children }) => <>{children}</>;
   const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
@@ -79,8 +79,8 @@ export const renderApp = (
     readOnlyMode: initialData.readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic();
-
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <I18nProvider>
       <KibanaThemeProvider theme$={params.theme$}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
@@ -95,10 +95,9 @@ export const renderApp = (
         </KibanaContextProvider>
       </KibanaThemeProvider>
     </I18nProvider>,
-    params.element
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
     unmountKibanaLogic();
     unmountLicensingLogic();
     unmountHttpLogic();
@@ -118,11 +117,11 @@ export const renderHeaderActions = (
   store: Store,
   kibanaHeaderEl: HTMLElement
 ) => {
-  ReactDOM.render(
+  const root = createRoot(kibanaHeaderEl);
+  root.render(
     <Provider store={store}>
       <HeaderActions />
     </Provider>,
-    kibanaHeaderEl
   );
-  return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
+  return () => root.unmount();
 };

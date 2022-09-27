@@ -7,7 +7,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import type { FC, PropsWithChildren } from 'react';
+import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -45,7 +46,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
 
   coreStart.chrome.docTitle.change(title);
 
-  const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
+  const RedirectToHomeIfUnauthorized: FC<PropsWithChildren> = ({ children }) => {
     const allowed = capabilities?.management?.kibana?.objects ?? false;
 
     if (!allowed) {
@@ -55,7 +56,9 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     return children! as React.ReactElement;
   };
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     wrapWithTheme(
       <I18nProvider>
         <Router history={history}>
@@ -92,12 +95,11 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
         </Router>
       </I18nProvider>,
       theme$
-    ),
-    element
+    )
   );
 
   return () => {
     coreStart.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

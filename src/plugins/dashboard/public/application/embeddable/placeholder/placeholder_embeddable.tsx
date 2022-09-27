@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import classNames from 'classnames';
 
 import { EuiLoadingChart } from '@elastic/eui';
@@ -27,7 +27,7 @@ export class PlaceholderEmbeddable extends Embeddable {
   }
   public render(node: HTMLElement) {
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
     this.node = node;
 
@@ -38,13 +38,12 @@ export class PlaceholderEmbeddable extends Embeddable {
     } = pluginServices.getServices();
 
     const classes = classNames('embPanel', 'embPanel-isLoading');
-    ReactDOM.render(
+    createRoot(this.node).render(
       <KibanaThemeProvider theme$={theme$}>
         <div className={classes}>
           <EuiLoadingChart size="l" mono />
         </div>
-      </KibanaThemeProvider>,
-      node
+      </KibanaThemeProvider>
     );
   }
 

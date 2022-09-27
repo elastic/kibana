@@ -41,6 +41,7 @@ export const MetaEnginesConflictsTable: React.FC = () => {
         </EuiTableHeaderCell>
         <EuiTableHeaderCell>{ENGINES_TITLE}</EuiTableHeaderCell>
       </EuiTableHeader>
+      {/* @ts-expect-error update types */}
       <EuiTableBody>
         {Object.entries(conflictingFields).map(([fieldName, conflicts]) =>
           Object.entries(conflicts).map(([fieldType, engines], i) => {

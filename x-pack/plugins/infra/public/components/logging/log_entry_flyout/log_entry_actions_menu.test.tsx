@@ -7,6 +7,7 @@
 
 import { subj as testSubject } from '@kbn/test-subj-selector';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { mount } from 'enzyme';
@@ -19,7 +20,7 @@ coreStartMock.application.getUrlForApp.mockImplementation((app, options) => {
   return `/test-basepath/s/test-space/app/${app}${options?.path}`;
 });
 
-const ProviderWrapper: React.FC = ({ children }) => {
+const ProviderWrapper: FC<PropsWithChildren> = ({ children }) => {
   return <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
 };
 

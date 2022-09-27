@@ -17,7 +17,7 @@ import { DEFAULT_PAGE_SIZE } from './table_basic';
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
   const onChangeHeight = useCallback(
-    (newHeightMode, heightProperty, heightLinesProperty) => {
+    (newHeightMode: string | undefined, heightProperty: string, heightLinesProperty: string) => {
       const rowHeightLines =
         newHeightMode === 'single' ? 1 : newHeightMode !== 'auto' ? 2 : undefined;
       setState({
@@ -30,7 +30,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
   );
 
   const onChangeHeightLines = useCallback(
-    (newRowHeightLines, heightLinesProperty) => {
+    (newRowHeightLines: number, heightLinesProperty: string) => {
       setState({
         ...state,
         [heightLinesProperty]: newRowHeightLines,

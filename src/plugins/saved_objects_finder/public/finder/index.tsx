@@ -14,6 +14,7 @@ const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
 const SavedObjectFinder = (props: SavedObjectFinderProps) => (
   <React.Suspense
     fallback={
+      // @ts-expect-error update types
       <EuiDelayRender delay={300}>
         <EuiLoadingContent />
       </EuiDelayRender>

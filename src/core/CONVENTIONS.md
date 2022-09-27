@@ -163,7 +163,7 @@ leverage this pattern.
 // my_plugin/public/applications/my_app.ts
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreStart, AppMountParameters } from 'src/core/public';
 
 import { MyAppRoot } from './components/app.ts';
@@ -176,8 +176,9 @@ export const renderApp = (
   deps: MyPluginDepsStart,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(<MyAppRoot core={core} deps={deps} routerHistory={history} />, element);
-  return () => ReactDOM.unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(<MyAppRoot core={core} deps={deps} routerHistory={history} />);
+  return () => root.unmount();
 };
 ```
 

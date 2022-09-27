@@ -28,6 +28,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/timeline/actions';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
+import type { RowRenderersBrowserProps } from './row_renderers_browser';
 import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 
@@ -78,16 +79,17 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
   );
   const [show, setShow] = useState(false);
 
-  const setExcludedRowRendererIds = useCallback(
-    (payload) =>
-      dispatch(
-        dispatchSetExcludedRowRendererIds({
-          id: timelineId,
-          excludedRowRendererIds: payload,
-        })
-      ),
-    [dispatch, timelineId]
-  );
+  const setExcludedRowRendererIds: RowRenderersBrowserProps['setExcludedRowRendererIds'] =
+    useCallback(
+      (payload) =>
+        dispatch(
+          dispatchSetExcludedRowRendererIds({
+            id: timelineId,
+            excludedRowRendererIds: payload,
+          })
+        ),
+      [dispatch, timelineId]
+    );
 
   const toggleShow = useCallback(() => setShow(!show), [show]);
 

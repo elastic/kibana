@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
+import type { Anomaly } from '../../../common/components/ml/types';
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../common/store/inputs/constants';
@@ -80,7 +81,7 @@ const NetworkDetailsComponent: React.FC = () => {
 
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: Anomaly, interval: string) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

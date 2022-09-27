@@ -70,6 +70,7 @@ function Wrapper({
   }) as unknown as ApmPluginContextValue;
 
   return (
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>

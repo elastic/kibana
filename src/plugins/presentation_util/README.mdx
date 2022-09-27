@@ -262,15 +262,16 @@ The ReduxEmbeddableWrapper should be used inside of embeddable classes, and shou
 <DocAccordion buttonContent="Wrapping Embeddable Render" initialIsOpen>
   ```ts
   // my_embeddable.tsx
+  import { createRoot } from 'react-dom/client';
 
   public render(dom: HTMLElement) {
-    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.domNode) this.root.unmount();
     this.domNode = dom;
-    ReactDOM.render(
-        <MyEmbeddableReduxWrapper embeddable={this} reducers={myEmbeddableReducers}>
-          <MyEmbeddableComponent />
-        </MyEmbeddableReduxWrapper>,
-      dom
+    this.root = createRoot(this.domNode);
+    this.root.render(
+      <MyEmbeddableReduxWrapper embeddable={this} reducers={myEmbeddableReducers}>
+        <MyEmbeddableComponent />
+      </MyEmbeddableReduxWrapper>
     );
   }
   ```

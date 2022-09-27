@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import type { Position } from '@elastic/charts';
+import type { BrushEndListener, Position } from '@elastic/charts';
 import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
@@ -105,7 +105,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 }) => {
   const dispatch = useDispatch();
 
-  const handleBrushEnd = useCallback(
+  const handleBrushEnd = useCallback<BrushEndListener>(
     ({ x }) => {
       if (!x) {
         return;
@@ -275,7 +275,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                     queryId={id}
                     stackByField={selectedStackByOption.value}
                     timerange={timerange}
-                    title={title}
+                    title={<>{title}</>}
                   />
                 </EuiFlexItem>
               )}

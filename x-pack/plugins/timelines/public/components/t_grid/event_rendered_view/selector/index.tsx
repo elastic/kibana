@@ -119,7 +119,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
     [viewSelected]
   );
 
-  const renderOption = useCallback((option) => {
+  const renderOption = useCallback((option: typeof options[0]) => {
     return (
       <>
         <EuiTitle size="xxs">
@@ -148,7 +148,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
       closePopover={closePopover}
     >
       <ContainerEuiSelectable>
-        <EuiSelectable
+        <EuiSelectable<typeof options[0]>
           options={options}
           onChange={onChangeSelectable}
           renderOption={renderOption}

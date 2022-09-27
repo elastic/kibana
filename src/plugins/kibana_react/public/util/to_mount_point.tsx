@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MountPoint, CoreTheme } from '@kbn/core/public';
@@ -28,8 +28,9 @@ export const toMountPoint = (
 ): MountPoint => {
   const content = theme$ ? <KibanaThemeProvider theme$={theme$}>{node}</KibanaThemeProvider> : node;
   const mount = (element: HTMLElement) => {
-    ReactDOM.render(<I18nProvider>{content}</I18nProvider>, element);
-    return () => ReactDOM.unmountComponentAtNode(element);
+    const root = createRoot(element);
+    root.render(<I18nProvider>{content}</I18nProvider>);
+    return () => root.unmount();
   };
   // only used for tests and snapshots serialization
   if (process.env.NODE_ENV !== 'production') {

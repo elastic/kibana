@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginSetupDependencies, AppPluginStartDependencies } from './types';
 import { ScreenshotModeExampleApp } from './components/app';
@@ -18,16 +18,17 @@ export const renderApp = (
   { navigation }: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <ScreenshotModeExampleApp
       basename={appBasePath}
       notifications={notifications}
       http={http}
       navigation={navigation}
       screenshotMode={screenshotMode}
-    />,
-    element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

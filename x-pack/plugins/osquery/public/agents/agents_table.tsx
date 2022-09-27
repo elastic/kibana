@@ -7,6 +7,7 @@
 
 import { find } from 'lodash/fp';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { EuiComboBoxProps } from '@elastic/eui';
 import { EuiComboBox, EuiHealth, EuiFormRow, EuiHighlight, EuiSpacer } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 
@@ -29,7 +30,13 @@ import {
   AGENT_SELECTION_LABEL,
 } from './translations';
 
-import type { SelectedGroups, AgentOptionValue, GroupOption, AgentSelection } from './types';
+import type {
+  SelectedGroups,
+  AgentOptionValue,
+  GroupOptionValue,
+  GroupOption,
+  AgentSelection,
+} from './types';
 import { AGENT_GROUP_KEY } from './types';
 
 interface AgentsTableProps {
@@ -160,18 +167,20 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     }
   }, [groupsLoading, agents, agentsFetched, groupsFetched, agentGroupsData]);
 
-  const renderOption = useCallback((option, searchVal, contentClassName) => {
+  const renderOption = useCallback<
+    NonNullable<EuiComboBoxProps<AgentOptionValue | GroupOptionValue>['renderOption']>
+  >((option, searchVal, contentClassName) => {
     const { label, value } = option;
 
     return value?.groupType === AGENT_GROUP_KEY.Agent ? (
-      <EuiHealth color={value?.status === 'online' ? 'success' : 'danger'}>
+      <EuiHealth color={(value as AgentOptionValue)?.status === 'online' ? 'success' : 'danger'}>
         <span className={contentClassName}>
           <EuiHighlight search={searchVal}>{label}</EuiHighlight>
         </span>
       </EuiHealth>
     ) : (
       <span className={contentClassName}>
-        <span>[{value?.size ?? 0}]</span>
+        <span>[{(value as GroupOptionValue)?.size ?? 0}]</span>
         &nbsp;
         <EuiHighlight search={searchVal}>{label}</EuiHighlight>
       </span>

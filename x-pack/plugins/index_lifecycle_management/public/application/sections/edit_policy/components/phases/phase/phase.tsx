@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,7 +38,7 @@ interface Props {
   topLevelSettings?: React.ReactNode;
 }
 
-export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
+export const Phase: FC<PropsWithChildren<Props>> = ({ children, topLevelSettings, phase }) => {
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],

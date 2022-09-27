@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useEffect } from 'react';
+import type { PropsWithChildren } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { TimelineId } from '@kbn/timelines-plugin/common';
@@ -16,7 +17,7 @@ import { timelineActions } from '../../../timelines/store/timeline';
  * This component should be used above all routes, but below the Provider.
  * It dispatches actions when the URL is changed.
  */
-export const RouteCapture = memo(({ children }) => {
+export const RouteCapture = memo<PropsWithChildren>(({ children }) => {
   const location: AppLocation = useLocation();
   const dispatch = useDispatch();
 

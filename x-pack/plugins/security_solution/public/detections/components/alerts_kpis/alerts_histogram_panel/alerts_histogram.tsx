@@ -73,6 +73,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
 
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={true}>
+            {/* @ts-expect-error update types */}
             <Chart size={chartSize}>
               <Settings
                 legendPosition={legendPosition}

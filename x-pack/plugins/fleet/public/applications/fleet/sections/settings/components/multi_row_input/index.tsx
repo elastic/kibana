@@ -7,7 +7,7 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import type { ReactNode, FunctionComponent, ChangeEvent } from 'react';
 import sytled, { useTheme } from 'styled-components';
-
+import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -308,7 +308,7 @@ export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
     onChange([...value, '']);
   }, [value, onChange]);
 
-  const onDragEndHandler = useCallback(
+  const onDragEndHandler = useCallback<DragDropContextProps['onDragEnd']>(
     ({ source, destination }) => {
       if (source && destination) {
         const items = euiDragDropReorder(value, source.index, destination.index);

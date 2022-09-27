@@ -7,6 +7,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { PluginServiceFactory } from './factory';
 
 /**
@@ -59,7 +60,7 @@ export class PluginServiceProvider<
   private _requiredServices?: RequiredServices;
   private context = createContext<Service | null>(null);
   private pluginService: Service | null = null;
-  public readonly Provider: React.FC = ({ children }) => {
+  public readonly Provider: FC<PropsWithChildren> = ({ children }) => {
     return <this.context.Provider value={this.getService()}>{children}</this.context.Provider>;
   };
 

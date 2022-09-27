@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import {
   getPushedInfo,
   useGetCaseUserActions,
@@ -22,9 +22,9 @@ import {
 } from './mock';
 import { Actions } from '../../common/api';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { testQueryClient } from '../common/mock';
-import { waitFor } from '@testing-library/dom';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 
@@ -37,7 +37,7 @@ const initialData = {
   isLoading: true,
 };
 
-const wrapper: React.FC<string> = ({ children }) => (
+const wrapper: FC<PropsWithChildren> = ({ children }) => (
   <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
 );
 
@@ -49,7 +49,7 @@ describe('useGetCaseUserActions', () => {
 
   it('returns proper state on getCaseUserActions', async () => {
     await act(async () => {
-      const { result } = renderHook<string, UseGetCaseUserActions>(
+      const { result } = renderHook<UseGetCaseUserActions, {}>(
         () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
         { wrapper }
       );
@@ -79,13 +79,14 @@ describe('useGetCaseUserActions', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
+    renderHook<UseGetCaseUserActions, {}>(
       () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
       { wrapper }
     );
-    await waitForNextUpdate();
-    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   describe('getProfileUids', () => {
@@ -99,7 +100,7 @@ describe('useGetCaseUserActions', () => {
         );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
+        const { result } = renderHook<UseGetCaseUserActions, {}>(
           () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );
@@ -124,7 +125,7 @@ describe('useGetCaseUserActions', () => {
       );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
+        const { result } = renderHook<UseGetCaseUserActions, {}>(
           () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );
@@ -147,7 +148,7 @@ describe('useGetCaseUserActions', () => {
         );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
+        const { result } = renderHook<UseGetCaseUserActions, {}>(
           () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );
@@ -175,7 +176,7 @@ describe('useGetCaseUserActions', () => {
         );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
+        const { result } = renderHook<UseGetCaseUserActions, {}>(
           () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );
@@ -199,7 +200,7 @@ describe('useGetCaseUserActions', () => {
         );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
+        const { result } = renderHook<UseGetCaseUserActions, {}>(
           () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );

@@ -73,6 +73,7 @@ export class MapDetails extends Component<Props, State> {
 
     return (
       <EuiTable style={{ tableLayout: 'auto' }}>
+        {/* @ts-expect-error update types */}
         <EuiTableBody>
           <EuiTableRow>
             <EuiTableRowCell>

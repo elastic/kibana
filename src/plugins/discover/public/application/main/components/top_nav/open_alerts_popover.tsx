@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -134,12 +134,6 @@ export function AlertsPopover({
   );
 }
 
-function closeAlertsPopover() {
-  ReactDOM.unmountComponentAtNode(container);
-  document.body.removeChild(container);
-  isOpen = false;
-}
-
 export function openAlertsPopover({
   I18nContext,
   anchorElement,
@@ -153,6 +147,14 @@ export function openAlertsPopover({
   services: DiscoverServices;
   savedQueryId?: string;
 }) {
+  const root = createRoot(container);
+
+  function closeAlertsPopover() {
+    root.unmount();
+    document.body.removeChild(container);
+    isOpen = false;
+  }
+
   if (isOpen) {
     closeAlertsPopover();
     return;
@@ -173,5 +175,5 @@ export function openAlertsPopover({
       </KibanaContextProvider>
     </I18nContext>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 }

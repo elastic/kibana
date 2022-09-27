@@ -232,7 +232,8 @@ export const EventFieldsBrowser = React.memo<Props>(
     }, []);
 
     const onUpdateColumns = useCallback(
-      (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
+      (columns: ColumnHeaderOptions[]) =>
+        dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
       [dispatch, timelineId]
     );
 

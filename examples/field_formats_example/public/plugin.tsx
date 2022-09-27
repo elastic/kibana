@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
   AppMountParameters,
@@ -80,11 +80,12 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount({ element }: AppMountParameters) {
         const [, plugins] = await core.getStartServices();
-        ReactDOM.render(
+        const root = createRoot(element);
+
+        root.render(
           <App deps={{ fieldFormats: plugins.fieldFormats, openDateViewNumberFieldEditor }} />,
-          element
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 

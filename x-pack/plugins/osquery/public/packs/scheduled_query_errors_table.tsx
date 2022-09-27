@@ -36,7 +36,7 @@ const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = (
 }) => {
   const navigateToApp = useKibana().services.application.navigateToApp;
 
-  const handleClick = useCallback(
+  const handleClick = useCallback<React.MouseEventHandler>(
     (event) => {
       const openInNewTab = !(!isModifiedEvent(event) && isLeftClickEvent(event));
 
@@ -90,14 +90,17 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     interval,
   });
 
-  const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
+  const renderAgentIdColumn = useCallback(
+    (agentId: string) => <AgentIdToName agentId={agentId} />,
+    []
+  );
 
   const renderLogsErrorsAction = useCallback(
-    (item) => (
+    (item: SearchHit) => (
       <ViewErrorsInLogsAction
         actionId={actionId}
-        agentId={item?.fields['elastic_agent.id'][0]}
-        timestamp={item?.fields['event.ingested'][0]}
+        agentId={item?.fields?.['elastic_agent.id'][0]}
+        timestamp={item?.fields?.['event.ingested'][0]}
       />
     ),
     [actionId]

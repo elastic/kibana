@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -13,7 +14,6 @@ import {
   EuiTableFieldDataColumnType,
   EuiTitle,
   EuiToolTip,
-  PropsOf,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,10 @@ import type { Serializable } from '@kbn/utility-types';
 import { getPrimaryRuleTags } from '../../../common/utils/get_primary_rule_tags';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
-import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
+import {
+  CspEvaluationBadge,
+  CspEvaluationBadgeProps,
+} from '../../../components/csp_evaluation_badge';
 import {
   FINDINGS_TABLE_CELL_ADD_FILTER,
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
@@ -30,7 +33,7 @@ import {
 
 export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
 
-export const PageTitle: React.FC = ({ children }) => (
+export const PageTitle: FC<PropsWithChildren> = ({ children }) => (
   <EuiTitle size="l">
     <div>
       {children}
@@ -91,9 +94,7 @@ const baseColumns = [
     }),
     width: '120px',
     sortable: true,
-    render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
-      <CspEvaluationBadge type={type} />
-    ),
+    render: (type: CspEvaluationBadgeProps['type']) => <CspEvaluationBadge type={type} />,
   },
   {
     field: 'resource.sub_type',
@@ -231,11 +232,13 @@ const getCellValue = (value: unknown) => {
   if (typeof value === 'string' || typeof value === 'number') return value;
 };
 
-const FilterableCell: React.FC<{
-  onAddFilter(): void;
-  onAddNegateFilter(): void;
-  field: string;
-}> = ({ children, onAddFilter, onAddNegateFilter, field }) => (
+const FilterableCell: FC<
+  PropsWithChildren<{
+    onAddFilter(): void;
+    onAddNegateFilter(): void;
+    field: string;
+  }>
+> = ({ children, onAddFilter, onAddNegateFilter, field }) => (
   <div
     css={css`
       position: relative;

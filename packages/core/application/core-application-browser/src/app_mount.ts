@@ -63,21 +63,22 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
+   * import { createRoot } from 'react-dom/client';
    * import { Router, Route } from 'react-router-dom';
    *
    * import { CoreStart, AppMountParameters } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
    * export renderApp = ({ element, history }: AppMountParameters) => {
-   *   ReactDOM.render(
+   *   const root = createRoot(element);
+   *
+   *   root.render(
    *     <Router history={history}>
    *       <Route path="/" exact component={HomePage} />
-   *     </Router>,
-   *     element
+   *     </Router>
    *   );
    *
-   *   return () => ReactDOM.unmountComponentAtNode(element);
+   *   return () => root.unmount();
    * }
    * ```
    */
@@ -113,22 +114,23 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
+   * import { createRoot } from 'react-dom/client';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
    * import { CoreStart, AppMountParameters } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
    * export renderApp = ({ appBasePath, element }: AppMountParameters) => {
-   *   ReactDOM.render(
+   *   const root = createRoot(params.element);
+   *
+   *   root.render(
    *     // pass `appBasePath` to `basename`
    *     <BrowserRouter basename={appBasePath}>
    *       <Route path="/" exact component={HomePage} />
-   *     </BrowserRouter>,
-   *     element
+   *     </BrowserRouter>
    *   );
    *
-   *   return () => ReactDOM.unmountComponentAtNode(element);
+   *   return () => root.unmount();
    * }
    * ```
    */
@@ -147,7 +149,6 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
    * import { CoreStart, AppMountParameters } from 'src/core/public';
@@ -183,7 +184,6 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
    * import { CoreStart, AppMountParameters } from 'src/core/public';
@@ -210,15 +210,16 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
+   * import { createRoot } from 'react-dom/client';
    *
    * import { AppMountParameters } from 'src/core/public';
    * import { wrapWithTheme } from 'src/plugins/kibana_react';
    * import { MyApp } from './app';
    *
    * export renderApp = ({ element, theme$ }: AppMountParameters) => {
-   *    ReactDOM.render(wrapWithTheme(<MyApp/>, theme$), element);
-   *    return () => ReactDOM.unmountComponentAtNode(element);
+   *    const root = createRoot(element);
+   *    root.render(wrapWithTheme(<MyApp/>, theme$));
+   *    return () => root.unmount();
    * }
    * ```
    */

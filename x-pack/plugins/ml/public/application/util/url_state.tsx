@@ -6,15 +6,8 @@
  */
 
 import { parse, stringify } from 'query-string';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  FC,
-  useRef,
-  useEffect,
-} from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useEffect } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -88,7 +81,7 @@ export const urlStateStore = createContext<UrlState>({
 
 const { Provider } = urlStateStore;
 
-export const UrlStateProvider: FC = ({ children }) => {
+export const UrlStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
 

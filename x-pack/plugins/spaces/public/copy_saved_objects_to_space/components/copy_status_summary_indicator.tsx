@@ -50,6 +50,7 @@ const renderIcon = (props: Props) => {
         type={'checkInCircleFilled'}
         color={'success'}
         iconProps={{
+          // @ts-expect-error update types
           'data-test-subj': getDataTestSubj('success'),
         }}
         content={
@@ -69,6 +70,7 @@ const renderIcon = (props: Props) => {
         type={'alert'}
         color={'danger'}
         iconProps={{
+          // @ts-expect-error update types
           'data-test-subj': getDataTestSubj('failed'),
         }}
         content={
@@ -88,6 +90,7 @@ const renderIcon = (props: Props) => {
         type={'link'}
         color={'warning'}
         iconProps={{
+          // @ts-expect-error update types
           'data-test-subj': getDataTestSubj('missingReferences'),
         }}
         content={
@@ -114,6 +117,7 @@ const renderIcon = (props: Props) => {
           type={'alert'}
           color={'warning'}
           iconProps={{
+            // @ts-expect-error update types
             'data-test-subj': getDataTestSubj('conflicts'),
           }}
           content={

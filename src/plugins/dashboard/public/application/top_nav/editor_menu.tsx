@@ -304,6 +304,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >
+      {/* @ts-expect-error update types */}
       {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenu
           initialPanelId={0}

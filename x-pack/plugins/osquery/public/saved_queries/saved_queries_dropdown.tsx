@@ -31,7 +31,17 @@ export interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
     value:
-      | (Pick<SavedQuerySO['attributes'], 'id' | 'description' | 'query' | 'ecs_mapping'> & {
+      | (Pick<
+          SavedQuerySO['attributes'],
+          | 'id'
+          | 'description'
+          | 'query'
+          | 'ecs_mapping'
+          | 'platform'
+          | 'version'
+          | 'interval'
+          | 'snapshot'
+        > & {
           savedQueryId: string;
         })
       | null
@@ -73,6 +83,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   );
 
   const handleSavedQueryChange = useCallback(
+    // @ts-expect-error update types
     (newSelectedOptions) => {
       if (!newSelectedOptions.length) {
         onChange(null);
@@ -96,7 +107,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   );
 
   const renderOption = useCallback(
-    ({ value }) => (
+    ({ value }: SelectedOption) => (
       <>
         <strong>{value.id}</strong>
         <TextTruncate>
@@ -129,12 +140,12 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   return (
     <EuiFormRow
       isInvalid={!!queryFieldError}
-      error={queryFieldError}
+      error={queryFieldError as string}
       label={QUERIES_DROPDOWN_SEARCH_FIELD_LABEL}
       labelAppend={<OsquerySchemaLink />}
       fullWidth
     >
-      <EuiComboBox
+      <EuiComboBox<SelectedOption['value']>
         data-test-subj={'savedQuerySelect'}
         isDisabled={disabled}
         fullWidth
@@ -144,6 +155,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
         options={queryOptions}
         selectedOptions={selectedOptions}
         onChange={handleSavedQueryChange}
+        // @ts-expect-error update types
         renderOption={renderOption}
         rowHeight={110}
       />

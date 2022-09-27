@@ -12,18 +12,18 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import React from 'react';
-import { withRouter } from 'react-router-dom';
+import type { FC, PropsWithChildren } from 'react';
 
 interface LayoutProps {
   title: string | React.ReactNode;
   actionSection?: React.ReactNode;
-  modalClosePath?: string;
 }
 
-export const NoDataLayout: React.FunctionComponent<LayoutProps> = withRouter<
-  any,
-  React.FunctionComponent<LayoutProps>
->(({ actionSection, title, modalClosePath, children }: React.PropsWithChildren<LayoutProps>) => {
+export const NoDataLayout: FC<PropsWithChildren<LayoutProps>> = ({
+  actionSection,
+  title,
+  children,
+}) => {
   return (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
@@ -38,4 +38,4 @@ export const NoDataLayout: React.FunctionComponent<LayoutProps> = withRouter<
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}) as any;
+};

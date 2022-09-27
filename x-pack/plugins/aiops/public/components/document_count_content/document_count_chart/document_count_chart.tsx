@@ -319,6 +319,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
         </div>
       )}
       <div css={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
+        {/* @ts-expect-error update types */}
         <Chart
           size={{
             width: '100%',

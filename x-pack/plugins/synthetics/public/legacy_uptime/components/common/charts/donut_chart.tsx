@@ -50,6 +50,7 @@ export const DonutChart = ({ height, down, up }: DonutChartProps) => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
+        {/* @ts-expect-error update types */}
         <Chart
           size={height}
           aria-label={i18n.translate('xpack.synthetics.snapshot.donutChart.ariaLabel', {

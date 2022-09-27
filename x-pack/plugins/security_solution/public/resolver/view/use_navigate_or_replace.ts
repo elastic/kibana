@@ -18,7 +18,7 @@ export function useNavigateOrReplace(
   additionalOnClick?: EventHandlerCallback
 ): { href: string; onClick: EventHandlerCallback } {
   const history = useHistory();
-  const onClick = useCallback(
+  const onClick = useCallback<EventHandlerCallback>(
     (event) => {
       try {
         if (additionalOnClick) {

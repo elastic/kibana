@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState, useEffect } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
@@ -29,7 +30,7 @@ import { validatePackagePolicy, validationHasErrors } from '../../../services';
 import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 
-const ExpandableAdvancedSettings: React.FC = ({ children }) => {
+const ExpandableAdvancedSettings: FC<PropsWithChildren> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
   return (

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { EuiPageBody } from '@elastic/eui';
 import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
@@ -72,7 +72,9 @@ export const LinksExample: React.FC<{
 };
 
 export const renderApp = (props: { appBasePath: string }, { element }: AppMountParameters) => {
-  ReactDOM.render(<LinksExample {...props} />, element);
+  const root = createRoot(element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  root.render(<LinksExample {...props} />);
+
+  return () => root.unmount();
 };

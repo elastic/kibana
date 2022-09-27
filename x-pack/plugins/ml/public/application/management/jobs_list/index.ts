@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -28,7 +28,8 @@ const renderApp = (
   spacesApi?: SpacesPluginStart,
   usageCollection?: UsageCollectionSetup
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     React.createElement(JobsListPage, {
       coreStart,
       history,
@@ -37,11 +38,10 @@ const renderApp = (
       spacesApi,
       usageCollection,
       fieldFormats,
-    }),
-    element
+    })
   );
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

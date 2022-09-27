@@ -35,6 +35,7 @@ export const AnalyticsChart: React.FC<Props> = ({ height = 300, lines }) => {
   const { charts } = useValues(KibanaLogic);
 
   return (
+    // @ts-expect-error update types
     <Chart size={{ height }}>
       <Settings
         theme={charts.theme.useChartsTheme()}

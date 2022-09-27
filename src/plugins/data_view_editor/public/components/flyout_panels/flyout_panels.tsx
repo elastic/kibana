@@ -14,6 +14,7 @@ import React, {
   useMemo,
   useLayoutEffect,
 } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
 
 import './flyout_panels.scss';
@@ -48,7 +49,7 @@ export interface Props {
   gutterSize?: EuiFlexGroupProps['gutterSize'];
 }
 
-export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props }) => {
+export const Panels: FC<PropsWithChildren<Props>> = ({ maxWidth, flyoutClassName, ...props }) => {
   const flyoutDOMelement = useMemo(() => {
     const el = document.getElementsByClassName(flyoutClassName);
 

@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { AppMountParameters, CoreStart, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -57,14 +57,15 @@ export function renderOverwrittenSessionPage(
   { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
   props: Props
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <i18nStart.Context>
       <KibanaThemeProvider theme$={theme$}>
         <OverwrittenSessionPage {...props} />
       </KibanaThemeProvider>
-    </i18nStart.Context>,
-    element
+    </i18nStart.Context>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }

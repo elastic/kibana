@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { isEqual } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 
 import { I18nStart } from '@kbn/core/public';
@@ -42,9 +43,11 @@ export const createInputControlVisController = (
     updateSubsciption: any;
     timeFilterSubscription: Subscription;
     visParams?: InputControlVisParams;
+    root?: Root;
 
     constructor() {
       this.controls = [];
+      this.root = createRoot(el);
 
       this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
 
@@ -78,7 +81,7 @@ export const createInputControlVisController = (
     destroy() {
       this.updateSubsciption.unsubscribe();
       this.timeFilterSubscription.unsubscribe();
-      unmountComponentAtNode(el);
+      this.root?.unmount();
       this.controls.forEach((control) => control.destroy());
     }
 
@@ -87,7 +90,7 @@ export const createInputControlVisController = (
         throw new Error('no i18n context found');
       }
 
-      render(
+      this.root?.render(
         <I18nContext>
           <VisualizationContainer handlers={handlers}>
             <InputControlVis
@@ -102,8 +105,7 @@ export const createInputControlVisController = (
               refreshControl={this.refreshControl}
             />
           </VisualizationContainer>
-        </I18nContext>,
-        el
+        </I18nContext>
       );
     };
 

@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as React from 'react';
+import React from 'react';
 import { formatDuration } from '../../monitor/ping_list/ping_list';
 import { JourneyStep, Ping } from '../../../../../common/runtime_types';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';

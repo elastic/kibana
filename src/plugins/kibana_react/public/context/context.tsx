@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import { useMemo, useContext, createElement, createContext } from 'react';
+import type { Context, Consumer, ComponentType, FC, PropsWithChildren } from 'react';
 import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
 import { createReactOverlays } from '../overlays';
 import { createNotifications } from '../notifications';
-
-const { useMemo, useContext, createElement, createContext } = React;
 
 const defaultContextValue = {
   services: {},
@@ -23,15 +22,14 @@ export const context = createContext<KibanaReactContextValue<KibanaServices>>(de
 
 export const useKibana = <Extra extends object = {}>(): KibanaReactContextValue<
   KibanaServices & Extra
-> =>
-  useContext(context as unknown as React.Context<KibanaReactContextValue<KibanaServices & Extra>>);
+> => useContext(context as unknown as Context<KibanaReactContextValue<KibanaServices & Extra>>);
 
 export const withKibana = <Props extends { kibana: KibanaReactContextValue<{}> }>(
-  type: React.ComponentType<Props>
-): React.FC<Omit<Props, 'kibana'>> => {
-  const EnhancedType: React.FC<Omit<Props, 'kibana'>> = (props: Omit<Props, 'kibana'>) => {
+  type: ComponentType<Props>
+): FC<Omit<Props, 'kibana'>> => {
+  const EnhancedType: FC<Omit<Props, 'kibana'>> = (props: Omit<Props, 'kibana'>) => {
     const kibana = useKibana();
-    return React.createElement(type, { ...props, kibana } as Props);
+    return createElement(type, { ...props, kibana } as Props);
   };
   return EnhancedType;
 };
@@ -45,7 +43,7 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
     notifications: createNotifications(services),
   };
 
-  const Provider: React.FC<{ services?: Services }> = ({
+  const Provider: FC<PropsWithChildren<{ services?: Services }>> = ({
     services: newServices = {},
     children,
   }) => {
@@ -63,7 +61,7 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
   return {
     value,
     Provider,
-    Consumer: context.Consumer as unknown as React.Consumer<KibanaReactContextValue<Services>>,
+    Consumer: context.Consumer as unknown as Consumer<KibanaReactContextValue<Services>>,
   };
 };
 

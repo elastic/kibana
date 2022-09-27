@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment/moment';
-import React, { FC } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -126,7 +127,7 @@ export const mockedServices = {
   },
 };
 
-export const TestProvidersComponent: FC = ({ children }) => (
+export const TestProvidersComponent: FC<PropsWithChildren<any>> = ({ children }) => (
   <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
     <FieldTypesContext.Provider value={generateFieldTypeMap()}>
       <EuiThemeProvider>

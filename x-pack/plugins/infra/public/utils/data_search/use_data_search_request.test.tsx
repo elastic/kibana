@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import React from 'react';
+import { act, renderHook } from '@testing-library/react';
 import { firstValueFrom, Observable, of, Subject } from 'rxjs';
 import {
   DataPublicPluginStart,
@@ -38,7 +37,7 @@ describe('useDataSearch hook', () => {
           parseResponses: noopParseResponse,
         }),
       {
-        wrapper: ({ children }) => <KibanaContextProvider>{children}</KibanaContextProvider>,
+        wrapper: KibanaContextProvider,
       }
     );
 
@@ -83,7 +82,7 @@ describe('useDataSearch hook', () => {
           parseResponses: noopParseResponse,
         }),
       {
-        wrapper: ({ children }) => <KibanaContextProvider>{children}</KibanaContextProvider>,
+        wrapper: KibanaContextProvider,
       }
     );
 
@@ -152,7 +151,7 @@ describe('useDataSearch hook', () => {
           parseResponses: noopParseResponse,
         }),
       {
-        wrapper: ({ children }) => <KibanaContextProvider>{children}</KibanaContextProvider>,
+        wrapper: KibanaContextProvider,
       }
     );
 

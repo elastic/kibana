@@ -35,6 +35,7 @@ const config = {
 
 export const render = (component: React.ReactNode) => {
   return testLibRender(
+    // @ts-expect-error update types
     <IntlProvider locale="en-US" messages={translations.messages}>
       <KibanaContextProvider services={{ ...core, data }}>
         <PluginContext.Provider

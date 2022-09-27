@@ -270,6 +270,7 @@ export function DiscoverHistogram({
   return (
     <React.Fragment>
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
+        {/* @ts-expect-error update types */}
         <Chart size="100%">
           <Settings
             xDomain={xDomain}

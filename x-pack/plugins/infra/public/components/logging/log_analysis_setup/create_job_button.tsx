@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { EuiButton, PropsOf } from '@elastic/eui';
+import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { MissingSetupPrivilegesToolTip } from './missing_setup_privileges_tooltip';
 
-export const CreateJobButton: React.FunctionComponent<
-  {
-    hasSetupCapabilities?: boolean;
-  } & PropsOf<typeof EuiButton>
-> = ({ hasSetupCapabilities = true, children, ...buttonProps }) => {
+export type CreateJobButtonProps = PropsWithChildren<{
+  hasSetupCapabilities?: boolean;
+  onClick?: () => void;
+}> &
+  EuiButtonProps;
+
+export const CreateJobButton: FC<CreateJobButtonProps> = ({
+  hasSetupCapabilities = true,
+  children,
+  ...buttonProps
+}) => {
   const button = (
     <EuiButton isDisabled={!hasSetupCapabilities} {...buttonProps}>
       {children ?? (
@@ -35,10 +42,7 @@ export const CreateJobButton: React.FunctionComponent<
   );
 };
 
-export const RecreateJobButton: React.FunctionComponent<PropsOf<typeof CreateJobButton>> = ({
-  children,
-  ...otherProps
-}) => (
+export const RecreateJobButton: FC<CreateJobButtonProps> = ({ children, ...otherProps }) => (
   <CreateJobButton {...otherProps}>
     {children ?? (
       <FormattedMessage

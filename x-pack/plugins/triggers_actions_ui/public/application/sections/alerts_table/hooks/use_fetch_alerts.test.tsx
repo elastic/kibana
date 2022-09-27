@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { of } from 'rxjs';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useFetchAlerts, FetchAlertsArgs } from './use_fetch_alerts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';

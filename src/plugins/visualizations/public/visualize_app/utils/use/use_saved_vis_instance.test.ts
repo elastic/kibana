@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { EventEmitter } from 'events';
 
 import { setTypes } from '../../../services';
@@ -126,7 +126,7 @@ describe('useSavedVisInstance', () => {
 
   describe('edit saved visualization route', () => {
     test('should load instance and initiate an editor if chrome is set up', async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useSavedVisInstance(mockServices, eventEmitter, true, undefined, savedVisId)
       );
 
@@ -134,31 +134,33 @@ describe('useSavedVisInstance', () => {
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, savedVisId);
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
-      await waitForNextUpdate();
-      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
-      expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
-      expect(getEditBreadcrumbs).toHaveBeenCalledWith(
-        { originatingAppName: undefined, redirectToOrigin: undefined },
-        'Test Vis'
-      );
-      expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
-      expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
-      expect(result.current.visEditorController).toBeDefined();
-      expect(result.current.savedVisInstance).toBeDefined();
+      await waitFor(() => {
+        expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
+        expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
+        expect(getEditBreadcrumbs).toHaveBeenCalledWith(
+          { originatingAppName: undefined, redirectToOrigin: undefined },
+          'Test Vis'
+        );
+        expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
+        expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
+        expect(result.current.visEditorController).toBeDefined();
+        expect(result.current.savedVisInstance).toBeDefined();
+      });
     });
 
     test('should destroy the editor and the savedVis on unmount if chrome exists', async () => {
-      const { result, unmount, waitForNextUpdate } = renderHook(() =>
+      const { result, unmount } = renderHook(() =>
         useSavedVisInstance(mockServices, eventEmitter, true, undefined, savedVisId)
       );
 
       result.current.visEditorRef.current = document.createElement('div');
 
-      await waitForNextUpdate();
-      unmount();
+      await waitFor(() => {
+        unmount();
 
-      expect(mockDefaultEditorControllerDestroy.mock.calls.length).toBe(1);
-      expect(mockEmbeddableHandlerDestroy).not.toHaveBeenCalled();
+        expect(mockDefaultEditorControllerDestroy.mock.calls.length).toBe(1);
+        expect(mockEmbeddableHandlerDestroy).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -174,7 +176,7 @@ describe('useSavedVisInstance', () => {
     });
 
     test('should create new visualization based on search params', async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useSavedVisInstance(mockServices, eventEmitter, true, undefined, undefined)
       );
 
@@ -185,12 +187,12 @@ describe('useSavedVisInstance', () => {
         type: 'area',
       });
 
-      await waitForNextUpdate();
-
-      expect(getCreateBreadcrumbs).toHaveBeenCalled();
-      expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
-      expect(result.current.visEditorController).toBeDefined();
-      expect(result.current.savedVisInstance).toBeDefined();
+      await waitFor(() => {
+        expect(getCreateBreadcrumbs).toHaveBeenCalled();
+        expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
+        expect(result.current.visEditorController).toBeDefined();
+        expect(result.current.savedVisInstance).toBeDefined();
+      });
     });
 
     test('should throw error if vis type is invalid', async () => {
@@ -222,7 +224,7 @@ describe('useSavedVisInstance', () => {
 
   describe('embeded mode', () => {
     test('should create new visualization based on search params', async () => {
-      const { result, unmount, waitForNextUpdate } = renderHook(() =>
+      const { result, unmount } = renderHook(() =>
         useSavedVisInstance(mockServices, eventEmitter, false, undefined, savedVisId)
       );
 
@@ -232,15 +234,15 @@ describe('useSavedVisInstance', () => {
 
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, savedVisId);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(mockEmbeddableHandlerRender).toHaveBeenCalled();
+        expect(result.current.visEditorController).toBeUndefined();
+        expect(result.current.savedVisInstance).toBeDefined();
 
-      expect(mockEmbeddableHandlerRender).toHaveBeenCalled();
-      expect(result.current.visEditorController).toBeUndefined();
-      expect(result.current.savedVisInstance).toBeDefined();
-
-      unmount();
-      expect(mockDefaultEditorControllerDestroy).not.toHaveBeenCalled();
-      expect(mockEmbeddableHandlerDestroy.mock.calls.length).toBe(1);
+        unmount();
+        expect(mockDefaultEditorControllerDestroy).not.toHaveBeenCalled();
+        expect(mockEmbeddableHandlerDestroy.mock.calls.length).toBe(1);
+      });
     });
   });
 });

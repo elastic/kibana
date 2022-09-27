@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useToasts, useKibana } from '../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import * as api from './api';
@@ -39,7 +39,7 @@ describe('useBulkGetUserProfiles', () => {
   it('calls bulkGetUserProfiles with correct arguments', async () => {
     const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
 
-    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
+    const { result } = renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -52,7 +52,7 @@ describe('useBulkGetUserProfiles', () => {
   });
 
   it('returns a mapping with user profiles', async () => {
-    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
+    const { result } = renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -104,7 +104,7 @@ describe('useBulkGetUserProfiles', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
+    const { result } = renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 

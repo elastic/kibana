@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -57,7 +58,7 @@ describe('Connector', () => {
   let appMockRender: AppMockRenderer;
   let globalForm: FormHook;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { connectorId: connectorsMock[0].id, fields: null },
       schema: {

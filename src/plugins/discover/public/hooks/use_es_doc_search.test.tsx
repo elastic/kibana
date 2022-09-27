@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Subject } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -15,6 +15,7 @@ import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import type { PropsWithChildren } from 'react';
 import { buildDataTableRecord } from '../utils/build_data_record';
 
 const index = 'test-index';
@@ -226,7 +227,7 @@ describe('Test of <Doc /> helper / hook', () => {
       dataView,
     } as unknown as DocProps;
 
-    const hook = renderHook((p: DocProps) => useEsDocSearch(p), {
+    const hook = renderHook((p: PropsWithChildren<DocProps>) => useEsDocSearch(p), {
       initialProps: props,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
@@ -249,7 +250,7 @@ describe('Test of <Doc /> helper / hook', () => {
       dataView,
     } as unknown as DocProps;
 
-    const hook = renderHook((p: DocProps) => useEsDocSearch(p), {
+    const hook = renderHook((p: PropsWithChildren<DocProps>) => useEsDocSearch(p), {
       initialProps: props,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
@@ -276,12 +277,13 @@ describe('Test of <Doc /> helper / hook', () => {
         },
       });
       mockSearchResult.complete();
-      await hook.waitForNextUpdate();
     });
 
-    expect(hook.result.current.slice(0, 2)).toEqual([
-      ElasticRequestState.Found,
-      buildDataTableRecord(record),
-    ]);
+    await waitFor(() => {
+      expect(hook.result.current.slice(0, 2)).toEqual([
+        ElasticRequestState.Found,
+        buildDataTableRecord(record),
+      ]);
+    });
   });
 });

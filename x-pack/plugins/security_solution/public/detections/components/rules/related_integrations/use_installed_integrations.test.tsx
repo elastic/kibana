@@ -9,8 +9,9 @@ jest.mock('../../../containers/detection_engine/rules/api');
 jest.mock('../../../../common/lib/kibana');
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { renderHook, cleanup, waitFor } from '@testing-library/react';
 
 import { useInstalledIntegrations } from './use_installed_integrations';
 
@@ -35,7 +36,7 @@ describe('useInstalledIntegrations', () => {
         },
       },
     });
-    const wrapper: React.FC = ({ children }) => (
+    const wrapper: FC<PropsWithChildren> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     return wrapper;
@@ -55,18 +56,18 @@ describe('useInstalledIntegrations', () => {
   it('calls the API via fetchInstalledIntegrations', async () => {
     const fetchInstalledIntegrations = jest.spyOn(api, 'fetchInstalledIntegrations');
 
-    const { waitForNextUpdate } = render();
+    render();
 
-    await waitForNextUpdate();
-
-    expect(fetchInstalledIntegrations).toHaveBeenCalledTimes(1);
-    expect(fetchInstalledIntegrations).toHaveBeenLastCalledWith(
-      expect.objectContaining({ packages: [] })
-    );
+    await waitFor(() => {
+      expect(fetchInstalledIntegrations).toHaveBeenCalledTimes(1);
+      expect(fetchInstalledIntegrations).toHaveBeenLastCalledWith(
+        expect.objectContaining({ packages: [] })
+      );
+    });
   });
 
   it('fetches data from the API', async () => {
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -74,28 +75,28 @@ describe('useInstalledIntegrations', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents returns
-    await waitForNextUpdate();
-
-    // It switches to a success state
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isSuccess).toEqual(true);
-    expect(result.current.isError).toEqual(false);
-    expect(result.current.data).toEqual([
-      {
-        integration_name: 'audit',
-        integration_title: 'Audit Logs',
-        is_enabled: true,
-        package_name: 'atlassian_bitbucket',
-        package_title: 'Atlassian Bitbucket',
-        package_version: '1.0.1',
-      },
-      {
-        is_enabled: true,
-        package_name: 'system',
-        package_title: 'System',
-        package_version: '1.6.4',
-      },
-    ]);
+    await waitFor(() => {
+      // It switches to a success state
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.isSuccess).toEqual(true);
+      expect(result.current.isError).toEqual(false);
+      expect(result.current.data).toEqual([
+        {
+          integration_name: 'audit',
+          integration_title: 'Audit Logs',
+          is_enabled: true,
+          package_name: 'atlassian_bitbucket',
+          package_title: 'Atlassian Bitbucket',
+          package_version: '1.0.1',
+        },
+        {
+          is_enabled: true,
+          package_name: 'system',
+          package_title: 'System',
+          package_version: '1.6.4',
+        },
+      ]);
+    });
   });
 
   // Skipping until we re-enable errors
@@ -103,7 +104,7 @@ describe('useInstalledIntegrations', () => {
     const exception = new Error('Boom!');
     jest.spyOn(api, 'fetchInstalledIntegrations').mockRejectedValue(exception);
 
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -111,18 +112,18 @@ describe('useInstalledIntegrations', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitForNextUpdate();
+    await waitFor(() => {
+      // It switches to an error state
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.isSuccess).toEqual(false);
+      expect(result.current.isError).toEqual(true);
+      expect(result.current.error).toEqual(exception);
 
-    // It switches to an error state
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isSuccess).toEqual(false);
-    expect(result.current.isError).toEqual(true);
-    expect(result.current.error).toEqual(exception);
-
-    // And shows a toast with the caught exception
-    expect(useToasts().addError).toHaveBeenCalledTimes(1);
-    expect(useToasts().addError).toHaveBeenCalledWith(exception, {
-      title: 'Failed to fetch installed integrations',
+      // And shows a toast with the caught exception
+      expect(useToasts().addError).toHaveBeenCalledTimes(1);
+      expect(useToasts().addError).toHaveBeenCalledWith(exception, {
+        title: 'Failed to fetch installed integrations',
+      });
     });
   });
 });

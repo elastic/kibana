@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -46,17 +46,18 @@ export const getRevealImageRenderer =
       config: RevealImageRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const root = createRoot(domNode);
+
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaThemeProvider theme$={theme$}>
           <I18nProvider>
             <RevealImageComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
           </I18nProvider>
-        </KibanaThemeProvider>,
-        domNode
+        </KibanaThemeProvider>
       );
     },
   });

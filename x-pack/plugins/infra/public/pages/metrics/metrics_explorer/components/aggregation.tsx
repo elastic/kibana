@@ -53,7 +53,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     }),
   };
 
-  const handleChange = useCallback(
+  const handleChange = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
     (e) => {
       const aggregation =
         (metricsExplorerAggregationRT.is(e.target.value) && e.target.value) || 'avg';

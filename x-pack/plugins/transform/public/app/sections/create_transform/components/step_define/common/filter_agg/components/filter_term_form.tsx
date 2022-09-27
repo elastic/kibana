@@ -93,7 +93,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   );
 
   const onSearchChange = useCallback(
-    async (searchValue) => {
+    async (searchValue: string) => {
       if (selectedField === undefined) return;
 
       setIsLoading(true);
@@ -105,7 +105,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   );
 
   const updateConfig = useCallback(
-    (update) => {
+    (update: { value: string | undefined }) => {
       onChange({
         config: {
           ...config,

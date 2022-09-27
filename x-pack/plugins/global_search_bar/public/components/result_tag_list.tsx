@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
 import type { Tag } from '@kbn/saved-objects-tagging-plugin/public';
 
 const MAX_TAGS_TO_SHOW = 3;
 
-const TagListWrapper: FC = ({ children }) => (
+const TagListWrapper: FC<PropsWithChildren> = ({ children }) => (
   <ul
     className="kbnSearchOption__tagsList"
     aria-label={i18n.translate('xpack.globalSearchBar.searchBar.optionTagListAriaLabel', {

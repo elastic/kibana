@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { RiskScoreEntity } from '../../../common/search_strategy';
 import { useEnableRiskScoreViaDevTools } from './use_enable_risk_score_via_dev_tools';
 

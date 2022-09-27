@@ -6,7 +6,7 @@
  */
 
 import type { AppMountParameters } from '@kbn/core/public';
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
@@ -17,7 +17,11 @@ export interface Props {
   theme$: AppMountParameters['theme$'];
 }
 
-export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, theme$ }) => {
+export const HeaderPortal: FC<PropsWithChildren<Props>> = ({
+  children,
+  setHeaderActionMenu,
+  theme$,
+}) => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, PropsOf } from '@elastic/eui';
+import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
-export const ManageJobsButton: React.FunctionComponent<PropsOf<typeof EuiButton>> = (props) => (
+export const ManageJobsButton: FC<PropsWithChildren<EuiButtonProps & { onClick: any }>> = (
+  props
+) => (
   <EuiButton {...props}>
     <FormattedMessage
       id="xpack.infra.logs.analysis.manageMlJobsButtonLabel"

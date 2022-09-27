@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
 import { useAutoplayHelper } from './use_autoplay_helper';
 import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
 
@@ -19,7 +20,7 @@ const getMockedContext = (context: any) =>
     ...context,
   } as WorkpadRoutingContextType);
 
-const getContextWrapper: (context: WorkpadRoutingContextType) => FC =
+const getContextWrapper: (context: WorkpadRoutingContextType) => FC<PropsWithChildren> =
   (context) =>
   ({ children }) =>
     <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;

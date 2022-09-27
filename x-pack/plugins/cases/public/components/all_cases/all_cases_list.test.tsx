@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { PropsWithChildren } from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { act, render, waitFor, screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, render, renderHook, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
@@ -287,7 +287,7 @@ describe('AllCasesListGeneric', () => {
       expect(column.find('span').text()).toEqual(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+    const { result } = renderHook<CasesColumns[], PropsWithChildren<GetCasesColumn>>(
       () => useCasesColumns(defaultColumnArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -739,7 +739,7 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+    const { result } = renderHook<CasesColumns[], PropsWithChildren<GetCasesColumn>>(
       () =>
         useCasesColumns({
           ...defaultColumnArgs,

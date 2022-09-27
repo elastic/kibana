@@ -44,7 +44,7 @@ export const UserNotification = React.memo(
     const userNotificationMessage =
       policyDetailsConfig && policyDetailsConfig.windows.popup[protection].message;
 
-    const handleUserNotificationCheckbox = useCallback(
+    const handleUserNotificationCheckbox = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
       (event) => {
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
@@ -68,7 +68,7 @@ export const UserNotification = React.memo(
       [policyDetailsConfig, dispatch, protection, osList]
     );
 
-    const handleCustomUserNotification = useCallback(
+    const handleCustomUserNotification = useCallback<React.ChangeEventHandler<HTMLTextAreaElement>>(
       (event) => {
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);

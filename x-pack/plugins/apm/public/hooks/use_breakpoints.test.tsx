@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { useBreakpoints } from './use_breakpoints';
 
-const wrapper: FC = ({ children }) => (
+const wrapper: FC<PropsWithChildren> = ({ children }) => (
   <EuiProvider
     modify={{
       // set in apm/public/application/index.tsx

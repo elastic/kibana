@@ -57,6 +57,7 @@ describe('Rule Alert Summary', () => {
     useLoadRuleTypes.mockReturnValue({ ruleTypes });
 
     wrapper = mount(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <RuleAlertsSummary
           rule={mockedRule}

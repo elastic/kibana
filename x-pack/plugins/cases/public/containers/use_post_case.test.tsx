@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { usePostCase, UsePostCase } from './use_post_case';
 import * as api from './api';
 import { ConnectorTypes } from '../../common/api';
@@ -38,9 +38,8 @@ describe('usePostCase', () => {
   });
 
   it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
-      await waitForNextUpdate();
+    const { result } = renderHook<UsePostCase, {}>(() => usePostCase());
+    await waitFor(() => {
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
@@ -52,32 +51,26 @@ describe('usePostCase', () => {
   it('calls postCase with correct arguments', async () => {
     const spyOnPostCase = jest.spyOn(api, 'postCase');
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
-      await waitForNextUpdate();
+    const { result } = renderHook<UsePostCase, {}>(() => usePostCase());
 
-      result.current.postCase(samplePost);
-      await waitForNextUpdate();
+    result.current.postCase(samplePost);
+    await waitFor(() => {
       expect(spyOnPostCase).toBeCalledWith(samplePost, abortCtrl.signal);
     });
   });
 
   it('calls postCase with correct result', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
-      await waitForNextUpdate();
-
-      const postData = await result.current.postCase(samplePost);
+    const { result } = renderHook<UsePostCase, {}>(() => usePostCase());
+    const postData = await result.current.postCase(samplePost);
+    await waitFor(() => {
       expect(postData).toEqual(basicCasePost);
     });
   });
 
   it('post case', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
-      await waitForNextUpdate();
-      result.current.postCase(samplePost);
-      await waitForNextUpdate();
+    const { result } = renderHook<UsePostCase, {}>(() => usePostCase());
+    result.current.postCase(samplePost);
+    await waitFor(() => {
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
@@ -87,9 +80,8 @@ describe('usePostCase', () => {
   });
 
   it('set isLoading to true when posting case', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
-      await waitForNextUpdate();
+    const { result } = renderHook<UsePostCase, {}>(() => usePostCase());
+    await waitFor(() => {
       result.current.postCase(samplePost);
 
       expect(result.current.isLoading).toBe(true);
@@ -102,9 +94,8 @@ describe('usePostCase', () => {
       throw new Error('Something went wrong');
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
-      await waitForNextUpdate();
+    const { result } = renderHook<UsePostCase, {}>(() => usePostCase());
+    await waitFor(() => {
       result.current.postCase(samplePost);
 
       expect(result.current).toEqual({

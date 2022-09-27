@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { Form as LibForm, FormHook } from '../../../../../shared_imports';
 
 import { ConfigurationProvider } from '../configuration_context';
@@ -18,7 +18,7 @@ interface Props {
   form: FormHook;
 }
 
-export const Form: FunctionComponent<Props> = ({ form, children }) => {
+export const Form: FC<PropsWithChildren<Props>> = ({ form, children }) => {
   return (
     <LibForm form={form}>
       <ConfigurationProvider>

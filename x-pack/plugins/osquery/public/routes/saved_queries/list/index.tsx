@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -37,7 +37,14 @@ export type SavedQuerySO = SavedObject<{
   query: string;
   ecs_mapping: ECSMapping;
   updated_at: string;
+  updated_by: string;
   prebuilt?: boolean;
+  platform?: string;
+  version?: string;
+  removed?: boolean;
+  snapshot?: boolean;
+  created_by?: string;
+  interval?: number;
 }>;
 
 interface PlayButtonProps {
@@ -139,7 +146,7 @@ const SavedQueriesPageComponent = () => {
     [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
-  const renderUpdatedAt = useCallback((updatedAt, item) => {
+  const renderUpdatedAt = useCallback((updatedAt: string, item: SavedQuerySO) => {
     if (!updatedAt) return '-';
 
     const updatedBy =
@@ -209,11 +216,22 @@ const SavedQueriesPageComponent = () => {
     [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
   );
 
-  const onTableChange = useCallback(({ page = {}, sort = {} }) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
-    setSortField(sort.field);
-    setSortDirection(sort.direction);
+  const onTableChange = useCallback(({ page, sort }: Criteria<SavedQuerySO>) => {
+    if (page?.index) {
+      setPageIndex(page.index);
+    }
+
+    if (page?.size) {
+      setPageSize(page.size);
+    }
+
+    if (sort?.field) {
+      setSortField(sort.field);
+    }
+
+    if (sort?.direction) {
+      setSortDirection(sort.direction as Direction);
+    }
   }, []);
 
   const pagination = useMemo(

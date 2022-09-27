@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import type { PropsWithChildren } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { chooseLightOrDarkColor, tintOrShade } from '../../../utils/styles';
 
@@ -39,7 +39,7 @@ export const HighlightMarker = euiStyled.mark`
 export const highlightFieldValue = (
   value: string,
   highlightTerms: string[],
-  HighlightComponent: React.ComponentType
+  HighlightComponent: React.ComponentType<PropsWithChildren>
 ) =>
   highlightTerms.reduce<React.ReactNode[]>(
     (fragments, highlightTerm, index) => {

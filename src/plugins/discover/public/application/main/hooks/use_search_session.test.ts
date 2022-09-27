@@ -7,7 +7,7 @@
  */
 
 import { useSearchSession } from './use_search_session';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';

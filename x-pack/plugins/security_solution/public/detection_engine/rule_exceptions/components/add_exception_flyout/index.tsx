@@ -416,7 +416,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   }, []);
 
   const handleOSSelectionChange = useCallback(
-    (selectedOptions): void => {
+    (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>): void => {
       setSelectedOs(selectedOptions[0].value);
     },
     [setSelectedOs]

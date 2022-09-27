@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -14,7 +15,7 @@ import { EuiCallOut, EuiSpacer, EuiGlobalToastList } from '@elastic/eui';
 import { FLASH_MESSAGE_TYPES, DEFAULT_TOAST_TIMEOUT } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
 
-export const FlashMessages: React.FC = ({ children }) => {
+export const FlashMessages: FC<PropsWithChildren> = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
 
   return (

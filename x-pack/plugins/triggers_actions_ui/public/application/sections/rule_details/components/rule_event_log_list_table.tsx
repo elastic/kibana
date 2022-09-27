@@ -267,7 +267,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     setSelectedRunLog(undefined);
   }, []);
 
-  const onSearchChange = useCallback(
+  const onSearchChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
     (e) => {
       if (e.target.value === '') {
         setSearchText('');
@@ -277,7 +277,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     [setSearchText, setSearch]
   );
 
-  const onKeyUp = useCallback(
+  const onKeyUp = useCallback<React.KeyboardEventHandler>(
     (e) => {
       if (e.key === 'Enter') {
         setSearchText(search);

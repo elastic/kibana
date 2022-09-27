@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,7 +35,7 @@ interface HealthStatus {
   hasPermanentEncryptionKey: boolean;
 }
 
-export const HealthCheck: React.FunctionComponent<Props> = ({
+export const HealthCheck: FC<PropsWithChildren<Props>> = ({
   children,
   waitForCheck,
   inFlyout = false,

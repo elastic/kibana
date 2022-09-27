@@ -33,7 +33,7 @@ enum SourceType {
   ZIP = 'syntheticsBrowserZipURLConfig',
 }
 
-interface SourceConfig {
+export interface SourceConfig {
   zipUrl: string;
   proxyUrl: string;
   folder: string;

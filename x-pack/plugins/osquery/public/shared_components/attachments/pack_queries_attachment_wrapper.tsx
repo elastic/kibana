@@ -7,6 +7,7 @@
 
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { useKibana } from '../../common/lib/kibana';
+import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { getAddToTimeline } from '../../timelines/get_add_to_timeline';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
@@ -39,7 +40,7 @@ export const PackQueriesAttachmentWrapper = ({
   }, [data?.status]);
 
   const addToTimeline = useCallback(
-    (payload) => {
+    (payload: AddToTimelinePayload) => {
       if (!actionId || !addToTimelineButton) {
         return <></>;
       }

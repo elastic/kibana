@@ -7,6 +7,7 @@
 
 import { CaseSeverity } from '../../../common/api';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { Form, FormHook, useForm } from '../../common/shared_imports';
 import { Severity } from './severity';
@@ -16,7 +17,7 @@ import { waitFor } from '@testing-library/dom';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 let globalForm: FormHook;
-const MockHookWrapperComponent: React.FC = ({ children }) => {
+const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
   const { form } = useForm<FormProps>({
     defaultValue: { severity: CaseSeverity.LOW },
     schema: {

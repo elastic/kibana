@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
@@ -41,16 +41,16 @@ export const getVislibVisRenderer: (
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(config.visData, config.visType);
+    const root = createRoot(domNode);
 
-    handlers.onDestroy(() => unmountComponentAtNode(domNode));
+    handlers.onDestroy(() => root.unmount());
 
-    render(
+    root.render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
           <VislibWrapper {...config} core={core} charts={charts} handlers={handlers} />
         </VisualizationContainer>
-      </KibanaThemeProvider>,
-      domNode
+      </KibanaThemeProvider>
     );
   },
 });

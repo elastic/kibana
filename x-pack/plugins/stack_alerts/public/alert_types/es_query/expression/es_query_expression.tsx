@@ -194,7 +194,7 @@ export const EsQueryExpression: React.FC<
         id="queryEditor"
         fullWidth
         isInvalid={errors.esQuery.length > 0}
-        error={errors.esQuery}
+        error={errors.esQuery as string[]}
         helpText={
           <EuiLink href={docLinks.links.query.queryDsl} target="_blank">
             <FormattedMessage

@@ -12,7 +12,9 @@ import deepEqual from 'fast-deep-equal';
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
+import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import type { DraggableWrapperProps } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import {
   DragEffects,
   DraggableWrapper,
@@ -118,7 +120,7 @@ const NonDecoratedIpComponent: React.FC<{
   );
 
   const render = useCallback(
-    (dataProvider, _, snapshot) =>
+    (dataProvider: DataProvider, _: DraggableProvided | null, snapshot: DraggableStateSnapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />
@@ -184,7 +186,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       if (onClick) {
         onClick();
@@ -252,7 +254,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     ]
   );
 
-  const render = useCallback(
+  const render = useCallback<DraggableWrapperProps['render']>(
     (_props, _provided, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>

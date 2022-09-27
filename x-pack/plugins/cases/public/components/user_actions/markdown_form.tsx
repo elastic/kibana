@@ -59,7 +59,7 @@ const UserActionMarkdownComponent = forwardRef<
   }, [content, id, onChangeEditable, onSaveContent, submit]);
 
   const setComment = useCallback(
-    (newComment) => {
+    (newComment: string) => {
       setFieldValue(fieldName, newComment);
     },
     [setFieldValue]

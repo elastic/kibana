@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import isDeepEqual from 'fast-deep-equal';
 import { kea, MakeLogicType } from 'kea';
-
-import { isDeepEqual } from 'react-use/lib/util';
 
 import { i18n } from '@kbn/i18n';
 

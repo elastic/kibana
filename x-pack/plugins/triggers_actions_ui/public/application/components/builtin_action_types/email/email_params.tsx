@@ -57,7 +57,7 @@ export const EmailParamsFields = ({
     <>
       <EuiFormRow
         fullWidth
-        error={errors.to}
+        error={errors.to as string[]}
         isInvalid={isToInvalid}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientTextFieldLabel',
@@ -121,7 +121,7 @@ export const EmailParamsFields = ({
       {addCC || (cc && cc?.length > 0) ? (
         <EuiFormRow
           fullWidth
-          error={errors.cc}
+          error={errors.cc as string[]}
           isInvalid={isCCInvalid}
           isDisabled={isDisabled}
           label={i18n.translate(
@@ -164,7 +164,7 @@ export const EmailParamsFields = ({
       {addBCC || (bcc && bcc?.length > 0) ? (
         <EuiFormRow
           fullWidth
-          error={errors.bcc}
+          error={errors.bcc as string[]}
           isInvalid={isBCCInvalid}
           label={i18n.translate(
             'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
@@ -207,7 +207,7 @@ export const EmailParamsFields = ({
       {showEmailSubjectAndMessage && (
         <EuiFormRow
           fullWidth
-          error={errors.subject}
+          error={errors.subject as string[]}
           isInvalid={isSubjectInvalid}
           label={i18n.translate(
             'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',

@@ -11,7 +11,7 @@ import { last } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { RangeValues, RangesParamEditor } from '../controls/ranges';
+import { RangeValues, RangesParamEditor, RangesParamEditorProps } from '../controls/ranges';
 
 export type SetColorRangeValue = (paramName: string, value: RangeValues[]) => void;
 
@@ -38,15 +38,15 @@ function ColorRanges({
     return { from, to };
   }, [colorsRange]);
 
-  const validateRange = useCallback(
+  const validateRange = useCallback<NonNullable<RangesParamEditorProps['validateRange']>>(
     ({ from, to }, index) => {
       if (!colorsRange[index]) {
         return [false, false];
       }
 
       const leftBound = index === 0 ? -Infinity : colorsRange[index - 1].to || 0;
-      const isFromValid = from >= leftBound;
-      const isToValid = to >= from;
+      const isFromValid = from! >= leftBound;
+      const isToValid = to! >= from!;
 
       return [isFromValid, isToValid];
     },

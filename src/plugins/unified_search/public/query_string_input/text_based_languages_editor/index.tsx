@@ -43,7 +43,7 @@ import {
   getDocumentationSections,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
-import { ResizableButton } from './resizable_button';
+import { ResizableButton, ResizableButtonProps } from './resizable_button';
 
 import './overwrite.scss';
 import { IUnifiedSearchPluginServices } from '../../types';
@@ -129,7 +129,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   });
 
   // When the editor is on full size mode, the user can resize the height of the editor.
-  const onMouseDownResizeHandler = useCallback(
+  const onMouseDownResizeHandler = useCallback<ResizableButtonProps['onMouseDownResizeHandler']>(
     (mouseDownEvent) => {
       const startSize = editorHeight;
       const startPosition = mouseDownEvent.pageY;
@@ -149,7 +149,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [editorHeight]
   );
 
-  const onKeyDownResizeHandler = useCallback(
+  const onKeyDownResizeHandler = useCallback<ResizableButtonProps['onKeyDownResizeHandler']>(
     (keyDownEvent) => {
       let height = editorHeight;
       if (

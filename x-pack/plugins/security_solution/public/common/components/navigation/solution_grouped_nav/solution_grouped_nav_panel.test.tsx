@@ -93,6 +93,7 @@ describe('SolutionGroupedNav', () => {
     mockItems.forEach((item) => {
       expect(result.getByText(item.label)).toBeInTheDocument();
       if (item.description) {
+        // @ts-expect-error update types
         expect(result.getByText(item.description)).toBeInTheDocument();
       }
     });

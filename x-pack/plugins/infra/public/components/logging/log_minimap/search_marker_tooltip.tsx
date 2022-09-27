@@ -6,7 +6,8 @@
  */
 
 import { calculatePopoverPosition, EuiPortal } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
+import type { PropsWithChildren } from 'react';
 
 import { AutoSizer } from '../../auto_sizer';
 
@@ -16,7 +17,10 @@ interface SearchMarkerTooltipProps {
   markerPosition: ClientRect;
 }
 
-export class SearchMarkerTooltip extends React.PureComponent<SearchMarkerTooltipProps, {}> {
+export class SearchMarkerTooltip extends React.PureComponent<
+  PropsWithChildren<SearchMarkerTooltipProps>,
+  {}
+> {
   public render() {
     const { children, markerPosition } = this.props;
 

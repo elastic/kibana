@@ -68,7 +68,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       return editAction(
         'subActionParams',
         {
@@ -102,7 +102,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
       <EuiFormRow
         data-test-subj="title-row"
         fullWidth
-        error={errors['subActionParams.incident.title']}
+        error={errors['subActionParams.incident.title'] as string[]}
         isInvalid={
           errors['subActionParams.incident.title'] !== undefined &&
           errors['subActionParams.incident.title'].length > 0 &&

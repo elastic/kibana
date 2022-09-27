@@ -9,10 +9,10 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useStore } from 'react-redux';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
+import { exporters, getEsQueryConfig, SavedQuery } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -600,7 +600,7 @@ export const LensTopNavMenu = ({
     theme$,
   ]);
 
-  const onQuerySubmitWrapped = useCallback(
+  const onQuerySubmitWrapped = useCallback<NonNullable<TopNavMenuProps['onQuerySubmit']>>(
     (payload) => {
       const { dateRange, query: newQuery } = payload;
       const currentRange = data.query.timefilter.timefilter.getTime();
@@ -624,14 +624,14 @@ export const LensTopNavMenu = ({
   );
 
   const onSavedWrapped = useCallback(
-    (newSavedQuery) => {
+    (newSavedQuery: SavedQuery) => {
       dispatchSetState({ savedQuery: newSavedQuery });
     },
     [dispatchSetState]
   );
 
   const onSavedQueryUpdatedWrapped = useCallback(
-    (newSavedQuery) => {
+    (newSavedQuery: SavedQuery) => {
       const savedQueryFilters = newSavedQuery.attributes.filters || [];
       const globalFilters = data.query.filterManager.getGlobalFilters();
       data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);

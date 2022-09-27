@@ -6,7 +6,7 @@
  */
 
 import { EuiAccordion, EuiErrorBoundary, EuiSpacer, EuiText } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,7 +19,7 @@ export interface ApiKeysEmptyPromptProps {
   error?: Error;
 }
 
-export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
+export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> = ({
   error,
   children,
 }) => {

@@ -6,7 +6,7 @@
  */
 
 import { mockUseKibanaForFilters } from '../../../../common/mocks/mock_use_kibana_for_filters';
-import { renderHook, act, RenderHookResult, Renderer } from '@testing-library/react-hooks';
+import { renderHook, act, RenderHookResult } from '@testing-library/react';
 import { useFilters, UseFiltersValue } from './use_filters';
 
 import { useHistory, useLocation } from 'react-router-dom';
@@ -21,7 +21,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('useFilters()', () => {
-  let hookResult: RenderHookResult<{}, UseFiltersValue, Renderer<unknown>>;
+  let hookResult: RenderHookResult<UseFiltersValue, {}>;
   let mockRef: ReturnType<typeof mockUseKibanaForFilters>;
 
   describe('when mounted', () => {

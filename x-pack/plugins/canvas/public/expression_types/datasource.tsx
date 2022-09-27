@@ -61,12 +61,12 @@ const DatasourceWrapperComponent: React.FunctionComponent<DatasourceWrapperProps
   const { spec, datasourceProps, handlers } = props;
   const prevSpec = usePrevious(spec);
 
-  const onMount = useCallback((ref) => {
+  const onMount = useCallback((ref: any) => {
     datasourceRef.current = ref ?? undefined;
   }, []);
 
   const callRenderFn = useCallback(
-    (domNode) => {
+    (domNode: any) => {
       const { template } = spec;
       if (!template) {
         return null;

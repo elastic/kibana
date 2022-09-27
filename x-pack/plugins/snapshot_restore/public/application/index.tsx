@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
 
@@ -25,15 +25,14 @@ const AppWithRouter = ({ history }: AppWithRouterProps) => (
 );
 
 export const renderApp = (elem: Element, dependencies: AppDependencies) => {
-  render(
+  const root = createRoot(elem);
+  root.render(
     <AppProviders appDependencies={dependencies}>
       <AppWithRouter history={dependencies.services.history} />
-    </AppProviders>,
-    elem
+    </AppProviders>
   );
-
   return () => {
-    unmountComponentAtNode(elem);
+    root.unmount();
   };
 };
 

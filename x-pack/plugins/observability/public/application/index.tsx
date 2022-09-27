@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -80,7 +80,8 @@ export const renderApp = ({
 
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <ApplicationUsageTrackingProvider>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaContextProvider
@@ -110,10 +111,9 @@ export const renderApp = ({
           </PluginContext.Provider>
         </KibanaContextProvider>
       </KibanaThemeProvider>
-    </ApplicationUsageTrackingProvider>,
-    element
+    </ApplicationUsageTrackingProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

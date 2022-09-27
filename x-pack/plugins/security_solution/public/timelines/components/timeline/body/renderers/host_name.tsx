@@ -52,7 +52,7 @@ const HostNameComponent: React.FC<Props> = ({
   const isInTimelineContext =
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
   const openHostDetailsSidePanel = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
 
       if (onClick) {

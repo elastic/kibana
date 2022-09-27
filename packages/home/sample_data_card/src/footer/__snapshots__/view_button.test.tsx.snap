@@ -2,7 +2,7 @@
 
 exports[`should render popover when appLinks is not empty 1`] = `
 <div
-  class="euiPopover emotion-euiPopover"
+  class="euiPopover css-jfgyh9-euiPopover"
   data-test-subj="launchSampleDataSetecommerce"
   id="sampleDataLinksecommerce"
 >
@@ -35,7 +35,7 @@ exports[`should render popover when appLinks is not empty 1`] = `
 
 exports[`should render popover with ordered appLinks 1`] = `
 <div
-  class="euiPopover emotion-euiPopover"
+  class="euiPopover css-jfgyh9-euiPopover"
   data-test-subj="launchSampleDataSetecommerce"
   id="sampleDataLinksecommerce"
 >

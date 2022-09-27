@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { EuiFilePickerProps } from '@elastic/eui';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PackItem } from '../packs/types';
 
 const SUPPORTED_CONFIG_EXTENSIONS = ['application/json', 'text/plain'];
 
@@ -27,7 +29,7 @@ const ExampleConfigLink = React.memo(() => (
 ExampleConfigLink.displayName = 'ExampleOsqueryConfigLink';
 
 interface ConfigUploaderProps {
-  onChange: (payload: Record<string, unknown>) => void;
+  onChange: (payload: { packs: PackItem[] }) => void;
 }
 
 const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) => {
@@ -72,9 +74,9 @@ const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) =>
     fileReader.readAsText(file);
   };
 
-  const handleInputChange = useCallback(
+  const handleInputChange = useCallback<NonNullable<EuiFilePickerProps['onChange']>>(
     (inputFiles) => {
-      if (!inputFiles.length) {
+      if (!inputFiles?.length) {
         return;
       }
 

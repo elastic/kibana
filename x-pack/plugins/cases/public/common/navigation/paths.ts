@@ -40,18 +40,20 @@ export const getCaseViewWithCommentPath = (casesBasePath: string) =>
 
 export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   const { commentId, tabId } = params;
-  // Cast for generatePath argument type constraint
-  const pathParams = params as unknown as { [paramName: string]: string };
 
   // paths with commentId have their own specific path.
   // Effectively overwrites the tabId
   if (commentId) {
-    return normalizePath(generatePath(CASE_VIEW_COMMENT_PATH, pathParams));
+    return normalizePath(
+      generatePath(CASE_VIEW_COMMENT_PATH, params as { detailName: string; commentId: string })
+    );
   }
 
   if (tabId !== undefined) {
-    return normalizePath(generatePath(CASE_VIEW_TAB_PATH, pathParams));
+    return normalizePath(
+      generatePath(CASE_VIEW_TAB_PATH, params as { detailName: string; tabId: string })
+    );
   }
 
-  return normalizePath(generatePath(CASE_VIEW_PATH, pathParams));
+  return normalizePath(generatePath(CASE_VIEW_PATH, params));
 };

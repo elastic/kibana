@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import type { PropsWithChildren } from 'react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import {
   initialState,
   useCaseConfigure,
@@ -50,8 +51,8 @@ describe('useConfigure', () => {
   });
 
   test('init', async () => {
-    const { result } = renderHook<string, ReturnUseCaseConfigure>(() => useCaseConfigure(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+      wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
     });
 
     await act(async () =>
@@ -69,32 +70,30 @@ describe('useConfigure', () => {
 
   test('fetch case configuration', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        ...initialState,
-        closureType: caseConfigurationCamelCaseResponseMock.closureType,
-        connector: caseConfigurationCamelCaseResponseMock.connector,
-        currentConfiguration: {
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          ...initialState,
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
           connector: caseConfigurationCamelCaseResponseMock.connector,
-        },
-        mappings: [],
-        firstLoad: true,
-        loading: false,
-        persistCaseConfigure: result.current.persistCaseConfigure,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
-        setClosureType: result.current.setClosureType,
-        setConnector: result.current.setConnector,
-        setCurrentConfiguration: result.current.setCurrentConfiguration,
-        setMappings: result.current.setMappings,
-        version: caseConfigurationCamelCaseResponseMock.version,
-        id: caseConfigurationCamelCaseResponseMock.id,
+          currentConfiguration: {
+            closureType: caseConfigurationCamelCaseResponseMock.closureType,
+            connector: caseConfigurationCamelCaseResponseMock.connector,
+          },
+          mappings: [],
+          firstLoad: true,
+          loading: false,
+          persistCaseConfigure: result.current.persistCaseConfigure,
+          refetchCaseConfigure: result.current.refetchCaseConfigure,
+          setClosureType: result.current.setClosureType,
+          setConnector: result.current.setConnector,
+          setCurrentConfiguration: result.current.setCurrentConfiguration,
+          setMappings: result.current.setMappings,
+          version: caseConfigurationCamelCaseResponseMock.version,
+          id: caseConfigurationCamelCaseResponseMock.id,
+        });
       });
     });
   });
@@ -103,59 +102,51 @@ describe('useConfigure', () => {
     const spyOnGetCaseConfigure = jest.spyOn(api, 'getCaseConfigure');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      result.current.refetchCaseConfigure();
-      expect(spyOnGetCaseConfigure).toHaveBeenCalledTimes(2);
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        result.current.refetchCaseConfigure();
+        expect(spyOnGetCaseConfigure).toHaveBeenCalledTimes(2);
+      });
     });
   });
 
   test('correctly sets mappings', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      expect(result.current.mappings).toEqual([]);
-      result.current.setMappings(mappings);
-      expect(result.current.mappings).toEqual(mappings);
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        expect(result.current.mappings).toEqual([]);
+        result.current.setMappings(mappings);
+        expect(result.current.mappings).toEqual(mappings);
+      });
     });
   });
 
   test('set isLoading to true when fetching case configuration', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      result.current.refetchCaseConfigure();
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        result.current.refetchCaseConfigure();
 
-      expect(result.current.loading).toBe(true);
+        expect(result.current.loading).toBe(true);
+      });
     });
   });
 
   test('persist case configuration', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      result.current.persistCaseConfigure(configuration);
-      expect(result.current.persistLoading).toBeTruthy();
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        result.current.persistCaseConfigure(configuration);
+        expect(result.current.persistLoading).toBeTruthy();
+      });
     });
   });
 
@@ -178,20 +169,19 @@ describe('useConfigure', () => {
     );
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      expect(mockErrorToast).not.toHaveBeenCalled();
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        expect(mockErrorToast).not.toHaveBeenCalled();
 
-      result.current.persistCaseConfigure(configuration);
+        result.current.persistCaseConfigure(configuration);
 
-      expect(result.current.connector.id).toEqual('123');
-      await waitForNextUpdate();
-      expect(result.current.connector.id).toEqual('456');
+        expect(result.current.connector.id).toEqual('123');
+      });
+      await waitFor(() => {
+        expect(result.current.connector.id).toEqual('456');
+      });
     });
   });
 
@@ -206,14 +196,12 @@ describe('useConfigure', () => {
     );
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      expect(mockErrorToast).toHaveBeenCalled();
+      renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        expect(mockErrorToast).toHaveBeenCalled();
+      });
     });
   });
 
@@ -237,19 +225,18 @@ describe('useConfigure', () => {
     );
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      expect(mockErrorToast).not.toHaveBeenCalled();
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        expect(mockErrorToast).not.toHaveBeenCalled();
 
-      result.current.persistCaseConfigure(configuration);
-      expect(mockErrorToast).not.toHaveBeenCalled();
-      await waitForNextUpdate();
-      expect(mockErrorToast).toHaveBeenCalled();
+        result.current.persistCaseConfigure(configuration);
+        expect(mockErrorToast).not.toHaveBeenCalled();
+      });
+      await waitFor(() => {
+        expect(mockErrorToast).toHaveBeenCalled();
+      });
     });
   });
 
@@ -263,19 +250,18 @@ describe('useConfigure', () => {
     );
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        result.current.persistCaseConfigure(configuration);
 
-      result.current.persistCaseConfigure(configuration);
+        expect(result.current.connector.id).toEqual('123');
+      });
 
-      expect(result.current.connector.id).toEqual('123');
-      await waitForNextUpdate();
-      expect(result.current.connector.id).toEqual('456');
+      await waitFor(() => {
+        expect(result.current.connector.id).toEqual('456');
+      });
     });
   });
 
@@ -286,25 +272,22 @@ describe('useConfigure', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
 
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        ...initialState,
-        loading: false,
-        persistCaseConfigure: result.current.persistCaseConfigure,
-        persistLoading: false,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
-        setClosureType: result.current.setClosureType,
-        setConnector: result.current.setConnector,
-        setCurrentConfiguration: result.current.setCurrentConfiguration,
-        setMappings: result.current.setMappings,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          ...initialState,
+          loading: false,
+          persistCaseConfigure: result.current.persistCaseConfigure,
+          persistLoading: false,
+          refetchCaseConfigure: result.current.refetchCaseConfigure,
+          setClosureType: result.current.setClosureType,
+          setConnector: result.current.setConnector,
+          setCurrentConfiguration: result.current.setCurrentConfiguration,
+          setMappings: result.current.setMappings,
+        });
       });
     });
   });
@@ -324,34 +307,31 @@ describe('useConfigure', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<ReturnUseCaseConfigure, {}>(() => useCaseConfigure(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        result.current.persistCaseConfigure(configuration);
 
-      result.current.persistCaseConfigure(configuration);
-
-      expect(result.current).toEqual({
-        ...initialState,
-        closureType: caseConfigurationCamelCaseResponseMock.closureType,
-        connector: caseConfigurationCamelCaseResponseMock.connector,
-        currentConfiguration: {
+        expect(result.current).toEqual({
+          ...initialState,
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
           connector: caseConfigurationCamelCaseResponseMock.connector,
-        },
-        firstLoad: true,
-        loading: false,
-        mappings: [],
-        persistCaseConfigure: result.current.persistCaseConfigure,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
-        setClosureType: result.current.setClosureType,
-        setConnector: result.current.setConnector,
-        setCurrentConfiguration: result.current.setCurrentConfiguration,
-        setMappings: result.current.setMappings,
+          currentConfiguration: {
+            closureType: caseConfigurationCamelCaseResponseMock.closureType,
+            connector: caseConfigurationCamelCaseResponseMock.connector,
+          },
+          firstLoad: true,
+          loading: false,
+          mappings: [],
+          persistCaseConfigure: result.current.persistCaseConfigure,
+          refetchCaseConfigure: result.current.refetchCaseConfigure,
+          setClosureType: result.current.setClosureType,
+          setConnector: result.current.setConnector,
+          setCurrentConfiguration: result.current.setCurrentConfiguration,
+          setMappings: result.current.setMappings,
+        });
       });
     });
   });

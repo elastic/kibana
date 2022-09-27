@@ -69,7 +69,7 @@ export function VisitorBreakdownChart({
   );
 
   const filterHandler = useCallback(
-    (event) => {
+    (event: any) => {
       onFilter(metric, event);
     },
     [onFilter, metric]

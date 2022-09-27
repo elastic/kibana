@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
@@ -77,7 +78,7 @@ interface SeriesControlsProps {
 /**
  * Component for handling the detector and entities controls.
  */
-export const SeriesControls: FC<SeriesControlsProps> = ({
+export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   bounds,
   selectedDetectorIndex,
   selectedJobId,
@@ -216,7 +217,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
   };
 
-  const detectorIndexChangeHandler: EuiSelectProps['onChange'] = useCallback(
+  const detectorIndexChangeHandler = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       const id = e.target.value;
       if (id !== undefined) {

@@ -147,7 +147,7 @@ export const RiskScoreField = ({
         <EuiFormRow
           label={riskScoreLabel}
           labelAppend={field.labelAppend}
-          helpText={field.helpText}
+          helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
           error={'errorMessage'}
           isInvalid={false}
           fullWidth

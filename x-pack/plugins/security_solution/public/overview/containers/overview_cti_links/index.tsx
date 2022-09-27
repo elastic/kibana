@@ -6,6 +6,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-browser';
 import type { TiDataSources } from './use_ti_data_sources';
 import type { LinkPanelListItem } from '../../components/link_panel';
 import { useKibana } from '../../../common/lib/kibana';
@@ -31,7 +32,7 @@ export const useCtiDashboardLinks = ({
   const savedObjectsClient = useKibana().services.savedObjects.client;
 
   const handleTagsReceived = useCallback(
-    (TagsSO?) => {
+    (TagsSO?: SavedObjectsFindResponse<SavedObjectAttributes, unknown>) => {
       if (TagsSO?.savedObjects?.length) {
         return savedObjectsClient.find<SavedObjectAttributes>({
           type: 'dashboard',

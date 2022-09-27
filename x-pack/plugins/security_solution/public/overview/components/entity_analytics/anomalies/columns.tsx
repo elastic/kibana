@@ -105,7 +105,7 @@ const EnableJobLink = ({ jobId }: { jobId: string }) => {
     },
   });
 
-  const onClick = useCallback(
+  const onClick = useCallback<React.MouseEventHandler>(
     (ev) => {
       ev.preventDefault();
       navigateToUrl(jobUrl);

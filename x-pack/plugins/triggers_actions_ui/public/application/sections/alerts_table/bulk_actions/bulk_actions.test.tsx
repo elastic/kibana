@@ -136,6 +136,7 @@ describe('AlertsTable.BulkActions', () => {
     );
 
     return (
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <BulkActionsContext.Provider value={initialBulkActionsState}>
           <AlertsTable {...props} />
@@ -147,6 +148,7 @@ describe('AlertsTable.BulkActions', () => {
   describe('when the bulk action hook is not set', () => {
     it('should not show the bulk actions column', () => {
       const { queryByTestId } = render(
+        // @ts-expect-error update types
         <IntlProvider locale="en">
           <AlertsTable {...tableProps} />
         </IntlProvider>
@@ -158,6 +160,7 @@ describe('AlertsTable.BulkActions', () => {
   describe('when the bulk action hook is set', () => {
     it('should show the bulk actions column', () => {
       const { getByTestId } = render(
+        // @ts-expect-error update types
         <IntlProvider locale="en">
           <AlertsTable {...tablePropsWithBulkActions} />
         </IntlProvider>

@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { keys, EuiText } from '@elastic/eui';
 
 import './_ui_ace_keyboard_mode.scss';
@@ -71,7 +71,8 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       overlayMountNode.current.addEventListener('focus', enableOverlay);
       overlayMountNode.current.addEventListener('keydown', onDismissOverlay);
 
-      ReactDOM.render(<OverlayText />, overlayMountNode.current);
+      const root = createRoot(overlayMountNode.current);
+      root.render(<OverlayText />);
 
       aceTextAreaElement.parentElement!.insertBefore(overlayMountNode.current, aceTextAreaElement);
       aceTextAreaElement.setAttribute('tabindex', '-1');

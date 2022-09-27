@@ -262,7 +262,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it shows the deprecated tooltip when the connector is deprecated', () => {
     render(<ConnectorsDropdown {...props} selectedConnector="servicenow-uses-table-api" />, {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: TestProviders,
     });
 
     const tooltips = screen.getAllByText(
@@ -284,7 +284,7 @@ describe('ConnectorsDropdown', () => {
         ]}
         selectedConnector={connector.id}
       />,
-      { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
+      { wrapper: TestProviders }
     );
 
     const tooltips = screen.getAllByText(

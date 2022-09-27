@@ -15,6 +15,7 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import type { PackQueriesStatusTableProps } from '../../../live_queries/form/pack_queries_status_table';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 
 const LiveQueryDetailsPageComponent = () => {
@@ -53,7 +54,7 @@ const LiveQueryDetailsPageComponent = () => {
   useLayoutEffect(() => {
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
-  const addToCaseButton = useCallback(
+  const addToCaseButton = useCallback<NonNullable<PackQueriesStatusTableProps['addToCase']>>(
     (payload) => (
       <AddToCaseButton
         queryId={payload.queryId}

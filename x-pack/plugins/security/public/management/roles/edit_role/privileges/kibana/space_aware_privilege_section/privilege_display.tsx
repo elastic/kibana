@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PropsOf } from '@elastic/eui';
+import type { EuiTextProps } from '@elastic/eui';
 import { EuiIcon, EuiText } from '@elastic/eui';
 import _ from 'lodash';
 import type { FC, ReactNode } from 'react';
@@ -13,7 +13,7 @@ import React from 'react';
 
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
-interface Props extends PropsOf<typeof EuiText> {
+interface Props extends EuiTextProps {
   privilege: string | string[] | undefined;
   'data-test-subj'?: string;
 }

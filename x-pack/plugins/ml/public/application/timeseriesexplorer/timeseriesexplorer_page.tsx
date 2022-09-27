@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -24,7 +25,7 @@ interface TimeSeriesExplorerPageProps {
   noSingleMetricJobsFound?: boolean;
 }
 
-export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
+export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPageProps>> = ({
   children,
   dateFormatTz,
   resizeRef,

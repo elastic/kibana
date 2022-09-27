@@ -61,7 +61,7 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     });
 
     setData(response);
-    updateTotalItemCount(response?.stats.total);
+    updateTotalItemCount(response?.stats.total!);
   }, [
     ccs,
     clusterUuid,

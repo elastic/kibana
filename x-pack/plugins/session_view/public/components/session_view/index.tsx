@@ -341,54 +341,56 @@ export const SessionView = ({
           return (
             <>
               <EuiResizablePanel initialSize={100} minSize="60%" paddingSize="none">
-                {hasError && (
-                  <EuiEmptyPrompt
-                    iconType="alert"
-                    color="danger"
-                    title={
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.sessionView.errorHeading"
-                          defaultMessage="Error loading Session View"
-                        />
-                      </h2>
-                    }
-                    body={
-                      <p>
-                        <FormattedMessage
-                          id="xpack.sessionView.errorMessage"
-                          defaultMessage="There was an error loading the Session View."
-                        />
-                      </p>
-                    }
-                  />
-                )}
-
-                {hasData && (
-                  <div css={styles.processTree}>
-                    <ProcessTree
-                      key={sessionEntityId + currentJumpToCursor}
-                      sessionEntityId={sessionEntityId}
-                      data={data.pages}
-                      searchQuery={searchQuery}
-                      selectedProcess={selectedProcess}
-                      onProcessSelected={onProcessSelected}
-                      onJumpToOutput={onJumpToOutput}
-                      jumpToEntityId={currentJumpToEntityId}
-                      investigatedAlertId={investigatedAlertId}
-                      isFetching={isFetching}
-                      hasPreviousPage={hasPreviousPage}
-                      hasNextPage={hasNextPage}
-                      fetchNextPage={fetchNextPage}
-                      fetchPreviousPage={fetchPreviousPage}
-                      setSearchResults={setSearchResults}
-                      updatedAlertsStatus={updatedAlertsStatus}
-                      onShowAlertDetails={onShowAlertDetails}
-                      showTimestamp={displayOptions?.timestamp}
-                      verboseMode={displayOptions?.verboseMode}
+                <>
+                  {hasError && (
+                    <EuiEmptyPrompt
+                      iconType="alert"
+                      color="danger"
+                      title={
+                        <h2>
+                          <FormattedMessage
+                            id="xpack.sessionView.errorHeading"
+                            defaultMessage="Error loading Session View"
+                          />
+                        </h2>
+                      }
+                      body={
+                        <p>
+                          <FormattedMessage
+                            id="xpack.sessionView.errorMessage"
+                            defaultMessage="There was an error loading the Session View."
+                          />
+                        </p>
+                      }
                     />
-                  </div>
-                )}
+                  )}
+
+                  {hasData && (
+                    <div css={styles.processTree}>
+                      <ProcessTree
+                        key={sessionEntityId + currentJumpToCursor}
+                        sessionEntityId={sessionEntityId}
+                        data={data.pages}
+                        searchQuery={searchQuery}
+                        selectedProcess={selectedProcess}
+                        onProcessSelected={onProcessSelected}
+                        onJumpToOutput={onJumpToOutput}
+                        jumpToEntityId={currentJumpToEntityId}
+                        investigatedAlertId={investigatedAlertId}
+                        isFetching={isFetching}
+                        hasPreviousPage={hasPreviousPage}
+                        hasNextPage={hasNextPage}
+                        fetchNextPage={fetchNextPage}
+                        fetchPreviousPage={fetchPreviousPage}
+                        setSearchResults={setSearchResults}
+                        updatedAlertsStatus={updatedAlertsStatus}
+                        onShowAlertDetails={onShowAlertDetails}
+                        showTimestamp={displayOptions?.timestamp}
+                        verboseMode={displayOptions?.verboseMode}
+                      />
+                    </div>
+                  )}
+                </>
               </EuiResizablePanel>
 
               <EuiResizableButton css={styles.resizeHandle} />

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Route, Switch } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -22,7 +22,9 @@ export const renderApp = (
   { appBasePath, element, history }: AppMountParameters, // FIXME: appBasePath is deprecated
   forwardedParams: MyForwardableState
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <ApplicationContextProvider forwardedState={forwardedParams}>
       <KibanaThemeProvider theme$={coreStart.theme.theme$}>
         <Router history={history}>
@@ -32,9 +34,8 @@ export const renderApp = (
           </Switch>
         </Router>
       </KibanaThemeProvider>
-    </ApplicationContextProvider>,
-    element
+    </ApplicationContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

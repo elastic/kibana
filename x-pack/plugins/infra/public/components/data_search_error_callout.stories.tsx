@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { PropsOf } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../test_utils/use_global_storybook_theme';
-import { DataSearchErrorCallout } from './data_search_error_callout';
+import { DataSearchErrorCallout, DataSearchErrorCalloutProps } from './data_search_error_callout';
 
 export default {
   title: 'infra/dataSearch/DataSearchErrorCallout',
@@ -28,8 +27,6 @@ export default {
     },
   },
 } as Meta;
-
-type DataSearchErrorCalloutProps = PropsOf<typeof DataSearchErrorCallout>;
 
 const DataSearchErrorCalloutTemplate: Story<DataSearchErrorCalloutProps> = (args) => (
   <DataSearchErrorCallout {...args} />

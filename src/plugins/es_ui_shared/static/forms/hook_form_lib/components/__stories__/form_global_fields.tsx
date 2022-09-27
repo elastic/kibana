@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useState, useContext, createContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiSpacer, EuiText, EuiTextColor, EuiButton } from '@elastic/eui';
 
 import { TextField, NumericField } from '../../../components';
@@ -48,7 +49,7 @@ const useGlobalFields = () => {
   return ctx;
 };
 
-const FormGlobalFields: React.FC = ({ children }) => {
+const FormGlobalFields: FC<PropsWithChildren> = ({ children }) => {
   return (
     <UseMultiFields fields={globalFields}>
       {(fields) => {
@@ -170,7 +171,7 @@ const useGlobalFields = () => {
   return ctx;
 };
 
-const FormGlobalFields: React.FC = ({ children }) => {
+const FormGlobalFields: FC<PropsWithChildren> = ({ children }) => {
   return (
     <UseMultiFields fields={globalFields}>
       {(fields) => {

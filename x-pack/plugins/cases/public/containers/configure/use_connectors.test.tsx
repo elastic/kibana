@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import * as api from './api';
 import { TestProviders } from '../../common/mock';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
@@ -26,13 +25,13 @@ describe('useConnectors', () => {
 
   it('fetches connectors', async () => {
     const spy = jest.spyOn(api, 'fetchConnectors');
-    const { waitForNextUpdate } = renderHook(() => useGetConnectors(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    renderHook(() => useGetConnectors(), {
+      wrapper: TestProviders,
     });
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
+    });
   });
 
   it('shows a toast error when the API returns error', async () => {
@@ -44,25 +43,25 @@ describe('useConnectors', () => {
       throw new Error('Something went wrong');
     });
 
-    const { waitForNextUpdate } = renderHook(() => useGetConnectors(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    renderHook(() => useGetConnectors(), {
+      wrapper: TestProviders,
     });
-    await waitForNextUpdate();
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('does not fetch connectors when the user does not has access to actions', async () => {
     const spyOnFetchConnectors = jest.spyOn(api, 'fetchConnectors');
     useApplicationCapabilitiesMock().actions = { crud: false, read: false };
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetConnectors(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    const { result } = renderHook(() => useGetConnectors(), {
+      wrapper: TestProviders,
     });
 
-    await waitForNextUpdate();
-
-    expect(spyOnFetchConnectors).not.toHaveBeenCalled();
-    expect(result.current.data).toEqual([]);
+    await waitFor(() => {
+      expect(spyOnFetchConnectors).not.toHaveBeenCalled();
+      expect(result.current.data).toEqual([]);
+    });
   });
 });

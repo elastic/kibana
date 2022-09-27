@@ -7,7 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { getContextHash, useNavigationProps, UseNavigationProps } from './use_navigation_props';
 import { Router } from 'react-router-dom';

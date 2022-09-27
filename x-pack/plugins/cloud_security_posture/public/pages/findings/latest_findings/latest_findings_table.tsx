@@ -27,7 +27,7 @@ import {
 
 type TableProps = Required<EuiBasicTableProps<CspFinding>>;
 
-interface Props {
+export interface FindingsTableProps {
   loading: boolean;
   items: CspFinding[];
   pagination: Pagination;
@@ -43,7 +43,7 @@ const FindingsTableComponent = ({
   sorting,
   setTableOptions,
   onAddFilter,
-}: Props) => {
+}: FindingsTableProps) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
   const getRowProps = (row: CspFinding) => ({

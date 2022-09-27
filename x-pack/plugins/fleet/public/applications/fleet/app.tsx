@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
@@ -62,7 +62,7 @@ import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
-const ErrorLayout: FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
+const ErrorLayout: FC<PropsWithChildren<{ isAddIntegrationsPath: boolean }>> = ({
   isAddIntegrationsPath,
   children,
 }) => (
@@ -83,7 +83,7 @@ const Panel = styled(EuiPanel)`
   margin-left: auto;
 `;
 
-const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ error }) => {
+const PermissionsError: FC<{ error: string }> = memo(({ error }) => {
   if (error === 'MISSING_SECURITY') {
     return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
   }
@@ -133,7 +133,7 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
   );
 });
 
-export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
+export const WithPermissionsAndSetup: FC<PropsWithChildren> = memo(({ children }) => {
   useBreadcrumbs('base');
   const core = useStartServices();
   const { notifications } = core;
@@ -221,16 +221,18 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
  * and no routes defined
  */
-export const FleetAppContext: React.FC<{
-  startServices: FleetStartServices;
-  config: FleetConfigType;
-  history: AppMountParameters['history'];
-  kibanaVersion: string;
-  extensions: UIExtensionsStorage;
-  theme$: AppMountParameters['theme$'];
-  /** For testing purposes only */
-  routerHistory?: History<any>;
-}> = memo(
+export const FleetAppContext: FC<
+  PropsWithChildren<{
+    startServices: FleetStartServices;
+    config: FleetConfigType;
+    history: AppMountParameters['history'];
+    kibanaVersion: string;
+    extensions: UIExtensionsStorage;
+    theme$: AppMountParameters['theme$'];
+    /** For testing purposes only */
+    routerHistory?: History<any>;
+  }>
+> = memo(
   ({
     children,
     startServices,

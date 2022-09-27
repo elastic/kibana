@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import type { FC, PropsWithChildren } from 'react';
 import { CloudStart } from '.';
 import { ServicesProvider } from './services';
 
@@ -34,7 +34,7 @@ const config = {
   },
 };
 
-const getContextProvider: () => React.FC =
+const getContextProvider: () => FC<PropsWithChildren> =
   () =>
   ({ children }) =>
     <ServicesProvider {...config}>{children}</ServicesProvider>;

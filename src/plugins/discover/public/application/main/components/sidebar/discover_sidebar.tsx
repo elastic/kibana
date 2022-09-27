@@ -301,7 +301,7 @@ export function DiscoverSidebarComponent({
   );
 
   const getPaginated = useCallback(
-    (list) => {
+    (list: DataViewField[]) => {
       return list.slice(0, fieldsToRender);
     },
     [fieldsToRender]

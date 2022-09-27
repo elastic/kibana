@@ -148,6 +148,7 @@ const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as
 hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
 
 const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
+  // @ts-expect-error update types
   <IntlProvider locale="en">
     <AlertsTableState {...props} />
   </IntlProvider>

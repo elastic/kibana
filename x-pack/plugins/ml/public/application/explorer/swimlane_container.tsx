@@ -436,6 +436,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   hidden={noSwimLaneData}
                 >
                   {showSwimlane && !isLoading && (
+                    // @ts-expect-error update types
                     <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
                       <Settings
                         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md

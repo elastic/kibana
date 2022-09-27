@@ -19,6 +19,7 @@ interface Props {
 export const ResultFields: React.FC<Props> = ({ fields, isExpanded }) => {
   return (
     <EuiTable>
+      {/* @ts-expect-error update types */}
       <EuiTableBody>
         {fields.map((field) => (
           <ResultField

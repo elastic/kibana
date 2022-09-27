@@ -7,7 +7,7 @@
 
 import { Router } from 'react-router-dom';
 import React, { useCallback, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -25,17 +25,16 @@ export function renderApp(
   parameters: AppMountParameters,
   timelinesPluginSetup: TimelinesUIStart | null
 ) {
-  ReactDOM.render(
+  const root = createRoot(parameters.element);
+  root.render(
     <AppRoot
       coreStart={coreStart}
       parameters={parameters}
       timelinesPluginSetup={timelinesPluginSetup}
-    />,
-    parameters.element
+    />
   );
-
   return () => {
-    ReactDOM.unmountComponentAtNode(parameters.element);
+    root.unmount();
   };
 }
 
@@ -51,7 +50,7 @@ const AppRoot = React.memo(
   }) => {
     const refetch = useRef();
 
-    const setRefetch = useCallback((_refetch) => {
+    const setRefetch = useCallback((_refetch: any) => {
       refetch.current = _refetch;
     }, []);
 

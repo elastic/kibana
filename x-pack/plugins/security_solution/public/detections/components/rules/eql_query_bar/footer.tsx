@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -42,7 +42,7 @@ export interface Props {
   onOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
 }
 
-type SizeVoidFunc = (newSize: string) => void;
+type SizeVoidFunc = (newSize: number) => void;
 
 const Container = styled(EuiPanel)`
   border-radius: 0;
@@ -123,15 +123,15 @@ export const EqlQueryBarFooter: FC<Props> = ({
     },
     [onOptionsChange]
   );
-  const handleSizeField = useCallback(
+  const handleSizeField = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (evt) => {
       if (onOptionsChange) {
-        setLocalSize(evt?.target?.value);
+        setLocalSize(evt?.target?.value as unknown as number);
         if (debounceSize.current?.cancel) {
           debounceSize.current?.cancel();
         }
         debounceSize.current = debounce((newSize) => onOptionsChange('size', newSize), 800);
-        debounceSize.current(evt?.target?.value);
+        debounceSize.current(evt?.target?.value as unknown as number);
       }
     },
     [onOptionsChange]

@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
@@ -206,7 +207,9 @@ export const DiscoverTopNav = ({
     adHocDataViews: adHocDataViewList,
   };
 
-  const onTextBasedSavedAndExit = useCallback(
+  const onTextBasedSavedAndExit = useCallback<
+    NonNullable<TopNavMenuProps['onTextBasedSavedAndExit']>
+  >(
     ({ onSave, onCancel }) => {
       onSaveSearch({
         savedSearch,

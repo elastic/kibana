@@ -17,6 +17,8 @@ import {
   EuiIconTip,
   Query,
 } from '@elastic/eui';
+import { QueryType } from '@elastic/eui';
+import { EuiSearchBarProps } from '@elastic/eui';
 import { getFieldByType } from '../../../../../../../../common/inventory_models';
 import {
   useProcessList,
@@ -30,7 +32,7 @@ import { ProcessesTable } from './processes_table';
 import { parseSearchString } from './parse_search_string';
 
 const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
-  const [searchBarState, setSearchBarState] = useState<Query>(Query.MATCH_ALL);
+  const [searchBarState, setSearchBarState] = useState<QueryType | undefined>(Query.MATCH_ALL);
   const [searchFilter, setSearchFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortBy>({
     name: 'cpu',
@@ -54,9 +56,9 @@ const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
     [setSearchFilter]
   );
 
-  const searchBarOnChange = useCallback(
+  const searchBarOnChange = useCallback<NonNullable<EuiSearchBarProps['onChange']>>(
     ({ query, queryText }) => {
-      setSearchBarState(query);
+      setSearchBarState(query ?? undefined);
       debouncedSearchOnChange(queryText);
     },
     [setSearchBarState, debouncedSearchOnChange]

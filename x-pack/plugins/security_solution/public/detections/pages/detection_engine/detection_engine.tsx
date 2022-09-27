@@ -186,7 +186,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [dispatch]
   );
 
-  const goToRules = useCallback(
+  const goToRules = useCallback<React.MouseEventHandler>(
     (ev) => {
       ev.preventDefault();
       navigateToUrl(formatUrl(getRulesUrl()));

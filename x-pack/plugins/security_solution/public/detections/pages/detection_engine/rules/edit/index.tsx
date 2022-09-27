@@ -391,7 +391,7 @@ const EditRulePageComponent: FC = () => {
     [activeStep, goToStep, setStepData]
   );
 
-  const goToDetailsRule = useCallback(
+  const goToDetailsRule = useCallback<React.MouseEventHandler>(
     (ev) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Route, Redirect } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -42,7 +42,9 @@ export const renderApp = (
   { data, navigation, unifiedSearch }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <I18nProvider>
       <RedirectAppLinks application={application}>
         <SearchExamplePage exampleLinks={LINKS} basePath={http.basePath}>
@@ -75,11 +77,10 @@ export const renderApp = (
         </SearchExamplePage>
       </RedirectAppLinks>
     </I18nProvider>,
-    element
   );
 
   return () => {
     data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

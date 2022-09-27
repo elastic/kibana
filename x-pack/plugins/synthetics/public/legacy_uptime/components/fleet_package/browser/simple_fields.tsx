@@ -39,7 +39,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
       proxyUrl,
       isGeneratedScript,
       fileName,
-    }) => {
+    }: any) => {
       setFields((prevFields) => ({
         ...prevFields,
         [ConfigKey.SOURCE_ZIP_URL]: zipUrl,

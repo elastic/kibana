@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useLocation } from 'react-router-dom';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveConflict } from './use_resolve_conflict';
@@ -62,7 +62,7 @@ describe('useResolveConflict', () => {
         graphEventId: 'current-graph-event-id',
         show: false,
       }));
-      const { result } = renderHook<{}, JSX.Element | null>(() => useResolveConflict());
+      const { result } = renderHook<JSX.Element | null, {}>(() => useResolveConflict());
       expect(mockGetLegacyUrlConflict).not.toHaveBeenCalled();
       expect(result.current).toEqual(null);
     });
@@ -79,7 +79,7 @@ describe('useResolveConflict', () => {
         graphEventId: 'current-graph-event-id',
         show: false,
       }));
-      const { result } = renderHook<{}, JSX.Element | null>(() => useResolveConflict());
+      const { result } = renderHook<JSX.Element | null, {}>(() => useResolveConflict());
       expect(mockGetLegacyUrlConflict).not.toHaveBeenCalled();
       expect(result.current).toEqual(null);
     });
@@ -93,7 +93,7 @@ describe('useResolveConflict', () => {
           alias_target_id: 'new-id',
         },
       }));
-      const { result } = renderHook<{}, JSX.Element | null>(() => useResolveConflict());
+      const { result } = renderHook<JSX.Element | null, {}>(() => useResolveConflict());
       expect(mockGetLegacyUrlConflict).not.toHaveBeenCalled();
       expect(result.current).toEqual(null);
     });
@@ -109,7 +109,7 @@ describe('useResolveConflict', () => {
         },
       }));
       mockGetLegacyUrlConflict.mockImplementation(() => mockTextContent);
-      const { result } = renderHook<{}, JSX.Element | null>(() => useResolveConflict());
+      const { result } = renderHook<JSX.Element | null, {}>(() => useResolveConflict());
       expect(mockGetLegacyUrlConflict).toHaveBeenCalledWith({
         objectNoun: 'timeline',
         currentObjectId: '04e8ffb0-2c2a-11ec-949c-39005af91f70',
@@ -146,7 +146,7 @@ describe('useResolveConflict', () => {
         }));
         mockGetLegacyUrlConflict.mockImplementation(() => mockTextContent);
         renderHook(() => useResolveConflict());
-        const { result } = renderHook<{}, JSX.Element | null>(() => useResolveConflict());
+        const { result } = renderHook<JSX.Element | null, {}>(() => useResolveConflict());
         expect(mockGetLegacyUrlConflict).toHaveBeenCalledWith({
           objectNoun: 'timeline',
           currentObjectId: 'current-saved-object-id',

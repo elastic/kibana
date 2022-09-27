@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector } from '../mock';
@@ -22,31 +22,32 @@ describe('useGetIncidentTypes', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIncidentTypes>(() =>
+      const { result } = renderHook<UseGetIncidentTypes, {}>(() =>
         useGetIncidentTypes({ http, toastNotifications: notifications.toasts })
       );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: true, incidentTypes: [] });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: true, incidentTypes: [] });
+      });
     });
   });
 
   test('fetch incident types', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIncidentTypes>(() =>
+      const { result } = renderHook<UseGetIncidentTypes, {}>(() =>
         useGetIncidentTypes({
           http,
           toastNotifications: notifications.toasts,
           connector,
         })
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        incidentTypes: [
-          { id: 17, name: 'Communication error (fax; email)' },
-          { id: 1001, name: 'Custom type' },
-        ],
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          incidentTypes: [
+            { id: 17, name: 'Communication error (fax; email)' },
+            { id: 1001, name: 'Custom type' },
+          ],
+        });
       });
     });
   });
@@ -58,14 +59,13 @@ describe('useGetIncidentTypes', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIncidentTypes>(() =>
+      const { result } = renderHook<UseGetIncidentTypes, {}>(() =>
         useGetIncidentTypes({ http, toastNotifications: notifications.toasts, connector })
       );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({ isLoading: false, incidentTypes: [] });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: false, incidentTypes: [] });
+      });
     });
   });
 });

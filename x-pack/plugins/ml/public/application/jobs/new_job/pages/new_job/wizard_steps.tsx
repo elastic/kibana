@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,9 +51,9 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   }
 
   return (
-    <Fragment>
+    <>
       {currentStep === WIZARD_STEPS.TIME_RANGE && (
-        <Fragment>
+        <>
           <Title data-test-subj="mlJobWizardStepTitleTimeRange">
             <FormattedMessage
               id="xpack.ml.newJob.wizard.stepComponentWrapper.timeRangeTitle"
@@ -63,10 +64,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
             isCurrentStep={currentStep === WIZARD_STEPS.TIME_RANGE}
             setCurrentStep={setCurrentStep}
           />
-        </Fragment>
+        </>
       )}
       {currentStep === WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED && (
-        <Fragment>
+        <>
           <Title data-test-subj="mlJobWizardStepTitleConfigureDatafeed">
             <FormattedMessage
               id="xpack.ml.newJob.wizard.stepComponentWrapper.configureDatafeedTitle"
@@ -77,10 +78,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
             isCurrentStep={currentStep === WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED}
             setCurrentStep={setCurrentStep}
           />
-        </Fragment>
+        </>
       )}
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
-        <Fragment>
+        <>
           <Title data-test-subj="mlJobWizardStepTitlePickFields">
             <FormattedMessage
               id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
@@ -91,10 +92,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
             isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
             setCurrentStep={setCurrentStep}
           />
-        </Fragment>
+        </>
       )}
       {currentStep === WIZARD_STEPS.JOB_DETAILS && (
-        <Fragment>
+        <>
           <Title data-test-subj="mlJobWizardStepTitleJobDetails">
             <FormattedMessage
               id="xpack.ml.newJob.wizard.stepComponentWrapper.jobDetailsTitle"
@@ -109,10 +110,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
             additionalExpanded={additionalExpanded}
             setAdditionalExpanded={setAdditionalExpanded}
           />
-        </Fragment>
+        </>
       )}
       {currentStep === WIZARD_STEPS.VALIDATION && (
-        <Fragment>
+        <>
           <Title data-test-subj="mlJobWizardStepTitleValidation">
             <FormattedMessage
               id="xpack.ml.newJob.wizard.stepComponentWrapper.validationTitle"
@@ -123,28 +124,31 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
             isCurrentStep={currentStep === WIZARD_STEPS.VALIDATION}
             setCurrentStep={setCurrentStep}
           />
-        </Fragment>
+        </>
       )}
       {currentStep === WIZARD_STEPS.SUMMARY && (
-        <Fragment>
+        <>
           <Title data-test-subj="mlJobWizardStepTitleSummary">{getSummaryStepTitle()}</Title>
           <SummaryStep
             isCurrentStep={currentStep === WIZARD_STEPS.SUMMARY}
             setCurrentStep={setCurrentStep}
           />
-        </Fragment>
+        </>
       )}
-    </Fragment>
+    </>
   );
 };
 
-const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
+const Title: FC<PropsWithChildren<{ 'data-test-subj': string }>> = ({
+  'data-test-subj': dataTestSubj,
+  children,
+}) => {
   return (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h2 data-test-subj={dataTestSubj}>{children}</h2>
       </EuiTitle>
       <EuiSpacer />
-    </Fragment>
+    </>
   );
 };

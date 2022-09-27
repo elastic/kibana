@@ -27,8 +27,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
@@ -49,7 +50,7 @@ const BetaBadgeWrapper = styled.span`
 const DEFAULT_TIMERANGE = {
   from: 'now-7d',
   to: 'now',
-  mode: 'relative',
+  mode: 'relative' as const,
 };
 
 type LensIncomingEmbeddablePackage = Omit<EmbeddablePackageState, 'input'> & {
@@ -96,7 +97,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [clearDraftComment, currentAppId, embeddable, onCancel]);
 
   const handleAdd = useCallback(
-    (attributes, timerange) => {
+    (
+      attributes: TypedLensByValueInput['attributes'],
+      timerange: TypedLensByValueInput['timeRange']
+    ) => {
       onSave(
         `!{${ID}${JSON.stringify({
           timeRange: timerange,
@@ -113,7 +117,11 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleUpdate = useCallback(
-    (attributes, timerange, position) => {
+    (
+      attributes: TypedLensByValueInput['attributes'],
+      timerange: LensEmbeddableInput['timeRange'],
+      position: EuiMarkdownAstNodePosition
+    ) => {
       markdownContext.replaceNode(
         position,
         `!{${ID}${JSON.stringify({
@@ -161,7 +169,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   ]);
 
   const handleEditInLensClick = useCallback(
-    (lensAttributes?, timeRange = DEFAULT_TIMERANGE) => {
+    (
+      lensAttributes: TypedLensByValueInput['attributes'],
+      timerange?: LensEmbeddableInput['timeRange']
+    ) => {
       storage.set(DRAFT_COMMENT_STORAGE_ID, {
         commentId: commentEditorContext?.editorId,
         comment: commentEditorContext?.value,
@@ -174,7 +185,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         lensAttributes || node?.attributes
           ? {
               id: '',
-              timeRange,
+              timeRange: timerange || DEFAULT_TIMERANGE,
               attributes: lensAttributes || node?.attributes,
             }
           : undefined,
@@ -199,9 +210,14 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleChooseLensSO = useCallback(
-    (savedObjectId, savedObjectType, fullName, savedObject) => {
+    (
+      savedObjectId: string,
+      savedObjectType: string,
+      fullName: string,
+      savedObject: SimpleSavedObject<unknown>
+    ) => {
       handleEditInLensClick({
-        ...savedObject.attributes,
+        ...(savedObject.attributes as TypedLensByValueInput['attributes']),
         title: '',
         references: savedObject.references,
       });

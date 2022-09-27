@@ -29,6 +29,7 @@ import { LabelField } from './label_field';
 import OsqueryLogo from './osquery_icon/osquery.svg';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
+import type { ECSMappingArray } from './utils';
 import { convertECSMappingToObject } from './utils';
 
 const StyledEuiButton = styled(EuiButton)`
@@ -36,6 +37,12 @@ const StyledEuiButton = styled(EuiButton)`
     margin-block-end: 0;
   }
 `;
+
+interface FormData {
+  query: string;
+  label: string;
+  ecs_mapping: ECSMappingArray;
+}
 
 const OsqueryEditorComponent = ({
   node,
@@ -63,7 +70,7 @@ const OsqueryEditorComponent = ({
   });
 
   const onSubmit = useCallback(
-    (data) => {
+    (data: FormData) => {
       onSave(
         `!{osquery${JSON.stringify(
           pickBy(
@@ -126,6 +133,7 @@ const OsqueryEditorComponent = ({
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
+        {/* @ts-expect-error update types */}
         <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill>
           {isEditMode ? (
             <FormattedMessage

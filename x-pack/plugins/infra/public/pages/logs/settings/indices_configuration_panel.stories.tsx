@@ -10,7 +10,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
-  PropsOf,
 } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Meta, Story } from '@storybook/react/types-6-0';
@@ -22,7 +21,10 @@ import {
 } from '../../../hooks/use_kibana_index_patterns.mock';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import { LogIndicesFormState, useLogIndicesFormElement } from './indices_configuration_form_state';
-import { IndicesConfigurationPanel } from './indices_configuration_panel';
+import {
+  IndicesConfigurationPanel,
+  IndicesConfigurationPanelProps,
+} from './indices_configuration_panel';
 
 export default {
   title: 'infra/logsSettings/indicesConfiguration',
@@ -60,8 +62,6 @@ export default {
     },
   },
 } as Meta;
-
-type IndicesConfigurationPanelProps = PropsOf<typeof IndicesConfigurationPanel>;
 
 type IndicesConfigurationPanelStoryArgs = Pick<
   IndicesConfigurationPanelProps,

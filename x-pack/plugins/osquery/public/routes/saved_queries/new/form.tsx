@@ -28,7 +28,7 @@ import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_f
 
 interface NewSavedQueryFormProps {
   defaultValue?: SavedQuerySOFormData;
-  handleSubmit: (payload: unknown) => Promise<void>;
+  handleSubmit: (payload: SavedQuerySOFormData) => Promise<void>;
 }
 
 const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({

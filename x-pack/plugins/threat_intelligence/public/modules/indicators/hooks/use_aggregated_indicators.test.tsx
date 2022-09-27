@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { BehaviorSubject, throwError } from 'rxjs';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { IKibanaSearchResponse, TimeRangeBounds } from '@kbn/data-plugin/common';
 import {
   AGGREGATION_NAME,

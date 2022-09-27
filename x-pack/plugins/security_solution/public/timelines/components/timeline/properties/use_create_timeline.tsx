@@ -36,7 +36,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
-    ({ id, show }) => {
+    ({ id, show }: { id: string; show: boolean }) => {
       if (id === TimelineId.active && timelineFullScreen) {
         setTimelineFullScreen(false);
       }
@@ -87,11 +87,11 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
   );
 
   const handleCreateNewTimeline = useCallback(() => {
-    createTimeline({ id: timelineId, show: true, timelineType });
+    createTimeline({ id: timelineId as string, show: true });
     if (typeof closeGearMenu === 'function') {
       closeGearMenu();
     }
-  }, [createTimeline, timelineId, timelineType, closeGearMenu]);
+  }, [createTimeline, timelineId, closeGearMenu]);
 
   return handleCreateNewTimeline;
 };

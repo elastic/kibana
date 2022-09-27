@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiFlexGrid,
@@ -123,7 +123,8 @@ export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
   const { element } = mountParams;
 
-  ReactDOM.render(<CasesFixtureApp deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<CasesFixtureApp deps={deps} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

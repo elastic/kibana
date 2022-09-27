@@ -89,7 +89,7 @@ And add the following to it:
 
 ```ts
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 
 export class HelloWorldPlugin implements Plugin {
@@ -99,8 +99,9 @@ export class HelloWorldPlugin implements Plugin {
       id: 'helloWorld',
       title: 'Hello World',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<div>Hello World!</div>, element);
-        return () => ReactDOM.unmountComponentAtNode(element);
+        const root = createRoot(element);
+        root.render(<div>Hello World!</div>);
+        return () => root.unmount();
       },
     });
   }

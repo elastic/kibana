@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector as actionConnector, issues } from '../mock';
@@ -23,7 +23,7 @@ describe('useGetSingleIssue', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetSingleIssue>(() =>
+      const { result } = renderHook<UseGetSingleIssue, {}>(() =>
         useGetSingleIssue({
           http,
           toastNotifications: notifications.toasts,
@@ -31,14 +31,15 @@ describe('useGetSingleIssue', () => {
           id: null,
         })
       );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: false, issue: null });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: false, issue: null });
+      });
     });
   });
 
   test('fetch issues', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetSingleIssue>(() =>
+      const { result } = renderHook<UseGetSingleIssue, {}>(() =>
         useGetSingleIssue({
           http,
           toastNotifications: notifications.toasts,
@@ -46,11 +47,11 @@ describe('useGetSingleIssue', () => {
           id: '123',
         })
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        issue: issues[0],
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          issue: issues[0],
+        });
       });
     });
   });
@@ -62,7 +63,7 @@ describe('useGetSingleIssue', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetSingleIssue>(() =>
+      const { result } = renderHook<UseGetSingleIssue, {}>(() =>
         useGetSingleIssue({
           http,
           toastNotifications: notifications.toasts,
@@ -71,10 +72,9 @@ describe('useGetSingleIssue', () => {
         })
       );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({ isLoading: false, issue: null });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: false, issue: null });
+      });
     });
   });
 });

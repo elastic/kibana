@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 
@@ -29,7 +29,9 @@ export const mountRedirectApp = ({
   screenshotMode,
   share,
 }: MountParams) => {
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <EuiErrorBoundary>
       <RedirectApp
         apiClient={apiClient}
@@ -37,11 +39,10 @@ export const mountRedirectApp = ({
         screenshotMode={screenshotMode}
         share={share}
       />
-    </EuiErrorBoundary>,
-    element
+    </EuiErrorBoundary>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

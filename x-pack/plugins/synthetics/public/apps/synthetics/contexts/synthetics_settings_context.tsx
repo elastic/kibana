@@ -13,6 +13,7 @@ import {
   I18nStart,
 } from '@kbn/core/public';
 import React, { createContext, useContext, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { useGetUrlParams } from '../hooks';
@@ -72,7 +73,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
-export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = ({
+export const SyntheticsSettingsContextProvider: FC<PropsWithChildren<SyntheticsAppProps>> = ({
   children,
   ...props
 }) => {

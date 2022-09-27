@@ -83,7 +83,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     }, [isLoading, refreshRef, refreshCaseViewPage]);
 
     const onSubmitTitle = useCallback(
-      (newTitle) =>
+      (newTitle: string) =>
         onUpdateField({
           key: 'title',
           value: newTitle,

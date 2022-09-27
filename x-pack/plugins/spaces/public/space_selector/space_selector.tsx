@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -221,13 +221,13 @@ export const renderSpaceSelectorApp = (
   { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
   props: Props
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <i18nStart.Context>
       <KibanaThemeProvider theme$={theme$}>
         <SpaceSelector {...props} />
       </KibanaThemeProvider>
     </i18nStart.Context>,
-    element
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

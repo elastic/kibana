@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { getSyntheticsSingleMetricConfig } from './configurations/synthetics/single_metric_config';

@@ -102,6 +102,7 @@ export function BreakdownChart({
       status={fetchStatus}
       id={id}
     >
+      {/* @ts-expect-error update types */}
       <Chart ref={chartRef}>
         <Settings
           tooltip={{ stickTo: 'top', showNullValues: true }}

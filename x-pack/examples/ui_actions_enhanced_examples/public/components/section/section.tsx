@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import type { FC, ReactNode, PropsWithChildren } from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
 export interface Props {
-  title: React.ReactNode;
+  title: ReactNode;
 }
 
-export const Section: React.FC<Props> = ({ title, children }) => {
+export const Section: FC<PropsWithChildren<Props>> = ({ title, children }) => {
   return (
     <section>
       <EuiTitle size="m">

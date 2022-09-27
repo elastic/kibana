@@ -210,7 +210,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       [totalAlertsObj]
     );
 
-    const goToDetectionEngine = useCallback(
+    const goToDetectionEngine = useCallback<React.MouseEventHandler>(
       (ev) => {
         ev.preventDefault();
         navigateToApp(APP_UI_ID, {

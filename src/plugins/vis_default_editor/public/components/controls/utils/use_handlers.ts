@@ -20,7 +20,7 @@ function useSubAggParamsHandlers(
   setValue: SetValue
 ) {
   const setAggParamValue = useCallback(
-    (aggId, paramName, val) => {
+    (aggId: string, paramName: string | number | symbol, val: IAggConfig) => {
       const parsedParams = subAgg.serialize();
       const params = {
         ...parsedParams,
@@ -36,7 +36,7 @@ function useSubAggParamsHandlers(
   );
 
   const onAggTypeChange = useCallback(
-    (aggId, aggType) => {
+    (aggId: string, aggType: any) => {
       const parsedAgg = subAgg.serialize();
       const parsedAggParams = parsedAgg.params as SerializableRecord;
 

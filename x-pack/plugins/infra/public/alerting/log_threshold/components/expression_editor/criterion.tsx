@@ -8,6 +8,7 @@
 import {
   EuiButtonIcon,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiExpression,
   EuiFieldNumber,
   EuiFieldText,
@@ -132,7 +133,7 @@ export const Criterion: React.FC<Props> = ({
   }, [fieldInfo]);
 
   const handleFieldChange = useCallback(
-    ([selectedOption]) => {
+    ([selectedOption]: Array<EuiComboBoxOptionOption<string>>) => {
       if (!selectedOption) {
         updateCriterion(idx, { field: '' });
         return;
@@ -197,7 +198,7 @@ export const Criterion: React.FC<Props> = ({
                 <EuiFormRow
                   style={{ minWidth: '300px' }}
                   isInvalid={errors.field.length > 0}
-                  error={errors.field}
+                  error={errors.field as string[]}
                 >
                   <EuiComboBox
                     compressed
@@ -249,7 +250,10 @@ export const Criterion: React.FC<Props> = ({
                 <EuiPopoverTitle>{criterionComparatorValueTitle}</EuiPopoverTitle>
                 <EuiFlexGroup gutterSize="l">
                   <EuiFlexItem grow={false}>
-                    <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
+                    <EuiFormRow
+                      isInvalid={errors.comparator.length > 0}
+                      error={errors.comparator as string[]}
+                    >
                       <EuiSelect
                         compressed
                         hasNoInitialSelection={criterion.comparator == null}
@@ -262,7 +266,10 @@ export const Criterion: React.FC<Props> = ({
                     </EuiFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+                    <EuiFormRow
+                      isInvalid={errors.value.length > 0}
+                      error={errors.value as string[]}
+                    >
                       {fieldInfo?.type === 'number' ? (
                         <EuiFieldNumber
                           compressed

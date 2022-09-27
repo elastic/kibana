@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactRouterDom, { Route } from 'react-router-dom';
 import { fireEvent, screen } from '@testing-library/dom';
-import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
+import { renderHook, act as hooksAct } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { EuiButtonIcon } from '@elastic/eui';
 import { getExpandedStepCallback, useExpandedRow } from './use_expanded_row';

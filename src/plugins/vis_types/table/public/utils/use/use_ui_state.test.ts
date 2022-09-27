@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { TableVisUiState } from '../../types';
 import { useUiState } from './use_ui_state';
@@ -38,7 +38,7 @@ describe('useUiState', () => {
   });
 
   it('should subscribe on uiState changes and update local state', async () => {
-    const { result, unmount, waitForNextUpdate } = renderHook(() => useUiState(uiState));
+    const { result, unmount } = renderHook(() => useUiState(uiState));
 
     expect(uiState.on).toHaveBeenCalledWith('change', expect.any(Function));
     // @ts-expect-error
@@ -60,17 +60,17 @@ describe('useUiState', () => {
       updateOnChange();
     });
 
-    await waitForNextUpdate();
-
-    // should update local state with new values
-    expect(result.current).toEqual({
-      columnsWidth: [],
-      sort: {
-        columnIndex: 1,
-        direction: 'asc',
-      },
-      setColumnsWidth: expect.any(Function),
-      setSort: expect.any(Function),
+    await waitFor(() => {
+      // should update local state with new values
+      expect(result.current).toEqual({
+        columnsWidth: [],
+        sort: {
+          columnIndex: 1,
+          direction: 'asc',
+        },
+        setColumnsWidth: expect.any(Function),
+        setSort: expect.any(Function),
+      });
     });
 
     act(() => {

@@ -39,6 +39,7 @@ describe('Data Frame Analytics: <ScatterplotMatrix />', () => {
   it('renders the scatterplot matrix wrapper with options but not the chart itself', async () => {
     // prepare
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <ScatterplotMatrix
           {...{
@@ -62,6 +63,7 @@ describe('Data Frame Analytics: <ScatterplotMatrix />', () => {
   it('renders the scatterplot matrix wrapper with options and the chart itself', async () => {
     // prepare
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <ScatterplotMatrix
           {...{

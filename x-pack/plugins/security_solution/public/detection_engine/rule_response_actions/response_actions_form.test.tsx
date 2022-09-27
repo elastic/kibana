@@ -14,6 +14,7 @@ import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 const renderWithContext = (Element: React.ReactElement) => {
+  // @ts-expect-error update types
   return render(<IntlProvider locale={'en'}>{Element}</IntlProvider>);
 };
 

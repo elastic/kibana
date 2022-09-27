@@ -57,7 +57,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
     numberOfExecutions
   );
 
-  const onChange = useCallback(
+  const onChange = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
     ({ target }) => onChangeDuration(Number(target.value)),
     [onChangeDuration]
   );
@@ -103,72 +103,69 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
       {!isLoading &&
         (executionDuration.valuesWithTimestamp &&
         Object.entries(executionDuration.valuesWithTimestamp).length > 0 ? (
-          <>
-            <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
-              <Settings
-                // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
-                theme={{
-                  lineSeriesStyle: {
-                    point: { visible: false },
-                    line: { stroke: lightEuiTheme.euiColorAccent },
-                  },
-                }}
-              />
-              <BarSeries
-                id="executionDuration"
-                name={i18n.translate(
-                  'xpack.triggersActionsUI.sections.executionDurationChart.durationLabel',
-                  {
-                    defaultMessage: `Duration`,
-                  }
-                )}
-                xScaleType="linear"
-                yScaleType="linear"
-                xAccessor={0}
-                yAccessors={[1]}
-                data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
-                  timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
-                  val,
-                ])}
-                minBarHeight={2}
-              />
-              <LineSeries
-                id="rule_duration_avg"
-                name={i18n.translate(
-                  'xpack.triggersActionsUI.sections.executionDurationChart.avgDurationLabel',
-                  {
-                    defaultMessage: `Avg Duration`,
-                  }
-                )}
-                xScaleType="linear"
-                yScaleType="linear"
-                xAccessor={0}
-                yAccessors={[1]}
-                data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
-                  timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
-                  val ? executionDuration.average : null,
-                ])}
-                curve={CurveType.CURVE_NATURAL}
-              />
-              <Axis id="left-axis" position="left" tickFormat={(d) => formatMillisForDisplay(d)} />
-            </Chart>
-          </>
-        ) : (
-          <>
-            <EuiEmptyPrompt
-              data-test-subj="executionDurationChartEmpty"
-              body={
-                <>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.executionDurationChart.executionDurationNoData"
-                      defaultMessage="There is no available run duration information for this rule."
-                    />
-                  </p>
-                </>
-              }
+          // @ts-expect-error update types
+          <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
+            <Settings
+              // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+              theme={{
+                lineSeriesStyle: {
+                  point: { visible: false },
+                  line: { stroke: lightEuiTheme.euiColorAccent },
+                },
+              }}
             />
-          </>
+            <BarSeries
+              id="executionDuration"
+              name={i18n.translate(
+                'xpack.triggersActionsUI.sections.executionDurationChart.durationLabel',
+                {
+                  defaultMessage: `Duration`,
+                }
+              )}
+              xScaleType="linear"
+              yScaleType="linear"
+              xAccessor={0}
+              yAccessors={[1]}
+              data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
+                timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
+                val,
+              ])}
+              minBarHeight={2}
+            />
+            <LineSeries
+              id="rule_duration_avg"
+              name={i18n.translate(
+                'xpack.triggersActionsUI.sections.executionDurationChart.avgDurationLabel',
+                {
+                  defaultMessage: `Avg Duration`,
+                }
+              )}
+              xScaleType="linear"
+              yScaleType="linear"
+              xAccessor={0}
+              yAccessors={[1]}
+              data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
+                timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
+                val ? executionDuration.average : null,
+              ])}
+              curve={CurveType.CURVE_NATURAL}
+            />
+            <Axis id="left-axis" position="left" tickFormat={(d) => formatMillisForDisplay(d)} />
+          </Chart>
+        ) : (
+          <EuiEmptyPrompt
+            data-test-subj="executionDurationChartEmpty"
+            body={
+              <>
+                <p>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.executionDurationChart.executionDurationNoData"
+                    defaultMessage="There is no available run duration information for this rule."
+                  />
+                </p>
+              </>
+            }
+          />
         ))}
     </EuiPanel>
   );

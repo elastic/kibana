@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { FormEvent, MouseEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import ReactMarkdown from 'react-markdown';
 
 import type {
@@ -132,14 +132,15 @@ export function renderAccessAgreementPage(
   { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
   props: Props
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <i18nStart.Context>
       <KibanaThemeProvider theme$={theme$}>
         <AccessAgreementPage {...props} />
       </KibanaThemeProvider>
-    </i18nStart.Context>,
-    element
+    </i18nStart.Context>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }

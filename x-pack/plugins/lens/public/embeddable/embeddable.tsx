@@ -9,7 +9,8 @@ import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 import type { DataViewBase, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
@@ -235,6 +236,7 @@ export class Embeddable
   private expressionRenderer: ReactExpressionRendererType;
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
+  private root: Root | undefined;
   private domNode: HTMLElement | Element | undefined;
   private warningDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
@@ -517,7 +519,8 @@ export class Embeddable
       if (warningMessage && warningMessage.length) return true;
     });
     if (warnings && this.warningDomNode) {
-      render(<Warnings warnings={warnings} />, this.warningDomNode);
+      const root = createRoot(this.warningDomNode);
+      root.render(<Warnings warnings={warnings} />);
     }
   }
 
@@ -621,7 +624,8 @@ export class Embeddable
 
     const input = this.getInput();
 
-    render(
+    const root = createRoot(domNode);
+    root.render(
       <KibanaThemeProvider theme$={this.deps.theme.theme$}>
         <ExpressionWrapper
           ExpressionRenderer={this.expressionRenderer}
@@ -664,8 +668,7 @@ export class Embeddable
             }
           }}
         />
-      </KibanaThemeProvider>,
-      domNode
+      </KibanaThemeProvider>
     );
   }
 
@@ -996,8 +999,8 @@ export class Embeddable
         reloadSub.unsubscribe();
       });
     }
-    if (this.domNode) {
-      unmountComponentAtNode(this.domNode);
+    if (this.root) {
+      this.root.unmount();
     }
     if (this.subscription) {
       this.subscription.unsubscribe();

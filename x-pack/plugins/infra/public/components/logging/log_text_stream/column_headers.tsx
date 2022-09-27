@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { transparentize } from 'polished';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -103,10 +104,12 @@ export const LogColumnHeaders: React.FunctionComponent<{
   );
 };
 
-export const LogColumnHeader: React.FunctionComponent<{
-  columnWidth: LogEntryColumnWidth;
-  'data-test-subj'?: string;
-}> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
+export const LogColumnHeader: FC<
+  PropsWithChildren<{
+    columnWidth: LogEntryColumnWidth;
+    'data-test-subj'?: string;
+  }>
+> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
   <LogColumnHeaderWrapper data-test-subj={dataTestSubj} {...columnWidth}>
     <LogColumnHeaderContent>{children}</LogColumnHeaderContent>
   </LogColumnHeaderWrapper>

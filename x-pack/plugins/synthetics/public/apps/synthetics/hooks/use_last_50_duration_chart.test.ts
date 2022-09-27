@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as hooks from './use_last_x_checks';
 import { useLast50DurationChart } from './use_last_50_duration_chart';
 import { WrappedHelper } from '../utils/testing';

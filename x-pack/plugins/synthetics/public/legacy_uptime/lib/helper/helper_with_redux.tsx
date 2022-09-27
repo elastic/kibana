@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import type { Store } from 'redux';
 import { createStore as createReduxStore, applyMiddleware } from 'redux';
 
@@ -23,11 +24,9 @@ const createRealStore = (): Store => {
   return store;
 };
 
-export const MountWithReduxProvider: React.FC<{ state?: AppState; useRealStore?: boolean }> = ({
-  children,
-  state,
-  useRealStore,
-}) => {
+export const MountWithReduxProvider: FC<
+  PropsWithChildren<{ state?: AppState; useRealStore?: boolean }>
+> = ({ children, state, useRealStore }) => {
   const store = useRealStore
     ? createRealStore()
     : {

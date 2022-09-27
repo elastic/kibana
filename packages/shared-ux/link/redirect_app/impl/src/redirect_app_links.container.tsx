@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { useServices } from './services';
 import { RedirectAppLinks as Component } from './redirect_app_links.component';
@@ -22,7 +23,10 @@ import { RedirectAppLinks as Component } from './redirect_app_links.component';
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks: FC<{ className?: string, children: React.ReactNode }> = ({ className, children }) => (
+export const RedirectAppLinks: FC<PropsWithChildren<{ className?: string }>> = ({
+  className,
+  children,
+}) => (
   <Component {...useServices()} className={className}>
     {children}
   </Component>

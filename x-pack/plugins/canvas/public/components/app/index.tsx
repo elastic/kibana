@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { Component, useEffect } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import PropTypes from 'prop-types';
 import { ScopedHistory } from '@kbn/core/public';
 import { useNavLinkService } from '../../services';
@@ -14,7 +15,7 @@ import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';
 import { Flyouts } from '../flyouts';
 
-class ShortcutManagerContextWrapper extends React.Component {
+class ShortcutManagerContextWrapper extends Component<PropsWithChildren> {
   static childContextTypes = {
     shortcuts: PropTypes.object.isRequired,
   };

@@ -55,6 +55,7 @@ const primaryButtonConfigs = {
       panelPaddingSize="none"
       primary={true}
     >
+      {/* @ts-expect-error update types */}
       {() => (
         <EuiContextMenu
           initialPanelId={0}
@@ -96,6 +97,7 @@ const extraButtonConfigs = {
   Canvas: undefined,
   Dashboard: [
     <SolutionToolbarPopover iconType="visualizeApp" label="All editors" panelPaddingSize="none">
+      {/* @ts-expect-error update types */}
       {() => (
         <EuiContextMenu
           initialPanelId={0}

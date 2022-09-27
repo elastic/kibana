@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';

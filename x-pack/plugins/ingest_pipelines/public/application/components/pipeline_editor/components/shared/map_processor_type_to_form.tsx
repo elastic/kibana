@@ -53,7 +53,7 @@ import {
   UriParts,
 } from '../processor_form/processors';
 
-interface FieldDescriptor {
+export interface FieldDescriptor {
   FieldsComponent?: FormFieldsComponent;
   docLinkPath: string;
   /**

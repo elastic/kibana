@@ -8,6 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type { DraggableProvided } from 'react-beautiful-dnd';
 import { Draggable } from 'react-beautiful-dnd';
 import type { ResizeCallback } from 're-resizable';
 import { Resizable } from 're-resizable';
@@ -217,7 +218,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   );
 
   const DraggableContent = useCallback(
-    (dragProvided) => (
+    (dragProvided: DraggableProvided) => (
       <EventsTh
         data-test-subj="draggable-header"
         {...dragProvided.draggableProps}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useUpdateCase, UseUpdateCase } from './use_update_case';
 import { basicCase } from './mock';
 import * as api from './api';
@@ -36,15 +36,14 @@ describe('useUpdateCase', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: false,
-        updateKey: null,
-        updateCaseProperty: result.current.updateCaseProperty,
+      const { result } = renderHook<UseUpdateCase, {}>(() => useUpdateCase());
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          isError: false,
+          updateKey: null,
+          updateCaseProperty: result.current.updateCaseProperty,
+        });
       });
     });
   });
@@ -53,51 +52,45 @@ describe('useUpdateCase', () => {
     const spyOnPatchCase = jest.spyOn(api, 'patchCase');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase()
-      );
-      await waitForNextUpdate();
-
-      result.current.updateCaseProperty(sampleUpdate);
-      await waitForNextUpdate();
-      expect(spyOnPatchCase).toBeCalledWith(
-        basicCase.id,
-        { description: 'updated description' },
-        basicCase.version,
-        abortCtrl.signal
-      );
+      const { result } = renderHook<UseUpdateCase, {}>(() => useUpdateCase());
+      await waitFor(() => {
+        result.current.updateCaseProperty(sampleUpdate);
+        expect(spyOnPatchCase).toBeCalledWith(
+          basicCase.id,
+          { description: 'updated description' },
+          basicCase.version,
+          abortCtrl.signal
+        );
+      });
     });
   });
 
   it('patch case and refresh the case page', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase()
-      );
-      await waitForNextUpdate();
-      result.current.updateCaseProperty(sampleUpdate);
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        updateKey: null,
-        isLoading: false,
-        isError: false,
-        updateCaseProperty: result.current.updateCaseProperty,
+      const { result } = renderHook<UseUpdateCase, {}>(() => useUpdateCase());
+      await waitFor(() => {
+        result.current.updateCaseProperty(sampleUpdate);
+        expect(result.current).toEqual({
+          updateKey: null,
+          isLoading: false,
+          isError: false,
+          updateCaseProperty: result.current.updateCaseProperty,
+        });
+        expect(useRefreshCaseViewPage()).toHaveBeenCalled();
+        expect(onSuccess).toHaveBeenCalled();
       });
-      expect(useRefreshCaseViewPage()).toHaveBeenCalled();
-      expect(onSuccess).toHaveBeenCalled();
     });
   });
 
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase()
-      );
-      await waitForNextUpdate();
-      result.current.updateCaseProperty(sampleUpdate);
+      const { result } = renderHook<UseUpdateCase, {}>(() => useUpdateCase());
+      await waitFor(() => {
+        result.current.updateCaseProperty(sampleUpdate);
 
-      expect(result.current.isLoading).toBe(true);
-      expect(result.current.updateKey).toBe(updateKey);
+        expect(result.current.isLoading).toBe(true);
+        expect(result.current.updateKey).toBe(updateKey);
+      });
     });
   });
 
@@ -108,19 +101,18 @@ describe('useUpdateCase', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase()
-      );
-      await waitForNextUpdate();
-      result.current.updateCaseProperty(sampleUpdate);
+      const { result } = renderHook<UseUpdateCase, {}>(() => useUpdateCase());
+      await waitFor(() => {
+        result.current.updateCaseProperty(sampleUpdate);
 
-      expect(result.current).toEqual({
-        updateKey: null,
-        isLoading: false,
-        isError: true,
-        updateCaseProperty: result.current.updateCaseProperty,
+        expect(result.current).toEqual({
+          updateKey: null,
+          isLoading: false,
+          isError: true,
+          updateCaseProperty: result.current.updateCaseProperty,
+        });
+        expect(onError).toHaveBeenCalled();
       });
-      expect(onError).toHaveBeenCalled();
     });
   });
 });

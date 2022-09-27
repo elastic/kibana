@@ -27,7 +27,7 @@ type ThrottleSelectField = typeof SelectField;
 
 export const ThrottleSelectField: ThrottleSelectField = (props) => {
   const { setValue } = props.field;
-  const onChange = useCallback(
+  const onChange = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
     (e) => {
       const throttle = e.target.value;
       setValue(throttle);

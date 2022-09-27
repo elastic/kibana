@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 
 import { useKibana } from '../../shared_imports';
@@ -19,9 +19,11 @@ interface ContextValue {
 
 const InternalApiClientContext = createContext<undefined | ContextValue>(undefined);
 
-export const InternalApiClientProvider: FunctionComponent<{
-  apiClient: ReportingAPIClient;
-}> = ({ apiClient, children }) => {
+export const InternalApiClientProvider: FC<
+  PropsWithChildren<{
+    apiClient: ReportingAPIClient;
+  }>
+> = ({ apiClient, children }) => {
   const {
     services: { http },
   } = useKibana();

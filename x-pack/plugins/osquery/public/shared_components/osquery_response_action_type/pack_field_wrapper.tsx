@@ -15,7 +15,7 @@ import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_sta
 import { usePacks } from '../../packs/use_packs';
 import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
 
-interface PackFieldWrapperProps {
+export interface PackFieldWrapperProps {
   liveQueryDetails?: {
     queries?: Array<{
       id: string;
@@ -27,7 +27,12 @@ interface PackFieldWrapperProps {
   };
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
   submitButtonContent?: React.ReactNode;
-  addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
+  addToCase?: (payload: {
+    actionId?: string;
+    queryId?: string;
+    isIcon?: boolean;
+    isDisabled?: boolean;
+  }) => ReactElement;
   showResultsHeader?: boolean;
 }
 

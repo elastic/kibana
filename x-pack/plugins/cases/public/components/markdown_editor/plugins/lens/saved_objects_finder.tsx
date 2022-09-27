@@ -10,7 +10,7 @@
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-
+import type { PropsWithChildren } from 'react';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -107,7 +107,7 @@ export type SavedObjectFinderUiProps = {
 // TODO: Fix this manually. Issue #123375
 // eslint-disable-next-line react/display-name
 export class SavedObjectFinderUi extends React.Component<
-  SavedObjectFinderUiProps,
+  PropsWithChildren<SavedObjectFinderUiProps>,
   SavedObjectFinderState
 > {
   public static propTypes = {

@@ -90,7 +90,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   );
 
   const updateLimitPagination = useCallback(
-    (newLimit) =>
+    (newLimit: number) =>
       dispatch(
         hostsActions.updateTableLimit({
           hostsType: type,
@@ -102,7 +102,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   );
 
   const updateActivePage = useCallback(
-    (newPage) =>
+    (newPage: number) =>
       dispatch(
         hostsActions.updateTableActivePage({
           activePage: newPage,

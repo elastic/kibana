@@ -206,6 +206,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {/* @ts-expect-error update types */}
       <Chart size={{ height: 50 }}>
         <Settings tooltip={tooltipSettings} theme={theme} />
         <BarSeries

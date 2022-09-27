@@ -39,8 +39,8 @@ export const useUrlPagination = (): UrlPagination => {
         ...location,
         search: toUrlParams({
           ...urlParams,
-          currentPage,
-          pageSize,
+          currentPage: `${currentPage}`,
+          pageSize: `${pageSize}`,
         }),
       });
     },

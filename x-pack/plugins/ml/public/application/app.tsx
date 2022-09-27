@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import './_index.scss';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 
@@ -146,18 +146,15 @@ export const renderApp = (
 
   appMountParams.onAppLeave((actions) => actions.default());
 
+  const root = createRoot(appMountParams.element);
   const mlLicense = setLicenseCache(deps.licensing, coreStart.application, [
-    () =>
-      ReactDOM.render(
-        <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
-        appMountParams.element
-      ),
+    () => root.render(<App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />),
   ]);
 
   return () => {
     mlLicense.unsubscribe();
     clearCache();
-    ReactDOM.unmountComponentAtNode(appMountParams.element);
+    root.unmount();
     deps.data.search.session.clear();
   };
 };

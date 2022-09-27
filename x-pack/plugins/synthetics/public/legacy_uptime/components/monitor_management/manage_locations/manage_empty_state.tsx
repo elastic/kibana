@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useSelector } from 'react-redux';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { PrivateLocation } from '../../../../../common/runtime_types';
 import { EmptyLocations } from './empty_locations';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
-export const ManageEmptyState: FC<{
-  privateLocations: PrivateLocation[];
-  hasFleetPermissions: boolean;
-  setIsAddingNew: (val: boolean) => void;
-}> = ({ children, privateLocations, setIsAddingNew, hasFleetPermissions }) => {
+export const ManageEmptyState: FC<
+  PropsWithChildren<{
+    privateLocations: PrivateLocation[];
+    hasFleetPermissions: boolean;
+    setIsAddingNew: (val: boolean) => void;
+  }>
+> = ({ children, privateLocations, setIsAddingNew, hasFleetPermissions }) => {
   const { data: agentPolicies } = useSelector(selectAgentPolicies);
 
   if (agentPolicies?.total === 0) {

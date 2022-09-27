@@ -7,11 +7,13 @@
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
+import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DraggingStyle,
+  DroppableProvided,
   NotDraggingStyle,
 } from 'react-beautiful-dnd';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
@@ -45,7 +47,7 @@ DragEffects.displayName = 'DragEffects';
  * writing, there's no hook equivalent for `componentDidCatch`, per
  * https://reactjs.org/docs/hooks-faq.html#do-hooks-cover-all-use-cases-for-classes
  */
-class DragDropErrorBoundary extends React.PureComponent {
+class DragDropErrorBoundary extends React.PureComponent<PropsWithChildren> {
   componentDidCatch() {
     this.forceUpdate(); // required for recovery
   }
@@ -96,7 +98,7 @@ type RenderFunctionProp = (
   state: DraggableStateSnapshot
 ) => React.ReactNode;
 
-interface Props {
+export interface DraggableWrapperProps {
   dataProvider: DataProvider;
   hideTopN?: boolean;
   isDraggable?: boolean;
@@ -127,7 +129,7 @@ export const getStyle = (
   };
 };
 
-const DraggableOnWrapperComponent: React.FC<Props> = ({
+const DraggableOnWrapperComponent: React.FC<DraggableWrapperProps> = ({
   dataProvider,
   hideTopN = false,
   onFilterAdded,
@@ -185,7 +187,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   );
 
   const RenderClone = useCallback(
-    (provided, snapshot) => (
+    (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
       <ConditionalPortal registerProvider={registerProvider}>
         <div
           {...provided.draggableProps}
@@ -207,7 +209,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   );
 
   const DraggableContent = useCallback(
-    (provided, snapshot) => (
+    (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
       <ProviderContainer
         {...provided.draggableProps}
         {...provided.dragHandleProps}
@@ -253,7 +255,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   });
 
   const DroppableContent = useCallback(
-    (droppableProvided) => (
+    (droppableProvided: DroppableProvided) => (
       <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
         <div
           className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}
@@ -312,7 +314,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   );
 };
 
-const DraggableWrapperComponent: React.FC<Props> = ({
+const DraggableWrapperComponent: React.FC<DraggableWrapperProps> = ({
   dataProvider,
   hideTopN = false,
   isDraggable = false,

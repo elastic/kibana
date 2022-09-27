@@ -74,6 +74,7 @@ export function FilterQueryInput({
               color="subdued"
               content={helpMessage}
               iconProps={{
+                // @ts-expect-error update types
                 className: 'eui-alignTop',
               }}
               position="top"
@@ -111,10 +112,12 @@ export function FilterQueryInput({
                         defaultMessage: 'Click to edit',
                       })}
                     >
-                      {inputFilter?.query ||
-                        i18n.translate('xpack.lens.indexPattern.filterBy.emptyFilterQuery', {
-                          defaultMessage: '(empty)',
-                        })}
+                      <>
+                        {inputFilter?.query ||
+                          i18n.translate('xpack.lens.indexPattern.filterBy.emptyFilterQuery', {
+                            defaultMessage: '(empty)',
+                          })}
+                      </>
                     </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>

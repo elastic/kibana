@@ -6,8 +6,8 @@
  */
 
 import { I18nProvider } from '@kbn/i18n-react';
-import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
@@ -27,7 +27,9 @@ export async function mountManagementSection(
   urlService: SharePluginSetup['url'],
   params: ManagementAppMountParams
 ) {
-  render(
+  const root = createRoot(params.element);
+
+  root.render(
     <I18nProvider>
       <KibanaContextProvider
         services={{
@@ -50,11 +52,10 @@ export async function mountManagementSection(
           </IlmPolicyStatusContextProvider>
         </InternalApiClientProvider>
       </KibanaContextProvider>
-    </I18nProvider>,
-    params.element
+    </I18nProvider>
   );
 
   return () => {
-    unmountComponentAtNode(params.element);
+    root.unmount();
   };
 }

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import * as React from 'react';
+import React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';

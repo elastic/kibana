@@ -61,7 +61,15 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
       <UseField path="format" config={getFieldConfig('format')}>
         {(formatField) => {
           return (
-            <EuiFormRow label={formatField.label} helpText={formatField.helpText} fullWidth>
+            <EuiFormRow
+              label={formatField.label}
+              helpText={
+                typeof formatField.helpText === 'function'
+                  ? formatField.helpText()
+                  : formatField.helpText
+              }
+              fullWidth
+            >
               <EuiComboBox
                 placeholder={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.formatParameter.placeholderLabel',

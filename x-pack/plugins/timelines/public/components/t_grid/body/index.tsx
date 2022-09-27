@@ -856,14 +856,14 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     ]);
 
     const onChangeItemsPerPage = useCallback(
-      (itemsChangedPerPage) => {
+      (itemsChangedPerPage: number) => {
         dispatch(tGridActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
       },
       [id, dispatch]
     );
 
     const onChangePage = useCallback(
-      (page) => {
+      (page: number) => {
         loadPage(page);
       },
       [loadPage]

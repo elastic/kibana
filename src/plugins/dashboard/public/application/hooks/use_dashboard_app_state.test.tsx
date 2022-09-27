@@ -9,7 +9,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { createBrowserHistory } from 'history';
-import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, act, RenderHookResult, waitFor } from '@testing-library/react';
 import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 
@@ -39,9 +39,9 @@ interface SetupEmbeddableFactoryReturn {
 
 interface RenderDashboardStateHookReturn {
   embeddableFactoryResult: SetupEmbeddableFactoryReturn;
-  renderHookResult: RenderHookResult<Partial<UseDashboardStateProps>, DashboardAppState>;
-  services: DashboardAppServices;
+  renderHookResult: RenderHookResult<DashboardAppState, Partial<UseDashboardStateProps>>;
   props: UseDashboardStateProps;
+  services: DashboardAppServices;
 }
 
 const originalDashboardEmbeddableId = 'originalDashboardEmbeddableId';
@@ -135,7 +135,7 @@ describe('Dashboard container lifecycle', () => {
     const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({});
 
     embeddableFactoryResult.finalizeEmbeddableCreation();
-    await renderHookResult.waitForNextUpdate();
+    await waitFor(() => renderHookResult);
 
     expect(embeddableFactoryResult.dashboardContainer).toBe(
       renderHookResult.result.current.dashboardContainer
@@ -153,7 +153,7 @@ describe('Dashboard container lifecycle', () => {
     expect(getResult().dashboardContainer).toBeUndefined();
     embeddableFactoryResult.finalizeEmbeddableCreation();
 
-    await renderHookResult.waitForNextUpdate();
+    await waitFor(() => renderHookResult);
     expect(embeddableFactoryResult.dashboardContainer).toBe(getResult().dashboardContainer);
     expect(embeddableFactoryResult.dashboardDestroySpy).not.toBeCalled();
 
@@ -162,7 +162,7 @@ describe('Dashboard container lifecycle', () => {
     renderHookResult.rerender({ savedDashboardId: newDashboardId });
 
     embeddableFactoryNew.finalizeEmbeddableCreation();
-    await renderHookResult.waitForNextUpdate();
+    await waitFor(() => renderHookResult);
 
     expect(embeddableFactoryNew.dashboardContainer).toEqual(getResult().dashboardContainer);
     expect(embeddableFactoryNew.dashboardDestroySpy).not.toBeCalled();
@@ -183,7 +183,7 @@ describe('Dashboard container lifecycle', () => {
     renderHookResult.rerender({ savedDashboardId: newDashboardId });
     await act(() => Promise.resolve()); // wait for the new savedDashboard to be loaded...
     embeddableFactoryNew.finalizeEmbeddableCreation();
-    await renderHookResult.waitForNextUpdate();
+    await waitFor(() => renderHookResult);
     expect(embeddableFactoryNew.dashboardContainer).toBe(getResult().dashboardContainer);
     expect(embeddableFactoryNew.dashboardDestroySpy).not.toBeCalled();
 
@@ -206,7 +206,7 @@ describe.skip('Dashboard initial state', () => {
     expect(getResult().savedDashboard).toBeUndefined();
 
     embeddableFactoryResult.finalizeEmbeddableCreation();
-    await renderHookResult.waitForNextUpdate();
+    await waitFor(() => renderHookResult);
 
     expect(getResult().savedDashboard).toBeDefined();
     expect(getResult().savedDashboard?.title).toEqual(
@@ -234,7 +234,7 @@ describe.skip('Dashboard initial state', () => {
     const getResult = () => renderHookResult.result.current;
 
     embeddableFactoryResult.finalizeEmbeddableCreation();
-    await renderHookResult.waitForNextUpdate();
+    await waitFor(() => renderHookResult);
 
     expect(getResult().getLatestDashboardState?.().timeRestore).toEqual(true);
     expect(
@@ -263,7 +263,7 @@ describe.skip('Dashboard initial state', () => {
     const getResult = () => renderHookResult.result.current;
 
     embeddableFactoryResult.finalizeEmbeddableCreation();
-    await renderHookResult.waitForNextUpdate();
+    await waitFor(() => renderHookResult);
     expect(getResult().getLatestDashboardState?.().description).toEqual('with this');
     expect(getResult().getLatestDashboardState?.().viewMode).toEqual(ViewMode.EDIT);
   });
@@ -279,7 +279,7 @@ describe.skip('Dashboard state sync', () => {
     DashboardConstants.CHANGE_CHECK_DEBOUNCE = 0;
     defaultDashboardAppStateHookResult = renderDashboardAppStateHook({});
     defaultDashboardAppStateHookResult.embeddableFactoryResult.finalizeEmbeddableCreation();
-    await defaultDashboardAppStateHookResult.renderHookResult.waitForNextUpdate();
+    await waitFor(() => defaultDashboardAppStateHookResult.renderHookResult);
   });
 
   it('Updates Dashboard container input when state changes', async () => {

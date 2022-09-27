@@ -31,7 +31,7 @@ const CallOutComponent = ({
   type,
   hasLicenseError,
 }: CallOutProps) => {
-  const handleCallOut = useCallback(
+  const handleCallOut = useCallback<React.MouseEventHandler>(
     (e) => handleButtonClick(e, id, type),
     [handleButtonClick, id, type]
   );

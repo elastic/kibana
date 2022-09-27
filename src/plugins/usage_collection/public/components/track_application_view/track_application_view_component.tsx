@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { findDOMNode } from 'react-dom';
 import { IApplicationUsageTracker } from '../../plugin';
 import { TrackApplicationViewProps } from './types';
 
@@ -20,7 +20,7 @@ export class TrackApplicationViewComponent extends React.Component<Props> {
 
   onClick = (e: MouseEvent) => {
     const { applicationUsageTracker, viewId } = this.props;
-    this.parentNode = this.parentNode || ReactDOM.findDOMNode(this)?.parentNode;
+    this.parentNode = this.parentNode || findDOMNode(this)?.parentNode;
     if (this.parentNode === e.target || this.parentNode?.contains(e.target as Node | null)) {
       applicationUsageTracker?.updateViewClickCounter(viewId);
     }

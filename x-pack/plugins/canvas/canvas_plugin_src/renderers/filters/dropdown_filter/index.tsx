@@ -8,7 +8,7 @@
 import { fromExpression, toExpression, Ast } from '@kbn/interpreter';
 import { get } from 'lodash';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererFactory } from '../../../../types';
@@ -96,14 +96,15 @@ export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> =
         />
       );
 
-      ReactDOM.render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>{filter}</KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
+      const root = createRoot(domNode);
+
+      root.render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>{filter}</KibanaThemeProvider>
+        // () => handlers.done()
       );
 
       handlers.onDestroy(() => {
-        ReactDOM.unmountComponentAtNode(domNode);
+        root.unmount();
       });
     },
   });

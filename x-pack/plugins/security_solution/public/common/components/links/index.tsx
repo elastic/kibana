@@ -7,7 +7,7 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
-import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import type { SyntheticEvent, MouseEventHandler, MouseEvent, FC, PropsWithChildren } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
@@ -49,7 +49,7 @@ export const DEFAULT_NUMBER_OF_LINK = 5;
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 // Internal Links
-const UserDetailsLinkComponent: React.FC<{
+const UserDetailsLinkComponent: FC<{
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -64,7 +64,7 @@ const UserDetailsLinkComponent: React.FC<{
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const { navigateToApp } = useKibana().services.application;
   const goToUsersDetails = useCallback(
-    (ev) => {
+    (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
@@ -109,7 +109,7 @@ const UserDetailsLinkComponent: React.FC<{
 
 export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 
-const HostDetailsLinkComponent: React.FC<{
+const HostDetailsLinkComponent: FC<{
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -125,7 +125,7 @@ const HostDetailsLinkComponent: React.FC<{
   const encodedHostName = encodeURIComponent(hostName);
 
   const goToHostDetails = useCallback(
-    (ev) => {
+    (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
@@ -203,7 +203,7 @@ export const ExternalLink = React.memo<{
 
 ExternalLink.displayName = 'ExternalLink';
 
-const NetworkDetailsLinkComponent: React.FC<{
+const NetworkDetailsLinkComponent: FC<{
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -253,14 +253,14 @@ const NetworkDetailsLinkComponent: React.FC<{
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 
-const CaseDetailsLinkComponent: React.FC<{
+const CaseDetailsLinkComponent: FC<{
   children?: React.ReactNode;
   detailName: string;
   title?: string;
 }> = ({ children, detailName, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
-  const goToCaseDetails = useCallback(
+  const goToCaseDetails = useCallback<React.MouseEventHandler>(
     async (ev) => {
       ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
@@ -288,7 +288,7 @@ CaseDetailsLink.displayName = 'CaseDetailsLink';
 export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ children }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
-  const goToCreateCase = useCallback(
+  const goToCreateCase = useCallback<React.MouseEventHandler>(
     async (ev) => {
       ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
@@ -412,7 +412,7 @@ const defaultNameMapping: Record<DefaultReputationLink, string> = {
   [DefaultReputationLink['talosIntelligence.com']]: i18n.VIEW_TALOS_INTELLIGENCE,
 };
 
-const ReputationLinkComponent: React.FC<{
+const ReputationLinkComponent: FC<{
   overflowIndexStart?: number;
   allItemsLimit?: number;
   showDomain?: boolean;
@@ -448,7 +448,7 @@ const ReputationLinkComponent: React.FC<{
   );
 
   const renderCallback = useCallback(
-    (rowItem) =>
+    (rowItem: ReputationLinkSetting) =>
       isReputationLink(rowItem) && (
         <ExternalLink
           url={rowItem.url_template}
@@ -524,6 +524,13 @@ interface SecuritySolutionLinkProps {
 interface LinkProps {
   onClick: MouseEventHandler;
   href: string;
+  tabIndex?: number;
+  hasBorder?: boolean;
+  textAlign?: 'left' | 'center' | 'right';
+  paddingSize?: 'none' | 'xs' | 's' | 'm' | 'l' | 'xl';
+  image?: React.ReactNode;
+  title?: React.ReactNode;
+  description?: string | React.ReactNode;
 }
 
 type GetSecuritySolutionProps = (
@@ -561,14 +568,11 @@ export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
  * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
  */
 export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
-  WrappedComponent: React.FC<T>
+  WrappedComponent: FC<PropsWithChildren<T>>
 ) => {
-  const SecuritySolutionLink: React.FC<Omit<T & SecuritySolutionLinkProps, 'href'>> = ({
-    deepLinkId,
-    path,
-    onClick: onClickProps,
-    ...rest
-  }) => {
+  const SecuritySolutionLink: FC<
+    PropsWithChildren<Omit<T & SecuritySolutionLinkProps, 'href'>>
+  > = ({ deepLinkId, path, onClick: onClickProps, ...rest }) => {
     const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
     const { onClick, href } = getSecuritySolutionLinkProps({
       deepLinkId,

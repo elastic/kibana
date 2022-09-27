@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
@@ -44,9 +44,10 @@ export const heatmapRenderer: (
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     const { core, plugins } = getStartDeps();
+    const root = createRoot(domNode);
 
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
     const onClickValue = (data: FilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
@@ -73,7 +74,7 @@ export const heatmapRenderer: (
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;
 
-    render(
+    root.render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <div className="heatmap-container" data-test-subj="heatmapChart">
           <HeatmapComponent
@@ -90,8 +91,7 @@ export const heatmapRenderer: (
             interactive={isInteractive()}
           />
         </div>
-      </KibanaThemeProvider>,
-      domNode
+      </KibanaThemeProvider>
     );
   },
 });

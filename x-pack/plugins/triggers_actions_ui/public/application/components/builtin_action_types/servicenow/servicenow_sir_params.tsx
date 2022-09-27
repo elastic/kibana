@@ -74,7 +74,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   );
 
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
@@ -155,7 +155,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        error={errors['subActionParams.incident.short_description']}
+        error={errors['subActionParams.incident.short_description'] as string[]}
         isInvalid={
           errors['subActionParams.incident.short_description'] !== undefined &&
           errors['subActionParams.incident.short_description'].length > 0 &&

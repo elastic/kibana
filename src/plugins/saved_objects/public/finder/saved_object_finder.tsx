@@ -105,7 +105,7 @@ export type SavedObjectFinderUiProps = {
 } & SavedObjectFinderProps;
 
 class SavedObjectFinderUi extends React.Component<
-  SavedObjectFinderUiProps,
+  React.PropsWithChildren<SavedObjectFinderUiProps>,
   SavedObjectFinderState
 > {
   public static propTypes = {

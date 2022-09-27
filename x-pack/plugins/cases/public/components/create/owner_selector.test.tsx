@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 
@@ -19,7 +20,7 @@ import { waitForComponentToPaint } from '../../common/test_utils';
 describe('Case Owner Selection', () => {
   let globalForm: FormHook;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { selectedOwner: '' },
       schema: {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { ThemeServiceSetup } from '@kbn/core/public';

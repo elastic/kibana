@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { MockRedux } from '../../../lib/helper/rtl_helpers';
 import { useInlineErrorsCount } from './use_inline_errors_count';
 import * as obsvPlugin from '@kbn/observability-plugin/public/hooks/use_es_search';
@@ -22,6 +22,7 @@ describe('useInlineErrorsCount', function () {
     const spy = jest.spyOn(obsvPlugin, 'useEsSearch');
 
     const { result } = renderHook(() => useInlineErrorsCount(), {
+      // @ts-expect-error update types
       wrapper: MockRedux,
     });
 

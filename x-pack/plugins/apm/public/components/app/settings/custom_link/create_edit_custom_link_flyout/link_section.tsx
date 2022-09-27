@@ -20,7 +20,7 @@ import { Documentation } from './documentation';
 interface InputField {
   name: keyof CustomLink;
   label: string;
-  helpText: string | React.ReactNode;
+  helpText: string | React.ReactNode | Function;
   placeholder: string;
   onChange: (value: string) => void;
   value?: string;
@@ -108,7 +108,11 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
             fullWidth
             key={field.name}
             label={field.label}
-            helpText={field.helpText}
+            helpText={
+              typeof field.helpText === 'function'
+                ? field.helpText()
+                : field.helpText
+            }
             labelAppend={
               <EuiText size="xs">
                 {i18n.translate(

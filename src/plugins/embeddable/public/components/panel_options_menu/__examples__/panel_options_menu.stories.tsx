@@ -7,7 +7,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import * as React from 'react';
+import React from 'react';
 import { PanelOptionsMenu } from '..';
 
 export default {

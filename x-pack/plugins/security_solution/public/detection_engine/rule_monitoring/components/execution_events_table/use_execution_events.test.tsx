@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { renderHook, cleanup, waitFor } from '@testing-library/react';
 
 import {
   LogLevel,
@@ -41,7 +42,7 @@ describe('useExecutionEvents', () => {
         },
       },
     });
-    const wrapper: React.FC = ({ children }) => (
+    const wrapper: FC<PropsWithChildren> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     return wrapper;
@@ -55,18 +56,18 @@ describe('useExecutionEvents', () => {
   it('calls the API via fetchRuleExecutionEvents', async () => {
     const fetchRuleExecutionEvents = jest.spyOn(api, 'fetchRuleExecutionEvents');
 
-    const { waitForNextUpdate } = render();
+    render();
 
-    await waitForNextUpdate();
-
-    expect(fetchRuleExecutionEvents).toHaveBeenCalledTimes(1);
-    expect(fetchRuleExecutionEvents).toHaveBeenLastCalledWith(
-      expect.objectContaining({ ruleId: SOME_RULE_ID })
-    );
+    await waitFor(() => {
+      expect(fetchRuleExecutionEvents).toHaveBeenCalledTimes(1);
+      expect(fetchRuleExecutionEvents).toHaveBeenLastCalledWith(
+        expect.objectContaining({ ruleId: SOME_RULE_ID })
+      );
+    });
   });
 
   it('fetches data from the API', async () => {
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -74,27 +75,27 @@ describe('useExecutionEvents', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents returns
-    await waitForNextUpdate();
-
-    // It switches to a success state
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isSuccess).toEqual(true);
-    expect(result.current.isError).toEqual(false);
-    expect(result.current.data).toEqual({
-      events: [
-        {
-          timestamp: '2021-12-29T10:42:59.996Z',
-          sequence: 0,
-          level: LogLevel.info,
-          type: RuleExecutionEventType['status-change'],
-          message: 'Rule changed status to "succeeded". Rule execution completed without errors',
+    await waitFor(() => {
+      // It switches to a success state
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.isSuccess).toEqual(true);
+      expect(result.current.isError).toEqual(false);
+      expect(result.current.data).toEqual({
+        events: [
+          {
+            timestamp: '2021-12-29T10:42:59.996Z',
+            sequence: 0,
+            level: LogLevel.info,
+            type: RuleExecutionEventType['status-change'],
+            message: 'Rule changed status to "succeeded". Rule execution completed without errors',
+          },
+        ],
+        pagination: {
+          page: 1,
+          per_page: 20,
+          total: 1,
         },
-      ],
-      pagination: {
-        page: 1,
-        per_page: 20,
-        total: 1,
-      },
+      });
     });
   });
 
@@ -102,7 +103,7 @@ describe('useExecutionEvents', () => {
     const exception = new Error('Boom!');
     jest.spyOn(api, 'fetchRuleExecutionEvents').mockRejectedValue(exception);
 
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -110,18 +111,18 @@ describe('useExecutionEvents', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitForNextUpdate();
+    await waitFor(() => {
+      // It switches to an error state
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.isSuccess).toEqual(false);
+      expect(result.current.isError).toEqual(true);
+      expect(result.current.error).toEqual(exception);
 
-    // It switches to an error state
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isSuccess).toEqual(false);
-    expect(result.current.isError).toEqual(true);
-    expect(result.current.error).toEqual(exception);
-
-    // And shows a toast with the caught exception
-    expect(useToasts().addError).toHaveBeenCalledTimes(1);
-    expect(useToasts().addError).toHaveBeenCalledWith(exception, {
-      title: 'Failed to fetch rule execution events',
+      // And shows a toast with the caught exception
+      expect(useToasts().addError).toHaveBeenCalledTimes(1);
+      expect(useToasts().addError).toHaveBeenCalledWith(exception, {
+        title: 'Failed to fetch rule execution events',
+      });
     });
   });
 });

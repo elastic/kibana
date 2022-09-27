@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useFilters } from './use_filters';
 import { defaultCore, WrappedHelper } from '../../../../utils/testing';
 
@@ -55,27 +55,27 @@ describe('useMonitorListFilters', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useFilters(), {
+    const { result } = renderHook(() => useFilters(), {
       wrapper: WrappedHelper,
     });
 
     expect(result.current).toStrictEqual({ locations: [], tags: [], types: [] });
 
-    await waitForNextUpdate();
-
-    expect(result.current).toStrictEqual({
-      locations: [
-        { label: 'Test 1', count: 1 },
-        { label: 'Test 2', count: 2 },
-      ],
-      tags: [
-        { label: 'Test 3', count: 3 },
-        { label: 'Test 4', count: 4 },
-      ],
-      types: [
-        { label: 'Test 5', count: 5 },
-        { label: 'Test 6', count: 6 },
-      ],
+    await waitFor(() => {
+      expect(result.current).toStrictEqual({
+        locations: [
+          { label: 'Test 1', count: 1 },
+          { label: 'Test 2', count: 2 },
+        ],
+        tags: [
+          { label: 'Test 3', count: 3 },
+          { label: 'Test 4', count: 4 },
+        ],
+        types: [
+          { label: 'Test 5', count: 5 },
+          { label: 'Test 6', count: 6 },
+        ],
+      });
     });
   });
 });

@@ -93,7 +93,7 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<Res
     );
 
     const onFieldChange = useCallback(
-      (key, value) => {
+      (key: string, value: string | string[]) => {
         onChange({
           ...fields,
           incidentTypes,

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { EventEmitter } from 'events';
 import type {
   Vis,
@@ -34,7 +34,7 @@ export class EditorController implements IEditorController {
     const I18nContext = getI18n().Context;
     const defaultIndexPattern = (await getDataViewsStart().getDefault()) || undefined;
 
-    render(
+    createRoot(this.el).render(
       <I18nContext>
         <KibanaThemeProvider theme$={getCoreStart().theme.theme$}>
           <VisEditor
@@ -49,12 +49,11 @@ export class EditorController implements IEditorController {
             defaultIndexPattern={defaultIndexPattern}
           />
         </KibanaThemeProvider>
-      </I18nContext>,
-      this.el
+      </I18nContext>
     );
   }
 
   destroy() {
-    unmountComponentAtNode(this.el);
+    createRoot(this.el).unmount();
   }
 }

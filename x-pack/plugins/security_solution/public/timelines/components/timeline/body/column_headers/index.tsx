@@ -6,7 +6,11 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import type { DraggableChildrenFn } from 'react-beautiful-dnd';
+import type {
+  DraggableChildrenFn,
+  DroppableProvided,
+  DroppableStateSnapshot,
+} from 'react-beautiful-dnd';
 import { Droppable } from 'react-beautiful-dnd';
 
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
@@ -165,7 +169,7 @@ export const ColumnHeadersComponent = ({
   );
 
   const DroppableContent = useCallback(
-    (dropProvided, snapshot) => (
+    (dropProvided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
       <>
         <EventsThGroupData
           data-test-subj="headers-group"

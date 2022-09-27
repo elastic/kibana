@@ -107,7 +107,7 @@ export const ScheduleItem = ({
   const { value, setValue } = field;
 
   const onChangeTimeType = useCallback(
-    (e) => {
+    (e: { target: { value: string } }) => {
       setTimeType(e.target.value);
       setValue(`${timeVal}${e.target.value}`);
     },
@@ -115,7 +115,7 @@ export const ScheduleItem = ({
   );
 
   const onChangeTimeVal = useCallback(
-    (e) => {
+    (e: { target: { value: string } }) => {
       const sanitizedValue = getNumberFromUserInput(e.target.value, minimumValue);
       setTimeVal(sanitizedValue);
       setValue(`${sanitizedValue}${timeType}`);
@@ -165,7 +165,7 @@ export const ScheduleItem = ({
   return (
     <StyledEuiFormRow
       label={label}
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth={fullWidth}

@@ -262,16 +262,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Registers custom component that is going to be render on fleet section
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
+      // @ts-expect-error update types
       () => import('./tutorial/tutorial_fleet_instructions')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgent',
+      // @ts-expect-error update types
       () => import('./tutorial/config_agent')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgentRumScript',
+      // @ts-expect-error update types
       () => import('./tutorial/config_agent/rum_script')
     );
 

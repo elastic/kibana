@@ -6,15 +6,18 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { useHasData } from '../components/monitors_page/overview/empty_state/use_has_data';
 
 export const SyntheticsDataViewContext = createContext({} as DataView);
 
-export const SyntheticsDataViewContextProvider: React.FC<{
-  dataViews: DataViewsPublicPluginStart;
-}> = ({ children, dataViews }) => {
+export const SyntheticsDataViewContextProvider: FC<
+  PropsWithChildren<{
+    dataViews: DataViewsPublicPluginStart;
+  }>
+> = ({ children, dataViews }) => {
   const { settings, data: indexStatus } = useHasData();
 
   const heartbeatIndices = settings?.heartbeatIndices || '';

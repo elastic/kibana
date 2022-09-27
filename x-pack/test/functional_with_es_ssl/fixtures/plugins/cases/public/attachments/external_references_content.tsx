@@ -17,6 +17,7 @@ const AttachmentContent: React.FC = (props) => {
   return (
     <EuiFlexGroup data-test-subj="test-attachment-content">
       <EuiFlexItem>
+        {/* @ts-expect-error update types */}
         <Chart size={{ height: 200 }}>
           <Settings showLegend={false} />
           <BarSeries

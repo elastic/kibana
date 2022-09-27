@@ -48,6 +48,7 @@ describe('<BrowserAdvancedFields />', () => {
     onFieldBlur?: (field: ConfigKey) => void;
   }) => {
     return (
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <BrowserSimpleFieldsContextProvider defaultValues={defaultSimpleFields}>
           <BrowserAdvancedFieldsContextProvider defaultValues={defaultValues}>

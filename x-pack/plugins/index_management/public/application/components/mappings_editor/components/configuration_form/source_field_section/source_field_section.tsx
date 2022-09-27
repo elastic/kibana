@@ -70,7 +70,11 @@ export const SourceFieldSection = () => {
     <div data-test-subj="sourceField">
       <UseField path="sourceField.includes">
         {({ label, helpText, value, setValue }) => (
-          <EuiFormRow label={label} helpText={helpText} fullWidth>
+          <EuiFormRow
+            label={label}
+            helpText={typeof helpText === 'function' ? helpText() : helpText}
+            fullWidth
+          >
             <EuiComboBox
               noSuggestions
               placeholder={i18n.translate(
@@ -101,7 +105,11 @@ export const SourceFieldSection = () => {
 
       <UseField path="sourceField.excludes">
         {({ label, helpText, value, setValue }) => (
-          <EuiFormRow label={label} helpText={helpText} fullWidth>
+          <EuiFormRow
+            label={label}
+            helpText={typeof helpText === 'function' ? helpText() : helpText}
+            fullWidth
+          >
             <EuiComboBox
               noSuggestions
               placeholder={i18n.translate(

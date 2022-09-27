@@ -704,6 +704,7 @@ export const termsOperation: OperationDefinition<
                   defaultMessage: `Specifies the dimension the top values are ranked by.`,
                 })}
                 iconProps={{
+                  // @ts-expect-error update types
                   className: 'eui-alignTop',
                 }}
                 position="top"
@@ -1018,6 +1019,7 @@ export const termsOperation: OperationDefinition<
                         defaultMessage: `Improves results for high-cardinality data, but increases the load on the Elasticsearch cluster.`,
                       })}
                       iconProps={{
+                        // @ts-expect-error update types
                         className: 'eui-alignTop',
                       }}
                       position="top"

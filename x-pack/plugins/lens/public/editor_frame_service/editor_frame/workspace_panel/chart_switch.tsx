@@ -378,6 +378,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                                   }
                                 )}
                                 iconProps={{
+                                  // @ts-expect-error update types
                                   className: 'lnsChartSwitch__chartIcon',
                                   'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
                                 }}

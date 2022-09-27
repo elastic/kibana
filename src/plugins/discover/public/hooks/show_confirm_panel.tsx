@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,8 +26,9 @@ export const showConfirmPanel = ({
 
   isOpenConfirmPanel = true;
   const container = document.createElement('div');
+  const root = createRoot(container);
   const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
     isOpenConfirmPanel = false;
   };
@@ -61,5 +62,5 @@ export const showConfirmPanel = ({
       </p>
     </EuiConfirmModal>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 };

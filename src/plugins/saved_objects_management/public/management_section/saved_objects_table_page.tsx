@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useLocation } from 'react-router-dom';
 import { get } from 'lodash';
 import { Query } from '@elastic/eui';
@@ -24,7 +25,9 @@ import {
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent: FC<PropsWithChildren<SpacesContextProps>> = ({ children }) => (
+  <>{children}</>
+);
 
 const SavedObjectsTablePage = ({
   coreStart,

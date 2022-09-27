@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import type { PropsWithChildren } from 'react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useGetCasesStatus, UseGetCasesStatus } from './use_get_cases_status';
 import { casesStatus } from './mock';
 import * as api from '../api';
@@ -24,8 +25,8 @@ describe('useGetCasesStatus', () => {
   });
 
   it('init', async () => {
-    const { result } = renderHook<string, UseGetCasesStatus>(() => useGetCasesStatus(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    const { result } = renderHook<UseGetCasesStatus, {}>(() => useGetCasesStatus(), {
+      wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
     });
 
     await act(async () => {
@@ -43,39 +44,35 @@ describe('useGetCasesStatus', () => {
   it('calls getCasesStatus api', async () => {
     const spyOnGetCasesStatus = jest.spyOn(api, 'getCasesStatus');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
-        () => useGetCasesStatus(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+      renderHook<UseGetCasesStatus, {}>(() => useGetCasesStatus(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
 
-      await waitForNextUpdate();
-      expect(spyOnGetCasesStatus).toBeCalledWith({
-        http: expect.anything(),
-        signal: abortCtrl.signal,
-        query: { owner: [SECURITY_SOLUTION_OWNER] },
+      await waitFor(() => {
+        expect(spyOnGetCasesStatus).toBeCalledWith({
+          http: expect.anything(),
+          signal: abortCtrl.signal,
+          query: { owner: [SECURITY_SOLUTION_OWNER] },
+        });
       });
     });
   });
 
   it('fetch statuses', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
-        () => useGetCasesStatus(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<UseGetCasesStatus, {}>(() => useGetCasesStatus(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
 
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        countClosedCases: casesStatus.countClosedCases,
-        countOpenCases: casesStatus.countOpenCases,
-        countInProgressCases: casesStatus.countInProgressCases,
-        isLoading: false,
-        isError: false,
-        fetchCasesStatus: result.current.fetchCasesStatus,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          countClosedCases: casesStatus.countClosedCases,
+          countOpenCases: casesStatus.countOpenCases,
+          countInProgressCases: casesStatus.countInProgressCases,
+          isLoading: false,
+          isError: false,
+          fetchCasesStatus: result.current.fetchCasesStatus,
+        });
       });
     });
   });
@@ -87,21 +84,18 @@ describe('useGetCasesStatus', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
-        () => useGetCasesStatus(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        countClosedCases: 0,
-        countOpenCases: 0,
-        countInProgressCases: 0,
-        isLoading: false,
-        isError: true,
-        fetchCasesStatus: result.current.fetchCasesStatus,
+      const { result } = renderHook<UseGetCasesStatus, {}>(() => useGetCasesStatus(), {
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          countClosedCases: 0,
+          countOpenCases: 0,
+          countInProgressCases: 0,
+          isLoading: false,
+          isError: true,
+          fetchCasesStatus: result.current.fetchCasesStatus,
+        });
       });
     });
   });

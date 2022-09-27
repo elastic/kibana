@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -53,16 +53,17 @@ export const getImageRenderer =
         backgroundSize: config.mode as string,
       };
 
+      const root = createRoot(domNode);
+
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaThemeProvider theme$={theme$}>
           <div style={style} />
-        </KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
+        </KibanaThemeProvider>
+        // () => handlers.done()
       );
     },
   });

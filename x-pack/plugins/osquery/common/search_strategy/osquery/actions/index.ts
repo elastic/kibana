@@ -25,7 +25,7 @@ export interface ActionDetails {
   '@timestamp': string;
   agent_all: boolean;
   agent_ids: string[];
-  agent_platforoms: string[];
+  agent_platforms: string[];
   agent_policy_ids: string[];
   agents: string[];
   user_id?: string;

@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { render } from '@testing-library/react';
+import { render, renderHook, act } from '@testing-library/react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
 import { useKibana } from '../../lib/kibana';
@@ -50,10 +49,6 @@ jest.mock('./utils', () => ({
 const renderUseSecurityDashboardsTableItems = async () => {
   const renderedHook = renderHook(() => useSecurityDashboardsTableItems(), {
     wrapper: TestProviders,
-  });
-  await act(async () => {
-    // needed to let dashboard items to be updated from saved objects response
-    await renderedHook.waitForNextUpdate();
   });
   return renderedHook;
 };

@@ -84,6 +84,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
           />
         </ExpandedRowFieldHeader>
         <EuiSpacer size="xs" />
+        {/* @ts-expect-error update types */}
         <Chart renderer="canvas" size={{ height: BOOLEAN_DISTRIBUTION_CHART_HEIGHT }}>
           <Axis id="bottom" position="bottom" showOverlappingTicks />
           <Axis

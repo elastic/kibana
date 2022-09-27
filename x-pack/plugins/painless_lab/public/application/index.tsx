@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart, HttpSetup, ChromeStart, CoreTheme } from '@kbn/core/public';
 
@@ -35,7 +35,8 @@ export function renderApp(
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
   });
-  render(
+  const root = createRoot(element);
+  root.render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaReactContextProvider>
@@ -44,8 +45,7 @@ export function renderApp(
           </AppContextProvider>
         </KibanaReactContextProvider>
       </KibanaThemeProvider>
-    </I18nContext>,
-    element
+    </I18nContext>
   );
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

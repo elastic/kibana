@@ -56,6 +56,7 @@ export const createLazyComponentWithKibanaContext = <T extends React.ComponentTy
         return {
           default: (props: PropsOf<T>) => (
             <Provider>
+              {/* @ts-expect-error update types */}
               <LazilyLoadedComponent {...props} />
             </Provider>
           ),

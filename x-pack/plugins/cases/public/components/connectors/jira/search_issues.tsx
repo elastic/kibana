@@ -62,9 +62,10 @@ const SearchIssuesComponent: React.FC<Props> = ({ selectedValue, actionConnector
   }, []);
 
   const onChangeComboBox = useCallback(
-    (changedOptions) => {
+    (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedOptions(changedOptions);
-      onChange(changedOptions[0].value);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      onChange(changedOptions[0].value!);
     },
     [onChange]
   );

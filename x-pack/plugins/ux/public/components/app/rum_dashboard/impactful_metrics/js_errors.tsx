@@ -99,13 +99,15 @@ export function JSErrors() {
             data-test-subj={'uxJsErrorsTotal'}
             titleSize="s"
             title={
-              totalErrors < 1000 ? (
-                totalErrors
-              ) : (
-                <EuiToolTip content={totalErrors}>
-                  <>{numeral(totalErrors).format('0 a')}</>
-                </EuiToolTip>
-              )
+              <>
+                {totalErrors < 1000 ? (
+                  totalErrors
+                ) : (
+                  <EuiToolTip content={<>{totalErrors}</>}>
+                    <>{numeral(totalErrors).format('0 a')}</>
+                  </EuiToolTip>
+                )}
+              </>
             }
             description={I18LABELS.totalErrors}
             isLoading={!!loading}

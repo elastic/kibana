@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo, Fragment } from 'react';
+import React, { memo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
@@ -26,7 +27,7 @@ interface Panel {
   marginBottom: number;
 }
 
-export const SplitCards: FC<Props> = memo(
+export const SplitCards: FC<PropsWithChildren<Props>> = memo(
   ({ fieldValues, splitField, children, numberOfDetectors, jobType, animate = false }) => {
     const panels: Panel[] = [];
 
@@ -93,9 +94,9 @@ export const SplitCards: FC<Props> = memo(
         <EuiFlexItem data-test-subj="mlDataSplit">
           {(fieldValues.length === 0 || numberOfDetectors === 0) && <>{children}</>}
           {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
-            <Fragment>
+            <>
               {jobType === JOB_TYPE.MULTI_METRIC && (
-                <Fragment>
+                <>
                   <div
                     style={{ fontSize: 'small' }}
                     data-test-subj={`mlDataSplitTitle ${splitField.name}`}
@@ -107,7 +108,7 @@ export const SplitCards: FC<Props> = memo(
                     />
                   </div>
                   <EuiSpacer size="m" />
-                </Fragment>
+                </>
               )}
 
               {getBackPanels()}
@@ -125,7 +126,7 @@ export const SplitCards: FC<Props> = memo(
                 <EuiHorizontalRule margin="s" />
                 <>{children}</>
               </EuiPanel>
-            </Fragment>
+            </>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

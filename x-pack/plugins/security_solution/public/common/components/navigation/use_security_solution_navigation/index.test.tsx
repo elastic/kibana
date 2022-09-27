@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
@@ -84,7 +84,7 @@ describe('useSecuritySolutionNavigation', () => {
   });
 
   it('should create navigation config', async () => {
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+    const { result } = renderHook<KibanaPageTemplateProps['solutionNav'], {}>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
@@ -95,7 +95,7 @@ describe('useSecuritySolutionNavigation', () => {
   // TODO: [kubernetes] remove when no longer experimental
   it('should include kubernetes when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+    const { result } = renderHook<KibanaPageTemplateProps['solutionNav'], {}>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
@@ -104,7 +104,7 @@ describe('useSecuritySolutionNavigation', () => {
 
   it('should omit host isolation exceptions if hook reports false', () => {
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(false);
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+    const { result } = renderHook<KibanaPageTemplateProps['solutionNav'], {}>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
@@ -122,7 +122,7 @@ describe('useSecuritySolutionNavigation', () => {
       it('should display the cases navigation item when the user has read permissions', () => {
         (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
 
-        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+        const { result } = renderHook<KibanaPageTemplateProps['solutionNav'], {}>(
           () => useSecuritySolutionNavigation(),
           { wrapper: TestProviders }
         );
@@ -147,7 +147,7 @@ describe('useSecuritySolutionNavigation', () => {
       it('should not display the cases navigation item when the user does not have read permissions', () => {
         (useGetUserCasesPermissions as jest.Mock).mockReturnValue(noCasesPermissions());
 
-        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+        const { result } = renderHook<KibanaPageTemplateProps['solutionNav'], {}>(
           () => useSecuritySolutionNavigation(),
           { wrapper: TestProviders }
         );
@@ -162,7 +162,7 @@ describe('useSecuritySolutionNavigation', () => {
 
   describe('Guided onboarding tour', () => {
     it('nav can be collapsed if tour is not shown', () => {
-      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      const { result } = renderHook<KibanaPageTemplateProps['solutionNav'], {}>(
         () => useSecuritySolutionNavigation(),
         { wrapper: TestProviders }
       );
@@ -172,7 +172,7 @@ describe('useSecuritySolutionNavigation', () => {
     it(`nav can't be collapsed if tour is shown`, () => {
       (useTourContext as jest.Mock).mockReturnValue({ isTourShown: true });
 
-      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      const { result } = renderHook<KibanaPageTemplateProps['solutionNav'], {}>(
         () => useSecuritySolutionNavigation(),
         { wrapper: TestProviders }
       );

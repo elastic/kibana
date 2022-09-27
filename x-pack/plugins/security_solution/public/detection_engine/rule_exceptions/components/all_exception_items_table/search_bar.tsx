@@ -63,7 +63,7 @@ const ExceptionsViewerSearchBarComponent = ({
   onAddExceptionClick,
 }: ExceptionsViewerSearchBarProps): JSX.Element => {
   const handleOnSearch = useCallback(
-    ({ queryText }): void => {
+    ({ queryText }: { queryText: string }): void => {
       onSearch({ search: queryText });
     },
     [onSearch]

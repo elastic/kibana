@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-
+import type { FC, PropsWithChildren } from 'react';
 import { AuthorizationProvider } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
-export const ComponentTemplatesAuthProvider: React.FunctionComponent = ({
+export const ComponentTemplatesAuthProvider: FC<PropsWithChildren> = ({
   children,
 }: {
   children?: React.ReactNode;

@@ -134,7 +134,7 @@ import { Embeddable } from '@kbn/embeddable-plugin/public';
 export class HelloWorld extends Embeddable {
   // ...
 
-  private node?: HTMLElement;
+  private root?: Root;
 
   render(node: HTMLElement) {
     this.node = node;
@@ -163,16 +163,18 @@ The default behavior is to hide that visually and show the error message on top 
 
 ```typescript
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 
 export class HelloWorld extends Embeddable {
   // ...
 
   renderError(node: HTMLElement, error: Error) {
-    render(<div>Something went wrong: {error.message}</div>, node);
+    const root = createRoot(node);
 
-    return () => unmountComponentAtNode(node);
+    root.render(<div>Something went wrong: {error.message}</div>);
+
+    return () => root.unmount();
   }
 }
 ```
@@ -181,7 +183,7 @@ export class HelloWorld extends Embeddable {
 This hook is invoked when the embeddable is destroyed and should perform cleanup actions.
 ```typescript
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 
 export class HelloWorld extends Embeddable {
@@ -195,7 +197,7 @@ export class HelloWorld extends Embeddable {
 
   destroy() {
     if (this.node) {
-      unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
   }
 }

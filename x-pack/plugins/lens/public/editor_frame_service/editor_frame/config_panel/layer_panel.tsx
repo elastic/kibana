@@ -110,7 +110,7 @@ export function LayerPanel(
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const registerLayerRef = useCallback(
-    (el) => registerNewLayerRef(layerId, el),
+    (el: HTMLDivElement) => registerNewLayerRef(layerId, el),
     [layerId, registerNewLayerRef]
   );
 
@@ -419,6 +419,7 @@ export function LayerPanel(
                           color="subdued"
                           content={group.groupTooltip}
                           iconProps={{
+                            // @ts-expect-error update types
                             className: 'eui-alignTop',
                           }}
                           position="top"

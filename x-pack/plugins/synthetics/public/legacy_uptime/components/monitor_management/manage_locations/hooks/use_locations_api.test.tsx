@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { defaultCore, WrappedHelper } from '../../../../../apps/synthetics/utils/testing';
 import { useLocationsAPI } from './use_locations_api';
@@ -38,7 +38,7 @@ describe('useLocationsAPI', () => {
     },
   });
   it('returns expected results after data', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI({ isOpen: true }), {
+    const { result } = renderHook(() => useLocationsAPI({ isOpen: true }), {
       wrapper: WrappedHelper,
     });
 
@@ -49,60 +49,60 @@ describe('useLocationsAPI', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual(
-      expect.objectContaining({
-        loading: false,
-        privateLocations: [
-          {
-            id: 'Test',
-            agentPolicyId: 'testPolicy',
-          },
-        ],
-      })
-    );
+    await waitFor(() => {
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          loading: false,
+          privateLocations: [
+            {
+              id: 'Test',
+              agentPolicyId: 'testPolicy',
+            },
+          ],
+        })
+      );
+    });
   });
 
   it('adds location on submit', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI({ isOpen: true }), {
+    const { result } = renderHook(() => useLocationsAPI({ isOpen: true }), {
       wrapper: WrappedHelper,
     });
 
-    await waitForNextUpdate();
-
-    result.current.onSubmit({
-      id: 'new',
-      agentPolicyId: 'newPolicy',
-      label: 'new',
-      concurrentMonitors: 1,
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
+    await waitFor(() => {
+      result.current.onSubmit({
+        id: 'new',
+        agentPolicyId: 'newPolicy',
+        label: 'new',
+        concurrentMonitors: 1,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+      });
     });
 
-    await waitForNextUpdate();
-
-    expect(defaultCore.savedObjects.client.create).toHaveBeenCalledWith(
-      'synthetics-privates-locations',
-      {
-        locations: [
-          { id: 'Test', agentPolicyId: 'testPolicy' },
-          {
-            concurrentMonitors: 1,
-            id: 'newPolicy',
-            geo: {
-              lat: 0,
-              lon: 0,
+    await waitFor(() => {
+      expect(defaultCore.savedObjects.client.create).toHaveBeenCalledWith(
+        'synthetics-privates-locations',
+        {
+          locations: [
+            { id: 'Test', agentPolicyId: 'testPolicy' },
+            {
+              concurrentMonitors: 1,
+              id: 'newPolicy',
+              geo: {
+                lat: 0,
+                lon: 0,
+              },
+              label: 'new',
+              agentPolicyId: 'newPolicy',
             },
-            label: 'new',
-            agentPolicyId: 'newPolicy',
-          },
-        ],
-      },
-      { id: 'synthetics-privates-locations-singleton', overwrite: true }
-    );
+          ],
+        },
+        { id: 'synthetics-privates-locations-singleton', overwrite: true }
+      );
+    });
   });
 
   it('deletes location on delete', async () => {
@@ -121,27 +121,27 @@ describe('useLocationsAPI', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI({ isOpen: true }), {
+    const { result } = renderHook(() => useLocationsAPI({ isOpen: true }), {
       wrapper: WrappedHelper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      result.current.onDelete('Test');
+    });
 
-    result.current.onDelete('Test');
-
-    await waitForNextUpdate();
-
-    expect(defaultCore.savedObjects.client.create).toHaveBeenLastCalledWith(
-      'synthetics-privates-locations',
-      {
-        locations: [
-          {
-            id: 'Test1',
-            agentPolicyId: 'testPolicy1',
-          },
-        ],
-      },
-      { id: 'synthetics-privates-locations-singleton', overwrite: true }
-    );
+    await waitFor(() => {
+      expect(defaultCore.savedObjects.client.create).toHaveBeenLastCalledWith(
+        'synthetics-privates-locations',
+        {
+          locations: [
+            {
+              id: 'Test1',
+              agentPolicyId: 'testPolicy1',
+            },
+          ],
+        },
+        { id: 'synthetics-privates-locations-singleton', overwrite: true }
+      );
+    });
   });
 });

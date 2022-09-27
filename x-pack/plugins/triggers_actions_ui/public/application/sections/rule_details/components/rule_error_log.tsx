@@ -165,7 +165,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     [setDateStart, setDateEnd]
   );
 
-  const onSearchChange = useCallback(
+  const onSearchChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
     (e) => {
       if (e.target.value === '') {
         setSearchText('');
@@ -175,7 +175,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     [setSearchText, setSearch]
   );
 
-  const onKeyUp = useCallback(
+  const onKeyUp = useCallback<React.KeyboardEventHandler<HTMLInputElement>>(
     (e) => {
       if (e.key === 'Enter') {
         setSearchText(search);

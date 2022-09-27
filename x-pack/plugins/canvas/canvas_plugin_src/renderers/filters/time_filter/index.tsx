@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { toExpression } from '@kbn/interpreter';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -59,7 +59,9 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
         }
       }
 
-      ReactDOM.render(
+      const root = createRoot(domNode);
+
+      root.render(
         <KibanaThemeProvider theme$={theme.theme$}>
           <TimeFilter
             commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
@@ -67,13 +69,12 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
             commonlyUsedRanges={customQuickRanges}
             dateFormat={customDateFormat}
           />
-        </KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
+        </KibanaThemeProvider>
+        // () => handlers.done()
       );
 
       handlers.onDestroy(() => {
-        ReactDOM.unmountComponentAtNode(domNode);
+        root.unmount();
       });
     },
   });

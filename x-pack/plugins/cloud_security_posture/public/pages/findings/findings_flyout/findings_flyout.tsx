@@ -16,10 +16,11 @@ import {
   EuiTabs,
   EuiTab,
   EuiFlexGroup,
-  PropsOf,
   EuiCodeBlock,
   EuiMarkdownFormat,
   EuiIcon,
+  EuiCodeBlockProps,
+  EuiMarkdownFormatProps,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -68,11 +69,11 @@ interface FindingFlyoutProps {
   findings: CspFinding;
 }
 
-export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
+export const CodeBlock: React.FC<EuiCodeBlockProps> = (props) => (
   <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
 );
 
-export const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => (
+export const Markdown: React.FC<EuiMarkdownFormatProps> = (props) => (
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 

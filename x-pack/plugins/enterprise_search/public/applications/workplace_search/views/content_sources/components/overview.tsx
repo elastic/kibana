@@ -168,6 +168,7 @@ export const Overview: React.FC = () => {
                 <EuiTableHeaderCell>{CONTENT_TYPE_HEADER}</EuiTableHeaderCell>
                 <EuiTableHeaderCell>{ITEMS_HEADER}</EuiTableHeaderCell>
               </EuiTableHeader>
+              {/* @ts-expect-error update types */}
               <EuiTableBody>
                 {tableContent}
                 <EuiTableRow>
@@ -211,6 +212,7 @@ export const Overview: React.FC = () => {
           {!custom && <EuiTableHeaderCell>{STATUS_HEADER}</EuiTableHeaderCell>}
           <EuiTableHeaderCell align="right">{TIME_HEADER}</EuiTableHeaderCell>
         </EuiTableHeader>
+        {/* @ts-expect-error update types */}
         <EuiTableBody>
           {activities.map(({ details: activityDetails, event, time, status }, i) => (
             <EuiTableRow key={i}>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
 import { KibanaThemeProvider, useExecutionContext } from '../shared_imports';
@@ -26,7 +26,9 @@ const AppWithExecutionContext = ({ history, executionContext }) => {
 };
 
 export const renderApp = (elem, I18nContext, appDependencies, history, theme$) => {
-  render(
+  const root = createRoot(elem);
+
+  root.render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <Provider store={remoteClustersStore}>
@@ -41,5 +43,5 @@ export const renderApp = (elem, I18nContext, appDependencies, history, theme$) =
     </I18nContext>,
     elem
   );
-  return () => unmountComponentAtNode(elem);
+  return () => root.unmount();
 };

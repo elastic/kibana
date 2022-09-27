@@ -324,7 +324,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   }, [loadTimestampFieldOptions, title, getFields]);
 
   const onTypeChange = useCallback(
-    (newType) => {
+    (newType: string) => {
       form.setFieldValue('title', '');
       form.setFieldValue('name', '');
       form.setFieldValue('timestampField', '');

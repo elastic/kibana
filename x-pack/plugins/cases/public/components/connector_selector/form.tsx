@@ -58,7 +58,7 @@ export const ConnectorSelector = ({
       describedByIds={idAria ? [idAria] : undefined}
       error={errorMessage}
       fullWidth
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       isInvalid={isInvalid}
       label={field.label}
       labelAppend={field.labelAppend}

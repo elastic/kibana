@@ -6,7 +6,7 @@
  */
 
 import { useHostIpToName } from './use_host_ip_to_name';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 
 const renderUseHostIpToNameHook = () =>
   renderHook((props) => useHostIpToName(props.ipAddress, props.indexPattern), {
@@ -32,42 +32,46 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 describe('useHostIpToName Hook', () => {
   it('should basically work', async () => {
     mockedFetch.mockResolvedValue({ host: 'example-01' } as any);
-    const { result, waitForNextUpdate } = renderUseHostIpToNameHook();
+    const { result } = renderUseHostIpToNameHook();
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(true);
-    await waitForNextUpdate();
-    expect(result.current.name).toBe('example-01');
-    expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe(null);
+    await waitFor(() => {
+      expect(result.current.name).toBe('example-01');
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe(null);
+    });
   });
 
   it('should handle errors', async () => {
     const error = new Error('Host not found');
     mockedFetch.mockRejectedValue(error);
-    const { result, waitForNextUpdate } = renderUseHostIpToNameHook();
+    const { result } = renderUseHostIpToNameHook();
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(true);
-    await waitForNextUpdate();
-    expect(result.current.name).toBe(null);
-    expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe(error);
+    await waitFor(() => {
+      expect(result.current.name).toBe(null);
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe(error);
+    });
   });
 
   it('should reset errors', async () => {
     const error = new Error('Host not found');
     mockedFetch.mockRejectedValue(error);
-    const { result, waitForNextUpdate, rerender } = renderUseHostIpToNameHook();
+    const { result, rerender } = renderUseHostIpToNameHook();
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(true);
-    await waitForNextUpdate();
-    expect(result.current.name).toBe(null);
-    expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe(error);
+    await waitFor(() => {
+      expect(result.current.name).toBe(null);
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe(error);
+    });
     mockedFetch.mockResolvedValue({ host: 'example-01' } as any);
     rerender({ ipAddress: '192.168.1.2', indexPattern: 'metricbeat-*' });
-    await waitForNextUpdate();
-    expect(result.current.name).toBe('example-01');
-    expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe(null);
+    await waitFor(() => {
+      expect(result.current.name).toBe('example-01');
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe(null);
+    });
   });
 });

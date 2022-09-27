@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { css, keyframes } from '@emotion/css';
 import type {
   Datatable,
@@ -30,14 +30,13 @@ export const getRotatingNumberRenderer = (
     config: RotatingNumberChartProps,
     handlers: IInterpreterRenderHandlers
   ) => {
-    ReactDOM.render(
-      <RotatingNumberChart {...config} formatFactory={await formatFactory} />,
-      domNode,
-      () => {
-        handlers.done();
-      }
-    );
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const root = createRoot(domNode);
+
+    root.render(<RotatingNumberChart {...config} formatFactory={await formatFactory} />);
+    //  () => {
+    //   handlers.done();
+    // });
+    handlers.onDestroy(() => root.unmount());
   },
 });
 

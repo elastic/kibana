@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { BrowserTestRunResult } from './browser/browser_test_results';
 import { SimpleTestResults } from './simple/simple_test_results';

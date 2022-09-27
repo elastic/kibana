@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 interface SyntheticsRefreshContext {
   lastRefresh: number;
@@ -21,7 +22,7 @@ const defaultContext: SyntheticsRefreshContext = {
 
 export const SyntheticsRefreshContext = createContext(defaultContext);
 
-export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
+export const SyntheticsRefreshContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const refreshApp = () => {

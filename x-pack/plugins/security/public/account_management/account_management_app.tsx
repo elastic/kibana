@@ -6,9 +6,9 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from 'react-router-dom';
 import type { Observable } from 'rxjs';
 
@@ -52,8 +52,9 @@ export const accountManagementApp = Object.freeze({
           getStartServices(),
           import('./account_management_page'),
         ]);
+        const root = createRoot(element);
 
-        render(
+        root.render(
           <Providers
             services={coreStart}
             theme$={theme$}
@@ -62,11 +63,10 @@ export const accountManagementApp = Object.freeze({
             securityApiClients={securityApiClients}
           >
             <AccountManagementPage />
-          </Providers>,
-          element
+          </Providers>
         );
 
-        return () => unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
   },
@@ -81,7 +81,7 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
   theme$,
   history,

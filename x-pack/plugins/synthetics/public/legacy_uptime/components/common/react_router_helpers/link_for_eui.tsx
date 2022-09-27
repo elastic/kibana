@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiLink,
@@ -29,7 +30,10 @@ interface IEuiReactRouterProps {
   to: string;
 }
 
-export const ReactRouterHelperForEui: React.FC<IEuiReactRouterProps> = ({ to, children }) => {
+export const ReactRouterHelperForEui: FC<PropsWithChildren<IEuiReactRouterProps>> = ({
+  to,
+  children,
+}) => {
   const history = useHistory();
 
   const onClick = (event: React.MouseEvent) => {

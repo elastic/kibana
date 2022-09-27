@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useCallback, useState, useContext } from 'react';
+import React, { useEffect, useMemo, useCallback, useState, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { omit } from 'lodash';
 import { isDefined } from '../../../../common/types/guards';
 import { useMlKibana } from '../kibana';
@@ -28,7 +29,7 @@ export const MlStorageContext = React.createContext<StorageAPI>({
   },
 });
 
-export const MlStorageContextProvider: FC = ({ children }) => {
+export const MlStorageContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const {
     services: { storage },
   } = useMlKibana();

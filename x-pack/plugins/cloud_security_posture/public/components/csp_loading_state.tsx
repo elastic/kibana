@@ -7,10 +7,11 @@
 
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 
 // Keep this component lean as it is part of the main app bundle
-export const CspLoadingState: React.FunctionComponent<{ ['data-test-subj']?: string }> = ({
+export const CspLoadingState: FC<PropsWithChildren<{ ['data-test-subj']?: string }>> = ({
   children,
   ...rest
 }) => {

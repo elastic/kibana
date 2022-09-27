@@ -130,6 +130,7 @@ const EditSavedQueryPageComponent = () => {
   );
 
   const handleSubmit = useCallback(
+    // @ts-expect-error update types
     async (payload) => {
       await updateSavedQueryMutation.mutateAsync(payload);
     },
@@ -146,6 +147,7 @@ const EditSavedQueryPageComponent = () => {
     >
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
+          // @ts-expect-error update types
           defaultValue={savedQueryDetails?.attributes}
           handleSubmit={handleSubmit}
           viewMode={viewMode}

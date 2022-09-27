@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { DrilldownManagerState, DrilldownManagerStateDeps } from '../../state';
 
 const context = React.createContext<DrilldownManagerState | null>(null);
@@ -15,7 +16,7 @@ export const useDrilldownManager = () => React.useContext(context)!;
 
 export type DrilldownManagerProviderProps = DrilldownManagerStateDeps;
 
-export const DrilldownManagerProvider: React.FC<DrilldownManagerProviderProps> = ({
+export const DrilldownManagerProvider: FC<PropsWithChildren<DrilldownManagerProviderProps>> = ({
   children,
   ...deps
 }) => {

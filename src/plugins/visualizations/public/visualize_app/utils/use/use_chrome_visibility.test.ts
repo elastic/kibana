@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { chromeServiceMock } from '@kbn/core/public/mocks';
 import { useChromeVisibility } from './use_chrome_visibility';

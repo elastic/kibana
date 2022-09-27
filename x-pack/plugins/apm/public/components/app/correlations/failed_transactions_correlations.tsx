@@ -384,7 +384,7 @@ export function FailedTransactionsCorrelations({
     useState<keyof FailedTransactionsCorrelation>('normalizedScore');
   const [sortDirection, setSortDirection] = useState<Direction>('desc');
 
-  const onTableChange = useCallback(({ sort }) => {
+  const onTableChange = useCallback(({ sort }: any) => {
     const { field: currentSortField, direction: currentSortDirection } = sort;
 
     setSortField(currentSortField);
@@ -541,6 +541,7 @@ export function FailedTransactionsCorrelations({
           <EuiIconTip
             size="m"
             iconProps={{
+              // @ts-expect-error update types
               style: { marginLeft: euiTheme.eui.euiSizeXS },
             }}
             content={i18n.translate(

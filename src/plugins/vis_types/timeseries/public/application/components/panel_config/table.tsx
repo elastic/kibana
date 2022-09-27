@@ -49,6 +49,7 @@ export class TablePanelConfig extends Component<
   { selectedTab: PANEL_CONFIG_TABS }
 > {
   static contextType = VisDataContext;
+  declare context: any;
   constructor(props: PanelConfigProps) {
     super(props);
     this.state = { selectedTab: PANEL_CONFIG_TABS.DATA };

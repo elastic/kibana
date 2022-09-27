@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ActionCell } from '../table/action_cell';
@@ -64,7 +65,7 @@ interface OverviewCardProps {
   title: string;
 }
 
-export const OverviewCard: React.FC<OverviewCardProps> = ({
+export const OverviewCard: FC<PropsWithChildren<OverviewCardProps>> = ({
   title,
   children,
   isPopoverVisible = false, // default to false as this behavior is only really necessary in the situation without an overflow
@@ -100,7 +101,7 @@ type OverviewCardWithActionsProps = OverviewCardProps & {
   dataTestSubj?: string;
 };
 
-export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = ({
+export const OverviewCardWithActions: FC<PropsWithChildren<OverviewCardWithActionsProps>> = ({
   title,
   children,
   contextId,

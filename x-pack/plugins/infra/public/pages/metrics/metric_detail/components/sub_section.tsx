@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { isValidElement, cloneElement, FunctionComponent, Children, useMemo } from 'react';
+import React, { isValidElement, cloneElement, Children, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiTitle } from '@elastic/eui';
 import { InventoryMetric } from '../../../../../common/inventory_models/types';
 import { LayoutProps } from '../types';
@@ -15,7 +16,7 @@ type SubSectionProps = LayoutProps & {
   label?: string;
 };
 
-export const SubSection: FunctionComponent<SubSectionProps> = ({
+export const SubSection: FC<PropsWithChildren<SubSectionProps>> = ({
   id,
   label,
   children,

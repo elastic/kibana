@@ -32,7 +32,7 @@ export const JsonEditorField = ({ field, ...rest }: Props) => {
   return (
     <JsonEditor
       label={label}
-      helpText={helpText}
+      helpText={typeof helpText === 'function' ? helpText() : helpText}
       value={value}
       onUpdate={onJsonUpdate}
       error={errorMessage}

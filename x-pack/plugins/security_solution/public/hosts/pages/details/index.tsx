@@ -19,6 +19,7 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
+import type { Anomaly } from '../../../common/components/ml/types';
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -98,7 +99,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const isEnterprisePlus = useLicense().isEnterprise();
 
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: Anomaly, interval: string) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

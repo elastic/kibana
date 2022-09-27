@@ -10,6 +10,7 @@ import { Reporter, ApplicationUsageTracker } from '@kbn/analytics';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { Subscription } from 'rxjs';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import type {
   PluginInitializerContext,
   Plugin,
@@ -52,15 +53,15 @@ export interface UsageCollectionSetup {
      *       title,
      *       ...,
      *       mount: async (params: AppMountParameters) => {
-     *         ReactDOM.render(
+     *         const root = createRoot(params.element);
+     *         root.render(
      *           <ApplicationUsageTrackingProvider> // Set the tracking context provider at the App level
      *             <I18nProvider>
      *               <App />
      *             </I18nProvider>
-     *           </ApplicationUsageTrackingProvider>,
-     *           element
+     *           </ApplicationUsageTrackingProvider>
      *         );
-     *         return () => ReactDOM.unmountComponentAtNode(element);
+     *         return () => root.unmount();
      *       },
      *     });
      *   }
@@ -68,7 +69,7 @@ export interface UsageCollectionSetup {
      * }
      * ```
      */
-    ApplicationUsageTrackingProvider: React.FC;
+    ApplicationUsageTrackingProvider: FC<PropsWithChildren>;
   };
 
   /** Report whenever a UI event occurs for UI counters to report it **/

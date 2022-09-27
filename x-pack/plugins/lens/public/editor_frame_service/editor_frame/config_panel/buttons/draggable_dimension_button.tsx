@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useContext, ReactElement } from 'react';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
+import { DragDrop, DragDropIdentifier, DragContext, DropHandler } from '../../../../drag_drop';
 import {
   Datasource,
   VisualizationDimensionGroupConfig,
@@ -144,11 +144,11 @@ export function DraggableDimensionButton({
   );
 
   const registerNewButtonRefMemoized = useCallback(
-    (el) => registerNewButtonRef(columnId, el),
+    (el: HTMLDivElement) => registerNewButtonRef(columnId, el),
     [registerNewButtonRef, columnId]
   );
 
-  const handleOnDrop = useCallback(
+  const handleOnDrop = useCallback<DropHandler>(
     (source, selectedDropType) => onDrop(source, value, selectedDropType),
     [value, onDrop]
   );

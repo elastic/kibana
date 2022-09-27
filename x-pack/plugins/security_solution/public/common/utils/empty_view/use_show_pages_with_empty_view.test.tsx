@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useShowPagesWithEmptyView } from './use_show_pages_with_empty_view';
 
 jest.mock('../route/use_route_spy', () => ({
@@ -28,26 +28,29 @@ jest.mock('../../containers/sourcerer', () => ({
 describe('use show pages with empty view', () => {
   it('shows empty view when on an elligible page and indices do not exist', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowPagesWithEmptyView());
-      await waitForNextUpdate();
-      const emptyResult = result.current;
-      expect(emptyResult).toEqual(true);
+      const { result } = renderHook(() => useShowPagesWithEmptyView());
+      await waitFor(() => {
+        const emptyResult = result.current;
+        expect(emptyResult).toEqual(true);
+      });
     });
   });
   it('does not show empty view when on an inelligible page and indices do not exist', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowPagesWithEmptyView());
-      await waitForNextUpdate();
-      const emptyResult = result.current;
-      expect(emptyResult).toEqual(false);
+      const { result } = renderHook(() => useShowPagesWithEmptyView());
+      await waitFor(() => {
+        const emptyResult = result.current;
+        expect(emptyResult).toEqual(false);
+      });
     });
   });
   it('shows empty view when on an elligible page and indices do exist', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowPagesWithEmptyView());
-      await waitForNextUpdate();
-      const emptyResult = result.current;
-      expect(emptyResult).toEqual(true);
+      const { result } = renderHook(() => useShowPagesWithEmptyView());
+      await waitFor(() => {
+        const emptyResult = result.current;
+        expect(emptyResult).toEqual(true);
+      });
     });
   });
 });

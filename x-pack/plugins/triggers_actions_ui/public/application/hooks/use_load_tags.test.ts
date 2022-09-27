@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useLoadTags } from './use_load_tags';
 
 const MOCK_TAGS = ['a', 'b', 'c'];
@@ -27,15 +27,16 @@ describe('useLoadTags', () => {
   });
 
   it('should call loadRuleTags API and handle result', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLoadTags({ onError }));
+    const { result } = renderHook(() => useLoadTags({ onError }));
 
     await act(async () => {
       result.current.loadTags();
-      await waitForNextUpdate();
     });
 
-    expect(loadRuleTags).toBeCalled();
-    expect(result.current.tags).toEqual(MOCK_TAGS);
+    await waitFor(() => {
+      expect(loadRuleTags).toBeCalled();
+      expect(result.current.tags).toEqual(MOCK_TAGS);
+    });
   });
 
   it('should call onError if API fails', async () => {

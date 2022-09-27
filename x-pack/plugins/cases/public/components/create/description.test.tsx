@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { waitFor } from '@testing-library/react';
 import userEvent, { specialChars } from '@testing-library/user-event';
 
@@ -20,7 +21,7 @@ describe('Description', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { description: 'My description' },
       schema: {

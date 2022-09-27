@@ -183,7 +183,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
   const { ecsMappingArray: watchedEcsMapping } = watch();
   const handleChange = useCallback(
-    (newSelectedOptions) => {
+    (newSelectedOptions: Array<EuiComboBoxOptionOption<ECSSchemaOption>>) => {
       setSelected(newSelectedOptions);
       ECSField.onChange(newSelectedOptions[0]?.label ?? '');
     },
@@ -191,7 +191,9 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   );
 
   // TODO: Create own component for this.
-  const renderOption = useCallback(
+  const renderOption = useCallback<
+    NonNullable<EuiComboBoxProps<ECSSchemaOption['value']>['renderOption']>
+  >(
     (option, searchValue, contentClassName) => (
       <EuiFlexGroup
         className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
@@ -206,13 +208,13 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
-            {option.value.field}
+            {option.value?.field}
           </StyledFieldSpan>
         </EuiFlexItem>
 
         <DescriptionWrapper grow={false}>
           <StyledFieldSpan className="euiSuggestItem__description euiSuggestItem__description">
-            {option.value.description}
+            {option.value?.description}
           </StyledFieldSpan>
         </DescriptionWrapper>
       </EuiFlexGroup>
@@ -286,12 +288,12 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
       describedByIds={describedByIds}
       isDisabled={euiFieldProps.isDisabled}
     >
-      <EuiComboBox
+      {/* @ts-expect-error update types */}
+      <EuiComboBox<ECSSchemaOption['value']>
         prepend={prepend}
         fullWidth
         singleSelection={SINGLE_SELECTION}
         error={ECSFieldState.error?.message}
-        // @ts-expect-error update types
         options={availableECSSchemaOptions}
         selectedOptions={selectedOptions}
         onChange={handleChange}
@@ -425,7 +427,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const [selectedOptions, setSelected] = useState<OsquerySchemaOption[]>([]);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
 
-  const renderOsqueryOption = useCallback(
+  const renderOsqueryOption = useCallback<
+    NonNullable<EuiComboBoxProps<OsquerySchemaOption['value']>['renderOption']>
+  >(
     (option, searchValue, contentClassName) => (
       <EuiFlexGroup
         className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
@@ -434,12 +438,12 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       >
         <EuiFlexItem grow={false}>
           <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
-            {option.value.suggestion_label}
+            {option.value?.suggestion_label}
           </StyledFieldSpan>
         </EuiFlexItem>
         <DescriptionWrapper grow={false}>
           <StyledFieldSpan className="euiSuggestItem__description euiSuggestItem__description">
-            {option.value.description}
+            {option.value?.description}
           </StyledFieldSpan>
         </DescriptionWrapper>
       </EuiFlexGroup>
@@ -448,12 +452,12 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   );
 
   const handleKeyChange = useCallback(
-    (newSelectedOptions) => {
+    (newSelectedOptions: OsquerySchemaOption[]) => {
       setSelected(newSelectedOptions);
       resultField.onChange(
         isArray(newSelectedOptions)
           ? map(newSelectedOptions, 'label')
-          : newSelectedOptions[0]?.label ?? ''
+          : (newSelectedOptions as OsquerySchemaOption[])[0]?.label ?? ''
       );
     },
     [resultField]
@@ -475,7 +479,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   }, [ecsMappingArray, index, isLastItem, resultTypeField.value]);
 
   const onTypeChange = useCallback(
-    (newType) => {
+    (newType: string) => {
       if (newType !== resultTypeField.value) {
         resultTypeField.onChange(newType);
         resultField.onChange(newType === 'value' && isSingleSelection === false ? [] : '');

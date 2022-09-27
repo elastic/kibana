@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, Context } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
 import { SidebarItems } from '../../step_detail/waterfall/types';
@@ -61,7 +62,7 @@ interface ProviderProps {
   activeStep?: JourneyStep;
 }
 
-export const WaterfallProvider: React.FC<ProviderProps> = ({
+export const WaterfallProvider: FC<PropsWithChildren<ProviderProps>> = ({
   children,
   data,
   markerItems,

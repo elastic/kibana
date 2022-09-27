@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { mount, shallow } from 'enzyme';
 
 import { TimelineType } from '../../../../../common/types/timeline';
@@ -35,92 +33,91 @@ describe('useCreateTimelineButton', () => {
 
   test('return getButton', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
         { wrapper: wrapperContainer }
       );
-      await waitForNextUpdate();
-
-      expect(result.current.getButton).toBeTruthy();
+      await waitFor(() => {
+        expect(result.current.getButton).toBeTruthy();
+      });
     });
   });
 
   test('getButton renders correct outline - EuiButton', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
         { wrapper: wrapperContainer }
       );
-      await waitForNextUpdate();
-
-      const button = result.current.getButton({ outline: true, title: 'mock title' });
-      const wrapper = shallow(button);
-      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').exists()).toBeTruthy();
+      await waitFor(() => {
+        const button = result.current.getButton({ outline: true, title: 'mock title' });
+        const wrapper = shallow(button);
+        expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').exists()).toBeTruthy();
+      });
     });
   });
 
   test('getButton renders correct iconType - EuiButton', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
         { wrapper: wrapperContainer }
       );
-      await waitForNextUpdate();
-
-      const button = result.current.getButton({
-        outline: true,
-        title: 'mock title',
-        iconType: 'pencil',
+      await waitFor(() => {
+        const button = result.current.getButton({
+          outline: true,
+          title: 'mock title',
+          iconType: 'pencil',
+        });
+        const wrapper = shallow(button);
+        expect(
+          wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('iconType')
+        ).toEqual('pencil');
       });
-      const wrapper = shallow(button);
-      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('iconType')).toEqual(
-        'pencil'
-      );
     });
   });
 
   test('getButton renders correct filling - EuiButton', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
         { wrapper: wrapperContainer }
       );
-      await waitForNextUpdate();
-
-      const button = result.current.getButton({
-        outline: true,
-        title: 'mock title',
-        fill: false,
+      await waitFor(() => {
+        const button = result.current.getButton({
+          outline: true,
+          title: 'mock title',
+          fill: false,
+        });
+        const wrapper = shallow(button);
+        expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toEqual(
+          false
+        );
       });
-      const wrapper = shallow(button);
-      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toEqual(
-        false
-      );
     });
   });
 
   test('getButton renders correct outline - EuiButtonEmpty', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
         { wrapper: wrapperContainer }
       );
-      await waitForNextUpdate();
-
-      const button = result.current.getButton({ outline: false, title: 'mock title' });
-      const wrapper = shallow(button);
-      expect(wrapper.find('[data-test-subj="timeline-new"]').exists()).toBeTruthy();
+      await waitFor(() => {
+        const button = result.current.getButton({ outline: false, title: 'mock title' });
+        const wrapper = shallow(button);
+        expect(wrapper.find('[data-test-subj="timeline-new"]').exists()).toBeTruthy();
+      });
     });
   });
 
   test('Make sure that timeline reset to the global date picker', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
         { wrapper: wrapperContainer }
       );
 
-      await waitForNextUpdate();
       const button = result.current.getButton({ outline: false, title: 'mock title' });
       await waitFor(() => {
         const wrapper = mount(button);

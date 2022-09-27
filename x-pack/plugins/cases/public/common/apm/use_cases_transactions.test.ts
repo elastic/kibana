@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { CaseAttachmentsWithoutOwner } from '../../types';
 import {
   StartAddAttachmentToExistingCaseTransaction,
@@ -35,12 +35,12 @@ const bulkAttachments = [
 ] as CaseAttachmentsWithoutOwner;
 
 const renderUseCreateCaseWithAttachmentsTransaction = () =>
-  renderHook<void, { startTransaction: StartCreateCaseWithAttachmentsTransaction }>(
+  renderHook<{ startTransaction: StartCreateCaseWithAttachmentsTransaction }, {}>(
     useCreateCaseWithAttachmentsTransaction
   );
 
 const renderUseAddAttachmentToExistingCaseTransaction = () =>
-  renderHook<void, { startTransaction: StartAddAttachmentToExistingCaseTransaction }>(
+  renderHook<{ startTransaction: StartAddAttachmentToExistingCaseTransaction }, {}>(
     useAddAttachmentToExistingCaseTransaction
   );
 

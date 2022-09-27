@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
   Embeddable,
@@ -68,10 +68,10 @@ export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, Mult
 
   public render(node: HTMLElement) {
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
     this.node = node;
-    ReactDOM.render(<MultiTaskTodoEmbeddableComponent embeddable={this} />, node);
+    createRoot(node).render(<MultiTaskTodoEmbeddableComponent embeddable={this} />);
   }
 
   public reload() {}
@@ -80,7 +80,7 @@ export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, Mult
     super.destroy();
     this.subscription.unsubscribe();
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
   }
 }

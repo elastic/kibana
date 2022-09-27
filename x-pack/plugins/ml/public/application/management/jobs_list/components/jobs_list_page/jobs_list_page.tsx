@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,7 +48,9 @@ import { HttpService } from '../../../../services/http_service';
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent: FC<PropsWithChildren<SpacesContextProps>> = ({ children }) => (
+  <>{children}</>
+);
 
 export const JobsListPage: FC<{
   coreStart: CoreStart;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
@@ -25,14 +25,16 @@ export const getTextRenderer =
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render(domNode, { text: textString }, handlers) {
-      ReactDOM.render(
+      const root = createRoot(domNode);
+
+      root.render(
         <KibanaThemeProvider theme$={theme$}>
           <div>{textString}</div>
-        </KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
+        </KibanaThemeProvider>
+        // () => handlers.done()
       );
-      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+
+      handlers.onDestroy(() => root.unmount());
     },
   });
 

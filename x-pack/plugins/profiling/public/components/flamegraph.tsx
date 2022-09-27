@@ -256,6 +256,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
         <EuiFlexGroup direction="row">
           {columnarData.viewModel.label.length > 0 && (
             <EuiFlexItem grow>
+              {/* @ts-expect-error */}
               <Chart key={columnarData.key}>
                 <Settings
                   theme={chartTheme}

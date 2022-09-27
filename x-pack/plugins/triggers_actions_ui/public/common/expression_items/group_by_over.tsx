@@ -153,7 +153,7 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <>
               <EuiFlexItem grow={false}>
-                <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
+                <EuiFormRow isInvalid={errors.termSize.length > 0} error={<>{errors.termSize}</>}>
                   <EuiFieldNumber
                     isInvalid={errors.termSize.length > 0}
                     value={termSize || ''}
@@ -170,7 +170,7 @@ export const GroupByExpression = ({
               <EuiFlexItem grow={false}>
                 <EuiFormRow
                   isInvalid={errors.termField.length > 0 && termField !== undefined}
-                  error={errors.termField}
+                  error={errors.termField as string[]}
                 >
                   <EuiSelect
                     data-test-subj="fieldsExpressionSelect"

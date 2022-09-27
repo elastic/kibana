@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import {
@@ -25,7 +26,7 @@ interface PageProps {
   isHome?: boolean;
 }
 
-export const Page: React.FC<PageProps> = (props) => {
+export const Page: FC<PropsWithChildren<PageProps>> = (props) => {
   const { title, crumb, isHome, children } = props;
 
   const history = useHistory();

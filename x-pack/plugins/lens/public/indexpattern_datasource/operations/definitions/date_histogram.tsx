@@ -314,6 +314,7 @@ export const dateHistogramOperation: OperationDefinition<
                         }
                       )}
                       iconProps={{
+                        // @ts-expect-error update types
                         className: 'eui-alignTop',
                       }}
                       position="top"

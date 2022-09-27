@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -39,7 +39,9 @@ export const renderApp = async (
   const pipelinesService = new PipelinesService(core.http, monitoringService);
   const pipelineService = new PipelineService(core.http, pipelinesService);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <core.i18n.Context>
       <KibanaThemeProvider theme$={theme$}>
         <Router history={history}>
@@ -101,11 +103,10 @@ export const renderApp = async (
           </Switch>
         </Router>
       </KibanaThemeProvider>
-    </core.i18n.Context>,
-    element
+    </core.i18n.Context>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

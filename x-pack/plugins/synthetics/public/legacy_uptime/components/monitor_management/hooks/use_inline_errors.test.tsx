@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { MockRedux } from '../../../lib/helper/rtl_helpers';
 import { useInlineErrors } from './use_inline_errors';
 import { DEFAULT_THROTTLING } from '../../../../../common/runtime_types';
@@ -22,6 +22,7 @@ describe('useInlineErrors', function () {
     const spy = jest.spyOn(obsvPlugin, 'useEsSearch');
 
     const { result } = renderHook(() => useInlineErrors({ onlyInvalidMonitors: true }), {
+      // @ts-expect-error update types
       wrapper: MockRedux,
     });
 

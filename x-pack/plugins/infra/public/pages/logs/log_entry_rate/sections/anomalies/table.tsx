@@ -146,7 +146,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
 
   const handleTableChange = useCallback(
-    ({ sort = {} }) => {
+    ({ sort }: any) => {
       changeSortOptions(sort);
     },
     [changeSortOptions]

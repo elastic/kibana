@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useLocationMonitors } from './use_location_monitors';
 import { defaultCore, WrappedHelper } from '../../../../../apps/synthetics/utils/testing';
@@ -38,26 +38,26 @@ describe('useLocationMonitors', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useLocationMonitors(), {
+    const { result } = renderHook(() => useLocationMonitors(), {
       wrapper: WrappedHelper,
     });
 
     expect(result.current).toStrictEqual({ locationMonitors: [], loading: true });
 
-    await waitForNextUpdate();
-
-    expect(result.current).toStrictEqual({
-      loading: false,
-      locationMonitors: [
-        {
-          id: 'Test',
-          count: 5,
-        },
-        {
-          id: 'Test 1',
-          count: 0,
-        },
-      ],
+    await waitFor(() => {
+      expect(result.current).toStrictEqual({
+        loading: false,
+        locationMonitors: [
+          {
+            id: 'Test',
+            count: 5,
+          },
+          {
+            id: 'Test 1',
+            count: 0,
+          },
+        ],
+      });
     });
   });
 });

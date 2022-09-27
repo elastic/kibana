@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { render, screen } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
+import { renderHook, act, render, screen, waitFor } from '@testing-library/react';
 
 import '../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
@@ -83,24 +83,25 @@ describe('usePushToService', () => {
 
   it('push case button posts the push with correct args', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+      const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
         () => usePushToService(defaultArgs),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
-      result.current.pushButton.props.children.props.onClick();
-      expect(pushCaseToExternalService).toBeCalledWith({
-        caseId,
-        connector: {
-          fields: null,
-          id: 'servicenow-1',
-          name: 'My Connector',
-          type: ConnectorTypes.serviceNowITSM,
-        },
+      await waitFor(() => {
+        result.current.pushButton.props.children.props.onClick();
+        expect(pushCaseToExternalService).toBeCalledWith({
+          caseId,
+          connector: {
+            fields: null,
+            id: 'servicenow-1',
+            name: 'My Connector',
+            type: ConnectorTypes.serviceNowITSM,
+          },
+        });
+        expect(result.current.pushCallouts).toBeNull();
       });
-      expect(result.current.pushCallouts).toBeNull();
     });
   });
 
@@ -113,16 +114,17 @@ describe('usePushToService', () => {
       },
     }));
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+      const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
         () => usePushToService(defaultArgs),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('license-error');
+      await waitFor(() => {
+        const errorsMsg = result.current.pushCallouts?.props.messages;
+        expect(errorsMsg).toHaveLength(1);
+        expect(errorsMsg[0].id).toEqual('license-error');
+      });
     });
   });
 
@@ -136,23 +138,23 @@ describe('usePushToService', () => {
     }));
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+      const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
         () => usePushToService(defaultArgs),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
-
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('kibana-config-error');
+      await waitFor(() => {
+        const errorsMsg = result.current.pushCallouts?.props.messages;
+        expect(errorsMsg).toHaveLength(1);
+        expect(errorsMsg[0].id).toEqual('kibana-config-error');
+      });
     });
   });
 
   it('Displays message when user does not have any connector configured', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+      const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -169,20 +171,20 @@ describe('usePushToService', () => {
         }
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        render(result.current.pushCallouts ?? <></>);
+        // getByText will thrown an error if the element is not found.
+        screen.getByText(i18n.CONFIGURE_CONNECTOR);
 
-      render(result.current.pushCallouts ?? <></>);
-      // getByText will thrown an error if the element is not found.
-      screen.getByText(i18n.CONFIGURE_CONNECTOR);
-
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
+        const errorsMsg = result.current.pushCallouts?.props.messages;
+        expect(errorsMsg).toHaveLength(1);
+      });
     });
   });
 
   it('Displays message when user does have a connector but is configured to none', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+      const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -198,20 +200,20 @@ describe('usePushToService', () => {
         }
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        render(result.current.pushCallouts ?? <></>);
+        // getByText will thrown an error if the element is not found.
+        screen.getByText(i18n.CONFIGURE_CONNECTOR);
 
-      render(result.current.pushCallouts ?? <></>);
-      // getByText will thrown an error if the element is not found.
-      screen.getByText(i18n.CONFIGURE_CONNECTOR);
-
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
+        const errorsMsg = result.current.pushCallouts?.props.messages;
+        expect(errorsMsg).toHaveLength(1);
+      });
     });
   });
 
   it('Displays message when connector is deleted', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+      const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -227,16 +229,17 @@ describe('usePushToService', () => {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('connector-deleted-error');
+      await waitFor(() => {
+        const errorsMsg = result.current.pushCallouts?.props.messages;
+        expect(errorsMsg).toHaveLength(1);
+        expect(errorsMsg[0].id).toEqual('connector-deleted-error');
+      });
     });
   });
 
   it('Displays message when connector is deleted with empty connectors', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+      const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -253,16 +256,17 @@ describe('usePushToService', () => {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('connector-deleted-error');
+      await waitFor(() => {
+        const errorsMsg = result.current.pushCallouts?.props.messages;
+        expect(errorsMsg).toHaveLength(1);
+        expect(errorsMsg[0].id).toEqual('connector-deleted-error');
+      });
     });
   });
 
   it('Displays message when case is closed', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+      const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -272,17 +276,18 @@ describe('usePushToService', () => {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual(CLOSED_CASE_PUSH_ERROR_ID);
+      await waitFor(() => {
+        const errorsMsg = result.current.pushCallouts?.props.messages;
+        expect(errorsMsg).toHaveLength(1);
+        expect(errorsMsg[0].id).toEqual(CLOSED_CASE_PUSH_ERROR_ID);
+      });
     });
   });
 
   describe('user does not have write permissions', () => {
     it('disables the push button when the user does not have push permissions', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
           () => usePushToService(defaultArgs),
           {
             wrapper: ({ children }) => (
@@ -290,11 +295,11 @@ describe('usePushToService', () => {
             ),
           }
         );
-        await waitForNextUpdate();
+        await waitFor(() => {
+          const { getByTestId } = render(result.current.pushButton);
 
-        const { getByTestId } = render(result.current.pushButton);
-
-        expect(getByTestId('push-to-external-service')).toBeDisabled();
+          expect(getByTestId('push-to-external-service')).toBeDisabled();
+        });
       });
     });
 
@@ -307,7 +312,7 @@ describe('usePushToService', () => {
         },
       }));
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
           () => usePushToService(defaultArgs),
           {
             wrapper: ({ children }) => (
@@ -315,8 +320,9 @@ describe('usePushToService', () => {
             ),
           }
         );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
+        await waitFor(() => {
+          expect(result.current.pushCallouts).toBeNull();
+        });
       });
     });
 
@@ -329,7 +335,7 @@ describe('usePushToService', () => {
         },
       }));
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
           () => usePushToService(defaultArgs),
           {
             wrapper: ({ children }) => (
@@ -337,14 +343,15 @@ describe('usePushToService', () => {
             ),
           }
         );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
+        await waitFor(() => {
+          expect(result.current.pushCallouts).toBeNull();
+        });
       });
     });
 
     it('does not display a message when user does not have any connector configured', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
           () =>
             usePushToService({
               ...defaultArgs,
@@ -362,14 +369,15 @@ describe('usePushToService', () => {
             ),
           }
         );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
+        await waitFor(() => {
+          expect(result.current.pushCallouts).toBeNull();
+        });
       });
     });
 
     it('does not display a message when user does have a connector but is configured to none', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
           () =>
             usePushToService({
               ...defaultArgs,
@@ -386,14 +394,15 @@ describe('usePushToService', () => {
             ),
           }
         );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
+        await waitFor(() => {
+          expect(result.current.pushCallouts).toBeNull();
+        });
       });
     });
 
     it('does not display a message when connector is deleted', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
           () =>
             usePushToService({
               ...defaultArgs,
@@ -411,14 +420,15 @@ describe('usePushToService', () => {
             ),
           }
         );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
+        await waitFor(() => {
+          expect(result.current.pushCallouts).toBeNull();
+        });
       });
     });
 
     it('does not display a message when connector is deleted with empty connectors', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
           () =>
             usePushToService({
               ...defaultArgs,
@@ -437,14 +447,15 @@ describe('usePushToService', () => {
             ),
           }
         );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
+        await waitFor(() => {
+          expect(result.current.pushCallouts).toBeNull();
+        });
       });
     });
 
     it('does not display a message when case is closed', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        const { result } = renderHook<ReturnUsePushToService, PropsWithChildren<UsePushToService>>(
           () =>
             usePushToService({
               ...defaultArgs,
@@ -456,8 +467,9 @@ describe('usePushToService', () => {
             ),
           }
         );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
+        await waitFor(() => {
+          expect(result.current.pushCallouts).toBeNull();
+        });
       });
     });
   });

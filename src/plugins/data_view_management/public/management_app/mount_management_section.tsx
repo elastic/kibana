@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
@@ -80,7 +80,9 @@ export async function mountManagementSection(
     savedObjectsManagement,
   };
 
-  ReactDOM.render(
+  const root = createRoot(params.element);
+
+  root.render(
     <KibanaContextProvider services={deps}>
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
@@ -104,11 +106,10 @@ export async function mountManagementSection(
         </I18nProvider>
       </KibanaThemeProvider>
     </KibanaContextProvider>,
-    params.element
   );
 
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 }

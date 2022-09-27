@@ -376,7 +376,8 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <div data-test-subj="mlAnnotationsViewDatafeedFlyoutChart">
-                      <Chart size={CHART_SIZE}>
+                      {/* @ts-expect-error update types */}
+                      <Chart Chart size={CHART_SIZE}>
                         <Settings
                           showLegend
                           legendPosition={Position.Bottom}

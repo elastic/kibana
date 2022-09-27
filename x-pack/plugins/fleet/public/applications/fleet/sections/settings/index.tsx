@@ -77,6 +77,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
             </EuiPortal>
           </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
+            {/* @ts-expect-error update types */}
             {(route: { match: { params: { outputId: string } } }) => {
               const output = outputs.data?.items.find((o) => route.match.params.outputId === o.id);
               if (!output) {
@@ -96,6 +97,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
             </EuiPortal>
           </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
+            {/* @ts-expect-error update types */}
             {(route: { match: { params: { downloadSourceId: string } } }) => {
               const downloadSource = downloadSources.data?.items.find(
                 (o) => route.match.params.downloadSourceId === o.id

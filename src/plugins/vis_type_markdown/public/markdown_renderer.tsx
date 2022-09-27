@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { MarkdownVisRenderValue } from './markdown_fn';
@@ -20,15 +20,16 @@ export const markdownVisRenderer: ExpressionRenderDefinition<MarkdownVisRenderVa
   displayName: 'markdown visualization',
   reuseDomNode: true,
   render: async (domNode, { visParams }, handlers) => {
+    const root = createRoot(domNode);
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
-    render(
+    root.render(
       <VisualizationContainer className="markdownVis" handlers={handlers}>
         <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
-      </VisualizationContainer>,
-      domNode
+      </VisualizationContainer>
     );
   },
 };

@@ -53,7 +53,7 @@ export const AutocompleteField = ({
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
       fullWidth
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       label={field.label}
       labelAppend={field.labelAppend}
     >

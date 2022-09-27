@@ -15,6 +15,7 @@ import React, {
   useState,
   useCallback,
 } from 'react';
+import type { EuiMarkdownEditorProps, EuiMarkdownParseError } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 
@@ -40,10 +41,13 @@ export interface MarkdownEditorRef {
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   ({ onChange, value, ariaLabel, editorId, dataTestSubj, height, autoFocusDisabled }, ref) => {
-    const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-    const onParse = useCallback((err, { messages }) => {
-      setMarkdownErrorMessages(err ? [err] : messages);
-    }, []);
+    const [markdownErrorMessages, setMarkdownErrorMessages] = useState<EuiMarkdownParseError[]>([]);
+    const onParse = useCallback<NonNullable<EuiMarkdownEditorProps['onParse']>>(
+      (err, { messages }) => {
+        setMarkdownErrorMessages(err ? [err] : messages);
+      },
+      []
+    );
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
     useEffect(() => {

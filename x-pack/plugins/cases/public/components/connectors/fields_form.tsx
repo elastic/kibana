@@ -13,11 +13,17 @@ import { ConnectorFieldsProps } from './types';
 import { getCaseConnectors } from '.';
 import { ConnectorTypeFields } from '../../../common/api';
 
-interface Props extends Omit<ConnectorFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
+export interface ConnectorFieldsFormProps
+  extends Omit<ConnectorFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
   connector: CaseActionConnector | null;
 }
 
-const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChange, fields }) => {
+const ConnectorFieldsFormComponent: React.FC<ConnectorFieldsFormProps> = ({
+  connector,
+  isEdit,
+  onChange,
+  fields,
+}) => {
   const { caseConnectorsRegistry } = getCaseConnectors();
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {

@@ -9,7 +9,7 @@ import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-// union type constisting of valid guide sections that we link to
+// union type consisting of valid guide sections that we link to
 type DocsSection =
   | '/apm/get-started'
   | '/x-pack'
@@ -18,9 +18,10 @@ type DocsSection =
   | '/elasticsearch/reference'
   | '/cloud';
 
-interface Props extends EuiLinkAnchorProps {
+interface Props extends Omit<EuiLinkAnchorProps, 'children'> {
   section: DocsSection;
   path: string;
+  children: React.ReactNode | ((props: string) => React.ReactNode);
 }
 
 export function ElasticDocsLink({ section, path, children, ...rest }: Props) {

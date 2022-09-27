@@ -91,6 +91,7 @@ function ErrorGroupList({
               type="questionInCircle"
               color="subdued"
               iconProps={{
+                // @ts-expect-error
                 className: 'eui-alignTop',
               }}
               content={i18n.translate(

@@ -64,7 +64,7 @@ export const QueryPackSelectable = ({
   resetFormFields,
 }: QueryPackSelectableProps) => {
   const handleChange = useCallback(
-    (type) => {
+    (type: string) => {
       setQueryType(type);
       if (resetFormFields) {
         resetFormFields();

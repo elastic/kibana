@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useLoadRuleAggregations } from './use_load_rule_aggregations';
 import { RuleStatus } from '../../types';
 
@@ -44,7 +44,7 @@ describe('useLoadRuleAggregations', () => {
       tagsFilter: [],
     };
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadRuleAggregations({
         ...params,
         onError,
@@ -53,11 +53,12 @@ describe('useLoadRuleAggregations', () => {
 
     await act(async () => {
       result.current.loadRuleAggregations();
-      await waitForNextUpdate();
     });
 
-    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
-    expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    await waitFor(() => {
+      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
+      expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    });
   });
 
   it('should call loadRuleAggregation API with params and handle result', async () => {
@@ -70,7 +71,7 @@ describe('useLoadRuleAggregations', () => {
       tagsFilter: ['tag1', 'tag2'],
     };
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadRuleAggregations({
         ...params,
         onError,
@@ -79,11 +80,12 @@ describe('useLoadRuleAggregations', () => {
 
     await act(async () => {
       result.current.loadRuleAggregations();
-      await waitForNextUpdate();
     });
 
-    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
-    expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    await waitFor(() => {
+      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
+      expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    });
   });
 
   it('should call onError if API fails', async () => {

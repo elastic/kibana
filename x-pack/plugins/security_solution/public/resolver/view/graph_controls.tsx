@@ -132,7 +132,7 @@ export const GraphControls = React.memo(
     const colorMap = useColors();
 
     const setActivePopover = useCallback(
-      (value) => {
+      (value: null | 'schemaInfo' | 'nodeLegend') => {
         if (value === activePopover) {
           setPopover(null);
         } else {

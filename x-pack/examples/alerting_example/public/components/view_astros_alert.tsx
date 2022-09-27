@@ -59,10 +59,13 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
     <Fragment>
       <EuiCallOut title={`Rule "${alert.name}"`} iconType="search">
         <p>
-          This is a specific view for all
-          <EuiTextColor color="accent"> example.people-in-space </EuiTextColor> Rules created by the
-          <EuiTextColor color="accent"> {ALERTING_EXAMPLE_APP_ID} </EuiTextColor>
-          plugin.
+          <>
+            This is a specific view for all
+            <EuiTextColor color="accent"> example.people-in-space </EuiTextColor> Rules created by
+            the
+            <EuiTextColor color="accent"> {ALERTING_EXAMPLE_APP_ID} </EuiTextColor>
+            plugin.
+          </>
         </p>
       </EuiCallOut>
       <EuiSpacer size="l" />
@@ -72,16 +75,20 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
       {isEmpty(alertState.alerts) ? (
         <EuiCallOut title="No Alerts!" color="warning" iconType="help">
           <p>
-            The people in {alert.params.craft} at the moment <b>are not</b> {alert.params.op}{' '}
-            {alert.params.outerSpaceCapacity}
+            <>
+              The people in {alert.params.craft} at the moment <b>are not</b> {alert.params.op}{' '}
+              {alert.params.outerSpaceCapacity}
+            </>
           </p>
         </EuiCallOut>
       ) : (
         <Fragment>
           <EuiCallOut title="Active State" color="success" iconType="user">
             <p>
-              The rule has been triggered because the people in {alert.params.craft} at the moment{' '}
-              {alert.params.op} {alert.params.outerSpaceCapacity}
+              <>
+                The rule has been triggered because the people in {alert.params.craft} at the moment{' '}
+                {alert.params.op} {alert.params.outerSpaceCapacity}
+              </>
             </p>
           </EuiCallOut>
           <EuiSpacer size="l" />

@@ -46,6 +46,7 @@ export const createApp =
   () =>
   ({ securitySolutionContext }: AppProps) =>
     (
+      // @ts-expect-error update types
       <IntlProvider>
         <ReduxStoreProvider store={securitySolutionContext.getSecuritySolutionStore}>
           <SecuritySolutionContext.Provider value={securitySolutionContext}>

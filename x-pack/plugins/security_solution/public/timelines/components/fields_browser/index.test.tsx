@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, renderHook } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
 import type { UseFieldBrowserOptionsProps, UseFieldBrowserOptions, FieldEditorActionsRef } from '.';
 import { useFieldBrowserOptions } from '.';
 import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
@@ -16,8 +17,6 @@ import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { TimelineId } from '../../../../common/types';
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { removeColumn, upsertColumn } from '../../store/timeline/actions';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
@@ -66,7 +65,7 @@ const runAllPromises = () => new Promise(setImmediate);
 
 // helper function to render the hook
 const renderUseFieldBrowserOptions = (props: Partial<UseFieldBrowserOptionsProps> = {}) =>
-  renderHook<UseFieldBrowserOptionsProps, ReturnType<UseFieldBrowserOptions>>(
+  renderHook<ReturnType<UseFieldBrowserOptions>, UseFieldBrowserOptionsProps>(
     () =>
       useFieldBrowserOptions({
         sourcererScope: SourcererScopeName.default,
@@ -83,12 +82,11 @@ const renderUpdatedUseFieldBrowserOptions = async (
   props: Partial<UseFieldBrowserOptionsProps> = {}
 ) => {
   let renderHookResult: RenderHookResult<
-    UseFieldBrowserOptionsProps,
-    ReturnType<UseFieldBrowserOptions>
+    ReturnType<UseFieldBrowserOptions>,
+    UseFieldBrowserOptionsProps
   > | null = null;
   await act(async () => {
     renderHookResult = renderUseFieldBrowserOptions(props);
-    await renderHookResult.waitForNextUpdate();
   });
   return renderHookResult!;
 };

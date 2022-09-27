@@ -213,6 +213,7 @@ export const WatchVisualization = () => {
       <div data-test-subj="watchVisualizationChart">
         <EuiSpacer size="l" />
         {watchVisualizationDataKeys.length ? (
+          // @ts-expect-error update types
           <Chart size={['100%', 300]} renderer="canvas">
             <Settings
               theme={[customTheme(), chartsTheme]}

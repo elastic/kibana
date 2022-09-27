@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   DataView,
   DataViewField,
@@ -406,6 +406,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     if (field.type === 'date') {
       return combineWithTitleAndFooter(
         <div data-test-subj={`${dataTestSubject}-histogram`}>
+          {/* @ts-expect-error update types */}
           <Chart size={{ height: 200, width: 300 - 32 }}>
             <Settings
               tooltip={{ type: TooltipType.None }}
@@ -451,6 +452,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (showingHistogram || !topValues || !topValues.buckets.length) {
       return combineWithTitleAndFooter(
+        // @ts-expect-error update types
         <Chart
           data-test-subj={`${dataTestSubject}-histogram`}
           size={{ height: 200, width: '100%' }}
@@ -499,8 +501,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   return null;
 };
 
-class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
-  constructor(props: FieldStatsProps) {
+class ErrorBoundary extends React.Component<PropsWithChildren, { hasError: boolean }> {
+  constructor(props: PropsWithChildren<FieldStatsProps>) {
     super(props);
     this.state = { hasError: false };
   }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -25,11 +25,12 @@ import { PersistableStateAttachmentTypeRegistry } from './client/attachment_fram
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
   const { element } = mountParams;
+  const root = createRoot(element);
 
-  ReactDOM.render(<App deps={deps} />, element);
+  root.render(<App deps={deps} />);
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

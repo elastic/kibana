@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 interface UptimeRefreshContext {
   lastRefresh: number;
@@ -21,7 +22,7 @@ const defaultContext: UptimeRefreshContext = {
 
 export const UptimeRefreshContext = createContext(defaultContext);
 
-export const UptimeRefreshContextProvider: React.FC = ({ children }) => {
+export const UptimeRefreshContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const refreshApp = () => {

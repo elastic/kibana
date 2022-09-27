@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { firstValueFrom, from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { CoreStart } from '@kbn/core/public';
@@ -23,10 +24,12 @@ export type MockIndexPatternSpec = Pick<DataView, 'id' | 'title' | 'type' | 'tim
   fields: FieldSpec[];
 };
 
-export const MockIndexPatternsKibanaContextProvider: React.FC<{
-  asyncDelay: number;
-  mockIndexPatterns: MockIndexPatternSpec[];
-}> = ({ asyncDelay, children, mockIndexPatterns }) => {
+export const MockIndexPatternsKibanaContextProvider: FC<
+  PropsWithChildren<{
+    asyncDelay: number;
+    mockIndexPatterns: MockIndexPatternSpec[];
+  }>
+> = ({ asyncDelay, children, mockIndexPatterns }) => {
   const indexPatterns = useMemo(
     () => createIndexPatternsMock(asyncDelay, mockIndexPatterns.map(createIndexPatternMock)),
     [asyncDelay, mockIndexPatterns]

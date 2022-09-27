@@ -282,7 +282,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     );
 
     const handleOnNameBlur = useCallback(
-      ({ target: { name } }) => {
+      ({ target: { name } }: { target: { name: string } }) => {
         processChanged(item);
         setVisited((prevVisited) => ({ ...prevVisited, [name]: true }));
       },

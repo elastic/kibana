@@ -123,7 +123,7 @@ export const getPoliciesPath = (search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-export const getPolicyDetailPath = (policyId: string, search?: string) => {
+export const getPolicyDetailPath = (policyId?: string, search?: string) => {
   return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,

@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ReactElement } from 'react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -54,7 +55,12 @@ export interface ResultsTableComponentProps {
   endDate?: string;
   startDate?: string;
   addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
-  addToCase?: ({ actionId }: { actionId?: string }) => React.ReactElement;
+  addToCase?: (payload: {
+    actionId?: string;
+    queryId?: string;
+    isIcon?: boolean;
+    isDisabled?: boolean;
+  }) => ReactElement;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -86,7 +92,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const { getUrlForApp } = useKibana().services.application;
 
   const getFleetAppUrl = useCallback(
-    (agentId) =>
+    (agentId: string) =>
       getUrlForApp('fleet', {
         path: pagePathGetters.agent_details({ agentId })[1],
       }),
@@ -95,7 +101,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
-    (pageSize) =>
+    (pageSize: number) =>
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
@@ -104,7 +110,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [setPagination]
   );
   const onChangePage = useCallback(
-    (pageIndex) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
+    (pageIndex: number) =>
+      setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
     [setPagination]
   );
 

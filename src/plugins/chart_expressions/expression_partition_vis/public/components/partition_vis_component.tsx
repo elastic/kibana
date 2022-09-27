@@ -382,6 +382,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendPosition={legendPosition}
               />
             )}
+            {/* @ts-expect-error update types */}
             <Chart size="100%">
               <ChartSplit
                 splitColumnAccessor={splitChartColumnAccessor}

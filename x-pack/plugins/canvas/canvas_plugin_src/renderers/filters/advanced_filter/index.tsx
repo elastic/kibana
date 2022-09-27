@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { StartInitializer } from '../../../plugin';
 import { RendererFactory } from '../../../../types';
@@ -23,19 +23,20 @@ export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> =
     reuseDomNode: true,
     height: 50,
     render(domNode, _, handlers) {
-      ReactDOM.render(
+      const root = createRoot(domNode);
+
+      root.render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <AdvancedFilter
             commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
             value={handlers.getFilter()}
           />
-        </KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
+        </KibanaThemeProvider>
+        // () => handlers.done()
       );
 
       handlers.onDestroy(() => {
-        ReactDOM.unmountComponentAtNode(domNode);
+        root.unmount();
       });
     },
   });

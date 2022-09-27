@@ -10,6 +10,7 @@ import type { IconType, ToolTipPositions } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyStringTag } from '../empty_value';
@@ -130,7 +131,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     );
 
     const renderCallback = useCallback(
-      (dataProvider, _, snapshot) =>
+      (dataProvider: DataProvider, _: DraggableProvided | null, snapshot: DraggableStateSnapshot) =>
         snapshot.isDragging ? (
           <DragEffects>
             <Provider dataProvider={dataProvider} />

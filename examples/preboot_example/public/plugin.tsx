@@ -8,7 +8,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { App } from './app';
 import { ConfigType } from './config';
 
@@ -25,8 +25,9 @@ export class PrebootExamplePlugin implements Plugin<void, void, {}, {}> {
       appRoute: '/',
       chromeless: true,
       mount: (params) => {
-        ReactDOM.render(<App http={core.http} token={this.#config.token} />, params.element);
-        return () => ReactDOM.unmountComponentAtNode(params.element);
+        const root = createRoot(params.element);
+        root.render(<App http={core.http} token={this.#config.token} />);
+        return () => root.unmount();
       },
     });
   }

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
@@ -16,7 +17,7 @@ import { schema, FormProps } from './schema';
 describe('SyncAlertsToggle', () => {
   let globalForm: FormHook;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { syncAlerts: true },
       schema: {

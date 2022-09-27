@@ -8,7 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiAutoRefreshButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiAutoRefreshButton,
+  EuiAutoRefreshButtonProps,
+} from '@elastic/eui';
 
 interface RulesListAutoRefreshProps {
   lastUpdate: string;
@@ -94,7 +100,7 @@ export const RulesListAutoRefresh = (props: RulesListAutoRefreshProps) => {
     };
   }, [isPaused, refreshInterval]);
 
-  const onRefreshChange = useCallback(
+  const onRefreshChange = useCallback<EuiAutoRefreshButtonProps['onRefreshChange']>(
     ({ isPaused: newIsPaused, refreshInterval: newRefreshInterval }) => {
       setIsPaused(newIsPaused);
       setRefreshInterval(newRefreshInterval);

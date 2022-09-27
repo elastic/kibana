@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import type { FC } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
@@ -35,7 +36,7 @@ type Sorting = Required<
   EuiBasicTableProps<Pick<FindingsByResourcePage, 'failed_findings'>>
 >['sorting'];
 
-interface Props {
+export interface FindingsByResourceTableProps {
   items: FindingsByResourcePage[];
   loading: boolean;
   pagination: Pagination;
@@ -48,14 +49,14 @@ export const getResourceId = (resource: FindingsByResourcePage) => {
   return [resource.resource_id, ...resource['rule.section']].join('/');
 };
 
-const FindingsByResourceTableComponent = ({
+const FindingsByResourceTableComponent: FC<FindingsByResourceTableProps> = ({
   items,
   loading,
   pagination,
   sorting,
   setTableOptions,
   onAddFilter,
-}: Props) => {
+}) => {
   const getRowProps = (row: FindingsByResourcePage) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
@@ -180,4 +181,6 @@ export const findingsByResourceColumns = Object.fromEntries(
   baseColumns.map((column) => [column.field, column])
 ) as Record<BaseFindingColumnName, typeof baseColumns[number]>;
 
-export const FindingsByResourceTable = React.memo(FindingsByResourceTableComponent);
+export const FindingsByResourceTable = React.memo<FindingsByResourceTableProps>(
+  FindingsByResourceTableComponent
+);

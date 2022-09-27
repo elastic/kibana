@@ -8,8 +8,8 @@
 
 import React from 'react';
 import uuid from 'uuid';
-import ReactDOM from 'react-dom';
-
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Subscription } from 'rxjs';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -80,6 +80,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public controlGroup?: ControlGroupContainer;
   private domNode?: HTMLElement;
+  private root?: Root;
 
   private allDataViews: DataView[] = [];
 
@@ -314,11 +315,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public render(dom: HTMLElement) {
     if (this.domNode) {
-      ReactDOM.unmountComponentAtNode(this.domNode);
+      this.root?.unmount();
     }
     this.domNode = dom;
+    this.root = createRoot(dom);
 
-    ReactDOM.render(
+    this.root.render(
       <I18nProvider>
         <KibanaThemeProvider theme$={this.theme$}>
           <DashboardViewport
@@ -328,7 +330,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           />
         </KibanaThemeProvider>
       </I18nProvider>,
-      dom
     );
   }
 
@@ -336,7 +337,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     super.destroy();
     this.subscriptions.unsubscribe();
     this.onDestroyControlGroup?.();
-    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.domNode) this.root?.unmount();
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {

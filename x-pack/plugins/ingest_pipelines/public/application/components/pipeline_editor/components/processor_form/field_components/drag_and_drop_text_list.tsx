@@ -20,6 +20,7 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiText,
+  DragDropContextProps,
 } from '@elastic/eui';
 
 import {
@@ -77,7 +78,7 @@ function DragAndDropTextListComponent({
   const [droppableId] = useState(() => uuid.v4());
   const [firstItemId] = useState(() => uuid.v4());
 
-  const onDragEnd = useCallback(
+  const onDragEnd = useCallback<DragDropContextProps['onDragEnd']>(
     ({ source, destination }) => {
       if (source && destination) {
         onMove(source.index, destination.index);

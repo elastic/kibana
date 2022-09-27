@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector } from '../mock';
@@ -22,11 +22,12 @@ describe('useGetFieldsByIssueType', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
+      const { result } = renderHook<UseGetFieldsByIssueType, {}>(() =>
         useGetFieldsByIssueType({ http, toastNotifications: notifications.toasts, issueType: null })
       );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: true, fields: {} });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: true, fields: {} });
+      });
     });
   });
 
@@ -34,7 +35,7 @@ describe('useGetFieldsByIssueType', () => {
     const spyOnGetFieldsByIssueType = jest.spyOn(api, 'getFieldsByIssueType');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
+      const { result } = renderHook<UseGetFieldsByIssueType, {}>(() =>
         useGetFieldsByIssueType({
           http,
           toastNotifications: notifications.toasts,
@@ -43,16 +44,16 @@ describe('useGetFieldsByIssueType', () => {
         })
       );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(spyOnGetFieldsByIssueType).not.toHaveBeenCalled();
-      expect(result.current).toEqual({ isLoading: false, fields: {} });
+      await waitFor(() => {
+        expect(spyOnGetFieldsByIssueType).not.toHaveBeenCalled();
+        expect(result.current).toEqual({ isLoading: false, fields: {} });
+      });
     });
   });
 
   test('fetch fields', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
+      const { result } = renderHook<UseGetFieldsByIssueType, {}>(() =>
         useGetFieldsByIssueType({
           http,
           toastNotifications: notifications.toasts,
@@ -60,22 +61,22 @@ describe('useGetFieldsByIssueType', () => {
           issueType: 'Task',
         })
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        fields: {
-          summary: { allowedValues: [], defaultValue: {} },
-          priority: {
-            allowedValues: [
-              {
-                name: 'Medium',
-                id: '3',
-              },
-            ],
-            defaultValue: { name: 'Medium', id: '3' },
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          fields: {
+            summary: { allowedValues: [], defaultValue: {} },
+            priority: {
+              allowedValues: [
+                {
+                  name: 'Medium',
+                  id: '3',
+                },
+              ],
+              defaultValue: { name: 'Medium', id: '3' },
+            },
           },
-        },
+        });
       });
     });
   });
@@ -87,7 +88,7 @@ describe('useGetFieldsByIssueType', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
+      const { result } = renderHook<UseGetFieldsByIssueType, {}>(() =>
         useGetFieldsByIssueType({
           http,
           toastNotifications: notifications.toasts,
@@ -96,10 +97,9 @@ describe('useGetFieldsByIssueType', () => {
         })
       );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({ isLoading: false, fields: {} });
+      await waitFor(() => {
+        expect(result.current).toEqual({ isLoading: false, fields: {} });
+      });
     });
   });
 });

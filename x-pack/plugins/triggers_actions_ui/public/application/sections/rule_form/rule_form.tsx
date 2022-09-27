@@ -545,7 +545,7 @@ export const RuleForm = ({
           {errors.actionConnectors.length >= 1 ? (
             <>
               <EuiSpacer />
-              <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
+              <EuiCallOut color="danger" size="s" title={errors.actionConnectors as string[]} />
               <EuiSpacer />
             </>
           ) : null}
@@ -654,7 +654,7 @@ export const RuleForm = ({
               />
             }
             isInvalid={errors.name.length > 0 && rule.name !== undefined}
-            error={errors.name}
+            error={errors.name as string[]}
           >
             <EuiFieldText
               fullWidth
@@ -718,7 +718,7 @@ export const RuleForm = ({
             helpText={getHelpTextForInterval()}
             label={labelForRuleChecked}
             isInvalid={errors['schedule.interval'].length > 0}
-            error={errors['schedule.interval']}
+            error={errors['schedule.interval'] as string[]}
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
@@ -849,7 +849,7 @@ export const RuleForm = ({
           {errors.ruleTypeId.length >= 1 && rule.ruleTypeId !== undefined ? (
             <>
               <EuiSpacer />
-              <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />
+              <EuiCallOut color="danger" size="s" title={errors.ruleTypeId as string[]} />
               <EuiSpacer />
             </>
           ) : null}

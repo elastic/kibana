@@ -118,7 +118,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const { activePage, limit } = useDeepEqualSelector((state) => getUsersSelector(state));
 
   const updateLimitPagination = useCallback(
-    (newLimit) => {
+    (newLimit: number) => {
       dispatch(
         usersActions.updateTableLimit({
           usersType: type,
@@ -131,7 +131,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   );
 
   const updateActivePage = useCallback(
-    (newPage) => {
+    (newPage: number) => {
       dispatch(
         usersActions.updateTableActivePage({
           activePage: newPage,

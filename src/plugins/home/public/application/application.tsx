@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
@@ -31,6 +31,7 @@ export const renderApp = async (
   coreStart: CoreStart,
   history: ScopedHistory
 ) => {
+  const root = createRoot(element);
   const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
   const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
 
@@ -43,7 +44,7 @@ export const renderApp = async (
       .getSolutions()
       .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
 
-    render(
+    root.render(
       <RedirectAppLinks application={coreStart.application}>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...coreStart }}>
@@ -52,8 +53,7 @@ export const renderApp = async (
             </SampleDataTabKibanaProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
-      </RedirectAppLinks>,
-      element
+      </RedirectAppLinks>
     );
   });
 
@@ -67,7 +67,7 @@ export const renderApp = async (
   });
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
     unlisten();
     navLinksSubscription.unsubscribe();
   };

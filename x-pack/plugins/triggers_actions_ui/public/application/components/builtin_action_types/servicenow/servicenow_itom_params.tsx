@@ -129,7 +129,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
       <EuiFormRow
         fullWidth
         label={i18n.SEVERITY_REQUIRED_LABEL}
-        error={errors.severity}
+        error={errors.severity as string[]}
         isInvalid={isFieldInvalid(severity, errors.severity)}
       >
         <EuiSelect

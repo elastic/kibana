@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useSecurityContext } from '../hooks/use_security_context';
 
-export const FiltersGlobal: FC = ({ children }) => {
+export const FiltersGlobal: FC<PropsWithChildren> = ({ children }) => {
   const contextValue = useSecurityContext();
 
   const Component = contextValue.getFiltersGlobalComponent();

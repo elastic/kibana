@@ -89,7 +89,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
-    (alert) => {
+    (alert: any) => {
       const idx = alerts.findIndex((a) =>
         (a as any)[ALERT_UUID].includes(alert.fields[ALERT_UUID])
       );

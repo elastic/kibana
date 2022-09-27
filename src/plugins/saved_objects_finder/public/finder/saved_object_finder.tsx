@@ -9,6 +9,7 @@
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
+import type { PropsWithChildren } from 'react';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 import {
@@ -97,7 +98,7 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
 export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
 
 export class SavedObjectFinderUi extends React.Component<
-  SavedObjectFinderProps,
+  PropsWithChildren<SavedObjectFinderProps>,
   SavedObjectFinderState
 > {
   public static propTypes = {

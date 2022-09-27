@@ -207,6 +207,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
         iconType="plusInCircle"
         data-test-subj="add-element-button"
       >
+        {/* @ts-expect-error update types */}
         {({ closePopover }: { closePopover: ClosePopoverFn }) => (
           <EuiContextMenu
             initialPanelId={0}

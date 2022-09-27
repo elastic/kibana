@@ -52,7 +52,7 @@ const UserNameComponent: React.FC<Props> = ({
 
   const isInTimelineContext = userName && eventContext?.timelineID;
   const openUserDetailsSidePanel = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
 
       if (onClick) {

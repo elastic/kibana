@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -69,7 +70,7 @@ const StyledEuiLink = styled(EuiLink)`
   font-size: ${(props) => props.theme.eui.euiFontSizeS};
 `;
 
-const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
+const CollapsablePanel: FC<PropsWithChildren<{ id: string; title: React.ReactNode }>> = ({
   id,
   title,
   children,

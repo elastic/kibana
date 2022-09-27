@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useCallback } from 'react';
-
+import type { FC, PropsWithChildren } from 'react';
 import { EMPTY } from 'rxjs';
 import type { DecoratorFn } from '@storybook/react';
 import { createBrowserHistory } from 'history';
@@ -41,10 +41,9 @@ import { getExecutionContext } from './execution_context';
 // mock later, (or, ideally, Fleet starts to use a service abstraction).
 //
 // Expect this to grow as components that are given Stories need access to mocked services.
-export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>[1] }> = ({
-  storyContext,
-  children: storyChildren,
-}) => {
+export const StorybookContext: FC<
+  PropsWithChildren<{ storyContext?: Parameters<DecoratorFn>[1] }>
+> = ({ storyContext, children: storyChildren }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();
   const history = new CoreScopedHistory(browserHistory, basepath);
@@ -68,7 +67,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
       chrome: getChrome(),
       cloud: {
         ...getCloud({ isCloudEnabled }),
-        CloudContextProvider: ({ children }) => <>{children}</>,
+        CloudContextProvider: ({ children }: PropsWithChildren) => <>{children}</>,
       },
       customIntegrations: {
         ContextProvider: getStorybookContextProvider(),

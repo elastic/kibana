@@ -72,7 +72,7 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
   });
 
   const handleChange = useCallback(
-    (newValue) => {
+    (newValue: string) => {
       if (newValue === SNAPSHOT_OPTION.value) {
         onSnapshotChange(true);
         onRemovedChange(false);

@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
@@ -174,7 +174,8 @@ export const getXyChartRenderer = ({
       import('../helpers'),
     ]);
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const root = createRoot(domNode);
+    handlers.onDestroy(() => root.unmount());
     const onClickValue = (data: FilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };
@@ -206,7 +207,7 @@ export const getXyChartRenderer = ({
       height: '100%',
     });
 
-    ReactDOM.render(
+    root.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
         <I18nProvider>
           <div css={chartContainerStyle} data-test-subj="xyVisChart">
@@ -233,8 +234,7 @@ export const getXyChartRenderer = ({
             />
           </div>{' '}
         </I18nProvider>
-      </KibanaThemeProvider>,
-      domNode
+      </KibanaThemeProvider>
     );
   },
 });

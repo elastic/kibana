@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
@@ -42,12 +42,12 @@ export const getDebugRenderer =
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render(domNode, config, handlers) {
-      handlers.onDestroy(() => unmountComponentAtNode(domNode));
-      render(
+      const root = createRoot(domNode);
+      handlers.onDestroy(() => root.unmount());
+      root.render(
         <KibanaThemeProvider theme$={theme$}>
           <Debug parentNode={domNode} payload={config} onLoaded={handlers.done} />
-        </KibanaThemeProvider>,
-        domNode
+        </KibanaThemeProvider>
       );
     },
   });

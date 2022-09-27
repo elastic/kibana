@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -91,7 +92,7 @@ interface ExplorerPageProps {
   updateLanguage?: (language: string) => void;
 }
 
-const ExplorerPage: FC<ExplorerPageProps> = ({
+const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
   children,
   jobSelectorProps,
   noInfluencersConfigured,
@@ -217,7 +218,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   );
 
   const onPanelWidthChange = useCallback(
-    (newSizes) => {
+    (newSizes: { [key: string]: number }) => {
       setAnomalyExplorerPanelState({
         mainPage: {
           size: newSizes.mainPage,

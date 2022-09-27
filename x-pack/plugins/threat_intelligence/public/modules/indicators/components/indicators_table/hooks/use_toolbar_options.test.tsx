@@ -6,7 +6,7 @@
  */
 
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useToolbarOptions } from './use_toolbar_options';
 
 describe('useToolbarOptions()', () => {
@@ -95,12 +95,12 @@ describe('useToolbarOptions()', () => {
               }
             >
               <React.Fragment>
-                Showing 
+                Showing
                 1
                 -
                 25
                  of
-                 
+
                 25
                  indicators
               </React.Fragment>
@@ -153,12 +153,12 @@ describe('useToolbarOptions()', () => {
               }
             >
               <React.Fragment>
-                Showing 
+                Showing
                 26
                 -
                 50
                  of
-                 
+
                 50
                  indicators
               </React.Fragment>

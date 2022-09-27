@@ -131,7 +131,7 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
       )}
       <EuiFormRow
         label={field?.label}
-        helpText={field?.helpText}
+        helpText={typeof field?.helpText === 'function' ? field?.helpText() : field?.helpText}
         error={errorMessage}
         isInvalid={isInvalid}
         data-test-subj="pick-rule-data-source"

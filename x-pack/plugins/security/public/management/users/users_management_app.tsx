@@ -6,9 +6,9 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
 import type { Observable } from 'rxjs';
@@ -63,8 +63,9 @@ export const usersManagementApp = Object.freeze({
           import('./user_api_client'),
           import('../roles'),
         ]);
+        const root = createRoot(element);
 
-        render(
+        root.render(
           <Providers
             services={coreStart}
             theme$={theme$}
@@ -116,12 +117,11 @@ export const usersManagementApp = Object.freeze({
                 </Route>
               </Switch>
             </Breadcrumb>
-          </Providers>,
-          element
+          </Providers>
         );
 
         return () => {
-          unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     } as RegisterManagementAppArgs;
@@ -136,7 +136,7 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
   theme$,
   history,

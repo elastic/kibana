@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import classNames from 'classnames';
-import * as React from 'react';
+import React from 'react';
 
 import { LogEntryTime } from '../../../../common/log_entry';
 import { LogSearchButtons } from './log_search_buttons';

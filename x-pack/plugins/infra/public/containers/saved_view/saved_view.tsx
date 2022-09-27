@@ -149,7 +149,7 @@ export const useSavedView = (props: Props) => {
   );
 
   const updateView = useCallback(
-    (id, d: { [p: string]: any }) => {
+    (id: string, d: { [p: string]: any }) => {
       const doSave = async () => {
         const view = await hasView(d.name);
         if (view && view.id !== id) {

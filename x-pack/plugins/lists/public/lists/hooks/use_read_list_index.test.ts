@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useReadListIndex } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -25,12 +25,12 @@ describe('useReadListIndex', () => {
   });
 
   it('invokes Api.readListIndex', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useReadListIndex());
+    const { result } = renderHook(() => useReadListIndex());
     act(() => {
       result.current.start({ http: httpMock });
     });
-    await waitForNextUpdate();
-
-    expect(Api.readListIndex).toHaveBeenCalledWith(expect.objectContaining({ http: httpMock }));
+    await waitFor(() => {
+      expect(Api.readListIndex).toHaveBeenCalledWith(expect.objectContaining({ http: httpMock }));
+    });
   });
 });

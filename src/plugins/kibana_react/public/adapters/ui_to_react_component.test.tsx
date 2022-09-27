@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { UiComponent } from '@kbn/kibana-utils-plugin/public';
 import { uiToReactComponent } from './ui_to_react_component';
 import { reactToUiComponent } from './react_to_ui_component';
@@ -24,7 +24,7 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp />, div);
+    createRoot(div).render(<ReactComp />);
 
     expect(div.innerHTML).toBe('<div>cnt: 0</div>');
   });
@@ -33,7 +33,7 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp cnt={5} />, div);
+    createRoot(div).render(<ReactComp cnt={5} />);
 
     expect(div.innerHTML).toBe('<div>cnt: 5</div>');
   });
@@ -42,11 +42,11 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    createRoot(div).render(<ReactComp cnt={1} />);
 
     expect(div.innerHTML).toBe('<div>cnt: 1</div>');
 
-    ReactDOM.render(<ReactComp cnt={2} />, div);
+    createRoot(div).render(<ReactComp cnt={2} />);
 
     expect(div.innerHTML).toBe('<div>cnt: 2</div>');
   });
@@ -61,8 +61,8 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp2);
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
-    ReactDOM.unmountComponentAtNode(div);
+    createRoot(div).render(<ReactComp cnt={1} />);
+    createRoot(div).unmount();
 
     expect(div.innerHTML).toBe('');
   });
@@ -81,11 +81,11 @@ describe('uiToReactComponent', () => {
 
     expect(unmount).toHaveBeenCalledTimes(0);
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    createRoot(div).render(<ReactComp cnt={1} />);
 
     expect(unmount).toHaveBeenCalledTimes(0);
 
-    ReactDOM.unmountComponentAtNode(div);
+    createRoot(div).unmount();
 
     expect(unmount).toHaveBeenCalledTimes(1);
   });
@@ -103,15 +103,15 @@ describe('uiToReactComponent', () => {
 
     expect(render).toHaveBeenCalledTimes(0);
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    createRoot(div).render(<ReactComp cnt={1} />);
 
     expect(render).toHaveBeenCalledTimes(1);
 
-    ReactDOM.render(<ReactComp cnt={2} />, div);
+    createRoot(div).render(<ReactComp cnt={2} />);
 
     expect(render).toHaveBeenCalledTimes(2);
 
-    ReactDOM.render(<ReactComp cnt={3} />, div);
+    createRoot(div).render(<ReactComp cnt={3} />);
 
     expect(render).toHaveBeenCalledTimes(3);
   });
@@ -120,7 +120,7 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp, 'span');
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp cnt={5} />, div);
+    createRoot(div).render(<ReactComp cnt={5} />);
 
     expect(div.innerHTML).toBe('<span>cnt: 5</span>');
   });
@@ -132,11 +132,11 @@ test('can adapt component many times', () => {
   );
   const div = document.createElement('div');
 
-  ReactDOM.render(<ReactComp />, div);
+  createRoot(div).render(<ReactComp />);
 
   expect(div.textContent).toBe('cnt: 0');
 
-  ReactDOM.render(<ReactComp cnt={123} />, div);
+  createRoot(div).render(<ReactComp cnt={123} />);
 
   expect(div.textContent).toBe('cnt: 123');
 });

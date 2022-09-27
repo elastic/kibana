@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
+
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { MockedFleetStartServices } from '../../../../../../mock';
 import { useLicense } from '../../../../../../hooks/use_license';
@@ -102,13 +104,11 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
-      useOutputOptions({} as AgentPolicy)
-    );
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
-    expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
+    await waitFor(() => {
+      expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
           "disabled": false,
@@ -132,7 +132,7 @@ describe('useOutputOptions', () => {
         },
       ]
     `);
-    expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
+      expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
           "disabled": undefined,
@@ -156,6 +156,7 @@ describe('useOutputOptions', () => {
         },
       ]
     `);
+    });
   });
 
   it('should only enable the default options if the licence is not platinium', async () => {
@@ -164,13 +165,11 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => false,
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
-      useOutputOptions({} as AgentPolicy)
-    );
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
-    expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
+    await waitFor(() => {
+      expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
           "disabled": false,
@@ -194,7 +193,7 @@ describe('useOutputOptions', () => {
         },
       ]
     `);
-    expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
+      expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
           "disabled": undefined,
@@ -218,6 +217,7 @@ describe('useOutputOptions', () => {
         },
       ]
     `);
+    });
   });
 
   it('should enable logstash output if there is no APM integration in the policy', async () => {
@@ -226,13 +226,11 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithLogstashOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
-      useOutputOptions({} as AgentPolicy)
-    );
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
-    expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
+    await waitFor(() => {
+      expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
           "disabled": false,
@@ -251,7 +249,7 @@ describe('useOutputOptions', () => {
         },
       ]
     `);
-    expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
+      expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
           "disabled": undefined,
@@ -270,6 +268,7 @@ describe('useOutputOptions', () => {
         },
       ]
     `);
+    });
   });
 
   it('should not enable logstash output if there is an APM integration in the policy', async () => {
@@ -278,7 +277,7 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithLogstashOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+    const { result } = testRenderer.renderHook(() =>
       useOutputOptions({
         package_policies: [
           {
@@ -291,8 +290,8 @@ describe('useOutputOptions', () => {
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
-    expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
+    await waitFor(() => {
+      expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
           "disabled": true,
@@ -347,7 +346,7 @@ describe('useOutputOptions', () => {
         },
       ]
     `);
-    expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
+      expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
           "disabled": undefined,
@@ -366,5 +365,6 @@ describe('useOutputOptions', () => {
         },
       ]
     `);
+    });
   });
 });

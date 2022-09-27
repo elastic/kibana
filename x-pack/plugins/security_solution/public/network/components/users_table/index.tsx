@@ -75,7 +75,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const { activePage, sort, limit } = useDeepEqualSelector(getUsersSelector);
 
   const updateLimitPagination = useCallback(
-    (newLimit) =>
+    (newLimit: number) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,
@@ -87,7 +87,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   );
 
   const updateActivePage = useCallback(
-    (newPage) =>
+    (newPage: number) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,

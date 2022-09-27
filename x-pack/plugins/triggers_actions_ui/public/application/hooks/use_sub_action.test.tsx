@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useSubAction } from './use_sub_action';
 
@@ -26,38 +26,38 @@ describe('useSubAction', () => {
   });
 
   it('init', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useSubAction(params));
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual({
-      isError: false,
-      isLoading: false,
-      response: {},
-      error: null,
+    const { result } = renderHook(() => useSubAction(params));
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        isError: false,
+        isLoading: false,
+        response: {},
+        error: null,
+      });
     });
   });
 
   it('executes the sub action correctly', async () => {
-    const { waitForNextUpdate } = renderHook(() => useSubAction(params));
-    await waitForNextUpdate();
-
-    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
-      '/api/actions/connector/test-id/_execute',
-      { body: '{"params":{"subAction":"test","subActionParams":{}}}' }
-    );
+    renderHook(() => useSubAction(params));
+    await waitFor(() => {
+      expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
+        '/api/actions/connector/test-id/_execute',
+        { body: '{"params":{"subAction":"test","subActionParams":{}}}' }
+      );
+    });
   });
 
   it('returns an error correctly', async () => {
     useKibanaMock().services.http.post = jest.fn().mockRejectedValue(new Error('error executing'));
 
-    const { result, waitForNextUpdate } = renderHook(() => useSubAction(params));
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual({
-      isError: true,
-      isLoading: false,
-      response: undefined,
-      error: expect.anything(),
+    const { result } = renderHook(() => useSubAction(params));
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        isError: true,
+        isLoading: false,
+        response: undefined,
+        error: expect.anything(),
+      });
     });
   });
 

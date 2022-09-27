@@ -15,6 +15,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 
 interface Context {
@@ -25,7 +26,7 @@ interface Context {
 
 interface Content<P extends object = { [key: string]: any }> {
   id: string;
-  Component: React.FunctionComponent<P>;
+  Component: FC<P>;
   props?: P;
   flyoutProps?: { [key: string]: any };
   cleanUpFunc?: () => void;
@@ -39,7 +40,7 @@ const DEFAULT_FLYOUT_PROPS = {
   maxWidth: 500,
 };
 
-export const GlobalFlyoutProvider: React.FC = ({ children }) => {
+export const GlobalFlyoutProvider: FC<PropsWithChildren> = ({ children }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [activeContent, setActiveContent] = useState<Content<any> | undefined>(undefined);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { get, map } from 'lodash';
 import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
@@ -244,7 +246,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   const { data: logsDataView } = useLogsDataView({ skip: !actionId });
 
   const handleClick = useCallback(
-    (event) => {
+    (event: any) => {
       event.preventDefault();
 
       if (logsDataView) {
@@ -450,13 +452,8 @@ const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
   </EuiFlexGroup>
 );
 
-interface PackViewInActionProps {
-  item: {
-    id: string;
-    interval: number;
-    action_id?: string;
-    agents: string[];
-  };
+export interface PackViewInActionProps {
+  item: PackQueryStatusItem;
   actionId?: string;
 }
 
@@ -524,13 +521,16 @@ type PackQueryStatusItem = Partial<{
   ecs_mapping?: ECSMapping;
   version?: string;
   platform?: string;
+  interval?: number;
   saved_query_id?: string;
   status?: string;
   pending?: number;
+  successful?: number;
+  failed?: number;
   docs?: number;
 }>;
 
-interface PackQueriesStatusTableProps {
+export interface PackQueriesStatusTableProps {
   agentIds?: string[];
   queryId?: string;
   actionId?: string;
@@ -538,14 +538,12 @@ interface PackQueriesStatusTableProps {
   startDate?: string;
   expirationDate?: string;
   addToTimeline?: (payload: AddToTimelinePayload) => ReactElement;
-  addToCase?: ({
-    actionId,
-    isIcon,
-    isDisabled,
-  }: {
+  addToCase?: (payload: {
     actionId?: string;
+    queryId?: string;
     isIcon?: boolean;
     isDisabled?: boolean;
+    iconProps?: Record<string, string>;
   }) => ReactElement;
   showResultsHeader?: boolean;
 }
@@ -577,7 +575,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     []
   );
 
-  const renderQueryColumn = useCallback((query: string, item) => {
+  const renderQueryColumn = useCallback((query: string, item: PackQueryStatusItem) => {
     const singleLine = removeMultilines(query);
     const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
 
@@ -600,7 +598,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     []
   );
 
-  const renderAgentsColumn = useCallback((item) => {
+  const renderAgentsColumn = useCallback((item: PackQueryStatusItem) => {
     if (!item.action_id) return;
 
     return (
@@ -613,11 +611,14 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, []);
 
   const renderDiscoverResultsAction = useCallback(
-    (item) => <PackViewInDiscoverAction item={item} />,
+    (item: PackQueryStatusItem) => <PackViewInDiscoverAction item={item} />,
     []
   );
 
-  const renderLensResultsAction = useCallback((item) => <PackViewInLensAction item={item} />, []);
+  const renderLensResultsAction = useCallback(
+    (item: PackQueryStatusItem) => <PackViewInLensAction item={item} />,
+    []
+  );
   const handleAddToCase = useCallback(
     (payload: { actionId: string; isIcon?: boolean }) =>
       // eslint-disable-next-line react/display-name
@@ -631,24 +632,24 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [addToCase]
   );
   const getHandleErrorsToggle = useCallback(
-    (item) => () => {
+    (item: PackQueryStatusItem) => () => {
       setItemIdToExpandedRowMap((prevValue) => {
         const itemIdToExpandedRowMapValues = { ...prevValue };
-        if (itemIdToExpandedRowMapValues[item.id]) {
-          delete itemIdToExpandedRowMapValues[item.id];
+        if (itemIdToExpandedRowMapValues[item.id!]) {
+          delete itemIdToExpandedRowMapValues[item.id!];
         } else {
-          itemIdToExpandedRowMapValues[item.id] = (
+          itemIdToExpandedRowMapValues[item.id!] = (
             <EuiFlexGroup gutterSize="xl">
               <EuiFlexItem>
                 <ResultTabs
-                  actionId={item.action_id}
+                  actionId={item.action_id!}
                   startDate={startDate}
                   ecsMapping={item.ecs_mapping}
                   endDate={expirationDate}
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
                   addToTimeline={addToTimeline}
-                  addToCase={addToCase && handleAddToCase({ actionId: item.action_id })}
+                  addToCase={addToCase && handleAddToCase({ actionId: item.action_id! })}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -662,12 +663,12 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderToggleResultsAction = useCallback(
-    (item) =>
+    (item: PackQueryStatusItem) =>
       item?.action_id && data?.length && data.length > 1 ? (
         <EuiButtonIcon
           data-test-subj={`toggleIcon-${item.id}`}
           onClick={getHandleErrorsToggle(item)}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id!] ? 'arrowUp' : 'arrowDown'}
         />
       ) : (
         <></>

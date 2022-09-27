@@ -80,6 +80,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
 
   return (
+    // @ts-expect-error update types
     <Chart size={{ height }}>
       <Settings
         showLegend={false}

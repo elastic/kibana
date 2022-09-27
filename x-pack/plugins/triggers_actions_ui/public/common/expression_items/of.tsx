@@ -123,7 +123,7 @@ export const OfExpression = ({
               id="ofField"
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
-              error={errors.aggField}
+              error={<>{errors.aggField}</>}
               data-test-subj="availablefieldsOptionsFormRow"
               helpText={helpText}
             >

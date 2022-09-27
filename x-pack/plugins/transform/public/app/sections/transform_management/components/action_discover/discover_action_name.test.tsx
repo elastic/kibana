@@ -51,6 +51,7 @@ describe('Transform: Transform List Actions <StopAction />', () => {
   it('renders an enabled button', async () => {
     // prepare
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <DiscoverActionName items={[item]} dataViewExists={true} />
       </IntlProvider>
@@ -71,6 +72,7 @@ describe('Transform: Transform List Actions <StopAction />', () => {
     const itemCopy = cloneDeep(item);
     itemCopy.stats.checkpointing.last.checkpoint = 0;
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <DiscoverActionName items={[itemCopy]} dataViewExists={false} />
       </IntlProvider>

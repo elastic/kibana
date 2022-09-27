@@ -7,7 +7,11 @@
 
 import { rgba } from 'polished';
 import React, { useCallback } from 'react';
-import type { DraggableChildrenFn } from 'react-beautiful-dnd';
+import type {
+  DraggableChildrenFn,
+  DroppableProvided,
+  DroppableStateSnapshot,
+} from 'react-beautiful-dnd';
 import { Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
@@ -100,7 +104,7 @@ export const DroppableWrapper = React.memo<Props>(
     renderClone,
   }) => {
     const DroppableContent = useCallback(
-      (provided, snapshot) => (
+      (provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
         <ReactDndDropTarget
           height={height}
           ref={provided.innerRef}

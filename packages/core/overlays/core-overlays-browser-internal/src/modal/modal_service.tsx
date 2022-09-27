@@ -11,7 +11,7 @@
 import { i18n as t } from '@kbn/i18n';
 import { EuiModal, EuiConfirmModal } from '@elastic/eui';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -86,13 +86,12 @@ export class ModalService {
 
         this.activeModal = modal;
 
-        render(
+        createRoot(targetDomElement).render(
           <CoreContextProvider i18n={i18n} theme={theme}>
             <EuiModal {...options} onClose={() => modal.close()}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiModal>
-          </CoreContextProvider>,
-          targetDomElement
+          </CoreContextProvider>
         );
 
         return modal;
@@ -146,11 +145,10 @@ export class ModalService {
               }),
           };
 
-          render(
+          createRoot(targetDomElement).render(
             <CoreContextProvider i18n={i18n} theme={theme}>
               <EuiConfirmModal {...props} />
-            </CoreContextProvider>,
-            targetDomElement
+            </CoreContextProvider>
           );
         });
       },
@@ -166,7 +164,7 @@ export class ModalService {
    */
   private cleanupDom(): void {
     if (this.targetDomElement != null) {
-      unmountComponentAtNode(this.targetDomElement);
+      createRoot(this.targetDomElement).unmount();
       this.targetDomElement.innerHTML = '';
     }
     this.activeModal = null;

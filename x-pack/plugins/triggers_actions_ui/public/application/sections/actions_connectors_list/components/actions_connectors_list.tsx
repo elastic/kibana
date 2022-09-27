@@ -231,7 +231,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             </EuiLink>
             {item.isMissingSecrets ? (
               <EuiIconTip
-                iconProps={{ 'data-test-subj': `missingSecrets_${item.id}` }}
+                iconProps={{
+                  // @ts-expect-error update types
+                  'data-test-subj': `missingSecrets_${item.id}`,
+                }}
                 type="alert"
                 color="warning"
                 content={i18n.translate(

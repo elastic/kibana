@@ -47,6 +47,7 @@ export const SchemaTable: React.FC = () => {
           {FIELD_TYPE}
         </EuiTableHeaderCell>
       </EuiTableHeader>
+      {/* @ts-expect-error update types */}
       <EuiTableBody>
         <EuiTableRow style={{ height: 56 }}>
           <EuiTableRowCell>

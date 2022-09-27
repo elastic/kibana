@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
 import { OperatingSystem } from '@kbn/securitysolution-utils';
@@ -43,7 +44,7 @@ export const AntivirusRegistrationForm = memo(() => {
   const dispatch = useDispatch();
 
   const handleSwitchChange = useCallback(
-    (event) =>
+    (event: EuiSwitchEvent) =>
       dispatch({
         type: 'userChangedAntivirusRegistration',
         payload: {

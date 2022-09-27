@@ -5,7 +5,8 @@
  * 2.0.
  */
 import '../_index.scss';
-import React, { FC } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
@@ -33,7 +34,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
     ...coreStart,
   };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (

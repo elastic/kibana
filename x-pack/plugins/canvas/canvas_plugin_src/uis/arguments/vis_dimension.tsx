@@ -37,7 +37,7 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
     setValue(argValue);
   }, [argValue]);
 
-  const onChange = useCallback(
+  const onChange = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
     (ev) => {
       const onChangeFn = confirm ? setValue : onValueChange;
       const astObj: ExpressionAstExpression = {
@@ -53,6 +53,7 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
         ],
       };
 
+      // @ts-expect-error update types
       onChangeFn(typeof value === 'string' ? ev.target.value : astObj);
     },
     [confirm, onValueChange, value]

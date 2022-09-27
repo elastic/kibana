@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 
 import { OperatingSystem } from '@kbn/securitysolution-utils';
@@ -35,7 +36,7 @@ export const AttackSurfaceReductionForm = memo(() => {
   const dispatch = useDispatch();
 
   const handleSwitchChange = useCallback(
-    (event) =>
+    (event: EuiSwitchEvent) =>
       dispatch({
         type: 'userChangedCredentialHardening',
         payload: {

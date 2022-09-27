@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -15,7 +16,7 @@ import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 
-export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
+export const LogEntryRatePageProviders: FC<PropsWithChildren> = ({ children }) => {
   const {
     hasFailedLoading,
     isLoading,

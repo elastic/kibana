@@ -86,6 +86,7 @@ export const MetricDistributionChart: FC<Props> = ({
       data-test-subj="dataVisualizerFieldDataMetricDistributionChart"
       className="dataGridChart__histogram"
     >
+      {/* @ts-expect-error update types */}
       <Chart size={{ width, height }}>
         <Settings theme={theme} tooltip={{ headerFormatter }} />
         <Axis

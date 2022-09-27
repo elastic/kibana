@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import {
@@ -46,17 +46,18 @@ export const getProgressRenderer =
       config: ProgressRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const root = createRoot(domNode);
+
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaThemeProvider theme$={theme$}>
           <I18nProvider>
             <ProgressComponent {...config} parentNode={domNode} onLoaded={handlers.done} />
           </I18nProvider>
-        </KibanaThemeProvider>,
-        domNode
+        </KibanaThemeProvider>
       );
     },
   });

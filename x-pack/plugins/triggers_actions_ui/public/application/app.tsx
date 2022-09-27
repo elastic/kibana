@@ -8,7 +8,7 @@
 import React, { lazy } from 'react';
 import { Switch, Route, Redirect, Router } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
@@ -65,9 +65,10 @@ export interface TriggersAndActionsUiServices extends CoreStart {
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
-  render(<App deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<App deps={deps} />);
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

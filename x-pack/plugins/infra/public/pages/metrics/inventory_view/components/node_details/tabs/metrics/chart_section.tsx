@@ -67,6 +67,7 @@ export const ChartSection = ({
   return (
     <>
       <ChartHeader title={title} metrics={metrics} />
+      {/* @ts-expect-error update types */}
       <Chart ref={chartRef} size={CHART_SIZE}>
         {series.map((chartSeries, index) => (
           <MetricExplorerSeriesChart

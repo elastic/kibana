@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import type { EuiSelectableProps } from '@elastic/eui';
 import { EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InputHistoryItem } from '../../console_state/types';
@@ -54,12 +54,15 @@ export const CommandInputHistory = memo(() => {
     };
   }, []);
 
-  const renderSelectionContent: EuiSelectableProps['children'] = useCallback((list, search) => {
-    return list;
-  }, []);
+  const renderSelectionContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
+    (list, search) => {
+      return list;
+    },
+    []
+  );
 
-  const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
-    (items: EuiSelectableOption[]) => {
+  const handleSelectableOnChange = useCallback<NonNullable<EuiSelectableProps['onChange']>>(
+    (items) => {
       optionWasSelected.current = true;
 
       const selected = items.find((item) => item.checked === 'on');
@@ -76,7 +79,9 @@ export const CommandInputHistory = memo(() => {
     [dispatch]
   );
 
-  const handleOnActiveOptionChange: EuiSelectableProps['onActiveOptionChange'] = useCallback(
+  const handleOnActiveOptionChange = useCallback<
+    NonNullable<EuiSelectableProps['onActiveOptionChange']>
+  >(
     (option) => {
       if (option) {
         dispatch({
@@ -90,9 +95,12 @@ export const CommandInputHistory = memo(() => {
     [dispatch]
   );
 
-  const handleRenderOption = useCallback((option) => {
-    return <UserCommandInput input={option.label} />;
-  }, []);
+  const handleRenderOption = useCallback<NonNullable<EuiSelectableProps['renderOption']>>(
+    (option) => {
+      return <UserCommandInput input={option.label} />;
+    },
+    []
+  );
 
   // When first loaded, clear out the current text entered, and when this component
   // unloads, if no option from the history was selected, then set the prior text

@@ -48,6 +48,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                     defaultMessage: `By default, area and line charts hide the gaps in the data. To fill the gap, make a selection.`,
                   })}
                   iconProps={{
+                    // @ts-expect-error update types
                     className: 'eui-alignTop',
                   }}
                   position="top"

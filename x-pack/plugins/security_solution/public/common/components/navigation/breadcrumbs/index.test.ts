@@ -14,7 +14,7 @@ import type { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { NetworkRouteType } from '../../../../network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { AdministrationSubTab } from '../../../../management/types';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';

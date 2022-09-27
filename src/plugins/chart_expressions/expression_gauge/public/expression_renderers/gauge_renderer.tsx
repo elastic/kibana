@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
@@ -32,10 +32,11 @@ export const gaugeRenderer: (
   }),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const root = createRoot(domNode);
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const renderComplete = () => {
@@ -66,7 +67,7 @@ export const gaugeRenderer: (
     };
 
     const { GaugeComponent } = await import('../components/gauge_component');
-    render(
+    root.render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <div className="gauge-container" data-test-subj="gaugeChart">
           <GaugeComponent
@@ -79,7 +80,6 @@ export const gaugeRenderer: (
           />
         </div>
       </KibanaThemeProvider>,
-      domNode
     );
   },
 });

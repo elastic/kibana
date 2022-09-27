@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ExceptionItemsSummary } from './exception_items_summary';
@@ -27,7 +28,7 @@ describe('Fleet event filters card', () => {
   const renderComponent: (
     stats: GetExceptionSummaryResponse
   ) => reactTestingLibrary.RenderResult = (stats) => {
-    const Wrapper: React.FC = ({ children }) => (
+    const Wrapper: FC<PropsWithChildren> = ({ children }) => (
       <I18nProvider>
         <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
       </I18nProvider>

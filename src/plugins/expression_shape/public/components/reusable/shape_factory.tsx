@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import type { PropsWithChildren } from 'react';
 import { viewBoxToString } from '../../../common/lib';
 import { ShapeProps, SvgConfig, SvgElementTypes } from './types';
 
@@ -16,7 +17,7 @@ export const getShapeComponent = (svgParams: SvgConfig) =>
     shapeContentAttributes,
     children,
     textAttributes,
-  }: ShapeProps) {
+  }: PropsWithChildren<ShapeProps>) {
     const {
       viewBox: initialViewBox,
       shapeProps: defaultShapeContentAttributes,

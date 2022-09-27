@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   LogFilterStateProvider,
   useLogFilterStateContext,
@@ -23,7 +24,7 @@ import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 
-const LogFilterState: React.FC = ({ children }) => {
+const LogFilterState: FC<PropsWithChildren> = ({ children }) => {
   const { derivedDataView } = useLogViewContext();
 
   return (
@@ -34,7 +35,7 @@ const LogFilterState: React.FC = ({ children }) => {
   );
 };
 
-const ViewLogInContext: React.FC = ({ children }) => {
+const ViewLogInContext: FC<PropsWithChildren> = ({ children }) => {
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
   const { logViewId } = useLogViewContext();
 
@@ -53,7 +54,7 @@ const ViewLogInContext: React.FC = ({ children }) => {
   );
 };
 
-const LogEntriesStateProvider: React.FC = ({ children }) => {
+const LogEntriesStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const { logViewId } = useLogViewContext();
   const { startTimestamp, endTimestamp, targetPosition, isInitialized } =
     useLogPositionStateContext();
@@ -83,7 +84,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   );
 };
 
-const LogHighlightsState: React.FC = ({ children }) => {
+const LogHighlightsState: FC<PropsWithChildren> = ({ children }) => {
   const { logViewId, logView } = useLogViewContext();
   const { topCursor, bottomCursor, entries } = useLogStreamContext();
   const { filterQuery } = useLogFilterStateContext();
@@ -100,7 +101,7 @@ const LogHighlightsState: React.FC = ({ children }) => {
   return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
 };
 
-export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
+export const LogsPageProviders: React.FC<PropsWithChildren> = ({ children }) => {
   const { logViewStatus } = useLogViewContext();
 
   // The providers assume the source is loaded, so short-circuit them otherwise

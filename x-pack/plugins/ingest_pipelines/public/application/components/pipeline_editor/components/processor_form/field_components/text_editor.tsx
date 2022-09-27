@@ -28,7 +28,7 @@ export const TextEditor: FunctionComponent<Props> = ({ field, editorProps }) => 
   return (
     <EuiFormRow
       label={label}
-      helpText={helpText}
+      helpText={typeof helpText === 'function' ? helpText() : helpText}
       isInvalid={typeof errorMessage === 'string'}
       error={errorMessage}
       fullWidth

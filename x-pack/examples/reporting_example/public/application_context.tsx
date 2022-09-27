@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useContext, createContext, FC } from 'react';
-
+import React, { useContext, createContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import type { MyForwardableState } from './types';
 
 interface ContextValue {
@@ -15,10 +15,9 @@ interface ContextValue {
 
 const ApplicationContext = createContext<undefined | ContextValue>(undefined);
 
-export const ApplicationContextProvider: FC<{ forwardedState: ContextValue['forwardedState'] }> = ({
-  forwardedState,
-  children,
-}) => {
+export const ApplicationContextProvider: FC<
+  PropsWithChildren<{ forwardedState: ContextValue['forwardedState'] }>
+> = ({ forwardedState, children }) => {
   return (
     <ApplicationContext.Provider value={{ forwardedState }}>{children}</ApplicationContext.Provider>
   );

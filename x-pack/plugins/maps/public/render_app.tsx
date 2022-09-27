@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import type { FC, PropsWithChildren } from 'react';
+import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
@@ -77,7 +78,7 @@ export async function renderApp(
   }: {
     coreStart: CoreStart;
     savedObjectsTagging?: SavedObjectTaggingPluginStart;
-    AppUsageTracker: React.FC;
+    AppUsageTracker: FC<PropsWithChildren>;
   }
 ) {
   goToSpecifiedPath = (path) => history.push(path);
@@ -124,7 +125,9 @@ export async function renderApp(
   }
 
   const I18nContext = getCoreI18n().Context;
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <AppUsageTracker>
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
@@ -140,7 +143,7 @@ export async function renderApp(
               <Switch>
                 <Route path={`/map/:savedMapId`} render={renderMapApp} />
                 <Route exact path={`/map`} render={renderMapApp} />
-                // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+                {/* Redirect other routes to list, or if hash-containing, their non-hash equivalents */}
                 <Route
                   path={``}
                   render={({ location: { pathname, hash } }) => {
@@ -160,11 +163,10 @@ export async function renderApp(
           </TableListViewKibanaProvider>
         </KibanaThemeProvider>
       </I18nContext>
-    </AppUsageTracker>,
-    element
+    </AppUsageTracker>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 }

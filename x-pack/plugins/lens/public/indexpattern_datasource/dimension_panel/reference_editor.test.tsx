@@ -167,7 +167,9 @@ describe('reference editor', () => {
       .prop('options');
 
     const findFieldDataTestSubj = (l: string) => {
-      return fields![0].options!.find(({ label }) => label === l)!['data-test-subj'];
+      return fields![0].options!.find(({ label }: { label: string }) => label === l)![
+        'data-test-subj'
+      ];
     };
     expect(findFieldDataTestSubj('timestampLabel')).toContain('Incompatible');
     expect(findFieldDataTestSubj('source')).toContain('Incompatible');
@@ -205,9 +207,9 @@ describe('reference editor', () => {
       .filter('[data-test-subj="indexPattern-reference-function"]')
       .prop('options');
 
-    expect(functions.find(({ label }) => label === 'Average')!['data-test-subj']).toContain(
-      'incompatible'
-    );
+    expect(
+      functions.find(({ label }: { label: string }) => label === 'Average')!['data-test-subj']
+    ).toContain('incompatible');
   });
 
   it('should not update when selecting the same operation', () => {
@@ -239,7 +241,9 @@ describe('reference editor', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+    const option = comboBox
+      .prop('options')!
+      .find(({ label }: { label: string }) => label === 'Average')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);
@@ -278,7 +282,9 @@ describe('reference editor', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox.prop('options')!.find(({ label }) => label === 'Maximum')!;
+    const option = comboBox
+      .prop('options')!
+      .find(({ label }: { label: string }) => label === 'Maximum')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);
@@ -323,7 +329,9 @@ describe('reference editor', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+    const option = comboBox
+      .prop('options')!
+      .find(({ label }: { label: string }) => label === 'Average')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);

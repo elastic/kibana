@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
@@ -23,6 +23,7 @@ export class ShareMenuManager {
   private isOpen = false;
 
   private container = document.createElement('div');
+  private root = createRoot(this.container);
 
   start(
     core: CoreStart,
@@ -56,7 +57,7 @@ export class ShareMenuManager {
   }
 
   private onClose = () => {
-    ReactDOM.unmountComponentAtNode(this.container);
+    this.root.unmount();
     this.isOpen = false;
   };
 
@@ -119,7 +120,7 @@ export class ShareMenuManager {
         </KibanaThemeProvider>
       </I18nProvider>
     );
-    ReactDOM.render(element, this.container);
+    this.root.render(element);
   }
 }
 export type ShareMenuManagerStart = ReturnType<ShareMenuManager['start']>;

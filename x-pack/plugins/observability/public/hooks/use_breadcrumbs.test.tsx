@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import React, { ReactNode } from 'react';
+import { renderHook } from '@testing-library/react';
+import React, { PropsWithChildren, ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -38,7 +38,7 @@ describe('useBreadcrumbs', () => {
   describe('when setBreadcrumbs and setTitle are not defined', () => {
     it('does not set breadcrumbs or the title', () => {
       renderHook(() => useBreadcrumbs([]), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: PropsWithChildren) => (
           <MemoryRouter>
             <KibanaContext.Provider
               services={

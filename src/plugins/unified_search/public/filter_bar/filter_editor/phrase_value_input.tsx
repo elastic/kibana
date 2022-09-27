@@ -14,7 +14,7 @@ import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
 
-interface PhraseValueInputProps extends PhraseSuggestorProps {
+export interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;
   onChange: (value: string | number | boolean) => void;
   intl: InjectedIntl;

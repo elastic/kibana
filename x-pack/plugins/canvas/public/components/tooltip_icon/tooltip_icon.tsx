@@ -8,7 +8,7 @@
 /* eslint react/forbid-elements: 0 */
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { EuiIconTip, PropsOf } from '@elastic/eui';
+import { EuiIconTip, EuiIconTipProps, ToolTipPositions } from '@elastic/eui';
 
 export enum IconType {
   error = 'error',
@@ -16,10 +16,10 @@ export enum IconType {
   info = 'info',
 }
 
-type EuiIconTipProps = PropsOf<typeof EuiIconTip>;
-
 interface Props extends Omit<EuiIconTipProps, 'type' | 'color'> {
   icon: IconType;
+  position: ToolTipPositions;
+  content: string;
 }
 
 export const TooltipIcon: FC<Props> = ({ icon = IconType.info, ...rest }) => {

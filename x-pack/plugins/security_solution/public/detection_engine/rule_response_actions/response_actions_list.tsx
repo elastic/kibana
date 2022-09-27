@@ -33,7 +33,7 @@ export const ResponseActionsList = React.memo(
     formRef,
   }: IResponseActionsListProps) => {
     const actionTypeIdRef = useRef<string | null>(null);
-    const updateActionTypeId = useCallback((id) => {
+    const updateActionTypeId = useCallback((id: string) => {
       actionTypeIdRef.current = id;
     }, []);
 

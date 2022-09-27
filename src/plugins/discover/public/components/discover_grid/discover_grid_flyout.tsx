@@ -185,6 +185,7 @@ export function DiscoverGridFlyout({
                     color="subdued"
                     position="right"
                     iconProps={{
+                      // @ts-expect-error
                       className: 'eui-alignTop',
                     }}
                   />

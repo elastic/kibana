@@ -7,6 +7,7 @@
 
 import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MonitorTags } from './monitor_tags';
 import * as hooks from '../../hooks/use_url_params';
@@ -162,7 +163,9 @@ describe('MonitorTags component', () => {
 
   it('expand tag show tags on click', () => {
     summaryPing.state.summaryPings[0].tags = ['red', 'green', 'blue', 'black', 'purple', 'yellow'];
-    const Wrapper: React.FC = ({ children }) => <MemoryRouter>{children}</MemoryRouter>;
+    const Wrapper: FC<PropsWithChildren> = ({ children }) => (
+      <MemoryRouter>{children}</MemoryRouter>
+    );
     render(<MonitorTags ping={summaryPing.state.summaryPings[0]} />, { wrapper: Wrapper });
 
     fireEvent.click(screen.getByText('+1'));

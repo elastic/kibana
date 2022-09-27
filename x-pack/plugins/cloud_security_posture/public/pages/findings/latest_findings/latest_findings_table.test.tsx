@@ -8,8 +8,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from '../test_subjects';
-import { FindingsTable } from './latest_findings_table';
-import type { PropsOf } from '@elastic/eui';
+import { FindingsTable, FindingsTableProps } from './latest_findings_table';
 import Chance from 'chance';
 import type { EcsEvent } from '@kbn/logging';
 import { TestProvider } from '../../../test/test_provider';
@@ -69,7 +68,7 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
   '@timestamp': new Date().toISOString(),
 });
 
-type TableProps = PropsOf<typeof FindingsTable>;
+type TableProps = FindingsTableProps;
 
 describe('<FindingsTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {

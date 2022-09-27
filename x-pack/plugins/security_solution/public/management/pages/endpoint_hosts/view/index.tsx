@@ -32,6 +32,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApplyRefreshInterval } from '@elastic/eui/src/components/date_picker/types';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -267,7 +268,7 @@ export const EndpointList = () => {
     });
   }, [dispatch]);
 
-  const onRefreshChange = useCallback(
+  const onRefreshChange = useCallback<ApplyRefreshInterval>(
     (evt) => {
       dispatch({
         type: 'userUpdatedEndpointListRefreshOptions',

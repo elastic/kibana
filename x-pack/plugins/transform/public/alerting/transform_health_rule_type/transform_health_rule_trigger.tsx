@@ -81,7 +81,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
     <EuiForm
       data-test-subj={'transformHealthAlertingRuleForm'}
       invalidCallout={'none'}
-      error={formErrors}
+      error={<>{formErrors}</>}
       isInvalid={isFormInvalid}
     >
       <TransformSelectorControl

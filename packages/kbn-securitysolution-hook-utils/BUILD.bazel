@@ -37,14 +37,14 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//@testing-library/react-hooks",
+  "@npm//@testing-library/react",
   "@npm//react",
   "@npm//rxjs",
   "@npm//tslib",
 ]
 
 TYPES_DEPS = [
-  "@npm//@testing-library/react-hooks",
+  "@npm//@testing-library/react",
   "@npm//rxjs",
   "@npm//tslib",
   "@npm//@types/jest",

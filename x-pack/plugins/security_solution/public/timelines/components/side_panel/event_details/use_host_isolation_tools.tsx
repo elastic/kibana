@@ -65,7 +65,7 @@ const useHostIsolationTools = () => {
     });
   }, []);
 
-  const showHostIsolationPanel = useCallback((action) => {
+  const showHostIsolationPanel = useCallback((action: 'isolateHost' | 'unisolateHost') => {
     if (action === 'isolateHost' || action === 'unisolateHost') {
       dispatch({ type: 'setIsHostIsolationPanel', isHostIsolationPanelOpen: true });
       dispatch({ type: 'setIsolateAction', isolateAction: action });

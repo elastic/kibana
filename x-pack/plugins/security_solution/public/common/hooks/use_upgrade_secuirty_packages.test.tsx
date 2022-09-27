@@ -6,9 +6,10 @@
  */
 
 import React, { memo } from 'react';
+import type { PropsWithChildren } from 'react';
 import { useKibana } from '../lib/kibana';
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as _renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook as _renderHook, waitFor } from '@testing-library/react';
 import { useUpgradeSecurityPackages } from './use_upgrade_security_packages';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 
@@ -25,12 +26,12 @@ jest.mock('../lib/kibana');
 
 // FLAKY: https://github.com/elastic/kibana/issues/112910
 describe.skip('When using the `useUpgradeSecurityPackages()` hook', () => {
-  let renderResult: RenderHookResult<object, void>;
-  let renderHook: () => RenderHookResult<object, void>;
+  let renderResult: RenderHookResult<void, object>;
+  let renderHook: () => RenderHookResult<void, object>;
   let kibana: ReturnType<typeof useKibana>;
 
   // eslint-disable-next-line react/display-name
-  const Wrapper = memo(({ children }) => {
+  const Wrapper = memo<PropsWithChildren>(({ children }) => {
     kibana = useKibana();
     return <>{children}</>;
   });
@@ -54,9 +55,7 @@ describe.skip('When using the `useUpgradeSecurityPackages()` hook', () => {
     expect(kibana.services.fleet?.isInitialized).toHaveBeenCalled();
     expect(kibana.services.http.post).not.toHaveBeenCalled();
 
-    await renderResult.waitFor(
-      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
-    );
+    await waitFor(() => (kibana.services.http.post as jest.Mock).mock.calls.length > 0);
 
     expect(kibana.services.http.post).toHaveBeenCalledWith(
       `${epmRouteService.getBulkInstallPath()}`,

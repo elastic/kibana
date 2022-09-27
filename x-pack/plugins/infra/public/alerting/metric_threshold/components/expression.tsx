@@ -82,7 +82,7 @@ export const Expressions: React.FC<Props> = (props) => {
   }, [metadata]);
 
   const updateParams = useCallback(
-    (id, e: MetricExpression) => {
+    (id: number, e: MetricExpression) => {
       const exp = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       exp[id] = e;
       setRuleParams('criteria', exp);

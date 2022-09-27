@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useDeleteCases, UseDeleteCase } from './use_delete_cases';
 import * as api from './api';
@@ -23,18 +23,17 @@ describe('useDeleteCases', () => {
   const deleteArr = ['1', '2', '3'];
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isDisplayConfirmDeleteModal: false,
-        isLoading: false,
-        isError: false,
-        isDeleted: false,
-        dispatchResetIsDeleted: result.current.dispatchResetIsDeleted,
-        handleOnDeleteConfirm: result.current.handleOnDeleteConfirm,
-        handleToggleModal: result.current.handleToggleModal,
+      const { result } = renderHook<UseDeleteCase, {}>(() => useDeleteCases());
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isDisplayConfirmDeleteModal: false,
+          isLoading: false,
+          isError: false,
+          isDeleted: false,
+          dispatchResetIsDeleted: result.current.dispatchResetIsDeleted,
+          handleOnDeleteConfirm: result.current.handleOnDeleteConfirm,
+          handleToggleModal: result.current.handleToggleModal,
+        });
       });
     });
   });
@@ -43,63 +42,56 @@ describe('useDeleteCases', () => {
     const spyOnDeleteCases = jest.spyOn(api, 'deleteCases');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<UseDeleteCase, {}>(() => useDeleteCases());
 
       result.current.handleOnDeleteConfirm(deleteObj);
-      await waitForNextUpdate();
-      expect(spyOnDeleteCases).toBeCalledWith(deleteArr, abortCtrl.signal);
+      await waitFor(() => {
+        expect(spyOnDeleteCases).toBeCalledWith(deleteArr, abortCtrl.signal);
+      });
     });
   });
 
   it('deletes cases', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<UseDeleteCase, {}>(() => useDeleteCases());
       result.current.handleToggleModal();
       result.current.handleOnDeleteConfirm(deleteObj);
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isDisplayConfirmDeleteModal: false,
-        isLoading: false,
-        isError: false,
-        isDeleted: true,
-        dispatchResetIsDeleted: result.current.dispatchResetIsDeleted,
-        handleOnDeleteConfirm: result.current.handleOnDeleteConfirm,
-        handleToggleModal: result.current.handleToggleModal,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isDisplayConfirmDeleteModal: false,
+          isLoading: false,
+          isError: false,
+          isDeleted: true,
+          dispatchResetIsDeleted: result.current.dispatchResetIsDeleted,
+          handleOnDeleteConfirm: result.current.handleOnDeleteConfirm,
+          handleToggleModal: result.current.handleToggleModal,
+        });
       });
     });
   });
 
   it('resets is deleting', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<UseDeleteCase, {}>(() => useDeleteCases());
       result.current.handleToggleModal();
       result.current.handleOnDeleteConfirm(deleteObj);
-      await waitForNextUpdate();
-      expect(result.current.isDeleted).toBeTruthy();
-      result.current.handleToggleModal();
-      result.current.dispatchResetIsDeleted();
-      expect(result.current.isDeleted).toBeFalsy();
+      await waitFor(() => {
+        expect(result.current.isDeleted).toBeTruthy();
+        result.current.handleToggleModal();
+        result.current.dispatchResetIsDeleted();
+        expect(result.current.isDeleted).toBeFalsy();
+      });
     });
   });
 
   it('set isLoading to true when deleting cases', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
-      result.current.handleToggleModal();
-      result.current.handleOnDeleteConfirm(deleteObj);
-      expect(result.current.isLoading).toBe(true);
+      const { result } = renderHook<UseDeleteCase, {}>(() => useDeleteCases());
+      await waitFor(() => {
+        result.current.handleToggleModal();
+        result.current.handleOnDeleteConfirm(deleteObj);
+        expect(result.current.isLoading).toBe(true);
+      });
     });
   });
 
@@ -110,21 +102,20 @@ describe('useDeleteCases', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<UseDeleteCase, {}>(() => useDeleteCases());
       result.current.handleToggleModal();
       result.current.handleOnDeleteConfirm(deleteObj);
 
-      expect(result.current).toEqual({
-        isDisplayConfirmDeleteModal: false,
-        isLoading: false,
-        isError: true,
-        isDeleted: false,
-        dispatchResetIsDeleted: result.current.dispatchResetIsDeleted,
-        handleOnDeleteConfirm: result.current.handleOnDeleteConfirm,
-        handleToggleModal: result.current.handleToggleModal,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isDisplayConfirmDeleteModal: false,
+          isLoading: false,
+          isError: true,
+          isDeleted: false,
+          dispatchResetIsDeleted: result.current.dispatchResetIsDeleted,
+          handleOnDeleteConfirm: result.current.handleOnDeleteConfirm,
+          handleToggleModal: result.current.handleToggleModal,
+        });
       });
     });
   });

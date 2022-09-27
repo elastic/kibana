@@ -7,7 +7,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverServices } from '../build_services';
 import { LocalStorageMock } from '../__mocks__/local_storage_mock';

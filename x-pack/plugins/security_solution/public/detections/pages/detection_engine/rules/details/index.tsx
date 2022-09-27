@@ -586,7 +586,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
   }, []);
 
-  const goToEditRule = useCallback(
+  const goToEditRule = useCallback<React.MouseEventHandler>(
     (ev) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {

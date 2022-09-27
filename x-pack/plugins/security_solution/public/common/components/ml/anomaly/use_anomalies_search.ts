@@ -41,7 +41,7 @@ export interface AnomaliesCount {
   entity: AnomalyEntity;
 }
 
-interface UseNotableAnomaliesSearchProps {
+export interface UseNotableAnomaliesSearchProps {
   skip: boolean;
   from: string;
   to: string;

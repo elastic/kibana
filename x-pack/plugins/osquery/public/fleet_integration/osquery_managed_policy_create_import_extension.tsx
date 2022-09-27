@@ -44,6 +44,7 @@ import {
   fieldValidators,
 } from '../shared_imports';
 import { useFetchStatus } from './use_fetch_status';
+import type { PackItem } from '../packs/types';
 
 // https://github.com/elastic/beats/blob/master/x-pack/osquerybeat/internal/osqd/args.go#L57
 const RESTRICTED_CONFIG_OPTIONS = [
@@ -199,7 +200,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   }, [getUrlForApp, policy?.policy_id]);
 
   const handleConfigUpload = useCallback(
-    (newConfig) => {
+    (newConfig: { packs: PackItem[] }) => {
       let currentPacks = {};
       try {
         currentPacks = JSON.parse(config)?.packs;

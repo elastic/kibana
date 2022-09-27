@@ -159,7 +159,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             />
           }
           isInvalid={errors.index.length > 0 && index != null && index.length > 0}
-          error={errors.index}
+          error={errors.index as string[]}
           helpText={
             <FormattedMessage
               id="xpack.stackAlerts.components.ui.alertParams.howToBroadenSearchQueryDescription"
@@ -214,7 +214,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             />
           }
           isInvalid={errors.timeField.length > 0 && timeField !== undefined}
-          error={errors.timeField}
+          error={errors.timeField as string[]}
         >
           <EuiSelect
             options={timeFieldOptions}

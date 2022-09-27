@@ -248,7 +248,7 @@ export const FooterComponent = ({
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   const onChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) =>
+    (itemsChangedPerPage: number) =>
       dispatch(tGridActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage })),
     [dispatch, id]
   );

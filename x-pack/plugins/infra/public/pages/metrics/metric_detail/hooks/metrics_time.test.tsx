@@ -7,6 +7,7 @@
 
 import { createMemoryHistory } from 'history';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { Router } from 'react-router-dom';
 import { mountHook } from '@kbn/test-jest-helpers';
 import { CoreScopedHistory } from '@kbn/core/public';
@@ -70,7 +71,7 @@ const createProviderWrapper = () => {
   history.push(INITIAL_URL);
   const scopedHistory = new CoreScopedHistory(history, INITIAL_URL);
 
-  const ProviderWrapper: React.FC = ({ children }) => {
+  const ProviderWrapper: FC<PropsWithChildren> = ({ children }) => {
     return <Router history={scopedHistory}>{children}</Router>;
   };
 

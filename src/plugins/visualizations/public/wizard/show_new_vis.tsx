@@ -7,7 +7,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiPortal, EuiProgress } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -49,10 +49,11 @@ export function showNewVisModal({
   selectedVisType,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
+  const root = createRoot(container);
   let isClosed = false;
   const handleClose = () => {
     if (isClosed) return;
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
     if (onClose) {
       onClose();
@@ -91,7 +92,8 @@ export function showNewVisModal({
       </I18nProvider>
     </KibanaThemeProvider>
   );
-  ReactDOM.render(element, container);
+
+  root.render(element);
 
   return () => handleClose();
 }

@@ -26,7 +26,10 @@ function StringParamEditor({
     setValidity(isValid);
   }, [isValid, setValidity]);
 
-  const onChange = useCallback((ev) => setValue(ev.target.value), [setValue]);
+  const onChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
+    (ev) => setValue(ev.target.value),
+    [setValue]
+  );
 
   return (
     <EuiFormRow

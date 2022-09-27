@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import 'react-vis/dist/style.css';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
@@ -63,7 +63,9 @@ export const renderApp = ({
   // add .kbnAppWrappers class to root element
   element.classList.add(APP_WRAPPER_CLASS);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <KibanaThemeProvider
       theme$={theme$}
       modify={{
@@ -77,10 +79,9 @@ export const renderApp = ({
         apmPluginContextValue={apmPluginContextValue}
         pluginsStart={pluginsStart}
       />
-    </KibanaThemeProvider>,
-    element
+    </KibanaThemeProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

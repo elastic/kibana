@@ -6,9 +6,9 @@
  */
 
 import { sortBy } from 'lodash';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -121,7 +121,8 @@ export class SecurityNavControlService {
     core.chrome.navControls.registerRight({
       order: 2000,
       mount: (element: HTMLElement) => {
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <Providers
             services={core}
             authc={authc}
@@ -133,11 +134,10 @@ export class SecurityNavControlService {
               logoutUrl={this.logoutUrl}
               userMenuLinks$={this.userMenuLinks$}
             />
-          </Providers>,
-          element
+          </Providers>
         );
 
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 
@@ -156,7 +156,7 @@ export interface ProvidersProps {
   theme$: Observable<CoreTheme>;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   authc,
   services,
   theme$,

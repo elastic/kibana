@@ -22,6 +22,7 @@ export default {
   component: CoreVitalItem,
   decorators: [
     (Story: ComponentType) => (
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <KibanaReactContext.Provider>
           <Story />

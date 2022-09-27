@@ -7,18 +7,21 @@
  */
 
 import React from 'react';
+import type { FC } from 'react';
 
 import './resizable_button.scss';
 
-export function ResizableButton({
-  onMouseDownResizeHandler,
-  onKeyDownResizeHandler,
-}: {
+export interface ResizableButtonProps {
   onMouseDownResizeHandler: (
     mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
-  onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
-}) {
+  onKeyDownResizeHandler: (keyDownEvent: React.KeyboardEvent) => void;
+}
+
+export const ResizableButton: FC<ResizableButtonProps> = ({
+  onMouseDownResizeHandler,
+  onKeyDownResizeHandler,
+}) => {
   const setFocus = (e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.focus();
 
   return (
@@ -32,4 +35,4 @@ export function ResizableButton({
       />
     </div>
   );
-}
+};

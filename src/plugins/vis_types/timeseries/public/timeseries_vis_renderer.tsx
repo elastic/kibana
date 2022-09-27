@@ -8,13 +8,11 @@
 
 import React, { lazy } from 'react';
 import { get } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
 import { IUiSettingsClient, KibanaExecutionContext, ThemeServiceStart } from '@kbn/core/public';
-
 import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plugin/public';
-
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getUsageCollectionStart } from './services';
@@ -59,8 +57,9 @@ export const getTimeseriesVisRenderer: (deps: {
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const root = createRoot(domNode);
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
     const { visParams: model, visData, syncColors, syncTooltips } = config;
     const showNoResult = !checkIfDataExists(visData, model);
@@ -91,7 +90,7 @@ export const getTimeseriesVisRenderer: (deps: {
       handlers.done();
     };
 
-    render(
+    root.render(
       <I18nProvider>
         <KibanaThemeProvider theme$={theme.theme$}>
           <VisualizationContainer
@@ -114,8 +113,7 @@ export const getTimeseriesVisRenderer: (deps: {
             />
           </VisualizationContainer>
         </KibanaThemeProvider>
-      </I18nProvider>,
-      domNode
+      </I18nProvider>
     );
   },
 });

@@ -11,5 +11,8 @@ export { LogEntryFieldColumn } from './log_entry_field_column';
 export { LogEntryMessageColumn } from './log_entry_message_column';
 export { LogEntryRowWrapper } from './log_entry_row';
 export { LogEntryTimestampColumn } from './log_entry_timestamp_column';
-export { ScrollableLogTextStreamView } from './scrollable_log_text_stream_view';
+export {
+  ScrollableLogTextStreamView,
+  ScrollableLogTextStreamViewProps,
+} from './scrollable_log_text_stream_view';
 export { LogEntryContextMenu } from './log_entry_context_menu';

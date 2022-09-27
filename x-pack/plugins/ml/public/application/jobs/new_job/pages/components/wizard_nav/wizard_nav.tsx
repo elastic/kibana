@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -24,14 +25,14 @@ interface StepsNavProps {
   next?(): void;
 }
 
-export const WizardNav: FC<StepsNavProps> = ({
+export const WizardNav: FC<PropsWithChildren<StepsNavProps>> = ({
   previous,
   previousActive = true,
   next,
   nextActive = true,
   children,
 }) => (
-  <Fragment>
+  <>
     <EuiHorizontalRule />
     <EuiFlexGroup>
       {previous && (
@@ -47,7 +48,7 @@ export const WizardNav: FC<StepsNavProps> = ({
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       <EuiFlexItem />
     </EuiFlexGroup>
-  </Fragment>
+  </>
 );
 
 export const PreviousButton: FC<StepsNavProps> = ({ previous, previousActive = true }) => (

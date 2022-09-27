@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { RootComponent } from './app';
@@ -20,13 +20,14 @@ export function mountManagementSection(
   dependencies: AppDependencies
 ) {
   const { element, setBreadcrumbs } = params;
+  const root = createRoot(element);
 
   apiService.setup(dependencies.services.core.http);
   breadcrumbService.setup(setBreadcrumbs);
 
-  render(<RootComponent {...dependencies} />, element);
+  root.render(<RootComponent {...dependencies} />);
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 }

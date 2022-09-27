@@ -33,6 +33,7 @@ import type {
   PackSOQueryFormData,
 } from './use_pack_query_form';
 import { usePackQueryForm } from './use_pack_query_form';
+import type { SavedQueriesDropdownProps } from '../../saved_queries/saved_queries_dropdown';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
@@ -68,7 +69,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     onClose();
   };
 
-  const handleSetQueryValue = useCallback(
+  const handleSetQueryValue = useCallback<SavedQueriesDropdownProps['onChange']>(
     (savedQuery) => {
       if (savedQuery) {
         resetField('id', { defaultValue: savedQuery.id });

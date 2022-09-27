@@ -64,7 +64,7 @@ export const MarkdownEditorForm = React.memo(
             describedByIds={idAria ? [idAria] : undefined}
             fullWidth
             error={errorMessage}
-            helpText={field.helpText}
+            helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
             isInvalid={isInvalid}
             label={field.label}
             labelAppend={field.labelAppend}

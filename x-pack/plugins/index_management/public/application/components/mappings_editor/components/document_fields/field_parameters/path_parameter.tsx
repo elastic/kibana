@@ -111,7 +111,11 @@ export const PathParameter = ({ field, allFields }: Props) => {
 
               <EuiFormRow
                 label={pathField.label}
-                helpText={pathField.helpText}
+                helpText={
+                  typeof pathField.helpText === 'function'
+                    ? pathField.helpText()
+                    : pathField.helpText
+                }
                 error={error}
                 isInvalid={isInvalid}
                 fullWidth

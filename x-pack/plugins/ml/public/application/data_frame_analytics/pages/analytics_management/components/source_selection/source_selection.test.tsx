@@ -113,6 +113,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
   it('renders the title text', async () => {
     // prepare
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <SourceSelection />
       </IntlProvider>
@@ -126,6 +127,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
   it('shows the error callout when clicking a remote data view', async () => {
     // prepare
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <SourceSelection />
       </IntlProvider>
@@ -146,6 +148,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
   it('calls navigateToPath for a plain data view ', async () => {
     // prepare
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <SourceSelection />
       </IntlProvider>
@@ -169,6 +172,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
   it('shows the error callout when clicking a saved search using a remote data view', async () => {
     // prepare
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <SourceSelection />
       </IntlProvider>
@@ -194,6 +198,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
   it('calls navigateToPath for a saved search using a plain data view ', async () => {
     // prepare
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <SourceSelection />
       </IntlProvider>

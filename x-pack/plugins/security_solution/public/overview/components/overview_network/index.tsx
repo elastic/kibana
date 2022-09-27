@@ -71,7 +71,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
     skip: querySkip,
   });
 
-  const goToNetwork = useCallback(
+  const goToNetwork = useCallback<React.MouseEventHandler>(
     (ev) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {

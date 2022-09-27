@@ -10,7 +10,7 @@ import type { Capabilities } from '@kbn/core/types';
 import { mockGlobalState, TestProviders } from '../mock';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { AppLinkItems } from './types';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import {
   useAppLinks,
   getAncestorLinksInfo,
@@ -76,9 +76,9 @@ const mockLicense = {
 } as unknown as ILicense;
 
 const renderUseAppLinks = () =>
-  renderHook<{}, AppLinkItems>(() => useAppLinks(), { wrapper: TestProviders });
+  renderHook<AppLinkItems, {}>(() => useAppLinks(), { wrapper: TestProviders });
 const renderUseLinkExists = (id: SecurityPageName) =>
-  renderHook<SecurityPageName, boolean>(() => useLinkExists(id), {
+  renderHook<boolean, SecurityPageName>(() => useLinkExists(id), {
     wrapper: TestProviders,
   });
 
@@ -100,7 +100,7 @@ describe('Security app links', () => {
     });
 
     it('should filter not allowed links', async () => {
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       // this link should not be excluded, the test checks all conditions are passed
       const networkLinkItem = {
         id: SecurityPageName.network,
@@ -170,10 +170,11 @@ describe('Security app links', () => {
             license: { hasAtLeast: licenseBasicMock } as unknown as ILicense,
           }
         );
-        await waitForNextUpdate();
       });
 
-      expect(result.current).toStrictEqual([networkLinkItem]);
+      await waitFor(() => {
+        expect(result.current).toStrictEqual([networkLinkItem]);
+      });
     });
   });
 
@@ -189,7 +190,7 @@ describe('Security app links', () => {
     });
 
     it('should update if the links are removed', async () => {
-      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      const { result } = renderUseLinkExists(SecurityPageName.hostsEvents);
       expect(result.current).toBe(true);
       await act(async () => {
         updateAppLinks(
@@ -206,13 +207,14 @@ describe('Security app links', () => {
             license: mockLicense,
           }
         );
-        await waitForNextUpdate();
       });
-      expect(result.current).toBe(false);
+      await waitFor(() => {
+        expect(result.current).toBe(false);
+      });
     });
 
     it('should update if the links are added', async () => {
-      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.rules);
+      const { result } = renderUseLinkExists(SecurityPageName.rules);
       expect(result.current).toBe(false);
       await act(async () => {
         updateAppLinks(
@@ -236,9 +238,10 @@ describe('Security app links', () => {
             license: mockLicense,
           }
         );
-        await waitForNextUpdate();
       });
-      expect(result.current).toBe(true);
+      await waitFor(() => {
+        expect(result.current).toBe(true);
+      });
     });
   });
 

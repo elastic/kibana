@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { LogEntryCategoriesSetupView } from './log_entry_categories_setup_view';
 import { LogEntryRateSetupView } from './log_entry_rate_setup_view';
 import { LogAnalysisModuleList } from './module_list';
@@ -81,9 +82,11 @@ const ModuleSetupView: React.FC<{
   }
 };
 
-const LogAnalysisSetupFlyoutSubPage: React.FC<{
-  onViewModuleList?: () => void;
-}> = ({ children, onViewModuleList }) => (
+const LogAnalysisSetupFlyoutSubPage: FC<
+  PropsWithChildren<{
+    onViewModuleList?: () => void;
+  }>
+> = ({ children, onViewModuleList }) => (
   <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
     {onViewModuleList ? (
       <EuiFlexItem grow={false}>

@@ -7,6 +7,14 @@
 
 import { isEmpty, reduce } from 'lodash';
 
+export type ECSMappingArray = Array<{
+  key: string;
+  result: {
+    type: string;
+    value: string;
+  };
+}>;
+
 export const convertECSMappingToObject = (
   ecsMapping: Array<{
     key: string;

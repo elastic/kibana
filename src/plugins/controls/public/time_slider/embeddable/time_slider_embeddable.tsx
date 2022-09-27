@@ -13,7 +13,7 @@ import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import { TIME_SLIDER_CONTROL } from '../..';
 import { TimeSliderControlEmbeddableInput } from '../../../common/time_slider/types';
@@ -263,13 +263,13 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   public render = (node: HTMLElement) => {
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
     this.node = node;
 
     const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
 
-    ReactDOM.render(
+    createRoot(this.node).render(
       <TimeSliderControlReduxWrapper>
         <TimeSlider
           formatDate={this.epochToKbnDateFormat}
@@ -279,8 +279,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
             this.onRangeChange(range);
           }}
         />
-      </TimeSliderControlReduxWrapper>,
-      node
+      </TimeSliderControlReduxWrapper>
     );
   };
 

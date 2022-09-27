@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 export const manageAngularLifecycle = ($scope: any, $route: any, elem: HTMLElement | null) => {
   const lastRoute = $route.current;
@@ -23,7 +23,7 @@ export const manageAngularLifecycle = ($scope: any, $route: any, elem: HTMLEleme
     }
 
     if (elem) {
-      unmountComponentAtNode(elem);
+      createRoot(elem).unmount();
     }
   });
 };

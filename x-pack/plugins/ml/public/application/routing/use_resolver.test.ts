@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { IUiSettingsClient } from '@kbn/core/public';
 
@@ -46,34 +46,32 @@ describe('useResolver', () => {
   });
 
   it('should accept undefined as dataViewId and savedSearchId.', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useResolver(undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
     );
 
-    await act(async () => {
-      await waitForNextUpdate();
-    });
-
-    expect(result.current).toStrictEqual({
-      context: {
-        combinedQuery: {
-          bool: {
-            must: [
-              {
-                match_all: {},
-              },
-            ],
+    await waitFor(() => {
+      expect(result.current).toStrictEqual({
+        context: {
+          combinedQuery: {
+            bool: {
+              must: [
+                {
+                  match_all: {},
+                },
+              ],
+            },
           },
+          currentDataView: null,
+          currentSavedSearch: null,
+          dataViewsContract: {},
+          kibanaConfig: {},
         },
-        currentDataView: null,
-        currentSavedSearch: null,
-        dataViewsContract: {},
-        kibanaConfig: {},
-      },
-      results: {},
+        results: {},
+      });
+      expect(addError).toHaveBeenCalledTimes(0);
+      expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(0);
     });
-    expect(addError).toHaveBeenCalledTimes(0);
-    expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(0);
   });
 
   it('should add an error toast and redirect if dataViewId is an empty string.', async () => {

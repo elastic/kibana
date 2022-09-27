@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResults } from './use_action_results';
+import type { SearchHit } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useActionResultsPrivileges } from './use_action_privileges';
 
@@ -64,11 +65,14 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     });
   }
 
-  const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
-  const renderRowsColumn = useCallback((rowsCount) => rowsCount ?? '-', []);
+  const renderAgentIdColumn = useCallback(
+    (agentId: string) => <AgentIdToName agentId={agentId} />,
+    []
+  );
+  const renderRowsColumn = useCallback((rowsCount: number) => rowsCount ?? '-', []);
   const renderStatusColumn = useCallback(
-    (_, item) => {
-      if (!item.fields.completed_at) {
+    (_: string, item: SearchHit) => {
+      if (!item.fields?.completed_at) {
         return expired
           ? i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
               defaultMessage: 'expired',

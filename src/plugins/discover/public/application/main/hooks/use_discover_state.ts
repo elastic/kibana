@@ -242,7 +242,7 @@ export function useDiscoverState({
    * Function triggered when the user changes the query in the search bar
    */
   const onUpdateQuery = useCallback(
-    (_payload, isUpdate?: boolean) => {
+    (_payload: unknown, isUpdate?: boolean) => {
       if (isUpdate === false) {
         searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
         refetch$.next(undefined);

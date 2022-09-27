@@ -10,6 +10,7 @@ import { get } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import type { Ecs } from '../../../../../../../common/ecs';
 import {
   DragEffects,
@@ -18,7 +19,7 @@ import {
 import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
 import { GoogleLink, ReputationLink } from '../../../../../../common/components/links';
 import { Provider } from '../../../data_providers/provider';
-import type { QueryOperator } from '../../../data_providers/data_provider';
+import type { DataProvider, QueryOperator } from '../../../data_providers/data_provider';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
@@ -90,7 +91,7 @@ export const DraggableZeekElement = React.memo<{
   );
 
   const render = useCallback(
-    (dataProvider, _, snapshot) =>
+    (dataProvider: DataProvider, _: DraggableProvided | null, snapshot: DraggableStateSnapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />

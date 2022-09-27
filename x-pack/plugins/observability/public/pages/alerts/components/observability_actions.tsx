@@ -52,7 +52,7 @@ export function ObservabilityActions({
   setFlyoutAlert,
 }: ObservabilityActionsProps) {
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-  const [openActionsPopoverId, setActionsPopover] = useState(null);
+  const [openActionsPopoverId, setActionsPopover] = useState<string | null>(null);
   const { cases, http } = useKibana<ObservabilityAppServices>().services;
   const { config } = usePluginContext();
 
@@ -67,7 +67,7 @@ export function ObservabilityActions({
     setActionsPopover(null);
   }, []);
 
-  const toggleActionsPopover = useCallback((id) => {
+  const toggleActionsPopover = useCallback((id: string) => {
     setActionsPopover((current) => (current ? null : id));
   }, []);
 

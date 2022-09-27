@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
 import { timelineActions } from '../../../store/timeline';
@@ -53,46 +53,46 @@ describe('useDetailPanel', () => {
 
   test('should return openDetailsPanel fn, handleOnDetailsPanelClosed fn, shouldShowDetailsPanel, and the DetailsPanel component', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
+      const { result } = renderHook(() => {
         return useDetailPanel(defaultProps);
       });
-      await waitForNextUpdate();
-
-      expect(result.current.openDetailsPanel).toBeDefined();
-      expect(result.current.handleOnDetailsPanelClosed).toBeDefined();
-      expect(result.current.shouldShowDetailsPanel).toBe(false);
-      expect(result.current.DetailsPanel).toBeNull();
+      await waitFor(() => {
+        expect(result.current.openDetailsPanel).toBeDefined();
+        expect(result.current.handleOnDetailsPanelClosed).toBeDefined();
+        expect(result.current.shouldShowDetailsPanel).toBe(false);
+        expect(result.current.DetailsPanel).toBeNull();
+      });
     });
   });
 
   test('should fire redux action to open details panel', async () => {
     const testEventId = '123';
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
+      const { result } = renderHook(() => {
         return useDetailPanel(defaultProps);
       });
-      await waitForNextUpdate();
+      await waitFor(() => {
+        result.current?.openDetailsPanel(testEventId);
 
-      result.current?.openDetailsPanel(testEventId);
-
-      expect(mockDispatch).toHaveBeenCalled();
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
+        expect(mockDispatch).toHaveBeenCalled();
+        expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
+      });
     });
   });
 
   test('should call provided onClose callback provided to openDetailsPanel fn', async () => {
     const testEventId = '123';
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
+      const { result } = renderHook(() => {
         return useDetailPanel(defaultProps);
       });
-      await waitForNextUpdate();
+      await waitFor(() => {
+        const mockOnClose = jest.fn();
+        result.current?.openDetailsPanel(testEventId, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
 
-      const mockOnClose = jest.fn();
-      result.current?.openDetailsPanel(testEventId, mockOnClose);
-      result.current?.handleOnDetailsPanelClosed();
-
-      expect(mockOnClose).toHaveBeenCalled();
+        expect(mockOnClose).toHaveBeenCalled();
+      });
     });
   });
 
@@ -100,22 +100,22 @@ describe('useDetailPanel', () => {
     // Test that the onClose ref is properly updated
     const testEventId = '123';
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
+      const { result } = renderHook(() => {
         return useDetailPanel(defaultProps);
       });
-      await waitForNextUpdate();
+      await waitFor(() => {
+        const mockOnClose = jest.fn();
+        const secondMockOnClose = jest.fn();
+        result.current?.openDetailsPanel(testEventId, mockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
 
-      const mockOnClose = jest.fn();
-      const secondMockOnClose = jest.fn();
-      result.current?.openDetailsPanel(testEventId, mockOnClose);
-      result.current?.handleOnDetailsPanelClosed();
+        expect(mockOnClose).toHaveBeenCalled();
 
-      expect(mockOnClose).toHaveBeenCalled();
+        result.current?.openDetailsPanel(testEventId, secondMockOnClose);
+        result.current?.handleOnDetailsPanelClosed();
 
-      result.current?.openDetailsPanel(testEventId, secondMockOnClose);
-      result.current?.handleOnDetailsPanelClosed();
-
-      expect(secondMockOnClose).toHaveBeenCalled();
+        expect(secondMockOnClose).toHaveBeenCalled();
+      });
     });
   });
 
@@ -131,19 +131,19 @@ describe('useDetailPanel', () => {
     };
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
+      const { result } = renderHook(() => {
         return useDetailPanel(updatedProps);
       });
-      await waitForNextUpdate();
-
-      expect(result.current.DetailsPanel).toMatchInlineSnapshot(`
-        <Memo(DetailsPanel)
-          browserFields={Object {}}
-          handleOnPanelClosed={[Function]}
-          tabType="session"
-          timelineId="test"
-        />
-      `);
+      await waitFor(() => {
+        expect(result.current.DetailsPanel).toMatchInlineSnapshot(`
+          <Memo(DetailsPanel)
+            browserFields={Object {}}
+            handleOnPanelClosed={[Function]}
+            tabType="session"
+            timelineId="test"
+          />
+        `);
+      });
     });
   });
 });

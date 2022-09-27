@@ -34,7 +34,7 @@ const OsqueryAppEmptyStateComponent = () => {
     [getUrlForApp]
   );
 
-  const integrationClick = useCallback(
+  const integrationClick = useCallback<React.MouseEventHandler>(
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();

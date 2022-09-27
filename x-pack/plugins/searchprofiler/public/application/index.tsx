@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import { HttpStart as Http, ToastsSetup, CoreTheme } from '@kbn/core/public';
 import { RouteComponentProps } from 'react-router-dom';
@@ -36,7 +36,9 @@ export const renderApp = ({
   theme$,
   location,
 }: AppDependencies) => {
-  render(
+  const root = createRoot(el);
+
+  root.render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <AppContextProvider args={{ initialLicenseStatus, notifications, http, location }}>
@@ -45,9 +47,8 @@ export const renderApp = ({
           </ProfileContextProvider>
         </AppContextProvider>
       </KibanaThemeProvider>
-    </I18nContext>,
-    el
+    </I18nContext>
   );
 
-  return () => unmountComponentAtNode(el);
+  return () => root.unmount();
 };

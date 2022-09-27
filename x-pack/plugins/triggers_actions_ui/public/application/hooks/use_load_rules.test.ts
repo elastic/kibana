@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useLoadRules } from './use_load_rules';
 import {
   RuleExecutionStatusErrorReasons,
@@ -251,7 +251,7 @@ describe('useLoadRules', () => {
       tagsFilter: [],
     };
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadRules({
         ...params,
         onPage,
@@ -265,17 +265,18 @@ describe('useLoadRules', () => {
 
     await act(async () => {
       result.current.loadRules();
-      await waitForNextUpdate();
     });
 
-    expect(result.current.initialLoad).toBeFalsy();
-    expect(result.current.noData).toBeFalsy();
-    expect(result.current.rulesState.isLoading).toBeFalsy();
+    await waitFor(() => {
+      expect(result.current.initialLoad).toBeFalsy();
+      expect(result.current.noData).toBeFalsy();
+      expect(result.current.rulesState.isLoading).toBeFalsy();
 
-    expect(onPage).toBeCalledTimes(0);
-    expect(loadRulesWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
-    expect(result.current.rulesState.data).toEqual(expect.arrayContaining(MOCK_RULE_DATA.data));
-    expect(result.current.rulesState.totalItemCount).toEqual(MOCK_RULE_DATA.total);
+      expect(onPage).toBeCalledTimes(0);
+      expect(loadRulesWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
+      expect(result.current.rulesState.data).toEqual(expect.arrayContaining(MOCK_RULE_DATA.data));
+      expect(result.current.rulesState.totalItemCount).toEqual(MOCK_RULE_DATA.total);
+    });
   });
 
   it('should call loadRules API with params and handle result', async () => {
@@ -292,7 +293,7 @@ describe('useLoadRules', () => {
       tagsFilter: ['tag1', 'tag2'],
     };
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadRules({
         ...params,
         onPage,
@@ -302,10 +303,11 @@ describe('useLoadRules', () => {
 
     await act(async () => {
       result.current.loadRules();
-      await waitForNextUpdate();
     });
 
-    expect(loadRulesWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
+    await waitFor(() => {
+      expect(loadRulesWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
+    });
   });
 
   it('should reset the page if the data is fetched while paged', async () => {
@@ -327,7 +329,7 @@ describe('useLoadRules', () => {
       tagsFilter: [],
     };
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadRules({
         ...params,
         onPage,
@@ -337,12 +339,13 @@ describe('useLoadRules', () => {
 
     await act(async () => {
       result.current.loadRules();
-      await waitForNextUpdate();
     });
 
-    expect(onPage).toHaveBeenCalledWith({
-      index: 0,
-      size: 25,
+    await waitFor(() => {
+      expect(onPage).toHaveBeenCalledWith({
+        index: 0,
+        size: 25,
+      });
     });
   });
 
@@ -392,7 +395,7 @@ describe('useLoadRules', () => {
         tagsFilter: [],
       };
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useLoadRules({
           ...params,
           onPage,
@@ -404,10 +407,11 @@ describe('useLoadRules', () => {
 
       await act(async () => {
         result.current.loadRules();
-        await waitForNextUpdate();
       });
 
-      expect(result.current.noData).toBeTruthy();
+      await waitFor(() => {
+        expect(result.current.noData).toBeTruthy();
+      });
     });
 
     it('noData should be false, if there is rule types filter and no rules', async () => {
@@ -425,7 +429,7 @@ describe('useLoadRules', () => {
         tagsFilter: [],
       };
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useLoadRules({
           ...params,
           onPage,
@@ -437,10 +441,11 @@ describe('useLoadRules', () => {
 
       await act(async () => {
         result.current.loadRules();
-        await waitForNextUpdate();
       });
 
-      expect(result.current.noData).toBeFalsy();
+      await waitFor(() => {
+        expect(result.current.noData).toBeFalsy();
+      });
     });
 
     it('noData should be true, if there is rule types filter and no rules with hasDefaultRuleTypesFiltersOn = true', async () => {
@@ -459,7 +464,7 @@ describe('useLoadRules', () => {
         hasDefaultRuleTypesFiltersOn: true,
       };
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useLoadRules({
           ...params,
           onPage,
@@ -471,10 +476,11 @@ describe('useLoadRules', () => {
 
       await act(async () => {
         result.current.loadRules();
-        await waitForNextUpdate();
       });
 
-      expect(result.current.noData).toBeTruthy();
+      await waitFor(() => {
+        expect(result.current.noData).toBeTruthy();
+      });
     });
   });
 });

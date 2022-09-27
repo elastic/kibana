@@ -7,7 +7,7 @@
  */
 
 import React, { Suspense, lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
@@ -28,7 +28,7 @@ class DefaultEditorController implements IEditorController {
   ) {}
 
   render(props: EditorRenderProps) {
-    render(
+    createRoot(this.el).render(
       <KibanaThemeProvider theme$={getTheme().theme$}>
         <EuiErrorBoundary>
           <Suspense
@@ -53,13 +53,12 @@ class DefaultEditorController implements IEditorController {
             />
           </Suspense>
         </EuiErrorBoundary>
-      </KibanaThemeProvider>,
-      this.el
+      </KibanaThemeProvider>
     );
   }
 
   destroy() {
-    unmountComponentAtNode(this.el);
+    createRoot(this.el).unmount();
   }
 }
 

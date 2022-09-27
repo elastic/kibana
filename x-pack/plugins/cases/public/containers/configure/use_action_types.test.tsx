@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import * as api from './api';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { useGetActionTypes } from './use_action_types';
@@ -24,12 +24,13 @@ describe('useActionTypes', () => {
 
   it('should fetch action types', async () => {
     const spy = jest.spyOn(api, 'fetchActionTypes');
-    const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
+    renderHook(() => useGetActionTypes(), {
       wrapper: appMockRenderer.AppWrapper,
     });
 
-    await waitForNextUpdate();
-    expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
+    });
   });
 
   it('should show a toast eror message if failed to fetch', async () => {
@@ -39,10 +40,11 @@ describe('useActionTypes', () => {
     });
     const addErrorMock = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError: addErrorMock });
-    const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
+    renderHook(() => useGetActionTypes(), {
       wrapper: appMockRenderer.AppWrapper,
     });
-    await waitForNextUpdate();
-    expect(addErrorMock).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addErrorMock).toHaveBeenCalled();
+    });
   });
 });

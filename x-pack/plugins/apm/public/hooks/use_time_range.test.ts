@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import { useTimeRange } from './use_time_range';
 
 describe('useTimeRange', () => {
   let hook: RenderHookResult<
-    Parameters<typeof useTimeRange>[0],
-    ReturnType<typeof useTimeRange>
+    ReturnType<typeof useTimeRange>,
+    Parameters<typeof useTimeRange>[0]
   >;
 
   beforeEach(() => {

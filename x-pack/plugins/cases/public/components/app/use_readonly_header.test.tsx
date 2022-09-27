@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import type { PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
 
 import { useKibana } from '../../common/lib/kibana';
 import { readCasesPermissions, TestProviders } from '../../common/mock';
@@ -25,7 +26,7 @@ describe('CaseContainerComponent', () => {
 
   it('does not display the readonly glasses badge when the user has write permissions', () => {
     renderHook(() => useReadonlyHeader(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: TestProviders,
     });
 
     expect(mockedSetBadge).not.toBeCalled();
@@ -33,7 +34,7 @@ describe('CaseContainerComponent', () => {
 
   it('displays the readonly glasses badge read permissions but not write', () => {
     renderHook(() => useReadonlyHeader(), {
-      wrapper: ({ children }) => (
+      wrapper: ({ children }: PropsWithChildren) => (
         <TestProviders permissions={readCasesPermissions()}>{children}</TestProviders>
       ),
     });

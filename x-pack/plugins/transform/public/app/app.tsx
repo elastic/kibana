@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, FC } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Route, Switch } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
 
@@ -63,7 +63,9 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
 export const renderApp = (element: HTMLElement, appDependencies: AppDependencies) => {
   const I18nContext = appDependencies.i18n.Context;
 
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <EuiErrorBoundary>
       <KibanaThemeProvider theme$={appDependencies.theme.theme$}>
         <KibanaContextProvider services={appDependencies}>
@@ -74,11 +76,10 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
           </AuthorizationProvider>
         </KibanaContextProvider>
       </KibanaThemeProvider>
-    </EuiErrorBoundary>,
-    element
+    </EuiErrorBoundary>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

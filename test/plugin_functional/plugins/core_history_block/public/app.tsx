@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route, Prompt } from 'react-router-dom';
 import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
@@ -66,7 +66,8 @@ export const renderApp = (
   { basePath, application }: AppOptions,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <Router history={history}>
       <Switch>
         <Route path="/" exact={true}>
@@ -76,8 +77,7 @@ export const renderApp = (
           <FooPage basePath={basePath} application={application} />
         </Route>
       </Switch>
-    </Router>,
-    element
+    </Router>
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

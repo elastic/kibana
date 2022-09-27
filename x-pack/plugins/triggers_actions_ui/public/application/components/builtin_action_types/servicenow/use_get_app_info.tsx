@@ -29,7 +29,7 @@ export const useGetAppInfo = ({ actionTypeId, http }: UseGetAppInfoProps): UseGe
   const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
 
-  const fetchAppInfo = useCallback(
+  const fetchAppInfo = useCallback<UseGetAppInfo['fetchAppInfo']>(
     async (connector) => {
       try {
         if (!actionTypeId || isEmpty(actionTypeId)) {

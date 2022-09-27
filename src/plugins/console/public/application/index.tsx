@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import {
   HttpSetup,
@@ -69,7 +69,8 @@ export function renderApp({
   const api = createApi({ http });
   const esHostService = createEsHostService({ api });
 
-  render(
+  const root = createRoot(element);
+  root.render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <ServicesContextProvider
@@ -97,9 +98,8 @@ export function renderApp({
           </RequestContextProvider>
         </ServicesContextProvider>
       </KibanaThemeProvider>
-    </I18nContext>,
-    element
+    </I18nContext>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

@@ -133,7 +133,7 @@ export function useLatestFunctionConfig(
   }, [dataView, data.search.aggs, runtimeMappings]);
 
   const updateLatestFunctionConfig = useCallback(
-    (update) =>
+    (update: any) =>
       setLatestFunctionConfig({
         ...config,
         ...update,

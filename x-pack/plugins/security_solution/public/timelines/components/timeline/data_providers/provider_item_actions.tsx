@@ -7,7 +7,7 @@
 
 import type { EuiContextMenuPanelDescriptor, EuiPopoverProps } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -52,7 +52,7 @@ interface OwnProps {
   type: DataProviderType;
 }
 
-const MyEuiPopover = styled(EuiPopover as unknown as FunctionComponent)<
+const MyEuiPopover = styled(EuiPopover as unknown as FC<PropsWithChildren>)<
   EuiPopoverProps & {
     id?: string;
   }

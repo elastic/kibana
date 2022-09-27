@@ -57,7 +57,7 @@ function useSortableProperties<T>(
 
   return {
     updateSortableProperties: useCallback(
-      (property) => {
+      (property: string) => {
         sortableProperties.sortOn(property);
         callback(omit(sortableProperties.getSortedProperty(), 'getValue'));
       },
@@ -167,6 +167,7 @@ export const ProcessesTable = ({
             </EuiTableHeaderCell>
           ))}
         </EuiTableHeader>
+        {/* @ts-expect-error update types */}
         <StyledTableBody>
           <ProcessesTableBody items={currentItems} currentTime={currentTime} />
         </StyledTableBody>

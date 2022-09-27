@@ -68,9 +68,11 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         color="danger"
         size="s"
         title={
-          ['index', 'searchType'].includes(errorParam)
-            ? errors[errorParam]
-            : expressionGenericErrorMessage
+          ['index', 'searchType'].includes(errorParam) ? (
+            <>{errors[errorParam]}</>
+          ) : (
+            expressionGenericErrorMessage
+          )
         }
       />
       <EuiSpacer />

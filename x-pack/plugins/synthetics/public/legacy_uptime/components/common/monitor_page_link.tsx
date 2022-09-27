@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { Link } from 'react-router-dom';
 
@@ -20,7 +21,7 @@ interface DetailPageLinkProps {
   linkParameters: string | undefined;
 }
 
-export const MonitorPageLink: FC<DetailPageLinkProps> = ({
+export const MonitorPageLink: FC<PropsWithChildren<DetailPageLinkProps>> = ({
   children,
   monitorId,
   linkParameters,

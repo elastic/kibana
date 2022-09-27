@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { SavedQuerySOFormData } from '../../../saved_queries/form/use_saved_query_form';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
@@ -48,7 +49,7 @@ const NewSavedQueryPageComponent = () => {
   );
 
   const handleSubmit = useCallback(
-    async (payload) => {
+    async (payload: SavedQuerySOFormData) => {
       await mutateAsync(payload);
     },
     [mutateAsync]

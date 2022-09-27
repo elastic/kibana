@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { ExpressionsServiceFork } from '@kbn/expressions-plugin/common/service/expressions_fork';
 import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '@kbn/core/public';
@@ -35,13 +35,13 @@ export class PartialResultsExamplePlugin implements Plugin<void, void, SetupDeps
       title: 'Partial Results Example',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async ({ element }: AppMountParameters) => {
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <ExpressionsContext.Provider value={expressionsStart}>
             <App />
-          </ExpressionsContext.Provider>,
-          element
+          </ExpressionsContext.Provider>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 

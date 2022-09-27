@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import userEvent from '@testing-library/user-event';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 
@@ -25,7 +26,7 @@ describe('Assignees', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
     const { form } = useForm<FormProps>();
     globalForm = form;
 

@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { OnTimeChangeProps } from '@elastic/eui';
 
 interface LogDatepickerProps {
   startDateExpression: string;
@@ -27,7 +28,7 @@ export const LogDatepicker: React.FC<LogDatepickerProps> = ({
   onStopStreaming,
 }) => {
   const handleTimeChange = useCallback(
-    ({ start, end, isInvalid }) => {
+    ({ start, end, isInvalid }: OnTimeChangeProps) => {
       if (onUpdateDateRange && !isInvalid) {
         onUpdateDateRange({ startDateExpression: start, endDateExpression: end });
       }
@@ -43,7 +44,6 @@ export const LogDatepicker: React.FC<LogDatepickerProps> = ({
           end={endDateExpression}
           onTimeChange={handleTimeChange}
           showUpdateButton={false}
-          // @ts-ignore: EuiSuperDatePicker doesn't expose the `isDisabled` prop, although it exists.
           isDisabled={isStreaming}
         />
       </EuiFlexItem>

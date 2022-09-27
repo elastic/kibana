@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
@@ -62,7 +62,8 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
   }
 
   public render(node: HTMLElement) {
-    ReactDOM.render(
+    const root = createRoot(node);
+    root.render(
       <I18nProvider>
         {this.options.panelComponent ? (
           <HelloWorldContainerComponent
@@ -73,7 +74,6 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
           <div>Panel component not provided.</div>
         )}
       </I18nProvider>,
-      node
     );
   }
 }

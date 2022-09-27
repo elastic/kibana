@@ -6,7 +6,8 @@
  */
 
 import { EuiAccordion, EuiCodeBlock } from '@elastic/eui';
-import React, { FC } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 interface Props {
   buttonContent: string;
@@ -20,7 +21,7 @@ interface Props {
  * Utility for showing `EuiAccordions` with code blocks which we use frequently in synthetics to display
  * stack traces, long error messages, and synthetics journey code.
  */
-export const CodeBlockAccordion: FC<Props> = ({
+export const CodeBlockAccordion: FC<PropsWithChildren<Props>> = ({
   buttonContent,
   children,
   id,

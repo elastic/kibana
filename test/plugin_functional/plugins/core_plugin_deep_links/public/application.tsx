@@ -8,7 +8,7 @@
 
 import { History } from 'history';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Route, withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
 
 import {
@@ -152,7 +152,8 @@ const DlApp = ({ history, coreStart }: { history: History; coreStart: CoreStart 
 );
 
 export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<DlApp history={history} coreStart={coreStart} />, element);
+  const root = createRoot(element);
+  root.render(<DlApp history={history} coreStart={coreStart} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

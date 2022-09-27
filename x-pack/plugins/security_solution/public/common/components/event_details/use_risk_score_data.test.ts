@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { ONLY_FIRST_ITEM_PAGINATION, useRiskScoreData } from './use_risk_score_data';
 import { useUserRiskScore, useHostRiskScore } from '../../../risk_score/containers';

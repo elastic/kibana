@@ -21,7 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import { deleteColumn, GenericIndexPatternColumn } from '../indexpattern';
@@ -42,7 +42,7 @@ import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { IndexPatternLayer } from '../types';
-import { FormatSelector } from './format_selector';
+import { FormatSelector, FormatSelectorProps } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
@@ -122,7 +122,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const { euiTheme } = useEuiTheme();
 
   const updateLayer = useCallback(
-    (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
+    (newLayer: Partial<IndexPatternLayer>) =>
+      setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
   );
 
@@ -283,7 +284,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   useEffect(() => {
     return () => {
       if (helpPopoverContainer.current) {
-        ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+        createRoot(helpPopoverContainer.current).unmount();
         document.body.removeChild(helpPopoverContainer.current);
       }
     };
@@ -422,6 +423,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   helpPopoverContainer.current = container;
                   document.body.appendChild(container);
                   const HelpComponent = operationDefinitionMap[operationType].helpComponent!;
+                  const root = createRoot(helpPopoverContainer.current);
                   const element = (
                     <WrappingHelpPopover
                       button={e.target as HTMLElement}
@@ -429,7 +431,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       title={operationDefinitionMap[operationType].helpComponentTitle}
                       closePopover={() => {
                         if (helpPopoverContainer.current) {
-                          ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+                          root.unmount();
                           document.body.removeChild(helpPopoverContainer.current);
                           helpPopoverContainer.current = null;
                         }
@@ -438,9 +440,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       <HelpComponent />
                     </WrappingHelpPopover>
                   );
-                  ReactDOM.render(element, helpPopoverContainer.current);
+                  root.render(element);
                 } else {
-                  ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+                  createRoot(helpPopoverContainer.current).unmount();
                   document.body.removeChild(helpPopoverContainer.current);
                   helpPopoverContainer.current = null;
                 }
@@ -771,7 +773,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const ButtonGroupContent = showQuickFunctions ? quickFunctions : customParamEditor;
 
-  const onFormatChange = useCallback(
+  const onFormatChange = useCallback<FormatSelectorProps['onChange']>(
     (newFormat) => {
       updateLayer(
         updateColumnParam({

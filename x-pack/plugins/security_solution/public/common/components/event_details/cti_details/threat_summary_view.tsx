@@ -7,6 +7,7 @@
 
 import styled from 'styled-components';
 import React, { useCallback, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiTitle,
   EuiHorizontalRule,
@@ -35,7 +36,7 @@ const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
 `;
 
-const ThreatSummaryPanelTitle: React.FC = ({ children }) => (
+const ThreatSummaryPanelTitle: FC<PropsWithChildren> = ({ children }) => (
   <UppercaseEuiTitle size="xxxs">
     <h5>{children}</h5>
   </UppercaseEuiTitle>

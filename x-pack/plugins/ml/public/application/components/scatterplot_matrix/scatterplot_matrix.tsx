@@ -74,6 +74,7 @@ const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, toolti
     <EuiIconTip
       content={tooltip}
       iconProps={{
+        // @ts-expect-error update types
         className: 'eui-alignTop',
       }}
       size="s"

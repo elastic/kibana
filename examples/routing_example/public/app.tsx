@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters } from '@kbn/core/public';
 import {
   EuiPage,
@@ -86,7 +86,9 @@ function RoutingExplorer({
 }
 
 export const renderApp = (props: Props, element: AppMountParameters['element']) => {
-  ReactDOM.render(<RoutingExplorer {...props} />, element);
+  const root = createRoot(element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  root.render(<RoutingExplorer {...props} />);
+
+  return () => root.unmount();
 };

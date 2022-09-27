@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useReducer, Dispatch } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { merge } from 'lodash';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { DEFAULT_FEATURES } from '../../../common/constants';
@@ -57,7 +58,7 @@ export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' 
   appTitle?: string;
 }
 
-export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
+export const CasesProvider: FC<PropsWithChildren<{ value: CasesContextProps }>> = ({
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,

@@ -98,7 +98,7 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
 
   const indexPopover = (
     <Fragment>
-      <EuiFormRow id="geoIndexPatternSelect" fullWidth error={errors.index}>
+      <EuiFormRow id="geoIndexPatternSelect" fullWidth error={<>{errors.index}</>}>
         <GeoIndexPatternSelect
           onChange={(_indexPattern) => {
             // reset time field and expression fields if indices are deleted

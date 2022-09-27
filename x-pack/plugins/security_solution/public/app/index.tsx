@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
@@ -27,7 +27,8 @@ export const renderApp = ({
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-  render(
+  const root = createRoot(element);
+  root.render(
     <SecurityApp
       history={history}
       onAppLeave={onAppLeave}
@@ -46,8 +47,7 @@ export const renderApp = ({
           </Route>
         </Switch>
       </ApplicationUsageTrackingProvider>
-    </SecurityApp>,
-    element
+    </SecurityApp>
   );
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -30,13 +30,15 @@ export const renderApp = (
     { text: i18n.translate('kibanaOverview.breadcrumbs.title', { defaultMessage: 'Analytics' }) },
   ]);
 
+  const root = createRoot(element);
+
   core.chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
     const solutions = home.featureCatalogue
       .getSolutions()
       .filter(({ id }) => id !== 'kibana')
       .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
 
-    ReactDOM.render(
+    root.render(
       <I18nProvider>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...core, ...deps }}>
@@ -46,10 +48,9 @@ export const renderApp = (
             />
           </KibanaContextProvider>
         </KibanaThemeProvider>
-      </I18nProvider>,
-      element
+      </I18nProvider>
     );
   });
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

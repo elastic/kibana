@@ -42,7 +42,7 @@ export function Filtering({
 }) {
   const inputFilter = selectedColumn.filter;
   const onChange = useCallback(
-    (query) => {
+    (query: Query) => {
       const { isValid } = validateQuery(query, indexPattern);
       if (isValid && !isEqual(inputFilter, query)) {
         updateLayer(setFilter(columnId, layer, query));

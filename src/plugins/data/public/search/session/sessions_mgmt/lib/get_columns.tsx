@@ -128,7 +128,10 @@ export const getColumns = (
               {' '}
               <EuiIconTip
                 type="alert"
-                iconProps={{ 'data-test-subj': 'versionIncompatibleWarningTestSubj' }}
+                iconProps={{
+                  // @ts-expect-error update types
+                  'data-test-subj': 'versionIncompatibleWarningTestSubj',
+                }}
                 content={
                   <FormattedMessage
                     id="data.mgmt.searchSessions.table.versionIncompatibleWarning"

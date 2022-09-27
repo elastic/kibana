@@ -7,7 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useUiSetting } from '../../lib/kibana';
 import type { ChartSeriesData } from './common';

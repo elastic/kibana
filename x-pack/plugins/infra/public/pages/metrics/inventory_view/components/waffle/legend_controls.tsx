@@ -144,15 +144,15 @@ export const LegendControls = ({
   }, [autoBounds, boundsOverride, options]);
 
   const handleStepsChange = useCallback(
-    (e) => {
+    (e: any) => {
       const steps = parseInt(e.target.value, 10);
       setLegendOptions((previous) => ({ ...previous, steps }));
     },
     [setLegendOptions]
   );
 
-  const handlePaletteChange = useCallback(
-    (e) => {
+  const handlePaletteChange = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
+    (e: any) => {
       const palette = e.target.value;
       setLegendOptions((previous) => ({ ...previous, palette }));
     },

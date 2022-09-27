@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { PropsWithChildren } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 
@@ -46,11 +47,11 @@ interface Props {
   exampleLinks: ExampleLink[];
 }
 
-export const StateContainersExamplesPage: React.FC<Props> = ({
+export const StateContainersExamplesPage: FC<PropsWithChildren<Props>> = ({
   navigateToApp,
   children,
   exampleLinks,
-}: PropsWithChildren<Props>) => {
+} ) => {
   return (
     <EuiPage>
       <EuiPageSideBar>

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 
-export const LoadingIssuesError: FunctionComponent = ({ children }) => (
+export const LoadingIssuesError: FC<PropsWithChildren> = ({ children }) => (
   <EuiText color="subdued" data-test-subj="loadingIssuesError">
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>

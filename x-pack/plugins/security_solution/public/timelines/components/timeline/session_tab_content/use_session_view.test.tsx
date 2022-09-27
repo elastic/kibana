@@ -6,9 +6,9 @@
  */
 
 import React, { memo } from 'react';
-
+import type { PropsWithChildren } from 'react';
 import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -88,7 +88,7 @@ describe('useSessionView with active timeline and a session id and graph event i
   let setTimelineFullScreen: jest.Mock;
   let setGlobalFullScreen: jest.Mock;
   let kibana: ReturnType<typeof useKibana>;
-  const Wrapper = memo(({ children }) => {
+  const Wrapper = memo<PropsWithChildren>(({ children }) => {
     kibana = useKibana();
     return <TestProviders>{children}</TestProviders>;
   });

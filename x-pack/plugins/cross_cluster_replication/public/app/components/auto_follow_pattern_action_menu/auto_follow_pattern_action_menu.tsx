@@ -168,6 +168,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
 
 export const AutoFollowPatternActionMenu = (props: Omit<Props, 'deleteAutoFollowPatterns'>) => (
   <AutoFollowPatternDeleteProvider>
+    {/* @ts-expect-error update types */}
     {(deleteAutoFollowPattern: (ids: string[]) => void) => (
       <AutoFollowPatternActionMenuUI {...props} deleteAutoFollowPattern={deleteAutoFollowPattern} />
     )}

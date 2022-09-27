@@ -53,12 +53,12 @@ export const InfluencerFilter = ({
     [nodeType, onChangeFieldName]
   );
 
-  const onSelectFieldName = useCallback(
+  const onSelectFieldName = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
     (e) => onChangeFieldName(e.target.value),
     [onChangeFieldName]
   );
   const onUpdateFieldValue = useCallback(
-    (value) => {
+    (value: string) => {
       updateStoredFieldValue(value);
       onChangeFieldValue(value);
     },

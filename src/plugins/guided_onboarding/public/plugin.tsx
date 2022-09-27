@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -77,14 +77,14 @@ export class GuidedOnboardingPlugin
     api: ApiService;
     application: ApplicationStart;
   }) {
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
           <GuidePanel api={api} application={application} />
         </I18nProvider>
-      </KibanaThemeProvider>,
-      targetDomElement
+      </KibanaThemeProvider>
     );
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    return () => root.unmount();
   }
 }

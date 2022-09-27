@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
@@ -14,26 +14,24 @@ import { useActions } from './use_actions';
 
 describe('Transform: Transform List Actions', () => {
   test('useActions()', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useActions({ forceDisable: false, transformNodes: 1 })
-    );
+    const { result } = renderHook(() => useActions({ forceDisable: false, transformNodes: 1 }));
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      const actions = result.current.actions;
 
-    const actions = result.current.actions;
-
-    // Using `any` for the callback. Somehow the EUI types don't pass
-    // on the `data-test-subj` attribute correctly. We're interested
-    // in the runtime result here anyway.
-    expect(actions.map((a: any) => a['data-test-subj'])).toStrictEqual([
-      'transformActionDiscover',
-      'transformActionCreateAlertRule',
-      'transformActionStart',
-      'transformActionStop',
-      'transformActionEdit',
-      'transformActionClone',
-      'transformActionDelete',
-      'transformActionReset',
-    ]);
+      // Using `any` for the callback. Somehow the EUI types don't pass
+      // on the `data-test-subj` attribute correctly. We're interested
+      // in the runtime result here anyway.
+      expect(actions.map((a: any) => a['data-test-subj'])).toStrictEqual([
+        'transformActionDiscover',
+        'transformActionCreateAlertRule',
+        'transformActionStart',
+        'transformActionStop',
+        'transformActionEdit',
+        'transformActionClone',
+        'transformActionDelete',
+        'transformActionReset',
+      ]);
+    });
   });
 });

@@ -86,6 +86,7 @@ export class RemoteClusterForm extends Component<Props, State> {
   };
 
   static contextType = AppContext;
+  declare context: any;
   private readonly generateId: (idSuffix?: string) => string;
 
   constructor(props: Props, context: Context) {

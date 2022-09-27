@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RenderResult, WaitForNextUpdate } from '@testing-library/react-hooks';
-import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+import { renderHook, act, cleanup, waitFor } from '@testing-library/react';
 import type { QueryToggle } from '.';
 import { useQueryToggle } from '.';
 import type { RouteSpyState } from '../../utils/route/types';
@@ -26,8 +25,7 @@ jest.mock('../../utils/route/use_route_spy', () => ({
 }));
 
 describe('useQueryToggle', () => {
-  let result: RenderResult<QueryToggle>;
-  let waitForNextUpdate: WaitForNextUpdate;
+  let result: { current: QueryToggle };
   const mockSet = jest.fn();
   beforeAll(() => {
     (useKibana as jest.Mock).mockReturnValue({
@@ -44,9 +42,10 @@ describe('useQueryToggle', () => {
   });
   it('Toggles local storage', async () => {
     await act(async () => {
-      ({ result, waitForNextUpdate } = renderHook(() => useQueryToggle('queryId')));
-      await waitForNextUpdate();
-      expect(result.current.toggleStatus).toEqual(true);
+      ({ result } = renderHook(() => useQueryToggle('queryId')));
+      await waitFor(() => {
+        expect(result.current.toggleStatus).toEqual(true);
+      });
     });
     act(() => {
       result.current.setToggleStatus(false);
@@ -56,9 +55,8 @@ describe('useQueryToggle', () => {
     cleanup();
   });
   it('null storage key, do not set', async () => {
-    await act(async () => {
-      ({ result, waitForNextUpdate } = renderHook(() => useQueryToggle()));
-      await waitForNextUpdate();
+    ({ result } = renderHook(() => useQueryToggle()));
+    await waitFor(() => {
       expect(result.current.toggleStatus).toEqual(true);
     });
     act(() => {

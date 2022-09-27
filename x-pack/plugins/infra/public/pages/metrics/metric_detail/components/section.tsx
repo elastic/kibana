@@ -6,13 +6,8 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
-import React, {
-  Children,
-  cloneElement,
-  FunctionComponent,
-  isValidElement,
-  useContext,
-} from 'react';
+import React, { Children, cloneElement, isValidElement, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { SideNavContext, SubNavItem } from '../lib/side_nav_context';
 import { LayoutProps } from '../types';
@@ -22,7 +17,7 @@ type SectionProps = LayoutProps & {
   sectionLabel: string;
 };
 
-export const Section: FunctionComponent<SectionProps> = ({
+export const Section: FC<PropsWithChildren<SectionProps>> = ({
   children,
   metrics,
   navLabel,

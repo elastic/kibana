@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import '@testing-library/jest-dom/extend-expect';
 import { render, screen, waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { CoreSetup } from '@kbn/core/public';
 
@@ -48,13 +49,14 @@ const runtimeMappings = {
 describe('Transform: useIndexData()', () => {
   test('dataView set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
-    const wrapper: FC = ({ children }) => (
+    const wrapper: FC<PropsWithChildren> = ({ children }) => (
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
       </IntlProvider>
     );
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useIndexData(
           {
@@ -70,11 +72,11 @@ describe('Transform: useIndexData()', () => {
 
     const IndexObj: UseIndexDataReturnType = result.current;
 
-    await waitForNextUpdate();
-
-    expect(IndexObj.errorMessage).toBe('');
-    expect(IndexObj.status).toBe(1);
-    expect(IndexObj.tableItems).toEqual([]);
+    await waitFor(() => {
+      expect(IndexObj.errorMessage).toBe('');
+      expect(IndexObj.status).toBe(1);
+      expect(IndexObj.tableItems).toEqual([]);
+    });
   });
 });
 
@@ -105,6 +107,7 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     };
 
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <MlSharedContext.Provider value={mlSharedImports}>
           <Wrapper />
@@ -148,6 +151,7 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     };
 
     render(
+      // @ts-expect-error update types
       <IntlProvider locale="en">
         <MlSharedContext.Provider value={mlSharedImports}>
           <Wrapper />

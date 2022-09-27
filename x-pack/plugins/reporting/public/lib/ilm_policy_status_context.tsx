@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 
 import { IlmPolicyStatusResponse } from '../../common/types';
@@ -22,7 +22,7 @@ interface ContextValue {
 
 const IlmPolicyStatusContext = createContext<undefined | ContextValue>(undefined);
 
-export const IlmPolicyStatusContextProvider: FunctionComponent = ({ children }) => {
+export const IlmPolicyStatusContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus();
 
   return (

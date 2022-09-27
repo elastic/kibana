@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useFormWrapped } from '../hooks/use_form_wrapped';
@@ -14,11 +15,9 @@ import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
 
-export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: string }> = ({
-  children,
-  defaultValues,
-  space,
-}) => {
+export const MonitorForm: FC<
+  PropsWithChildren<{ defaultValues?: SyntheticsMonitor; space?: string }>
+> = ({ children, defaultValues, space }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onChange',

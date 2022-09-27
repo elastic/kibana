@@ -6,11 +6,16 @@
  */
 
 import React, { useEffect } from 'react';
+import type { PropsWithChildren } from 'react';
 
-export const PageRoute = (props: { title: string; component: React.ReactType }) => {
+export const PageRoute = (props: {
+  title: string;
+  component: React.ComponentType<PropsWithChildren>;
+}) => {
   const { title, ...rest } = props;
   useEffect(() => {
     document.title = `${title} - Kibana`;
   }, [title]);
+  // @ts-expect-error
   return <props.component {...rest} />;
 };

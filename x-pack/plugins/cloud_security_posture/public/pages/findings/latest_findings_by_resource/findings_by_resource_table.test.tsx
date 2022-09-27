@@ -7,8 +7,12 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from '../test_subjects';
-import { FindingsByResourceTable, formatNumber, getResourceId } from './findings_by_resource_table';
-import type { PropsOf } from '@elastic/eui';
+import {
+  FindingsByResourceTable,
+  FindingsByResourceTableProps,
+  formatNumber,
+  getResourceId,
+} from './findings_by_resource_table';
 import Chance from 'chance';
 import numeral from '@elastic/numeral';
 import { TestProvider } from '../../../test/test_provider';
@@ -41,11 +45,9 @@ const getFakeFindingsByResource = (): FindingsByResourcePage => {
   };
 };
 
-type TableProps = PropsOf<typeof FindingsByResourceTable>;
-
 describe('<FindingsByResourceTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
-    const props: TableProps = {
+    const props: FindingsByResourceTableProps = {
       loading: false,
       items: [],
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
@@ -70,7 +72,7 @@ describe('<FindingsByResourceTable />', () => {
   it('renders the table with provided items', () => {
     const data = Array.from({ length: 10 }, getFakeFindingsByResource);
 
-    const props: TableProps = {
+    const props: FindingsByResourceTableProps = {
       loading: false,
       items: data,
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },

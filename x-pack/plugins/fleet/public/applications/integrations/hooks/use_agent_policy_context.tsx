@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useRef, useCallback } from 'react';
 
 import type { IntegrationsAppBrowseRouteState } from '../../../types';
@@ -17,7 +17,7 @@ interface AgentPolicyContextValue {
 
 const AgentPolicyContext = createContext<AgentPolicyContextValue>({ getId: () => undefined });
 
-export const AgentPolicyContextProvider: FunctionComponent = ({ children }) => {
+export const AgentPolicyContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const maybeState = useIntraAppState<undefined | IntegrationsAppBrowseRouteState>();
   const ref = useRef<undefined | string>(maybeState?.forAgentPolicyId);
 

@@ -129,7 +129,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   );
 
   const updateActivePage = useCallback(
-    (newPage) =>
+    (newPage: number) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,
@@ -141,7 +141,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   );
 
   const updateLimitPagination = useCallback(
-    (newLimit) =>
+    (newLimit: number) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,

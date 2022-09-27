@@ -67,7 +67,7 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
   const { activePage, isPtrIncluded, limit, sort } = useDeepEqualSelector(getNetworkDnsSelector);
 
   const updateLimitPagination = useCallback(
-    (newLimit) =>
+    (newLimit: number) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,
@@ -79,7 +79,7 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
   );
 
   const updateActivePage = useCallback(
-    (newPage) =>
+    (newPage: number) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,

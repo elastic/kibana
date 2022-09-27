@@ -82,7 +82,7 @@ export const HeaderComponent: React.FC<Props> = ({
   }, [dispatch, header, sort, timelineId]);
 
   const onColumnRemoved = useCallback(
-    (columnId) => dispatch(timelineActions.removeColumn({ id: timelineId, columnId })),
+    (columnId: string) => dispatch(timelineActions.removeColumn({ id: timelineId, columnId })),
     [dispatch, timelineId]
   );
 

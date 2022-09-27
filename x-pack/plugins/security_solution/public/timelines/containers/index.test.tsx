@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
 import { initSortDefault, useTimelineEvents } from '.';
 import { SecurityPageName } from '../../../common/constants';
@@ -123,127 +123,122 @@ describe('useTimelineEvents', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseTimelineEventsProps,
-        [boolean, TimelineArgs]
-      >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
-      });
+      const { result } = renderHook<[boolean, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: { ...props },
+        }
+      );
 
       // useEffect on params request
-      await waitForNextUpdate();
-      expect(result.current).toEqual([
-        false,
-        {
-          events: [],
-          id: TimelineId.active,
-          inspect: result.current[1].inspect,
-          loadPage: result.current[1].loadPage,
-          pageInfo: result.current[1].pageInfo,
-          refetch: result.current[1].refetch,
-          totalCount: -1,
-          updatedAt: 0,
-        },
-      ]);
+      await waitFor(() => {
+        expect(result.current).toEqual([
+          false,
+          {
+            events: [],
+            id: TimelineId.active,
+            inspect: result.current[1].inspect,
+            loadPage: result.current[1].loadPage,
+            pageInfo: result.current[1].pageInfo,
+            refetch: result.current[1].refetch,
+            totalCount: -1,
+            updatedAt: 0,
+          },
+        ]);
+      });
     });
   });
 
   test('happy path query', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, rerender } = renderHook<
-        UseTimelineEventsProps,
-        [boolean, TimelineArgs]
-      >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
-      });
+      const { result, rerender } = renderHook<[boolean, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: { ...props },
+        }
+      );
 
-      // useEffect on params request
-      await waitForNextUpdate();
       rerender({ ...props, startDate, endDate });
       // useEffect on params request
-      await waitForNextUpdate();
-
-      expect(mockSearch).toHaveBeenCalledTimes(2);
-      expect(result.current).toEqual([
-        false,
-        {
-          events: mockEvents,
-          id: TimelineId.active,
-          inspect: result.current[1].inspect,
-          loadPage: result.current[1].loadPage,
-          pageInfo: result.current[1].pageInfo,
-          refetch: result.current[1].refetch,
-          totalCount: 32,
-          updatedAt: result.current[1].updatedAt,
-        },
-      ]);
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(2);
+        expect(result.current).toEqual([
+          false,
+          {
+            events: mockEvents,
+            id: TimelineId.active,
+            inspect: result.current[1].inspect,
+            loadPage: result.current[1].loadPage,
+            pageInfo: result.current[1].pageInfo,
+            refetch: result.current[1].refetch,
+            totalCount: 32,
+            updatedAt: result.current[1].updatedAt,
+          },
+        ]);
+      });
     });
   });
 
   test('Mock cache for active timeline when switching page', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, rerender } = renderHook<
-        UseTimelineEventsProps,
-        [boolean, TimelineArgs]
-      >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
-      });
+      const { result, rerender } = renderHook<[boolean, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: { ...props },
+        }
+      );
 
-      // useEffect on params request
-      await waitForNextUpdate();
       rerender({ ...props, startDate, endDate });
       // useEffect on params request
-      await waitForNextUpdate();
+      await waitFor(() => {
+        mockUseRouteSpy.mockReturnValue([
+          {
+            pageName: SecurityPageName.timelines,
+            detailName: undefined,
+            tabName: undefined,
+            search: '',
+            pathName: '/timelines',
+          },
+        ]);
 
-      mockUseRouteSpy.mockReturnValue([
-        {
-          pageName: SecurityPageName.timelines,
-          detailName: undefined,
-          tabName: undefined,
-          search: '',
-          pathName: '/timelines',
-        },
-      ]);
+        expect(mockSearch).toHaveBeenCalledTimes(2);
 
-      expect(mockSearch).toHaveBeenCalledTimes(2);
-
-      expect(result.current).toEqual([
-        false,
-        {
-          events: mockEvents,
-          id: TimelineId.active,
-          inspect: result.current[1].inspect,
-          loadPage: result.current[1].loadPage,
-          pageInfo: result.current[1].pageInfo,
-          refetch: result.current[1].refetch,
-          totalCount: 32,
-          updatedAt: result.current[1].updatedAt,
-        },
-      ]);
+        expect(result.current).toEqual([
+          false,
+          {
+            events: mockEvents,
+            id: TimelineId.active,
+            inspect: result.current[1].inspect,
+            loadPage: result.current[1].loadPage,
+            pageInfo: result.current[1].pageInfo,
+            refetch: result.current[1].refetch,
+            totalCount: 32,
+            updatedAt: result.current[1].updatedAt,
+          },
+        ]);
+      });
     });
   });
 
   test('Correlation pagination is calling search strategy when switching page', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, rerender } = renderHook<
-        UseTimelineEventsProps,
-        [boolean, TimelineArgs]
-      >((args) => useTimelineEvents(args), {
-        initialProps: {
-          ...props,
-          language: 'eql',
-          eqlOptions: {
-            eventCategoryField: 'category',
-            tiebreakerField: '',
-            timestampField: '@timestamp',
-            query: 'find it EQL',
-            size: 100,
+      const { result, rerender } = renderHook<[boolean, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: {
+            ...props,
+            language: 'eql',
+            eqlOptions: {
+              eventCategoryField: 'category',
+              tiebreakerField: '',
+              timestampField: '@timestamp',
+              query: 'find it EQL',
+              size: 100,
+            },
           },
-        },
-      });
+        }
+      );
 
-      // useEffect on params request
-      await waitForNextUpdate();
       rerender({
         ...props,
         startDate,
@@ -257,12 +252,11 @@ describe('useTimelineEvents', () => {
           size: 100,
         },
       });
-      // useEffect on params request
-      await waitForNextUpdate();
-      mockSearch.mockReset();
-      result.current[1].loadPage(4);
-      await waitForNextUpdate();
-      expect(mockSearch).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        mockSearch.mockReset();
+        result.current[1].loadPage(4);
+        expect(mockSearch).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

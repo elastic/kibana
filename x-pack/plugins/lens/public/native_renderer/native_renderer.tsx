@@ -6,7 +6,7 @@
  */
 
 import React, { HTMLAttributes, useEffect, useRef } from 'react';
-import { unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 type CleanupCallback = (el: Element) => void;
 
@@ -40,7 +40,7 @@ export function NativeRenderer<T>({ render, nativeProps, tag, ...rest }: NativeR
         if (cleanupRef.current && typeof cleanupRef.current === 'function') {
           cleanupRef.current(elementRef.current);
         }
-        unmountComponentAtNode(elementRef.current);
+        createRoot(elementRef.current).unmount();
       }
     };
   }, []);

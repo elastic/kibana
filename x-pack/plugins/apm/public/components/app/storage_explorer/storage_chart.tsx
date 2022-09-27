@@ -90,6 +90,7 @@ export function StorageChart() {
         status={status}
         id="storageExplorerTimeseriesChart"
       >
+        {/* @ts-expect-error update types */}
         <Chart id="storageExplorerTimeseriesChart">
           <Settings
             theme={[

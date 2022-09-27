@@ -7,7 +7,7 @@
 
 /* eslint-disable no-console */
 
-import * as React from 'react';
+import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 

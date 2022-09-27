@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Route, RouteComponentProps } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -73,7 +73,9 @@ export const renderApp = (
   { appBasePath, element }: AppMountParameters
 ) => {
   const { http } = core;
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <KibanaContextProvider services={{ ...core, ...deps }}>
       <AlertingExampleApp
         basename={appBasePath}
@@ -81,8 +83,7 @@ export const renderApp = (
         triggersActionsUi={deps.triggersActionsUi}
       />
     </KibanaContextProvider>,
-    element
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

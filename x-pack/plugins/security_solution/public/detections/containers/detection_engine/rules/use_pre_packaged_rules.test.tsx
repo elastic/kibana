@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import type { ReactElement } from 'react';
 import { useToasts } from '../../../../common/lib/kibana';
@@ -36,7 +36,7 @@ describe('usePrePackagedRules', () => {
 
   test('initial state', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: null,
@@ -48,14 +48,14 @@ describe('usePrePackagedRules', () => {
         { wrapper: TestProviders }
       );
 
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        getLoadPrebuiltRulesAndTemplatesButton: expect.any(Function),
-        getReloadPrebuiltRulesAndTemplatesButton: expect.any(Function),
-        createPrePackagedRules: expect.any(Function),
-        loading: true,
-        loadingCreatePrePackagedRules: false,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          getLoadPrebuiltRulesAndTemplatesButton: expect.any(Function),
+          getReloadPrebuiltRulesAndTemplatesButton: expect.any(Function),
+          createPrePackagedRules: expect.any(Function),
+          loading: true,
+          loadingCreatePrePackagedRules: false,
+        });
       });
     });
   });
@@ -77,7 +77,7 @@ describe('usePrePackagedRules', () => {
       timelines_updated: 0,
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: null,
@@ -88,24 +88,23 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        getLoadPrebuiltRulesAndTemplatesButton:
-          result.current.getLoadPrebuiltRulesAndTemplatesButton,
-        getReloadPrebuiltRulesAndTemplatesButton:
-          result.current.getReloadPrebuiltRulesAndTemplatesButton,
-        createPrePackagedRules: result.current.createPrePackagedRules,
-        loading: false,
-        loadingCreatePrePackagedRules: false,
-        rulesCustomInstalled: 33,
-        rulesInstalled: 12,
-        rulesNotInstalled: 0,
-        rulesNotUpdated: 0,
-        timelinesInstalled: 0,
-        timelinesNotInstalled: 0,
-        timelinesNotUpdated: 0,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          getLoadPrebuiltRulesAndTemplatesButton:
+            result.current.getLoadPrebuiltRulesAndTemplatesButton,
+          getReloadPrebuiltRulesAndTemplatesButton:
+            result.current.getReloadPrebuiltRulesAndTemplatesButton,
+          createPrePackagedRules: result.current.createPrePackagedRules,
+          loading: false,
+          loadingCreatePrePackagedRules: false,
+          rulesCustomInstalled: 33,
+          rulesInstalled: 12,
+          rulesNotInstalled: 0,
+          rulesNotUpdated: 0,
+          timelinesInstalled: 0,
+          timelinesNotInstalled: 0,
+          timelinesNotUpdated: 0,
+        });
       });
     });
   });
@@ -128,7 +127,7 @@ describe('usePrePackagedRules', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -139,26 +138,25 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
       result.current.createPrePackagedRules();
-      await waitForNextUpdate();
-      expect(api.createPrepackagedRules).toHaveBeenCalled();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        getLoadPrebuiltRulesAndTemplatesButton:
-          result.current.getLoadPrebuiltRulesAndTemplatesButton,
-        getReloadPrebuiltRulesAndTemplatesButton:
-          result.current.getReloadPrebuiltRulesAndTemplatesButton,
-        createPrePackagedRules: result.current.createPrePackagedRules,
-        loading: false,
-        loadingCreatePrePackagedRules: false,
-        rulesCustomInstalled: 33,
-        rulesInstalled: 12,
-        rulesNotInstalled: 0,
-        rulesNotUpdated: 0,
-        timelinesInstalled: 0,
-        timelinesNotInstalled: 0,
-        timelinesNotUpdated: 0,
+      await waitFor(() => {
+        expect(api.createPrepackagedRules).toHaveBeenCalled();
+        expect(result.current).toEqual({
+          getLoadPrebuiltRulesAndTemplatesButton:
+            result.current.getLoadPrebuiltRulesAndTemplatesButton,
+          getReloadPrebuiltRulesAndTemplatesButton:
+            result.current.getReloadPrebuiltRulesAndTemplatesButton,
+          createPrePackagedRules: result.current.createPrePackagedRules,
+          loading: false,
+          loadingCreatePrePackagedRules: false,
+          rulesCustomInstalled: 33,
+          rulesInstalled: 12,
+          rulesNotInstalled: 0,
+          rulesNotUpdated: 0,
+          timelinesInstalled: 0,
+          timelinesNotInstalled: 0,
+          timelinesNotUpdated: 0,
+        });
       });
     });
   });
@@ -180,7 +178,7 @@ describe('usePrePackagedRules', () => {
       timelines_updated: 0,
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -191,8 +189,6 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
 
       const button = result.current.getLoadPrebuiltRulesAndTemplatesButton({
         isDisabled: false,
@@ -200,7 +196,11 @@ describe('usePrePackagedRules', () => {
         'data-test-subj': 'button',
       });
       const wrapper = shallow(button as ReactElement);
-      expect(wrapper.find('[data-test-subj="button"]').text()).toEqual(i18n.LOAD_PREPACKAGED_RULES);
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="button"]').text()).toEqual(
+          i18n.LOAD_PREPACKAGED_RULES
+        );
+      });
     });
   });
 
@@ -221,7 +221,7 @@ describe('usePrePackagedRules', () => {
       timelines_updated: 0,
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -232,8 +232,6 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
 
       const button = result.current.getLoadPrebuiltRulesAndTemplatesButton({
         isDisabled: false,
@@ -241,9 +239,11 @@ describe('usePrePackagedRules', () => {
         'data-test-subj': 'button',
       });
       const wrapper = shallow(button as ReactElement);
-      expect(wrapper.find('[data-test-subj="button"]').text()).toEqual(
-        i18n.LOAD_PREPACKAGED_TIMELINE_TEMPLATES
-      );
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="button"]').text()).toEqual(
+          i18n.LOAD_PREPACKAGED_TIMELINE_TEMPLATES
+        );
+      });
     });
   });
 
@@ -264,7 +264,7 @@ describe('usePrePackagedRules', () => {
       timelines_updated: 0,
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -275,8 +275,6 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
 
       const button = result.current.getLoadPrebuiltRulesAndTemplatesButton({
         isDisabled: false,
@@ -284,9 +282,11 @@ describe('usePrePackagedRules', () => {
         'data-test-subj': 'button',
       });
       const wrapper = shallow(button as ReactElement);
-      expect(wrapper.find('[data-test-subj="button"]').text()).toEqual(
-        i18n.LOAD_PREPACKAGED_RULES_AND_TEMPLATES
-      );
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="button"]').text()).toEqual(
+          i18n.LOAD_PREPACKAGED_RULES_AND_TEMPLATES
+        );
+      });
     });
   });
 
@@ -307,7 +307,7 @@ describe('usePrePackagedRules', () => {
       timelines_updated: 0,
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -318,17 +318,17 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
 
       const button = result.current.getReloadPrebuiltRulesAndTemplatesButton({
         isDisabled: false,
         onClick: jest.fn(),
       });
       const wrapper = shallow(button as ReactElement);
-      expect(wrapper.find('[data-test-subj="reloadPrebuiltRulesBtn"]').text()).toEqual(
-        'Install 1 Elastic prebuilt rule and 1 Elastic prebuilt timeline '
-      );
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="reloadPrebuiltRulesBtn"]').text()).toEqual(
+          'Install 1 Elastic prebuilt rule and 1 Elastic prebuilt timeline '
+        );
+      });
     });
   });
 
@@ -349,7 +349,7 @@ describe('usePrePackagedRules', () => {
       timelines_updated: 0,
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -360,17 +360,17 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
 
       const button = result.current.getReloadPrebuiltRulesAndTemplatesButton({
         isDisabled: false,
         onClick: jest.fn(),
       });
       const wrapper = shallow(button as ReactElement);
-      expect(wrapper.find('[data-test-subj="reloadPrebuiltRulesBtn"]').text()).toEqual(
-        'Install 1 Elastic prebuilt rule '
-      );
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="reloadPrebuiltRulesBtn"]').text()).toEqual(
+          'Install 1 Elastic prebuilt rule '
+        );
+      });
     });
   });
 
@@ -391,7 +391,7 @@ describe('usePrePackagedRules', () => {
       timelines_updated: 0,
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -402,24 +402,24 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
 
       const button = result.current.getReloadPrebuiltRulesAndTemplatesButton({
         isDisabled: false,
         onClick: jest.fn(),
       });
       const wrapper = shallow(button as ReactElement);
-      expect(wrapper.find('[data-test-subj="reloadPrebuiltRulesBtn"]').text()).toEqual(
-        'Install 1 Elastic prebuilt timeline '
-      );
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="reloadPrebuiltRulesBtn"]').text()).toEqual(
+          'Install 1 Elastic prebuilt timeline '
+        );
+      });
     });
   });
 
   test('unhappy path to createPrePackagedRules', async () => {
     (api.createPrepackagedRules as jest.Mock).mockRejectedValue(new Error('Something went wrong'));
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -430,17 +430,17 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
       result.current.createPrePackagedRules();
-      await waitForNextUpdate();
-      expect(api.createPrepackagedRules).toHaveBeenCalled();
-      expect(useToasts().addError).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(api.createPrepackagedRules).toHaveBeenCalled();
+        expect(useToasts().addError).toHaveBeenCalled();
+      });
     });
   });
 
   test('can NOT createPrePackagedRules because canUserCrud === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: false,
@@ -451,16 +451,16 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
       result.current.createPrePackagedRules();
-      await waitForNextUpdate();
-      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      });
     });
   });
 
   test('can NOT createPrePackagedRules because hasIndexWrite === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -471,16 +471,16 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
       result.current.createPrePackagedRules();
-      await waitForNextUpdate();
-      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      });
     });
   });
 
   test('can NOT createPrePackagedRules because isAuthenticated === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -491,16 +491,16 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
       result.current.createPrePackagedRules();
-      await waitForNextUpdate();
-      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      });
     });
   });
 
   test('can NOT createPrePackagedRules because hasEncryptionKey === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -511,16 +511,16 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
       result.current.createPrePackagedRules();
-      await waitForNextUpdate();
-      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      });
     });
   });
 
   test('can NOT createPrePackagedRules because isSignalIndexExists === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+      const { result } = renderHook<ReturnPrePackagedRulesAndTimelines, {}>(
         () =>
           usePrePackagedRules({
             canUserCRUD: true,
@@ -531,10 +531,10 @@ describe('usePrePackagedRules', () => {
           }),
         { wrapper: TestProviders }
       );
-      await waitForNextUpdate();
       result.current.createPrePackagedRules();
-      await waitForNextUpdate();
-      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(api.createPrepackagedRules).not.toHaveBeenCalled();
+      });
     });
   });
 });

@@ -8,6 +8,7 @@
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { FC } from 'react';
 import {
   AbortedRequestSearchStrategyError,
   GenericSearchStrategyError,
@@ -15,11 +16,17 @@ import {
   ShardFailureSearchStrategyError,
 } from '../../common/search_strategies/common/errors';
 
-export const DataSearchErrorCallout: React.FC<{
+export interface DataSearchErrorCalloutProps {
   title: React.ReactNode;
   errors: SearchStrategyError[];
   onRetry?: () => void;
-}> = ({ errors, onRetry, title }) => {
+}
+
+export const DataSearchErrorCallout: FC<DataSearchErrorCalloutProps> = ({
+  errors,
+  onRetry,
+  title,
+}) => {
   const calloutColor = errors.some((error) => error.type !== 'aborted') ? 'danger' : 'warning';
 
   return (

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import type { PropsWithChildren } from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
@@ -140,12 +140,12 @@ describe('StatefulOpenTimeline', () => {
 
   describe("Template timelines' tab", () => {
     test("should land on correct timelines' tab with url timelines/default", () => {
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
-        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        UseTimelineTypesResult,
+        PropsWithChildren<UseTimelineTypesArgs>
+      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }), {
+        wrapper: TestProviders,
+      });
 
       expect(result.current.timelineType).toBe(TimelineType.default);
     });
@@ -156,12 +156,12 @@ describe('StatefulOpenTimeline', () => {
         pageName: SecurityPageName.timelines,
       });
 
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
-        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        UseTimelineTypesResult,
+        PropsWithChildren<UseTimelineTypesArgs>
+      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }), {
+        wrapper: TestProviders,
+      });
 
       expect(result.current.timelineType).toBe(TimelineType.template);
     });
@@ -198,12 +198,12 @@ describe('StatefulOpenTimeline', () => {
         pageName: SecurityPageName.case,
       });
 
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
-        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        UseTimelineTypesResult,
+        PropsWithChildren<UseTimelineTypesArgs>
+      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }), {
+        wrapper: TestProviders,
+      });
 
       expect(result.current.timelineType).toBe(TimelineType.default);
     });

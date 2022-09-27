@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState, useEffect } from 'react';
-import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { getDataViewsStart } from '../../../../services';
 
@@ -38,9 +38,9 @@ export const ComboBoxSelect = ({
   const [availableIndexes, setAvailableIndexes] = useState<IdsWithTitle>([]);
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>([]);
 
-  const onComboBoxChange: EuiComboBoxProps<IndexPatternValue>['onChange'] = useCallback(
-    ([selected]) => {
-      onIndexChange(selected ? { id: selected.id } : '');
+  const onComboBoxChange = useCallback(
+    ([selected]: Array<EuiComboBoxOptionOption<IndexPatternValue>>) => {
+      onIndexChange(selected ? { id: selected.id! } : '');
     },
     [onIndexChange]
   );
@@ -75,7 +75,7 @@ export const ComboBoxSelect = ({
   const isInvalid = Boolean(fetchedIndex.missedIndex);
 
   return (
-    <EuiComboBox
+    <EuiComboBox<IndexPatternValue>
       singleSelection={{ asPlainText: true }}
       isInvalid={isInvalid}
       onChange={onComboBoxChange}

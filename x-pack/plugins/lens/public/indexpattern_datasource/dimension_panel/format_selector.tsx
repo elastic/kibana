@@ -7,7 +7,14 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange, EuiFieldText } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiComboBox,
+  EuiSpacer,
+  EuiRange,
+  EuiFieldText,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnFormatted } from '../operations/definitions/helpers';
 import { useDebouncedValue } from '../../shared_components';
@@ -55,7 +62,7 @@ export interface FormatSelectorOptions {
   disableExtraOptions?: boolean;
 }
 
-interface FormatSelectorProps {
+export interface FormatSelectorProps {
   selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
   options?: FormatSelectorOptions;
@@ -109,7 +116,7 @@ export function FormatSelector(props: FormatSelectorProps) {
   );
 
   const onChangeWrapped = useCallback(
-    (choices) => {
+    (choices: Array<EuiComboBoxOptionOption<string>>) => {
       if (choices.length === 0) {
         return;
       }

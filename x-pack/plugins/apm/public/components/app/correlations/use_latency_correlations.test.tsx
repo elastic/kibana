@@ -8,7 +8,7 @@
 import React, { ReactNode } from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -27,7 +27,7 @@ function wrapper({
   error = false,
 }: {
   children?: ReactNode;
-  error: boolean;
+  error?: boolean;
 }) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>
     jest.fn().mockImplementation(async (pathname) => {
@@ -111,7 +111,7 @@ describe('useLatencyCorrelations', () => {
   describe('when successfully loading results', () => {
     it('should automatically start fetching results', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
+        wrapper: ({ children }) => wrapper({ children }),
       });
 
       try {
@@ -129,7 +129,7 @@ describe('useLatencyCorrelations', () => {
 
     it('should not have received any results after 50ms', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
+        wrapper: ({ children }) => wrapper({ children }),
       });
 
       try {
@@ -146,12 +146,9 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should receive partial updates and finish running', async () => {
-      const { result, unmount, waitFor } = renderHook(
-        () => useLatencyCorrelations(),
-        {
-          wrapper,
-        }
-      );
+      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
+        wrapper: ({ children }) => wrapper({ children }),
+      });
 
       try {
         jest.advanceTimersByTime(150);
@@ -270,10 +267,7 @@ describe('useLatencyCorrelations', () => {
   describe('when throwing an error', () => {
     it('should automatically start fetching results', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+        wrapper: ({ children }) => wrapper({ children, error: true }),
       });
 
       try {
@@ -288,10 +282,7 @@ describe('useLatencyCorrelations', () => {
 
     it('should still be running after 50ms', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+        wrapper: ({ children }) => wrapper({ children, error: true }),
       });
 
       try {
@@ -308,15 +299,9 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should stop and return an error after more than 100ms', async () => {
-      const { result, unmount, waitFor } = renderHook(
-        () => useLatencyCorrelations(),
-        {
-          wrapper,
-          initialProps: {
-            error: true,
-          },
-        }
-      );
+      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
+        wrapper: ({ children }) => wrapper({ children, error: true }),
+      });
 
       try {
         jest.advanceTimersByTime(150);
@@ -337,12 +322,9 @@ describe('useLatencyCorrelations', () => {
 
   describe('when canceled', () => {
     it('should stop running', async () => {
-      const { result, unmount, waitFor } = renderHook(
-        () => useLatencyCorrelations(),
-        {
-          wrapper,
-        }
-      );
+      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
+        wrapper: ({ children }) => wrapper({ children }),
+      });
 
       try {
         jest.advanceTimersByTime(150);

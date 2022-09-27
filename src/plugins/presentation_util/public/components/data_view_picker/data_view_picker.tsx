@@ -45,7 +45,7 @@ export function DataViewPicker({
     : {};
 
   const createTrigger = function () {
-    const { label, title, ...rest } = trigger;
+    const { label, title, onClick, ...rest } = trigger;
     return (
       <ToolbarButton
         title={title}

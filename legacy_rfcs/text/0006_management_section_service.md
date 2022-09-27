@@ -71,14 +71,15 @@ export class MyPlugin {
 // my_plugin/public/my-section.tsx
 
 export function renderApp(context, { sectionBasePath, element }) {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     // `sectionBasePath` would be `/app/management/my-section/my-management-app`
-    <MyApp basename={sectionBasePath} />,
-    element
+    <MyApp basename={sectionBasePath} />
   );
  
   // return value must be a function that unmounts (just like Core Application Service)
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }
 ```
 
@@ -92,16 +93,17 @@ export const mountWithReact = (
   context: AppMountContext,
   params: ManagementSectionMountParams,
 ) => {
-  ReactDOM.render(
+  const root = createRoot(params.element);
+
+  root.render(
     (
       <KibanaContextProvider services={{ ...context }}>
         <Component basename={params.sectionBasePath} />
       </KibanaContextProvider>
-    ),
-    params.element
+    )
   );
 
-  return () => ReactDOM.unmountComponentAtNode(params.element);
+  return () => root.unmount();
 }
 
 // my_plugin/public/plugin.ts

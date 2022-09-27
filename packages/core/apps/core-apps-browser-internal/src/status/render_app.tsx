@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { HttpSetup } from '@kbn/core-http-browser';
@@ -24,16 +24,17 @@ export const renderApp = (
   { element, theme$ }: AppMountParameters,
   { http, notifications }: Deps
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <I18nProvider>
       <CoreThemeProvider theme$={theme$}>
         <StatusApp http={http} notifications={notifications} />
       </CoreThemeProvider>
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { usePostPushToService, UsePostPushToService } from './use_post_push_to_service';
 import { pushedCase } from './mock';
 import * as api from './api';
@@ -26,14 +26,13 @@ describe('usePostPushToService', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
-        usePostPushToService()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: false,
-        pushCaseToExternalService: result.current.pushCaseToExternalService,
+      const { result } = renderHook<UsePostPushToService, {}>(() => usePostPushToService());
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          isError: false,
+          pushCaseToExternalService: result.current.pushCaseToExternalService,
+        });
       });
     });
   });
@@ -42,40 +41,35 @@ describe('usePostPushToService', () => {
     const spyOnPushToService = jest.spyOn(api, 'pushCase');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
-        usePostPushToService()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<UsePostPushToService, {}>(() => usePostPushToService());
       result.current.pushCaseToExternalService({ caseId, connector });
-      await waitForNextUpdate();
-      expect(spyOnPushToService).toBeCalledWith(caseId, connector.id, abortCtrl.signal);
+      await waitFor(() => {
+        expect(spyOnPushToService).toBeCalledWith(caseId, connector.id, abortCtrl.signal);
+      });
     });
   });
 
   it('post push to service', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
-        usePostPushToService()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<UsePostPushToService, {}>(() => usePostPushToService());
       result.current.pushCaseToExternalService({ caseId, connector });
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: false,
-        pushCaseToExternalService: result.current.pushCaseToExternalService,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          isError: false,
+          pushCaseToExternalService: result.current.pushCaseToExternalService,
+        });
       });
     });
   });
 
   it('set isLoading to true when pushing case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
-        usePostPushToService()
-      );
-      await waitForNextUpdate();
-      result.current.pushCaseToExternalService({ caseId, connector });
-      expect(result.current.isLoading).toBe(true);
+      const { result } = renderHook<UsePostPushToService, {}>(() => usePostPushToService());
+      await waitFor(() => {
+        result.current.pushCaseToExternalService({ caseId, connector });
+        expect(result.current.isLoading).toBe(true);
+      });
     });
   });
 
@@ -86,16 +80,15 @@ describe('usePostPushToService', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
-        usePostPushToService()
-      );
-      await waitForNextUpdate();
-      result.current.pushCaseToExternalService({ caseId, connector });
+      const { result } = renderHook<UsePostPushToService, {}>(() => usePostPushToService());
+      await waitFor(() => {
+        result.current.pushCaseToExternalService({ caseId, connector });
 
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: true,
-        pushCaseToExternalService: result.current.pushCaseToExternalService,
+        expect(result.current).toEqual({
+          isLoading: false,
+          isError: true,
+          pushCaseToExternalService: result.current.pushCaseToExternalService,
+        });
       });
     });
   });

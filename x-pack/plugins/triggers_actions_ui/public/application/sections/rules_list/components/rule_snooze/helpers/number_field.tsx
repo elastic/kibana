@@ -18,9 +18,12 @@ export const NumberField: React.FC<
   const max = typeof props.max !== 'undefined' ? props.max : Infinity;
 
   const onChange = useCallback(
-    (e) => {
+    (e: { target: { value: string } }) => {
       const { value } = e.target;
-      const isValid = !isNaN(Number(value)) && value >= min && value <= max;
+      const isValid =
+        !isNaN(Number(value)) &&
+        (value as unknown as number) >= min &&
+        (value as unknown as number) <= max;
       if (isValid || value === '') {
         setDisplayValue(value);
       }
@@ -31,7 +34,7 @@ export const NumberField: React.FC<
     [props, setDisplayValue, max, min]
   );
 
-  const onBlur = useCallback(
+  const onBlur = useCallback<React.FocusEventHandler<HTMLInputElement>>(
     (e) => {
       if (isNaN(Number(displayValue)) || displayValue === '') {
         setDisplayValue(props.value);

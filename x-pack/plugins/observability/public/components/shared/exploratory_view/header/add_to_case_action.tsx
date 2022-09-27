@@ -15,6 +15,7 @@ import {
   GetAllCasesSelectorModalProps,
 } from '@kbn/cases-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { Case } from '@kbn/cases-plugin/common';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { useAddToCase } from '../hooks/use_add_to_case';
@@ -48,7 +49,7 @@ export function AddToCaseAction({
   } = kServices;
 
   const getToastText = useCallback(
-    (theCase) =>
+    (theCase: Case) =>
       toMountPoint(
         <CaseToastText
           linkUrl={getUrlForApp(appId ?? observabilityAppId, {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Route, Router, useParams } from 'react-router-dom';
 
 import type { FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
@@ -113,7 +113,9 @@ export const rolesManagementApp = Object.freeze({
           );
         };
 
-        render(
+        const root = createRoot(element);
+
+        root.render(
           <KibanaContextProvider services={startServices}>
             <i18nStart.Context>
               <KibanaThemeProvider theme$={theme$}>
@@ -140,12 +142,11 @@ export const rolesManagementApp = Object.freeze({
                 </Router>
               </KibanaThemeProvider>
             </i18nStart.Context>
-          </KibanaContextProvider>,
-          element
+          </KibanaContextProvider>
         );
 
         return () => {
-          unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     } as RegisterManagementAppArgs;

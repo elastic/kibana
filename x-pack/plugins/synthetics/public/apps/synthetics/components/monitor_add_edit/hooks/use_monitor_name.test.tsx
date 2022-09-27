@@ -6,7 +6,7 @@
  */
 
 import { defaultCore, WrappedHelper } from '../../../utils/testing/rtl_helpers';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useMonitorName } from './use_monitor_name';
 
 import * as reactRouter from 'react-router-dom';
@@ -45,15 +45,15 @@ describe('useMonitorName', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useMonitorName({ search: 'Test' }), {
+    const { result } = renderHook(() => useMonitorName({ search: 'Test' }), {
       wrapper: WrappedHelper,
     });
 
     expect(result.current).toStrictEqual({ nameAlreadyExists: false, validName: 'Test' });
 
-    await waitForNextUpdate();
-
-    expect(result.current).toStrictEqual({ nameAlreadyExists: true, validName: '' });
+    await waitFor(() => {
+      expect(result.current).toStrictEqual({ nameAlreadyExists: true, validName: '' });
+    });
   });
 
   it('returns expected results after data while editing monitor', async () => {
@@ -67,14 +67,14 @@ describe('useMonitorName', () => {
 
     jest.spyOn(mockRouter, 'useParams').mockReturnValue({ monitorId: 'test-id' });
 
-    const { result, waitForNextUpdate } = renderHook(() => useMonitorName({ search: 'Test' }), {
+    const { result } = renderHook(() => useMonitorName({ search: 'Test' }), {
       wrapper: WrappedHelper,
     });
 
     expect(result.current).toStrictEqual({ nameAlreadyExists: false, validName: 'Test' });
 
-    await waitForNextUpdate();
-
-    expect(result.current).toStrictEqual({ nameAlreadyExists: false, validName: 'Test' });
+    await waitFor(() => {
+      expect(result.current).toStrictEqual({ nameAlreadyExists: false, validName: 'Test' });
+    });
   });
 });

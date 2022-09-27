@@ -41,7 +41,7 @@ export const LocationForm = ({
           fullWidth
           label={LOCATION_NAME_LABEL}
           isInvalid={Boolean(errors?.label)}
-          error={errors?.label?.message}
+          error={errors?.label?.message as string}
         >
           <EuiFieldText
             fullWidth

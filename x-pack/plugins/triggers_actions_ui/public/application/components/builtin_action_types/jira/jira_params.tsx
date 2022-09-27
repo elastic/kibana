@@ -93,7 +93,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
@@ -280,7 +280,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           <EuiFormRow
             data-test-subj="summary-row"
             fullWidth
-            error={errors['subActionParams.incident.summary']}
+            error={<>{errors['subActionParams.incident.summary']}</>}
             isInvalid={
               errors['subActionParams.incident.summary'] !== undefined &&
               errors['subActionParams.incident.summary'].length > 0 &&

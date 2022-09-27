@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Store } from 'redux';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -68,8 +68,9 @@ export const renderApp = ({
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
   const ServicesContextProvider = pluginServices.getContextProvider();
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
       <ServicesContextProvider>
         <LegacyServicesProvider providers={services}>
@@ -84,11 +85,10 @@ export const renderApp = ({
           </presentationUtil.ContextProvider>
         </LegacyServicesProvider>
       </ServicesContextProvider>
-    </KibanaContextProvider>,
-    element
+    </KibanaContextProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
     canvasStore.dispatch(appUnload());
   };
 };
@@ -150,15 +150,16 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode, { hideHelpMenu }) => {
-      ReactDOM.render(
+      const root = createRoot(domNode);
+
+      root.render(
         <KibanaThemeProvider theme$={coreStart.theme.theme$}>
           <Provider store={canvasStore}>
             <HelpMenu hideHelpMenu={hideHelpMenu} />
           </Provider>
-        </KibanaThemeProvider>,
-        domNode
+        </KibanaThemeProvider>
       );
-      return () => ReactDOM.unmountComponentAtNode(domNode);
+      return () => root.unmount();
     },
   });
 

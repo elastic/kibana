@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type {
   CoreSetup,
   CoreStart,
@@ -70,7 +70,7 @@ export interface CloudStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
    */
-  CloudContextProvider: FC<{}>;
+  CloudContextProvider: FC<PropsWithChildren>;
 }
 
 export interface CloudSetup {
@@ -187,7 +187,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     // There's a risk that the request for chat config will take too much time to complete, and the provider
     // will maintain a stale value.  To avoid this, we'll use an Observable.
-    const CloudContextProvider: FC = ({ children }) => {
+    const CloudContextProvider: FC<PropsWithChildren> = ({ children }) => {
       const chatConfig = useObservable(this.chatConfig$, { enabled: false });
       return <ServicesProvider chat={chatConfig}>{children}</ServicesProvider>;
     };

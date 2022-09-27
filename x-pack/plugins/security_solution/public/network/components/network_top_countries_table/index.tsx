@@ -101,7 +101,7 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
       : `node.${flowTargeted}.${sort.field}`;
 
   const updateLimitPagination = useCallback(
-    (newLimit) =>
+    (newLimit: number) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,
@@ -113,7 +113,7 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
   );
 
   const updateActivePage = useCallback(
-    (newPage) =>
+    (newPage: number) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SyntheticEvent } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import type {
   EuiButtonIcon,
@@ -52,7 +51,7 @@ const GenericLinkButtonComponent: React.FC<{
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   dataTestSubj?: string;
   href: string;
-  onClick?: (e: SyntheticEvent) => void;
+  onClick?: React.MouseEventHandler;
   title?: string;
   iconType?: string;
 }> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'expand' }) => {
@@ -82,7 +81,7 @@ export const PortContainer = styled.div`
   }
 `;
 
-interface ReputationLinkOverflowProps {
+export interface ReputationLinkOverflowProps {
   rowItems: ReputationLinkSetting[];
   render?: (item: ReputationLinkSetting) => React.ReactNode;
   overflowIndexStart?: number;

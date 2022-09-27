@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as React from 'react';
+import React from 'react';
 
 import { euiStyled, keyframes } from '@kbn/kibana-react-plugin/common';
 import { LogEntryTime } from '../../../../common/log_entry';

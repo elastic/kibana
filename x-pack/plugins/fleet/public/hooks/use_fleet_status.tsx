@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useContext, useEffect, useCallback } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import type { GetFleetStatusResponse } from '../types';
 
@@ -34,7 +35,7 @@ interface FleetStatus extends FleetStatusState {
 
 const FleetStatusContext = React.createContext<FleetStatus | undefined>(undefined);
 
-export const FleetStatusProvider: React.FC = ({ children }) => {
+export const FleetStatusProvider: FC<PropsWithChildren> = ({ children }) => {
   const config = useConfig();
   const [forceDisplayInstructions, setForceDisplayInstructions] = useState(false);
 

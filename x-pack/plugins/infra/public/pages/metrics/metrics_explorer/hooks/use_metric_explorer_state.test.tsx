@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { MetricsExplorerOptionsContainer } from './use_metrics_explorer_options';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import {
   source,
   derivedIndexPattern,
@@ -24,7 +24,7 @@ jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
 const renderUseMetricsExplorerStateHook = () =>
   renderHook((props) => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
     initialProps: { source, derivedIndexPattern },
-    wrapper: ({ children }) => (
+    wrapper: ({ children }: PropsWithChildren) => (
       <MetricsExplorerOptionsContainer>{children}</MetricsExplorerOptionsContainer>
     ),
   });

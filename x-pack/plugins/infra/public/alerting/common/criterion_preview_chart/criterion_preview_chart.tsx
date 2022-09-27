@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { niceTimeFormatter, TooltipValue } from '@elastic/charts';
 import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 import moment from 'moment';
@@ -77,7 +78,7 @@ export const getChartTheme = (isDarkMode: boolean): Theme => {
   return isDarkMode ? DARK_THEME : LIGHT_THEME;
 };
 
-export const EmptyContainer: React.FC = ({ children }) => (
+export const EmptyContainer: FC<PropsWithChildren> = ({ children }) => (
   <div
     style={{
       width: '100%',
@@ -91,7 +92,7 @@ export const EmptyContainer: React.FC = ({ children }) => (
   </div>
 );
 
-export const ChartContainer: React.FC = ({ children }) => (
+export const ChartContainer: FC<PropsWithChildren> = ({ children }) => (
   <div
     style={{
       width: '100%',

@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import {
@@ -32,20 +33,22 @@ const AgentPolicyName = styled(EuiDescriptionListDescription)`
   overflow: hidden;
 `;
 
-export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
-  from: EditPackagePolicyFrom;
-  cancelUrl: string;
-  onCancel?: React.ReactEventHandler;
-  agentPolicy?: AgentPolicy;
-  packageInfo?: PackageInfo;
-  integrationInfo?: RegistryPolicyTemplate;
-  'data-test-subj'?: string;
-  tabs?: Array<{
-    title: string;
-    isSelected: boolean;
-    onClick: React.ReactEventHandler;
-  }>;
-}> = memo(
+export const CreatePackagePolicySinglePageLayout: FC<
+  PropsWithChildren<{
+    from: EditPackagePolicyFrom;
+    cancelUrl: string;
+    onCancel?: React.ReactEventHandler;
+    agentPolicy?: AgentPolicy;
+    packageInfo?: PackageInfo;
+    integrationInfo?: RegistryPolicyTemplate;
+    'data-test-subj'?: string;
+    tabs?: Array<{
+      title: string;
+      isSelected: boolean;
+      onClick: React.ReactEventHandler;
+    }>;
+  }>
+> = memo(
   ({
     from,
     cancelUrl,

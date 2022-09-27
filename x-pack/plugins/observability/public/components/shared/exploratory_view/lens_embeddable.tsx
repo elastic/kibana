@@ -43,7 +43,7 @@ export function LensEmbeddable(props: Props) {
   const trackEvent = useUiTracker();
 
   const onLensLoad = useCallback(
-    (isLoading) => {
+    (isLoading: boolean) => {
       const timeLoaded = Date.now();
 
       setChartTimeRangeContext?.({

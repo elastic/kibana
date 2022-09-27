@@ -237,7 +237,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const updateSelectedPolicyTab = useCallback(
-    (selectedTab) => {
+    (selectedTab: SelectedPolicyTab) => {
       setSelectedPolicyTab(selectedTab);
       setPolicyValidation(selectedTab, newAgentPolicy);
     },

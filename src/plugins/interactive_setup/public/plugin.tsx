@@ -8,7 +8,7 @@
 
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { Observable } from 'rxjs';
 
 import type { CoreSetup, CoreStart, CoreTheme, Plugin } from '@kbn/core/public';
@@ -35,13 +35,13 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
         };
         const [services] = await core.getStartServices();
 
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <Providers defaultCode={defaultCode} services={services} theme$={theme$}>
             <App onSuccess={onSuccess} />
           </Providers>,
-          element
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
   }

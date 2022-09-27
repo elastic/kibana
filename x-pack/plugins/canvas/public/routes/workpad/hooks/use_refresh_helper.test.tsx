@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
 import { useRefreshHelper } from './use_refresh_helper';
 import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
 
@@ -31,7 +32,7 @@ const getMockedContext = (context: any) =>
 
 const getContextWrapper: (context: WorkpadRoutingContextType) => FC =
   (context) =>
-  ({ children }) =>
+  ({ children }: PropsWithChildren) =>
     <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;
 
 describe('useRefreshHelper', () => {

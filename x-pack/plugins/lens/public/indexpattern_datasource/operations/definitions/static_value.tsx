@@ -161,7 +161,7 @@ export const staticValueOperation: OperationDefinition<
     paramEditorCustomProps,
   }) {
     const onChange = useCallback(
-      (newValue) => {
+      (newValue: string | undefined) => {
         // even if debounced it's triggering for empty string with the previous valid value
         if (currentColumn.params.value === newValue) {
           return;

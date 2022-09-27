@@ -84,7 +84,7 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   uiActions,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
-    (field: IndexPatternField, index) => (
+    (field: IndexPatternField, index: number) => (
       <FieldItem
         {...fieldProps}
         key={field.name}
@@ -130,6 +130,7 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
             position="right"
             content={helpTooltip}
             iconProps={{
+              // @ts-expect-error update types
               className: 'eui-alignTop',
             }}
           />

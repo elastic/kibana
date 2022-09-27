@@ -14,8 +14,8 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  FunctionComponent,
 } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -63,7 +63,7 @@ export const valueTypeToSelectedType = (value: unknown): RuntimePrimitiveTypes =
   return 'keyword';
 };
 
-export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
+export const FieldPreviewProvider: FC<PropsWithChildren> = ({ children }) => {
   const previewCount = useRef(0);
 
   // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests

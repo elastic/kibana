@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 import {
   I18nStart,
@@ -41,7 +41,9 @@ export const renderApp = (
   cloud?: CloudSetup
 ): UnmountCallback => {
   const { getUrlForApp } = application;
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
@@ -59,9 +61,8 @@ export const renderApp = (
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </I18nContext>
-    </RedirectAppLinks>,
-    element
+    </RedirectAppLinks>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

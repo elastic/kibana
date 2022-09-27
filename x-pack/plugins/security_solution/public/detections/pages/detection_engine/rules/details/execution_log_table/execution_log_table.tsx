@@ -208,7 +208,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   // Callbacks
   const onTableChangeCallback = useCallback(
     ({ page = {}, sort = {} }) => {
+      // @ts-expect-error update types
       const { index, size } = page;
+      // @ts-expect-error update types
       const { field, direction } = sort;
 
       setPageIndex(index + 1);

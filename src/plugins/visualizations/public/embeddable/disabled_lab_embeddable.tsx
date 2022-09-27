@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Embeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 
@@ -18,6 +19,7 @@ import { getTheme } from '../services';
 
 export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, EmbeddableOutput> {
   private domNode?: HTMLElement;
+  private root?: Root;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   constructor(private readonly title: string, initialInput: VisualizeInput) {
@@ -28,18 +30,18 @@ export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, Embeddable
   public render(domNode: HTMLElement) {
     if (this.title) {
       this.domNode = domNode;
-      ReactDOM.render(
+      this.root = createRoot(this.domNode);
+      this.root.render(
         <KibanaThemeProvider theme$={getTheme().theme$}>
           <DisabledLabVisualization title={this.title} />
-        </KibanaThemeProvider>,
-        domNode
+        </KibanaThemeProvider>
       );
     }
   }
 
   public destroy() {
     if (this.domNode) {
-      ReactDOM.unmountComponentAtNode(this.domNode);
+      this.root?.unmount();
     }
   }
 }

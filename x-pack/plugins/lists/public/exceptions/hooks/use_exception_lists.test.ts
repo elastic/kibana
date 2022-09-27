@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type {
   ExceptionListSchema,
   UseExceptionListsProps,
@@ -33,10 +33,7 @@ describe('useExceptionLists', () => {
 
   test('initializes hook', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseExceptionListsProps,
-        ReturnExceptionLists
-      >(() =>
+      const { result } = renderHook<ReturnExceptionLists, UseExceptionListsProps>(() =>
         useExceptionLists({
           errorMessage: 'Uh oh',
           filterOptions: {},
@@ -50,28 +47,25 @@ describe('useExceptionLists', () => {
           notifications: mockKibanaNotificationsService,
         })
       );
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual([
-        true,
-        [],
-        {
-          page: 1,
-          perPage: 20,
-          total: 0,
-        },
-        expect.any(Function),
-        expect.any(Function),
-      ]);
+      await waitFor(() => {
+        expect(result.current).toEqual([
+          true,
+          [],
+          {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
+          expect.any(Function),
+          expect.any(Function),
+        ]);
+      });
     });
   });
 
   test('fetches exception lists', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseExceptionListsProps,
-        ReturnExceptionLists
-      >(() =>
+      const { result } = renderHook<ReturnExceptionLists, UseExceptionListsProps>(() =>
         useExceptionLists({
           errorMessage: 'Uh oh',
           filterOptions: {},
@@ -85,24 +79,22 @@ describe('useExceptionLists', () => {
           notifications: mockKibanaNotificationsService,
         })
       );
-      // NOTE: First `waitForNextUpdate` is initialization
-      // Second call applies the params
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      await waitFor(() => {
+        const expectedListItemsResult: ExceptionListSchema[] =
+          getFoundExceptionListSchemaMock().data;
 
-      const expectedListItemsResult: ExceptionListSchema[] = getFoundExceptionListSchemaMock().data;
-
-      expect(result.current).toEqual([
-        false,
-        expectedListItemsResult,
-        {
-          page: 1,
-          perPage: 20,
-          total: 1,
-        },
-        expect.any(Function),
-        expect.any(Function),
-      ]);
+        expect(result.current).toEqual([
+          false,
+          expectedListItemsResult,
+          {
+            page: 1,
+            perPage: 20,
+            total: 1,
+          },
+          expect.any(Function),
+          expect.any(Function),
+        ]);
+      });
     });
   });
 
@@ -110,7 +102,7 @@ describe('useExceptionLists', () => {
     const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+      renderHook<ReturnExceptionLists, UseExceptionListsProps>(() =>
         useExceptionLists({
           errorMessage: 'Uh oh',
           filterOptions: {},
@@ -125,18 +117,15 @@ describe('useExceptionLists', () => {
           notifications: mockKibanaNotificationsService,
         })
       );
-      // NOTE: First `waitForNextUpdate` is initialization
-      // Second call applies the params
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
-        filters:
-          '(not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
-        http: mockKibanaHttpService,
-        namespaceTypes: 'single,agnostic',
-        pagination: { page: 1, perPage: 20 },
-        signal: new AbortController().signal,
+      await waitFor(() => {
+        expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
+          filters:
+            '(not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
+          http: mockKibanaHttpService,
+          namespaceTypes: 'single,agnostic',
+          pagination: { page: 1, perPage: 20 },
+          signal: new AbortController().signal,
+        });
       });
     });
   });
@@ -145,7 +134,7 @@ describe('useExceptionLists', () => {
     const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+      renderHook<ReturnExceptionLists, UseExceptionListsProps>(() =>
         useExceptionLists({
           errorMessage: 'Uh oh',
           filterOptions: {
@@ -163,18 +152,15 @@ describe('useExceptionLists', () => {
           notifications: mockKibanaNotificationsService,
         })
       );
-      // NOTE: First `waitForNextUpdate` is initialization
-      // Second call applies the params
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
-        filters:
-          '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
-        http: mockKibanaHttpService,
-        namespaceTypes: 'single,agnostic',
-        pagination: { page: 1, perPage: 20 },
-        signal: new AbortController().signal,
+      await waitFor(() => {
+        expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
+          filters:
+            '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
+          http: mockKibanaHttpService,
+          namespaceTypes: 'single,agnostic',
+          pagination: { page: 1, perPage: 20 },
+          signal: new AbortController().signal,
+        });
       });
     });
   });
@@ -182,10 +168,7 @@ describe('useExceptionLists', () => {
   test('fetches a new exception list and its items when props change', async () => {
     const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
     await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<
-        UseExceptionListsProps,
-        ReturnExceptionLists
-      >(
+      const { rerender } = renderHook<ReturnExceptionLists, UseExceptionListsProps>(
         ({ errorMessage, filterOptions, http, initialPagination, namespaceTypes, notifications }) =>
           useExceptionLists({
             errorMessage,
@@ -210,10 +193,6 @@ describe('useExceptionLists', () => {
           },
         }
       );
-      // NOTE: First `waitForNextUpdate` is initialization
-      // Second call applies the params
-      await waitForNextUpdate();
-      await waitForNextUpdate();
 
       rerender({
         errorMessage: 'Uh oh',
@@ -227,20 +206,17 @@ describe('useExceptionLists', () => {
         namespaceTypes: ['single', 'agnostic'],
         notifications: mockKibanaNotificationsService,
       });
-      // NOTE: Only need one call here because hook already initilaized
-      await waitForNextUpdate();
 
-      expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2);
+      await waitFor(() => {
+        expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2);
+      });
     });
   });
 
   test('fetches list when refreshExceptionList callback invoked', async () => {
     const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseExceptionListsProps,
-        ReturnExceptionLists
-      >(() =>
+      const { result } = renderHook<ReturnExceptionLists, UseExceptionListsProps>(() =>
         useExceptionLists({
           errorMessage: 'Uh oh',
           filterOptions: {},
@@ -254,20 +230,18 @@ describe('useExceptionLists', () => {
           notifications: mockKibanaNotificationsService,
         })
       );
-      // NOTE: First `waitForNextUpdate` is initialization
-      // Second call applies the params
-      await waitForNextUpdate();
-      await waitForNextUpdate();
 
-      expect(typeof result.current[3]).toEqual('function');
+      await waitFor(() => {
+        expect(typeof result.current[3]).toEqual('function');
+      });
 
       if (result.current[4] != null) {
         result.current[4]();
       }
-      // NOTE: Only need one call here because hook already initilaized
-      await waitForNextUpdate();
 
-      expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2);
+      await waitFor(() => {
+        expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2);
+      });
     });
   });
 
@@ -277,7 +251,7 @@ describe('useExceptionLists', () => {
       .spyOn(api, 'fetchExceptionLists')
       .mockRejectedValue(mockError);
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+      renderHook<ReturnExceptionLists, UseExceptionListsProps>(() =>
         useExceptionLists({
           errorMessage: 'Uh oh',
           filterOptions: {},
@@ -291,15 +265,12 @@ describe('useExceptionLists', () => {
           notifications: mockKibanaNotificationsService,
         })
       );
-      // NOTE: First `waitForNextUpdate` is initialization
-      // Second call applies the params
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(mockKibanaNotificationsService.toasts.addError).toHaveBeenCalledWith(mockError, {
-        title: 'Uh oh',
+      await waitFor(() => {
+        expect(mockKibanaNotificationsService.toasts.addError).toHaveBeenCalledWith(mockError, {
+          title: 'Uh oh',
+        });
+        expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(1);
       });
-      expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(1);
     });
   });
 });

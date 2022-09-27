@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
@@ -50,7 +51,7 @@ export interface Props {
 // The default FormWrapper is the <EuiForm />, which wrapps the form with
 // a <div>. We can't have a div as first child of the Flyout as it breaks
 // the height calculaction and does not render the footer position correctly.
-const FormWrapper: React.FC = ({ children }) => <>{children}</>;
+const FormWrapper: FC<PropsWithChildren> = ({ children }) => <>{children}</>;
 
 export const EditField = React.memo(
   ({ form, field, allFields, exitEdit, updateField, kibanaVersion }: Props) => {

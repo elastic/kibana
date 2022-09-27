@@ -49,11 +49,13 @@ export class WhereExpression extends Component<Props, State> {
     const SearchBar = getSearchBar();
     const { whereQuery, indexPattern } = this.props;
     const expressionValue =
-      whereQuery && whereQuery.query
-        ? whereQuery.query
-        : i18n.translate('xpack.maps.layerPanel.whereExpression.expressionValuePlaceholder', {
-            defaultMessage: '-- add filter --',
-          });
+      whereQuery && whereQuery.query ? (
+        <>{whereQuery.query}</>
+      ) : (
+        i18n.translate('xpack.maps.layerPanel.whereExpression.expressionValuePlaceholder', {
+          defaultMessage: '-- add filter --',
+        })
+      );
 
     return (
       <EuiPopover

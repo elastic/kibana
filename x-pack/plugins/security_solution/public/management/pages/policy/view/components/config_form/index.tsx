@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { memo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,7 +49,7 @@ interface ConfigFormProps {
   rightCorner?: ReactNode;
 }
 
-export const ConfigFormHeading: FC = memo(({ children }) => (
+export const ConfigFormHeading = memo<PropsWithChildren>(({ children }) => (
   <EuiTitle size="xxs">
     <h5>{children}</h5>
   </EuiTitle>
@@ -57,7 +57,7 @@ export const ConfigFormHeading: FC = memo(({ children }) => (
 
 ConfigFormHeading.displayName = 'ConfigFormHeading';
 
-export const ConfigForm: FC<ConfigFormProps> = memo(
+export const ConfigForm: FC<PropsWithChildren<ConfigFormProps>> = memo(
   ({ type, supportedOss, osRestriction, dataTestSubj, rightCorner, children }) => {
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
     return (

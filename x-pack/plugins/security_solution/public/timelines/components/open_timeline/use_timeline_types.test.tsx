@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor, fireEvent, render } from '@testing-library/react';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
 import { useTimelineTypes } from './use_timeline_types';
 
@@ -47,15 +46,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 describe('useTimelineTypes', () => {
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseTimelineTypesArgs,
-        UseTimelineTypesResult
-      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        timelineType: 'default',
-        timelineTabs: result.current.timelineTabs,
-        timelineFilters: result.current.timelineFilters,
+      const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(() =>
+        useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 })
+      );
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          timelineType: 'default',
+          timelineTabs: result.current.timelineTabs,
+          timelineFilters: result.current.timelineFilters,
+        });
       });
     });
   });
@@ -63,29 +62,26 @@ describe('useTimelineTypes', () => {
   describe('timelineTabs', () => {
     it('render timelineTabs', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
-
-        const { container } = render(result.current.timelineTabs);
-        expect(
-          container.querySelector('[data-test-subj="timeline-tab-default"]')
-        ).toHaveTextContent('Timelines');
-        expect(
-          container.querySelector('[data-test-subj="timeline-tab-template"]')
-        ).toHaveTextContent('Templates');
+        const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(() =>
+          useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 })
+        );
+        await waitFor(() => {
+          const { container } = render(result.current.timelineTabs);
+          expect(
+            container.querySelector('[data-test-subj="timeline-tab-default"]')
+          ).toHaveTextContent('Timelines');
+          expect(
+            container.querySelector('[data-test-subj="timeline-tab-template"]')
+          ).toHaveTextContent('Templates');
+        });
       });
     });
 
     it('set timelineTypes correctly', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
+        const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(() =>
+          useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 })
+        );
 
         const { container } = render(result.current.timelineTabs);
 
@@ -97,21 +93,21 @@ describe('useTimelineTypes', () => {
           })
         );
 
-        expect(result.current).toEqual({
-          timelineType: 'template',
-          timelineTabs: result.current.timelineTabs,
-          timelineFilters: result.current.timelineFilters,
+        await waitFor(() => {
+          expect(result.current).toEqual({
+            timelineType: 'template',
+            timelineTabs: result.current.timelineTabs,
+            timelineFilters: result.current.timelineFilters,
+          });
         });
       });
     });
 
     it('stays in the same tab if clicking again on current tab', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
+        const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(() =>
+          useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 })
+        );
 
         const { container } = render(result.current.timelineTabs);
 
@@ -123,10 +119,12 @@ describe('useTimelineTypes', () => {
           })
         );
 
-        expect(result.current).toEqual({
-          timelineType: 'default',
-          timelineTabs: result.current.timelineTabs,
-          timelineFilters: result.current.timelineFilters,
+        await waitFor(() => {
+          expect(result.current).toEqual({
+            timelineType: 'default',
+            timelineTabs: result.current.timelineTabs,
+            timelineFilters: result.current.timelineFilters,
+          });
         });
       });
     });
@@ -135,30 +133,26 @@ describe('useTimelineTypes', () => {
   describe('timelineFilters', () => {
     it('render timelineFilters', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
-
-        const { container } = render(<>{result.current.timelineFilters}</>);
-        expect(
-          container.querySelector('[data-test-subj="open-timeline-modal-body-filter-default"]')
-        ).toHaveTextContent('Timelines');
-        expect(
-          container.querySelector('[data-test-subj="open-timeline-modal-body-filter-template"]')
-        ).toHaveTextContent('Templates');
+        const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(() =>
+          useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 })
+        );
+        await waitFor(() => {
+          const { container } = render(<>{result.current.timelineFilters}</>);
+          expect(
+            container.querySelector('[data-test-subj="open-timeline-modal-body-filter-default"]')
+          ).toHaveTextContent('Timelines');
+          expect(
+            container.querySelector('[data-test-subj="open-timeline-modal-body-filter-template"]')
+          ).toHaveTextContent('Templates');
+        });
       });
     });
 
     it('set timelineTypes correctly', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
-
+        const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(() =>
+          useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 })
+        );
         const { container } = render(<>{result.current.timelineFilters}</>);
 
         fireEvent(
@@ -168,22 +162,21 @@ describe('useTimelineTypes', () => {
             cancelable: true,
           })
         );
-
-        expect(result.current).toEqual({
-          timelineType: 'template',
-          timelineTabs: result.current.timelineTabs,
-          timelineFilters: result.current.timelineFilters,
+        await waitFor(() => {
+          expect(result.current).toEqual({
+            timelineType: 'template',
+            timelineTabs: result.current.timelineTabs,
+            timelineFilters: result.current.timelineFilters,
+          });
         });
       });
     });
 
     it('stays in the same tab if clicking again on current tab', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
+        const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(() =>
+          useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 })
+        );
 
         const { container } = render(<>{result.current.timelineFilters}</>);
 
@@ -195,10 +188,12 @@ describe('useTimelineTypes', () => {
           })
         );
 
-        expect(result.current).toEqual({
-          timelineType: 'default',
-          timelineTabs: result.current.timelineTabs,
-          timelineFilters: result.current.timelineFilters,
+        await waitFor(() => {
+          expect(result.current).toEqual({
+            timelineType: 'default',
+            timelineTabs: result.current.timelineTabs,
+            timelineFilters: result.current.timelineFilters,
+          });
         });
       });
     });

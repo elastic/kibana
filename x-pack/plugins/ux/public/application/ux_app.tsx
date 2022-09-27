@@ -8,12 +8,11 @@
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { Redirect } from 'react-router-dom';
+import { createRoot } from 'react-dom/client';
+import { Redirect, RouteComponentProps, RouteProps } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
-import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import {
   AppMountParameters,
   CoreStart,
@@ -189,6 +188,7 @@ export const renderApp = ({
   corePlugins: ApmPluginStartDeps;
 }) => {
   const { element } = appMountParameters;
+  const root = createRoot(element);
 
   createCallApmApi(core);
 
@@ -198,16 +198,14 @@ export const renderApp = ({
     console.log('Error creating static data view', e);
   });
 
-  ReactDOM.render(
+  root.render(
     <UXAppRoot
       appMountParameters={appMountParameters}
       core={core}
       deps={deps}
       corePlugins={corePlugins}
-    />,
-    element
+    />
   );
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-  };
+
+  return () => root.unmount();
 };

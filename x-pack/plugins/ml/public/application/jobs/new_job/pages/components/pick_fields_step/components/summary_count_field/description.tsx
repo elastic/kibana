@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, FC } from 'react';
+import React, { memo } from 'react';
+import type { PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
@@ -16,7 +17,7 @@ interface Props {
   validation: Validation;
 }
 
-export const Description: FC<Props> = memo(({ children, validation }) => {
+export const Description = memo<PropsWithChildren<Props>>(({ children, validation }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.title', {
     defaultMessage: 'Summary count field',
   });

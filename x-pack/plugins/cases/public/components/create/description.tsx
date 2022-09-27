@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect, useRef } from 'react';
-import { MarkdownEditorForm } from '../markdown_editor';
+import { MarkdownEditorForm, MarkdownEditorRef } from '../markdown_editor';
 import { UseField, useFormContext, useFormData } from '../../common/shared_imports';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { ID as LensPluginId } from '../markdown_editor/plugins/lens/constants';
@@ -22,7 +22,7 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
     useLensDraftComment();
   const { setFieldValue } = useFormContext();
   const [{ title, tags }] = useFormData({ watch: ['title', 'tags'] });
-  const editorRef = useRef<Record<string, unknown>>();
+  const editorRef = useRef<MarkdownEditorRef>();
   const disabledUiPlugins = [LensPluginId];
 
   useEffect(() => {

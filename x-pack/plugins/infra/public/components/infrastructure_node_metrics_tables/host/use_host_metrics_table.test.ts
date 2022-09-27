@@ -7,7 +7,7 @@
 
 import { useHostMetricsTable } from './use_host_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 jest.mock('../shared', () => ({
   ...jest.requireActual('../shared'),

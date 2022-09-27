@@ -179,7 +179,7 @@ export const SeverityField = ({
         <EuiFormRow
           label={severityLabel}
           labelAppend={field.labelAppend}
-          helpText={field.helpText}
+          helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
           error={'errorMessage'}
           isInvalid={false}
           fullWidth

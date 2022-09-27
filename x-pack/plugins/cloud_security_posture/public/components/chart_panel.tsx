@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiPanel,
   EuiText,
@@ -45,7 +46,7 @@ const Error = () => (
   </EuiFlexGroup>
 );
 
-export const ChartPanel: React.FC<ChartPanelProps> = ({
+export const ChartPanel: FC<PropsWithChildren<ChartPanelProps>> = ({
   title,
   hasBorder = true,
   isLoading,

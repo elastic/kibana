@@ -284,7 +284,7 @@ export const QueryBarDefineRule = ({
       <EuiFormRow
         label={field.label}
         labelAppend={field.labelAppend}
-        helpText={field.helpText}
+        helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
         error={errorMessage}
         isInvalid={isInvalid}
         fullWidth

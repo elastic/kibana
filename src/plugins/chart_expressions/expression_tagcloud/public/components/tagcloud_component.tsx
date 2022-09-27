@@ -146,7 +146,7 @@ export const TagCloudChart = ({
   );
 
   const handleWordClick = useCallback(
-    (elements) => {
+    (elements: any) => {
       if (!bucket) {
         return;
       }
@@ -184,6 +184,7 @@ export const TagCloudChart = ({
     <EuiResizeObserver onResize={updateChart}>
       {(resizeRef) => (
         <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
+          {/* @ts-expect-error update types */}
           <Chart size="100%">
             <Settings
               onElementClick={handleWordClick}

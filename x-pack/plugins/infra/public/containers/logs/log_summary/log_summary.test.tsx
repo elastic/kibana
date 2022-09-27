@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 
@@ -47,35 +47,34 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(firstMockResponse)
       .mockResolvedValueOnce(secondMockResponse);
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       ({ sourceId }) => useLogSummary(sourceId, startTimestamp, endTimestamp, null),
       {
         initialProps: { sourceId: 'INITIAL_SOURCE_ID' },
       }
     );
 
-    await waitForNextUpdate();
-
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        sourceId: 'INITIAL_SOURCE_ID',
-      }),
-      expect.anything()
-    );
-    expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
-
+    await waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sourceId: 'INITIAL_SOURCE_ID',
+        }),
+        expect.anything()
+      );
+      expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
+    });
     rerender({ sourceId: 'CHANGED_SOURCE_ID' });
-    await waitForNextUpdate();
-
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        sourceId: 'CHANGED_SOURCE_ID',
-      }),
-      expect.anything()
-    );
-    expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
+    await waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sourceId: 'CHANGED_SOURCE_ID',
+        }),
+        expect.anything()
+      );
+      expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
+    });
   });
 
   it('queries for new summary buckets when the filter query changes', async () => {
@@ -92,35 +91,35 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(firstMockResponse)
       .mockResolvedValueOnce(secondMockResponse);
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       ({ filterQuery }) => useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, filterQuery),
       {
         initialProps: { filterQuery: 'INITIAL_FILTER_QUERY' },
       }
     );
 
-    await waitForNextUpdate();
-
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        query: 'INITIAL_FILTER_QUERY',
-      }),
-      expect.anything()
-    );
-    expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
+    await waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: 'INITIAL_FILTER_QUERY',
+        }),
+        expect.anything()
+      );
+      expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
+    });
 
     rerender({ filterQuery: 'CHANGED_FILTER_QUERY' });
-    await waitForNextUpdate();
-
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        query: 'CHANGED_FILTER_QUERY',
-      }),
-      expect.anything()
-    );
-    expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
+    await waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: 'CHANGED_FILTER_QUERY',
+        }),
+        expect.anything()
+      );
+      expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
+    });
   });
 
   it('queries for new summary buckets when the start and end date changes', async () => {
@@ -129,7 +128,7 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(createMockResponse([]));
 
     const firstRange = createMockDateRange();
-    const { waitForNextUpdate, rerender } = renderHook(
+    const { rerender } = renderHook(
       ({ startTimestamp, endTimestamp }) =>
         useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, null),
       {
@@ -137,29 +136,30 @@ describe('useLogSummary hook', () => {
       }
     );
 
-    await waitForNextUpdate();
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        startTimestamp: firstRange.startTimestamp,
-        endTimestamp: firstRange.endTimestamp,
-      }),
-      expect.anything()
-    );
+    await waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          startTimestamp: firstRange.startTimestamp,
+          endTimestamp: firstRange.endTimestamp,
+        }),
+        expect.anything()
+      );
+    });
 
     const secondRange = createMockDateRange('now-20s', 'now');
 
     rerender(secondRange);
-    await waitForNextUpdate();
-
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        startTimestamp: secondRange.startTimestamp,
-        endTimestamp: secondRange.endTimestamp,
-      }),
-      expect.anything()
-    );
+    await waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          startTimestamp: secondRange.startTimestamp,
+          endTimestamp: secondRange.endTimestamp,
+        }),
+        expect.anything()
+      );
+    });
   });
 });
 

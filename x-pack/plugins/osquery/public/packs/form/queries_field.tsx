@@ -16,9 +16,10 @@ import { useController, useFormContext, useWatch, useFieldArray } from 'react-ho
 
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
+import type { OsqueryPackUploaderProps } from './pack_uploader';
 import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms/helpers';
-import type { PackQueryFormData } from '../queries/use_pack_query_form';
+import type { PackQueryFormData, PackSOQueryFormData } from '../queries/use_pack_query_form';
 
 interface QueriesFieldProps {
   euiFieldProps: EuiComboBoxProps<{}>;
@@ -55,7 +56,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   const handleHideEditFlyout = useCallback(() => setShowEditQueryFlyout(-1), []);
 
   const handleDeleteClick = useCallback(
-    (query) => {
+    (query: PackQueryFormData) => {
       const streamIndex = findIndex(fieldValue, ['id', query.id]);
 
       if (streamIndex > -1) {
@@ -66,7 +67,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   );
 
   const handleEditClick = useCallback(
-    (query) => {
+    (query: PackQueryFormData) => {
       const streamIndex = findIndex(fieldValue, ['id', query.id]);
 
       setShowEditQueryFlyout(streamIndex);
@@ -75,12 +76,12 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   );
 
   const handleEditQuery = useCallback(
-    (updatedQuery) =>
+    (updatedQuery: PackSOQueryFormData) =>
       new Promise<void>((resolve) => {
         if (showEditQueryFlyout >= 0) {
           update(
             showEditQueryFlyout,
-            produce({}, (draft: PackQueryFormData) => {
+            produce({}, (draft: PackSOQueryFormData) => {
               draft.id = updatedQuery.id;
               draft.interval = updatedQuery.interval;
               draft.query = updatedQuery.query;
@@ -116,7 +117,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   );
 
   const handleAddQuery = useCallback(
-    (newQuery) =>
+    (newQuery: PackSOQueryFormData) =>
       new Promise<void>((resolve) => {
         append(newQuery);
         handleHideAddFlyout();
@@ -133,7 +134,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
     setTableSelectedItems([]);
   }, [fieldValue, remove, tableSelectedItems]);
 
-  const handlePackUpload = useCallback(
+  const handlePackUpload: OsqueryPackUploaderProps['onChange'] = useCallback(
     (parsedContent, uploadedPackName) => {
       replace(
         map(parsedContent.queries, (newQuery, newQueryId) =>

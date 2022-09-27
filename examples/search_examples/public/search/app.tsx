@@ -225,15 +225,17 @@ export const SearchExamplesApp = ({
             const executedAt = (res as IMyStrategyResponse).executed_at;
             const message = (
               <EuiText>
-                Searched {res.rawResponse.hits.total} documents. <br />
-                The ${metricAggType} of {selectedNumericField!.name} is{' '}
-                {aggResult ? Math.floor(aggResult) : 0}.
-                <br />
-                {isCool ? `Is it Cool? ${isCool}` : undefined}
-                <br />
-                <EuiText data-test-subj="requestExecutedAt">
-                  {executedAt ? `Executed at? ${executedAt}` : undefined}
-                </EuiText>
+                <>
+                  Searched {res.rawResponse.hits.total} documents. <br />
+                  The ${metricAggType} of {selectedNumericField!.name} is{' '}
+                  {aggResult ? Math.floor(aggResult) : 0}.
+                  <br />
+                  {isCool ? `Is it Cool? ${isCool}` : undefined}
+                  <br />
+                  <EuiText data-test-subj="requestExecutedAt">
+                    {executedAt ? `Executed at? ${executedAt}` : undefined}
+                  </EuiText>
+                </>
               </EuiText>
             );
             notifications.toasts.addSuccess(
@@ -343,7 +345,11 @@ export const SearchExamplesApp = ({
         setWarningContents(warnings);
       }
 
-      const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
+      const message = (
+        <EuiText>
+          <>Searched {result.rawResponse.hits.total} documents.</>
+        </EuiText>
+      );
       notifications.toasts.addSuccess(
         {
           title: 'Query result',

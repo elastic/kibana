@@ -44,6 +44,7 @@ const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
 storiesOf('components/layout/DiscoverLayout', module).add(
   'Data view with timestamp',
   withDiscoverServices(() => (
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <DiscoverLayoutStory {...getDocumentsLayoutProps(getDataViewMock(true))} />
     </IntlProvider>
@@ -53,6 +54,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
 storiesOf('components/layout/DiscoverLayout', module).add(
   'Data view without timestamp',
   withDiscoverServices(() => (
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <DiscoverLayoutStory {...getDocumentsLayoutProps(getDataViewMock(false))} />
     </IntlProvider>
@@ -62,6 +64,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
 storiesOf('components/layout/DiscoverLayout', module).add(
   'SQL view',
   withDiscoverServices(() => (
+    // @ts-expect-error update types
     <IntlProvider locale="en">
       <DiscoverLayoutStory {...getPlainRecordLayoutProps(getDataViewMock(false))} />
     </IntlProvider>

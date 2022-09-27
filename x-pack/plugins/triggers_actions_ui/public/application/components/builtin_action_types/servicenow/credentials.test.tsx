@@ -27,9 +27,12 @@ describe('Credentials', () => {
   it('renders basic auth form', async () => {
     render(
       <ConnectorFormTestProvider connector={connector}>
-        <IntlProvider locale="en">
-          <Credentials isOAuth={false} readOnly={false} isLoading={false} />
-        </IntlProvider>
+        {
+          // @ts-expect-error update types
+          <IntlProvider locale="en">
+            <Credentials isOAuth={false} readOnly={false} isLoading={false} />
+          </IntlProvider>
+        }
       </ConnectorFormTestProvider>
     );
     expect(screen.getByRole('switch')).toBeInTheDocument();
@@ -49,9 +52,12 @@ describe('Credentials', () => {
   it('switches to oauth form', async () => {
     render(
       <ConnectorFormTestProvider connector={connector}>
-        <IntlProvider locale="en">
-          <Credentials isOAuth={true} readOnly={false} isLoading={false} />
-        </IntlProvider>
+        {
+          // @ts-expect-error update types
+          <IntlProvider locale="en">
+            <Credentials isOAuth={true} readOnly={false} isLoading={false} />
+          </IntlProvider>
+        }
       </ConnectorFormTestProvider>
     );
 

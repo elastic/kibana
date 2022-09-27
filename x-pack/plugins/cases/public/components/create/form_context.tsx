@@ -68,8 +68,8 @@ export const FormContext: React.FC<Props> = ({
         fields,
         syncAlerts = isSyncAlertsEnabled,
         ...dataWithoutConnectorId
-      },
-      isValid
+      }: FormProps,
+      isValid: boolean
     ) => {
       if (isValid) {
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;

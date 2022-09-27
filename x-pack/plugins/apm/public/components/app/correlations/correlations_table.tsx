@@ -10,7 +10,10 @@ import { debounce } from 'lodash';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
-import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import type {
+  Criteria,
+  CriteriaWithPagination,
+} from '@elastic/eui/src/components/basic_table/basic_table';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
@@ -71,7 +74,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
   }, [pageIndex, pageSize, significantTerms]);
 
   const onChange = useCallback(
-    (tableSettings) => {
+    (tableSettings: CriteriaWithPagination<T>) => {
       const { index, size } = tableSettings.page;
 
       setPageIndex(index);
@@ -83,7 +86,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
   );
 
   return (
-    <EuiBasicTable
+    <EuiBasicTable<T>
       items={pageOfItems ?? []}
       noItemsMessage={
         status === FETCH_STATUS.LOADING ? loadingText : noDataText

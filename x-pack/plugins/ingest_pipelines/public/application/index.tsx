@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 
 import { ApplicationStart } from '@kbn/core/public';
@@ -55,7 +55,9 @@ export const renderApp = (
   coreServices: CoreServices,
   { theme$ }: { theme$: Observable<CoreTheme> }
 ) => {
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <AuthorizationProvider
       privilegesEndpoint={`${API_BASE_PATH}/privileges`}
       httpClient={coreServices.http}
@@ -67,11 +69,10 @@ export const renderApp = (
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </I18nContext>
-    </AuthorizationProvider>,
-    element
+    </AuthorizationProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

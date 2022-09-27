@@ -6,6 +6,7 @@
  */
 
 import React, { useReducer, createContext, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { reducer } from './reducer';
 import { State, Dispatch } from './types';
@@ -13,7 +14,7 @@ import { State, Dispatch } from './types';
 const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
-export const StateProvider: React.FC = ({ children }) => {
+export const StateProvider: FC<PropsWithChildren> = ({ children }) => {
   const initialState: State = {
     isValid: true,
     configuration: {

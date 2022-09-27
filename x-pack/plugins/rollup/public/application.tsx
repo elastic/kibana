@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
 import { CoreSetup, ExecutionContextStart } from '@kbn/core/public';
@@ -49,7 +49,9 @@ export const renderApp = async (
     setBreadcrumbs,
   };
 
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaContextProvider services={services}>
@@ -58,10 +60,10 @@ export const renderApp = async (
           </Provider>
         </KibanaContextProvider>
       </KibanaThemeProvider>
-    </I18nContext>,
-    element
+    </I18nContext>
   );
+
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

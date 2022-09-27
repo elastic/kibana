@@ -117,7 +117,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
     const updateIsLoading = useCallback(
-      (payload) => dispatch(dispatchUpdateIsLoading(payload)),
+      (payload: { id: string; isLoading: boolean }) => dispatch(dispatchUpdateIsLoading(payload)),
       [dispatch]
     );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCanSeeHostIsolationExceptionsMenu } from './hooks';
-import { renderHook as _renderHook } from '@testing-library/react-hooks';
+import { renderHook as _renderHook, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
@@ -60,14 +60,12 @@ describe('host isolation exceptions hooks', () => {
 
     it('should return true if does not have privileges and there are existing host isolation items', async () => {
       useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
-      const { result, waitForNextUpdate } = renderHook(
-        () => useCanSeeHostIsolationExceptionsMenu(),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      expect(result.current).toBe(true);
+      const { result } = renderHook(() => useCanSeeHostIsolationExceptionsMenu(), {
+        wrapper: TestProviders,
+      });
+      await waitFor(() => {
+        expect(result.current).toBe(true);
+      });
     });
   });
 });

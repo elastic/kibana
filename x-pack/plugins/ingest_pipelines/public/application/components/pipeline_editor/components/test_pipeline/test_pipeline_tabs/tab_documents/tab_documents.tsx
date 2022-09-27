@@ -152,7 +152,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
   const { getFormData, reset } = form;
 
   const onAddDocumentHandler = useCallback(
-    (document) => {
+    (document: any) => {
       const { documents: existingDocuments = [] } = getFormData();
 
       reset({ defaultValue: { documents: [...existingDocuments, document] } });

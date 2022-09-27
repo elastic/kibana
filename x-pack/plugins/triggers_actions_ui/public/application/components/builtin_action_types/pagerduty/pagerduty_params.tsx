@@ -129,7 +129,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            error={errors.dedupKey}
+            error={errors.dedupKey as string[]}
             isInvalid={isDedupKeyInvalid}
             label={
               isDedupeKeyRequired
@@ -163,7 +163,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           <EuiFormRow
             id="pagerDutySummary"
             fullWidth
-            error={errors.summary}
+            error={errors.summary as string[]}
             isInvalid={isSummaryInvalid}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.summaryFieldLabel',
@@ -208,7 +208,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             <EuiFlexItem>
               <EuiFormRow
                 fullWidth
-                error={errors.timestamp}
+                error={errors.timestamp as string[]}
                 isInvalid={isTimestampInvalid}
                 label={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.timestampTextFieldLabel',

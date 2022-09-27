@@ -80,7 +80,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
 
   const navigateToAllCasesClick = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       if (e) {
         e.preventDefault();
       }

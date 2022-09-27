@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import type { TileMapVisRenderValue } from './tile_map_fn';
 import { LazyWrapper } from '../../lazy_wrapper';
@@ -20,8 +20,10 @@ export const tileMapRenderer = {
   name: TILE_MAP_RENDER,
   reuseDomNode: true,
   render: async (domNode, { filters, query, timeRange, visConfig }, handlers) => {
+    const root = createRoot(domNode);
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const props = {
@@ -34,6 +36,6 @@ export const tileMapRenderer = {
       visConfig,
     };
 
-    render(<LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />, domNode);
+    root.render(<LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />);
   },
 } as ExpressionRenderDefinition<TileMapVisRenderValue>;

@@ -143,7 +143,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   }, [detailVertexId, getPageData]);
 
   const onChangePipelineHash = useCallback(
-    (hash) => {
+    (hash: string) => {
       window.location.hash = getSafeForExternalLink(`#/logstash/pipelines/${pipelineId}/${hash}`);
     },
     [pipelineId]

@@ -320,7 +320,7 @@ export const DiscoverGrid = ({
   const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
 
   const onTableSort = useCallback(
-    (sortingColumnsData) => {
+    (sortingColumnsData: SortObj[]) => {
       if (isSortEnabled && onSort) {
         onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
       }

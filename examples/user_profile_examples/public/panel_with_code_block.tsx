@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiTitle, EuiSpacer, EuiSplitPanel, EuiCodeBlock } from '@elastic/eui';
 
 export interface PanelWithCodeBlockProps {
@@ -13,7 +14,7 @@ export interface PanelWithCodeBlockProps {
   code: string;
 }
 
-export const PanelWithCodeBlock: React.FunctionComponent<PanelWithCodeBlockProps> = ({
+export const PanelWithCodeBlock: FC<PropsWithChildren<PanelWithCodeBlockProps>> = ({
   title,
   code,
   children,

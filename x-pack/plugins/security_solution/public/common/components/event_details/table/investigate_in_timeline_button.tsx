@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
@@ -21,10 +22,12 @@ import { useCreateTimeline } from '../../../../timelines/components/timeline/pro
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
-export const InvestigateInTimelineButton: React.FunctionComponent<{
-  asEmptyButton: boolean;
-  dataProviders: DataProvider[];
-}> = ({ asEmptyButton, children, dataProviders, ...rest }) => {
+export const InvestigateInTimelineButton: FC<
+  PropsWithChildren<{
+    asEmptyButton: boolean;
+    dataProviders: DataProvider[];
+  }>
+> = ({ asEmptyButton, children, dataProviders, ...rest }) => {
   const dispatch = useDispatch();
 
   const getDataViewsSelector = useMemo(

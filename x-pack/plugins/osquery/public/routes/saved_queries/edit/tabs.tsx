@@ -25,7 +25,12 @@ interface ResultTabsProps {
   failedAgentsCount?: number;
   endDate?: string;
   addToTimeline?: (payload: AddToTimelinePayload) => ReactElement;
-  addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
+  addToCase?: (payload: {
+    actionId?: string;
+    queryId?: string;
+    isIcon?: boolean;
+    isDisabled?: boolean;
+  }) => ReactElement;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({

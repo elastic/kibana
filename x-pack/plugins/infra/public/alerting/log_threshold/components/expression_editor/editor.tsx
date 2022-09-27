@@ -8,6 +8,7 @@
 import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import useMount from 'react-use/lib/useMount';
 import {
   ForLastExpression,
@@ -33,7 +34,7 @@ import { LogViewProvider, useLogViewContext } from '../../../../hooks/use_log_vi
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';
-import { Threshold } from './threshold';
+import { Threshold, ThresholdProps } from './threshold';
 import { TypeSwitcher } from './type_switcher';
 
 export interface ExpressionCriteria {
@@ -112,7 +113,7 @@ export const ExpressionEditor: React.FC<
   );
 };
 
-export const SourceStatusWrapper: React.FC = ({ children }) => {
+export const SourceStatusWrapper: FC<PropsWithChildren> = ({ children }) => {
   const { load, isLoading, hasFailedLoading, isUninitialized } = useLogViewContext();
 
   return (
@@ -178,7 +179,7 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
     }
   }, [resolvedLogView]);
 
-  const updateThreshold = useCallback(
+  const updateThreshold = useCallback<ThresholdProps['updateThreshold']>(
     (thresholdParams) => {
       const nextThresholdParams = { ...ruleParams.count, ...thresholdParams };
       setRuleParams('count', nextThresholdParams);

@@ -25,6 +25,7 @@ export function KeyValueTable({
 }) {
   return (
     <EuiTable compressed {...tableProps}>
+      {/* @ts-expect-error update types */}
       <EuiTableBody>
         {keyValuePairs.map(({ key, value }) => {
           const asArray = castArray(value);

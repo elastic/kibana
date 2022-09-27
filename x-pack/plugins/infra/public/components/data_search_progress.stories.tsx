@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { PropsOf } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../test_utils/use_global_storybook_theme';
-import { DataSearchProgress } from './data_search_progress';
+import { DataSearchProgress, DataSearchProgressProps } from './data_search_progress';
 
 export default {
   title: 'infra/dataSearch/DataSearchProgress',
@@ -21,8 +20,6 @@ export default {
     layout: 'padded',
   },
 } as Meta;
-
-type DataSearchProgressProps = PropsOf<typeof DataSearchProgress>;
 
 const DataSearchProgressTemplate: Story<DataSearchProgressProps> = (args) => (
   <DataSearchProgress {...args} />

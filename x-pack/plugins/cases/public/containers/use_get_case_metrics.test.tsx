@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { SingleCaseMetricsFeature } from '../../common/ui';
 import { useGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase } from './mock';
@@ -16,8 +15,6 @@ import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
-
-const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</TestProviders>;
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
@@ -31,11 +28,12 @@ describe('useGetCaseMetrics', () => {
   it('calls getSingleCaseMetrics with correct arguments', async () => {
     const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
-        wrapper,
+      renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+        wrapper: TestProviders,
       });
-      await waitForNextUpdate();
-      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+      await waitFor(() => {
+        expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+      });
     });
   });
 
@@ -48,11 +46,12 @@ describe('useGetCaseMetrics', () => {
       throw new Error('Something went wrong');
     });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
-      wrapper,
+    renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+      wrapper: TestProviders,
     });
-    await waitForNextUpdate();
-    expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

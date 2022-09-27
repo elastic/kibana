@@ -107,7 +107,7 @@ export interface SecuritySolutionTabNavigationProps {
 export type NavigateToUrl = (url: string) => void;
 export interface NavLinkItem {
   categories?: LinkCategories;
-  description?: string;
+  description?: string | null;
   disabled?: boolean;
   icon?: IconType;
   id: SecurityPageName;

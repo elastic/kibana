@@ -12,7 +12,8 @@ import React, {
   useImperativeHandle,
   useState,
 } from 'react';
-import { unmountComponentAtNode, createPortal } from 'react-dom';
+import { createPortal } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
@@ -74,7 +75,7 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
       );
 
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        createRoot(domNode).unmount();
       });
 
       return createPortal(el, domNode);

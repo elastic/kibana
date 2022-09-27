@@ -158,37 +158,39 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     return (
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
-          {this.renderExportAsRadioGroup()}
-          {this.renderUrlParamExtensions()}
-          {urlRow}
+          <>
+            {this.renderExportAsRadioGroup()}
+            {this.renderUrlParamExtensions()}
+            {urlRow}
 
-          <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-          <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
-            {(copy: () => void) => (
-              <EuiButton
-                fill
-                fullWidth
-                onClick={copy}
-                disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-                data-share-url={this.state.url}
-                data-test-subj="copyShareUrlButton"
-                size="s"
-              >
-                {this.props.isEmbedded ? (
-                  <FormattedMessage
-                    id="share.urlPanel.copyIframeCodeButtonLabel"
-                    defaultMessage="Copy iFrame code"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="share.urlPanel.copyLinkButtonLabel"
-                    defaultMessage="Copy link"
-                  />
-                )}
-              </EuiButton>
-            )}
-          </EuiCopy>
+            <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
+              {(copy: () => void) => (
+                <EuiButton
+                  fill
+                  fullWidth
+                  onClick={copy}
+                  disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+                  data-share-url={this.state.url}
+                  data-test-subj="copyShareUrlButton"
+                  size="s"
+                >
+                  {this.props.isEmbedded ? (
+                    <FormattedMessage
+                      id="share.urlPanel.copyIframeCodeButtonLabel"
+                      defaultMessage="Copy iFrame code"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="share.urlPanel.copyLinkButtonLabel"
+                      defaultMessage="Copy link"
+                    />
+                  )}
+                </EuiButton>
+              )}
+            </EuiCopy>
+          </>
         </EuiForm>
       </I18nProvider>
     );

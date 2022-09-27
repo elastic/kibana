@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { act, renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -49,7 +49,7 @@ describe('useAddOrUpdateException', () => {
   >;
   let buildAlertsFilter: jest.SpyInstance<ReturnType<typeof buildFilterHelpers.buildAlertsFilter>>;
   let addOrUpdateItemsArgs: Parameters<AddOrUpdateExceptionItemsFunc>;
-  let render: () => RenderHookResult<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>;
+  let render: () => RenderHookResult<ReturnUseAddOrUpdateException, UseAddOrUpdateExceptionProps>;
   const onError = jest.fn();
   const onSuccess = jest.fn();
   const ruleStaticId = 'rule-id';
@@ -94,23 +94,16 @@ describe('useAddOrUpdateException', () => {
   const itemsToAddOrUpdate = [...itemsToAdd, ...itemsToUpdate];
 
   const waitForAddOrUpdateFunc: (arg: {
-    waitForNextUpdate: RenderHookResult<
-      UseAddOrUpdateExceptionProps,
-      ReturnUseAddOrUpdateException
-    >['waitForNextUpdate'];
     rerender: RenderHookResult<
-      UseAddOrUpdateExceptionProps,
-      ReturnUseAddOrUpdateException
+      ReturnUseAddOrUpdateException,
+      UseAddOrUpdateExceptionProps
     >['rerender'];
-    result: RenderHookResult<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>['result'];
-  }) => Promise<ReturnUseAddOrUpdateException[1]> = async ({
-    waitForNextUpdate,
-    rerender,
-    result,
-  }) => {
-    await waitForNextUpdate();
+    result: RenderHookResult<ReturnUseAddOrUpdateException, UseAddOrUpdateExceptionProps>['result'];
+  }) => Promise<ReturnUseAddOrUpdateException[1]> = async ({ rerender, result }) => {
     rerender();
-    expect(result.current[1]).not.toBeNull();
+    await waitFor(() => {
+      expect(result.current[1]).not.toBeNull();
+    });
     return Promise.resolve(result.current[1]);
   };
 
@@ -135,7 +128,7 @@ describe('useAddOrUpdateException', () => {
 
     addOrUpdateItemsArgs = [ruleStaticId, itemsToAddOrUpdate];
     render = () =>
-      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(
+      renderHook<ReturnUseAddOrUpdateException, UseAddOrUpdateExceptionProps>(
         () =>
           useAddOrUpdateException({
             http: mockKibanaHttpService,
@@ -155,9 +148,10 @@ describe('useAddOrUpdateException', () => {
 
   it('initializes hook', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = render();
-      await waitForNextUpdate();
-      expect(result.current).toEqual([{ isLoading: false }, result.current[1]]);
+      const { result } = render();
+      await waitFor(() => {
+        expect(result.current).toEqual([{ isLoading: false }, result.current[1]]);
+      });
     });
   });
 
@@ -169,17 +163,17 @@ describe('useAddOrUpdateException', () => {
       .mockRejectedValue(mockError);
 
     await act(async () => {
-      const { rerender, result, waitForNextUpdate } = render();
+      const { rerender, result } = render();
       const addOrUpdateItems = await waitForAddOrUpdateFunc({
         rerender,
         result,
-        waitForNextUpdate,
       });
       if (addOrUpdateItems) {
         addOrUpdateItems(...addOrUpdateItemsArgs);
       }
-      await waitForNextUpdate();
-      expect(onError).toHaveBeenCalledWith(mockError, null, null);
+      await waitFor(() => {
+        expect(onError).toHaveBeenCalledWith(mockError, null, null);
+      });
     });
   });
 
@@ -191,69 +185,69 @@ describe('useAddOrUpdateException', () => {
       .mockRejectedValue(mockError);
 
     await act(async () => {
-      const { rerender, result, waitForNextUpdate } = render();
+      const { rerender, result } = render();
       const addOrUpdateItems = await waitForAddOrUpdateFunc({
         rerender,
         result,
-        waitForNextUpdate,
       });
       if (addOrUpdateItems) {
         addOrUpdateItems(...addOrUpdateItemsArgs);
       }
-      await waitForNextUpdate();
-      expect(onError).toHaveBeenCalledWith(mockError, null, null);
+      await waitFor(() => {
+        expect(onError).toHaveBeenCalledWith(mockError, null, null);
+      });
     });
   });
 
   describe('when alertIdToClose is not passed in', () => {
     it('should not update the alert status', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(updateAlertStatus).not.toHaveBeenCalled();
+        await waitFor(() => {
+          expect(updateAlertStatus).not.toHaveBeenCalled();
+        });
       });
     });
 
     it('creates new items', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(addExceptionListItem).toHaveBeenCalledTimes(2);
-        expect(addExceptionListItem.mock.calls[1][0].listItem).toEqual(itemsToAdd[1]);
+        await waitFor(() => {
+          expect(addExceptionListItem).toHaveBeenCalledTimes(2);
+          expect(addExceptionListItem.mock.calls[1][0].listItem).toEqual(itemsToAdd[1]);
+        });
       });
     });
     it('updates existing items', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(updateExceptionListItem).toHaveBeenCalledTimes(2);
-        expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(
-          itemsToUpdateFormatted[1]
-        );
+        await waitFor(() => {
+          expect(updateExceptionListItem).toHaveBeenCalledTimes(2);
+          expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(
+            itemsToUpdateFormatted[1]
+          );
+        });
       });
     });
   });
@@ -264,51 +258,51 @@ describe('useAddOrUpdateException', () => {
     });
     it('should update the alert status', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(updateAlertStatus).toHaveBeenCalledTimes(1);
+        await waitFor(() => {
+          expect(updateAlertStatus).toHaveBeenCalledTimes(1);
+        });
       });
     });
     it('creates new items', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(addExceptionListItem).toHaveBeenCalledTimes(2);
-        expect(addExceptionListItem.mock.calls[1][0].listItem).toEqual(itemsToAdd[1]);
+        await waitFor(() => {
+          expect(addExceptionListItem).toHaveBeenCalledTimes(2);
+          expect(addExceptionListItem.mock.calls[1][0].listItem).toEqual(itemsToAdd[1]);
+        });
       });
     });
     it('updates existing items', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(updateExceptionListItem).toHaveBeenCalledTimes(2);
-        expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(
-          itemsToUpdateFormatted[1]
-        );
+        await waitFor(() => {
+          expect(updateExceptionListItem).toHaveBeenCalledTimes(2);
+          expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(
+            itemsToUpdateFormatted[1]
+          );
+        });
       });
     });
   });
@@ -319,104 +313,104 @@ describe('useAddOrUpdateException', () => {
     });
     it('should update the status of only alerts that are open', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(buildAlertStatusesFilter).toHaveBeenCalledTimes(1);
-        expect(buildAlertStatusesFilter.mock.calls[0][0]).toEqual([
-          'open',
-          'acknowledged',
-          'in-progress',
-        ]);
+        await waitFor(() => {
+          expect(buildAlertStatusesFilter).toHaveBeenCalledTimes(1);
+          expect(buildAlertStatusesFilter.mock.calls[0][0]).toEqual([
+            'open',
+            'acknowledged',
+            'in-progress',
+          ]);
+        });
       });
     });
     it('should update the status of only alerts generated by the provided rule', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(buildAlertsFilter).toHaveBeenCalledTimes(1);
-        expect(buildAlertsFilter.mock.calls[0][0]).toEqual(ruleStaticId);
+        await waitFor(() => {
+          expect(buildAlertsFilter).toHaveBeenCalledTimes(1);
+          expect(buildAlertsFilter.mock.calls[0][0]).toEqual(ruleStaticId);
+        });
       });
     });
     it('should generate the query filter using exceptions', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(getQueryFilter).toHaveBeenCalledTimes(1);
-        expect(getQueryFilter.mock.calls[0][4]).toEqual(itemsToAddOrUpdate);
-        expect(getQueryFilter.mock.calls[0][5]).toEqual(false);
+        await waitFor(() => {
+          expect(getQueryFilter).toHaveBeenCalledTimes(1);
+          expect(getQueryFilter.mock.calls[0][4]).toEqual(itemsToAddOrUpdate);
+          expect(getQueryFilter.mock.calls[0][5]).toEqual(false);
+        });
       });
     });
     it('should update the alert status', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(updateAlertStatus).toHaveBeenCalledTimes(1);
+        await waitFor(() => {
+          expect(updateAlertStatus).toHaveBeenCalledTimes(1);
+        });
       });
     });
     it('creates new items', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(addExceptionListItem).toHaveBeenCalledTimes(2);
-        expect(addExceptionListItem.mock.calls[1][0].listItem).toEqual(itemsToAdd[1]);
+        await waitFor(() => {
+          expect(addExceptionListItem).toHaveBeenCalledTimes(2);
+          expect(addExceptionListItem.mock.calls[1][0].listItem).toEqual(itemsToAdd[1]);
+        });
       });
     });
     it('updates existing items', async () => {
       await act(async () => {
-        const { rerender, result, waitForNextUpdate } = render();
+        const { rerender, result } = render();
         const addOrUpdateItems = await waitForAddOrUpdateFunc({
           rerender,
           result,
-          waitForNextUpdate,
         });
         if (addOrUpdateItems) {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
-        await waitForNextUpdate();
-        expect(updateExceptionListItem).toHaveBeenCalledTimes(2);
-        expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(
-          itemsToUpdateFormatted[1]
-        );
+        await waitFor(() => {
+          expect(updateExceptionListItem).toHaveBeenCalledTimes(2);
+          expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(
+            itemsToUpdateFormatted[1]
+          );
+        });
       });
     });
   });

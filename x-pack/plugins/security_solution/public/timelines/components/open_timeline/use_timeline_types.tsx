@@ -46,7 +46,7 @@ export const useTimelineTypes = ({
   const templateUrl = formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch));
 
   const goToTimeline = useCallback(
-    (ev) => {
+    (ev: { preventDefault: () => void }) => {
       ev.preventDefault();
       navigateToUrl(timelineUrl);
     },
@@ -54,14 +54,14 @@ export const useTimelineTypes = ({
   );
 
   const goToTemplateTimeline = useCallback(
-    (ev) => {
+    (ev: { preventDefault: () => void }) => {
       ev.preventDefault();
       navigateToUrl(templateUrl);
     },
     [navigateToUrl, templateUrl]
   );
-  const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
-    (timelineTabsStyle: TimelineTabsStyle) => [
+  const getFilterOrTabs = useCallback<(timelineTabsStyle: TimelineTabsStyle) => TimelineTab[]>(
+    (timelineTabsStyle) => [
       {
         id: TimelineType.default,
         name: i18n.TAB_TIMELINES,
@@ -83,7 +83,7 @@ export const useTimelineTypes = ({
   );
 
   const onFilterClicked = useCallback(
-    (tabId, tabStyle: TimelineTabsStyle) => {
+    (tabId: TimelineType, tabStyle: TimelineTabsStyle) => {
       setTimelineTypes((prevTimelineTypes) => {
         if (prevTimelineTypes !== tabId) {
           setTimelineTypes(tabId);

@@ -197,6 +197,7 @@ export const SubChart: React.FC<SubChartProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
+        {/* @ts-expect-error update types */}
         <Chart size={{ height, width }}>
           <Settings
             showLegend={false}

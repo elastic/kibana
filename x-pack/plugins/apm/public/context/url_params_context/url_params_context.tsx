@@ -12,6 +12,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { Location } from 'history';
+import type { PropsWithChildren } from 'react';
 import { withRouter } from 'react-router-dom';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
@@ -31,7 +33,7 @@ const UrlParamsContext = createContext({
 });
 
 const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
-  ({ location, children }) => {
+  ({ location, children }: PropsWithChildren<{ location: Location }>) => {
     const refUrlParams = useRef(resolveUrlParams(location, {}));
 
     const { start, end, rangeFrom, rangeTo } = refUrlParams.current;

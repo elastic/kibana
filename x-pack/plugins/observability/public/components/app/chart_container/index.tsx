@@ -41,5 +41,6 @@ export function ChartContainer({
       </div>
     );
   }
+  // @ts-expect-error update types
   return <Chart size={{ height }}>{children}</Chart>;
 }

@@ -8,11 +8,11 @@
 import { useEffect, useState } from 'react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-export interface UseAlertsPrivelegesReturn extends AlertsPrivelegesState {
+export interface UseAlertsPrivilegesReturn extends AlertsPrivilegesState {
   loading: boolean;
 }
 
-export interface AlertsPrivelegesState {
+export interface AlertsPrivilegesState {
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
   hasIndexManage: boolean | null;
@@ -27,8 +27,8 @@ export interface AlertsPrivelegesState {
  * Hook to get user privilege from
  *
  */
-export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
-  const [privileges, setPrivileges] = useState<AlertsPrivelegesState>({
+export const useAlertsPrivileges = (): UseAlertsPrivilegesReturn => {
+  const [privileges, setPrivileges] = useState<AlertsPrivilegesState>({
     isAuthenticated: null,
     hasEncryptionKey: null,
     hasIndexManage: null,

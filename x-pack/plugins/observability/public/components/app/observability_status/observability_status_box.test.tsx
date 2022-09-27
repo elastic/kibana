@@ -34,6 +34,7 @@ describe('ObservabilityStatusBox', () => {
       application.navigateToUrl.mockImplementation();
 
       render(
+        // @ts-expect-error update types
         <IntlProvider locale="en">
           <KibanaContextProvider services={{ application }}>
             <ObservabilityStatusBox {...props} />
@@ -73,6 +74,7 @@ describe('ObservabilityStatusBox', () => {
       };
 
       render(
+        // @ts-expect-error update types
         <IntlProvider locale="en">
           <ObservabilityStatusBox {...props} />
         </IntlProvider>

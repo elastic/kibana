@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
+import { EuiInMemoryTable, Pagination, Direction, useEuiTheme, Criteria } from '@elastic/eui';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getFieldColumns, getFieldItems, isActionsColumn } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
-import type { FieldBrowserProps, GetFieldTableColumns } from '../../types';
+import type { BrowserFieldItem, FieldBrowserProps, GetFieldTableColumns } from '../../types';
 import { FieldTableHeader } from './field_table_header';
 import { styles } from './field_table.styles';
 
@@ -104,16 +104,21 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
     [sortDirection, sortField]
   );
 
-  const onTableChange = useCallback(({ page, sort = DEFAULT_SORTING }) => {
-    const { index, size } = page;
-    const { field, direction } = sort;
+  const onTableChange = useCallback(
+    // @ts-expect-error update types
+    ({ page, sort = DEFAULT_SORTING }: Criteria<BrowserFieldItem>) => {
+      // @ts-expect-error update types
+      const { index, size } = page;
+      const { field, direction } = sort;
 
-    setPageIndex(index);
-    setPageSize(size);
+      setPageIndex(index);
+      setPageSize(size);
 
-    setSortField(field);
-    setSortDirection(direction);
-  }, []);
+      setSortField(field);
+      setSortDirection(direction);
+    },
+    []
+  );
 
   /**
    * Process columns

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
@@ -16,6 +16,8 @@ export const buttonRenderer: ExpressionRenderDefinition<any> = {
   displayName: 'Button',
   reuseDomNode: true,
   render(domNode, config, handlers) {
+    const root = createRoot(domNode);
+
     const buttonClick = () => {
       handlers.event({
         name: 'NAVIGATE',
@@ -25,8 +27,9 @@ export const buttonRenderer: ExpressionRenderDefinition<any> = {
       });
     };
 
-    const renderDebug = () => (
+    const renderDebug = ({ callback }: any) => (
       <div
+        ref={callback}
         style={{
           width: domNode.offsetWidth,
           height: domNode.offsetHeight,
@@ -42,8 +45,8 @@ export const buttonRenderer: ExpressionRenderDefinition<any> = {
       </div>
     );
 
-    ReactDOM.render(renderDebug(), domNode, () => handlers.done());
+    root.render(renderDebug({ callback: handlers.done }));
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    handlers.onDestroy(() => root.unmount());
   },
 };

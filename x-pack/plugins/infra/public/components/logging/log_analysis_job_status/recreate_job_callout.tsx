@@ -7,13 +7,16 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import { RecreateJobButton } from '../log_analysis_setup/create_job_button';
+import type { FC, PropsWithChildren } from 'react';
+import { RecreateJobButton, CreateJobButtonProps } from '../log_analysis_setup/create_job_button';
 
-export const RecreateJobCallout: React.FC<{
-  hasSetupCapabilities?: boolean;
-  onRecreateMlJob: () => void;
-  title?: React.ReactNode;
-}> = ({ children, hasSetupCapabilities, onRecreateMlJob, title }) => (
+export const RecreateJobCallout: FC<
+  PropsWithChildren<{
+    hasSetupCapabilities?: boolean;
+    onRecreateMlJob: CreateJobButtonProps['onClick'];
+    title?: React.ReactNode;
+  }>
+> = ({ children, hasSetupCapabilities, onRecreateMlJob, title }) => (
   <EuiCallOut color="warning" iconType="alert" title={title}>
     {children}
     <RecreateJobButton

@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// import React from 'react';
-import type { RenderResult } from '@testing-library/react-hooks';
-import { act, renderHook } from '@testing-library/react-hooks';
+
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import type { Refetch } from '../../../store/inputs/model';
 import type { AnomaliesCount } from './use_anomalies_search';
@@ -73,23 +72,20 @@ describe('useNotableAnomaliesSearch', () => {
   });
 
   it('refetch calls notableAnomaliesSearch', async () => {
-    let renderResult: RenderResult<{
-      isLoading: boolean;
-      data: AnomaliesCount[];
-      refetch: Refetch;
-    }>;
+    let renderResult: {
+      current: {
+        isLoading: boolean;
+        data: AnomaliesCount[];
+        refetch: Refetch;
+      };
+    };
 
     // first notableAnomaliesSearch call
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const { result } = renderHook(() => useNotableAnomaliesSearch({ skip: false, from, to }), {
+        wrapper: TestProviders,
+      });
       renderResult = result;
-
-      await waitForNextUpdate();
     });
 
     await act(async () => {
@@ -97,35 +93,33 @@ describe('useNotableAnomaliesSearch', () => {
       await renderResult.current.refetch();
     });
 
-    expect(mockNotableAnomaliesSearch).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockNotableAnomaliesSearch).toHaveBeenCalled();
+    });
   });
 
-  it('returns formated data', async () => {
+  it('returns formatted data', async () => {
     await act(async () => {
       const jobCount = { key: jobId, doc_count: 99 };
       mockNotableAnomaliesSearch.mockResolvedValue({
         aggregations: { number_of_anomalies: { buckets: [jobCount] } },
       });
-      const { result, waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current.data).toEqual(
-        expect.arrayContaining([
-          {
-            count: 99,
-            jobId,
-            name: jobId,
-            status: AnomalyJobStatus.enabled,
-            entity: AnomalyEntity.Host,
-          },
-        ])
-      );
+      const { result } = renderHook(() => useNotableAnomaliesSearch({ skip: false, from, to }), {
+        wrapper: TestProviders,
+      });
+      await waitFor(() => {
+        expect(result.current.data).toEqual(
+          expect.arrayContaining([
+            {
+              count: 99,
+              jobId,
+              name: jobId,
+              status: AnomalyJobStatus.enabled,
+              entity: AnomalyEntity.Host,
+            },
+          ])
+        );
+      });
     });
   });
 
@@ -140,26 +134,22 @@ describe('useNotableAnomaliesSearch', () => {
       mockNotableAnomaliesSearch.mockResolvedValue({
         aggregations: { number_of_anomalies: { buckets: [] } },
       });
-      const { result, waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current.data).toEqual(
-        expect.arrayContaining([
-          {
-            count: 0,
-            jobId: undefined,
-            name: jobId,
-            status: AnomalyJobStatus.uninstalled,
-            entity: AnomalyEntity.Host,
-          },
-        ])
-      );
+      const { result } = renderHook(() => useNotableAnomaliesSearch({ skip: false, from, to }), {
+        wrapper: TestProviders,
+      });
+      await waitFor(() => {
+        expect(result.current.data).toEqual(
+          expect.arrayContaining([
+            {
+              count: 0,
+              jobId: undefined,
+              name: jobId,
+              status: AnomalyJobStatus.uninstalled,
+              entity: AnomalyEntity.Host,
+            },
+          ])
+        );
+      });
     });
   });
 
@@ -182,27 +172,23 @@ describe('useNotableAnomaliesSearch', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const { result } = renderHook(() => useNotableAnomaliesSearch({ skip: false, from, to }), {
+        wrapper: TestProviders,
+      });
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current.data).toEqual(
-        expect.arrayContaining([
-          {
-            count: 99,
-            jobId: customJobId,
-            name: jobId,
-            status: AnomalyJobStatus.enabled,
-            entity: AnomalyEntity.Host,
-          },
-        ])
-      );
+      await waitFor(() => {
+        expect(result.current.data).toEqual(
+          expect.arrayContaining([
+            {
+              count: 99,
+              jobId: customJobId,
+              name: jobId,
+              status: AnomalyJobStatus.enabled,
+              entity: AnomalyEntity.Host,
+            },
+          ])
+        );
+      });
     });
   });
 
@@ -241,26 +227,22 @@ describe('useNotableAnomaliesSearch', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current.data).toEqual(
-        expect.arrayContaining([
-          {
-            count: 99,
-            jobId: mostRecentJobId,
-            name: jobId,
-            status: AnomalyJobStatus.enabled,
-            entity: AnomalyEntity.Host,
-          },
-        ])
-      );
+      const { result } = renderHook(() => useNotableAnomaliesSearch({ skip: false, from, to }), {
+        wrapper: TestProviders,
+      });
+      await waitFor(() => {
+        expect(result.current.data).toEqual(
+          expect.arrayContaining([
+            {
+              count: 99,
+              jobId: mostRecentJobId,
+              name: jobId,
+              status: AnomalyJobStatus.enabled,
+              entity: AnomalyEntity.Host,
+            },
+          ])
+        );
+      });
     });
   });
 });

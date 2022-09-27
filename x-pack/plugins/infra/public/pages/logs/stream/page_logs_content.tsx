@@ -15,7 +15,10 @@ import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { LogMinimap } from '../../../components/logging/log_minimap';
-import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
+import {
+  ScrollableLogTextStreamView,
+  ScrollableLogTextStreamViewProps,
+} from '../../../components/logging/log_text_stream';
 import { LogEntryStreamItem } from '../../../components/logging/log_text_stream/item';
 import { PageContent } from '../../../components/page';
 import { useLogFilterStateContext } from '../../../containers/logs/log_filter';
@@ -148,30 +151,33 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   const [, { setContextEntry }] = useViewLogInProviderContext();
 
-  const handleDateRangeExtension = useCallback(
+  const handleDateRangeExtension = useCallback<ScrollableLogTextStreamViewProps['updateDateRange']>(
     (newDateRange) => {
       updateDateRange(newDateRange);
 
       if (
         'startDateExpression' in newDateRange &&
-        isValidDatemath(newDateRange.startDateExpression)
+        isValidDatemath(newDateRange?.startDateExpression!)
       ) {
         fetchPreviousEntries({
           force: true,
-          extendTo: datemathToEpochMillis(newDateRange.startDateExpression)!,
+          extendTo: datemathToEpochMillis(newDateRange.startDateExpression!)!,
         });
       }
-      if ('endDateExpression' in newDateRange && isValidDatemath(newDateRange.endDateExpression)) {
+      if (
+        'endDateExpression' in newDateRange &&
+        isValidDatemath(newDateRange?.endDateExpression!)
+      ) {
         fetchNextEntries({
           force: true,
-          extendTo: datemathToEpochMillis(newDateRange.endDateExpression)!,
+          extendTo: datemathToEpochMillis(newDateRange?.endDateExpression!)!,
         });
       }
     },
     [updateDateRange, fetchPreviousEntries, fetchNextEntries]
   );
 
-  const handlePagination = useCallback(
+  const handlePagination = useCallback<ScrollableLogTextStreamViewProps['reportVisibleInterval']>(
     (params) => {
       reportVisiblePositions(params);
       if (!params.fromScroll) {

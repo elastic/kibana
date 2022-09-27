@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import type { ReturnCreateRule } from './use_create_rule';
 import { useCreateRule } from './use_create_rule';
@@ -26,7 +26,7 @@ describe('useCreateRule', () => {
   });
 
   test('init', async () => {
-    const { result } = renderHook<unknown, ReturnCreateRule>(() => useCreateRule(), {
+    const { result } = renderHook<ReturnCreateRule, {}>(() => useCreateRule(), {
       wrapper: TestProviders,
     });
 
@@ -35,34 +35,29 @@ describe('useCreateRule', () => {
 
   test('saving rule with isLoading === true', async () => {
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook<void, ReturnCreateRule>(
-        () => useCreateRule(),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      result.current[1](getCreateRulesSchemaMock());
-      rerender();
-      expect(result.current).toEqual([{ isLoading: true, ruleId: null }, result.current[1]]);
+      const { result, rerender } = renderHook<ReturnCreateRule, {}>(() => useCreateRule(), {
+        wrapper: TestProviders,
+      });
+      await waitFor(() => {
+        result.current[1](getCreateRulesSchemaMock());
+        rerender();
+        expect(result.current).toEqual([{ isLoading: true, ruleId: null }, result.current[1]]);
+      });
     });
   });
 
   test('updates ruleId after the rule has been saved', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, ReturnCreateRule>(
-        () => useCreateRule(),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<ReturnCreateRule, {}>(() => useCreateRule(), {
+        wrapper: TestProviders,
+      });
       result.current[1](getCreateRulesSchemaMock());
-      await waitForNextUpdate();
-      expect(result.current).toEqual([
-        { isLoading: false, ruleId: getRulesSchemaMock().id },
-        result.current[1],
-      ]);
+      await waitFor(() => {
+        expect(result.current).toEqual([
+          { isLoading: false, ruleId: getRulesSchemaMock().id },
+          result.current[1],
+        ]);
+      });
     });
   });
 });

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
@@ -16,14 +16,6 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { OptionsMenu } from './options';
 import { pluginServices } from '../../services/plugin_services';
 
-let isOpen = false;
-
-const container = document.createElement('div');
-
-const onClose = () => {
-  ReactDOM.unmountComponentAtNode(container);
-  isOpen = false;
-};
 
 export interface ShowOptionsPopoverProps {
   anchorElement: HTMLElement;
@@ -53,6 +45,16 @@ export function showOptionsPopover({
       theme: { theme$ },
     },
   } = pluginServices.getServices();
+
+  let isOpen = false;
+
+  const container = document.createElement('div');
+  const root = createRoot(container);
+
+  const onClose = () => {
+    root.unmount();
+    isOpen = false;
+  };
 
   if (isOpen) {
     onClose();
@@ -85,5 +87,5 @@ export function showOptionsPopover({
       </KibanaThemeProvider>
     </I18nProvider>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 }

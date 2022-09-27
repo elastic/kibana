@@ -55,7 +55,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
   const isValid = !errors.length;
 
   const setExtents = useCallback(
-    (paramName, value) => {
+    (paramName: 'min' | 'max', value: number | '') => {
       setScale(paramName, value === '' ? null : value);
     },
     [setScale]

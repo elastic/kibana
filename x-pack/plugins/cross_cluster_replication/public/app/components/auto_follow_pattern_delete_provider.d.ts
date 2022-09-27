@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
-declare const AutoFollowPatternDeleteProvider: FunctionComponent;
+declare const AutoFollowPatternDeleteProvider: FC<PropsWithChildren>;

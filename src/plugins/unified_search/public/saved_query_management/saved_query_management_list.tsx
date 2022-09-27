@@ -123,7 +123,7 @@ export function SavedQueryManagementList({
 }: SavedQueryManagementListProps) {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
-  const [selectedSavedQuery, setSelectedSavedQuery] = useState(null as SavedQuery | null);
+  const [selectedSavedQuery, setSelectedSavedQuery] = useState<SavedQuery | undefined>(undefined);
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState(null as SavedQuery | null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
@@ -155,7 +155,7 @@ export function SavedQueryManagementList({
     }
   }, [onLoad, selectedSavedQuery, onClose]);
 
-  const handleSelect = useCallback((savedQueryToSelect) => {
+  const handleSelect = useCallback((savedQueryToSelect?: SavedQuery) => {
     setSelectedSavedQuery(savedQueryToSelect);
   }, []);
 

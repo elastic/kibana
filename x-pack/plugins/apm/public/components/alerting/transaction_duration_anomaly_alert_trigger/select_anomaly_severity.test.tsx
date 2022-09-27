@@ -12,6 +12,7 @@ import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
 import { SelectAnomalySeverity } from './select_anomaly_severity';
 
 function Wrapper({ children }: { children?: ReactNode }) {
+  // @ts-expect-error update types
   return <IntlProvider locale="en">{children}</IntlProvider>;
 }
 

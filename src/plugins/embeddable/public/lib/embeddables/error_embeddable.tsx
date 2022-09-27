@@ -8,7 +8,8 @@
 
 import { EuiText, EuiIcon, EuiPopover, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 import { KibanaThemeProvider, Markdown } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Embeddable } from './embeddable';
@@ -29,6 +30,7 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public readonly type = ERROR_EMBEDDABLE_TYPE;
   public error: Error | string;
   private dom?: HTMLElement;
+  private root?: Root;
 
   constructor(
     error: Error | string,
@@ -45,6 +47,7 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public render(dom: HTMLElement) {
     const title = typeof this.error === 'string' ? this.error : this.error.message;
     this.dom = dom;
+    this.root = createRoot(dom);
     let theme;
     try {
       theme = getTheme();
@@ -74,12 +77,12 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
         node
       );
 
-    ReactDOM.render(content, dom);
+    this.root.render(content);
   }
 
   public destroy() {
     if (this.dom) {
-      ReactDOM.unmountComponentAtNode(this.dom);
+      this.root?.unmount();
     }
   }
 }

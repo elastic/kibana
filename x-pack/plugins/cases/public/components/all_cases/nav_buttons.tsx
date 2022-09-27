@@ -35,7 +35,7 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const navigateToCreateCaseClick = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       navigateToCreateCase();
     },

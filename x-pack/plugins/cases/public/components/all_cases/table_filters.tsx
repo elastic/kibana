@@ -69,7 +69,7 @@ const CasesTableFiltersComponent = ({
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [selectedOwner, setSelectedOwner] = useState([]);
+  const [selectedOwner, setSelectedOwner] = useState<string[]>([]);
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
   const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
   const { caseAssignmentAuthorized } = useCasesFeatures();
@@ -95,7 +95,7 @@ const CasesTableFiltersComponent = ({
   );
 
   const handleSelectedTags = useCallback(
-    (newTags) => {
+    (newTags: string[]) => {
       if (!isEqual(newTags, selectedTags)) {
         setSelectedTags(newTags);
         onFilterChanged({ tags: newTags });
@@ -105,7 +105,7 @@ const CasesTableFiltersComponent = ({
   );
 
   const handleSelectedSolution = useCallback(
-    (newOwner) => {
+    (newOwner: string[]) => {
       if (!isEqual(newOwner, selectedOwner)) {
         setSelectedOwner(newOwner);
         onFilterChanged({ owner: newOwner });
@@ -122,7 +122,7 @@ const CasesTableFiltersComponent = ({
   }, [handleSelectedTags, selectedTags, tags]);
 
   const handleOnSearch = useCallback(
-    (newSearch) => {
+    (newSearch: string) => {
       const trimSearch = newSearch.trim();
       if (!isEqual(trimSearch, search)) {
         setSearch(trimSearch);

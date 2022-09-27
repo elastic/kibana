@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
 
 import type {
@@ -340,16 +340,17 @@ export function renderLoginPage(
   { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
   props: Props
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <i18nStart.Context>
       <KibanaThemeProvider theme$={theme$}>
         <LoginPage {...props} />
       </KibanaThemeProvider>
-    </i18nStart.Context>,
-    element
+    </i18nStart.Context>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }
 
 function isWindowEmbedded() {

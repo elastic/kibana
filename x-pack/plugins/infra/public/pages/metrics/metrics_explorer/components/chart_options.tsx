@@ -15,6 +15,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import {
   MetricsExplorerChartOptions as ChartOptions,
@@ -112,7 +113,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
   );
 
   const handleStackChange = useCallback(
-    (e) => {
+    (e: EuiSwitchEvent) => {
       onChange({
         ...chartOptions,
         stack: e.target.checked,

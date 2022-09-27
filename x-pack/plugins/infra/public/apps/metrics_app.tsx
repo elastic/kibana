@@ -8,7 +8,7 @@
 import { History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -30,8 +30,9 @@ export const renderApp = (
   const storage = new Storage(window.localStorage);
 
   prepareMountElement(element, 'infraMetricsPage');
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <MetricsApp
       core={core}
       history={history}
@@ -40,12 +41,11 @@ export const renderApp = (
       setHeaderActionMenu={setHeaderActionMenu}
       storage={storage}
       theme$={theme$}
-    />,
-    element
+    />
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
     plugins.data.search.session.clear();
   };
 };

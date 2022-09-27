@@ -10,7 +10,7 @@ import React from 'react';
 import { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
 import type { ThemeServiceStart } from '@kbn/core/public';
@@ -96,13 +96,13 @@ export function redirectWhenMissing({
         defaultMessage: 'Saved object is missing',
       }),
       text: (element: HTMLElement) => {
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <KibanaThemeProvider theme$={theme.theme$}>
             <ErrorRenderer>{error.message}</ErrorRenderer>
           </KibanaThemeProvider>,
-          element
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 

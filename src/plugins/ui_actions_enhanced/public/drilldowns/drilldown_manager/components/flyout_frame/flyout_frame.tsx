@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import {
   EuiFlyoutHeader,
   EuiTitle,
@@ -30,7 +31,7 @@ export interface FlyoutFrameProps {
 /**
  * @todo This component can be moved to `kibana_react`.
  */
-export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
+export const FlyoutFrame: FC<PropsWithChildren<FlyoutFrameProps>> = ({
   title = '',
   footer,
   onClose,

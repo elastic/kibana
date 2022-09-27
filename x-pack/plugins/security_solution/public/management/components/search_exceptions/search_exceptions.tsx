@@ -68,7 +68,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     );
 
     const handleOnSearchQuery = useCallback(
-      (value) => {
+      (value: string) => {
         onSearch(value, includedPolicies, false);
       },
       [onSearch, includedPolicies]

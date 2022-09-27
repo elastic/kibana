@@ -11,7 +11,11 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * A list of allowed values that can be used in `xpack.fleet.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
-export const allowedExperimentalValues = Object.freeze({
+export const allowedExperimentalValues = Object.freeze<{
+  createPackagePolicyMultiPageLayout: boolean;
+  packageVerification: boolean;
+  showDevtoolsRequest: boolean;
+}>({
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
   showDevtoolsRequest: true,

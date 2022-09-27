@@ -42,6 +42,7 @@ export const ColumnChart: FC<Props> = ({
   return (
     <div data-test-subj={dataTestSubj} style={{ width: '100%' }}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
+        // @ts-expect-error update types
         <Chart size={size}>
           <Settings
             xDomain={Array.from({ length: maxChartColumns }, (_, i) => i)}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { EuiCallOut } from '@elastic/eui';
 
 import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
@@ -39,9 +39,10 @@ export const mount =
       </i18nCore.Context>
     );
 
-    render(reactElement, element);
+    const root = createRoot(element);
+    root.render(reactElement);
     return () => {
-      unmountComponentAtNode(element);
+      root.unmount();
       plugins.data.search.session.clear();
     };
   };

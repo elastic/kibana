@@ -37,7 +37,7 @@ export const ResponseActionAddButton = ({
   const isGoldLicense = useLicense().isGoldPlus();
 
   const handleAddActionType = useCallback(
-    (item) => {
+    (item: ResponseActionType) => {
       setAddResponseActionButtonShown(false);
       addActionType();
 

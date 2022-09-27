@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { mount } from 'enzyme';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -26,7 +26,7 @@ const theme$ = themeServiceMock.createTheme$();
 let history = scopedHistoryMock.create();
 const authc = securityMock.createSetup().authc;
 
-const wrapper: FunctionComponent = ({ children }) => (
+const wrapper: FC<PropsWithChildren> = ({ children }) => (
   <Providers
     services={coreStart}
     theme$={theme$}

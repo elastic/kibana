@@ -43,6 +43,7 @@ const onError = jest.fn();
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(
+    // @ts-expect-error update types
     <IntlProvider locale={'en'}>
       <KibanaReactContext.Provider>{Element}</KibanaReactContext.Provider>
     </IntlProvider>

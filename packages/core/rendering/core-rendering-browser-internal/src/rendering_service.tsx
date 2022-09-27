@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { pairwise, startWith } from 'rxjs/operators';
 
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -50,7 +50,9 @@ export class RenderingService {
         body.classList.add(...newClasses);
       });
 
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+
+    root.render(
       <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
         <>
           {/* Fixed headers */}
@@ -68,8 +70,7 @@ export class RenderingService {
             {appComponent}
           </AppWrapper>
         </>
-      </CoreContextProvider>,
-      targetDomElement
+      </CoreContextProvider>
     );
   }
 }

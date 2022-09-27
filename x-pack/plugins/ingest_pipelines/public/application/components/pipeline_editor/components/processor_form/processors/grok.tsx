@@ -129,7 +129,7 @@ export const Grok: FunctionComponent = () => {
           return (
             <DragAndDropTextList
               label={fieldsConfig.patterns.label!}
-              helpText={fieldsConfig.patterns.helpText}
+              helpText={fieldsConfig.patterns.helpText as string[]}
               error={error}
               value={items}
               onMove={moveItem}

@@ -118,35 +118,36 @@ export const usePrePackagedRules = ({
       prePackagedRulesStatus?.timelinesNotUpdated,
     ]
   );
-  const getLoadPrebuiltRulesAndTemplatesButton = useCallback(
-    ({ isDisabled, onClick, fill, 'data-test-subj': dataTestSubj = 'loadPrebuiltRulesBtn' }) => {
-      return (prePackagedAssetsStatus === 'ruleNotInstalled' ||
-        prePackagedTimelineStatus === 'timelinesNotInstalled') &&
-        prePackagedAssetsStatus !== 'someRuleUninstall' ? (
-        <EuiButton
-          fill={fill}
-          iconType="indexOpen"
-          isLoading={loadingCreatePrePackagedRules}
-          isDisabled={isDisabled}
-          onClick={onClick}
-          data-test-subj={dataTestSubj}
-        >
-          {prePackagedAssetsStatus === 'ruleNotInstalled' &&
-            prePackagedTimelineStatus === 'timelinesNotInstalled' &&
-            i18n.LOAD_PREPACKAGED_RULES_AND_TEMPLATES}
+  const getLoadPrebuiltRulesAndTemplatesButton =
+    useCallback<GetLoadPrebuiltRulesAndTemplatesButton>(
+      ({ isDisabled, onClick, fill, 'data-test-subj': dataTestSubj = 'loadPrebuiltRulesBtn' }) => {
+        return (prePackagedAssetsStatus === 'ruleNotInstalled' ||
+          prePackagedTimelineStatus === 'timelinesNotInstalled') &&
+          prePackagedAssetsStatus !== 'someRuleUninstall' ? (
+          <EuiButton
+            fill={fill}
+            iconType="indexOpen"
+            isLoading={loadingCreatePrePackagedRules}
+            isDisabled={isDisabled}
+            onClick={onClick}
+            data-test-subj={dataTestSubj}
+          >
+            {prePackagedAssetsStatus === 'ruleNotInstalled' &&
+              prePackagedTimelineStatus === 'timelinesNotInstalled' &&
+              i18n.LOAD_PREPACKAGED_RULES_AND_TEMPLATES}
 
-          {prePackagedAssetsStatus === 'ruleNotInstalled' &&
-            prePackagedTimelineStatus !== 'timelinesNotInstalled' &&
-            i18n.LOAD_PREPACKAGED_RULES}
+            {prePackagedAssetsStatus === 'ruleNotInstalled' &&
+              prePackagedTimelineStatus !== 'timelinesNotInstalled' &&
+              i18n.LOAD_PREPACKAGED_RULES}
 
-          {prePackagedAssetsStatus !== 'ruleNotInstalled' &&
-            prePackagedTimelineStatus === 'timelinesNotInstalled' &&
-            i18n.LOAD_PREPACKAGED_TIMELINE_TEMPLATES}
-        </EuiButton>
-      ) : null;
-    },
-    [loadingCreatePrePackagedRules, prePackagedAssetsStatus, prePackagedTimelineStatus]
-  );
+            {prePackagedAssetsStatus !== 'ruleNotInstalled' &&
+              prePackagedTimelineStatus === 'timelinesNotInstalled' &&
+              i18n.LOAD_PREPACKAGED_TIMELINE_TEMPLATES}
+          </EuiButton>
+        ) : null;
+      },
+      [loadingCreatePrePackagedRules, prePackagedAssetsStatus, prePackagedTimelineStatus]
+    );
 
   const getMissingRulesOrTimelinesButtonTitle = useCallback(
     (missingRules: number, missingTimelines: number) => {
@@ -160,34 +161,35 @@ export const usePrePackagedRules = ({
     []
   );
 
-  const getReloadPrebuiltRulesAndTemplatesButton = useCallback(
-    ({ isDisabled, onClick, fill = false }) => {
-      return prePackagedAssetsStatus === 'someRuleUninstall' ||
-        prePackagedTimelineStatus === 'someTimelineUninstall' ? (
-        <EuiButton
-          fill={fill}
-          iconType="plusInCircle"
-          isLoading={loadingCreatePrePackagedRules}
-          isDisabled={isDisabled}
-          onClick={onClick}
-          data-test-subj="reloadPrebuiltRulesBtn"
-        >
-          {getMissingRulesOrTimelinesButtonTitle(
-            prePackagedRulesStatus?.rulesNotInstalled ?? 0,
-            prePackagedRulesStatus?.timelinesNotInstalled ?? 0
-          )}
-        </EuiButton>
-      ) : null;
-    },
-    [
-      getMissingRulesOrTimelinesButtonTitle,
-      loadingCreatePrePackagedRules,
-      prePackagedAssetsStatus,
-      prePackagedRulesStatus?.rulesNotInstalled,
-      prePackagedRulesStatus?.timelinesNotInstalled,
-      prePackagedTimelineStatus,
-    ]
-  );
+  const getReloadPrebuiltRulesAndTemplatesButton =
+    useCallback<GetReloadPrebuiltRulesAndTemplatesButton>(
+      ({ isDisabled, onClick, fill = false }) => {
+        return prePackagedAssetsStatus === 'someRuleUninstall' ||
+          prePackagedTimelineStatus === 'someTimelineUninstall' ? (
+          <EuiButton
+            fill={fill}
+            iconType="plusInCircle"
+            isLoading={loadingCreatePrePackagedRules}
+            isDisabled={isDisabled}
+            onClick={onClick}
+            data-test-subj="reloadPrebuiltRulesBtn"
+          >
+            {getMissingRulesOrTimelinesButtonTitle(
+              prePackagedRulesStatus?.rulesNotInstalled ?? 0,
+              prePackagedRulesStatus?.timelinesNotInstalled ?? 0
+            )}
+          </EuiButton>
+        ) : null;
+      },
+      [
+        getMissingRulesOrTimelinesButtonTitle,
+        loadingCreatePrePackagedRules,
+        prePackagedAssetsStatus,
+        prePackagedRulesStatus?.rulesNotInstalled,
+        prePackagedRulesStatus?.timelinesNotInstalled,
+        prePackagedTimelineStatus,
+      ]
+    );
 
   return {
     loading: isFetching,

@@ -9,7 +9,7 @@ import { AppMountParameters, CoreStart, CoreTheme, MountPoint } from '@kbn/core/
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
@@ -74,19 +74,20 @@ export const renderApp = (
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <MonitoringApp
       core={core}
       plugins={plugins}
       externalConfig={externalConfig}
       setHeaderActionMenu={setHeaderActionMenu}
       theme$={theme$}
-    />,
-    element
+    />
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
     unlistenParentHistory();
   };
 };

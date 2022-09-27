@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { CaseStatuses } from '../../common/api';
 import { useUpdateCases, UseUpdateCases } from './use_bulk_update_case';
 import { basicCase } from './mock';
@@ -23,16 +23,15 @@ describe('useUpdateCases', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: false,
-        isUpdated: false,
-        updateBulkStatus: result.current.updateBulkStatus,
-        dispatchResetIsUpdated: result.current.dispatchResetIsUpdated,
+      const { result } = renderHook<UseUpdateCases, {}>(() => useUpdateCases());
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          isLoading: false,
+          isError: false,
+          isUpdated: false,
+          updateBulkStatus: result.current.updateBulkStatus,
+          dispatchResetIsUpdated: result.current.dispatchResetIsUpdated,
+        });
       });
     });
   });
@@ -41,68 +40,61 @@ describe('useUpdateCases', () => {
     const spyOnPatchCases = jest.spyOn(api, 'patchCasesStatus');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<UseUpdateCases, {}>(() => useUpdateCases());
 
       result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
-      await waitForNextUpdate();
-      expect(spyOnPatchCases).toBeCalledWith(
-        [
-          {
-            status: CaseStatuses.closed,
-            id: basicCase.id,
-            version: basicCase.version,
-          },
-        ],
-        abortCtrl.signal
-      );
+      await waitFor(() => {
+        expect(spyOnPatchCases).toBeCalledWith(
+          [
+            {
+              status: CaseStatuses.closed,
+              id: basicCase.id,
+              version: basicCase.version,
+            },
+          ],
+          abortCtrl.signal
+        );
+      });
     });
   });
 
   it('patch cases', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isUpdated: true,
-        isLoading: false,
-        isError: false,
-        updateBulkStatus: result.current.updateBulkStatus,
-        dispatchResetIsUpdated: result.current.dispatchResetIsUpdated,
+      const { result } = renderHook<UseUpdateCases, {}>(() => useUpdateCases());
+      await waitFor(() => {
+        result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
+        expect(result.current).toEqual({
+          isUpdated: true,
+          isLoading: false,
+          isError: false,
+          updateBulkStatus: result.current.updateBulkStatus,
+          dispatchResetIsUpdated: result.current.dispatchResetIsUpdated,
+        });
       });
     });
   });
 
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
+      const { result } = renderHook<UseUpdateCases, {}>(() => useUpdateCases());
+      await waitFor(() => {
+        result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
 
-      expect(result.current.isLoading).toBe(true);
+        expect(result.current.isLoading).toBe(true);
+      });
     });
   });
 
   it('dispatchResetIsUpdated resets is updated', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
+      const { result } = renderHook<UseUpdateCases, {}>(() => useUpdateCases());
 
-      await waitForNextUpdate();
       result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
-      await waitForNextUpdate();
-      expect(result.current.isUpdated).toBeTruthy();
-      result.current.dispatchResetIsUpdated();
-      expect(result.current.isUpdated).toBeFalsy();
+      await waitFor(() => {
+        expect(result.current.isUpdated).toBeTruthy();
+        result.current.dispatchResetIsUpdated();
+        expect(result.current.isUpdated).toBeFalsy();
+      });
     });
   });
 
@@ -113,18 +105,17 @@ describe('useUpdateCases', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
+      const { result } = renderHook<UseUpdateCases, {}>(() => useUpdateCases());
+      await waitFor(() => {
+        result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
 
-      expect(result.current).toEqual({
-        isUpdated: false,
-        isLoading: false,
-        isError: true,
-        updateBulkStatus: result.current.updateBulkStatus,
-        dispatchResetIsUpdated: result.current.dispatchResetIsUpdated,
+        expect(result.current).toEqual({
+          isUpdated: false,
+          isLoading: false,
+          isError: true,
+          updateBulkStatus: result.current.updateBulkStatus,
+          dispatchResetIsUpdated: result.current.dispatchResetIsUpdated,
+        });
       });
     });
   });

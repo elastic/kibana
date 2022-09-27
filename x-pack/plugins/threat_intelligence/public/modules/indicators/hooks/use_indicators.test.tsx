@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import {
   useIndicators,
   RawIndicatorsResponse,
@@ -33,7 +33,7 @@ describe('useIndicators()', () => {
     });
 
     beforeEach(async () => {
-      renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+      renderHook<UseIndicatorsValue, UseIndicatorsParams>(
         () => useIndicators(useIndicatorsParams),
         {
           wrapper: TestProvidersComponent,
@@ -52,7 +52,7 @@ describe('useIndicators()', () => {
     });
 
     it('should query the database again and reset page to 0', async () => {
-      const hookResult = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+      const hookResult = renderHook<UseIndicatorsValue, UseIndicatorsParams>(
         (props) => useIndicators(props),
         {
           initialProps: useIndicatorsParams,
@@ -109,7 +109,7 @@ describe('useIndicators()', () => {
     beforeEach(async () => {
       mockedSearchService.search.mockReturnValue(throwError(() => new Error('some random error')));
 
-      renderHook<UseIndicatorsParams, UseIndicatorsValue>((props) => useIndicators(props), {
+      renderHook<UseIndicatorsValue, UseIndicatorsParams>((props) => useIndicators(props), {
         initialProps: useIndicatorsParams,
         wrapper: TestProvidersComponent,
       });
@@ -146,7 +146,7 @@ describe('useIndicators()', () => {
     });
 
     it('should call mapping function on every hit', async () => {
-      const { result } = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+      const { result } = renderHook<UseIndicatorsValue, UseIndicatorsParams>(
         (props) => useIndicators(props),
         {
           initialProps: useIndicatorsParams,
@@ -168,7 +168,7 @@ describe('useIndicators()', () => {
 
     describe('when page changes', () => {
       it('should run the query again with pagination parameters', async () => {
-        const { result } = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+        const { result } = renderHook<UseIndicatorsValue, UseIndicatorsParams>(
           () => useIndicators(useIndicatorsParams),
           {
             wrapper: TestProvidersComponent,
@@ -210,7 +210,7 @@ describe('useIndicators()', () => {
 
       describe('when page size changes', () => {
         it('should fetch the first page and update internal page size', async () => {
-          const { result } = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+          const { result } = renderHook<UseIndicatorsValue, UseIndicatorsParams>(
             () => useIndicators(useIndicatorsParams),
             {
               wrapper: TestProvidersComponent,

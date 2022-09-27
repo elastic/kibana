@@ -7,7 +7,7 @@
 
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -93,7 +93,9 @@ function App({
 }
 
 export const renderApp = (props: Props, element: AppMountParameters['element']) => {
-  ReactDOM.render(<App {...props} />, element);
+  const root = createRoot(element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  root.render(<App {...props} />);
+
+  return () => root.unmount();
 };

@@ -71,7 +71,7 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
       : getHostsPageAuthenticationColumns();
 
   const updateLimitPagination = useCallback(
-    (newLimit) =>
+    (newLimit: number) =>
       dispatch(
         hostsActions.updateTableLimit({
           hostsType: type,
@@ -83,7 +83,7 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
   );
 
   const updateActivePage = useCallback(
-    (newPage) =>
+    (newPage: number) =>
       dispatch(
         hostsActions.updateTableActivePage({
           activePage: newPage,

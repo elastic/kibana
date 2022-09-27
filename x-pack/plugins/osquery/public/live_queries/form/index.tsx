@@ -26,6 +26,7 @@ import { LiveQueryQueryField } from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { AddToCaseButton } from '../../cases/add_to_cases_button';
+import type { PackFieldWrapperProps } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 
 export interface LiveQueryFormFields {
@@ -209,7 +210,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const liveQueryActionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails]);
   const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
 
-  const addToCaseButton = useCallback(
+  const addToCaseButton = useCallback<NonNullable<PackFieldWrapperProps['addToCase']>>(
     (payload) => {
       if (liveQueryActionId) {
         return (

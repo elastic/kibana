@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -13,7 +14,7 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../store';
 import { createStore } from '../../store';
@@ -25,12 +26,13 @@ describe('useSignalHelpers', () => {
 
   test('Default state, does not need init and does not need poll', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
+      const { result } = renderHook(() => useSignalHelpers(), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      expect(result.current.signalIndexNeedsInit).toEqual(false);
-      expect(result.current.pollForSignalIndex).toEqual(undefined);
+      await waitFor(() => {
+        expect(result.current.signalIndexNeedsInit).toEqual(false);
+        expect(result.current.pollForSignalIndex).toEqual(undefined);
+      });
     });
   });
   test('Needs init and does not need poll when signal index is not yet in default data view', async () => {
@@ -55,12 +57,15 @@ describe('useSignalHelpers', () => {
     const { storage } = createSecuritySolutionStorageMock();
     const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+      const { result } = renderHook(() => useSignalHelpers(), {
+        wrapper: ({ children }: PropsWithChildren) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
-      await waitForNextUpdate();
-      expect(result.current.signalIndexNeedsInit).toEqual(true);
-      expect(result.current.pollForSignalIndex).toEqual(undefined);
+      await waitFor(() => {
+        expect(result.current.signalIndexNeedsInit).toEqual(true);
+        expect(result.current.pollForSignalIndex).toEqual(undefined);
+      });
     });
   });
   test('Init happened and signal index does not have data yet, poll function becomes available', async () => {
@@ -85,12 +90,15 @@ describe('useSignalHelpers', () => {
     const { storage } = createSecuritySolutionStorageMock();
     const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+      const { result } = renderHook(() => useSignalHelpers(), {
+        wrapper: ({ children }: PropsWithChildren) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
-      await waitForNextUpdate();
-      expect(result.current.signalIndexNeedsInit).toEqual(false);
-      expect(result.current.pollForSignalIndex).not.toEqual(undefined);
+      await waitFor(() => {
+        expect(result.current.signalIndexNeedsInit).toEqual(false);
+        expect(result.current.pollForSignalIndex).not.toEqual(undefined);
+      });
     });
   });
 });

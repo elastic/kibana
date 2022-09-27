@@ -68,7 +68,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     });
 
     const handleSubmit = useCallback(
-      (titleAndDescription, isValid) => {
+      (titleAndDescription: { title: string; description: string }, isValid: boolean) => {
         if (isValid) {
           dispatch(
             timelineActions.updateTitleAndDescription({

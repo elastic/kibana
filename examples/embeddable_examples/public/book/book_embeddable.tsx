@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
   Embeddable,
@@ -104,10 +104,10 @@ export class BookEmbeddable
 
   public render(node: HTMLElement) {
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
     this.node = node;
-    ReactDOM.render(<BookEmbeddableComponent embeddable={this} />, node);
+    createRoot(node).render(<BookEmbeddableComponent embeddable={this} />);
   }
 
   public async reload() {
@@ -128,7 +128,7 @@ export class BookEmbeddable
     super.destroy();
     this.subscription.unsubscribe();
     if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+      createRoot(this.node).unmount();
     }
   }
 }

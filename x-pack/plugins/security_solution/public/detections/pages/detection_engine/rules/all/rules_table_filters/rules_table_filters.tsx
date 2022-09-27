@@ -58,7 +58,7 @@ const RulesTableFiltersComponent = ({
   const { showCustomRules, showElasticRules, tags: selectedTags } = filterOptions;
 
   const handleOnSearch = useCallback(
-    (filterString) => {
+    (filterString: string) => {
       startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
       setFilterOptions({ filter: filterString.trim() });
     },

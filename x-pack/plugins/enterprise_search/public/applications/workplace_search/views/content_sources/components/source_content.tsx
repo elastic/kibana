@@ -160,6 +160,7 @@ export const SourceContent: React.FC = () => {
           <EuiTableHeaderCell>{startCase(urlField)}</EuiTableHeaderCell>
           <EuiTableHeaderCell align="right">{LAST_UPDATED_HEADING}</EuiTableHeaderCell>
         </EuiTableHeader>
+        {/* @ts-expect-error update types */}
         <EuiTableBody>{contentItems.map(contentItem)}</EuiTableBody>
       </EuiTable>
       <EuiSpacer size="m" />

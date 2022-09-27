@@ -138,13 +138,16 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   // A list optimized to handle very many items.
   const renderVirtualList = () => {
     return (
+      // @ts-expect-error update types
       <WindowScroller ref={windowScrollerRef} scrollElement={window}>
         {({ height, registerChild, isScrolling, onChildScroll, scrollTop }: any) => {
           return (
+            // @ts-expect-error update types
             <AutoSizer disableHeight>
               {({ width }) => {
                 return (
                   <div style={{ width: '100%' }} ref={registerChild}>
+                    {/* @ts-expect-error update types */}
                     <List
                       ref={listRef}
                       autoHeight
