@@ -16,7 +16,7 @@ export const useDocumentTitle = (extraTitles: ChromeBreadcrumb[]) => {
   } = useKibanaContextForPlugin();
 
   useEffect(() => {
-    const docTitle: string[] = [{ text: observabilityTitle }, ...extraTitles]
+    const docTitle = [{ text: observabilityTitle }, ...extraTitles]
       .reverse()
       .map((breadcrumb) => breadcrumb.text as string);
 

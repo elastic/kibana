@@ -34,9 +34,7 @@ export const useBreadcrumbs = (app: AppId, appTitle: string, extraCrumbs: Chrome
       ...extraCrumbs,
     ];
 
-    const docTitle: string[] = [...breadcrumbs]
-      .reverse()
-      .map((breadcrumb) => breadcrumb.text as string);
+    const docTitle = [...breadcrumbs].reverse().map((breadcrumb) => breadcrumb.text as string);
 
     chrome.docTitle.change(docTitle);
     chrome.setBreadcrumbs(breadcrumbs);
