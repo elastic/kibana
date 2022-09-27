@@ -62,6 +62,22 @@ export function triggerVisualizeActions(
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
 
+export function triggerVisualizeActionsTextBasedLanguages(
+  contextualFields: string[],
+  dataView?: DataView,
+  query?: AggregateQuery
+) {
+  if (!dataView) return;
+  const triggerOptions = {
+    dataViewSpec: dataView.toSpec(false),
+    fieldName: '',
+    contextualFields,
+    originatingApp: PLUGIN_ID,
+    query,
+  };
+  getUiActions().getTrigger(VISUALIZE_FIELD_TRIGGER).exec(triggerOptions);
+}
+
 export interface VisualizeInformation {
   field: DataViewField;
   href?: string;

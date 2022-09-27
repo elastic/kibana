@@ -8,8 +8,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { Query, AggregateQuery } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { triggerVisualizeActions, VisualizeInformation } from './lib/visualize_trigger_utils';
 import { getVisualizeInformation } from './lib/visualize_trigger_utils';
@@ -20,13 +18,11 @@ interface Props {
   dataView: DataView;
   multiFields?: DataViewField[];
   contextualFields: string[];
-  query?: Query | AggregateQuery;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
-  ({ field, dataView, contextualFields, trackUiMetric, multiFields, query }) => {
-    const aggregateQuery = query && isOfAggregateQueryType(query) ? query : undefined;
+  ({ field, dataView, contextualFields, trackUiMetric, multiFields }) => {
     const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
 
     useEffect(() => {
@@ -47,12 +43,7 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
 
       const triggerVisualization = (updatedDataView: DataView) => {
         trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-        triggerVisualizeActions(
-          visualizeInfo.field,
-          contextualFields,
-          updatedDataView,
-          aggregateQuery
-        );
+        triggerVisualizeActions(visualizeInfo.field, contextualFields, updatedDataView);
       };
       triggerVisualization(dataView);
     };

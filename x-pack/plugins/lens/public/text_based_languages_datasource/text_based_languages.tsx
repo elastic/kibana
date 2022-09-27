@@ -36,7 +36,7 @@ import type {
   TextBasedLanguageField,
 } from './types';
 import { FieldSelect } from './field_select';
-import { Datasource } from '../types';
+import type { Datasource, IndexPatternMap } from '../types';
 import { LayerPanel } from './layerpanel';
 
 function getLayerReferenceName(layerId: string) {
@@ -85,22 +85,30 @@ export function getTextBasedLanguagesDatasource({
   const getSuggestionsForVisualizeField = (
     state: TextBasedLanguagesPrivateState,
     indexPatternId: string,
-    fieldName: string
-    // indexPatterns: any
+    fieldName: string,
+    indexPatterns: IndexPatternMap
   ) => {
     const context = state.initialContext;
     if (context && 'dataViewSpec' in context && context.dataViewSpec.title) {
       const newLayerId = generateId();
+      const indexPattern = indexPatterns[indexPatternId];
+
+      const contextualFields = context.contextualFields;
+      const newColumns = contextualFields?.map((c) => {
+        const field = indexPattern?.getFieldByName(c);
+        const newId = generateId();
+        const type = field?.type ?? 'number';
+        return {
+          columnId: newId,
+          fieldName: c,
+          meta: {
+            type: type as DatatableColumnType,
+          },
+        };
+      });
+
       const index = context.dataViewSpec.title;
       const query = context.query;
-      const newId = generateId();
-      const newColumn = {
-        columnId: newId,
-        fieldName,
-        meta: {
-          type: 'number' as DatatableColumnType,
-        },
-      };
       const updatedState = {
         ...state,
         layers: {
@@ -108,8 +116,8 @@ export function getTextBasedLanguagesDatasource({
           [newLayerId]: {
             index,
             query,
-            columns: [newColumn],
-            allColumns: [newColumn],
+            columns: newColumns ?? [],
+            allColumns: newColumns ?? [],
           },
         },
       };
@@ -124,7 +132,7 @@ export function getTextBasedLanguagesDatasource({
             isMultiRow: false,
             layerId: newLayerId,
             columns:
-              [newColumn].map((f) => {
+              newColumns?.map((f) => {
                 return {
                   columnId: f.columnId,
                   operation: {
