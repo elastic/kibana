@@ -368,7 +368,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
               <EuiFlexItem grow>
                 <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
-                    defaultMessage: 'Delete schedules',
+                    defaultMessage: 'Delete schedule',
                   })}
                 </EuiButton>
               </EuiFlexItem>

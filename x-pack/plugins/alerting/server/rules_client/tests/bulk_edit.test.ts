@@ -486,7 +486,7 @@ describe('bulkEdit()', () => {
       });
       expect(response.errors.length).toEqual(1);
       expect(response.errors[0].message).toEqual(
-        'Error updating rule: rule cannot have more than 5 snooze schedules'
+        'Error updating rule: could not add snooze - Rule cannot have more than 5 snooze schedules'
       );
     });
 
