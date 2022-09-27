@@ -114,7 +114,7 @@ jest.mock('../../hooks/endpoint/use_get_endpoints_list');
 
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
-describe('Response Actions Log', () => {
+describe('Response actions history', () => {
   const testPrefix = 'response-actions-list';
 
   let render: (
