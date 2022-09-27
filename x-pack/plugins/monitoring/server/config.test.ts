@@ -60,9 +60,11 @@ describe('config schema', () => {
             "healthCheck": Object {
               "delay": "PT2.5S",
             },
+            "idleSocketTimeout": "PT9M",
             "ignoreVersionMismatch": false,
             "logFetchCount": 10,
             "logQueries": false,
+            "maxIdleSockets": 256,
             "maxSockets": Infinity,
             "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [
