@@ -393,6 +393,28 @@ describe('Response Actions Log', () => {
       expect(noTrays).toEqual([]);
     });
 
+    it('should contain relevant details in each expanded row', async () => {
+      render();
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      expandButtons.map((button) => userEvent.click(button));
+      const trays = getAllByTestId(`${testPrefix}-details-tray`);
+      expect(trays).toBeTruthy();
+      expect(trays.length).toEqual(13);
+      expect(Array.from(trays[0].querySelectorAll('dt')).map((title) => title.textContent)).toEqual(
+        [
+          'Command placed',
+          'Execution started on',
+          'Execution completed',
+          'Input',
+          'Parameters',
+          'Comment',
+          'Output:',
+        ]
+      );
+    });
+
     it('should refresh data when autoRefresh is toggled on', async () => {
       render();
       const { getByTestId } = renderResult;

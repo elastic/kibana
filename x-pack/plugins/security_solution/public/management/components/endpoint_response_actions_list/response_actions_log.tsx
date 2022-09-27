@@ -265,6 +265,7 @@ export const ResponseActionsLog = memo<
           wasSuccessful,
           isExpired,
           command: _command,
+          comment,
           parameters,
         } = item;
 
@@ -295,6 +296,10 @@ export const ResponseActionsLog = memo<
           {
             title: OUTPUT_MESSAGES.expandSection.parameters,
             description: parametersList ? parametersList : emptyValue,
+          },
+          {
+            title: OUTPUT_MESSAGES.expandSection.comment,
+            description: comment ? comment : emptyValue,
           },
         ].map(({ title, description }) => {
           return {
