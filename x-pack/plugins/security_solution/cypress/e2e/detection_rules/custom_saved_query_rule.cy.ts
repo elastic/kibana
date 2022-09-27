@@ -25,8 +25,8 @@ import {
 
 import { goToRuleDetails, editFirstRule } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { createSavedQuery } from '../../tasks/api_calls/saved_queries';
-import { cleanKibana, deleteAlertsAndRules, deleteSavedQueries } from '../../tasks/common';
+import { createSavedQuery, deleteSavedQueries } from '../../tasks/api_calls/saved_queries';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,

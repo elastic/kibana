@@ -69,3 +69,10 @@ export const DELETED_RULE = i18n.translate(
     defaultMessage: 'Deleted rule',
   }
 );
+
+export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
+  {
+    defaultMessage: 'Failed to load the saved query',
+  }
+);

@@ -97,13 +97,10 @@ export const getFilter = async ({
             index,
             exceptionFilter,
           });
-        } else if (savedId && index != null) {
-          // if savedId present and we ending up here, then saved query failed to be fetched
-          // and we also didn't fall back to saved in rule query
-          throw Error(`Failed to fetch saved query. "${err.message}"`);
         } else {
           // user did not give any additional fall back mechanism for generating a rule
           // rethrow error for activity monitoring
+          err.message = `Failed to fetch saved query. "${err.message}"`;
           throw err;
         }
       }

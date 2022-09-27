@@ -70,6 +70,7 @@ const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => (
   filters: savedQuery.attributes.filters ?? [],
   query: savedQuery.attributes.query,
   saved_id: savedQuery.id,
+  title: savedQuery.attributes.title,
 });
 
 export const QueryBarDefineRule = ({
