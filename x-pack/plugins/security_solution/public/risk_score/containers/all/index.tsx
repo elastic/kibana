@@ -62,7 +62,9 @@ export const initialResult: Omit<
   totalCount: 0,
   data: undefined,
 };
-// why? because this makes typescript very happy
+
+// use this function instead of directly using useRiskScore
+// typescript is happy with the type specific hooks
 export const useHostRiskScore = (
   params?: UseRiskScoreParams
 ): [boolean, RiskScoreState<RiskQueries.hostsRiskScore>] => {
@@ -72,7 +74,8 @@ export const useHostRiskScore = (
   });
 };
 
-// why? because this makes typescript very happy
+// use this function instead of directly using useRiskScore
+// typescript is happy with the type specific hooks
 export const useUserRiskScore = (
   params?: UseRiskScoreParams
 ): [boolean, RiskScoreState<RiskQueries.usersRiskScore>] =>
