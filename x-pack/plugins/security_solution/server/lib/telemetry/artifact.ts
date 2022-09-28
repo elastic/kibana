@@ -26,7 +26,7 @@ class Artifact implements IArtifact {
     this.receiver = receiver;
     this.esClusterInfo = await this.receiver.fetchClusterInfo();
     const version = this.esClusterInfo?.version?.number;
-    this.manifestUrl = `${this.CDN_URL}/downloads/endpoint/manifest/artifacts-${version}.zip`;
+    this.manifestUrl = `${this.CDN_URL}/downloads/kibana/manifest/artifacts-${version}.zip`;
   }
 
   public async getArtifact(name: string): Promise<unknown> {
