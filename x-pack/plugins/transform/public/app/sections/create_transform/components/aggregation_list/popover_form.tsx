@@ -257,7 +257,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           fontSize="s"
           language="json"
           paddingSize="s"
-          style={{ width: '100%', height: '200px' }}
+          css={{ width: '100%', height: '200px' }}
         >
           {JSON.stringify(getEsAggFromAggConfig(defaultData), null, 2)}
         </EuiCodeBlock>
