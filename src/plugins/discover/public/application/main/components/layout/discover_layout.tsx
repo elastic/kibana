@@ -152,9 +152,13 @@ export function DiscoverLayout({
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
-  const onFieldEdited = useCallback(() => {
+  const onFieldEdited = useCallback(async () => {
+    if (!dataView.isPersisted()) {
+      const updateDataView = await updateAdHocDataViewId(dataView);
+      stateContainer.setAppState({ index: updateDataView.id! });
+    }
     savedSearchRefetch$.next('reset');
-  }, [savedSearchRefetch$]);
+  }, [dataView, savedSearchRefetch$, stateContainer, updateAdHocDataViewId]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager

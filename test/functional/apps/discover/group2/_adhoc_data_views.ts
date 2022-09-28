@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
+  const fieldEditor = getService('fieldEditor');
   const PageObjects = getPageObjects([
     'common',
     'unifiedSearch',
@@ -149,9 +150,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('search results should be different after data view update', async () => {
       await PageObjects.discover.createAdHocDataView('logst', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       await addRuntimeField('_bytes-runtimefield', `emit(doc["bytes"].value.toString())`);
       await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      expect(newDataViewId).not.to.equal(prevDataViewId);
 
       // save first search
       await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield');
@@ -184,6 +188,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const second = await secondSearchCell.getVisibleText();
 
       expect(+second).to.equal(+first * 2);
+    });
+
+    it('should update id after data view field edit', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
+
+      await PageObjects.discover.editField('_bytes-runtimefield');
+      await fieldEditor.setName('_bytes-runtimefield-edited', true);
+      await fieldEditor.save();
+      await fieldEditor.confirmSave();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      expect(prevDataViewId).not.to.equal(newDataViewId);
+    });
+
+    it('should update id after data view field removal', async () => {
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
+
+      await PageObjects.discover.clickFieldListItemRemove('_bytes-runtimefield-edited');
+      await PageObjects.discover.removeField('_bytes-runtimefield-edited');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      expect(prevDataViewId).not.to.equal(newDataViewId);
     });
   });
 }
