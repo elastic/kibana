@@ -28,8 +28,7 @@ interface Props {
     countInclusive: number;
     countExclusive: number;
   };
-  sampledTraces: number;
-  totalTraces: number;
+  totalSamples: number;
   totalSeconds: number;
   onClose: () => void;
   status: AsyncStatus;
@@ -105,8 +104,7 @@ function FlamegraphFrameInformationPanel({
 export function FlamegraphInformationWindow({
   onClose,
   frame,
-  sampledTraces,
-  totalTraces,
+  totalSamples,
   totalSeconds,
   status,
 }: Props) {
@@ -127,8 +125,7 @@ export function FlamegraphInformationWindow({
   const impactRows = getImpactRows({
     countInclusive,
     countExclusive,
-    samples: sampledTraces,
-    totalSamples: totalTraces,
+    totalSamples,
     totalSeconds,
   });
 

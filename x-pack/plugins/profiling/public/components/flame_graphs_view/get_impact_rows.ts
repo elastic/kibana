@@ -26,23 +26,16 @@ const CORE_COST_PER_HOUR = 0.0425;
 export function getImpactRows({
   countInclusive,
   countExclusive,
-  samples,
   totalSamples,
   totalSeconds,
 }: {
   countInclusive: number;
   countExclusive: number;
-  samples: number;
   totalSamples: number;
   totalSeconds: number;
 }) {
-  const samplingRate = samples / totalSamples;
-
-  const upscaledCountInclusive = countInclusive / samplingRate;
-  const upscaledCountExclusive = countExclusive / samplingRate;
-
-  const percentage = upscaledCountInclusive / totalSamples;
-  const percentageNoChildren = upscaledCountExclusive / samplingRate / totalSamples;
+  const percentage = countInclusive / totalSamples;
+  const percentageNoChildren = countExclusive / totalSamples;
   const totalCoreSeconds = totalSamples / 20;
   const coreSeconds = totalCoreSeconds * percentage;
   const coreSecondsNoChildren = totalCoreSeconds * percentageNoChildren;
@@ -79,7 +72,7 @@ export function getImpactRows({
       label: i18n.translate('xpack.profiling.flameGraphInformationWindow.samplesLabel', {
         defaultMessage: 'Samples',
       }),
-      value: asNumber(upscaledCountInclusive),
+      value: asNumber(countInclusive),
     },
     {
       label: i18n.translate(

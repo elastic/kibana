@@ -311,8 +311,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                 frame={selected}
                 status={highlightedFrameStatus}
                 totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
-                totalTraces={primaryFlamegraph?.TotalTraces ?? 0}
-                sampledTraces={primaryFlamegraph?.SampledTraces ?? 0}
+                totalSamples={totalSamples}
                 onClose={() => {
                   setShowInformationWindow(false);
                 }}
