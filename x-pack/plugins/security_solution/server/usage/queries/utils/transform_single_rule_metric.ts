@@ -52,6 +52,11 @@ export const transformSingleRuleMetric = ({
       avg: singleMetric.avgTotalSearchDuration.value ?? 0.0,
       min: singleMetric.minTotalSearchDuration.value ?? 0.0,
     },
+    enrichment_duration: {
+      max: singleMetric?.maxTotalEnrichmentDuration?.value ?? 0.0,
+      avg: singleMetric?.avgTotalEnrichmentDuration?.value ?? 0.0,
+      min: singleMetric?.minTotalEnrichmentDuration?.value ?? 0.0,
+    },
     gap_duration: {
       max: singleMetric.maxGapDuration.value ?? 0.0,
       avg: singleMetric.avgGapDuration.value ?? 0.0,
