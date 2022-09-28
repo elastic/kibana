@@ -57,7 +57,6 @@ const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, original
                 riskEntity,
                 riskScoreDocumentationLink: (
                   <RiskScoreDocLink
-                    external={false}
                     riskScoreEntity={riskEntity}
                     title={i18n.RISK_SCORE_TITLE(riskEntity)}
                   />
