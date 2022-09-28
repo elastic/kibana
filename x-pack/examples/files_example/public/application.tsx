@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';
 import { FilesExampleApp } from './components/app';
+import { FilesContext } from './imports';
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,9 @@ export const renderApp = (
 ) => {
   ReactDOM.render(
     <QueryClientProvider client={queryClient}>
-      <FilesExampleApp files={files} notifications={notifications} />
+      <FilesContext>
+        <FilesExampleApp files={files} notifications={notifications} />
+      </FilesContext>
     </QueryClientProvider>,
     element
   );

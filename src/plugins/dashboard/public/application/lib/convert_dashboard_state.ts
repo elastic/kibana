@@ -10,15 +10,15 @@ import _ from 'lodash';
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ControlGroupInput } from '@kbn/controls-plugin/public';
+import { type EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   compareFilters,
-  isFilterPinned,
-  migrateFilter,
   COMPARE_ALL_OPTIONS,
-  type Filter,
+  Filter,
+  isFilterPinned,
+  TimeRange,
 } from '@kbn/es-query';
-import { type EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 
 import type { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
@@ -72,6 +72,7 @@ export const savedObjectToDashboardState = ({
   if (rawState.timeRestore) {
     rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
   }
+
   rawState.controlGroupInput = deserializeControlGroupFromDashboardSavedObject(
     savedDashboard
   ) as ControlGroupInput;
@@ -89,9 +90,10 @@ export const stateToDashboardContainerInput = ({
   executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
   const {
-    data: { query: queryService },
+    data: {
+      query: { filterManager, timefilter: timefilterService },
+    },
   } = pluginServices.getServices();
-  const { filterManager, timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
 
   const {
@@ -109,6 +111,7 @@ export const stateToDashboardContainerInput = ({
     filters: dashboardFilters,
   } = dashboardState;
 
+  const migratedDashboardFilters = mapAndFlattenFilters(_.cloneDeep(dashboardFilters));
   return {
     refreshConfig: timefilter.getRefreshInterval(),
     filters: filterManager
@@ -116,8 +119,8 @@ export const stateToDashboardContainerInput = ({
       .filter(
         (filter) =>
           isFilterPinned(filter) ||
-          dashboardFilters.some((dashboardFilter) =>
-            filtersAreEqual(migrateFilter(_.cloneDeep(dashboardFilter)), filter)
+          migratedDashboardFilters.some((dashboardFilter) =>
+            filtersAreEqual(dashboardFilter, filter)
           )
       ),
     isFullScreenMode: fullScreenMode,

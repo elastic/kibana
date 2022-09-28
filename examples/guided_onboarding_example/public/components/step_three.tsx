@@ -11,7 +11,6 @@ import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiSpacer, EuiText, EuiTitle, EuiTourStep } from '@elastic/eui';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
-import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
@@ -26,17 +25,17 @@ export const StepThree = (props: StepThreeProps) => {
   const {
     guidedOnboarding: { guidedOnboardingApi },
   } = props;
-  const { search } = useLocation();
-  const history = useHistory();
-
-  const query = React.useMemo(() => new URLSearchParams(search), [search]);
-  useEffect(() => {
-    if (query.get('showTour') === 'true') {
-      setIsTourStepOpen(true);
-    }
-  }, [query]);
 
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const subscription = guidedOnboardingApi
+      ?.isGuideStepActive$('search', 'search_experience')
+      .subscribe((isStepActive) => {
+        setIsTourStepOpen(isStepActive);
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboardingApi]);
 
   return (
     <>
@@ -69,8 +68,6 @@ export const StepThree = (props: StepThreeProps) => {
           isStepOpen={isTourStepOpen}
           minWidth={300}
           onFinish={() => {
-            history.push('/stepThree');
-            query.set('showTour', 'false');
             setIsTourStepOpen(false);
           }}
           step={1}

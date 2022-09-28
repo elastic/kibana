@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { OsqueryParams } from './osquery';
+import { OsqueryParams, OsqueryParamsCamelCase } from './osquery';
 
 export enum RESPONSE_ACTION_TYPES {
   OSQUERY = '.osquery',
@@ -18,7 +18,7 @@ export const SUPPORTED_RESPONSE_ACTION_TYPES = Object.values(RESPONSE_ACTION_TYP
 const ResponseActionRuleParam = t.exact(
   t.type({
     actionTypeId: t.literal(RESPONSE_ACTION_TYPES.OSQUERY),
-    params: OsqueryParams,
+    params: OsqueryParamsCamelCase,
   })
 );
 export type RuleResponseAction = t.TypeOf<typeof ResponseActionRuleParam>;

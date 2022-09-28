@@ -106,7 +106,7 @@ export async function bulkCreateAgentActionResults(
   results: Array<{
     actionId: string;
     agentId: string;
-    error: string;
+    error?: string;
   }>
 ): Promise<void> {
   if (results.length === 0) {
@@ -134,6 +134,7 @@ export async function bulkCreateAgentActionResults(
   await esClient.bulk({
     index: AGENT_ACTIONS_RESULTS_INDEX,
     body: bulkBody,
+    refresh: 'wait_for',
   });
 }
 
@@ -157,6 +158,41 @@ export async function getAgentActions(esClient: ElasticsearchClient, actionId: s
   if (res.hits.hits.length === 0) {
     throw new AgentActionNotFoundError('Action not found');
   }
+
+  return res.hits.hits.map((hit) => ({
+    ...hit._source,
+    id: hit._id,
+  }));
+}
+
+export async function getUnenrollAgentActions(
+  esClient: ElasticsearchClient
+): Promise<FleetServerAgentAction[]> {
+  const res = await esClient.search<FleetServerAgentAction>({
+    index: AGENT_ACTIONS_INDEX,
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              type: 'UNENROLL',
+            },
+          },
+          {
+            exists: {
+              field: 'agents',
+            },
+          },
+          {
+            range: {
+              expiration: { gte: new Date().toISOString() },
+            },
+          },
+        ],
+      },
+    },
+    size: SO_SEARCH_LIMIT,
+  });
 
   return res.hits.hits.map((hit) => ({
     ...hit._source,
@@ -207,8 +243,8 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
         hit._source.agents.map((agentId) => ({
           agentId,
           data: {
+            upgraded_at: null,
             upgrade_started_at: null,
-            upgrade_status: 'completed',
           },
         }))
       );

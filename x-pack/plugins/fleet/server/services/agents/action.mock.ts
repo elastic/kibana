@@ -124,6 +124,8 @@ export function createClientMock() {
     };
   });
 
+  esClientMock.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
   return {
     soClient: soClientMock,
     esClient: esClientMock,

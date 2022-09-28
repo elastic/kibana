@@ -39,7 +39,7 @@ export const searchConfig: GuideConfig = {
       ],
       location: {
         appID: 'guidedOnboardingExample',
-        path: 'stepTwo?showTour=true',
+        path: 'stepTwo',
       },
     },
     {
@@ -52,7 +52,7 @@ export const searchConfig: GuideConfig = {
       ],
       location: {
         appID: 'guidedOnboardingExample',
-        path: 'stepThree?showTour=true',
+        path: 'stepThree',
       },
     },
   ],

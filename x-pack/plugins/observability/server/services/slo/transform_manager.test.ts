@@ -6,10 +6,14 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ElasticsearchClient } from '@kbn/core/server';
+import {
+  ElasticsearchClientMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 
 import { DefaultTransformManager } from './transform_manager';
 import {
@@ -19,10 +23,8 @@ import {
 import { SLO, SLITypes } from '../../types/models';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 
-const SPACE_ID = 'space-id';
-
 describe('TransformManager', () => {
-  let esClientMock: jest.Mocked<ElasticsearchClient>;
+  let esClientMock: ElasticsearchClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
 
   beforeEach(() => {
@@ -37,7 +39,7 @@ describe('TransformManager', () => {
         const generators: Record<SLITypes, TransformGenerator> = {
           'slo.apm.transaction_duration': new DummyTransformGenerator(),
         };
-        const service = new DefaultTransformManager(generators, esClientMock, loggerMock, SPACE_ID);
+        const service = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
         await expect(
           service.install(
@@ -59,12 +61,7 @@ describe('TransformManager', () => {
         const generators: Record<SLITypes, TransformGenerator> = {
           'slo.apm.transaction_duration': new FailTransformGenerator(),
         };
-        const transformManager = new DefaultTransformManager(
-          generators,
-          esClientMock,
-          loggerMock,
-          SPACE_ID
-        );
+        const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
         await expect(
           transformManager.install(
@@ -88,12 +85,7 @@ describe('TransformManager', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        esClientMock,
-        loggerMock,
-        SPACE_ID
-      );
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
       const slo = createSLO(createAPMTransactionErrorRateIndicator());
 
       const transformId = await transformManager.install(slo);
@@ -109,12 +101,7 @@ describe('TransformManager', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        esClientMock,
-        loggerMock,
-        SPACE_ID
-      );
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
       await transformManager.start('slo-transform-id');
 
@@ -128,12 +115,7 @@ describe('TransformManager', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        esClientMock,
-        loggerMock,
-        SPACE_ID
-      );
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
       await transformManager.stop('slo-transform-id');
 
@@ -147,16 +129,26 @@ describe('TransformManager', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        esClientMock,
-        loggerMock,
-        SPACE_ID
-      );
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
       await transformManager.uninstall('slo-transform-id');
 
       expect(esClientMock.transform.deleteTransform).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries on transient error', async () => {
+      esClientMock.transform.deleteTransform.mockRejectedValueOnce(
+        new EsErrors.ConnectionError('irrelevant')
+      );
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<SLITypes, TransformGenerator> = {
+        'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+      };
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
+
+      await transformManager.uninstall('slo-transform-id');
+
+      expect(esClientMock.transform.deleteTransform).toHaveBeenCalledTimes(2);
     });
   });
 });

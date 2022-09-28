@@ -26,8 +26,8 @@ import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
-import * as helpers from '../helpers';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import * as helpers from '../../../../common/lib/kuery';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -46,6 +46,8 @@ jest.mock('../../../../common/containers/sourcerer');
 jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
+
+jest.mock('../../../../common/lib/kuery');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -135,6 +137,7 @@ describe('Timeline', () => {
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: ' ',
+      kqlQueryLanguage: 'kuery',
       onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
