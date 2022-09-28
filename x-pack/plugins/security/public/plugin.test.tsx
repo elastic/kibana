@@ -157,7 +157,7 @@ describe('Security Plugin', () => {
       });
 
       const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
-      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
       plugin.start(coreStart, {
         dataViews: {} as DataViewsPublicPluginStart,
         features: {} as FeaturesPluginStart,
@@ -173,7 +173,7 @@ describe('Security Plugin', () => {
       });
 
       const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
-      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
       plugin.start(coreStart, {
         dataViews: {} as DataViewsPublicPluginStart,
         features: {} as FeaturesPluginStart,

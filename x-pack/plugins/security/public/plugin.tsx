@@ -190,7 +190,7 @@ export class SecurityPlugin
 
     const navControlService = this.navControlService.start({ core, authc: this.authc });
 
-    if (cloud?.isCloudEnabled && core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
+    if (cloud?.isCloudEnabled && !core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
       maybeAddCloudLinks({ authc: this.authc, chrome: core.chrome, cloud, navControlService });
     }
 
