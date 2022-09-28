@@ -7,12 +7,12 @@
  */
 
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
-import { coreMock } from './mocks';
+import { createPrebootCoreRouteHandlerContextParamsMock } from './test_helpers';
 
 describe('#uiSettings', () => {
   describe('#client', () => {
     test('returns the results of corePreboot.uiSettings.createDefaultsClient', () => {
-      const corePreboot = coreMock.createInternalPreboot();
+      const corePreboot = createPrebootCoreRouteHandlerContextParamsMock();
       const context = new PrebootCoreRouteHandlerContext(corePreboot);
 
       const client = context.uiSettings.client;
@@ -21,7 +21,7 @@ describe('#uiSettings', () => {
     });
 
     test('only creates one instance', () => {
-      const corePreboot = coreMock.createInternalPreboot();
+      const corePreboot = createPrebootCoreRouteHandlerContextParamsMock();
       const context = new PrebootCoreRouteHandlerContext(corePreboot);
 
       const client1 = context.uiSettings.client;
