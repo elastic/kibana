@@ -2954,6 +2954,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-request-handler-context-server-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-request-handler-context-server@link:bazel-bin/packages/core/http/core-http-request-handler-context-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-router-server-internal@link:bazel-bin/packages/core/http/core-http-router-server-internal":
   version "0.0.0"
   uid ""
@@ -3555,6 +3563,10 @@
   uid ""
 
 "@kbn/securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-exception-list-components@link:bazel-bin/packages/kbn-securitysolution-exception-list-components":
   version "0.0.0"
   uid ""
 
@@ -7075,6 +7087,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-http-request-handler-context-server-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-request-handler-context-server@link:bazel-bin/packages/core/http/core-http-request-handler-context-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-http-router-server-internal@link:bazel-bin/packages/core/http/core-http-router-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7664,6 +7684,10 @@
   uid ""
 
 "@types/kbn__securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__securitysolution-exception-list-components@link:bazel-bin/packages/kbn-securitysolution-exception-list-components/npm_module_types":
   version "0.0.0"
   uid ""
 

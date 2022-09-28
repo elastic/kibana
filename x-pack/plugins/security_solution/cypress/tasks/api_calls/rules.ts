@@ -57,7 +57,8 @@ export const createCustomRule = (
       severity,
       type: 'query',
       from: 'now-50000h',
-      index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : '',
+      index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
+      data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
       query: rule.customQuery,
       language: 'kuery',
       enabled: false,
@@ -92,7 +93,8 @@ export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_test
         name: rule.name,
         severity,
         type: 'eql',
-        index: rule.dataSource.index,
+        index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
+        data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
         query: rule.customQuery,
         language: 'eql',
         enabled: true,
@@ -120,7 +122,8 @@ export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing'
         name: rule.name,
         severity,
         type: 'threshold',
-        index: rule.dataSource.index,
+        index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
+        data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
         query: rule.customQuery,
         threshold: {
           field: [rule.thresholdField],
@@ -129,10 +132,9 @@ export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing'
         },
         enabled: true,
         tags: rule.tags,
-      },
-      headers: { 'kbn-xsrf': 'cypress-creds' },
-    });
-  }
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
 };
 
 export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') => {
@@ -152,7 +154,8 @@ export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') 
         name: rule.name,
         severity,
         type: 'new_terms',
-        index: rule.dataSource.index,
+        index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
+        data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
         query: rule.customQuery,
         new_terms_fields: rule.newTermsFields,
         history_window_start: `now-${rule.historyWindowSize.interval}${rule.historyWindowSize.type}`,
@@ -184,7 +187,8 @@ export const createSavedQueryRule = (
       severity,
       type: 'saved_query',
       from: 'now-50000h',
-      index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : '',
+      index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
+      data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
       saved_id: rule.savedId,
       language: 'kuery',
       enabled: false,
@@ -240,7 +244,8 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
         threat_index: rule.indicatorIndexPattern,
         threat_indicator_path: rule.threatIndicatorPath,
         from: 'now-50000h',
-        index: rule.dataSource.index,
+        index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
+        data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
         query: rule.customQuery || '*:*',
         language: 'kuery',
         enabled: true,
@@ -250,7 +255,6 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       failOnStatusCode: false,
     });
   }
-};
 
 export const createCustomRuleEnabled = (
   rule: CustomRule,
