@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Agent as HttpAgent } from 'http';
+import { Agent as HttpAgent, AgentOptions } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
+import { ConnectionOptions } from '@elastic/elasticsearch';
 
 const HTTPS = 'https:';
-const DEFAULT_CONFIG: HttpAgentOptions = {
-  keepAlive: true,
-  keepAliveMsecs: 1000,
-  maxSockets: 256,
-  maxFreeSockets: 256,
-  scheduling: 'lifo',
-};
 
 export type NetworkAgent = HttpAgent | HttpsAgent;
 export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
@@ -39,12 +32,12 @@ export class AgentManager {
   // Stores Http Agent instances
   private httpStore: Set<HttpAgent>;
 
-  constructor(private agentOptions: HttpAgentOptions = DEFAULT_CONFIG) {
+  constructor() {
     this.httpsStore = new Set();
     this.httpStore = new Set();
   }
 
-  public getAgentFactory(agentOptions?: HttpAgentOptions): AgentFactory {
+  public getAgentFactory(agentOptions?: AgentOptions): AgentFactory {
     // a given agent factory always provides the same Agent instances (for the same protocol)
     // we keep references to the instances at factory level, to be able to reuse them
     let httpAgent: HttpAgent;
@@ -53,13 +46,7 @@ export class AgentManager {
     return (connectionOpts: ConnectionOptions): NetworkAgent => {
       if (connectionOpts.url.protocol === HTTPS) {
         if (!httpsAgent) {
-          const config = Object.assign(
-            {},
-            DEFAULT_CONFIG,
-            this.agentOptions,
-            agentOptions,
-            connectionOpts.tls
-          );
+          const config = Object.assign({}, agentOptions, connectionOpts.tls);
           httpsAgent = new HttpsAgent(config);
           this.httpsStore.add(httpsAgent);
           dereferenceOnDestroy(this.httpsStore, httpsAgent);
@@ -69,8 +56,7 @@ export class AgentManager {
       }
 
       if (!httpAgent) {
-        const config = Object.assign({}, DEFAULT_CONFIG, this.agentOptions, agentOptions);
-        httpAgent = new HttpAgent(config);
+        httpAgent = new HttpAgent(agentOptions);
         this.httpStore.add(httpAgent);
         dereferenceOnDestroy(this.httpStore, httpAgent);
       }
