@@ -134,6 +134,7 @@ export async function bulkCreateAgentActionResults(
   await esClient.bulk({
     index: AGENT_ACTIONS_RESULTS_INDEX,
     body: bulkBody,
+    refresh: 'wait_for',
   });
 }
 
@@ -242,8 +243,8 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
         hit._source.agents.map((agentId) => ({
           agentId,
           data: {
+            upgraded_at: null,
             upgrade_started_at: null,
-            upgrade_status: 'completed',
           },
         }))
       );

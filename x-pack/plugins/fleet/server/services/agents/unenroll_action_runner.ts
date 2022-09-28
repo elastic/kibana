@@ -11,7 +11,7 @@ import { intersection } from 'lodash';
 
 import { AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
@@ -21,7 +21,7 @@ import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 
-import { errorsToResults, bulkUpdateAgents } from './crud';
+import { bulkUpdateAgents } from './crud';
 import {
   bulkCreateAgentActionResults,
   createAgentAction,
@@ -31,8 +31,8 @@ import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class UnenrollActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
-    return await unenrollBatch(this.soClient, this.esClient, agents, this.actionParams!, true);
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
+    return await unenrollBatch(this.soClient, this.esClient, agents, this.actionParams!);
   }
 
   protected getTaskType() {
@@ -60,9 +60,8 @@ export async function unenrollBatch(
     revoke?: boolean;
     actionId?: string;
     total?: number;
-  },
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+  }
+): Promise<{ actionId: string }> {
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
   const outgoingErrors: Record<Agent['id'], Error> = {};
 
@@ -134,7 +133,7 @@ export async function unenrollBatch(
   );
 
   return {
-    items: errorsToResults(givenAgents, outgoingErrors, undefined, skipSuccess),
+    actionId,
   };
 }
 

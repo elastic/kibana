@@ -13,7 +13,6 @@ const EXCLUDED_PACKAGES = [
   'apm',
   'cloud_security_posture',
   'dga',
-  'endpoint',
   'fleet_server',
   'kubernetes',
   'osquery_manager',
