@@ -57,8 +57,8 @@ export async function sendUpgradeAgentAction({
     type: 'UPGRADE',
   });
   await updateAgent(esClient, agentId, {
+    upgraded_at: null,
     upgrade_started_at: now,
-    upgrade_status: 'started',
   });
 }
 

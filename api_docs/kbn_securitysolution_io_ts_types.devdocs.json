@@ -405,6 +405,41 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.TimeDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "TimeDuration",
+        "description": [],
+        "signature": [
+          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.TimeDuration.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ allowedUnits, allowedDurations }",
+            "description": [],
+            "signature": [
+              "TimeDurationType"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -644,12 +679,30 @@
         "label": "TimeDurationC",
         "description": [],
         "signature": [
+          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
           "Type",
           "<string, string, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.TimeDurationC.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "TimeDurationWithAllowedDurations | TimeDurationWithAllowedUnits"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1038,24 +1091,6 @@
           "<number, string, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/string_to_positive_number/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-io-ts-types",
-        "id": "def-common.TimeDuration",
-        "type": "Object",
-        "tags": [],
-        "label": "TimeDuration",
-        "description": [
-          "\nTypes the TimeDuration as:\n  - A string that is not empty, and composed of a positive integer greater than 0 followed by a unit of time\n  - in the format {safe_integer}{timeUnit}, e.g. \"30s\", \"1m\", \"2h\""
-        ],
-        "signature": [
-          "Type",
-          "<string, string, unknown>"
-        ],
-        "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
