@@ -46,18 +46,6 @@ const validateEndpointIntegrationConfig = (
   }
 };
 const validateCloudIntegrationConfig = (config: PolicyCreateCloudConfig, logger: Logger): void => {
-  if (!config?.cloudConfig?.preventions) {
-    logger.warn(
-      'missing cloudConfig preventions: {preventions : behavior_protection: true / false}'
-    );
-    throwError('invalid value for cloudConfig: missing preventions ');
-  }
-  if (typeof config.cloudConfig.preventions.behavior_protection !== 'boolean') {
-    logger.warn(
-      `invalid value for cloudConfig preventions behavior_protection: ${config.cloudConfig.preventions.behavior_protection}`
-    );
-    throwError('invalid value for cloudConfig preventions behavior_protection');
-  }
   if (!config?.eventFilters) {
     logger.warn(
       `eventFilters is required for cloud integration: {eventFilters : nonInteractiveSession: true / false}`

@@ -13,11 +13,7 @@ import type { LicenseService } from '../../../common/license/license';
 import { isAtLeast } from '../../../common/license/license';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
-import type {
-  AnyPolicyCreateConfig,
-  PolicyCreateCloudConfig,
-  PolicyCreateEndpointConfig,
-} from '../types';
+import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
 import { ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL, ENDPOINT_CONFIG_PRESET_NGAV } from '../constants';
 
 /**
@@ -32,7 +28,7 @@ export const createDefaultPolicy = (
     : policyConfigFactoryWithoutPaidFeatures();
 
   if (config?.type === 'cloud') {
-    return getCloudPolicyWithIntegrationConfig(policy, config);
+    return getCloudPolicyConfig(policy);
   }
 
   return getEndpointPolicyWithIntegrationConfig(policy, config);
@@ -95,37 +91,20 @@ const getEndpointPolicyWithIntegrationConfig = (
 /**
  * Retrieve policy for cloud based on the on the cloud integration config
  */
-const getCloudPolicyWithIntegrationConfig = (
-  policy: PolicyConfig,
-  config: PolicyCreateCloudConfig
-): PolicyConfig => {
-  /**
-   * Check if the protection is supported, then retrieve Behavior Protection mode based on cloud settings
-   */
-  const getBehaviorProtectionMode = () => {
-    if (!policy.linux.behavior_protection.supported) {
-      return ProtectionModes.off;
-    }
-
-    return config.cloudConfig.preventions.behavior_protection
-      ? ProtectionModes.prevent
-      : ProtectionModes.off;
-  };
-
+const getCloudPolicyConfig = (policy: PolicyConfig): PolicyConfig => {
+  // Disabling all protections, since it's not yet supported on Cloud integrations
   const protections = {
-    // Disabling memory_protection, since it's not supported on Cloud integrations
     memory_protection: {
       supported: false,
       mode: ProtectionModes.off,
     },
     malware: {
       ...policy.linux.malware,
-      // Disabling Malware protection, since it's not supported on Cloud integrations due to performance reasons
       mode: ProtectionModes.off,
     },
     behavior_protection: {
       ...policy.linux.behavior_protection,
-      mode: getBehaviorProtectionMode(),
+      mode: ProtectionModes.off,
     },
   };
 

@@ -8,7 +8,6 @@
 import React, { memo, useState, useEffect, useRef, useCallback } from 'react';
 import {
   EuiForm,
-  EuiCheckbox,
   EuiRadio,
   EuiSelect,
   EuiText,
@@ -19,7 +18,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { useLicense } from '../../../../../../common/hooks/use_license';
 import {
   ALL_EVENTS,
   CLOUD_SECURITY,
@@ -28,7 +26,6 @@ import {
   EDR_ESSENTIAL,
   ENDPOINT,
   INTERACTIVE_ONLY,
-  PREVENT_MALICIOUS_BEHAVIOR,
 } from './translations';
 
 const PREFIX = 'endpoint_policy_create_extension';
@@ -70,11 +67,8 @@ const HelpTextWithPadding = styled.div`
  */
 export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    const isPlatinumPlus = useLicense().isPlatinumPlus();
-
     // / Endpoint Radio Options (NGAV and EDRs)
     const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('NGAV');
-    const [behaviorProtectionChecked, setBehaviorProtectionChecked] = useState(false);
     const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('ALL_EVENTS');
     const [selectedEnvironment, setSelectedEnvironment] = useState<Environment>('endpoint');
     const initialRender = useRef(true);
@@ -130,11 +124,6 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                       type: selectedEnvironment,
                       ...(selectedEnvironment === 'cloud'
                         ? {
-                            cloudConfig: {
-                              preventions: {
-                                behavior_protection: behaviorProtectionChecked,
-                              },
-                            },
                             eventFilters: {
                               nonInteractiveSession: selectedCloudEvent === 'INTERACTIVE_ONLY',
                             },
@@ -152,14 +141,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           },
         });
       }
-    }, [
-      selectedEnvironment,
-      behaviorProtectionChecked,
-      selectedCloudEvent,
-      endpointPreset,
-      onChange,
-      newPolicy,
-    ]);
+    }, [selectedEnvironment, selectedCloudEvent, endpointPreset, onChange, newPolicy]);
 
     const onChangeEnvironment = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedEnvironment(e?.target?.value as Environment);
@@ -169,9 +151,6 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     }, []);
     const onChangeEndpointPreset = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       setEndpointPreset(e.target.value as EndpointPreset);
-    }, []);
-    const onChangeMaliciousBehavior = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      setBehaviorProtectionChecked((checked) => !checked);
     }, []);
 
     const getEndpointPresetsProps = useCallback(
@@ -217,7 +196,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   <strong>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.environments"
-                      defaultMessage="protect your transitional endpoints or dynamic cloud environments"
+                      defaultMessage="protect your traditional endpoints or dynamic cloud environments"
                     />
                   </strong>
                 ),
@@ -327,36 +306,6 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             >
               <EuiRadio {...getCloudEventsProps('INTERACTIVE_ONLY')} />
             </EuiFormRow>
-            {isPlatinumPlus && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiTitle size="xxs">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.securitySolution.createPackagePolicy.stepConfigure.protectionModeTranslation"
-                      defaultMessage="Protection mode"
-                    />
-                  </p>
-                </EuiTitle>
-                <EuiSpacer size="xs" />
-                <EuiText color="subdued" size="s">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.securitySolution.createPackagePolicy.stepConfigure.protectionModeDetailsTranslation"
-                      defaultMessage="In addition to detections, Elastic security can prevent threats before they happen.
-                      You can disable protections anytime in the agent policy configurations settings."
-                    />
-                  </p>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiCheckbox
-                  id={`${PREFIX}_cloud_protection_malicious_behavior`}
-                  label={PREVENT_MALICIOUS_BEHAVIOR}
-                  checked={behaviorProtectionChecked}
-                  onChange={onChangeMaliciousBehavior}
-                />
-              </>
-            )}
           </>
         )}
         <EuiSpacer size="xl" />
