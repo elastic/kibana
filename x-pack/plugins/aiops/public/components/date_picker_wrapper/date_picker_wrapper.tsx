@@ -130,7 +130,6 @@ export const DatePickerWrapper: FC = () => {
     [setGlobalState]
   );
 
-  const [isLoading] = useState(false);
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
     timefilter.isAutoRefreshSelectorEnabled()
@@ -176,7 +175,7 @@ export const DatePickerWrapper: FC = () => {
                 })}
               >
                 <FormattedMessage
-                  id="xpack.dataVisualizer.index.pageRefreshResetButton"
+                  id="xpack.aiops.index.pageRefreshResetButton"
                   defaultMessage="Set to {defaultInterval}"
                   values={{
                     defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
@@ -286,7 +285,7 @@ export const DatePickerWrapper: FC = () => {
             color="primary"
             iconType={'refresh'}
             onClick={() => updateLastRefresh()}
-            data-test-subj={`mlRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
+            data-test-subj="aiOpsRefreshPageButton"
           >
             <FormattedMessage id="xpack.aiops.pageRefreshButton" defaultMessage="Refresh" />
           </EuiButton>

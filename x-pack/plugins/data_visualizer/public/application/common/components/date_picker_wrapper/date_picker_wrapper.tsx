@@ -119,7 +119,6 @@ export const DatePickerWrapper: FC = () => {
     [setGlobalState]
   );
 
-  const [isLoading] = useState(false);
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
     timefilter.isAutoRefreshSelectorEnabled()
@@ -244,7 +243,6 @@ export const DatePickerWrapper: FC = () => {
     >
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker
-          isLoading={isLoading}
           start={time.from}
           end={time.to}
           isPaused={refreshInterval.pause}
@@ -266,8 +264,7 @@ export const DatePickerWrapper: FC = () => {
             color="primary"
             iconType={'refresh'}
             onClick={() => updateLastRefresh()}
-            data-test-subj={`mlRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
-            isLoading={isLoading}
+            data-test-subj="dataVisualizerRefreshPageButton"
           >
             <FormattedMessage
               id="xpack.dataVisualizer.index.pageRefreshButton"
