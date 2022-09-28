@@ -543,7 +543,6 @@ export function DiscoverSidebarComponent({
         {isPlainRecord && (
           <EuiFlexItem grow={false}>
             <EuiButton
-              iconType="indexOpen"
               data-test-subj="textBased-visualize"
               onClick={visualizeAggregateQuery}
               size="s"

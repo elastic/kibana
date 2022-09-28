@@ -47,8 +47,7 @@ async function getCompatibleActions(
 export function triggerVisualizeActions(
   field: DataViewField,
   contextualFields: string[],
-  dataView?: DataView,
-  query?: AggregateQuery
+  dataView?: DataView
 ) {
   if (!dataView) return;
   const trigger = getTriggerConstant(field.type);
@@ -57,7 +56,6 @@ export function triggerVisualizeActions(
     fieldName: field.name,
     contextualFields,
     originatingApp: PLUGIN_ID,
-    query,
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
