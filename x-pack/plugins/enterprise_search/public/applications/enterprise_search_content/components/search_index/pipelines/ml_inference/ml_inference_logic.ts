@@ -40,7 +40,6 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
 
 interface MLInferenceProcessorsActions {
-  clearFormErrors: () => void;
   createApiError: (error: HttpError) => HttpError;
   createApiSuccess: typeof CreateMlInferencePipelineApiLogic.actions.apiSuccess;
   createPipeline: () => void;
@@ -50,9 +49,6 @@ interface MLInferenceProcessorsActions {
   mappingsApiError(error: HttpError): HttpError;
   mlModelsApiError(error: HttpError): HttpError;
   setCreateErrors(errors: string[]): { errors: string[] };
-  setFormErrors: (inputErrors: AddInferencePipelineFormErrors) => {
-    inputErrors: AddInferencePipelineFormErrors;
-  };
   setIndexName: (indexName: string) => { indexName: string };
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
@@ -69,6 +65,7 @@ interface MLInferenceProcessorsValues {
   createErrors: string[];
   formErrors: AddInferencePipelineFormErrors;
   isLoading: boolean;
+  isPipelineDataValid: boolean;
   mappingData: typeof MappingsApiLogic.values.data;
   mappingStatus: Status;
   mlModelsData: typeof MLModelsApiLogic.values.data;
@@ -124,12 +121,6 @@ export const MLInferenceLogic = kea<
       const {
         addInferencePipelineModal: { configuration, indexName },
       } = values;
-      const validationErrors = validateInferencePipelineConfiguration(configuration);
-      if (validationErrors !== undefined) {
-        actions.setFormErrors(validationErrors);
-        return;
-      }
-      actions.clearFormErrors();
 
       actions.makeCreatePipelineRequest({
         indexName,
@@ -171,20 +162,22 @@ export const MLInferenceLogic = kea<
         setCreateErrors: (_, { errors }) => errors,
       },
     ],
-    formErrors: [
-      {},
-      {
-        clearFormErrors: () => ({}),
-        setFormErrors: (_, { inputErrors }) => inputErrors,
-      },
-    ],
   },
   selectors: ({ selectors }) => ({
+    formErrors: [
+      () => [selectors.addInferencePipelineModal],
+      (modal: AddInferencePipelineModal) =>
+        validateInferencePipelineConfiguration(modal.configuration),
+    ],
     isLoading: [
       () => [selectors.mlModelsStatus, selectors.mappingStatus],
       (mlModelsStatus, mappingStatus) =>
         !API_REQUEST_COMPLETE_STATUSES.includes(mlModelsStatus) ||
         !API_REQUEST_COMPLETE_STATUSES.includes(mappingStatus),
+    ],
+    isPipelineDataValid: [
+      () => [selectors.formErrors],
+      (errors: AddInferencePipelineFormErrors) => Object.keys(errors).length === 0,
     ],
     sourceFields: [
       () => [selectors.mappingStatus, selectors.mappingData],

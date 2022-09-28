@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { IndexNameLogic } from '../../index_name_logic';
 
 import { ConfigurePipeline } from './configure_pipeline';
-import { MLInferenceLogic, AddInferencePipelineModal } from './ml_inference_logic';
+import { MLInferenceLogic } from './ml_inference_logic';
 import { NoModelsPanel } from './no_models';
 
 interface AddMLInferencePipelineModalProps {
@@ -64,13 +64,8 @@ export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalPr
   );
 };
 
-const isProcessorConfigurationInvalid = ({ configuration }: AddInferencePipelineModal): boolean => {
-  const { pipelineName, modelID, sourceField } = configuration;
-  return pipelineName.trim().length === 0 || modelID.length === 0 || sourceField.length === 0;
-};
-
 const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) => {
-  const { addInferencePipelineModal, createErrors, supportedMLModels, isLoading } =
+  const { createErrors, supportedMLModels, isLoading, isPipelineDataValid } =
     useValues(MLInferenceLogic);
   const { createPipeline } = useActions(MLInferenceLogic);
   if (isLoading) {
@@ -119,11 +114,7 @@ const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClo
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              color="success"
-              disabled={isProcessorConfigurationInvalid(addInferencePipelineModal)}
-              onClick={createPipeline}
-            >
+            <EuiButton color="success" disabled={!isPipelineDataValid} onClick={createPipeline}>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.footer.create',
                 {
