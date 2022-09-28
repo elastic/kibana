@@ -7,11 +7,11 @@
  */
 
 import { guidesConfig } from '../../common/guides_config';
-import { GuideConfig, StepConfig, UseCase } from '../../common/types';
+import { GuideConfig, StepConfig, GuideId } from '../../common/types';
 
 export const getGuideConfig = (guideID?: string): GuideConfig | undefined => {
   if (guideID && Object.keys(guidesConfig).includes(guideID)) {
-    return guidesConfig[guideID as UseCase];
+    return guidesConfig[guideID as GuideId];
   }
 };
 
@@ -31,12 +31,4 @@ export const isLastStep = (guideID: string, stepID: string): boolean => {
     return activeStepIndex === stepsNumber - 1;
   }
   return false;
-};
-
-export const getNextStep = (guideID: string, stepID: string): string | undefined => {
-  const guide = getGuideConfig(guideID);
-  const activeStepIndex = getStepIndex(guideID, stepID);
-  if (activeStepIndex > -1 && guide?.steps[activeStepIndex + 1]) {
-    return guide?.steps[activeStepIndex + 1].id;
-  }
 };

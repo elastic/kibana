@@ -30,8 +30,7 @@ import { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { guidesConfig } from '../../common/guides_config';
-import type { GuideConfig, StepConfig } from '../../common/types';
-import type { GuideState } from '../types';
+import type { GuideConfig, StepConfig, GuideState, GuideStepIds } from '../../common/types';
 import type { ApiService } from '../services/api';
 
 import { GuideStep } from './guide_panel_step';
@@ -69,12 +68,15 @@ const getStepNumber = (state?: GuideState): number | undefined => {
 };
 
 const getProgress = (state?: GuideState): number => {
-  return state?.steps.reduce((acc, currentVal) => {
-    if (currentVal.status === 'complete') {
-      acc = acc + 1;
-    }
-    return acc;
-  }, 0);
+  if (state) {
+    return state.steps.reduce((acc, currentVal) => {
+      if (currentVal.status === 'complete') {
+        acc = acc + 1;
+      }
+      return acc;
+    }, 0);
+  }
+  return 0;
 };
 
 export const GuidePanel = ({ api, application }: GuidePanelProps) => {
@@ -88,9 +90,8 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
   };
 
-  const navigateToStep = async (stepID: string, stepLocation: StepConfig['location']) => {
-    setIsGuideOpen(false);
-    await api.startGuideStep(guideState!.guideId, stepID);
+  const navigateToStep = async (stepId: GuideStepIds, stepLocation: StepConfig['location']) => {
+    await api.startGuideStep(guideState!.guideId, stepId);
     if (stepLocation) {
       application.navigateToApp(stepLocation.appID, { path: stepLocation.path });
     }
@@ -102,18 +103,14 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     application.navigateToApp('home', { path: '#getting_started' });
   };
 
+  const completeGuide = async () => {
+    await api.completeGuide(guideState!.guideId);
+  };
+
   useEffect(() => {
     const subscription = api.fetchActiveGuideState$().subscribe((newGuideState) => {
-      console.log('subscribing newState', newGuideState);
-
       if (newGuideState) {
-        // TODO not sure if this is needed
-        const activeStep = newGuideState.steps.find((step) => step.status === 'in_progress');
-
-        setGuideState({
-          ...newGuideState,
-          activeStep: activeStep?.id,
-        });
+        setGuideState(newGuideState);
       }
     });
     return () => subscription.unsubscribe();
@@ -241,24 +238,38 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                 const accordionId = htmlIdGenerator(`accordion${index}`)();
                 const stepState = guideState?.steps[index];
 
-                return (
-                  <GuideStep
-                    accordionId={accordionId}
-                    stepStatus={stepState?.status}
-                    stepConfig={step}
-                    stepNumber={index + 1}
-                    navigateToStep={navigateToStep}
-                    key={accordionId}
-                  />
-                );
+                if (stepState) {
+                  return (
+                    <GuideStep
+                      accordionId={accordionId}
+                      stepStatus={stepState.status}
+                      stepConfig={step}
+                      stepNumber={index + 1}
+                      navigateToStep={navigateToStep}
+                      key={accordionId}
+                    />
+                  );
+                }
               })}
+
+              {guideState?.status === 'ready_to_complete' && (
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton onClick={completeGuide} fill>
+                      {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
+                        defaultMessage: 'Continue using Elastic',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </div>
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
             <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
               <EuiFlexItem>
-                {/* TODO: Implement exit guide modal - https://github.com/elastic/kibana/issues/139804 */}
+                {/* TODO: Implement quit guide modal - https://github.com/elastic/kibana/issues/139804 */}
                 <EuiButtonEmpty onClick={() => {}}>
                   {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
                     defaultMessage: 'Exit setup guide',

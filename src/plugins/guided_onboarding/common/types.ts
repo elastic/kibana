@@ -6,27 +6,33 @@
  * Side Public License, v 1.
  */
 
-export type UseCase = 'observability' | 'security' | 'search';
+export type GuideId = 'observability' | 'security' | 'search';
+
+export type ObservabilityStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
+export type SecurityStepIds = 'add_data' | 'rules' | 'alerts' | 'cases';
+export type SearchStepIds = 'add_data' | 'browse_docs' | 'search_experience';
+
+export type GuideStepIds = ObservabilityStepIds | SecurityStepIds | SearchStepIds;
 
 /**
- * Inactive: Guide is inactive
- * Active: Guide has been initiated, but no steps have been started
- * In progress: Guide has been initiated and steps are in progress
- * Ready to complete: Steps have been completed, but "Continue using Elastic" has not been clicked
- * Complete: Steps and guide have been completed
+ * Allowed states for a guide:
+ *  in_progress: Guide has been started
+ *  ready_to_complete: All steps have been completed, but the "Continue using Elastic" button has not been clicked
+ *  complete: All steps and the guide have been completed
  */
 export type GuideStatus = 'in_progress' | 'ready_to_complete' | 'complete';
 
 /**
- * Inactive: Step has not started
- * Active: Step is ready to start (i.e., guide has been activated)
- * In progress: Step has been started and is in progress
- * Complete: Step has been completed
+ * Allowed states for each step in a guide:
+ *  in_active: Step has not started
+ *  active: Step is ready to start (i.e., the guide has been started)
+ *  in_progress: Step has been started and is in progress
+ *  complete: Step has been completed
  */
 export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'complete';
 
 export interface StepConfig {
-  id: string;
+  id: GuideStepIds;
   title: string;
   descriptionList: string[];
   location?: {
@@ -46,19 +52,17 @@ export interface GuideConfig {
 }
 
 export type GuidesConfig = {
-  [key in UseCase]: GuideConfig;
+  [key in GuideId]: GuideConfig;
 };
 
-export type ObservabilitySteps = 'add_data' | 'view_dashboard' | 'tour_observability';
-export type SecuritySteps = 'add_data' | 'rules' | 'alerts' | 'cases';
-export type SearchSteps = 'add_data' | 'browse_docs' | 'search_experience';
+export interface GuideStep {
+  id: GuideStepIds;
+  status: StepStatus;
+}
 
-export interface GuideSavedObject {
-  guideId: UseCase;
+export interface GuideState {
+  guideId: GuideId;
   status: GuideStatus;
-  isActive?: boolean;
-  steps: Array<{
-    id: ObservabilitySteps | SecuritySteps | SearchSteps;
-    status: StepStatus;
-  }>;
+  isActive?: boolean; // Drives the current guide shown in the dropdown panel
+  steps: GuideStep[];
 }

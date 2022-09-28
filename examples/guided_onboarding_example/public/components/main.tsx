@@ -25,12 +25,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
+import type {
   GuidedOnboardingPluginStart,
-  GuidedOnboardingState,
-  UseCase,
-  guidesConfig,
+  GuideState,
+  GuideStepIds,
+  GuideId,
+  GuideStep,
 } from '@kbn/guided-onboarding-plugin/public';
+import { guidesConfig } from '@kbn/guided-onboarding-plugin/public';
 
 interface MainProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
@@ -43,25 +45,21 @@ export const Main = (props: MainProps) => {
     notifications,
   } = props;
   const history = useHistory();
-  const [guidesState, setGuidesState] = useState<GuidedOnboardingState[] | undefined>(undefined);
-  const [activeGuide, setActiveGuide] = useState<GuidedOnboardingState | undefined>(undefined);
+  const [guidesState, setGuidesState] = useState<GuideState[] | undefined>(undefined);
+  const [activeGuide, setActiveGuide] = useState<GuideState | undefined>(undefined);
 
-  const [selectedGuide, setSelectedGuide] = useState<UseCase | undefined>(undefined);
-  const [selectedStep, setSelectedStep] = useState<string | undefined>(undefined);
+  const [selectedGuide, setSelectedGuide] = useState<GuideId | undefined>(undefined);
+  const [selectedStep, setSelectedStep] = useState<GuideStepIds | undefined>(undefined);
 
   useEffect(() => {
     const fetchGuidesState = async () => {
-      // get the data from the api
-      const { state: newGuidesState } = await guidedOnboardingApi?.fetchAllGuidesState();
-      // set state with the result
-      setGuidesState(newGuidesState);
+      const newGuidesState = await guidedOnboardingApi?.fetchAllGuidesState();
+      setGuidesState(newGuidesState ? newGuidesState.state : []);
     };
 
-    // call the function
     fetchGuidesState();
   }, [guidedOnboardingApi]);
 
-  // todo change this so subscription
   useEffect(() => {
     const newActiveGuide = guidesState?.find((guide) => guide.isActive === true);
     if (newActiveGuide) {
@@ -69,9 +67,8 @@ export const Main = (props: MainProps) => {
     }
   }, [guidesState, setActiveGuide]);
 
-  // TODO fix TS
-  const startGuide = async (guide: any, guideConfig: any) => {
-    const response = await guidedOnboardingApi?.activateGuide(guideConfig, guide);
+  const activateGuide = async (guideId: GuideId, guideState?: GuideState) => {
+    const response = await guidedOnboardingApi?.activateGuide(guideId, guideState);
 
     if (response) {
       notifications.toasts.addSuccess(
@@ -83,11 +80,45 @@ export const Main = (props: MainProps) => {
   };
 
   const updateGuideState = async () => {
-    const response = await guidedOnboardingApi?.updateGuideState({
-      activeGuide: selectedGuide!,
-      activeStep: selectedStep!,
+    const selectedGuideConfig = guidesConfig[selectedGuide!];
+    const selectedStepIndex = selectedGuideConfig.steps.findIndex(
+      (step) => step.id === selectedStep!
+    );
+
+    // Noop if the selected step is invalid
+    if (selectedStepIndex === -1) {
+      return;
+    }
+
+    const updatedSteps: GuideStep[] = selectedGuideConfig.steps.map((step, stepIndex) => {
+      if (selectedStepIndex > stepIndex) {
+        return {
+          id: step.id,
+          status: 'complete',
+        };
+      }
+
+      if (selectedStepIndex < stepIndex) {
+        return {
+          id: step.id,
+          status: 'inactive',
+        };
+      }
+
+      return {
+        id: step.id,
+        status: 'active',
+      };
     });
 
+    const updatedGuideState: GuideState = {
+      isActive: true,
+      status: 'in_progress',
+      steps: updatedSteps,
+      guideId: selectedGuide!,
+    };
+
+    const response = await guidedOnboardingApi?.updateGuide(updatedGuideState, true);
     if (response) {
       notifications.toasts.addSuccess(
         i18n.translate('guidedOnboardingExample.updateGuideState.toastLabel', {
@@ -132,7 +163,7 @@ export const Main = (props: MainProps) => {
                   defaultMessage="Active guide"
                 />
               </dt>
-              <dd>{activeGuide.guideId ?? 'undefined'}</dd>
+              <dd>{activeGuide.guideId}</dd>
 
               <dt>
                 <FormattedMessage
@@ -144,7 +175,7 @@ export const Main = (props: MainProps) => {
                 {activeGuide.steps.map((step) => {
                   return (
                     <>
-                      {`Step ${step.id}: ${step.status}`} <br />
+                      {`Step "${step.id}": ${step.status}`} <br />
                     </>
                   );
                 })}
@@ -170,17 +201,16 @@ export const Main = (props: MainProps) => {
         </EuiText>
         <EuiSpacer />
         <EuiFlexGroup>
-          {Object.keys(guidesConfig).map((guideId) => {
-            const guideStatus = guidesState?.find((guide) => guide.guideId === guideId);
-            const guideConfig = { ...guidesConfig[guideId], guideId };
+          {(Object.keys(guidesConfig) as GuideId[]).map((guideId) => {
+            const guideState = guidesState?.find((guide) => guide.guideId === guideId);
             return (
               <EuiFlexItem>
                 <EuiButton
-                  onClick={() => startGuide(guideStatus, guideConfig)}
+                  onClick={() => activateGuide(guideId, guideState)}
                   fill
-                  disabled={guideStatus?.status === 'complete'}
+                  disabled={guideState?.status === 'complete'}
                 >
-                  {guideStatus === undefined && (
+                  {guideState === undefined && (
                     <FormattedMessage
                       id="guidedOnboardingExample.guidesSelection.startButtonLabel"
                       defaultMessage="Start {guideId} guide"
@@ -189,9 +219,9 @@ export const Main = (props: MainProps) => {
                       }}
                     />
                   )}
-                  {(guideStatus?.isActive === true ||
-                    guideStatus?.status === 'in_progress' ||
-                    guideStatus?.status === 'ready_to_complete') && (
+                  {(guideState?.isActive === true ||
+                    guideState?.status === 'in_progress' ||
+                    guideState?.status === 'ready_to_complete') && (
                     <FormattedMessage
                       id="guidedOnboardingExample.guidesSelection.continueButtonLabel"
                       defaultMessage="Continue {guideId} guide"
@@ -200,7 +230,7 @@ export const Main = (props: MainProps) => {
                       }}
                     />
                   )}
-                  {guideStatus?.status === 'complete' && (
+                  {guideState?.status === 'complete' && (
                     <FormattedMessage
                       id="guidedOnboardingExample.guidesSelection.completeButtonLabel"
                       defaultMessage="Guide {guideId} complete"
@@ -229,16 +259,15 @@ export const Main = (props: MainProps) => {
           <EuiFlexItem>
             <EuiFormRow label="Guide" helpText="Select a guide">
               <EuiSelect
-                id={'guideSelect'}
+                id="guideSelect"
                 options={[
                   { value: 'observability', text: 'observability' },
                   { value: 'security', text: 'security' },
                   { value: 'search', text: 'search' },
-                  { value: '', text: 'unset' },
                 ]}
                 value={selectedGuide}
                 onChange={(e) => {
-                  const value = e.target.value as UseCase;
+                  const value = e.target.value as GuideId;
                   const shouldResetState = value.trim().length === 0;
                   if (shouldResetState) {
                     setSelectedGuide(undefined);
@@ -251,10 +280,10 @@ export const Main = (props: MainProps) => {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label="Step">
+            <EuiFormRow label="Step ID">
               <EuiFieldText
                 value={selectedStep}
-                onChange={(e) => setSelectedStep(e.target.value)}
+                onChange={(e) => setSelectedStep(e.target.value as GuideStepIds)}
               />
             </EuiFormRow>
           </EuiFlexItem>

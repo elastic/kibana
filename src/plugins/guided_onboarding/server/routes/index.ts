@@ -7,33 +7,32 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, SavedObjectsClient } from '@kbn/core/server';
+import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
+import type { GuideState } from '../../common/types';
 import { guidedSetupSavedObjectsType } from '../saved_objects';
 
-// TODO fix TS
-const findGuide = async (savedObjectsClient: SavedObjectsClient, guideId: string): Promise<any> => {
-  return savedObjectsClient.find({
+const findGuideById = async (savedObjectsClient: SavedObjectsClient, guideId: string) => {
+  return savedObjectsClient.find<GuideState>({
     type: guidedSetupSavedObjectsType,
     search: `"${guideId}"`,
     searchFields: ['guideId'],
   });
 };
 
-// TODO fix TS
-const findActiveGuide = async (savedObjectsClient: SavedObjectsClient): Promise<any> => {
-  return savedObjectsClient.find({
+const findActiveGuide = async (savedObjectsClient: SavedObjectsClient) => {
+  return savedObjectsClient.find<GuideState>({
     type: guidedSetupSavedObjectsType,
     search: 'true',
     searchFields: ['isActive'],
   });
 };
 
-// TODO fix TS
-const findAllGuides = async (savedObjectsClient: SavedObjectsClient): Promise<any> => {
-  return savedObjectsClient.find({ type: guidedSetupSavedObjectsType });
+const findAllGuides = async (savedObjectsClient: SavedObjectsClient) => {
+  return savedObjectsClient.find<GuideState>({ type: guidedSetupSavedObjectsType });
 };
 
 export function defineRoutes(router: IRouter) {
+  // Fetch all guides state; optionally pass the query param ?active=true to only return the active guide
   router.get(
     {
       path: '/api/guided_onboarding/state',
@@ -47,9 +46,10 @@ export function defineRoutes(router: IRouter) {
       const coreContext = await context.core;
       const soClient = coreContext.savedObjects.client as SavedObjectsClient;
 
-      const existingGuides = request.query.active
-        ? await findActiveGuide(soClient)
-        : await findAllGuides(soClient);
+      const existingGuides =
+        request.query.active === true
+          ? await findActiveGuide(soClient)
+          : await findAllGuides(soClient);
 
       if (existingGuides.total > 0) {
         const guidesState = existingGuides.saved_objects.map((guide) => guide.attributes);
@@ -57,6 +57,7 @@ export function defineRoutes(router: IRouter) {
           body: { state: guidesState },
         });
       } else {
+        // If no SO exists, we assume state hasn't been stored yet and return an empty array
         return response.ok({
           body: { state: [] },
         });
@@ -64,9 +65,11 @@ export function defineRoutes(router: IRouter) {
     }
   );
 
+  // Update the guide state for the passed guideId;
+  // will also check any existing active guides and update them to an "inactive" state
   router.put(
     {
-      path: '/api/guided_onboarding/state/{guideId}',
+      path: '/api/guided_onboarding/state',
       validate: {
         body: schema.object({
           status: schema.string(),
@@ -79,20 +82,15 @@ export function defineRoutes(router: IRouter) {
             })
           ),
         }),
-        params: schema.object({
-          guideId: schema.string(),
-        }),
       },
     },
     async (context, request, response) => {
-      const updatedGuidesState = request.body;
-      const { guideId } = request.params;
+      const updatedGuideState = request.body;
 
       const coreContext = await context.core;
       const savedObjectsClient = coreContext.savedObjects.client as SavedObjectsClient;
 
-      const activeGuideSO = await findActiveGuide(savedObjectsClient);
-      const selectedGuideSO = await findGuide(savedObjectsClient, guideId);
+      const selectedGuideSO = await findGuideById(savedObjectsClient, updatedGuideState.guideId);
 
       // If the SO already exists, update it, else create a new SO
       if (selectedGuideSO.total > 0) {
@@ -103,49 +101,60 @@ export function defineRoutes(router: IRouter) {
           type: guidedSetupSavedObjectsType,
           id: selectedGuide.id,
           attributes: {
-            ...updatedGuidesState,
+            ...updatedGuideState,
           },
         });
 
-        // We need to check if there is an existing active guide
+        // If we are activating a new guide, we need to check if there is a different, existing active guide
         // If yes, we need to mark it as inactive (only 1 guide can be active at a time)
-        if (activeGuideSO.total > 0) {
-          const activeGuide = activeGuideSO.saved_objects[0];
-          updatedGuides.push({
-            type: guidedSetupSavedObjectsType,
-            id: selectedGuide.id,
-            attributes: {
-              ...activeGuide.attributes,
-              isActive: false,
-            },
-          });
+        if (updatedGuideState.isActive) {
+          const activeGuideSO = await findActiveGuide(savedObjectsClient);
+
+          if (activeGuideSO.total > 0) {
+            const activeGuide = activeGuideSO.saved_objects[0];
+            if (activeGuide.attributes.guideId !== updatedGuideState.guideId) {
+              updatedGuides.push({
+                type: guidedSetupSavedObjectsType,
+                id: activeGuide.id,
+                attributes: {
+                  ...activeGuide.attributes,
+                  isActive: false,
+                },
+              });
+            }
+          }
         }
 
-        const updatedGuidedSetupSO = await savedObjectsClient.bulkUpdate(updatedGuides);
+        const updatedGuidesResponse = await savedObjectsClient.bulkUpdate(updatedGuides);
 
         return response.ok({
           body: {
-            state: updatedGuidedSetupSO,
+            state: updatedGuidesResponse,
           },
         });
       } else {
-        // If there is an existing "active" guide, update it back to inactive
-        if (activeGuideSO.total > 0) {
-          const activeGuide = activeGuideSO.saved_objects[0];
-          await savedObjectsClient.update(guidedSetupSavedObjectsType, activeGuide.id, {
-            ...activeGuide.attributes,
-            isActive: false,
-          });
+        // If we are activating a new guide, we need to check if there is an existing active guide
+        // If yes, we need to mark it as inactive (only 1 guide can be active at a time)
+        if (updatedGuideState.isActive) {
+          const activeGuideSO = await findActiveGuide(savedObjectsClient);
+
+          if (activeGuideSO.total > 0) {
+            const activeGuide = activeGuideSO.saved_objects[0];
+            await savedObjectsClient.update(guidedSetupSavedObjectsType, activeGuide.id, {
+              ...activeGuide.attributes,
+              isActive: false,
+            });
+          }
         }
 
-        const updatedGuidedSetupSO = await savedObjectsClient.create(
+        const createdGuideResponse = await savedObjectsClient.create(
           guidedSetupSavedObjectsType,
-          updatedGuidesState
+          updatedGuideState
         );
 
         return response.ok({
           body: {
-            state: updatedGuidedSetupSO,
+            state: createdGuideResponse,
           },
         });
       }

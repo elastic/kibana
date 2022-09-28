@@ -9,7 +9,6 @@
 import { SavedObjectsType } from '@kbn/core/server';
 
 export const guidedSetupSavedObjectsType = 'guided-setup-state';
-export const guidedSetupSavedObjectsId = 'guided-setup-state-id';
 
 export const guidedSetupSavedObjects: SavedObjectsType = {
   name: guidedSetupSavedObjectsType,
@@ -38,9 +37,6 @@ export const guidedSetupSavedObjects: SavedObjectsType = {
             type: 'keyword',
           },
         },
-      },
-      skippedDate: {
-        type: 'date',
       },
     },
   },
