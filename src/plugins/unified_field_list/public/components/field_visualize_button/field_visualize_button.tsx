@@ -22,14 +22,14 @@ export interface FieldVisualizeButtonProps {
   field: DataViewField;
   dataView: DataView;
   multiFields?: DataViewField[];
-  contextualFields: string[];
+  contextualFields?: string[];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   originatingApp: string; // plugin id
   uiActions: UiActionsStart;
   buttonProps?: Partial<EuiButtonProps>;
 }
 
-const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.memo(
+export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.memo(
   ({
     field,
     dataView,
@@ -81,7 +81,3 @@ const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.memo(
     );
   }
 );
-
-// Necessary for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FieldVisualizeButton;

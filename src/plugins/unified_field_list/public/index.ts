@@ -20,7 +20,7 @@ export {
   FieldPopover,
   type FieldPopoverProps,
   FieldPopoverHeader,
-  FieldPopoverHeaderProps,
+  type FieldPopoverHeaderProps,
 } from './components/field_popover';
 export {
   FieldVisualizeButton,

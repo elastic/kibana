@@ -6,28 +6,5 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
-import type { FieldPopoverProps } from './field_popover';
-import type { FieldPopoverHeaderProps } from './field_popover_header';
-
-const Fallback = () => <Fragment />;
-
-const LazyFieldPopover = React.lazy(() => import('./field_popover'));
-const WrappedFieldPopover: React.FC<FieldPopoverProps> = (props) => (
-  <React.Suspense fallback={<Fallback />}>
-    <LazyFieldPopover {...props} />
-  </React.Suspense>
-);
-
-export const FieldPopover = WrappedFieldPopover;
-export type { FieldPopoverProps };
-
-const LazyFieldPopoverHeader = React.lazy(() => import('./field_popover_header'));
-const WrappedFieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = (props) => (
-  <React.Suspense fallback={<Fallback />}>
-    <LazyFieldPopoverHeader {...props} />
-  </React.Suspense>
-);
-
-export const FieldPopoverHeader = WrappedFieldPopoverHeader;
-export type { FieldPopoverHeaderProps };
+export { type FieldPopoverProps, FieldPopover } from './field_popover';
+export { type FieldPopoverHeaderProps, FieldPopoverHeader } from './field_popover_header';

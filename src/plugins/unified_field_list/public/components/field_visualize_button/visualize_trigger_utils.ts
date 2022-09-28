@@ -32,7 +32,7 @@ async function getCompatibleActions(
   uiActions: UiActionsStart,
   fieldName: string,
   dataView: DataView,
-  contextualFields: string[],
+  contextualFields: string[] = [],
   trigger: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
   const compatibleActions = await uiActions.getTriggerCompatibleActions(trigger, {
@@ -46,7 +46,7 @@ async function getCompatibleActions(
 export function triggerVisualizeActions(
   uiActions: UiActionsStart,
   field: DataViewField,
-  contextualFields: string[],
+  contextualFields: string[] = [],
   originatingApp: string,
   dataView?: DataView
 ) {
@@ -74,7 +74,7 @@ export async function getVisualizeInformation(
   uiActions: UiActionsStart,
   field: DataViewField,
   dataView: DataView | undefined,
-  contextualFields: string[],
+  contextualFields: string[] = [],
   multiFields: DataViewField[] = []
 ): Promise<VisualizeInformation | undefined> {
   if (field.name === '_id' || !dataView?.id) {

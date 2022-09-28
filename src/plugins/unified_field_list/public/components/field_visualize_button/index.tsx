@@ -6,22 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
-import type { FieldVisualizeButtonProps } from './field_visualize_button';
+export { type FieldVisualizeButtonProps, FieldVisualizeButton } from './field_visualize_button';
 
-const Fallback = () => <Fragment />;
-
-const LazyFieldVisualizeButton = React.lazy(() => import('./field_visualize_button'));
-const WrappedFieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = (props) => (
-  <React.Suspense fallback={<Fallback />}>
-    <LazyFieldVisualizeButton {...props} />
-  </React.Suspense>
-);
-
-export const FieldVisualizeButton = WrappedFieldVisualizeButton;
-export type { FieldVisualizeButtonProps };
-
-// TODO: move to another plugin?
 export {
   triggerVisualizeActions,
   getVisualizeInformation,

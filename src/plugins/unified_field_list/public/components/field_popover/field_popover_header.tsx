@@ -38,7 +38,7 @@ export interface FieldPopoverHeaderProps {
   onDeleteField?: (fieldName: string) => unknown;
 }
 
-const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
+export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   field,
   closePopover,
   buttonAddFieldToWorkspaceProps,
@@ -155,7 +155,3 @@ const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     </EuiFlexGroup>
   );
 };
-
-// Necessary for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FieldPopoverHeader;

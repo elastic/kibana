@@ -8,14 +8,14 @@
 import './field_item.scss';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { EuiIconTip, EuiPopoverFooter, EuiText } from '@elastic/eui';
+import { EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FieldButton } from '@kbn/react-field';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EuiHighlight } from '@elastic/eui';
 import { Filter, Query } from '@kbn/es-query';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
@@ -24,14 +24,15 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
+  FieldVisualizeButton,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
+import { APP_ID } from '../../common/constants';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 import type { IndexPattern, IndexPatternField } from '../types';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
-import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 import type { LensAppServices } from '../app_plugin/types';
 import { debouncedComponent } from '../debounced_component';
 import { getFieldType } from './pure_utils';
@@ -267,6 +268,19 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             />
           ) : null
         }
+        renderFooter={() =>
+          dataViewField.type === 'geo_point' || dataViewField.type === 'geo_shape' ? (
+            <FieldVisualizeButton
+              field={dataViewField}
+              dataView={{ ...indexPattern, toSpec: () => indexPattern.spec } as unknown as DataView}
+              originatingApp={APP_ID}
+              uiActions={props.uiActions}
+              buttonProps={{
+                'data-test-subj': `lensVisualize-GeoField-${dataViewField.name}`,
+              }}
+            />
+          ) : null
+        }
       />
     </li>
   );
@@ -280,62 +294,43 @@ function FieldItemPopoverContents(
     onAddFilter: AddFieldFilterHandler | undefined;
   }
 ) {
-  const { query, filters, indexPattern, dataViewField, dateRange, uiActions, core, onAddFilter } =
-    props;
+  const { query, filters, indexPattern, dataViewField, dateRange, core, onAddFilter } = props;
   const services = useKibana<LensAppServices>().services;
 
   return (
-    <>
-      <FieldStats
-        services={services}
-        query={query}
-        filters={filters}
-        fromDate={dateRange.fromDate}
-        toDate={dateRange.toDate}
-        dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
-        onAddFilter={onAddFilter}
-        field={dataViewField}
-        data-test-subj="lnsFieldListPanel"
-        overrideMissingContent={(params) => {
-          if (dataViewField.type === 'geo_point' || dataViewField.type === 'geo_shape') {
-            return (
-              <>
-                {params.element}
+    <FieldStats
+      services={services}
+      query={query}
+      filters={filters}
+      fromDate={dateRange.fromDate}
+      toDate={dateRange.toDate}
+      dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
+      onAddFilter={onAddFilter}
+      field={dataViewField}
+      data-test-subj="lnsFieldListPanel"
+      overrideMissingContent={(params) => {
+        if (params?.noDataFound) {
+          // TODO: should we replace this with a default message "Analysis is not available for this field?"
+          const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
+          return (
+            <>
+              <EuiText size="s">
+                {isUsingSampling
+                  ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
+                      defaultMessage:
+                        'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
+                    })
+                  : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                      defaultMessage:
+                        'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+                    })}
+              </EuiText>
+            </>
+          );
+        }
 
-                <EuiPopoverFooter>
-                  <VisualizeGeoFieldButton
-                    uiActions={uiActions}
-                    indexPattern={indexPattern}
-                    fieldName={dataViewField.name}
-                  />
-                </EuiPopoverFooter>
-              </>
-            );
-          }
-
-          if (params?.noDataFound) {
-            // TODO: should we replace this with a default message "Analysis is not available for this field?"
-            const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
-            return (
-              <>
-                <EuiText size="s">
-                  {isUsingSampling
-                    ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
-                        defaultMessage:
-                          'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
-                      })
-                    : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-                        defaultMessage:
-                          'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
-                      })}
-                </EuiText>
-              </>
-            );
-          }
-
-          return params.element;
-        }}
-      />
-    </>
+        return params.element;
+      }}
+    />
   );
 }

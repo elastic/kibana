@@ -16,7 +16,7 @@ export interface FieldPopoverProps extends EuiPopoverProps {
   renderFooter?: () => React.ReactNode;
 }
 
-const FieldPopover: React.FC<FieldPopoverProps> = ({
+export const FieldPopover: React.FC<FieldPopoverProps> = ({
   isOpen,
   closePopover,
   renderHeader,
@@ -49,7 +49,3 @@ const FieldPopover: React.FC<FieldPopoverProps> = ({
     </EuiPopover>
   );
 };
-
-// Necessary for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FieldPopover;
