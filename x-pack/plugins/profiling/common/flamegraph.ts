@@ -19,7 +19,6 @@ export interface ElasticFlameGraph {
   ExecutableID: string[];
   Label: string[];
 
-  Samples: number[];
   CountInclusive: number[];
   CountExclusive: number[];
 
@@ -91,7 +90,6 @@ export function createFlameGraph(tree: CalleeTree, totalSeconds: number): Elasti
     FrameType: tree.FrameType.slice(0, tree.Size),
     ExecutableID: tree.FileID.slice(0, tree.Size),
 
-    Samples: tree.Samples.slice(0, tree.Size),
     CountInclusive: tree.CountInclusive.slice(0, tree.Size),
     CountExclusive: tree.CountExclusive.slice(0, tree.Size),
 
@@ -133,10 +131,10 @@ export function createColumnarViewModel(
     // order. A deterministic result allows deterministic UI views, something
     // that users expect.
     const children = flamegraph.Edges[node].sort((n1, n2) => {
-      if (flamegraph.Samples[n1] > flamegraph.Samples[n2]) {
+      if (flamegraph.CountInclusive[n1] > flamegraph.CountInclusive[n2]) {
         return -1;
       }
-      if (flamegraph.Samples[n1] < flamegraph.Samples[n2]) {
+      if (flamegraph.CountInclusive[n1] < flamegraph.CountInclusive[n2]) {
         return 1;
       }
       return flamegraph.ID[n1].localeCompare(flamegraph.ID[n2]);
@@ -144,11 +142,11 @@ export function createColumnarViewModel(
 
     let delta = 0;
     for (const child of children) {
-      delta += flamegraph.Samples[child];
+      delta += flamegraph.CountInclusive[child];
     }
 
     for (let i = children.length - 1; i >= 0; i--) {
-      delta -= flamegraph.Samples[children[i]];
+      delta -= flamegraph.CountInclusive[children[i]];
       queue.push({ x: x + delta, depth: depth + 1, node: children[i] });
     }
   }
@@ -163,7 +161,7 @@ export function createColumnarViewModel(
   }
 
   const position = new Float32Array(numNodes * 2);
-  const maxX = flamegraph.Samples[0];
+  const maxX = flamegraph.CountInclusive[0];
   const maxY = ys.reduce((max, n) => (n > max ? n : max), 0);
 
   for (let i = 0; i < numNodes; i++) {
@@ -175,12 +173,12 @@ export function createColumnarViewModel(
   const size = new Float32Array(numNodes);
 
   for (let i = 0; i < numNodes; i++) {
-    size[i] = normalize(flamegraph.Samples[i], 0, maxX);
+    size[i] = normalize(flamegraph.CountInclusive[i], 0, maxX);
   }
 
   return {
     label: flamegraph.Label.slice(0, numNodes),
-    value: Float64Array.from(flamegraph.Samples.slice(0, numNodes)),
+    value: Float64Array.from(flamegraph.CountInclusive.slice(0, numNodes)),
     color: colors,
     position0: position,
     position1: position,

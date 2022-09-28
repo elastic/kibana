@@ -39,10 +39,8 @@ export function getFlamegraphModel({
   colorNeutral: string;
   comparisonMode: FlameGraphComparisonMode;
 }) {
-  const comparisonNodesById: Record<
-    string,
-    { Samples: number; CountInclusive: number; CountExclusive: number }
-  > = {};
+  const comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }> =
+    {};
 
   if (!primaryFlamegraph || !primaryFlamegraph.Label || primaryFlamegraph.Label.length === 0) {
     return { key: uniqueId(), viewModel: nullColumnarViewModel, comparisonNodesById };
@@ -53,7 +51,6 @@ export function getFlamegraphModel({
   if (comparisonFlamegraph) {
     comparisonFlamegraph.ID.forEach((nodeID, index) => {
       comparisonNodesById[nodeID] = {
-        Samples: comparisonFlamegraph.Samples[index],
         CountInclusive: comparisonFlamegraph.CountInclusive[index],
         CountExclusive: comparisonFlamegraph.CountExclusive[index],
       };
@@ -88,8 +85,8 @@ export function getFlamegraphModel({
         : primaryFlamegraph.TotalSeconds / comparisonFlamegraph.TotalSeconds;
 
     primaryFlamegraph.ID.forEach((nodeID, index) => {
-      const samples = primaryFlamegraph.Samples[index];
-      const comparisonSamples = comparisonNodesById[nodeID]?.Samples as number | undefined;
+      const samples = primaryFlamegraph.CountInclusive[index];
+      const comparisonSamples = comparisonNodesById[nodeID]?.CountInclusive as number | undefined;
 
       const foreground =
         comparisonMode === FlameGraphComparisonMode.Absolute ? samples : samples / totalSamples;
