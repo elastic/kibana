@@ -154,7 +154,16 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [_, allReferences] = useFindExceptionListReferences(exceptionListsToQuery);
+  const [_, __, allReferences, fetchReferences] = useFindExceptionListReferences();
+
+  useEffect(() => {
+    if (fetchReferences != null && exceptionListsToQuery.length) {
+      const listsToQuery = exceptionListsToQuery.map(
+        ({ id, list_id: listId, namespace_type: namespaceType }) => ({ id, listId, namespaceType })
+      );
+      fetchReferences(listsToQuery);
+    }
+  }, [exceptionListsToQuery, fetchReferences]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {

@@ -23,6 +23,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
+  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   comment,
@@ -30,7 +31,10 @@ import {
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import type {
+  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
+} from '@kbn/securitysolution-list-utils';
 import {
   getOperatorType,
   getNewExceptionItem,
@@ -841,4 +845,63 @@ export const defaultEndpointExceptionItems = (
         })
       );
   }
+};
+
+/**
+ * Adds user defined name to all new exceptionItems
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param name new exception item name
+ */
+export const enrichNewExceptionItemsWithName = (
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
+  name: string
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
+    return {
+      ...item,
+      name,
+    };
+  });
+};
+
+/**
+ * Modifies exception items to prepare for creating as rule_default
+ * list items
+ * @param exceptionItems new or existing ExceptionItem[]
+ */
+export const enrichRuleExceptions = (
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[]
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
+    const entries = item.entries.map(({ id, ...rest }) => ({ ...rest }));
+    return {
+      ...item,
+      entries,
+      list_id: undefined,
+      namespace_type: 'single',
+    };
+  });
+};
+
+/**
+ * Prepares items to be added to shared exception lists
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param lists shared exception lists that were selected to add items to
+ */
+export const enrichSharedExceptions = (
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
+  lists: ExceptionListSchema[]
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return lists.flatMap((list) => {
+    return exceptionItems.map((item) => {
+      const entries = item.entries.map(({ id, ...rest }) => ({ ...rest }));
+
+      return {
+        ...item,
+        entries,
+        list_id: list.list_id,
+        namespace_type: list.namespace_type,
+      };
+    });
+  });
 };
