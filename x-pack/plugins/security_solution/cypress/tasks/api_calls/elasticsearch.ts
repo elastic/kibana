@@ -40,9 +40,14 @@ export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocu
           method: 'GET',
           url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
           headers: { 'kbn-xsrf': 'cypress-creds' },
+          failOnStatusCode: false,
         })
         .then((response) => {
-          return response.body.hits.hits.length > initialNumberOfDocuments;
+          if (response.status !== 200) {
+            return false;
+          } else {
+            return response.body.hits.hits.length > initialNumberOfDocuments;
+          }
         });
     },
     { interval: 500, timeout: 12000 }

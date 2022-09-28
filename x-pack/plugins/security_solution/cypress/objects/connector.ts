@@ -28,7 +28,7 @@ export interface IndexConnector extends Connector {
 export type Connectors = IndexConnector | EmailConnector;
 
 export const getEmailConnector = (): EmailConnector => ({
-  name: 'Test connector',
+  name: 'Test email connector',
   from: 'test@example.com',
   host: 'example.com',
   port: '80',
@@ -39,7 +39,7 @@ export const getEmailConnector = (): EmailConnector => ({
 });
 
 export const getIndexConnector = (): IndexConnector => ({
-  name: 'Index test connector',
+  name: 'Test index connector',
   index: 'my-index-000001',
   document: '{"test": "123"}',
   type: 'index',

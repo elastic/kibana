@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Throttle } from '@kbn/securitysolution-io-ts-alerting-types';
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
@@ -38,7 +39,7 @@ interface Interval {
 }
 
 export interface Actions {
-  interval: string;
+  throttle: Throttle;
   connectors: Connectors[];
 }
 
@@ -238,7 +239,7 @@ export const getNewRule = (): CustomRule => ({
   maxSignals: 100,
 });
 
-export const getSimpleRule = (): CustomRule => ({
+export const getSimpleCustomQueryRule = (): CustomRule => ({
   customQuery: 'host.name: *',
   dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'New Rule Test',

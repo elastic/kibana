@@ -114,6 +114,7 @@ import {
   JSON_EDITOR,
   CREATE_ACTION_CONNECTOR_BTN,
   EMAIL_ACTION_BTN,
+  COMBO_BOX_SELECTION,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -133,15 +134,31 @@ export const fillAboutRule = (
 ) => {
   cy.get(RULE_NAME_INPUT).clear({ force: true }).type(rule.name, { force: true });
   cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(rule.description, { force: true });
-  if (rule.severity) fillSeverity(rule.severity);
-  if (rule.riskScore) fillRiskScore(rule.riskScore);
-  if (rule.tags) fillRuleTags(rule.tags);
+  if (rule.severity) {
+    fillSeverity(rule.severity);
+  }
+  if (rule.riskScore) {
+    fillRiskScore(rule.riskScore);
+  }
+  if (rule.tags) {
+    fillRuleTags(rule.tags);
+  }
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
-  if (rule.referenceUrls) fillReferenceUrls(rule.referenceUrls);
-  if (rule.falsePositivesExamples) fillFalsePositiveExamples(rule.falsePositivesExamples);
 
-  if (rule.mitre) fillMitre(rule.mitre);
-  if (rule.note) fillNote(rule.note);
+  if (rule.referenceUrls) {
+    fillReferenceUrls(rule.referenceUrls);
+  }
+
+  if (rule.falsePositivesExamples) {
+    fillFalsePositiveExamples(rule.falsePositivesExamples);
+  }
+
+  if (rule.mitre) {
+    fillMitre(rule.mitre);
+  }
+  if (rule.note) {
+    fillNote(rule.note);
+  }
 };
 
 export const fillNote = (note: string) => {
@@ -228,7 +245,9 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
       });
   });
 
-  if (rule.severity) fillSeverity(rule.severity);
+  if (rule.severity) {
+    fillSeverity(rule.severity);
+  }
 
   cy.get(RISK_MAPPING_OVERRIDE_OPTION).click();
   cy.get(RISK_OVERRIDE).within(() => {
@@ -237,14 +256,24 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
 
   cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.riskScore}`, { force: true });
 
-  if (rule.tags) fillRuleTags(rule.tags);
+  if (rule.tags) {
+    fillRuleTags(rule.tags);
+  }
 
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
-  if (rule.referenceUrls) fillReferenceUrls(rule.referenceUrls);
-  if (rule.falsePositivesExamples) fillFalsePositiveExamples(rule.falsePositivesExamples);
-  if (rule.mitre) fillMitre(rule.mitre);
-  if (rule.note) fillNote(rule.note);
+  if (rule.referenceUrls) {
+    fillReferenceUrls(rule.referenceUrls);
+  }
+  if (rule.falsePositivesExamples) {
+    fillFalsePositiveExamples(rule.falsePositivesExamples);
+  }
+  if (rule.mitre) {
+    fillMitre(rule.mitre);
+  }
+  if (rule.note) {
+    fillNote(rule.note);
+  }
 
   cy.get(RULE_NAME_OVERRIDE).within(() => {
     cy.get(COMBO_BOX_INPUT).type(`${rule.nameOverride}{enter}`);
@@ -292,23 +321,23 @@ export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRu
 };
 
 export const fillRuleAction = (rule: CustomRule) => {
-  if (rule.actions) cy.get(ACTIONS_THROTTLE_INPUT).select(rule.actions.interval);
-  rule.actions?.connectors.forEach((connector) => {
-    switch (connector.type) {
-      case 'index':
-        const indexConnector = connector;
-        cy.get(INDEX_SELECTOR).click();
-        cy.get(CREATE_CONNECTOR_BTN).click();
-        fillIndexConnectorForm(indexConnector);
-        break;
-      case 'email':
-        const emailConnector = connector;
-        cy.get(EMAIL_ACTION_BTN).click();
-        cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
-        fillEmailConnectorForm(emailConnector);
-        break;
-    }
-  });
+  if (rule.actions) {
+    cy.get(ACTIONS_THROTTLE_INPUT).select(rule.actions.throttle);
+    rule.actions?.connectors.forEach((connector) => {
+      switch (connector.type) {
+        case 'index':
+          cy.get(INDEX_SELECTOR).click();
+          cy.get(CREATE_CONNECTOR_BTN).click();
+          fillIndexConnectorForm(connector);
+          break;
+        case 'email':
+          cy.get(EMAIL_ACTION_BTN).click();
+          cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
+          fillEmailConnectorForm(connector);
+          break;
+      }
+    });
+  }
 };
 
 export const fillDefineThresholdRule = (rule: ThresholdRule) => {
@@ -470,8 +499,10 @@ export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConne
 
 export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConnector()) => {
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
-  cy.get(COMBO_BOX_INPUT).type(connector.index.substring(0, 3));
-  cy.contains(connector.index).first().click();
+  cy.get(COMBO_BOX_INPUT).type(connector.index);
+
+  cy.get(COMBO_BOX_SELECTION).click({ force: true });
+
   cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
   cy.get(SAVE_ACTION_CONNECTOR_BTN).should('not.exist');
   cy.get(JSON_EDITOR).should('be.visible');
