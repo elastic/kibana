@@ -69,7 +69,8 @@ export const MlStorageContextProvider: FC = ({ children }) => {
         setState((prev) => {
           return {
             ...prev,
-            [event.key as MlStorageKey]: event.newValue,
+            [event.key as MlStorageKey]:
+              typeof event.newValue === 'string' ? JSON.parse(event.newValue) : event.newValue,
           };
         });
       } else {

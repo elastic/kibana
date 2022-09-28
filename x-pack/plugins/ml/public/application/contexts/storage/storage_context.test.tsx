@@ -95,4 +95,50 @@ describe('useStorage', () => {
     expect(result.current[0]).toBe(undefined);
     expect(mockRemove).toHaveBeenCalledWith('ml.gettingStarted.isDismissed');
   });
+
+  test('updates the value on storage event', async () => {
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStorage('ml.gettingStarted.isDismissed'),
+      {
+        wrapper: MlStorageContextProvider,
+      }
+    );
+
+    expect(result.current[0]).toBe(true);
+
+    await act(async () => {
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'test_key',
+          newValue: 'test_value',
+        })
+      );
+    });
+
+    expect(result.current[0]).toBe(true);
+
+    await act(async () => {
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'ml.gettingStarted.isDismissed',
+          newValue: null,
+        })
+      );
+      await waitForNextUpdate();
+    });
+
+    expect(result.current[0]).toBe(undefined);
+
+    await act(async () => {
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'ml.gettingStarted.isDismissed',
+          newValue: 'false',
+        })
+      );
+      await waitForNextUpdate();
+    });
+
+    expect(result.current[0]).toBe(false);
+  });
 });
