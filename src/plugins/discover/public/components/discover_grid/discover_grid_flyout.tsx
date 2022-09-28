@@ -25,6 +25,7 @@ import {
   EuiHideFor,
   keys,
 } from '@elastic/eui';
+import type { Filter } from '@kbn/es-query';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
@@ -32,6 +33,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
 
 export interface DiscoverGridFlyoutProps {
+  filters?: Filter[];
   columns: string[];
   hit: DataTableRecord;
   hits?: DataTableRecord[];
@@ -56,6 +58,7 @@ export function DiscoverGridFlyout({
   hits,
   dataView,
   columns,
+  filters,
   onFilter,
   onClose,
   onRemoveColumn,
@@ -95,13 +98,12 @@ export function DiscoverGridFlyout({
     [activePage, setPage]
   );
 
-  const { singleDocProps, surrDocsProps } = useNavigationProps({
-    dataViewId: dataView.id!,
+  const { onOpenSingleDoc, onOpenSurrDocs } = useNavigationProps({
+    dataView,
     rowIndex: hit.raw._index,
     rowId: hit.raw._id,
-    filterManager: services.filterManager,
-    addBasePath: services.addBasePath,
     columns,
+    filters,
   });
 
   return (
@@ -146,7 +148,7 @@ export function DiscoverGridFlyout({
                 iconType="document"
                 flush="left"
                 data-test-subj="docTableRowAction"
-                {...singleDocProps}
+                onClick={onOpenSingleDoc}
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
                   defaultMessage: 'Single document',
@@ -161,7 +163,7 @@ export function DiscoverGridFlyout({
                     iconSize="s"
                     iconType="documents"
                     flush="left"
-                    {...surrDocsProps}
+                    onClick={onOpenSurrDocs}
                     data-test-subj="docTableRowAction"
                   >
                     {i18n.translate(

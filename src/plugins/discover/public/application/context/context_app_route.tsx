@@ -16,6 +16,8 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
 import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { getScopedHistory } from '../../kibana_services';
+import { ContextHistoryLocationState } from './services/locator';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -26,9 +28,12 @@ export function ContextAppRoute() {
   const services = useDiscoverServices();
   const { chrome } = services;
 
+  const scopedHistory = getScopedHistory();
+  const locationState = scopedHistory.location.state as ContextHistoryLocationState;
+  const dataViewSpec = locationState?.dataViewSpec;
+
   const { dataViewId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
-  const usedDataViewId = decodeURIComponent(dataViewId);
   const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
@@ -42,7 +47,10 @@ export function ContextAppRoute() {
     ]);
   }, [chrome, breadcrumb]);
 
-  const { dataView, error } = useDataView(services.dataViews, usedDataViewId);
+  const { dataView, error } = useDataView({
+    dataViewId: decodeURIComponent(dataViewId),
+    dataViewSpec,
+  });
 
   if (error) {
     return (

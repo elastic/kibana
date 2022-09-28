@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
 import { formatFieldValue } from '../../../utils/format_value';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { TableCell } from './table_row/table_cell';
@@ -29,6 +30,7 @@ export type DocTableRow = EsHitRecord & {
 export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
+  filters?: Filter[];
   row: DataTableRecord;
   dataView: DataView;
   useNewFieldsApi: boolean;
@@ -38,6 +40,7 @@ export interface TableRowProps {
 }
 
 export const TableRow = ({
+  filters,
   columns,
   filter,
   row,
@@ -47,7 +50,7 @@ export const TableRow = ({
   onAddColumn,
   onRemoveColumn,
 }: TableRowProps) => {
-  const { uiSettings, filterManager, fieldFormats, addBasePath } = useDiscoverServices();
+  const { uiSettings, fieldFormats } = useDiscoverServices();
   const [maxEntries, hideTimeColumn] = useMemo(
     () => [
       uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
@@ -98,13 +101,12 @@ export const TableRow = ({
     [filter, dataView.fields, row.flattened]
   );
 
-  const { singleDocProps, surrDocsProps } = useNavigationProps({
-    dataViewId: dataView.id!,
+  const { onOpenSingleDoc, onOpenSurrDocs } = useNavigationProps({
+    dataView,
     rowIndex: row.raw._index,
     rowId: row.raw._id,
-    filterManager,
-    addBasePath,
     columns,
+    filters,
   });
 
   const rowCells = [
@@ -207,8 +209,8 @@ export const TableRow = ({
           open={open}
           colLength={(columns.length || 1) + 2}
           isTimeBased={dataView.isTimeBased()}
-          singleDocProps={singleDocProps}
-          surrDocsProps={surrDocsProps}
+          onOpenSingleDoc={onOpenSingleDoc}
+          onOpenSurrDocs={onOpenSurrDocs}
         >
           <DocViewer
             columns={columns}

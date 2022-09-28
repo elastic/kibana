@@ -6,22 +6,35 @@
  * Side Public License, v 1.
  */
 import { useEffect, useState } from 'react';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { useDiscoverServices } from './use_discover_services';
 
-export const useDataView = (dataViews: DataViewsContract, dataViewId: string) => {
-  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
+export const useDataView = ({
+  dataViewId,
+  dataViewSpec,
+}: {
+  dataViewId: string;
+  dataViewSpec?: DataViewSpec;
+}) => {
+  const { dataViews } = useDiscoverServices();
+  const [dataView, setDataView] = useState<DataView>();
   const [error, setError] = useState();
 
   useEffect(() => {
     async function loadDataView() {
       try {
-        const item = await dataViews.get(dataViewId);
+        let item: DataView;
+        if (dataViewSpec) {
+          item = await dataViews.create(dataViewSpec);
+        } else {
+          item = await dataViews.get(dataViewId);
+        }
         setDataView(item);
       } catch (e) {
         setError(e);
       }
     }
     loadDataView();
-  }, [dataViewId, dataViews]);
+  }, [dataViewId, dataViewSpec, dataViews]);
   return { dataView, error };
 };

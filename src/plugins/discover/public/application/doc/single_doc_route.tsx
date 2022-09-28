@@ -13,10 +13,11 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
-import { withQueryParams } from '../../utils/with_query_params';
 import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { getScopedHistory } from '../../kibana_services';
+import { SingleDocHistoryLocationState } from './locator';
 
 export interface SingleDocRouteProps {
   /**
@@ -30,11 +31,17 @@ export interface DocUrlParams {
   index: string;
 }
 
-const SingleDoc = ({ id }: SingleDocRouteProps) => {
+export const SingleDocRoute = ({ id }: SingleDocRouteProps) => {
   const services = useDiscoverServices();
   const { chrome, timefilter, core } = services;
 
+  const scopedHistory = getScopedHistory();
+  const locationState = scopedHistory.location.state as SingleDocHistoryLocationState;
+  const dataViewSpec = locationState?.dataViewSpec;
+
   const { dataViewId, index } = useParams<DocUrlParams>();
+  // eslint-disable-next-line no-console
+  console.log('dataViewId', dataViewId, 'index', index);
   const breadcrumb = useMainRouteBreadcrumb();
 
   useExecutionContext(core.executionContext, {
@@ -57,7 +64,10 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
     timefilter.disableTimeRangeSelector();
   });
 
-  const { dataView, error } = useDataView(services.dataViews, dataViewId);
+  const { dataView, error } = useDataView({
+    dataViewId: decodeURIComponent(dataViewId),
+    dataViewSpec,
+  });
 
   if (error) {
     return (
@@ -91,5 +101,3 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
     </div>
   );
 };
-
-export const SingleDocRoute = withQueryParams(SingleDoc, ['id']);
