@@ -37,6 +37,12 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   sourceField: '',
 };
 
+export enum AddInferencePipelineSteps {
+  Configuration,
+  Test,
+  Review,
+}
+
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
 
 interface MLInferenceProcessorsActions {
@@ -48,6 +54,9 @@ interface MLInferenceProcessorsActions {
   makeMappingRequest: typeof MappingsApiLogic.actions.makeRequest;
   mappingsApiError(error: HttpError): HttpError;
   mlModelsApiError(error: HttpError): HttpError;
+  setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => {
+    step: AddInferencePipelineSteps;
+  };
   setCreateErrors(errors: string[]): { errors: string[] };
   setIndexName: (indexName: string) => { indexName: string };
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
@@ -58,6 +67,7 @@ interface MLInferenceProcessorsActions {
 export interface AddInferencePipelineModal {
   configuration: InferencePipelineConfiguration;
   indexName: string;
+  step: AddInferencePipelineSteps;
 }
 
 interface MLInferenceProcessorsValues {
@@ -80,6 +90,7 @@ export const MLInferenceLogic = kea<
   actions: {
     clearFormErrors: true,
     createPipeline: true,
+    setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => ({ step }),
     setCreateErrors: (errors: string[]) => ({ errors }),
     setFormErrors: (inputErrors: AddInferencePipelineFormErrors) => ({ inputErrors }),
     setIndexName: (indexName: string) => ({ indexName }),
@@ -146,8 +157,10 @@ export const MLInferenceLogic = kea<
           ...EMPTY_PIPELINE_CONFIGURATION,
         },
         indexName: '',
+        step: AddInferencePipelineSteps.Configuration,
       },
       {
+        setAddInferencePipelineStep: (modal, { step }) => ({ ...modal, step }),
         setIndexName: (modal, { indexName }) => ({ ...modal, indexName }),
         setInferencePipelineConfiguration: (modal, { configuration }) => ({
           ...modal,
