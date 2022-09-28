@@ -47,7 +47,25 @@ enum SettingKeys {
 }
 
 export class Settings {
-  constructor(private readonly storage: Storage) {}
+  constructor(private readonly storage: Storage) {
+    // Migration from old settings to new ones
+    this.migrateSettings();
+  }
+
+  private migrateSettings() {
+    // Migrate old settings to new ones
+    const isHistoryDisabled = this.storage.get('is_history_disabled');
+    if (isHistoryDisabled !== undefined) {
+      this.setIsHistoryEnabled(!isHistoryDisabled);
+      this.storage.delete('is_history_disabled');
+    }
+
+    const isKeyboardShortcutsDisabled = this.storage.get('is_keyboard_shortcuts_disabled');
+    if (isKeyboardShortcutsDisabled !== undefined) {
+      this.setIsKeyboardShortcutsEnabled(!isKeyboardShortcutsDisabled);
+      this.storage.delete('is_keyboard_shortcuts_disabled');
+    }
+  }
 
   getFontSize() {
     return this.storage.get(SettingKeys.FONT_SIZE, DEFAULT_SETTINGS.fontSize);
