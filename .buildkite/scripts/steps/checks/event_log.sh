@@ -8,7 +8,7 @@ echo --- Check Event Log Schema
 
 # event log schema is pinned to a specific version of ECS
 ECS_STABLE_VERSION=1.8
-git clone -b $ECS_STABLE_VERSION https://github.com/elastic/ecs.git ../ecs
+git clone --depth 1 -b $ECS_STABLE_VERSION https://github.com/elastic/ecs.git ../ecs
 
 node x-pack/plugins/event_log/scripts/create_schemas.js
 
