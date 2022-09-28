@@ -19,9 +19,8 @@ import type {
   GroupAndBulkCreateReturnType,
   SearchAfterAndBulkCreateParams,
 } from '../types';
-import { addToSearchAfterReturn } from '../utils';
+import { addToSearchAfterReturn, getUnprocessedExceptionsWarnings } from '../utils';
 import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
-import { sendAlertTelemetryEvents } from '../send_telemetry_events';
 import type { ThrottleBuckets } from '../../rule_types/factories/utils/wrap_throttled_alerts';
 import { wrapThrottledAlerts } from '../../rule_types/factories/utils/wrap_throttled_alerts';
 import { ConfigType } from '../../../../config';
@@ -43,31 +42,33 @@ export const buildBucketHistoryFilter = ({
   primaryTimestamp: string;
   secondaryTimestamp: string | undefined;
   from: moment.Moment;
-}): estypes.QueryDslQueryContainer | undefined => {
+}): estypes.QueryDslQueryContainer[] | undefined => {
   if (buckets.length === 0) {
     return undefined;
   }
-  return {
-    bool: {
-      must_not: buckets.map((bucket) => ({
-        bool: {
-          must: [
-            ...Object.entries(bucket.key).map(([field, value]) => ({
-              term: {
-                [field]: value,
-              },
-            })),
-            buildTimeRangeFilter({
-              to: bucket.endDate.toISOString(),
-              from: from.toISOString(),
-              primaryTimestamp,
-              secondaryTimestamp,
-            }),
-          ],
-        },
-      })),
+  return [
+    {
+      bool: {
+        must_not: buckets.map((bucket) => ({
+          bool: {
+            must: [
+              ...Object.entries(bucket.key).map(([field, value]) => ({
+                term: {
+                  [field]: value,
+                },
+              })),
+              buildTimeRangeFilter({
+                to: bucket.endDate.toISOString(),
+                from: from.toISOString(),
+                primaryTimestamp,
+                secondaryTimestamp,
+              }),
+            ],
+          },
+        })),
+      },
     },
-  };
+  ];
 };
 
 // search_after through grouped documents and re-index using bulk endpoint.
@@ -100,19 +101,6 @@ export const groupAndBulkCreate = async ({
   groupByFields: string[];
 }): Promise<GroupAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
-    // TODO: Determine field(s) to group by
-    // Current thoughts...
-    // - analyze query for fields/wildcards
-    // - get a random sample of docs... analyze fields in the docs
-    // - use that to determine which fields to group by
-    // - low cardinality and high cardinality are probably not interesting
-    // maybe somewhere in the middle?
-    // - also, should we sort first by severity?
-
-    if (groupByFields.length === 0) {
-      throw new Error('groupByFields length must not be 0');
-    }
-
     const filteredBucketHistory =
       bucketHistory?.filter((bucket) => {
         bucket.endDate > tuple.from.toDate();
@@ -133,103 +121,114 @@ export const groupAndBulkCreate = async ({
       },
     };
 
-    const bucketHistoryFilter = buildBucketHistoryFilter({
-      buckets: filteredBucketHistory,
-      primaryTimestamp,
-      secondaryTimestamp,
-      from: tuple.from,
-    });
-
-    const additionalFilters = bucketHistoryFilter ? [bucketHistoryFilter] : undefined;
-
-    const groupingAggregation = buildGroupByFieldAggregation({
-      groupByFields,
-      maxSignals: tuple.maxSignals,
-      aggregatableTimestampField,
-    });
-
-    const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
-      aggregations: groupingAggregation,
-      searchAfterSortIds: undefined,
-      index: inputIndexPattern,
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      services,
-      ruleExecutionLogger,
-      filter,
-      pageSize: 0,
-      primaryTimestamp,
-      secondaryTimestamp,
-      runtimeMappings,
-      additionalFilters,
-    });
-    toReturn.searchAfterTimes.push(searchDuration);
-    toReturn.errors.push(...searchErrors);
-
-    const eventsByGroupResponseWithAggs = searchResult as EventGroupingMultiBucketAggregationResult;
-    if (!eventsByGroupResponseWithAggs.aggregations) {
-      throw new Error('expected to find aggregations on search result');
+    const exceptionsWarning = getUnprocessedExceptionsWarnings(exceptionsList);
+    if (exceptionsWarning) {
+      toReturn.warningMessages.push(exceptionsWarning);
     }
 
-    const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
+    try {
+      if (groupByFields.length === 0) {
+        throw new Error('groupByFields length must be greater than 0');
+      }
 
-    const newBucketHistory: BucketHistory[] = buckets
-      .filter((bucket) => {
-        return !Object.values(bucket.key).includes(null);
-      })
-      .map((bucket) => {
-        return {
-          // This cast should be safe as we just filtered out buckets where any key has a null value.
-          key: bucket.key as Record<string, string | number>,
-          endDate: bucket.max_timestamp.value_as_string
-            ? new Date(bucket.max_timestamp.value_as_string)
-            : tuple.to.toDate(),
-        };
+      const bucketHistoryFilter = buildBucketHistoryFilter({
+        buckets: filteredBucketHistory,
+        primaryTimestamp,
+        secondaryTimestamp,
+        from: tuple.from,
       });
 
-    toReturn.state.throttleGroupHistory.push(...newBucketHistory);
+      const groupingAggregation = buildGroupByFieldAggregation({
+        groupByFields,
+        maxSignals: tuple.maxSignals,
+        aggregatableTimestampField,
+      });
 
-    if (buckets.length === 0) {
-      return toReturn;
+      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+        aggregations: groupingAggregation,
+        searchAfterSortIds: undefined,
+        index: inputIndexPattern,
+        from: tuple.from.toISOString(),
+        to: tuple.to.toISOString(),
+        services,
+        ruleExecutionLogger,
+        filter,
+        pageSize: 0,
+        primaryTimestamp,
+        secondaryTimestamp,
+        runtimeMappings,
+        additionalFilters: bucketHistoryFilter,
+      });
+      toReturn.searchAfterTimes.push(searchDuration);
+      toReturn.errors.push(...searchErrors);
+
+      const eventsByGroupResponseWithAggs =
+        searchResult as EventGroupingMultiBucketAggregationResult;
+      if (!eventsByGroupResponseWithAggs.aggregations) {
+        throw new Error('expected to find aggregations on search result');
+      }
+
+      const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
+
+      if (buckets.length === 0) {
+        return toReturn;
+      }
+
+      const throttleBuckets: ThrottleBuckets[] = buckets.map((bucket) => ({
+        event: bucket.topHits.hits.hits[0],
+        count: bucket.doc_count,
+        start: bucket.min_timestamp.value_as_string
+          ? new Date(bucket.min_timestamp.value_as_string)
+          : tuple.from.toDate(),
+        end: bucket.max_timestamp.value_as_string
+          ? new Date(bucket.max_timestamp.value_as_string)
+          : tuple.to.toDate(),
+        values: Object.values(bucket.key),
+      }));
+
+      const wrappedAlerts = wrapThrottledAlerts({
+        throttleBuckets,
+        spaceId,
+        completeRule,
+        mergeStrategy,
+        indicesToQuery: inputIndexPattern,
+        buildReasonMessage,
+      });
+
+      // const enrichedEvents = await enrichment(wrappedAlerts);
+
+      const bulkCreateResult = await bulkCreate(wrappedAlerts);
+
+      addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+
+      ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+
+      const newBucketHistory: BucketHistory[] = buckets
+        .filter((bucket) => {
+          return !Object.values(bucket.key).includes(null);
+        })
+        .map((bucket) => {
+          return {
+            // This cast should be safe as we just filtered out buckets where any key has a null value.
+            key: bucket.key as Record<string, string | number>,
+            endDate: bucket.max_timestamp.value_as_string
+              ? new Date(bucket.max_timestamp.value_as_string)
+              : tuple.to.toDate(),
+          };
+        });
+
+      toReturn.state.throttleGroupHistory.push(...newBucketHistory);
+      // TODO: telemetry?`
+      /* sendAlertTelemetryEvents(
+        enrichedEvents,
+        createdItems,
+        eventsTelemetry,
+        ruleExecutionLogger
+      );*/
+    } catch (exc) {
+      toReturn.success = false;
+      toReturn.errors.push(exc.message);
     }
-
-    const throttleBuckets: ThrottleBuckets[] = buckets.map((bucket) => ({
-      event: bucket.topHits.hits.hits[0],
-      count: bucket.doc_count,
-      start: bucket.min_timestamp.value_as_string
-        ? new Date(bucket.min_timestamp.value_as_string)
-        : tuple.from.toDate(),
-      end: bucket.max_timestamp.value_as_string
-        ? new Date(bucket.max_timestamp.value_as_string)
-        : tuple.to.toDate(),
-      values: Object.values(bucket.key),
-    }));
-
-    const wrappedAlerts = wrapThrottledAlerts({
-      throttleBuckets,
-      spaceId,
-      completeRule,
-      mergeStrategy,
-      indicesToQuery: inputIndexPattern,
-      buildReasonMessage,
-    });
-
-    // const enrichedEvents = await enrichment(wrappedAlerts);
-    //const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
-
-    const bulkCreateResult = await bulkCreate(wrappedAlerts);
-
-    addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
-
-    ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
-
-    // TODO: telemetry?`
-    /* sendAlertTelemetryEvents(
-      enrichedEvents,
-      createdItems,
-      eventsTelemetry,
-      ruleExecutionLogger
-    );*/
 
     return toReturn;
   });

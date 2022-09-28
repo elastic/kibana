@@ -90,7 +90,7 @@ export const createQueryAlertType = (
         spaceId,
         state,
       } = execOptions;
-      const result = await queryExecutor({
+      return queryExecutor({
         completeRule,
         tuple,
         listClient,
@@ -115,7 +115,6 @@ export const createQueryAlertType = (
         osqueryCreateAction,
         licensing,
       });
-      return { ...result, state };
     },
   };
 };

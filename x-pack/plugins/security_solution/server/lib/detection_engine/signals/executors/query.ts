@@ -143,7 +143,7 @@ export const queryExecutor = async ({
         }
       }
 
-      return result;
+      return { ...result, state: {} };
     }
   });
 };
