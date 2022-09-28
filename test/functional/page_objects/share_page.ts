@@ -45,11 +45,17 @@ export class SharePageObject extends FtrService {
    * in a pure OSS environment, the permalinks sharing panel is displayed initially
    */
   async openPermaLinks() {
-    await this.openShareMenuItem(`Permalinks`);
+    if (await this.testSubjects.exists('sharePanel-Permalinks')) {
+      await this.testSubjects.click(`sharePanel-Permalinks`);
+    }
   }
 
-  async getSharedUrl() {
-    await this.openPermaLinks();
+  async getSharedUrl(openShareMenu: boolean = false) {
+    if (openShareMenu) {
+      await this.openShareMenuItem(`Permalinks`);
+    } else {
+      await this.openPermaLinks();
+    }
     return await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
   }
 

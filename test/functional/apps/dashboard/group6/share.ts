@@ -27,8 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('share dashboard', () => {
     const getSharedUrl = async (mode: TestingModes): Promise<string> => {
-      if (mode === 'savedObject') await PageObjects.share.exportAsSavedObject();
-      const sharedUrl = await PageObjects.share.getSharedUrl();
+      if (mode === 'savedObject') {
+        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.exportAsSavedObject();
+      }
+      const sharedUrl = await PageObjects.share.getSharedUrl(true);
       return sharedUrl;
     };
 
