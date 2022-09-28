@@ -202,7 +202,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     });
   }, []);
 
-  const { addOrRemoveExcludeTagFilter, addOrRemoveIncludeTagFilter } = useTags({
+  const { addOrRemoveIncludeTagFilter } = useTags({
     searchQuery,
     updateQuery,
   });
@@ -223,6 +223,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
               getDetailViewLink={getDetailViewLink}
               onClickTitle={onClickTitle}
               onClickTag={(tag) => {
+                addOrRemoveIncludeTagFilter(tag);
+              }}
               searchTerm={searchQuery.text}
             />
           );
@@ -291,7 +293,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     getDetailViewLink,
     onClickTitle,
     searchQuery.text,
-    addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
     DateFormatterComp,
   ]);
