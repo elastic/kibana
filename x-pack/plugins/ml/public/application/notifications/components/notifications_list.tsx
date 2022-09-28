@@ -162,6 +162,7 @@ export const NotificationsList: FC = () => {
 
   const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
     {
+      id: 'timestamp',
       field: 'timestamp',
       name: <FormattedMessage id="xpack.ml.notifications.timeLabel" defaultMessage="Time" />,
       sortable: true,
@@ -175,7 +176,7 @@ export const NotificationsList: FC = () => {
       name: <FormattedMessage id="xpack.ml.notifications.levelLabel" defaultMessage="Level" />,
       sortable: true,
       truncateText: false,
-      'data-test-subj': 'mlNotificationLabel',
+      'data-test-subj': 'mlNotificationLevel',
       render: (value: MlNotificationMessageLevel) => {
         return <EuiBadge color={levelBadgeMap[value]}>{value}</EuiBadge>;
       },
@@ -194,7 +195,7 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'job_id',
-      name: <FormattedMessage id="xpack.ml.notifications.entityLabe" defaultMessage="Entity ID" />,
+      name: <FormattedMessage id="xpack.ml.notifications.entityLabel" defaultMessage="Entity ID" />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationEntity',
@@ -320,6 +321,7 @@ export const NotificationsList: FC = () => {
               },
             },
           },
+          'data-test-subj': 'mlNotificationsSearchBarInput',
         }}
         filters={filters}
         onChange={(e) => {
