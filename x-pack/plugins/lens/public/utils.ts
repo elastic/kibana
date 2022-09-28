@@ -15,15 +15,19 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { Document } from './persistence/saved_object_store';
-import type {
+import {
   Datasource,
   DatasourceMap,
   Visualization,
   IndexPatternMap,
   IndexPatternRef,
+  DraggedField,
+  DragDropOperation,
+  isOperation,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import { IndexPatternServiceAPI } from './data_views_service/service';
+import { DraggingIdentifier } from './drag_drop';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -242,3 +246,34 @@ export function renewIDs<T = unknown>(
  */
 export const DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS =
   'lensDontCloseDimensionContainerOnClick';
+
+export function isDraggedField(fieldCandidate: unknown): fieldCandidate is DraggedField {
+  return (
+    typeof fieldCandidate === 'object' &&
+    fieldCandidate !== null &&
+    ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
+  );
+}
+
+export const isOperationFromCompatibleGroup = (
+  op1?: DraggingIdentifier,
+  op2?: DragDropOperation
+) => {
+  return (
+    isOperation(op1) &&
+    isOperation(op2) &&
+    op1.columnId !== op2.columnId &&
+    op1.groupId === op2.groupId &&
+    op1.layerId !== op2.layerId
+  );
+};
+
+export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: DragDropOperation) => {
+  return (
+    isOperation(op1) &&
+    isOperation(op2) &&
+    op1.columnId !== op2.columnId &&
+    op1.groupId === op2.groupId &&
+    op1.layerId === op2.layerId
+  );
+};

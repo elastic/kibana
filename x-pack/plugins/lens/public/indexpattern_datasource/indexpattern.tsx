@@ -68,7 +68,8 @@ import {
   isColumnInvalid,
   cloneLayer,
 } from './utils';
-import { normalizeOperationDataType, isDraggedField } from './pure_utils';
+import { isDraggedField } from '../utils';
+import { normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,

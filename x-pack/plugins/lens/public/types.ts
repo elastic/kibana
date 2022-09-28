@@ -228,14 +228,7 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
 export interface GetDropPropsArgs<T = unknown> {
   state: T;
   source?: DraggingIdentifier;
-  target: {
-    layerId: string;
-    groupId: string;
-    columnId: string;
-    filterOperations: (meta: OperationMetadata) => boolean;
-    prioritizedOperation?: string;
-    isNewColumn?: boolean;
-  };
+  target: DragDropOperation;
   indexPatterns: IndexPatternMap;
 }
 
@@ -581,7 +574,15 @@ export interface DragDropOperation {
   groupId: string;
   columnId: string;
   filterOperations: (operation: OperationMetadata) => boolean;
+  indexPatternId?: string;
+  isNewColumn?: boolean;
+  prioritizedOperation?: string;
 }
+
+export type DraggedField = DragDropIdentifier & {
+  field: IndexPatternField;
+  indexPatternId: string;
+};
 
 export function isOperation(operationCandidate: unknown): operationCandidate is DragDropOperation {
   return (
@@ -1021,6 +1022,10 @@ export interface Visualization<T = unknown, P = unknown> {
     dropType: DropType;
     group?: VisualizationDimensionGroupConfig;
   }) => T;
+
+  getDropProps?: (
+    dropProps: GetDropPropsArgs
+  ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
 
   /**
    * Additional editor that gets rendered inside the dimension popover.
