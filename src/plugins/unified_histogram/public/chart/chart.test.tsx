@@ -17,20 +17,19 @@ import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { GetStateReturn } from '../../services/discover_state';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
-import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { ChartData } from './point_series';
 import { Chart } from './chart';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ReactWrapper } from 'enzyme';
+import { unifiedHistogramServicesMock } from '../__mocks__/services';
 
 setHeaderActionMenuMounter(jest.fn());
 
 async function mountComponent(isTimeBased: boolean = false) {
   const searchSourceMock = createSearchSourceMock({});
-  const services = discoverServiceMock;
+  const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
@@ -90,6 +89,7 @@ async function mountComponent(isTimeBased: boolean = false) {
   }) as DataCharts$;
 
   const props = {
+    services: unifiedHistogramServicesMock,
     dataView: {
       isTimeBased: () => isTimeBased,
       id: '123',
@@ -119,11 +119,7 @@ async function mountComponent(isTimeBased: boolean = false) {
 
   let instance: ReactWrapper = {} as ReactWrapper;
   await act(async () => {
-    instance = mountWithIntl(
-      <KibanaContextProvider services={services}>
-        <Chart {...props} />
-      </KibanaContextProvider>
-    );
+    instance = mountWithIntl(<Chart {...props} />);
     // wait for initial async loading to complete
     await new Promise((r) => setTimeout(r, 0));
     await instance.update();

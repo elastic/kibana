@@ -23,16 +23,17 @@ import { GetStateReturn } from '../../services/discover_state';
 import { Histogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import {
   getVisualizeInformation,
   triggerVisualizeActions,
 } from '../sidebar/lib/visualize_trigger_utils';
+import { UnifiedHistogramServices } from '../types';
 
 const HistogramMemoized = memo(Histogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 
 export function Chart({
+  services: { data, storage },
   className,
   resetSavedSearch,
   savedSearch,
@@ -46,6 +47,7 @@ export function Chart({
   appendHistogram,
   onResetChartHeight,
 }: {
+  services: UnifiedHistogramServices;
   className?: string;
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
@@ -59,7 +61,6 @@ export function Chart({
   appendHistogram?: ReactElement;
   onResetChartHeight?: () => void;
 }) {
-  const { data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
 
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({

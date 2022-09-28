@@ -9,13 +9,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { DataCharts$ } from '../../hooks/use_saved_search';
-import { discoverServiceMock } from '../../../../__mocks__/services';
 import { ChartData } from './point_series';
 import { Histogram } from './histogram';
 import React from 'react';
 import * as hooks from '../../hooks/use_data_state';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { GetStateReturn } from '../../services/discover_state';
+import { unifiedHistogramServicesMock } from '../__mocks__/services';
 
 const chartData = {
   xAxisOrderedValues: [
@@ -57,7 +56,7 @@ const chartData = {
 } as unknown as ChartData;
 
 function mountComponent(fetchStatus: FetchStatus) {
-  const services = discoverServiceMock;
+  const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
@@ -75,6 +74,7 @@ function mountComponent(fetchStatus: FetchStatus) {
   const timefilterUpdateHandler = jest.fn();
 
   const props = {
+    services: unifiedHistogramServicesMock,
     savedSearchData$: charts$,
     timefilterUpdateHandler,
     stateContainer: {
@@ -86,11 +86,7 @@ function mountComponent(fetchStatus: FetchStatus) {
     } as unknown as GetStateReturn,
   };
 
-  return mountWithIntl(
-    <KibanaContextProvider services={services}>
-      <Histogram {...props} />
-    </KibanaContextProvider>
-  );
+  return mountWithIntl(<Histogram {...props} />);
 }
 
 describe('Histogram', () => {

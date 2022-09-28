@@ -9,8 +9,10 @@
 import React, { ReactElement, RefObject, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { Panels, PANELS_MODE } from '../panels';
+import { UnifiedHistogramServices } from '../types';
 
 export interface UnifiedHistogramLayoutProps {
+  services: UnifiedHistogramServices;
   className?: string;
   mode: PANELS_MODE;
   resizeRef: RefObject<HTMLDivElement>;

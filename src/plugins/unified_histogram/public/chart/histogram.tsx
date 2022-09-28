@@ -41,13 +41,14 @@ import {
   renderEndzoneTooltip,
 } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataCharts$, DataChartsMessage } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
+import { UnifiedHistogramServices } from '../types';
 
 export interface HistogramProps {
+  services: UnifiedHistogramServices;
   savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   stateContainer: GetStateReturn;
@@ -64,11 +65,11 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 }
 
 export function Histogram({
+  services: { data, theme, uiSettings, fieldFormats },
   savedSearchData$,
   timefilterUpdateHandler,
   stateContainer,
 }: HistogramProps) {
-  const { data, theme, uiSettings, fieldFormats } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
 
