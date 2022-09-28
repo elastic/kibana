@@ -1529,6 +1529,24 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.DatasourcePublicAPI.isTextBasedLanguage",
+            "type": "Function",
+            "tags": [],
+            "label": "isTextBasedLanguage",
+            "description": [
+              "\nReturns true if this is a text based language datasource"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.DatasourcePublicAPI.getFilters",
             "type": "Function",
             "tags": [],
@@ -11349,6 +11367,21 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-common.ENABLE_SQL",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_SQL",
+        "description": [],
+        "signature": [
+          "\"discover:enableSql\""
+        ],
+        "path": "x-pack/plugins/lens/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-common.FormatFactory",
         "type": "Type",
         "tags": [],
@@ -11491,6 +11524,21 @@
           "\"value\" | \"percent\" | \"hidden\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-common.OriginalColumn",
+        "type": "Type",
+        "tags": [],
+        "label": "OriginalColumn",
+        "description": [],
+        "signature": [
+          "{ id: string; label: string; } & ({ operationType: \"date_histogram\"; sourceField: string; } | { operationType: string; sourceField: never; })"
+        ],
+        "path": "x-pack/plugins/lens/common/expressions/map_to_columns/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

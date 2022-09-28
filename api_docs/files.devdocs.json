@@ -438,10 +438,10 @@
             "tags": [],
             "label": "getDownloadHref",
             "description": [
-              "\nGet a string for downloading a file that can be passed to a button element's\nhref for download."
+              "\nGet a string for downloading a file that can be passed to a button element's\nhref for download.\n"
             ],
             "signature": [
-              "(file: ",
+              "(args: Pick<",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -449,7 +449,7 @@
                 "section": "def-common.FileJSON",
                 "text": "FileJSON"
               },
-              "<unknown>) => string"
+              "<unknown>, \"id\" | \"fileKind\">) => string"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -460,9 +460,12 @@
                 "id": "def-public.FilesClient.getDownloadHref.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "file",
-                "description": [],
+                "label": "args",
+                "description": [
+                  "- get download URL args"
+                ],
                 "signature": [
+                  "Pick<",
                   {
                     "pluginId": "files",
                     "scope": "common",
@@ -470,7 +473,7 @@
                     "section": "def-common.FileJSON",
                     "text": "FileJSON"
                   },
-                  "<unknown>"
+                  "<unknown>, \"id\" | \"fileKind\">"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -1129,7 +1132,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>; }>; upload: (arg: Omit<Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<Readonly<{ fileName?: string | undefined; } & { id: string; }> & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<",
+          "<unknown>; }>; upload: (arg: Omit<Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<Readonly<{ fileName?: string | undefined; } & { id: string; }> & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<Pick<",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1137,7 +1140,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>, \"kind\">) => string; share: (arg: Omit<Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { kind: string; }, \"kind\">) => Promise<",
+          "<unknown>, \"id\" | \"fileKind\">, \"kind\">) => string; share: (arg: Omit<Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { kind: string; }, \"kind\">) => Promise<",
           {
             "pluginId": "files",
             "scope": "common",
