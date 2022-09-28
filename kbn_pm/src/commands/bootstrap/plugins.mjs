@@ -9,7 +9,7 @@
 import { REPO_ROOT } from '../../lib/paths.mjs';
 
 /** @type {string} */
-const PLUGIN_DISCOVERY_SRC = '../../../../packages/kbn-plugin-discovery/src/index.js';
+const PLUGIN_DISCOVERY_SRC = '../../../../packages/kbn-plugin-discovery/index.js';
 
 /**
  * @param {string} pluginId

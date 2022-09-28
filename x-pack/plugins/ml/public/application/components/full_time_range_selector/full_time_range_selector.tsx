@@ -53,7 +53,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
   }
 
   const [isPopoverOpen, setPopover] = useState(false);
-  const [frozenDataPreference, setFrozenDataPreference] = useStorage<FrozenTierPreference>(
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage(
     ML_FROZEN_TIER_PREFERENCE,
     FROZEN_TIER_PREFERENCE.EXCLUDE
   );
@@ -93,6 +93,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
     setFrozenDataPreference(id as FrozenTierPreference);
     setRange(dataView, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
     closePopover();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const popoverContent = useMemo(
@@ -106,6 +107,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
         />
       </EuiPanel>
     ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [frozenDataPreference, sortOptions]
   );
 

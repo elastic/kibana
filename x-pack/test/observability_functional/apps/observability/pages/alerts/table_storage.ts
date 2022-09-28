@@ -37,7 +37,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       const columnMenu = await testSubjects.find(
         'dataGridHeaderCellActionGroup-kibana.alert.duration.us'
       );
-      const removeButton = await columnMenu.findByCssSelector('[title="Remove column"]');
+      const removeButton = await columnMenu.findByCssSelector('[title="Hide column"]');
       await removeButton.click();
 
       await observability.alerts.common.navigateToTimeWithData();

@@ -10,7 +10,7 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import type { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
-import { COMMENT_EVENT } from '../../../../common/components/exceptions/translations';
+import { COMMENT_EVENT } from '../../../../detection_engine/rule_exceptions/utils/translations';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 const CustomEuiAvatar = styled(EuiAvatar)`

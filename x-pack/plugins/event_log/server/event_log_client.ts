@@ -12,6 +12,7 @@ import { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
+import { KueryNode } from '@kbn/core-saved-objects-api-server';
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
@@ -135,6 +136,32 @@ export class EventLogClient implements IEventLogClient {
       ids,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
       legacyIds,
+    });
+  }
+
+  public async aggregateEventsWithAuthFilter(
+    type: string,
+    authFilter: KueryNode,
+    options?: AggregateOptionsType
+  ) {
+    if (!authFilter) {
+      throw new Error('No authorization filter defined!');
+    }
+
+    const aggs = options?.aggs;
+    if (!aggs) {
+      throw new Error('No aggregation defined!');
+    }
+
+    // validate other query options separately from
+    const aggregateOptions = queryOptionsSchema.validate(omit(options, 'aggs') ?? {});
+
+    return await this.esContext.esAdapter.aggregateEventsWithAuthFilter({
+      index: this.esContext.esNames.indexPattern,
+      namespace: await this.getNamespace(),
+      type,
+      authFilter,
+      aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
     });
   }
 

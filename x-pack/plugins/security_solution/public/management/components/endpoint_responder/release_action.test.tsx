@@ -16,10 +16,14 @@ import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_a
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
-import { getDeferred } from '../mocks';
+import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
+import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import { getDeferred } from '../../mocks/utils';
 
 describe('When using the release action from response actions console', () => {
-  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: (
+    capabilities?: ResponderCapabilities[]
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
   let consoleManagerMockAccess: ReturnType<
@@ -31,14 +35,17 @@ describe('When using the release action from response actions console', () => {
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
-    render = async () => {
+    render = async (capabilities: ResponderCapabilities[] = [...RESPONDER_CAPABILITIES]) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
             return {
               consoleProps: {
                 'data-test-subj': 'test',
-                commands: getEndpointResponseActionsConsoleCommands('a.b.c'),
+                commands: getEndpointResponseActionsConsoleCommands({
+                  endpointAgentId: 'a.b.c',
+                  endpointCapabilities: [...capabilities],
+                }),
               },
             };
           }}
@@ -52,6 +59,15 @@ describe('When using the release action from response actions console', () => {
 
       return renderResult;
     };
+  });
+
+  it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
+    await render([]);
+    enterConsoleCommand(renderResult, 'release');
+
+    expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+    );
   });
 
   it('should call `release` api when command is entered', async () => {
@@ -100,7 +116,7 @@ describe('When using the release action from response actions console', () => {
     enterConsoleCommand(renderResult, 'release');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('releaseSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('release-success')).toBeTruthy();
     });
   });
 
@@ -115,7 +131,7 @@ describe('When using the release action from response actions console', () => {
     enterConsoleCommand(renderResult, 'release');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('releaseErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('release-actionFailure').textContent).toMatch(
         /error one \| error two/
       );
     });
@@ -188,7 +204,8 @@ describe('When using the release action from response actions console', () => {
       });
     });
 
-    it('should display completion output if done (no additional API calls)', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/139641
+    it.skip('should display completion output if done (no additional API calls)', async () => {
       await render();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);

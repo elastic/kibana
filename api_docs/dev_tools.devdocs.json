@@ -18,13 +18,7 @@
             "text": "DevToolsPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "devTools",
@@ -37,6 +31,7 @@
         ],
         "path": "src/plugins/dev_tools/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "devTools",
@@ -47,13 +42,7 @@
             "description": [],
             "signature": [
               "(coreSetup: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
               "CreateDevToolArgs",
               ") => ",
@@ -62,6 +51,7 @@
             ],
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "devTools",
@@ -71,17 +61,12 @@
                 "label": "coreSetup",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/dev_tools/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -93,6 +78,7 @@
                 "description": [],
                 "path": "src/plugins/dev_tools/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "devTools",
@@ -105,7 +91,8 @@
                       "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
                     ],
                     "path": "src/plugins/dev_tools/public/plugin.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -124,6 +111,7 @@
             ],
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -139,6 +127,7 @@
             ],
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -160,6 +149,7 @@
       "description": [],
       "path": "src/plugins/dev_tools/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "devTools",
@@ -178,6 +168,7 @@
           ],
           "path": "src/plugins/dev_tools/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "devTools",
@@ -193,6 +184,7 @@
               ],
               "path": "src/plugins/dev_tools/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],

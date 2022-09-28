@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
+
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -15,13 +17,14 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
-import { DashboardSavedObject } from '../..';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
+import type { DashboardSavedObject } from '../..';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
-import { useKibana } from '../../services/kibana_react';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
-import { DashboardAppServices, DashboardRedirect } from '../../types';
+import type { DashboardAppServices, DashboardRedirect } from '../../types';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 const DashboardUnsavedItem = ({
   id,
@@ -114,12 +117,10 @@ export const DashboardUnsavedListing = ({
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
   const {
-    services: {
-      dashboardSessionStorage,
-      savedDashboards,
-      core: { overlays },
-    },
+    services: { savedDashboards },
   } = useKibana<DashboardAppServices>();
+
+  const { dashboardSessionStorage } = pluginServices.getServices();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
 
@@ -132,12 +133,12 @@ export const DashboardUnsavedListing = ({
 
   const onDiscard = useCallback(
     (id?: string) => {
-      confirmDiscardUnsavedChanges(overlays, () => {
+      confirmDiscardUnsavedChanges(() => {
         dashboardSessionStorage.clearState(id);
         refreshUnsavedDashboards();
       });
     },
-    [overlays, refreshUnsavedDashboards, dashboardSessionStorage]
+    [refreshUnsavedDashboards, dashboardSessionStorage]
   );
 
   useEffect(() => {

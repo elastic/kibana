@@ -15,10 +15,11 @@ import {
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SortOrder } from '../components/doc_table/components/table_header/helpers';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
+  timeslice?: [number, number];
   query?: Query;
   filters?: Filter[];
   hidePanelTitles?: boolean;

@@ -28,6 +28,8 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'string'
     | string
     | 'nested'
+    | 'gauge'
+    | 'counter'
     | 'version';
   label?: string;
   scripted?: boolean;
@@ -56,6 +58,8 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },
+  gauge: { iconType: 'tokenMetricGauge' },
+  counter: { iconType: 'tokenMetricCounter' },
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
 };

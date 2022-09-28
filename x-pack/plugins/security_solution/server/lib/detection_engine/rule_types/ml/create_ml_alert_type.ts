@@ -13,7 +13,6 @@ import type { MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { machineLearningRuleParams } from '../../schemas/rule_schemas';
 import { mlExecutor } from '../../signals/executors/ml';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable } from '../utils';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
@@ -33,17 +32,6 @@ export const createMlAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
-        },
-        /**
-         * validate rule params when rule is bulk edited (update and created in future as well)
-         * returned params can be modified (useful in case of version increment)
-         * @param mutatedRuleParams
-         * @returns mutatedRuleParams
-         */
-        validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
-
-          return mutatedRuleParams;
         },
       },
     },
@@ -65,11 +53,12 @@ export const createMlAlertType = (
         runOpts: {
           bulkCreate,
           completeRule,
-          exceptionItems,
           listClient,
           ruleExecutionLogger,
           tuple,
           wrapHits,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
@@ -80,11 +69,12 @@ export const createMlAlertType = (
         tuple,
         ml,
         listClient,
-        exceptionItems,
         services,
         ruleExecutionLogger,
         bulkCreate,
         wrapHits,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

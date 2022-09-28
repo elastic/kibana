@@ -15,6 +15,7 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
+  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -22,6 +23,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import {
+  ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
@@ -29,6 +31,8 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { InitialAppData } from '../common/types';
+
+import { enableBehavioralAnalyticsSection } from '../common/ui_settings_keys';
 
 import { docLinks } from './applications/shared/doc_links';
 
@@ -66,6 +70,11 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     const { cloud } = plugins;
+
+    const bahavioralAnalyticsEnabled = core.uiSettings?.get<boolean>(
+      enableBehavioralAnalyticsSection,
+      false
+    );
 
     core.application.register({
       id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
@@ -110,6 +119,31 @@ export class EnterpriseSearchPlugin implements Plugin {
         );
 
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
+      id: ANALYTICS_PLUGIN.ID,
+      title: ANALYTICS_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      searchable: bahavioralAnalyticsEnabled,
+      navLinkStatus: bahavioralAnalyticsEnabled
+        ? AppNavLinkStatus.default
+        : AppNavLinkStatus.hidden,
+      appRoute: ANALYTICS_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ANALYTICS_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { Analytics } = await import('./applications/analytics');
+
+        return renderApp(Analytics, kibanaDeps, pluginData);
       },
     });
 
@@ -188,6 +222,18 @@ export class EnterpriseSearchPlugin implements Plugin {
         path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
         order: 100,
       });
+
+      if (bahavioralAnalyticsEnabled) {
+        plugins.home.featureCatalogue.register({
+          id: ANALYTICS_PLUGIN.ID,
+          title: ANALYTICS_PLUGIN.NAME,
+          icon: 'appAnalytics',
+          description: ANALYTICS_PLUGIN.DESCRIPTION,
+          path: ANALYTICS_PLUGIN.URL,
+          category: 'data',
+          showOnHomePage: false,
+        });
+      }
 
       plugins.home.featureCatalogue.register({
         id: APP_SEARCH_PLUGIN.ID,

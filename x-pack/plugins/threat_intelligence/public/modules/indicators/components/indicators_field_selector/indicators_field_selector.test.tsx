@@ -9,29 +9,27 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { DROPDOWN_TEST_ID, IndicatorsFieldSelector } from './indicators_field_selector';
+import { IndicatorsFieldSelector } from './indicators_field_selector';
 
-const mockIndexPatterns: DataView[] = [
-  {
-    fields: [
-      {
-        name: '@timestamp',
-        type: 'date',
-      } as DataViewField,
-      {
-        name: 'threat.feed.name',
-        type: 'string',
-      } as DataViewField,
-    ],
-  } as DataView,
-];
+const mockIndexPattern: DataView = {
+  fields: [
+    {
+      name: '@timestamp',
+      type: 'date',
+    } as DataViewField,
+    {
+      name: 'threat.feed.name',
+      type: 'string',
+    } as DataViewField,
+  ],
+} as DataView;
 
 describe('<IndicatorsFieldSelector />', () => {
   it('should handle empty array of indexPatterns', () => {
     const component = render(
       <TestProvidersComponent>
         <IndicatorsFieldSelector
-          indexPatterns={[]}
+          indexPattern={{ fields: [] } as any}
           // eslint-disable-next-line no-console
           valueChange={(value: string) => console.log(value)}
         />
@@ -45,7 +43,7 @@ describe('<IndicatorsFieldSelector />', () => {
     const component = render(
       <TestProvidersComponent>
         <IndicatorsFieldSelector
-          indexPatterns={mockIndexPatterns}
+          indexPattern={mockIndexPattern}
           // eslint-disable-next-line no-console
           valueChange={(value: string) => console.log(value)}
         />
@@ -53,11 +51,5 @@ describe('<IndicatorsFieldSelector />', () => {
     );
 
     expect(component).toMatchSnapshot();
-
-    const dropdownOptions: string = component.getByTestId(DROPDOWN_TEST_ID).innerHTML;
-    const optionsCount: number = (dropdownOptions.match(/<option/g) || []).length;
-    const mockFieldsCount: number = mockIndexPatterns[0].fields.length;
-
-    expect(optionsCount).toBe(mockFieldsCount);
   });
 });

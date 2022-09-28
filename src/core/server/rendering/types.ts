@@ -15,9 +15,9 @@ import type {
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
+import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { UiPlugins } from '../plugins';
-import { IUiSettingsClient } from '../ui_settings';
-import type { InternalStatusServiceSetup } from '../status';
 
 /** @internal */
 export interface RenderingMetadata {

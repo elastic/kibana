@@ -23,6 +23,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_UPDATE,
   DETECTION_ENGINE_RULES_BULK_DELETE,
   DETECTION_ENGINE_RULES_BULK_CREATE,
+  DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../../common/constants';
 import type { RuleAlertType, HapiReadableStream } from '../../rules/types';
 import { requestMock } from './request';
@@ -97,7 +98,7 @@ export const getReadRequestWithId = (id: string) =>
 export const getFindRequest = () =>
   requestMock.create({
     method: 'get',
-    path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+    path: DETECTION_ENGINE_RULES_URL_FIND,
   });
 
 export const getReadBulkRequest = () =>

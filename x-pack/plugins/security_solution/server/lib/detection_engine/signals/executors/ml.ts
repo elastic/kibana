@@ -13,13 +13,19 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import type { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
-import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
+import {
+  addToSearchAfterReturn,
+  createErrorsFromShard,
+  createSearchAfterReturnType,
+  mergeReturns,
+} from '../utils';
 import type { SetupPlugins } from '../../../../plugin';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
@@ -29,21 +35,23 @@ export const mlExecutor = async ({
   tuple,
   ml,
   listClient,
-  exceptionItems,
   services,
   ruleExecutionLogger,
   bulkCreate,
   wrapHits,
+  exceptionFilter,
+  unprocessedExceptions,
 }: {
   completeRule: CompleteRule<MachineLearningRuleParams>;
   tuple: RuleRangeTuple;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -93,13 +101,13 @@ export const mlExecutor = async ({
       anomalyThreshold: ruleParams.anomalyThreshold,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
-      exceptionItems,
+      exceptionFilter,
     });
 
     const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,
-      exceptionsList: exceptionItems,
       ruleExecutionLogger,
+      exceptionsList: unprocessedExceptions,
       events: anomalyResults.hits.hits,
     });
 
@@ -108,35 +116,26 @@ export const mlExecutor = async ({
       ruleExecutionLogger.debug(`Found ${anomalyCount} signals from ML anomalies`);
     }
 
-    const { success, errors, bulkCreateDuration, createdItemsCount, createdItems } =
-      await bulkCreateMlSignals({
-        anomalyHits: filteredAnomalyHits,
-        completeRule,
-        services,
-        ruleExecutionLogger,
-        id: completeRule.alertId,
-        signalsIndex: ruleParams.outputIndex,
-        bulkCreate,
-        wrapHits,
-      });
-    // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
-    const shardFailures =
-      (
-        anomalyResults._shards as typeof anomalyResults._shards & {
-          failures: [];
-        }
-      ).failures ?? [];
+    const createResult = await bulkCreateMlSignals({
+      anomalyHits: filteredAnomalyHits,
+      completeRule,
+      services,
+      ruleExecutionLogger,
+      id: completeRule.alertId,
+      signalsIndex: ruleParams.outputIndex,
+      bulkCreate,
+      wrapHits,
+    });
+    addToSearchAfterReturn({ current: result, next: createResult });
+    const shardFailures = anomalyResults._shards.failures ?? [];
     const searchErrors = createErrorsFromShard({
       errors: shardFailures,
     });
     return mergeReturns([
       result,
       createSearchAfterReturnType({
-        success: success && anomalyResults._shards.failed === 0,
-        errors: [...errors, ...searchErrors],
-        createdSignalsCount: createdItemsCount,
-        createdSignals: createdItems,
-        bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+        success: anomalyResults._shards.failed === 0,
+        errors: searchErrors,
       }),
     ]);
   });

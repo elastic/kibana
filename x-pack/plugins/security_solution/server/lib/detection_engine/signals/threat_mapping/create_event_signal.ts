@@ -24,7 +24,6 @@ export const createEventSignal = async ({
   currentResult,
   currentEventList,
   eventsTelemetry,
-  exceptionItems,
   filters,
   inputIndex,
   language,
@@ -49,6 +48,8 @@ export const createEventSignal = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
+  exceptionFilter,
+  unprocessedExceptions,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -66,7 +67,6 @@ export const createEventSignal = async ({
   } else {
     const threatListHits = await getAllThreatListHits({
       esClient: services.scopedClusterClient.asCurrentUser,
-      exceptionItems,
       threatFilters: [...threatFilters, threatFilter],
       query: threatQuery,
       language: threatLanguage,
@@ -80,6 +80,7 @@ export const createEventSignal = async ({
       reassignPitId: reassignThreatPitId,
       runtimeMappings,
       listClient,
+      exceptionFilter,
     });
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);
@@ -104,7 +105,7 @@ export const createEventSignal = async ({
       savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
+      exceptionFilter,
     });
 
     ruleExecutionLogger.debug(
@@ -122,10 +123,9 @@ export const createEventSignal = async ({
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
-      completeRule,
       enrichment: threatEnrichment,
       eventsTelemetry,
-      exceptionsList: exceptionItems,
+      exceptionsList: unprocessedExceptions,
       filter: esFilter,
       inputIndexPattern: inputIndex,
       listClient,

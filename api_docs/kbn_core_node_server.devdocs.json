@@ -23,6 +23,7 @@
         ],
         "path": "packages/core/node/core-node-server/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server",
@@ -43,7 +44,8 @@
               }
             ],
             "path": "packages/core/node/core-node-server/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -59,6 +61,7 @@
         ],
         "path": "packages/core/node/core-node-server/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server",
@@ -70,7 +73,8 @@
               "\nThe backgroundTasks role includes operations which don't involve\nresponding to incoming http traffic from the UI."
             ],
             "path": "packages/core/node/core-node-server/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-node-server",
@@ -82,7 +86,8 @@
               "\nThe ui role covers any operations that need to occur in order\nto handle http traffic from the browser."
             ],
             "path": "packages/core/node/core-node-server/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

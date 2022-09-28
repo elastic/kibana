@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiButton,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';

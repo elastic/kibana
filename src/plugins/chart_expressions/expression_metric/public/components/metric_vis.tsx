@@ -80,7 +80,10 @@ const getMetricFormatter = (
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId = serializedFieldFormat?.id ?? 'number';
+  const formatId =
+    (serializedFieldFormat?.id === 'suffix'
+      ? serializedFieldFormat.params?.id
+      : serializedFieldFormat?.id) ?? 'number';
 
   if (
     !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
@@ -160,16 +163,11 @@ const getColor = (
   data: Datatable,
   rowNumber: number
 ) => {
-  let minBound = paletteParams.rangeMin;
-  let maxBound = paletteParams.rangeMax;
-
   const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
-  minBound = min;
-  maxBound = max;
 
   return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
-    min: minBound,
-    max: maxBound,
+    min,
+    max,
   });
 };
 
@@ -313,21 +311,18 @@ export const MetricVis = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollDimensions = useResizeObserver(scrollContainerRef.current);
 
+  const {
+    metric: { minHeight },
+  } = getThemeService().useChartsBaseTheme();
+
   useEffect(() => {
-    const minTileHeight = 64; // TODO - magic number from the @elastic/charts side. would be nice to deduplicate
-    const minimumRequiredVerticalSpace = minTileHeight * grid.length;
+    const minimumRequiredVerticalSpace = minHeight * grid.length;
     setScrollChildHeight(
       (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
         ? '100%'
         : `${minimumRequiredVerticalSpace}px`
     );
-  }, [grid.length, scrollDimensions.height]);
-
-  // force chart to re-render to circumvent a charts bug
-  const magicKey = useRef(0);
-  useEffect(() => {
-    magicKey.current++;
-  }, [data]);
+  }, [grid.length, minHeight, scrollDimensions.height]);
 
   return (
     <div
@@ -345,7 +340,7 @@ export const MetricVis = ({
           height: ${scrollChildHeight};
         `}
       >
-        <Chart key={magicKey.current}>
+        <Chart>
           <Settings
             theme={[
               {

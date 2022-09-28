@@ -12,7 +12,7 @@ import classnames from 'classnames';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
-  CollectiveConfig,
+  MergedAnnotation,
 } from '../../common/types';
 import { getBaseIconPlacement } from '../components';
 import { hasIcon, iconSet } from './icon';
@@ -27,16 +27,19 @@ type PartialReferenceLineDecorationConfig = Pick<
   position?: Position;
 };
 
-type PartialCollectiveConfig = Pick<CollectiveConfig, 'position' | 'icon' | 'textVisibility'>;
+type PartialMergedAnnotation = Pick<
+  MergedAnnotation,
+  'position' | 'icon' | 'textVisibility' | 'label'
+>;
 
 const isExtendedDecorationConfig = (
-  config: PartialReferenceLineDecorationConfig | PartialCollectiveConfig | undefined
+  config: PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined
 ): config is PartialReferenceLineDecorationConfig =>
   (config as PartialReferenceLineDecorationConfig)?.iconPosition ? true : false;
 
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getLinesCausedPaddings = (
-  visualConfigs: Array<PartialReferenceLineDecorationConfig | PartialCollectiveConfig | undefined>,
+  visualConfigs: Array<PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined>,
   axesMap: AxesMap,
   shouldRotate: boolean
 ) => {
@@ -50,7 +53,7 @@ export const getLinesCausedPaddings = (
     const { position, icon, textVisibility } = config;
     const iconPosition = isExtendedDecorationConfig(config) ? config.iconPosition : undefined;
 
-    if (position && (hasIcon(icon) || textVisibility)) {
+    if (position && (hasIcon(icon) || (textVisibility && 'label' in config))) {
       const placement = getBaseIconPlacement(
         iconPosition,
         axesMap,
@@ -58,7 +61,7 @@ export const getLinesCausedPaddings = (
       );
       paddings[placement] = Math.max(
         paddings[placement] || 0,
-        LINES_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
+        LINES_MARKER_SIZE * (textVisibility && 'label' in config && config.label ? 2 : 1) // double the padding size if there's text
       );
       icons[placement] = (icons[placement] || 0) + (hasIcon(icon) ? 1 : 0);
     }

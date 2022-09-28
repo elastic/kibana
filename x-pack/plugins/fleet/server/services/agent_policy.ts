@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq, omit, isEqual, keyBy } from 'lodash';
+import { omit, isEqual, keyBy } from 'lodash';
 import uuidv5 from 'uuid/v5';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
@@ -52,6 +52,7 @@ import type {
   Installation,
   Output,
   DeletePackagePoliciesResponse,
+  PackageInfo,
 } from '../../common/types';
 import {
   AgentPolicyNameExistsError,
@@ -68,7 +69,7 @@ import {
   elasticAgentManagedManifest,
 } from './elastic_agent_manifest';
 
-import { getPackageInfo, bulkInstallPackages } from './epm/packages';
+import { bulkInstallPackages } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
@@ -122,7 +123,6 @@ class AgentPolicyService {
       existingAgentPolicy,
       this.hasAPMIntegration(existingAgentPolicy)
     );
-
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
@@ -186,8 +186,9 @@ class AgentPolicyService {
   }
 
   public hasAPMIntegration(agentPolicy: AgentPolicy) {
-    return agentPolicy.package_policies.some(
-      (p) => typeof p !== 'string' && p.package?.name === FLEET_APM_PACKAGE
+    return (
+      agentPolicy.package_policies &&
+      agentPolicy.package_policies.some((p) => p.package?.name === FLEET_APM_PACKAGE)
     );
   }
 
@@ -261,13 +262,7 @@ class AgentPolicyService {
 
     if (withPackagePolicies) {
       agentPolicy.package_policies =
-        (await packagePolicyService.getByIDs(
-          soClient,
-          (agentPolicySO.attributes.package_policies as string[]) || [],
-          {
-            ignoreMissing: true,
-          }
-        )) || [];
+        (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
     }
 
     return agentPolicy;
@@ -458,7 +453,7 @@ class AgentPolicyService {
     );
 
     // Copy all package policies and append (copy n) to their names
-    if (baseAgentPolicy.package_policies.length) {
+    if (baseAgentPolicy.package_policies) {
       const newPackagePolicies = await pMap(
         baseAgentPolicy.package_policies as PackagePolicy[],
         async (packagePolicy: PackagePolicy) => {
@@ -474,8 +469,10 @@ class AgentPolicyService {
       await packagePolicyService.bulkCreate(
         soClient,
         esClient,
-        newPackagePolicies,
-        newAgentPolicy.id,
+        newPackagePolicies.map((newPackagePolicy) => ({
+          ...newPackagePolicy,
+          policy_id: newAgentPolicy.id,
+        })),
         {
           ...options,
           bumpRevision: false,
@@ -610,75 +607,6 @@ class AgentPolicyService {
     return res;
   }
 
-  public async assignPackagePolicies(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    id: string,
-    packagePolicyIds: string[],
-    options: { user?: AuthenticatedUser; bumpRevision: boolean; force?: boolean } = {
-      bumpRevision: true,
-    }
-  ): Promise<AgentPolicy> {
-    const oldAgentPolicy = await this.get(soClient, id, false);
-
-    if (!oldAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-
-    if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot update integrations of hosted agent policy ${id}`
-      );
-    }
-
-    return await this._update(
-      soClient,
-      esClient,
-      id,
-      {
-        package_policies: uniq(
-          [...((oldAgentPolicy.package_policies || []) as string[])].concat(packagePolicyIds)
-        ),
-      },
-      options?.user,
-      { bumpRevision: options.bumpRevision }
-    );
-  }
-
-  public async unassignPackagePolicies(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    id: string,
-    packagePolicyIds: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean }
-  ) {
-    const oldAgentPolicy = await this.get(soClient, id, false);
-
-    if (!oldAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-
-    if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot remove integrations of hosted agent policy ${id}`
-      );
-    }
-
-    return await this._update(
-      soClient,
-      esClient,
-      id,
-      {
-        package_policies: uniq(
-          [...((oldAgentPolicy.package_policies || []) as string[])].filter(
-            (packagePolicyId) => !packagePolicyIds.includes(packagePolicyId)
-          )
-        ),
-      },
-      options?.user
-    );
-  }
-
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -705,12 +633,14 @@ class AgentPolicyService {
       throw new Error('Cannot delete agent policy that is assigned to agent(s)');
     }
 
-    if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
+    const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
+
+    if (packagePolicies.length) {
       const deletedPackagePolicies: DeletePackagePoliciesResponse =
         await packagePolicyService.delete(
           soClient,
           esClient,
-          agentPolicy.package_policies as string[],
+          packagePolicies.map((p) => p.id),
           {
             force: options?.force,
             skipUnassignFromAgentPolicies: true,
@@ -839,9 +769,15 @@ class AgentPolicyService {
         .map((fleetServerPolicy) =>
           // There are some potential performance concerns around using `agentPolicyService.update` in this context.
           // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
-          agentPolicyService.update(soClient, esClient, fleetServerPolicy.policy_id, {
-            schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-          })
+          agentPolicyService.update(
+            soClient,
+            esClient,
+            fleetServerPolicy.policy_id,
+            {
+              schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+            },
+            { force: true }
+          )
         )
     );
   }
@@ -1029,22 +965,16 @@ export async function addPackageToAgentPolicy(
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
   defaultOutput: Output,
+  packageInfo: PackageInfo,
   packagePolicyName?: string,
   packagePolicyId?: string | number,
   packagePolicyDescription?: string,
   transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy,
   bumpAgentPolicyRevison = false
 ) {
-  const packageInfo = await getPackageInfo({
-    savedObjectsClient: soClient,
-    pkgName: packageToInstall.name,
-    pkgVersion: packageToInstall.version,
-  });
-
   const basePackagePolicy = packageToPackagePolicy(
     packageInfo,
     agentPolicy.id,
-    defaultOutput.id,
     agentPolicy.namespace ?? 'default',
     packagePolicyName,
     packagePolicyDescription
@@ -1067,5 +997,6 @@ export async function addPackageToAgentPolicy(
     skipUniqueNameVerification: true,
     overwrite: true,
     force: true, // To add package to managed policy we need the force flag
+    packageInfo,
   });
 }

@@ -14,6 +14,7 @@ import {
   LayoutDirection,
   Metric,
   MetricElementEvent,
+  MetricWNumber,
   MetricWProgress,
   Settings,
 } from '@elastic/charts';
@@ -954,7 +955,7 @@ describe('MetricVisComponent', function () {
                 "stops": Array [],
               },
               Object {
-                "max": 28.984375,
+                "max": 57.96875,
                 "min": 0,
               },
             ],
@@ -1124,7 +1125,7 @@ describe('MetricVisComponent', function () {
         value: primaryMetric,
         valueFormatter,
         extra,
-      } = component.find(Metric).props().data?.[0][0]!;
+      } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
 
       return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
     };
@@ -1215,6 +1216,17 @@ describe('MetricVisComponent', function () {
           useShortSuffix: true,
         },
       });
+    });
+
+    it('ignores suffix formatting', () => {
+      const { primary, secondary } = getFormattedMetrics(0.23939, 11.2, {
+        id: 'suffix',
+        params: {
+          id: 'percent',
+        },
+      });
+      expect(primary).toBe('23.94%');
+      expect(secondary).toBe('1.12K%');
     });
   });
 });

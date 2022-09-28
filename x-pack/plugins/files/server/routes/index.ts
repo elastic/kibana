@@ -11,6 +11,8 @@ import * as find from './find';
 import * as metrics from './metrics';
 import * as publicDownload from './public_facing/download';
 
+export { registerFileKindRoutes } from './file_kind';
+
 export function registerRoutes(router: FilesRouter) {
   [find, metrics, publicDownload].forEach((endpoint) => {
     endpoint.register(router);

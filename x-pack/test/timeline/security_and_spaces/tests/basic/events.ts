@@ -69,20 +69,6 @@ export default ({ getService }: FtrProviderContext) => {
   const getPostBody = (): JsonObject => ({
     defaultIndex: ['.alerts-*'],
     entityType: 'alerts',
-    docValueFields: [
-      {
-        field: '@timestamp',
-      },
-      {
-        field: ALERT_RULE_CONSUMER,
-      },
-      {
-        field: ALERT_UUID,
-      },
-      {
-        field: 'event.kind',
-      },
-    ],
     factoryQueryType: TimelineEventsQueries.all,
     fieldRequested: ['@timestamp', 'message', ALERT_RULE_CONSUMER, ALERT_UUID, 'event.kind'],
     fields: [],
