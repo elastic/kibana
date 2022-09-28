@@ -42,7 +42,7 @@ export interface ContextAppContentProps {
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
-  onFieldEdited: () => Promise<void>;
+  onFieldEdited: () => void;
 }
 
 const controlColumnIds = ['openDetails'];
