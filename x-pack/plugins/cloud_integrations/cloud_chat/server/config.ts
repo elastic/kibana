@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
@@ -28,18 +28,21 @@ export const config: PluginConfigDescriptor<CloudChatConfigType> = {
     (cfg) => {
       return {
         set: [
-          {
-            path: 'xpack.cloud_integrations.chat.enabled',
-            value: get(cfg, 'xpack.cloud.chat.enabled'),
-          },
-          {
-            path: 'xpack.cloud_integrations.chat.chatURL',
-            value: get(cfg, 'xpack.cloud.chat.chatURL'),
-          },
-          {
-            path: 'xpack.cloud_integrations.chat.chatIdentitySecret',
-            value: get(cfg, 'xpack.cloud.chatIdentitySecret'),
-          },
+          ...copyIfExists({
+            cfg,
+            fromKey: 'xpack.cloud.chat.enabled',
+            toKey: 'xpack.cloud_integrations.chat.enabled',
+          }),
+          ...copyIfExists({
+            cfg,
+            fromKey: 'xpack.cloud.chat.chatURL',
+            toKey: 'xpack.cloud_integrations.chat.chatURL',
+          }),
+          ...copyIfExists({
+            cfg,
+            fromKey: 'xpack.cloud.chatIdentitySecret',
+            toKey: 'xpack.cloud_integrations.chat.chatIdentitySecret',
+          }),
         ],
         unset: [
           { path: 'xpack.cloud.chat.enabled' },
@@ -50,3 +53,22 @@ export const config: PluginConfigDescriptor<CloudChatConfigType> = {
     },
   ],
 };
+
+/**
+ * Defines the `set` action only if the key exists in the `fromKey` value.
+ * This is to avoid overwriting actual values with undefined.
+ * @param cfg The config object
+ * @param fromKey The key to copy from.
+ * @param toKey The key where the value should be copied to.
+ */
+function copyIfExists({
+  cfg,
+  fromKey,
+  toKey,
+}: {
+  cfg: Readonly<{ [p: string]: unknown }>;
+  fromKey: string;
+  toKey: string;
+}) {
+  return has(cfg, fromKey) ? [{ path: toKey, value: get(cfg, fromKey) }] : [];
+}
