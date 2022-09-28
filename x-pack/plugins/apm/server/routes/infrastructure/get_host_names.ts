@@ -12,17 +12,21 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
-const getHostNames = async ({
-  infraMetricsClient,
+export async function getContainerHostNames({
   containerIds,
+  infraMetricsClient,
   start,
   end,
 }: {
-  infraMetricsClient: InfraMetricsClient;
   containerIds: string[];
+  infraMetricsClient: InfraMetricsClient;
   start: number;
   end: number;
-}) => {
+}): Promise<string[]> {
+  if (!containerIds.length) {
+    return [];
+  }
+
   const response = await infraMetricsClient.search({
     size: 0,
     query: {
@@ -46,33 +50,10 @@ const getHostNames = async ({
       },
     },
   });
-  return {
-    hostNames:
-      response.aggregations?.hostNames?.buckets.map(
-        (bucket: { key: string }) => bucket.key
-      ) ?? [],
-  };
-};
 
-export const getContainerHostNames = async ({
-  containerIds,
-  infraMetricsClient,
-  start,
-  end,
-}: {
-  containerIds: string[];
-  infraMetricsClient: InfraMetricsClient;
-  start: number;
-  end: number;
-}): Promise<string[]> => {
-  if (containerIds.length) {
-    const containerHostNames = await getHostNames({
-      infraMetricsClient,
-      containerIds,
-      start,
-      end,
-    });
-    return containerHostNames.hostNames;
-  }
-  return [];
-};
+  const hostNames = response.aggregations?.hostNames?.buckets.map(
+    (bucket) => bucket.key as string
+  );
+
+  return hostNames ?? [];
+}

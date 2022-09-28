@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ESSearchRequest } from '@kbn/es-types';
+import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
 import { ApmPluginRequestHandlerContext } from '../../../../routes/typings';
 import { getInfraMetricIndices } from '../../get_infra_metric_indices';
@@ -30,7 +29,7 @@ export function createInfraMetricsClient({
   return {
     async search<TDocument, TParams extends InfraMetricsSearchParams>(
       opts: TParams
-    ): Promise<SearchResponse<TDocument, TParams>> {
+    ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       const {
         savedObjects: { client: savedObjectsClient },
         elasticsearch: { client: esClient },
@@ -46,10 +45,9 @@ export function createInfraMetricsClient({
         ...opts,
       };
 
-      const res = await esClient.asCurrentUser.search<TDocument, TParams>(
+      return esClient.asCurrentUser.search<TDocument>(
         searchParams
-      );
-      return res;
+      ) as Promise<any>;
     },
   };
 }
