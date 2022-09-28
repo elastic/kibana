@@ -114,7 +114,7 @@ jest.mock('../../hooks/endpoint/use_get_endpoints_list');
 
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
-describe('Response Actions Log', () => {
+describe('Response actions history', () => {
   const testPrefix = 'response-actions-list';
 
   let render: (
@@ -391,6 +391,26 @@ describe('Response Actions Log', () => {
       expandButtons.map((button) => userEvent.click(button));
       const noTrays = queryAllByTestId(`${testPrefix}-details-tray`);
       expect(noTrays).toEqual([]);
+    });
+
+    it('should contain relevant details in each expanded row', async () => {
+      render();
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      expandButtons.map((button) => userEvent.click(button));
+      const trays = getAllByTestId(`${testPrefix}-details-tray`);
+      expect(trays).toBeTruthy();
+      expect(Array.from(trays[0].querySelectorAll('dt')).map((title) => title.textContent)).toEqual(
+        [
+          'Command placed',
+          'Execution started on',
+          'Execution completed',
+          'Input',
+          'Parameters',
+          'Output:',
+        ]
+      );
     });
 
     it('should refresh data when autoRefresh is toggled on', async () => {

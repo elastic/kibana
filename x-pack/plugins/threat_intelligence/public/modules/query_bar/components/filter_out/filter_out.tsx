@@ -11,8 +11,11 @@ import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@
 import { Filter } from '@kbn/es-query';
 import { ComponentType } from '../../../../../common/types/component_type';
 import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_indicators_filters_context';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
-import { FilterOut as FilterOutConst, updateFiltersArray } from '../../lib/filter';
+import {
+  fieldAndValueValid,
+  getIndicatorFieldAndValue,
+} from '../../../indicators/utils/field_value';
+import { FilterOut as FilterOutConst, updateFiltersArray } from '../../utils/filter';
 import { Indicator } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 
