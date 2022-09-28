@@ -176,7 +176,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
-          "filter": undefined,
+          "filter": null,
           "sortField": undefined,
           "type": "alert",
         },
@@ -277,7 +277,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
-          "filter": undefined,
+          "filter": null,
           "sortField": undefined,
           "type": "alert",
         },
@@ -730,6 +730,8 @@ describe('find()', () => {
 
       expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
         fields: ['tags', 'alertTypeId', 'consumer'],
+        filter: null,
+        sortField: undefined,
         type: 'alert',
       });
       expect(ensureRuleTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'rule');

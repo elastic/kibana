@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
+import { fromKueryExpression } from '@kbn/es-query';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -191,6 +192,20 @@ const findTestUtils = (
           `${getUrlPrefix(Spaces.space1.id)}/${
             describeType === 'public' ? 'api' : 'internal'
           }/alerting/rules/_find?filter=alert.attributes.params.strValue:"my b"`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].params.strValue).to.eql('my b');
+      });
+
+      it('should filter on kueryNode parameters', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rules/_find?filter=${JSON.stringify(
+            fromKueryExpression('alert.attributes.params.strValue:"my b"')
+          )}`
         );
 
         expect(response.status).to.eql(200);
