@@ -44,7 +44,7 @@ export function WithIndicators() {
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsTable
           browserFields={{}}
-          loading={false}
+          isLoading={false}
           pagination={{
             pageSize: 10,
             pageIndex: 0,
@@ -76,7 +76,7 @@ export function WithNoIndicators() {
         onChangePage={stub}
         onChangeItemsPerPage={stub}
         indicatorCount={0}
-        loading={false}
+        isLoading={false}
         indexPattern={mockIndexPattern}
         columnSettings={columnSettings}
       />
