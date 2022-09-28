@@ -330,6 +330,9 @@
                                                 "rule_type_run_duration_ms": {
                                                     "type": "long"
                                                 },
+                                                "rule_type_run_duration_s": {
+                                                  "type": "long"
+                                              },
                                                 "process_alerts_duration_ms": {
                                                     "type": "long"
                                                 },
