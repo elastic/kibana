@@ -14,9 +14,11 @@ created_by:
     email:
       type: string
       example: null
+      nullable: true
     full_name:
       type: string
       example: null
+      nullable: true
     username: 
       type: string
       example: elastic
@@ -53,9 +55,11 @@ updated_by:
     email:
       type: string
       example: null
+      nullable: true
     full_name:
       type: string
       example: null
+      nullable: true
     username: 
       type: string
       example: elastic

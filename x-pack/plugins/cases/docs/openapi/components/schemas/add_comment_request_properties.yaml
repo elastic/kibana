@@ -1,0 +1,17 @@
+title: Add case comment request properties
+type: object
+description: Defines the shared properties for case comment requests
+discriminator:
+  propertyName: type
+  mapping:
+    alert: '../../entrypoint.yaml#/components/schemas/alertCaseCommentRequest'
+    user: '../../entrypoint.yaml#/components/schemas/userCaseCommentRequest'
+required:
+  - owner 
+  - type 
+properties:
+  owner:
+    $ref: '../../entrypoint.yaml#/components/schemas/ownerProperty'
+  type:
+    description: The type of comment.
+    type: string

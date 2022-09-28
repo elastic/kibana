@@ -20,9 +20,7 @@ properties:
       owner:
         $ref: 'owners.yaml'
       rule:
-        type: object
-        properties:
-          $ref: 'rule_properties.yaml'
+        $ref: 'rule.yaml'
       type:
         type: string
         enum:

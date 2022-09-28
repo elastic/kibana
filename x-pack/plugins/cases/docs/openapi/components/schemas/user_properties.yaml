@@ -1,9 +1,11 @@
 email:
   type: string
   example: null
+  nullable: true
 full_name:
   type: string
   example: null
+  nullable: true
 username:
   type: string
   example: elastic

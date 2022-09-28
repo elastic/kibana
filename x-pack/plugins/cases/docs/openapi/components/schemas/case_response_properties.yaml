@@ -13,9 +13,8 @@ comments:
   type: array
   items: 
     oneOf:
-      - $ref: 'alert_comment_response_properties.yaml'
-      - $ref: 'user_comment_response_properties.yaml'
-  example: []
+      - $ref: '../../entrypoint.yaml#/components/schemas/alertCaseCommentResponse'
+      - $ref: '../../entrypoint.yaml#/components/schemas/userCaseCommentResponse'
 connector: 
   type: object
   properties:
@@ -39,6 +38,7 @@ duration:
     was closed after less than half a second, the duration is rounded down to
     zero.
   example: 120
+  nullable: true
 external_service:
   $ref: 'external_service.yaml'
 id:

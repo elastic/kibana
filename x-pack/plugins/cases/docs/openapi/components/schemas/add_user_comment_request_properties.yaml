@@ -1,0 +1,13 @@
+title: Add case comment request properties for user comments
+description: Defines the properties for case comment requests when type is user
+allOf: # Combines the general comment request schema with the user comment-specific properties
+  - $ref: '../../entrypoint.yaml#/components/schemas/caseCommentRequest'
+  - type: object
+    title: Add comment to case request
+    properties:
+      comment:
+        description: The new comment. It is required only when `type` is `user`.
+        type: string
+        example: A new comment.
+    required:
+      - comment

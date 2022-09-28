@@ -6,8 +6,8 @@ description: >
   that the user has access to read.
 schema:
   oneOf:
-    - $ref: '../schemas/owners.yaml'
+    - $ref: '../../entrypoint.yaml#/components/schemas/ownerProperty'
     - type: array
       items:
-        $ref: '../schemas/owners.yaml'
+        $ref: '../../entrypoint.yaml#/components/schemas/ownerProperty'
 example: cases

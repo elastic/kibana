@@ -17,36 +17,36 @@ servers:
   - url: 'http://localhost:5601'
     description: local
 paths:
-  '/s/{spaceId}/api/cases':
-    $ref: 'paths/s@{spaceid}@api@cases.yaml'
-  '/s/{spaceId}/api/cases/_find':
-    $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
-  '/s/{spaceId}/api/cases/alerts/{alertId}':
-    $ref: 'paths/s@{spaceid}@api@cases@alerts@{alertid}.yaml'
-  '/s/{spaceId}/api/cases/configure':
-    $ref: paths/s@{spaceid}@api@cases@configure.yaml
-  '/s/{spaceId}/api/cases/configure/{configurationId}':
-    $ref: paths/s@{spaceid}@api@cases@configure@{configurationid}.yaml
-  '/s/{spaceId}/api/cases/configure/connectors/_find':
-    $ref: paths/s@{spaceid}@api@cases@configure@connectors@_find.yaml
-  '/s/{spaceId}/api/cases/reporters':
-    $ref: 'paths/s@{spaceid}@api@cases@reporters.yaml'
-  '/s/{spaceId}/api/cases/status':
-    $ref: 'paths/s@{spaceid}@api@cases@status.yaml'
-  '/s/{spaceId}/api/cases/tags':
-    $ref: 'paths/s@{spaceid}@api@cases@tags.yaml'
-  '/s/{spaceId}/api/cases/{caseId}':
-    $ref: 'paths/s@{spaceid}@api@cases@{caseid}.yaml'
-  '/s/{spaceId}/api/cases/{caseId}/alerts':
-    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@alerts.yaml'
+#  '/s/{spaceId}/api/cases':
+#    $ref: 'paths/s@{spaceid}@api@cases.yaml'
+#  '/s/{spaceId}/api/cases/_find':
+#    $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
+#  '/s/{spaceId}/api/cases/alerts/{alertId}':
+#    $ref: 'paths/s@{spaceid}@api@cases@alerts@{alertid}.yaml'
+#  '/s/{spaceId}/api/cases/configure':
+#    $ref: paths/s@{spaceid}@api@cases@configure.yaml
+#  '/s/{spaceId}/api/cases/configure/{configurationId}':
+#    $ref: paths/s@{spaceid}@api@cases@configure@{configurationid}.yaml
+#  '/s/{spaceId}/api/cases/configure/connectors/_find':
+#    $ref: paths/s@{spaceid}@api@cases@configure@connectors@_find.yaml
+#  '/s/{spaceId}/api/cases/reporters':
+#    $ref: 'paths/s@{spaceid}@api@cases@reporters.yaml'
+#  '/s/{spaceId}/api/cases/status':
+#    $ref: 'paths/s@{spaceid}@api@cases@status.yaml'
+#  '/s/{spaceId}/api/cases/tags':
+#    $ref: 'paths/s@{spaceid}@api@cases@tags.yaml'
+#  '/s/{spaceId}/api/cases/{caseId}':
+#    $ref: 'paths/s@{spaceid}@api@cases@{caseid}.yaml'
+#  '/s/{spaceId}/api/cases/{caseId}/alerts':
+#    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@alerts.yaml'
   '/s/{spaceId}/api/cases/{caseId}/comments':
     $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments.yaml'
-  '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
-    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@{commentid}.yaml'
-  '/s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push':
-    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@connector@{connectorid}@_push.yaml'
-  '/s/{spaceId}/api/cases/{caseId}/user_actions':
-    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@user_actions.yaml'
+#  '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
+#    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@{commentid}.yaml'
+#  '/s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push':
+#    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@connector@{connectorid}@_push.yaml'
+#  '/s/{spaceId}/api/cases/{caseId}/user_actions':
+#    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@user_actions.yaml'
 components:
   securitySchemes:
     basicAuth:
@@ -57,86 +57,20 @@ components:
       in: header
       name: ApiKey
   schemas:
-    commentRequest:
-      title: Add case comment request properties
-      type: object
-      required:
-        - owner
-        - type
-      properties:
-        owner:
-          $ref: 'components/schemas/owners.yaml'
-        type: 
-          description: The type of comment.
-          type: string
-          enum:
-            - alert
-            - user
-      discriminator:
-        propertyName: type
-    alert:  # "alert" is a value for the comment type property (the discriminator value)
-      title: Add case comment request properties for alerts
-      allOf: # Combines the general comment request schema with the alert-specific properties
-        - $ref: '#/components/schemas/commentRequest'
-        - type: object
-          title: Add alert to case request
-          properties:
-            alertId: 
-              description: >
-                The alert identifier. It is required only when `type` is `alert`. If it is
-                an array, `index` must also be an array. This functionality is in
-                technical preview and may be changed or removed in a future release.
-                Elastic will apply best effort to fix any issues, but features in
-                technical preview are not subject to the support SLA of official GA
-                features.
-              oneOf:
-                - type: string
-                - type: array
-                  items:
-                    type: string
-              x-technical-preview: true
-              example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
-            index:
-              description: >
-                The alert index. It is required only when `type` is `alert`. If it is an
-                array, `alertId` must also be an array. This functionality is in technical
-                preview and may be changed or removed in a future release. Elastic will
-                apply best effort to fix any issues, but features in technical preview are
-                not subject to the support SLA of official GA features.
-              oneOf:
-                - type: string
-                - type: array
-                  items:
-                    type: string
-              x-technical-preview: true
-            rule:
-              description: >
-                The rule that is associated with the alert. It is required only when
-                `type` is `alert`. This functionality is in technical preview and may be
-                changed or removed in a future release. Elastic will apply best effort to
-                fix any issues, but features in technical preview are not subject to the
-                support SLA of official GA features.
-              type: object
-              x-technical-preview: true
-              properties:
-                $ref: 'components/schemas/rule_properties.yaml'
-              required:
-                - alertId
-                - index
-                - rule
-    user:  # "user" is a value for the comment type property (the discriminator value)
-      title: Add case comment request properties for alerts
-      allOf: # Combines the general comment request schema with the user comment-specific properties
-        - $ref: '#/components/schemas/commentRequest'
-        - type: object
-          title: Add comment to case request
-          properties:
-            comment:
-              description: The new comment. It is required only when `type` is `user`.
-              type: string
-              example: A new comment.
-          required:
-            - comment
+    caseCommentRequest:
+      $ref: 'components/schemas/add_comment_request_properties.yaml' 
+    alertCaseCommentRequest:
+      $ref: 'components/schemas/add_alert_comment_request_properties.yaml'
+    alertCaseCommentResponse:
+      $ref: 'components/schemas/alert_comment_response_properties.yaml'
+    userCaseCommentRequest:
+      $ref: 'components/schemas/add_user_comment_request_properties.yaml'
+    userCaseCommentResponse:
+      $ref: 'components/schemas/user_comment_response_properties.yaml'
+    ownerProperty:
+      $ref: 'components/schemas/owners.yaml'
+    ruleObject:
+      $ref: 'components/schemas/rule.yaml'          
 security:
   - basicAuth: []
   - apiKeyAuth: []

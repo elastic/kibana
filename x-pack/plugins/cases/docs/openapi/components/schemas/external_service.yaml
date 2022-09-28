@@ -18,3 +18,4 @@ properties:
     properties:
       $ref: 'user_properties.yaml'
     nullable: true
+nullable: true
