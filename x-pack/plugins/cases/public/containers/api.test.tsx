@@ -25,7 +25,7 @@ import {
   getCaseUserActions,
   getTags,
   patchCase,
-  patchCasesStatus,
+  updateCases,
   patchComment,
   postCase,
   createAttachments,
@@ -449,7 +449,7 @@ describe('Cases API', () => {
     });
   });
 
-  describe('patchCasesStatus', () => {
+  describe('updateCases', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(casesSnake);
@@ -464,7 +464,7 @@ describe('Cases API', () => {
     ];
 
     test('should be called with correct check url, method, signal', async () => {
-      await patchCasesStatus(data, abortCtrl.signal);
+      await updateCases(data, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'PATCH',
         body: JSON.stringify({ cases: data }),
@@ -473,7 +473,7 @@ describe('Cases API', () => {
     });
 
     test('should return correct response should not covert to camel case registered attachments', async () => {
-      const resp = await patchCasesStatus(data, abortCtrl.signal);
+      const resp = await updateCases(data, abortCtrl.signal);
       expect(resp).toEqual(cases);
     });
   });

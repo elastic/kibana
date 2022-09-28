@@ -19,7 +19,7 @@ interface GetBulkItems {
   closePopover: () => void;
   deleteCasesAction: (cases: Case[]) => void;
   selectedCases: Case[];
-  updateCaseStatus: (status: string) => void;
+  updateCaseStatus: (status: CaseStatuses) => void;
 }
 
 export const getBulkItems = ({

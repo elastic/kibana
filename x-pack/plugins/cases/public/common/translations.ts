@@ -18,7 +18,7 @@ export const CANCEL = i18n.translate('xpack.cases.caseView.cancel', {
 export const DELETE_CASE = (quantity: number = 1) =>
   i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
     values: { quantity },
-    defaultMessage: `Delete {quantity, plural, =1 {case} other {cases}}`,
+    defaultMessage: `Delete {quantity, plural, =1 {case} other {{quantity} cases}}`,
   });
 
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
@@ -296,3 +296,9 @@ export const READ_ACTIONS_PERMISSIONS_ERROR_MSG = i18n.translate(
       'You do not have permission to view connectors. If you would like to view connectors, contact your Kibana administrator.',
   }
 );
+
+export const DELETED_CASES = (totalCases: number) =>
+  i18n.translate('xpack.cases.containers.deletedCases', {
+    values: { totalCases },
+    defaultMessage: 'Deleted {totalCases, plural, =1 {case} other {{totalCases} cases}}',
+  });

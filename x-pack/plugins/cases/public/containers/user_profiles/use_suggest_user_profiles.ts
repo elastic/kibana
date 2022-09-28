@@ -14,7 +14,7 @@ import { DEFAULT_USER_SIZE, SEARCH_DEBOUNCE_MS } from '../../../common/constants
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import { ServerError } from '../../types';
-import { USER_PROFILES_CACHE_KEY, USER_PROFILES_SUGGEST_CACHE_KEY } from '../constants';
+import { casesQueriesKeys } from '../constants';
 import { suggestUserProfiles, SuggestUserProfilesArgs } from './api';
 
 type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & { onDebounce?: () => void };
@@ -49,11 +49,7 @@ export const useSuggestUserProfiles = ({
   const toasts = useToasts();
 
   return useQuery<UserProfile[], ServerError>(
-    [
-      USER_PROFILES_CACHE_KEY,
-      USER_PROFILES_SUGGEST_CACHE_KEY,
-      { name: debouncedName, owners, size },
-    ],
+    casesQueriesKeys.suggestUsers({ name: debouncedName, owners, size }),
     () => {
       const abortCtrlRef = new AbortController();
       return suggestUserProfiles({

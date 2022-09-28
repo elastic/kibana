@@ -11,17 +11,18 @@ import { casesQueriesKeys } from '../../containers/constants';
 
 /**
  * Using react-query queryClient to invalidate all the
- * case view page cache namespace.
+ * cases table page cache namespace.
  *
- * This effectively clears the cache for all the case view pages and
+ * This effectively clears the cache for all the cases table pages and
  * forces the page to fetch all the data again. Including
- * metrics, actions, comments, etc.
+ * all cases, user profiles, statuses, metrics, tags, etc.
  */
 
-export const useRefreshCaseViewPage = () => {
+export const useRefreshCases = () => {
   const queryClient = useQueryClient();
   return useCallback(() => {
-    queryClient.invalidateQueries(casesQueriesKeys.caseView());
+    queryClient.invalidateQueries(casesQueriesKeys.casesList());
     queryClient.invalidateQueries(casesQueriesKeys.tags());
+    queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
   }, [queryClient]);
 };

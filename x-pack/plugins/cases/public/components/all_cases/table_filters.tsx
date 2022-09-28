@@ -19,7 +19,6 @@ import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
-import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
 import { CurrentUserProfile } from '../types';
@@ -31,7 +30,6 @@ interface CasesTableFiltersProps {
   countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
-  setFilterRefetch: (val: () => void) => void;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   availableSolutions: string[];
   displayCreateCaseButton?: boolean;
@@ -59,7 +57,6 @@ const CasesTableFiltersComponent = ({
   countInProgressCases,
   onFilterChanged,
   initial = DEFAULT_FILTER_OPTIONS,
-  setFilterRefetch,
   hiddenStatuses,
   availableSolutions,
   displayCreateCaseButton,
@@ -71,18 +68,8 @@ const CasesTableFiltersComponent = ({
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [selectedOwner, setSelectedOwner] = useState([]);
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
-  const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
+  const { data: tags = [] } = useGetTags();
   const { caseAssignmentAuthorized } = useCasesFeatures();
-
-  const refetch = useCallback(() => {
-    fetchTags();
-  }, [fetchTags]);
-
-  useEffect(() => {
-    if (setFilterRefetch != null) {
-      setFilterRefetch(refetch);
-    }
-  }, [refetch, setFilterRefetch]);
 
   const handleSelectedAssignees = useCallback(
     (newAssignees: UserProfileWithAvatar[]) => {
