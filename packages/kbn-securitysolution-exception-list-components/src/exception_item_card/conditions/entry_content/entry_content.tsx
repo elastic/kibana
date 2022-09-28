@@ -36,7 +36,7 @@ export const EntryContent = memo(
 
     const entryKey = `${field}${type}${value}${index}`;
     return (
-      <div data-test-subj={`${dataTestSubj}${entryKey}Condition`} key={entryKey}>
+      <div data-test-subj={`${dataTestSubj || ''}${entryKey}EntryContent`} key={entryKey}>
         <div css={expressionContainerCss}>
           {isNestedEntry ? (
             <EuiFlexGroup

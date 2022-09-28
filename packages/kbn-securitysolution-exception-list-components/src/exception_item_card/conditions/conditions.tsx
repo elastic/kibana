@@ -28,9 +28,9 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
         {entries.map((entry: Entry, index: number) => {
           const nestedEntries = 'entries' in entry ? entry.entries : [];
           return (
-            <div key={`ExceptionItemCardConditions-Container-${index}`}>
+            <div key={`ExceptionItemCardConditionsContainer${index}`}>
               <EntryContent
-                key={`entry-${index}`}
+                key={`entry${index}`}
                 entry={entry}
                 index={index}
                 dataTestSubj={dataTestSubj}
@@ -38,7 +38,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
               {nestedEntries?.length
                 ? nestedEntries.map((nestedEntry: Entry, nestedIndex: number) => (
                     <EntryContent
-                      key={`nestedEntry-${index}-${nestedIndex}`}
+                      key={`nestedEntry${index}${nestedIndex}`}
                       entry={nestedEntry}
                       index={nestedIndex}
                       isNestedEntry={true}

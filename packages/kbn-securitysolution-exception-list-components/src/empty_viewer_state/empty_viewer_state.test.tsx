@@ -13,7 +13,7 @@ import { EmptyViewerState } from './empty_viewer_state';
 import { ListTypeText, ViewerStatus } from '../types';
 
 describe('EmptyViewerState', () => {
-  it('it renders error screen when "viewerStatus" is "error" with the default title and body', () => {
+  it('it should render "error" with the default title and body', () => {
     const wrapper = render(
       <EmptyViewerState
         isReadOnly={false}
@@ -28,7 +28,7 @@ describe('EmptyViewerState', () => {
       'There was an error loading the exception items. Contact your administrator for help.'
     );
   });
-  it('it renders error screen when "viewerStatus" is "error" when sending the title and body props', () => {
+  it('it should render "error" when sending the title and body props', () => {
     const wrapper = render(
       <EmptyViewerState
         isReadOnly={false}
@@ -43,7 +43,7 @@ describe('EmptyViewerState', () => {
     expect(wrapper.getByTestId('errorTitle')).toHaveTextContent('Error title');
     expect(wrapper.getByTestId('errorBody')).toHaveTextContent('Error body');
   });
-  it('it renders loading screen when "viewerStatus" is "loading"', () => {
+  it('it should render loading', () => {
     const wrapper = render(
       <EmptyViewerState
         isReadOnly={false}
@@ -54,7 +54,7 @@ describe('EmptyViewerState', () => {
 
     expect(wrapper.getByTestId('loadingViewerState')).toBeTruthy();
   });
-  it('it renders empty search screen when "viewerStatus" is "empty_search" with the default title and body', () => {
+  it('it should render empty search with the default title and body', () => {
     const wrapper = render(
       <EmptyViewerState
         isReadOnly={false}
@@ -69,7 +69,7 @@ describe('EmptyViewerState', () => {
     );
     expect(wrapper.getByTestId('emptySearchBody')).toHaveTextContent('Try modifying your search');
   });
-  it('it renders empty search screen when "viewerStatus" is "empty_search" when sending title and body props', () => {
+  it('it should render empty search when sending title and body props', () => {
     const wrapper = render(
       <EmptyViewerState
         isReadOnly={false}
@@ -84,7 +84,7 @@ describe('EmptyViewerState', () => {
     expect(wrapper.getByTestId('emptySearchTitle')).toHaveTextContent('Empty search title');
     expect(wrapper.getByTestId('emptySearchBody')).toHaveTextContent('Empty search body');
   });
-  it('it renders no items screen when "viewerStatus" is "empty" when sending title and body props', () => {
+  it('it should render no items screen when sending title and body props', () => {
     const wrapper = render(
       <EmptyViewerState
         isReadOnly={false}
@@ -100,7 +100,7 @@ describe('EmptyViewerState', () => {
     expect(getByTestId('emptyStateButton')).toHaveTextContent('Add endpoint exception');
     expect(getByTestId('emptyViewerState')).toBeTruthy();
   });
-  it('it renders no items screen when "viewerStatus" is "empty" with default title and body props', () => {
+  it('it should render no items with default title and body props', () => {
     const wrapper = render(
       <EmptyViewerState
         isReadOnly={false}
@@ -117,7 +117,7 @@ describe('EmptyViewerState', () => {
     );
     expect(getByTestId('emptyStateButton')).toHaveTextContent('Create rule exception');
   });
-  it('it renders no items screen when "viewerStatus" is "empty" with default title and body props and listType endPoint', () => {
+  it('it should render no items screen with default title and body props and listType endPoint', () => {
     const wrapper = render(
       <EmptyViewerState
         isReadOnly={false}

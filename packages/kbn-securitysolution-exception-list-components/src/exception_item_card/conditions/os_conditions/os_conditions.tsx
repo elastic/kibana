@@ -23,7 +23,7 @@ export const OsCondition = memo<OsConditionsProps>(({ os, dataTestSubj }) => {
     return os.map((osValue) => OS_LABELS[osValue] ?? osValue).join(', ');
   }, [os]);
   return osLabel ? (
-    <div data-test-subj={`${dataTestSubj}Os`}>
+    <div data-test-subj={`${dataTestSubj || ''}Os`}>
       <strong>
         <EuiExpression description="" value={i18n.CONDITION_OS} />
         <EuiExpression description={i18n.CONDITION_OPERATOR_TYPE_MATCH} value={osLabel} />
