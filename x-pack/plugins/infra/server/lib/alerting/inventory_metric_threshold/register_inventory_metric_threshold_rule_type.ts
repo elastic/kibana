@@ -25,10 +25,15 @@ import {
 import { InfraBackendLibs } from '../../infra_types';
 import {
   alertStateActionVariableDescription,
+  cloudActionVariableDescription,
+  containerActionVariableDescription,
   groupActionVariableDescription,
   hostActionVariableDescription,
+  labelsActionVariableDescription,
   metricActionVariableDescription,
+  orchestratorActionVariableDescription,
   reasonActionVariableDescription,
+  tagsActionVariableDescription,
   thresholdActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
@@ -103,7 +108,12 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
         { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
+        { name: 'container', description: containerActionVariableDescription },
+        { name: 'orchestrator', description: orchestratorActionVariableDescription },
+        { name: 'labels', description: labelsActionVariableDescription },
+        { name: 'tags', description: tagsActionVariableDescription },
       ],
     },
   });

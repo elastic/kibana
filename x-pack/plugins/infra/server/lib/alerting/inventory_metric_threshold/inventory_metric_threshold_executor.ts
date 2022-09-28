@@ -193,6 +193,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           libs.basePath
         );
         scheduledActionsCount++;
+
+        const additionalContext = results && results.length > 0 ? results[0][group] : null;
+
         const context = {
           group,
           alertState: stateToAlertMessage[nextState],
@@ -204,7 +207,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           ),
           threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
-          host: results && results.length > 0 ? results[0][group].host : {},
+          cloud: additionalContext?.cloud,
+          host: additionalContext?.host,
+          container: additionalContext?.container,
+          orchestrator: additionalContext?.orchestrator,
+          labels: additionalContext?.labels,
+          tags: additionalContext?.tags,
         };
         alert.scheduleActions(actionGroupId, context);
       }

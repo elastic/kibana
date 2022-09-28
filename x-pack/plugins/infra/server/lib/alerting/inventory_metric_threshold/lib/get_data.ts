@@ -22,14 +22,27 @@ import { createRequest } from './create_request';
 interface BucketKey {
   node: string;
 }
-type Response = Record<string, { value: number | null; warn: boolean; trigger: boolean, host: EcsFieldsResponse | undefined }>;
+
+type Response = Record<string, { 
+  value: number | null;
+  warn: boolean;
+  trigger: boolean;
+  cloud?: EcsFieldsResponse | undefined;
+  host?: EcsFieldsResponse | undefined;
+  container?: EcsFieldsResponse;
+  orchestrator?: EcsFieldsResponse | undefined;
+  labels?: EcsFieldsResponse | undefined;
+  tags?: EcsFieldsResponse | undefined;
+}>;
+
 type Metric = Record<string, { value: number | null }>;
+
 interface Bucket {
   key: BucketKey;
   doc_count: number;
   shouldWarn: { value: number };
   shouldTrigger: { value: number };
-  host: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>,
+  additionalContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
 type NodeBucket = Bucket & Metric;
 interface ResponseAggregations {
@@ -59,13 +72,23 @@ export const getData = async (
     const nextAfterKey = nodes.after_key;
     for (const bucket of nodes.buckets) {
       const metricId = customMetric && customMetric.field ? customMetric.id : metric;
-      const hostContext = bucket?.host?.hits?.hits;
+      const bucketHits = bucket.additionalContext?.hits?.hits;
+
+      const additionalContext = bucketHits && bucketHits.length > 0 ?
+        {
+          cloud: bucketHits[0]._source?.cloud as unknown as EcsFieldsResponse,
+          host: bucketHits[0]._source?.host as unknown as EcsFieldsResponse,
+          container: bucketHits[0]._source?.container as unknown as EcsFieldsResponse,
+          orchestrator: bucketHits[0]._source?.orchestrator as unknown as EcsFieldsResponse,
+          labels: bucketHits[0]._source?.labels as unknown as EcsFieldsResponse,
+          tags: bucketHits[0]._source?.tags as unknown as EcsFieldsResponse,
+        } : null;
 
       previous[bucket.key.node] = {
         value: bucket?.[metricId]?.value ?? null,
         warn: bucket?.shouldWarn.value > 0 ?? false,
         trigger: bucket?.shouldTrigger.value > 0 ?? false,
-        host: hostContext && hostContext.length > 0 ? hostContext[0]._source : {} as EcsFieldsResponse
+        ...additionalContext
       };
     }
     if (nextAfterKey) {

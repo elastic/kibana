@@ -215,10 +215,50 @@ export const viewInAppUrlActionVariableDescription = i18n.translate(
   }
 );
 
-export const hostActionVariableDescription = i18n.translate(
-  'xpack.infra.metrics.alerting.hostsActionVariableDescription',
+export const cloudActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.cloudActionVariableDescription',
   {
     defaultMessage:
-      'Additional context for Hosts',
+      'Cloud action variable',
+  }
+);
+
+export const hostActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.hostActionVariableDescription',
+  {
+    defaultMessage:
+      'Host action variable',
+  }
+);
+
+export const containerActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.containerActionVariableDescription',
+  {
+    defaultMessage:
+      'Container action variable',
+  }
+);
+
+export const orchestratorActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.orchestratorActionVariableDescription',
+  {
+    defaultMessage:
+      'Orchestrator action variable',
+  }
+);
+
+export const labelsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.labelsActionVariableDescription',
+  {
+    defaultMessage:
+      'Labels action variable',
+  }
+);
+
+export const tagsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.tagsActionVariableDescription',
+  {
+    defaultMessage:
+      'Tags action variable',
   }
 );

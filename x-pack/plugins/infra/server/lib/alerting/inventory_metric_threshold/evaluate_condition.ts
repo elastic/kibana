@@ -17,14 +17,22 @@ import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric
 import { getData } from './lib/get_data';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
+type AdditionalContext = {
+  cloud: EcsFieldsResponse;
+  host: EcsFieldsResponse;
+  container: EcsFieldsResponse;
+  orchestrator: EcsFieldsResponse;
+  labels: EcsFieldsResponse;
+  tags: EcsFieldsResponse
+};
+
 export type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean;
   shouldWarn: boolean;
   currentValue: number;
   isNoData: boolean;
   isError: boolean;
-  host: EcsFieldsResponse;
-};
+} & AdditionalContext;
 
 export const evaluateCondition = async ({
   condition,
@@ -84,7 +92,12 @@ export const evaluateCondition = async ({
       isNoData: value === null,
       isError: value === undefined,
       currentValue: value.value,
-      host: value.host
+      cloud: value.cloud,
+      host: value.host,
+      container: value.container,
+      orchestrator: value.orchestrator,
+      labels: value.labels,
+      tags: value.tags
     };
   }) as unknown; // Typescript doesn't seem to know what `throw` is doing
 
