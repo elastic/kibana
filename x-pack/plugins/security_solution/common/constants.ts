@@ -280,13 +280,22 @@ export const DETECTION_ENGINE_RULES_BULK_UPDATE =
 export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
 export const DEV_TOOL_PREBUILT_CONTENT =
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
-export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
-  `/s/${spaceId}${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/${consoleId}` as const;
+export const devToolPrebuiltContentPath = (
+  consoleId: 'enable_host_risk_score' | 'enable_user_risk_score'
+) => `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/${consoleId}` as const;
+export const devToolPrebuiltContentUrl = (
+  spaceId: string,
+  consoleId: 'enable_host_risk_score' | 'enable_user_risk_score'
+) => `/s/${spaceId}${devToolPrebuiltContentPath(consoleId)}` as const;
 export const PREBUILT_SAVED_OBJECTS_BULK_CREATE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/{template_name}`;
-export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
+export const prebuiltSavedObjectsBulkCreateUrl = (
+  templateName: 'hostRiskScoreDashboards' | 'userRiskScoreDashboards'
+) =>
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
 export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
-export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
+export const prebuiltSavedObjectsBulkDeleteUrl = (
+  templateName: 'hostRiskScoreDashboards' | 'userRiskScoreDashboards'
+) =>
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
 export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
 export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;

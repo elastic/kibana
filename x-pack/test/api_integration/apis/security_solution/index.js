@@ -29,5 +29,10 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./uncommon_processes'));
     loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./tls'));
+    loadTestFile(require.resolve('./risk_score/indices'));
+    loadTestFile(require.resolve('./risk_score/prebuilt_devtools_content'));
+    loadTestFile(require.resolve('./risk_score/prebuilt_saved_objects'));
+    loadTestFile(require.resolve('./risk_score/stored_scripts'));
+    loadTestFile(require.resolve('./risk_score/index_status'));
   });
 }

@@ -104,7 +104,6 @@ export const bulkDeleteSavedObjects = async ({
 
   const tagName = getRiskScoreTagName(riskScoreEntity, spaceId);
   const tag = await findRiskScoreTag({ savedObjectsClient, search: tagName });
-
   /**
    * This is to delete the saved objects installed before 8.5
    * These saved objects were created according to these mappings:
@@ -139,6 +138,5 @@ export const bulkDeleteSavedObjects = async ({
       savedObjectTypes: Array.from(savedObjectsTypes),
     });
   }
-
   return [...deleteLegacySavedObjectResults, ...deleteSavedObjectResults];
 };

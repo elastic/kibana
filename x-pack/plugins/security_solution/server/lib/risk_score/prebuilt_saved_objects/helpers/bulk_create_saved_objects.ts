@@ -58,5 +58,5 @@ export const bulkCreateSavedObjects = async ({
     overwrite: true,
   });
 
-  return createSO;
+  return { saved_objects: [...createSO.saved_objects, tag] };
 };
