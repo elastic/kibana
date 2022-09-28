@@ -63,7 +63,7 @@ describe('Rule actions', () => {
     actions: { interval: 'rule', connectors: [INDEX_CONNECTOR] },
   };
   const index = rule.actions.connectors[0].index;
-  const initialNumberofDocuments = 1;
+  const initialNumberOfDocuments = 1;
   const expectedJson = JSON.parse(rule.actions.connectors[0].document);
 
   it('Creates a custom query rule with an index action ', function () {
