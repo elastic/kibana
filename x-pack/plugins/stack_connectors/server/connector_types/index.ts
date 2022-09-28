@@ -26,6 +26,8 @@ import {
   getSwimlaneConnectorType,
   getXmattersConnectorType,
 } from './cases';
+// TODO: move this to stack
+import { getOpsgenieConnectorType } from './cases/opsgenie';
 
 export type {
   EmailActionParams,
@@ -86,4 +88,5 @@ export function registerConnectorTypes({
   actions.registerType(getJiraConnectorType({ logger }));
   actions.registerType(getResilientConnectorType({ logger }));
   actions.registerType(getTeamsConnectorType({ logger }));
+  actions.registerSubActionConnectorType(getOpsgenieConnectorType());
 }

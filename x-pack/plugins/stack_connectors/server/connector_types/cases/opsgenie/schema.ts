@@ -1,0 +1,110 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+
+export const ConfigSchema = schema.object({
+  apiUrl: schema.string(),
+});
+
+export const SecretsSchema = schema.object({
+  apiKey: schema.string(),
+});
+
+const responderTypes = schema.oneOf([
+  schema.literal('team'),
+  schema.literal('user'),
+  schema.literal('escalation'),
+  schema.literal('schedule'),
+]);
+
+const validateDetails = (details: Record<string, string>): string | void => {
+  let totalChars = 0;
+
+  for (const [key, value] of Object.entries(details)) {
+    totalChars += key.length + value.length;
+
+    if (totalChars > 8000) {
+      return i18n.translate('xpack.stackConnectors.opsgenie.invalidDetails', {
+        defaultMessage: 'details field character count exceeds the 8000 limit',
+      });
+    }
+  }
+};
+
+export const CreateAlertParamsSchema = schema.object({
+  message: schema.string({ maxLength: 130 }),
+  alias: schema.maybe(schema.string({ maxLength: 500 })),
+  description: schema.maybe(schema.string({ maxLength: 15000 })),
+  responders: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.object({
+          name: schema.string(),
+          type: responderTypes,
+        }),
+        schema.object({ id: schema.string(), type: responderTypes }),
+      ]),
+      { maxSize: 50 }
+    )
+  ),
+  visibleTo: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.object({
+          name: schema.string(),
+          type: schema.literal('team'),
+        }),
+        schema.object({
+          id: schema.string(),
+          type: schema.literal('team'),
+        }),
+        schema.object({
+          id: schema.string(),
+          type: schema.literal('user'),
+        }),
+        schema.object({
+          username: schema.string(),
+          type: schema.literal('user'),
+        }),
+      ]),
+      { maxSize: 50 }
+    )
+  ),
+  actions: schema.maybe(schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 10 })),
+  tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 20 })),
+  details: schema.maybe(
+    schema.recordOf(schema.string(), schema.string(), { validate: validateDetails })
+  ),
+  entity: schema.maybe(schema.string({ maxLength: 512 })),
+  source: schema.maybe(schema.string({ maxLength: 100 })),
+  priority: schema.maybe(
+    schema.oneOf([
+      schema.literal('P1'),
+      schema.literal('P2'),
+      schema.literal('P3'),
+      schema.literal('P4'),
+      schema.literal('P5'),
+    ])
+  ),
+  user: schema.maybe(schema.string({ maxLength: 100 })),
+  note: schema.maybe(schema.string({ maxLength: 25000 })),
+});
+
+export const Response = schema.object({
+  message: schema.string(),
+  took: schema.number(),
+  requestId: schema.string(),
+  errors: schema.maybe(schema.object({ message: schema.string() })),
+});
+
+export const CloseAlertParamsSchema = schema.object({
+  user: schema.maybe(schema.string({ maxLength: 100 })),
+  source: schema.maybe(schema.string({ maxLength: 100 })),
+  note: schema.maybe(schema.string({ maxLength: 25000 })),
+});
