@@ -84,10 +84,12 @@
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
-/x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 /src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
 x-pack/plugins/files @elastic/kibana-app-services
 x-pack/examples/files_example @elastic/kibana-app-services
+/x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
+/test/plugin_functional/test_suites/panel_actions @elastic/kibana-app-services
+/test/plugin_functional/test_suites/data_plugin @elastic/kibana-app-services
 
 ### Observability Plugins
 
@@ -130,6 +132,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
+/src/dev/build/tasks/bundle_fleet_packages.ts
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
@@ -329,7 +332,9 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/event_log/ @elastic/response-ops
 /x-pack/plugins/task_manager/ @elastic/response-ops
 /x-pack/plugins/stack_connectors/ @elastic/response-ops
+/x-pack/plugins/stack_connectors/public/connector_types/stack/ @elastic/response-ops-execution
 /x-pack/plugins/stack_connectors/server/connector_types/stack/ @elastic/response-ops-execution
+/x-pack/plugins/stack_connectors/public/connector_types/cases/ @elastic/response-ops-cases
 /x-pack/plugins/stack_connectors/server/connector_types/cases/ @elastic/response-ops-cases
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
@@ -348,6 +353,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
 /x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/public/applications/shared/doc_links @elastic/ent-search-docs-team
 
 # Management Experience - Deployment Management
 /src/plugins/dev_tools/ @elastic/platform-deployment-management
@@ -737,6 +743,8 @@ packages/core/http/core-http-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-common @elastic/kibana-core
 packages/core/http/core-http-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
+packages/core/http/core-http-request-handler-context-server @elastic/kibana-core
+packages/core/http/core-http-request-handler-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server @elastic/kibana-core
@@ -784,6 +792,7 @@ packages/core/preboot/core-preboot-server-internal @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
+packages/core/root/core-root-browser-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-browser @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server-internal @elastic/kibana-core
