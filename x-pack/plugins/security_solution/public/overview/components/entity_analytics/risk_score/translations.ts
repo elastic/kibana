@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { getRiskEntityTranslation } from '../../../../common/components/risk_score/translations';
+import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 export * from '../../../../common/components/risk_score/translations';
 
 export const ENTITY_RISK_TOOLTIP = (riskEntity: RiskScoreEntity) =>
@@ -14,8 +15,8 @@ export const ENTITY_RISK_TOOLTIP = (riskEntity: RiskScoreEntity) =>
     defaultMessage:
       '{riskEntity} risk classification is determined by {riskEntityLowercase} risk score. {riskEntity}s classified as Critical or High are indicated as risky.',
     values: {
-      riskEntity: riskEntity === RiskScoreEntity.host ? 'Host' : 'User',
-      riskEntityLowercase: riskEntity === RiskScoreEntity.host ? 'host' : 'user',
+      riskEntity: getRiskEntityTranslation(riskEntity),
+      riskEntityLowercase: getRiskEntityTranslation(riskEntity, true),
     },
   });
 
@@ -23,7 +24,7 @@ export const ENTITY_RISK = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskClassificationTitle', {
     defaultMessage: '{riskEntity} risk classification',
     values: {
-      riskEntity: riskEntity === RiskScoreEntity.host ? 'Host' : 'User',
+      riskEntity: getRiskEntityTranslation(riskEntity),
     },
   });
 
@@ -31,7 +32,7 @@ export const ENTITY_NAME = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.nameTitle', {
     defaultMessage: '{riskEntity} Name',
     values: {
-      riskEntity: riskEntity === RiskScoreEntity.host ? 'Host' : 'User',
+      riskEntity: getRiskEntityTranslation(riskEntity),
     },
   });
 

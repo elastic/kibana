@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { getRiskEntityTranslation } from '../../risk_score/translations';
+import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 export * from '../../risk_score/translations';
 
 export const FEED_NAME_PREPOSITION = i18n.translate(
@@ -105,7 +106,7 @@ export const CURRENT_RISK_CLASSIFICATION = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskClassification', {
     defaultMessage: 'Current {riskEntity} risk classification',
     values: {
-      riskEntity: riskEntity === RiskScoreEntity.host ? 'host' : 'user',
+      riskEntity: getRiskEntityTranslation(riskEntity, true),
     },
   });
 
@@ -113,7 +114,7 @@ export const ORIGINAL_RISK_CLASSIFICATION = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.alertDetails.overview.originalHostRiskClassification', {
     defaultMessage: 'Original {riskEntity} risk classification',
     values: {
-      riskEntity: riskEntity === RiskScoreEntity.host ? 'host' : 'user',
+      riskEntity: getRiskEntityTranslation(riskEntity, true),
     },
   });
 
@@ -121,6 +122,6 @@ export const RISK_DATA_TITLE = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskDataTitle', {
     defaultMessage: '{riskEntity} Risk Data',
     values: {
-      riskEntity: riskEntity === RiskScoreEntity.host ? 'Host' : 'User',
+      riskEntity: getRiskEntityTranslation(riskEntity),
     },
   });
