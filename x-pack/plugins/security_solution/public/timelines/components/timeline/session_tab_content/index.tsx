@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import type { TimelineId } from '../../../../../common/types/timeline';
 import { useSessionViewNavigation, useSessionView } from './use_session_view';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
 
 const MaxWidthFlexItem = styled(EuiFlexItem)`
   width: 100%;
@@ -43,45 +40,18 @@ interface Props {
 }
 
 const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
-  const dispatch = useDispatch();
   const [height, setHeight] = useState(0);
   const measuredRef = useCallback((node) => {
     if (node !== null) {
       setHeight(node.getBoundingClientRect().height);
     }
   }, []);
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => getTimeline(state, timelineId)?.graphEventId
-  );
-  const sessionViewConfig = useShallowEqualSelector(
-    (state) => getTimeline(state, timelineId)?.sessionViewConfig
-  );
-
   const { Navigation } = useSessionViewNavigation({
-    isInTimeline: true,
-    graphEventId,
-    sessionViewConfig,
-    updateGraphEventId: (navGraphEventId) =>
-      dispatch(
-        timelineActions.updateTimelineGraphEventId({
-          id: timelineId,
-          graphEventId: navGraphEventId,
-        })
-      ),
-    updateSessionViewConfig: (navSessionViewConfig) =>
-      dispatch(
-        timelineActions.updateTimelineSessionViewConfig({
-          id: timelineId,
-          sessionViewConfig: navSessionViewConfig,
-        })
-      ),
+    scopeId: timelineId,
   });
   const { SessionView, shouldShowDetailsPanel, DetailsPanel } = useSessionView({
     scopeId: timelineId,
     height,
-    isInTimeline: true,
-    sessionViewConfig,
   });
 
   return (

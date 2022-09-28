@@ -8,8 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import type { TimelineId } from '../../../../../common/types/timeline';
 import { GraphOverlay } from '../../graph_overlay';
@@ -31,39 +30,17 @@ const VerticalRule = styled.div`
 `;
 
 const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }) => {
-  const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => getTimeline(state, timelineId)?.graphEventId
   );
-  const sessionViewConfig = useShallowEqualSelector(
-    (state) => getTimeline(state, timelineId)?.sessionViewConfig
-  );
 
   const { Navigation } = useSessionViewNavigation({
-    isInTimeline: true,
-    graphEventId,
-    sessionViewConfig,
-    updateGraphEventId: (navGraphEventId) =>
-      dispatch(
-        timelineActions.updateTimelineGraphEventId({
-          id: timelineId,
-          graphEventId: navGraphEventId,
-        })
-      ),
-    updateSessionViewConfig: (navSessionViewConfig) =>
-      dispatch(
-        timelineActions.updateTimelineSessionViewConfig({
-          id: timelineId,
-          sessionViewConfig: navSessionViewConfig,
-        })
-      ),
+    scopeId: timelineId,
   });
 
   const { shouldShowDetailsPanel, DetailsPanel, SessionView } = useSessionView({
     scopeId: timelineId,
-    sessionViewConfig,
-    isInTimeline: true,
   });
 
   if (!graphEventId) {

@@ -164,27 +164,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
 
   const { Navigation } = useSessionViewNavigation({
-    isInTimeline: false,
-    graphEventId,
-    sessionViewConfig,
-    updateGraphEventId: (navGraphEventId) =>
-      dispatch(
-        dataTableActions.updateTableGraphEventId({ id: tableId, graphEventId: navGraphEventId })
-      ),
-    updateSessionViewConfig: (navSessionViewConfig) =>
-      dispatch(
-        dataTableActions.updateTableSessionViewConfig({
-          id: tableId,
-          sessionViewConfig: navSessionViewConfig,
-        })
-      ),
+    scopeId: tableId,
   });
 
   const { DetailsPanel, SessionView } = useSessionView({
     entityType,
     scopeId: tableId,
-    sessionViewConfig,
-    isInTimeline: false,
   });
 
   const graphOverlay = useMemo(() => {

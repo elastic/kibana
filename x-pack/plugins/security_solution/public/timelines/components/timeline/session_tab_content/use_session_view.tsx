@@ -9,10 +9,15 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+import { useDispatch } from 'react-redux';
+import {
+  isInTableScope,
+  isTimelineScope,
+} from '../../../../common/components/event_details/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import type { TableId } from '../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useDetailPanel } from '../../side_panel/hooks/use_detail_panel';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { isFullScreen } from '../body/column_headers';
@@ -27,6 +32,10 @@ import {
   useGlobalFullScreen,
 } from '../../../../common/containers/use_full_screen';
 import { detectionsTimelineIds } from '../../../containers/helpers';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { tableDefaults, timelineDefaults } from '../../../store/timeline/defaults';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
 
 export interface SessionViewConfig {
   sessionEntityId: string;
@@ -58,7 +67,7 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   timelineFullScreen,
   toggleFullScreen,
   graphEventId,
-  activeTab = TimelineTabs.graph,
+  activeTab,
 }) => {
   const title = () => {
     if (isInTimeline) {
@@ -81,7 +90,7 @@ const NavigationComponent: React.FC<NavigationProps> = ({
               aria-label={
                 isFullScreen({
                   globalFullScreen,
-                  isInTimeline: false,
+                  isInTimeline,
                   timelineFullScreen,
                 })
                   ? EXIT_FULL_SCREEN
@@ -103,28 +112,28 @@ NavigationComponent.displayName = 'NavigationComponent';
 
 const Navigation = React.memo(NavigationComponent);
 
-export const useSessionViewNavigation = ({
-  isInTimeline,
-  graphEventId,
-  sessionViewConfig,
-  activeTab,
-  prevActiveTab,
-  setActiveTabTimeline,
-  updateGraphEventId,
-  updateSessionViewConfig,
-}: {
-  graphEventId?: string;
-  updateGraphEventId: (graphEventId: string) => void;
-  isInTimeline: boolean;
-  updateSessionViewConfig: (sessionViewConfig: SessionViewConfig | null) => void;
-  setActiveTabTimeline?: (activeTab: TimelineTabs) => void;
-  sessionViewConfig: SessionViewConfig | null;
-  activeTab?: TimelineTabs;
-  prevActiveTab?: TimelineTabs;
-}) => {
+export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
+  const dispatch = useDispatch();
+  const getScope = useMemo(() => {
+    if (isTimelineScope(scopeId)) {
+      return timelineSelectors.getTimelineByIdSelector();
+    } else if (isInTableScope(scopeId)) {
+      return dataTableSelectors.getTableByIdSelector();
+    }
+  }, [scopeId]);
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
+  const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
+  const { graphEventId, sessionViewConfig, activeTab, prevActiveTab } = useDeepEqualSelector(
+    (state) => ({
+      activeTab: timelineDefaults.activeTab,
+      prevActiveTab: timelineDefaults.prevActiveTab,
+      ...((getScope && getScope(state, scopeId)) ?? defaults),
+    })
+  );
+
+  const isInTimeline = scopeId === TimelineId.active;
   const onCloseOverlay = useCallback(() => {
     const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
     // Since EUI changes these values directly as a side effect, need to add them back on close.
@@ -142,30 +151,62 @@ export const useSessionViewNavigation = ({
       }
     }
     if (isInTimeline === false) {
-      updateGraphEventId('');
-      updateSessionViewConfig(null);
-    } else if (setActiveTabTimeline) {
+      if (isTimelineScope(scopeId)) {
+        dispatch(timelineActions.updateTimelineGraphEventId({ id: scopeId, graphEventId: '' }));
+        dispatch(
+          timelineActions.updateTimelineSessionViewConfig({ id: scopeId, sessionViewConfig: null })
+        );
+      } else if (isInTableScope(scopeId)) {
+        dispatch(dataTableActions.updateTableGraphEventId({ id: scopeId, graphEventId: '' }));
+        dispatch(
+          dataTableActions.updateTableSessionViewConfig({ id: scopeId, sessionViewConfig: null })
+        );
+      }
+    } else {
       if (activeTab === TimelineTabs.graph) {
-        updateGraphEventId('');
-        if (prevActiveTab === TimelineTabs.session && !sessionViewConfig) {
-          setActiveTabTimeline(TimelineTabs.query);
+        if (isTimelineScope(scopeId)) {
+          dispatch(timelineActions.updateTimelineGraphEventId({ id: scopeId, graphEventId: '' }));
+          if (prevActiveTab === TimelineTabs.session && !sessionViewConfig) {
+            dispatch(
+              timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: TimelineTabs.query })
+            );
+          }
+        } else if (isInTableScope(scopeId)) {
+          dispatch(dataTableActions.updateTableGraphEventId({ id: scopeId, graphEventId: '' }));
         }
       } else if (activeTab === TimelineTabs.session) {
-        updateSessionViewConfig(null);
-        if (prevActiveTab === TimelineTabs.graph && !graphEventId) {
-          setActiveTabTimeline(TimelineTabs.query);
-        } else if (prevActiveTab) {
-          setActiveTabTimeline(prevActiveTab);
+        if (isTimelineScope(scopeId)) {
+          dispatch(
+            timelineActions.updateTimelineSessionViewConfig({
+              id: scopeId,
+              sessionViewConfig: null,
+            })
+          );
+          if (prevActiveTab === TimelineTabs.graph && !graphEventId) {
+            dispatch(
+              timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: TimelineTabs.query })
+            );
+          } else {
+            dispatch(
+              timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: prevActiveTab })
+            );
+          }
+        } else if (isInTableScope(scopeId)) {
+          dispatch(
+            dataTableActions.updateTableSessionViewConfig({
+              id: scopeId,
+              sessionViewConfig: null,
+            })
+          );
         }
       }
     }
   }, [
     isInTimeline,
-    setActiveTabTimeline,
     setTimelineFullScreen,
     setGlobalFullScreen,
-    updateGraphEventId,
-    updateSessionViewConfig,
+    dispatch,
+    scopeId,
     activeTab,
     prevActiveTab,
     sessionViewConfig,
@@ -227,20 +268,30 @@ export const useSessionView = ({
   scopeId,
   entityType,
   height,
-  activeTab = TimelineTabs.query,
-  sessionViewConfig,
-  isInTimeline,
 }: {
   scopeId: string;
   entityType?: EntityType;
   height?: number;
-  sessionViewConfig: SessionViewConfig | null;
-  activeTab?: TimelineTabs;
-  isInTimeline: boolean;
 }) => {
   const { sessionView } = useKibana().services;
+  const getScope = useMemo(() => {
+    if (isTimelineScope(scopeId)) {
+      return timelineSelectors.getTimelineByIdSelector();
+    } else if (isInTableScope(scopeId)) {
+      return dataTableSelectors.getTableByIdSelector();
+    }
+  }, [scopeId]);
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
+
+  const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
+  const { sessionViewConfig, activeTab } = useDeepEqualSelector((state) => ({
+    activeTab: timelineDefaults.activeTab,
+    prevActiveTab: timelineDefaults.prevActiveTab,
+    ...((getScope && getScope(state, scopeId)) ?? defaults),
+  }));
+
+  const isInTimeline = scopeId === TimelineId.active;
 
   const fullScreen = useMemo(
     () =>
@@ -266,7 +317,7 @@ export const useSessionView = ({
     entityType,
     sourcererScope,
     scopeId,
-    tabType: activeTab,
+    tabType: isInTimeline ? activeTab : TimelineTabs.query,
   });
 
   const sessionViewComponent = useMemo(() => {

@@ -123,7 +123,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     renderHook(
       () => {
         const testProps = {
-          timelineId: TimelineId.active,
+          scopeId: TimelineId.active,
         };
         return useSessionView(testProps);
       },
@@ -136,7 +136,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     const { result } = renderHook(
       () => {
         const testProps = {
-          timelineId: TimelineId.active,
+          scopeId: TimelineId.active,
         };
         return useSessionViewNavigation(testProps);
       },
@@ -151,7 +151,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     renderHook(
       () => {
         const testProps = {
-          timelineId: TimelineId.test,
+          scopeId: TimelineId.test,
           height: 1118,
         };
         return useSessionView(testProps);
@@ -191,7 +191,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       const { result } = renderHook(
         () => {
           const testProps = {
-            timelineId: TableId.hostsPageEvents,
+            scopeId: TableId.hostsPageEvents,
           };
           return useSessionViewNavigation(testProps);
         },
@@ -232,7 +232,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       const { result } = renderHook(
         () => {
           const testProps = {
-            timelineId: TimelineId.active,
+            scopeId: TimelineId.active,
           };
           return useSessionView(testProps);
         },
@@ -253,7 +253,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       const { result } = renderHook(
         () => {
           const testProps = {
-            timelineId: TableId.hostsPageEvents,
+            scopeId: TableId.hostsPageEvents,
           };
           return useSessionViewNavigation(testProps);
         },
