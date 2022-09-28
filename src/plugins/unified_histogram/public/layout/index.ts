@@ -6,5 +6,11 @@
  * Side Public License, v 1.
  */
 
-export type { PanelsProps } from './panels';
-export { Panels, PANELS_MODE } from './panels';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { lazy } from 'react';
+
+export type { UnifiedHistogramLayoutProps } from './layout';
+
+const LazyUnifiedHistogramLayout = lazy(() => import('./layout'));
+
+export const UnifiedHistogramLayout = withSuspense(LazyUnifiedHistogramLayout);
