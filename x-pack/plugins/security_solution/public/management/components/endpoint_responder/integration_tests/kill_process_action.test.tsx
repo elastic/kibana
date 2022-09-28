@@ -250,6 +250,7 @@ describe('When using the kill-process action from response actions console', () 
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.killProcess).toHaveBeenCalledTimes(1);
+          expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
         });
 
         // Hide the console
@@ -270,16 +271,19 @@ describe('When using the kill-process action from response actions console', () 
       const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
         path: '/api/endpoint/action/1.2.3',
       });
+
       pendingDetailResponse.data.isCompleted = false;
+      apiMocks.responseProvider.actionDetails.mockClear();
       apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
+
       await render();
 
-      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(2);
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
 
       await consoleManagerMockAccess.openRunningConsole();
 
       await waitFor(() => {
-        expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(3);
+        expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(2);
       });
     });
 
