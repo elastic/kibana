@@ -154,12 +154,7 @@ describe('Insights', () => {
         it('should not show the related alerts by process ancestry insights module', () => {
           render(
             <TestProviders>
-              <Insights
-                browserFields={{}}
-                eventId="test"
-                data={dataWithoutAgentType}
-                timelineId=""
-              />
+              <Insights browserFields={{}} eventId="test" data={dataWithoutAgentType} scopeId="" />
             </TestProviders>
           );
 

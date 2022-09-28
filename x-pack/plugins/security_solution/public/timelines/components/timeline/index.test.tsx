@@ -93,12 +93,12 @@ jest.mock('react-redux', () => {
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../../common/containers/sourcerer');
 const mockDataView = {
-  dataViewId: mockGlobalState.timeline.timelineById.test?.dataViewId,
+  dataViewId: mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId,
   browserFields: mockBrowserFields,
   loading: false,
   indexPattern: mockIndexPattern,
   pageInfo: { activePage: 0, querySize: 0 },
-  selectedPatterns: mockGlobalState.timeline.timelineById.test?.indexNames,
+  selectedPatterns: mockGlobalState.timeline.timelineById[TimelineId.test]?.indexNames,
 };
 mockUseSourcererDataView.mockReturnValue(mockDataView);
 describe('StatefulTimeline', () => {
@@ -169,8 +169,8 @@ describe('StatefulTimeline', () => {
             timeline: {
               ...mockGlobalState.timeline,
               timelineById: {
-                test: {
-                  ...mockGlobalState.timeline.timelineById.test,
+                [TimelineId.test]: {
+                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
                   savedObjectId: 'definitely-not-null',
                   indexNames:
                     mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline]
@@ -200,8 +200,8 @@ describe('StatefulTimeline', () => {
             timeline: {
               ...mockGlobalState.timeline,
               timelineById: {
-                test: {
-                  ...mockGlobalState.timeline.timelineById.test,
+                [TimelineId.test]: {
+                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
                   savedObjectId: 'definitely-not-null',
                 },
               },
@@ -229,7 +229,7 @@ describe('StatefulTimeline', () => {
     expect(mockDispatch).toBeCalledTimes(1);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
       payload: {
-        id: 'test',
+        id: [TimelineId.test],
         dataViewId: mockDataView.dataViewId,
         indexNames: mockIndexNames,
       },

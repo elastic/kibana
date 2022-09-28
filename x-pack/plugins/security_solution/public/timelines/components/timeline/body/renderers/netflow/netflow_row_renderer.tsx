@@ -89,11 +89,11 @@ export const netflowRowRenderer: RowRenderer = {
   isInstance: (ecs) =>
     eventCategoryMatches(get(EVENT_CATEGORY_FIELD, ecs)) ||
     eventActionMatches(get(EVENT_ACTION_FIELD, ecs)),
-  renderRow: ({ data, isDraggable, timelineId }) => (
+  renderRow: ({ data, isDraggable, scopeId }) => (
     <RowRendererContainer>
       <Details>
         <Netflow
-          contextId={`netflow-row-renderer-render-row-${timelineId}-${data._id}`}
+          contextId={`netflow-row-renderer-render-row-${scopeId}-${data._id}`}
           destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)
