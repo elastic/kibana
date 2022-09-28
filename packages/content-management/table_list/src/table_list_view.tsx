@@ -19,7 +19,6 @@ import {
   EuiTableActionsColumnType,
   CriteriaWithPagination,
   Query,
-  Ast,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +38,7 @@ import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './
 import type { Action } from './actions';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
+import { useTags } from './use_tags';
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
@@ -60,7 +60,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
-    refs: {
+    refs?: {
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
     }
@@ -195,10 +195,18 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
-  const initializeQuery = useCallback(() => {
-    const ast = Ast.create([]);
-    return new Query(ast, undefined, searchQuery.text);
-  }, [searchQuery]);
+  const updateQuery = useCallback((query: Query) => {
+    dispatch({
+      type: 'onSearchQueryChange',
+      data: { query, text: query.text },
+    });
+  }, []);
+
+  const { addOrRemoveExcludeTagFilter, addOrRemoveIncludeTagFilter } = useTags({
+    searchQuery,
+    updateQuery,
+  });
+
   const tableColumns = useMemo(() => {
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
@@ -283,6 +291,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     getDetailViewLink,
     onClickTitle,
     searchQuery.text,
+    addOrRemoveExcludeTagFilter,
+    addOrRemoveIncludeTagFilter,
     DateFormatterComp,
   ]);
 

@@ -20,6 +20,7 @@ type InheritedProps<T extends UserContentCommonSchema> = Pick<
 interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {
   item: T;
   searchTerm?: string;
+  onClickTag: (tag: { name: string }) => void;
 }
 
 /**
@@ -35,6 +36,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   searchTerm = '',
   getDetailViewLink,
   onClickTitle,
+  onClickTag,
 }: Props<T>) {
   const {
     references,
@@ -113,7 +115,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       {hasTags && (
         <>
           <EuiSpacer size="s" />
-          <TagList references={references} />
+          <TagList references={references} onClick={onClickTag} />
         </>
       )}
     </div>
