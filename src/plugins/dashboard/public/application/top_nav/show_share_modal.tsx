@@ -43,11 +43,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
   return !!dashboard.show;
 };
 
-export function ShowShareModal({
-  isDirty,
-  anchorElement,
-  currentDashboardState,
-}: ShowShareModalProps) {
+export function ShowShareModal({ isDirty, anchorElement, savedDashboard }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
     dashboardSessionStorage,
@@ -124,8 +120,7 @@ export function ShowShareModal({
     DashboardAppLocatorParams,
     'options' | 'query' | 'savedQuery' | 'filters' | 'panels' | 'controlGroupInput'
   > = {};
-  const { savedObjectId, title } = currentDashboardState;
-  const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
+  const unsavedDashboardState = dashboardSessionStorage.getState(savedDashboard.id);
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
@@ -153,17 +148,11 @@ export function ShowShareModal({
     ...unsavedStateForLocator,
   };
 
-  const _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
-  const dropFromGlobalUrlState: string[] = [];
+  let _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
   if (_g?.filters && _g.filters.length === 0) {
-    dropFromGlobalUrlState.push('filters');
+    _g = _.omit(_g, 'filters');
   }
-  if (_g?.time && !unsavedDashboardState?.timeRange) {
-    // note that, if `timeRestore` is false, then `timeRange` will not end up in `unsavedDashboardState`
-    dropFromGlobalUrlState.push('time');
-  }
-  // TODO: Address refreshInterval
-  const baseUrl = setStateToKbnUrl('_g', _.omit(_g, dropFromGlobalUrlState));
+  const baseUrl = setStateToKbnUrl('_g', _g);
 
   const shareableUrl = setStateToKbnUrl(
     '_a',
