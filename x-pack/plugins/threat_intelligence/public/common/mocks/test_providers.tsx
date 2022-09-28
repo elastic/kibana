@@ -17,6 +17,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContext } from '../../hooks/use_kibana';
 import { SecuritySolutionPluginContext } from '../../types';
 import { getSecuritySolutionContextMock } from './mock_security_context';
@@ -128,27 +129,31 @@ export const mockedServices = {
 
 export const TestProvidersComponent: FC = ({ children }) => (
   <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
-    <FieldTypesContext.Provider value={generateFieldTypeMap()}>
-      <EuiThemeProvider>
-        <SecuritySolutionContext.Provider value={mockSecurityContext}>
-          <KibanaContext.Provider value={{ services: mockedServices } as any}>
-            <I18nProvider>
-              <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-                {children}
-              </IndicatorsFiltersContext.Provider>
-            </I18nProvider>
-          </KibanaContext.Provider>
-        </SecuritySolutionContext.Provider>
-      </EuiThemeProvider>
-    </FieldTypesContext.Provider>
+    <QueryClientProvider client={new QueryClient()}>
+      <FieldTypesContext.Provider value={generateFieldTypeMap()}>
+        <EuiThemeProvider>
+          <SecuritySolutionContext.Provider value={mockSecurityContext}>
+            <KibanaContext.Provider value={{ services: mockedServices } as any}>
+              <I18nProvider>
+                <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+                  {children}
+                </IndicatorsFiltersContext.Provider>
+              </I18nProvider>
+            </KibanaContext.Provider>
+          </SecuritySolutionContext.Provider>
+        </EuiThemeProvider>
+      </FieldTypesContext.Provider>
+    </QueryClientProvider>
   </InspectorContext.Provider>
 );
 
 export type MockedSearch = jest.Mocked<typeof mockedServices.data.search>;
 export type MockedTimefilter = jest.Mocked<typeof mockedServices.data.query.timefilter>;
 export type MockedTriggersActionsUi = jest.Mocked<typeof mockedServices.triggersActionsUi>;
+export type MockedQueryService = jest.Mocked<typeof mockedServices.data.query>;
 
 export const mockedSearchService = mockedServices.data.search as MockedSearch;
+export const mockedQueryService = mockedServices.data.query as MockedQueryService;
 export const mockedTimefilterService = mockedServices.data.query.timefilter as MockedTimefilter;
 export const mockedTriggersActionsUiService =
   mockedServices.triggersActionsUi as MockedTriggersActionsUi;
