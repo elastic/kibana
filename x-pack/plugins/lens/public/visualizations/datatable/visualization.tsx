@@ -20,6 +20,7 @@ import type {
   Visualization,
   VisualizationSuggestion,
   DatasourceLayers,
+  Suggestion,
 } from '../../types';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
@@ -27,6 +28,7 @@ import { LayerType, layerTypes } from '../../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../../common/expressions';
 import type { ColumnState, SortingState } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
+import { IndexPatternLayer } from '../../indexpattern_datasource/types';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -38,6 +40,16 @@ export interface DatatableVisualizationState {
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
+}
+
+interface DatatableDatasourceState {
+  [prop: string]: unknown;
+  layers: IndexPatternLayer[];
+}
+
+export interface DatatableSuggestion extends Suggestion {
+  datasourceState: DatatableDatasourceState;
+  visualizationState: DatatableVisualizationState;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -265,12 +277,12 @@ export const getDatatableVisualization = ({
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
-              const stops = columnConfig.palette?.params?.stops;
-              const hasColoring = Boolean(columnConfig.colorMode !== 'none' && stops);
+              const stops = columnConfig?.palette?.params?.stops;
+              const hasColoring = Boolean(columnConfig?.colorMode !== 'none' && stops);
 
               return {
                 columnId: accessor,
-                triggerIcon: columnConfig.hidden
+                triggerIcon: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring
                   ? 'colorBy'
@@ -582,6 +594,26 @@ export const getDatatableVisualization = ({
       default:
         return state;
     }
+  },
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as DatatableSuggestion[];
+    return {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...context.configuration,
+      },
+    };
   },
 });
 
