@@ -67,7 +67,6 @@ describe('browser normalizers', () => {
         locations: ['us_central'],
         tags: ['tag1', 'tag2'],
         ignoreHTTPSErrors: true,
-        apmServiceName: 'cart-service',
       } as ProjectMonitor, // test that normalizers defaults to browser when type is omitted
       {
         id: 'test-id-2',
@@ -85,7 +84,6 @@ describe('browser normalizers', () => {
         locations: ['us_central', 'us_east'],
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
-        apmServiceName: 'bean-service',
         type: DataStream.BROWSER,
       },
       {
@@ -105,7 +103,6 @@ describe('browser normalizers', () => {
         privateLocations: ['Germany'],
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
-        apmServiceName: 'bean-service',
         type: DataStream.BROWSER,
       },
     ];
@@ -145,7 +142,7 @@ describe('browser normalizers', () => {
               unit: 'm',
             },
             screenshots: 'off',
-            'service.name': 'cart-service',
+            'service.name': '',
             'source.project.content': 'test content 1',
             tags: ['tag1', 'tag2'],
             'throttling.config': '5d/10u/20l',
@@ -202,7 +199,7 @@ describe('browser normalizers', () => {
               unit: 'm',
             },
             screenshots: 'on',
-            'service.name': 'bean-service',
+            'service.name': '',
             'source.project.content': 'test content 2',
             tags: ['tag3', 'tag4'],
             'throttling.config': '10d/15u/18l',
@@ -265,7 +262,7 @@ describe('browser normalizers', () => {
               unit: 'm',
             },
             screenshots: 'on',
-            'service.name': 'bean-service',
+            'service.name': '',
             'source.project.content': 'test content 3',
             tags: ['tag3', 'tag4'],
             'throttling.config': '10d/15u/18l',

@@ -65,10 +65,6 @@ export const getNormalizeCommonFields = ({
       privateLocations,
       publicLocations: locations,
     }),
-    [ConfigKey.APM_SERVICE_NAME]: getAPMServiceName(
-      monitor,
-      defaultFields[ConfigKey.APM_SERVICE_NAME]
-    ),
     [ConfigKey.TAGS]: getOptionalListField(monitor.tags) || defaultFields[ConfigKey.TAGS],
     [ConfigKey.NAMESPACE]: formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
@@ -133,11 +129,10 @@ export const getUnsupportedKeysError = (
 ) => ({
   id: monitor.id,
   reason: 'Unsupported Heartbeat option',
-  details: `The following Heartbeat options are not supported for ${
-    monitor.type
-  } project monitors in ${version}: ${unsupportedKeys.join(
-    '|'
-  )}. You monitor was not created or updated.`,
+  details: `The following Heartbeat options are not supported for ${monitor.type
+    } project monitors in ${version}: ${unsupportedKeys.join(
+      '|'
+    )}. You monitor was not created or updated.`,
 });
 
 export const getMultipleUrlsOrHostsError = (
@@ -147,12 +142,11 @@ export const getMultipleUrlsOrHostsError = (
 ) => ({
   id: monitor.id,
   reason: 'Unsupported Heartbeat option',
-  details: `Multiple ${key} are not supported for ${
-    monitor.type
-  } project monitors in ${version}. Please set only 1 ${key.slice(
-    0,
-    -1
-  )} per monitor. You monitor was not created or updated.`,
+  details: `Multiple ${key} are not supported for ${monitor.type
+    } project monitors in ${version}. Please set only 1 ${key.slice(
+      0,
+      -1
+    )} per monitor. You monitor was not created or updated.`,
 });
 
 export const getValueInSeconds = (value: string) => {
