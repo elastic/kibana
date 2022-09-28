@@ -1016,7 +1016,7 @@ export class RulesClient {
       filter:
         (authorizationFilter && filterKueryNode
           ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
-          : authorizationFilter) ?? options.filter,
+          : authorizationFilter) ?? filterKueryNode,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
