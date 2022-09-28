@@ -13,7 +13,7 @@ export const journey = new Journey({
 })
   .step('Go to Security Users Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/security/detection_response`));
-    await page.waitForSelector(subj('severityRuleAlertsPanel'));
+    await page.waitForSelector(subj('severityRuleAlertsPanel'), { timeout: 60000 });
   })
 
   .step('Change time range to 24hr', async ({ page }) => {

@@ -13,7 +13,7 @@ export const journey = new Journey({
 })
   .step('Go to Security Network Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/security/network`));
-    await page.waitForSelector(subj('mapContainer'));
+    await page.waitForSelector(subj('mapContainer'), { timeout: 60000 });
   })
 
   .step('Change time range to 24hr', async ({ page }) => {

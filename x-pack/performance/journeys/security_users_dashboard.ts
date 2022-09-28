@@ -13,7 +13,7 @@ export const journey = new Journey({
 })
   .step('Go to Security Users Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/security/users/allUsers`));
-    await page.waitForSelector(subj('table-allUsers-loading-false'));
+    await page.waitForSelector(subj('table-allUsers-loading-false'), { timeout: 60000 });
   })
 
   .step('Change time range to 24hr', async ({ page }) => {

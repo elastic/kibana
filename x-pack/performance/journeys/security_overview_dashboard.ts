@@ -13,7 +13,7 @@ export const journey = new Journey({
 })
   .step('Go to Security Overview Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/security/overview`));
-    await page.waitForSelector(subj('endpoint-prompt-banner'));
+    await page.waitForSelector(subj('endpoint-prompt-banner'), { timeout: 60000 });
   })
 
   .step('Change time range to 24hr', async ({ page }) => {
