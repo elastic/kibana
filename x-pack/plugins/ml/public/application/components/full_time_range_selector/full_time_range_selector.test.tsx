@@ -20,7 +20,7 @@ jest.mock('./full_time_range_selector_service', () => ({
     mockSetFullTimeRange(indexPattern, query),
 }));
 
-jest.mock('../../contexts/ml/use_storage', () => {
+jest.mock('../../contexts/storage', () => {
   return {
     useStorage: jest.fn(() => 'exclude-frozen'),
   };

@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana } from '../../contexts/kibana';
-import { useStorage } from '../../contexts/ml/use_storage';
+import { useStorage } from '../../contexts/storage';
 import { ML_GETTING_STARTED_CALLOUT_DISMISSED } from '../../../../common/types/storage';
 
 const feedbackLink = 'https://www.elastic.co/community/';
