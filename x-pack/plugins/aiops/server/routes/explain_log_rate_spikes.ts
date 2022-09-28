@@ -172,7 +172,13 @@ export const defineExplainLogRateSpikesRoute = (
         for (const fieldCandidatesChunk of fieldCandidatesChunks) {
           let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
           try {
-            pValues = await fetchChangePointPValues(client, request.body, fieldCandidatesChunk);
+            pValues = await fetchChangePointPValues(
+              client,
+              request.body,
+              fieldCandidatesChunk,
+              logger,
+              (m: string) => push(addErrorAction(m))
+            );
           } catch (e) {
             push(addErrorAction(e.toString()));
             end();
