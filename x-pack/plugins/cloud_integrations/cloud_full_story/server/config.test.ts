@@ -28,31 +28,4 @@ describe('xpack.cloud config', () => {
       expect(() => config.schema.validate({ enabled: true, org_id: 'asdf' })).not.toThrow();
     });
   });
-
-  describe('gain_sight', () => {
-    it('allows org_id when enabled: false', () => {
-      expect(() =>
-        config.schema.validate({ gain_sight: { enabled: false, org_id: 'asdf' } })
-      ).not.toThrow();
-    });
-
-    it('rejects undefined or empty org_id when enabled: true', () => {
-      expect(() =>
-        config.schema.validate({ gain_sight: { enabled: true } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[gain_sight.org_id]: expected value of type [string] but got [undefined]"`
-      );
-      expect(() =>
-        config.schema.validate({ gain_sight: { enabled: true, org_id: '' } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[gain_sight.org_id]: value has length [0] but it must have a minimum length of [1]."`
-      );
-    });
-
-    it('accepts org_id when enabled: true', () => {
-      expect(() =>
-        config.schema.validate({ gain_sight: { enabled: true, org_id: 'asdf' } })
-      ).not.toThrow();
-    });
-  });
 });
