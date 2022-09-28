@@ -1725,7 +1725,7 @@ describe('Authenticator', () => {
         const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          AuthenticationResult.notHandled(new SessionMissingError())
+          AuthenticationResult.notHandled()
         );
         expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
@@ -1737,7 +1737,7 @@ describe('Authenticator', () => {
         });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          AuthenticationResult.notHandled(new SessionMissingError())
+          AuthenticationResult.notHandled()
         );
         expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
@@ -1749,7 +1749,7 @@ describe('Authenticator', () => {
 
         const request = httpServerMock.createKibanaRequest();
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          AuthenticationResult.notHandled(new SessionMissingError())
+          AuthenticationResult.notHandled()
         );
         expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();

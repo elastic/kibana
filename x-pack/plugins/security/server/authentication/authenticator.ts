@@ -387,6 +387,8 @@ export class Authenticator {
       );
     }
 
+    const requestIsRedirectable = canRedirectRequest(request);
+
     const suggestedProviderName =
       existingSessionValue?.provider.name ??
       request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
@@ -413,7 +415,7 @@ export class Authenticator {
           authenticationResult.options.redirectURL += '&msg=SESSION_EXPIRED';
         }
         return enrichWithUserProfileId(
-          canRedirectRequest(request)
+          requestIsRedirectable
             ? this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult)
             : authenticationResult,
           sessionUpdateResult ? sessionUpdateResult.value : null
@@ -421,9 +423,19 @@ export class Authenticator {
       }
     }
 
-    return AuthenticationResult.notHandled(
-      existingSessionValueRaw instanceof Error ? existingSessionValueRaw : undefined
-    );
+    if (
+      existingSessionValueRaw instanceof SessionExpiredError ||
+      existingSessionValueRaw instanceof SessionUnexpectedError
+    ) {
+      const options = requestIsRedirectable
+        ? undefined
+        : {
+            authResponseHeaders: { ['kbn-session-error-reason']: existingSessionValueRaw.code },
+          };
+      return AuthenticationResult.failed(existingSessionValueRaw, options);
+    } else {
+      return AuthenticationResult.notHandled();
+    }
   }
 
   /**
