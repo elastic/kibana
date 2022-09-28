@@ -30,6 +30,7 @@ import {
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
   RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
+  RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
   RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR,
   UPDATE_SCHEDULE_MENU_ITEM,
   UPDATE_SCHEDULE_INTERVAL_INPUT,
@@ -154,6 +155,14 @@ export const checkOverwriteTagsCheckbox = () => {
 export const checkOverwriteIndexPatternsCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX)
     .should('have.text', "Overwrite all selected rules' index patterns")
+    .click()
+    .get('input')
+    .should('be.checked');
+};
+
+export const checkOverwriteDataViewCheckbox = () => {
+  cy.get(RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX)
+    .should('have.text', 'Apply changes to rules configured with data views')
     .click()
     .get('input')
     .should('be.checked');

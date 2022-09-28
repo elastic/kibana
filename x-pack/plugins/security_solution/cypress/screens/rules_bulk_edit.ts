@@ -32,6 +32,9 @@ export const RULES_BULK_EDIT_INDEX_PATTERNS = '[data-test-subj="bulkEditRulesInd
 export const RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX =
   '[data-test-subj="bulkEditRulesOverwriteIndexPatterns"]';
 
+export const RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX =
+  '[data-test-subj="bulkEditRulesOverwriteRulesWithDataViews"]';
+
 export const RULES_BULK_EDIT_TAGS = '[data-test-subj="bulkEditRulesTags"]';
 
 export const RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX =
@@ -47,6 +50,9 @@ export const RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR =
 
 export const RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING =
   '[data-test-subj="bulkEditRulesTimelineTemplateWarning"]';
+
+export const RULES_BULK_EDIT_DATA_VIEWS_WARNING =
+  '[data-test-subj="bulkEditRulesDataViewsWarning"]';
 
 export const RULES_BULK_EDIT_SCHEDULES_WARNING = '[data-test-subj="bulkEditRulesSchedulesWarning"]';
 
