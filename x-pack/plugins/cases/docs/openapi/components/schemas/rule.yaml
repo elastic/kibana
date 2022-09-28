@@ -1,3 +1,4 @@
+title: Alerting rule
 description: >
   The rule that is associated with the alert. It is required only when
   `type` is `alert`. This functionality is in technical preview and may be

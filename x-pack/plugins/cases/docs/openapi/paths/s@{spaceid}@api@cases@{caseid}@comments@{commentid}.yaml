@@ -35,7 +35,7 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
             oneOf:
               - $ref: '../components/schemas/alert_comment_response_properties.yaml'

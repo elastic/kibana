@@ -1,3 +1,4 @@
+title: Owner applications
 type: string
 description: >
   The application that owns the cases: Stack Management, Observability, or
