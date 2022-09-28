@@ -194,7 +194,7 @@ export function getTSDBRollupWarningMessages(
       ).map((label) =>
         i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
           defaultMessage:
-            '"{label}" does not work for all indices in the selected data view because it\'s using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range.',
+            '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
           values: {
             label,
           },
