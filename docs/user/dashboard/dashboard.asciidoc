@@ -181,7 +181,7 @@ To add unsaved dashboard panels to the *Visualize Library*:
 [[add-text]]
 == Add context to panels
 
-To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You create *Text* panels using GitHub-flavored Markdown text.
+To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You create *Text* panels using GitHub-flavoured Markdown text.
 
 . On the dashboard, click image:images/dashboard_createNewTextButton_7.15.0.png[Create New Text button in dashboard toolbar].
 
