@@ -1,6 +1,15 @@
+title: Add case comment request properties for alerts
+required:
+  - alertId
+  - index
+  - owner
+  - rule
+  - type
+description: Defines properties for case comment requests when type is alert.
 type: object
 properties:
-  alertId: 
+  alertId:
+    title: Alert identifiers
     description: >
       The alert identifier. It is required only when `type` is `alert`. If it is
       an array, `index` must also be an array. This functionality is in
@@ -16,6 +25,7 @@ properties:
     x-technical-preview: true
     example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
   index:
+    title: Alert indices
     description: >
       The alert index. It is required only when `type` is `alert`. If it is an
       array, `alertId` must also be an array. This functionality is in technical
@@ -31,25 +41,10 @@ properties:
   owner:
     $ref: 'owners.yaml'
   rule:
-    description: >
-      The rule that is associated with the alert. It is required only when
-      `type` is `alert`. This functionality is in technical preview and may be
-      changed or removed in a future release. Elastic will apply best effort to
-      fix any issues, but features in technical preview are not subject to the
-      support SLA of official GA features.
-    type: object
-    x-technical-preview: true
-    properties:
-      $ref: 'rule_properties.yaml'
+    $ref: 'rule.yaml'
   type: 
     description: The type of comment.
     type: string
-    enum:
-     - alert
     example: alert
-required:
-  - alertId
-  - index
-  - owner
-  - rule
-  - type
+    enum:
+      - alert
