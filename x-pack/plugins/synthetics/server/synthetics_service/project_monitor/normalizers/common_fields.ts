@@ -48,7 +48,7 @@ export const getNormalizeCommonFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): CommonFields => {
+}: NormalizedProjectProps): Partial<CommonFields> => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
 
   const normalizedFields = {
@@ -74,10 +74,7 @@ export const getNormalizeCommonFields = ({
       ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
   };
-  return {
-    ...defaultFields,
-    ...normalizedFields,
-  };
+  return normalizedFields;
 };
 
 export const getCustomHeartbeatId = (
@@ -122,10 +119,11 @@ export const getUnsupportedKeysError = (
 ) => ({
   id: monitor.id,
   reason: 'Unsupported Heartbeat option',
-  details: `The following Heartbeat options are not supported for ${monitor.type
-    } project monitors in ${version}: ${unsupportedKeys.join(
-      '|'
-    )}. You monitor was not created or updated.`,
+  details: `The following Heartbeat options are not supported for ${
+    monitor.type
+  } project monitors in ${version}: ${unsupportedKeys.join(
+    '|'
+  )}. You monitor was not created or updated.`,
 });
 
 export const getMultipleUrlsOrHostsError = (
@@ -135,11 +133,12 @@ export const getMultipleUrlsOrHostsError = (
 ) => ({
   id: monitor.id,
   reason: 'Unsupported Heartbeat option',
-  details: `Multiple ${key} are not supported for ${monitor.type
-    } project monitors in ${version}. Please set only 1 ${key.slice(
-      0,
-      -1
-    )} per monitor. You monitor was not created or updated.`,
+  details: `Multiple ${key} are not supported for ${
+    monitor.type
+  } project monitors in ${version}. Please set only 1 ${key.slice(
+    0,
+    -1
+  )} per monitor. You monitor was not created or updated.`,
 });
 
 export const getValueInSeconds = (value: string) => {
