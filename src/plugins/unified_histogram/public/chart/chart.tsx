@@ -30,10 +30,9 @@ import {
 import { UnifiedHistogramServices } from '../types';
 
 const HistogramMemoized = memo(Histogram);
-export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 
 export function Chart({
-  services: { data, storage },
+  services,
   className,
   resetSavedSearch,
   savedSearch,
@@ -42,6 +41,7 @@ export function Chart({
   stateContainer,
   dataView,
   hideChart,
+  chartHiddenKey,
   interval,
   isTimeBased,
   appendHistogram,
@@ -57,10 +57,12 @@ export function Chart({
   dataView: DataView;
   isTimeBased: boolean;
   hideChart?: boolean;
+  chartHiddenKey: string;
   interval?: string;
   appendHistogram?: ReactElement;
   onResetChartHeight?: () => void;
 }) {
+  const { data, storage } = services;
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
 
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
@@ -102,7 +104,7 @@ export function Chart({
   const toggleHideChart = useCallback(() => {
     const newHideChart = !hideChart;
     chartRef.current.moveFocus = !newHideChart;
-    storage.set(CHART_HIDDEN_KEY, newHideChart);
+    storage.set(chartHiddenKey, newHideChart);
     stateContainer.setAppState({ hideChart: newHideChart });
   }, [hideChart, stateContainer, storage]);
 
@@ -211,6 +213,7 @@ export function Chart({
             className="unifiedHistogramTimechart"
           >
             <HistogramMemoized
+              services={services}
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
               stateContainer={stateContainer}
