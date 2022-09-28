@@ -28,7 +28,6 @@ import {
   fillDefineCustomRuleAndContinue,
   fillRuleAction,
   fillScheduleRuleAndContinue,
-  waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
 import { login, visit } from '../../tasks/login';
