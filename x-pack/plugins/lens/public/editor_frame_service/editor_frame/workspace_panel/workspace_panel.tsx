@@ -196,12 +196,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
-        (acc, datasource) => [
-          ...acc,
-          ...(datasource.getRenderEventCounters?.(
-            renderDeps.current!.datasourceStates[datasource.id].state
-          ) ?? []),
-        ],
+        (acc, datasource) => {
+          if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
+          return [
+            ...acc,
+            ...(datasource.getRenderEventCounters?.(
+              renderDeps.current!.datasourceStates[datasource.id]?.state
+            ) ?? []),
+          ];
+        },
         []
       );
       let visualizationEvents: string[] = [];

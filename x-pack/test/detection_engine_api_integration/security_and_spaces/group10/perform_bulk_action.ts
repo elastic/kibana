@@ -1633,10 +1633,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('throttle', () => {
+          // For bulk editing of rule actions, NOTIFICATION_THROTTLE_NO_ACTIONS
+          // is not available as payload, because "Perform No Actions" is not a valid option
           const casesForEmptyActions = [
-            {
-              payloadThrottle: NOTIFICATION_THROTTLE_NO_ACTIONS,
-            },
             {
               payloadThrottle: NOTIFICATION_THROTTLE_RULE,
             },
@@ -1681,10 +1680,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const casesForNonEmptyActions = [
-            {
-              payloadThrottle: NOTIFICATION_THROTTLE_NO_ACTIONS,
-              expectedThrottle: NOTIFICATION_THROTTLE_NO_ACTIONS,
-            },
             {
               payloadThrottle: NOTIFICATION_THROTTLE_RULE,
               expectedThrottle: NOTIFICATION_THROTTLE_RULE,
@@ -1736,12 +1731,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('notifyWhen', () => {
+          // For bulk editing of rule actions, NOTIFICATION_THROTTLE_NO_ACTIONS
+          // is not available as payload, because "Perform No Actions" is not a valid option
           const cases = [
-            {
-              payload: { throttle: NOTIFICATION_THROTTLE_NO_ACTIONS },
-              // keeps existing default value which is onActiveAlert
-              expected: { notifyWhen: 'onActiveAlert' },
-            },
             {
               payload: { throttle: '1d' },
               expected: { notifyWhen: 'onThrottleInterval' },
@@ -1955,6 +1947,42 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(setIndexRule.index).to.eql(['initial-index-*']);
         expect(setIndexRule.data_view_id).to.eql(undefined);
+      });
+
+      it('should return error when set an empty index pattern to a rule and overwrite the data view when overwrite_data_views is true', async () => {
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        const rule = await createRule(supertest, log, simpleRule);
+
+        const { body } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_index_patterns,
+                value: [],
+                overwrite_data_views: true,
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0]).to.eql({
+          message: "Mutated params invalid: Index patterns can't be empty",
+          status_code: 500,
+          rules: [
+            {
+              id: rule.id,
+              name: rule.name,
+            },
+          ],
+        });
       });
 
       it('should NOT set an index pattern to a rule and overwrite the data view when overwrite_data_views is false', async () => {
