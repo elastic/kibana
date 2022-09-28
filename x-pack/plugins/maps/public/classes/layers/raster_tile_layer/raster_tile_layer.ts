@@ -11,9 +11,9 @@ import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { TileStyle } from '../../styles/tile/tile_style';
-import { ITMSSource } from '../../sources/tms_source';
 import { DataRequestContext } from '../../../actions';
-import type {RasterTileSourceData} from '../../sources/tms_source'
+
+import { IRasterSource, RasterTileSourceData } from '../../sources/raster_source';
 
 export class RasterTileLayer extends AbstractLayer {
   static createDescriptor(options: Partial<LayerDescriptor>) {
@@ -30,15 +30,15 @@ export class RasterTileLayer extends AbstractLayer {
     source,
     layerDescriptor,
   }: {
-    source: ITMSSource;
+    source: IRasterSource;
     layerDescriptor: LayerDescriptor;
   }) {
     super({ source, layerDescriptor });
     this._style = new TileStyle();
   }
 
-  getSource(): ITMSSource {
-    return super.getSource() as ITMSSource;
+  getSource(): IRasterSource {
+    return super.getSource() as IRasterSource;
   }
 
   getStyleForEditing() {
@@ -61,7 +61,7 @@ export class RasterTileLayer extends AbstractLayer {
     };
     const prevDataRequest = this.getSourceDataRequest();
     if (prevDataRequest) {
-      const canSkip = await source.canSkipSourceUpdate(prevDataRequest,nextMeta);
+      const canSkip = await source.canSkipSourceUpdate(prevDataRequest, nextMeta);
       if (canSkip) return;
     }
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
@@ -100,10 +100,10 @@ export class RasterTileLayer extends AbstractLayer {
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    if(sourceDataRequest){
-      let data = sourceDataRequest.getData()
-      if(data){
-        return source.isSourceStale(mbSource,data as RasterTileSourceData);
+    if (sourceDataRequest) {
+      const data = sourceDataRequest.getData();
+      if (data) {
+        return source.isSourceStale(mbSource, data as RasterTileSourceData);
       }
     }
     return false;
