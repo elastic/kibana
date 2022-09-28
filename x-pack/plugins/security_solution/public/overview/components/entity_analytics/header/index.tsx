@@ -28,7 +28,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 
 const StyledEuiTitle = styled(EuiTitle)`
-  color: ${({ theme: { eui } }) => eui.euiColorVis9};
+  color: ${({ theme: { eui } }) => eui.euiColorDanger};
 `;
 
 const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';

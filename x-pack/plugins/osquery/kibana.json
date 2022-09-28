@@ -12,6 +12,7 @@
   "requiredPlugins": [
     "actions",
     "data",
+    "licensing",
     "dataViews",
     "discover",
     "features",

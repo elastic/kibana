@@ -35,6 +35,7 @@ const StyledIconsList = styled(EuiFlexItem)`
 
 export const PackResultsHeader = ({ actionId, addToCase }: PackResultsHeadersProps) => (
   <>
+    <EuiSpacer size={'l'} />
     <EuiFlexGroup direction="row" gutterSize="m">
       <StyledResultsHeading grow={false}>
         <EuiText>
