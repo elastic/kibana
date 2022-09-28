@@ -12,7 +12,6 @@ import React from 'react';
 import { ReactWrapper, shallow } from 'enzyme';
 
 import {
-  EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,

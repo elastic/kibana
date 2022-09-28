@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount, render } from 'enzyme';
 import { FieldValueSelection } from './field_value_selection';
-import { EuiButton, EuiSelectableList } from '@elastic/eui';
+import { EuiSelectableList } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 const values = [
