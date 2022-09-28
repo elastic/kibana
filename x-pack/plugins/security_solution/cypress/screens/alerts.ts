@@ -63,6 +63,12 @@ export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 
+export const OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN =
+  '[data-test-subj="open-alert-details-page-menu-item"]';
+
+export const ALERT_DETAILS_PAGE_BACK_TO_ALERTS =
+  '[data-test-subj="alert-details-back-to-alerts-link"]';
+
 export const PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
 export const PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
 
