@@ -132,6 +132,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
+/src/dev/build/tasks/bundle_fleet_packages.ts
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
@@ -352,6 +353,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
 /x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/public/applications/shared/doc_links @elastic/ent-search-docs-team
 
 # Management Experience - Deployment Management
 /src/plugins/dev_tools/ @elastic/platform-deployment-management
@@ -741,6 +743,8 @@ packages/core/http/core-http-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-common @elastic/kibana-core
 packages/core/http/core-http-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
+packages/core/http/core-http-request-handler-context-server @elastic/kibana-core
+packages/core/http/core-http-request-handler-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server @elastic/kibana-core
