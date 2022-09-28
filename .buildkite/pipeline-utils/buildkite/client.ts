@@ -111,7 +111,10 @@ export class BuildkiteClient {
     );
   };
 
-  getJobStatus = (build: Build, job: Job): { success: boolean; softFailed: boolean; state: JobState } => {
+  getJobStatus = (
+    build: Build,
+    job: Job
+  ): { success: boolean; softFailed: boolean; state: JobState } => {
     if (job.retried) {
       const retriedJob = build.jobs.find((j) => j.id === job.retried_in_job_id);
       if (!retriedJob) {
@@ -152,11 +155,10 @@ export class BuildkiteClient {
   getBuildStatus = (build: Build): BuildStatus => {
     let hasRetries = false;
     let hasNonPreemptionRetries = false;
-    let hasSoftFailure = false;
+    const hasSoftFailure = false;
     let success = build.state !== 'failed';
 
     for (const job of build.jobs) {
-
       if (job.retried) {
         hasRetries = true;
         const isPreemptionFailure =
