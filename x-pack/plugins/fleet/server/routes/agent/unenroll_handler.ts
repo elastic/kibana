@@ -8,10 +8,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type {
-  PostAgentUnenrollResponse,
-  PostBulkAgentUnenrollResponse,
-} from '../../../common/types';
+import type { PostAgentUnenrollResponse } from '../../../common/types';
 import type {
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
@@ -59,15 +56,8 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
       force: request.body?.force,
       batchSize: request.body?.batchSize,
     });
-    const body = results.items.reduce<PostBulkAgentUnenrollResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
 
-    return response.ok({ body: { ...body, actionId: results.actionId } });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
