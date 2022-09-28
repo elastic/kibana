@@ -187,7 +187,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         andProviderId: undefined,
         enabled: false,
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });
@@ -253,7 +253,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
         andProviderId: undefined,
         excluded: true,
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });
@@ -344,7 +344,7 @@ describe('Providers', () => {
 
       expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });
@@ -415,7 +415,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
         enabled: false,
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });
@@ -495,7 +495,7 @@ describe('Providers', () => {
       expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
         excluded: true,
-        id: 'test',
+        id: 'timeline-test',
         providerId: 'id-Provider 1',
       });
     });

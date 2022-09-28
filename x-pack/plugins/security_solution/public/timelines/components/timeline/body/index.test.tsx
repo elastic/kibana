@@ -31,7 +31,7 @@ import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
@@ -277,8 +277,8 @@ describe('Body', () => {
           ...mockGlobalState.timeline,
           timelineById: {
             ...mockGlobalState.timeline.timelineById,
-            'timeline-test': {
-              ...mockGlobalState.timeline.timelineById.test,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
               id: 'timeline-test',
               pinnedEventIds: { 1: true }, // we should NOT dispatch a pin event, because it's already pinned
             },
@@ -354,7 +354,7 @@ describe('Body', () => {
           tabType: 'query',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -379,7 +379,7 @@ describe('Body', () => {
           tabType: 'pinned',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -404,7 +404,7 @@ describe('Body', () => {
           tabType: 'notes',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
   });

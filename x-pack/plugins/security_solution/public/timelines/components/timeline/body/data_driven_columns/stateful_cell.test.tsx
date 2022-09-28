@@ -55,7 +55,6 @@ describe('StatefulCell', () => {
   const colIndex = 0;
   const eventId = '_id-123';
   const linkValues = ['foo', 'bar', '@baz'];
-  const tabType = TimelineTabs.query;
   const timelineId = TimelineId.test;
 
   let header: ColumnHeaderOptions;
