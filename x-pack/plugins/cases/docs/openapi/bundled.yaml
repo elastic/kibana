@@ -2534,9 +2534,14 @@ paths:
           application/json:
             schema:
               title: Add case comment request
+              description: >
+                The add comment to case API request body varies depending on
+                whether you are adding an alert or a comment.
               oneOf:
-                - $ref: '#/components/schemas/add_alert_comment_request_properties'
-                - $ref: '#/components/schemas/add_user_comment_request_properties'
+                - $ref: '#/components/schemas/alert'
+                - $ref: '#/components/schemas/user'
+              discriminator:
+                propertyName: type
             examples:
               createCaseCommentRequest:
                 $ref: '#/components/examples/add_comment_request'
@@ -3398,68 +3403,96 @@ components:
       type: apiKey
       in: header
       name: ApiKey
-  parameters:
-    kbn_xsrf:
-      schema:
-        type: string
-      in: header
-      name: kbn-xsrf
-      required: true
-    space_id:
-      in: path
-      name: spaceId
-      description: >-
-        An identifier for the space. If `/s/` and the identifier are omitted
-        from the path, the default space is used.
-      required: true
-      schema:
-        type: string
-        example: default
-    owner:
-      in: query
-      name: owner
-      description: >
-        A filter to limit the response to a specific set of applications. If
-        this parameter is omitted, the response contains information about all
-        the cases that the user has access to read.
-      schema:
-        oneOf:
-          - $ref: '#/components/schemas/owners'
-          - type: array
-            items:
-              $ref: '#/components/schemas/owners'
-      example: cases
-    case_id:
-      in: path
-      name: caseId
-      description: >-
-        The identifier for the case. To retrieve case IDs, use the find cases
-        API. All non-ASCII characters must be URL encoded.
-      required: true
-      schema:
-        type: string
-        example: 9c235210-6834-11ea-a78c-6ffb38a34414
-    comment_id:
-      in: path
-      name: commentId
-      description: >
-        The identifier for the comment. To retrieve comment IDs, use the get
-        case or find cases APIs.
-      required: true
-      schema:
-        type: string
-        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
-    connector_id:
-      in: path
-      name: connectorId
-      description: >-
-        An identifier for the connector. To retrieve connector IDs, use the find
-        connectors API.
-      required: true
-      schema:
-        type: string
-        example: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
   schemas:
+    commentRequest:
+      title: Add case comment request properties
+      type: object
+      required:
+        - owner
+        - type
+      properties:
+        owner:
+          $ref: '#/components/schemas/owners'
+        type:
+          description: The type of comment.
+          type: string
+          enum:
+            - alert
+            - user
+      discriminator:
+        propertyName: type
+    alert:
+      title: Add case comment request properties for alerts
+      allOf:
+        - $ref: '#/components/schemas/commentRequest'
+        - type: object
+          title: Add alert to case request
+          properties:
+            alertId:
+              description: >
+                The alert identifier. It is required only when `type` is
+                `alert`. If it is an array, `index` must also be an array. This
+                functionality is in technical preview and may be changed or
+                removed in a future release. Elastic will apply best effort to
+                fix any issues, but features in technical preview are not
+                subject to the support SLA of official GA features.
+              oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+              x-technical-preview: true
+              example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+            index:
+              description: >
+                The alert index. It is required only when `type` is `alert`. If
+                it is an array, `alertId` must also be an array. This
+                functionality is in technical preview and may be changed or
+                removed in a future release. Elastic will apply best effort to
+                fix any issues, but features in technical preview are not
+                subject to the support SLA of official GA features.
+              oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+              x-technical-preview: true
+            rule:
+              description: >
+                The rule that is associated with the alert. It is required only
+                when `type` is `alert`. This functionality is in technical
+                preview and may be changed or removed in a future release.
+                Elastic will apply best effort to fix any issues, but features
+                in technical preview are not subject to the support SLA of
+                official GA features.
+              type: object
+              x-technical-preview: true
+              properties:
+                id:
+                  description: The rule identifier.
+                  type: string
+                  example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+                name:
+                  description: The rule name.
+                  type: string
+                  example: security_rule
+              required:
+                - alertId
+                - index
+                - rule
+    user:
+      title: Add case comment request properties for alerts
+      allOf:
+        - $ref: '#/components/schemas/commentRequest'
+        - type: object
+          title: Add comment to case request
+          properties:
+            comment:
+              description: The new comment. It is required only when `type` is `user`.
+              type: string
+              example: A new comment.
+          required:
+            - comment
     connector_types:
       type: string
       description: The type of connector.
@@ -3730,90 +3763,6 @@ components:
         index:
           description: The alert index.
           type: string
-    add_alert_comment_request_properties:
-      type: object
-      properties:
-        alertId:
-          description: >
-            The alert identifier. It is required only when `type` is `alert`. If
-            it is an array, `index` must also be an array. This functionality is
-            in technical preview and may be changed or removed in a future
-            release. Elastic will apply best effort to fix any issues, but
-            features in technical preview are not subject to the support SLA of
-            official GA features.
-          oneOf:
-            - type: string
-            - type: array
-              items:
-                type: string
-          x-technical-preview: true
-          example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
-        index:
-          description: >
-            The alert index. It is required only when `type` is `alert`. If it
-            is an array, `alertId` must also be an array. This functionality is
-            in technical preview and may be changed or removed in a future
-            release. Elastic will apply best effort to fix any issues, but
-            features in technical preview are not subject to the support SLA of
-            official GA features.
-          oneOf:
-            - type: string
-            - type: array
-              items:
-                type: string
-          x-technical-preview: true
-        owner:
-          $ref: '#/components/schemas/owners'
-        rule:
-          description: >
-            The rule that is associated with the alert. It is required only when
-            `type` is `alert`. This functionality is in technical preview and
-            may be changed or removed in a future release. Elastic will apply
-            best effort to fix any issues, but features in technical preview are
-            not subject to the support SLA of official GA features.
-          type: object
-          x-technical-preview: true
-          properties:
-            id:
-              description: The rule identifier.
-              type: string
-              example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-            name:
-              description: The rule name.
-              type: string
-              example: security_rule
-        type:
-          description: The type of comment.
-          type: string
-          enum:
-            - alert
-          example: alert
-      required:
-        - alertId
-        - index
-        - owner
-        - rule
-        - type
-    add_user_comment_request_properties:
-      type: object
-      title: Add comment to case request
-      properties:
-        comment:
-          description: The new comment. It is required only when `type` is `user`.
-          type: string
-          example: A new comment.
-        owner:
-          $ref: '#/components/schemas/owners'
-        type:
-          type: string
-          description: The type of comment.
-          enum:
-            - user
-          example: user
-      required:
-        - comment
-        - owner
-        - type
     update_alert_comment_request_properties:
       type: object
       properties:
@@ -3925,15 +3874,6 @@ components:
         - owner
         - type
         - version
-    actions:
-      type: string
-      enum:
-        - add
-        - create
-        - delete
-        - push_to_service
-        - update
-      example: create
     payload_alert_comment:
       type: object
       properties:
@@ -4238,27 +4178,18 @@ components:
               type: string
               enum:
                 - user
-    action_types:
-      type: string
-      description: The type of action.
-      enum:
-        - create_case
-        - comment
-        - connector
-        - delete_case
-        - description
-        - pushed
-        - tags
-        - title
-        - status
-        - settings
-        - severity
-      example: create_case
     user_actions_response_properties:
       type: object
       properties:
         action:
-          $ref: '#/components/schemas/actions'
+          type: string
+          enum:
+            - add
+            - create
+            - delete
+            - push_to_service
+            - update
+          example: create
         action_id:
           type: string
           example: 22fd3e30-03b1-11ed-920c-974bfa104448
@@ -4304,7 +4235,82 @@ components:
             - $ref: '#/components/schemas/payload_user_comment'
           nullable: true
         type:
-          $ref: '#/components/schemas/action_types'
+          type: string
+          description: The type of action.
+          enum:
+            - create_case
+            - comment
+            - connector
+            - delete_case
+            - description
+            - pushed
+            - tags
+            - title
+            - status
+            - settings
+            - severity
+          example: create_case
+  parameters:
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      required: true
+    space_id:
+      in: path
+      name: spaceId
+      description: >-
+        An identifier for the space. If `/s/` and the identifier are omitted
+        from the path, the default space is used.
+      required: true
+      schema:
+        type: string
+        example: default
+    owner:
+      in: query
+      name: owner
+      description: >
+        A filter to limit the response to a specific set of applications. If
+        this parameter is omitted, the response contains information about all
+        the cases that the user has access to read.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/owners'
+          - type: array
+            items:
+              $ref: '#/components/schemas/owners'
+      example: cases
+    case_id:
+      in: path
+      name: caseId
+      description: >-
+        The identifier for the case. To retrieve case IDs, use the find cases
+        API. All non-ASCII characters must be URL encoded.
+      required: true
+      schema:
+        type: string
+        example: 9c235210-6834-11ea-a78c-6ffb38a34414
+    comment_id:
+      in: path
+      name: commentId
+      description: >
+        The identifier for the comment. To retrieve comment IDs, use the get
+        case or find cases APIs.
+      required: true
+      schema:
+        type: string
+        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+    connector_id:
+      in: path
+      name: connectorId
+      description: >-
+        An identifier for the connector. To retrieve connector IDs, use the find
+        connectors API.
+      required: true
+      schema:
+        type: string
+        example: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.

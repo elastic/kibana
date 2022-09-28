@@ -2004,18 +2004,16 @@ Any modifications made to this file will be overwritten.
 
   <h3>Table of Contents</h3>
   <ol>
+    <li><a href="#Add_alert_to_case_request"><code>Add_alert_to_case_request</code> - Add alert to case request</a></li>
+    <li><a href="#Add_alert_to_case_request_rule"><code>Add_alert_to_case_request_rule</code> - </a></li>
     <li><a href="#Add_case_comment_request"><code>Add_case_comment_request</code> - Add case comment request</a></li>
-    <li><a href="#action_types"><code>action_types</code> - </a></li>
-    <li><a href="#actions"><code>actions</code> - </a></li>
-    <li><a href="#add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - </a></li>
-    <li><a href="#add_alert_comment_request_properties_alertId"><code>add_alert_comment_request_properties_alertId</code> - </a></li>
-    <li><a href="#add_alert_comment_request_properties_index"><code>add_alert_comment_request_properties_index</code> - </a></li>
-    <li><a href="#add_alert_comment_request_properties_rule"><code>add_alert_comment_request_properties_rule</code> - </a></li>
-    <li><a href="#add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add comment to case request</a></li>
+    <li><a href="#Add_comment_to_case_request"><code>Add_comment_to_case_request</code> - Add comment to case request</a></li>
+    <li><a href="#alert"><code>alert</code> - Add case comment request properties for alerts</a></li>
     <li><a href="#alert_comment_response_properties"><code>alert_comment_response_properties</code> - </a></li>
     <li><a href="#alert_comment_response_properties_rule"><code>alert_comment_response_properties_rule</code> - </a></li>
     <li><a href="#alert_response_properties"><code>alert_response_properties</code> - </a></li>
     <li><a href="#closure_types"><code>closure_types</code> - </a></li>
+    <li><a href="#commentRequest"><code>commentRequest</code> - Add case comment request properties</a></li>
     <li><a href="#connector_types"><code>connector_types</code> - </a></li>
     <li><a href="#createCase_200_response"><code>createCase_200_response</code> - </a></li>
     <li><a href="#createCase_200_response_closed_by"><code>createCase_200_response_closed_by</code> - </a></li>
@@ -2064,65 +2062,27 @@ Any modifications made to this file will be overwritten.
     <li><a href="#updateCase_request"><code>updateCase_request</code> - </a></li>
     <li><a href="#updateCase_request_cases_inner"><code>updateCase_request_cases_inner</code> - </a></li>
     <li><a href="#update_alert_comment_request_properties"><code>update_alert_comment_request_properties</code> - </a></li>
+    <li><a href="#update_alert_comment_request_properties_alertId"><code>update_alert_comment_request_properties_alertId</code> - </a></li>
+    <li><a href="#update_alert_comment_request_properties_index"><code>update_alert_comment_request_properties_index</code> - </a></li>
+    <li><a href="#update_alert_comment_request_properties_rule"><code>update_alert_comment_request_properties_rule</code> - </a></li>
     <li><a href="#update_user_comment_request_properties"><code>update_user_comment_request_properties</code> - </a></li>
+    <li><a href="#user"><code>user</code> - Add case comment request properties for alerts</a></li>
     <li><a href="#user_actions_response_properties"><code>user_actions_response_properties</code> - </a></li>
     <li><a href="#user_actions_response_properties_payload"><code>user_actions_response_properties_payload</code> - </a></li>
     <li><a href="#user_comment_response_properties"><code>user_comment_response_properties</code> - </a></li>
   </ol>
 
   <div class="model">
-    <h3><a name="Add_case_comment_request"><code>Add_case_comment_request</code> - Add case comment request</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="Add_alert_to_case_request"><code>Add_alert_to_case_request</code> - Add alert to case request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_alertId">add_alert_comment_request_properties_alertId</a></span>  </div>
-<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_index">add_alert_comment_request_properties_index</a></span>  </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_rule">add_alert_comment_request_properties_rule</a></span>  </div>
-<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">user</div>
-<div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
+      <div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
+<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#Add_alert_to_case_request_rule">Add_alert_to_case_request_rule</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="action_types"><code>action_types</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The type of action.</div>
-    <div class="field-items">
-          </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="actions"><code>actions</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-          </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_alertId">add_alert_comment_request_properties_alertId</a></span>  </div>
-<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_index">add_alert_comment_request_properties_index</a></span>  </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_rule">add_alert_comment_request_properties_rule</a></span>  </div>
-<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">alert</div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="add_alert_comment_request_properties_alertId"><code>add_alert_comment_request_properties_alertId</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
-    <div class="field-items">
-          </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="add_alert_comment_request_properties_index"><code>add_alert_comment_request_properties_index</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
-    <div class="field-items">
-          </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="add_alert_comment_request_properties_rule"><code>add_alert_comment_request_properties_rule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="Add_alert_to_case_request_rule"><code>Add_alert_to_case_request_rule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The rule that is associated with the alert. It is required only when <code>type</code> is <code>alert</code>. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
@@ -2130,14 +2090,37 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add comment to case request</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="Add_case_comment_request"><code>Add_case_comment_request</code> - Add case comment request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The add comment to case API request body varies depending on whether you are adding an alert or a comment.</div>
+    <div class="field-items">
+      <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">alert</div><div class="param-enum">user</div>
+<div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
+<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#Add_alert_to_case_request_rule">Add_alert_to_case_request_rule</a></span>  </div>
+<div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Add_comment_to_case_request"><code>Add_comment_to_case_request</code> - Add comment to case request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="alert"><code>alert</code> - Add case comment request properties for alerts</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
         <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">user</div>
+        <div class="param-enum">alert</div><div class="param-enum">user</div>
+<div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
+<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#Add_alert_to_case_request_rule">Add_alert_to_case_request_rule</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2181,6 +2164,16 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>Indicates whether a case is automatically closed when it is pushed to external systems (<code>close-by-pushing</code>) or not automatically closed (<code>close-by-user</code>).</div>
     <div class="field-items">
           </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="commentRequest"><code>commentRequest</code> - Add case comment request properties</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">alert</div><div class="param-enum">user</div>
+    </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="connector_types"><code>connector_types</code> - </a> <a class="up" href="#__Models">Up</a></h3>
@@ -2616,11 +2609,11 @@ Any modifications made to this file will be overwritten.
     <h3><a name="updateCaseComment_request"><code>updateCaseComment_request</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_alertId">add_alert_comment_request_properties_alertId</a></span>  </div>
+      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_alertId">update_alert_comment_request_properties_alertId</a></span>  </div>
 <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the comment. To retrieve comment IDs, use the get comments API. </div>
-<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_index">add_alert_comment_request_properties_index</a></span>  </div>
+<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_index">update_alert_comment_request_properties_index</a></span>  </div>
 <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_rule">add_alert_comment_request_properties_rule</a></span>  </div>
+<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_rule">update_alert_comment_request_properties_rule</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">user</div>
@@ -2663,15 +2656,35 @@ Any modifications made to this file will be overwritten.
     <h3><a name="update_alert_comment_request_properties"><code>update_alert_comment_request_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_alertId">add_alert_comment_request_properties_alertId</a></span>  </div>
+      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_alertId">update_alert_comment_request_properties_alertId</a></span>  </div>
 <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the comment. To retrieve comment IDs, use the get comments API. </div>
-<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_index">add_alert_comment_request_properties_index</a></span>  </div>
+<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_index">update_alert_comment_request_properties_index</a></span>  </div>
 <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_rule">add_alert_comment_request_properties_rule</a></span>  </div>
+<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_rule">update_alert_comment_request_properties_rule</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">alert</div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current comment version. To retrieve version values, use the get comments API. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_alert_comment_request_properties_alertId"><code>update_alert_comment_request_properties_alertId</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_alert_comment_request_properties_index"><code>update_alert_comment_request_properties_index</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_alert_comment_request_properties_rule"><code>update_alert_comment_request_properties_rule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The rule that is associated with the alert. It is required only when <code>type</code> is <code>alert</code>. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule name. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2688,10 +2701,23 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="user"><code>user</code> - Add case comment request properties for alerts</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">alert</div><div class="param-enum">user</div>
+<div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="user_actions_response_properties"><code>user_actions_response_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">action (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions">actions</a></span>  </div>
+      <div class="param">action (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">add</div><div class="param-enum">create</div><div class="param-enum">delete</div><div class="param-enum">push_to_service</div><div class="param-enum">update</div>
 <div class="param">action_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">case_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">comment_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
@@ -2699,7 +2725,9 @@ Any modifications made to this file will be overwritten.
 <div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#createCase_200_response_created_by">createCase_200_response_created_by</a></span>  </div>
 <div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">payload (optional)</div><div class="param-desc"><span class="param-type"><a href="#user_actions_response_properties_payload">user_actions_response_properties_payload</a></span>  </div>
-<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#action_types">action_types</a></span>  </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of action. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">create_case</div><div class="param-enum">comment</div><div class="param-enum">connector</div><div class="param-enum">delete_case</div><div class="param-enum">description</div><div class="param-enum">pushed</div><div class="param-enum">tags</div><div class="param-enum">title</div><div class="param-enum">status</div><div class="param-enum">settings</div><div class="param-enum">severity</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

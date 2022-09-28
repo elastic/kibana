@@ -1,7 +1,14 @@
 type: object
 properties:
   action:
-    $ref: 'actions.yaml'
+    type: string
+    enum:
+      - add
+      - create
+      - delete
+      - push_to_service
+      - update
+    example: create
   action_id:
     type: string
     example: 22fd3e30-03b1-11ed-920c-974bfa104448
@@ -36,4 +43,18 @@ properties:
       - $ref: 'payload_user_comment.yaml'
     nullable: true
   type: 
-    $ref: 'action_types.yaml'
+    type: string
+    description: The type of action.
+    enum:
+      - create_case
+      - comment
+      - connector
+      - delete_case
+      - description
+      - pushed
+      - tags
+      - title
+      - status
+      - settings
+      - severity
+    example: create_case

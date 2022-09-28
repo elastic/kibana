@@ -16,9 +16,14 @@ post:
       application/json:
         schema:
           title: Add case comment request
+          description: >
+            The add comment to case API request body varies depending on whether
+            you are adding an alert or a comment.
           oneOf:
-            - $ref: '../components/schemas/add_alert_comment_request_properties.yaml' 
-            - $ref: '../components/schemas/add_user_comment_request_properties.yaml'
+            - $ref: '../entrypoint.yaml#/components/schemas/alert'
+            - $ref: '../entrypoint.yaml#/components/schemas/user'
+          discriminator:
+            propertyName: type
         examples:
           createCaseCommentRequest:
             $ref: '../components/examples/add_comment_request.yaml'
