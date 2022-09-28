@@ -72,8 +72,10 @@ export const ActionBar = ({
   const mouseMoveTimeoutIds = useRef<[number, number]>([0, 0]);
   const isReadOnly = monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
 
-  const hasServiceManagedLocation = monitor.locations?.some((loc) => loc.isServiceManaged);
-  const isOnlyPrivateLocations = !locations.some((loc) => loc.isServiceManaged);
+  const isAnyPublicLocationSelected = monitor.locations?.some((loc) => loc.isServiceManaged);
+  const isOnlyPrivateLocations =
+    !locations.some((loc) => loc.isServiceManaged) ||
+    ((monitor.locations?.length ?? 0) > 0 && !isAnyPublicLocationSelected);
 
   const { data, status } = useFetcher(() => {
     if (!isSaving || !isValid) {
@@ -167,7 +169,7 @@ export const ActionBar = ({
                         size="s"
                         color="success"
                         iconType="play"
-                        disabled={!isValid || isTestRunInProgress || !hasServiceManagedLocation}
+                        disabled={!isValid || isTestRunInProgress || !isAnyPublicLocationSelected}
                         data-test-subj={'monitorTestNowRunBtn'}
                         onClick={() => onTestNow()}
                         onMouseOver={() => {
@@ -199,7 +201,7 @@ export const ActionBar = ({
                       <p>
                         {isTestRunInProgress
                           ? TEST_SCHEDULED_LABEL
-                          : isOnlyPrivateLocations || (isValid && !hasServiceManagedLocation)
+                          : isOnlyPrivateLocations || (isValid && !isAnyPublicLocationSelected)
                           ? PRIVATE_AVAILABLE_LABEL
                           : TEST_NOW_DESCRIPTION}
                       </p>
