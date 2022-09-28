@@ -76,7 +76,7 @@
 }
 
 @mixin euiFlyout {
-  border-left: $euiFlyoutBorder;
+  border-left: $euiBorderThin;
   // The mixin augments the above
   // sass-lint:disable mixins-before-declarations
   @include euiBottomShadowLarge;
