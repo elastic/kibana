@@ -284,6 +284,27 @@ describe('getLayers', () => {
     ],
     series: [createSeries({ metrics: staticValueMetric })],
   });
+  const panelWithSingleAnnotationDefaultDataView = createPanel({
+    annotations: [
+      {
+        fields: 'geo.src,host',
+        template: 'Security Error from {{geo.src}} on {{host}}',
+        query_string: {
+          query: 'tags:error AND tags:security',
+          language: 'lucene',
+        },
+        id: 'ann1',
+        color: 'rgba(211,49,21,0.7)',
+        time_field: 'timestamp',
+        icon: 'fa-asterisk',
+        ignore_global_filters: 1,
+        ignore_panel_filters: 1,
+        hidden: true,
+        index_pattern: '',
+      },
+    ],
+    series: [createSeries({ metrics: staticValueMetric })],
+  });
 
   test.each<[string, [Record<number, Layer>, Panel], Array<Partial<XYLayerConfig>>]>([
     [
@@ -505,6 +526,51 @@ describe('getLayers', () => {
         },
       ],
     ],
+    [
+      'annotation layer gets correct dataView when none is defined',
+      [dataSourceLayersWithStatic, panelWithSingleAnnotationDefaultDataView],
+      [
+        {
+          layerType: 'referenceLine',
+          accessors: ['column-id-1'],
+          layerId: 'test-layer-1',
+          yConfig: [
+            {
+              forAccessor: 'column-id-1',
+              axisMode: 'right',
+              color: '#68BC00',
+              fill: 'below',
+            },
+          ],
+        },
+        {
+          layerId: 'test-id',
+          layerType: 'annotations',
+          ignoreGlobalFilters: true,
+          annotations: [
+            {
+              color: '#D33115',
+              extraFields: ['geo.src'],
+              filter: {
+                language: 'lucene',
+                query: 'tags:error AND tags:security',
+                type: 'kibana_query',
+              },
+              icon: 'asterisk',
+              id: 'ann1',
+              isHidden: true,
+              key: {
+                type: 'point_in_time',
+              },
+              label: 'Event',
+              timeField: 'timestamp',
+              type: 'query',
+            },
+          ],
+          indexPatternId: 'default',
+        },
+      ],
+    ],
   ])('should return %s', async (_, input, expected) => {
     const layers = await getLayers(...input, indexPatternsService as DataViewsPublicPluginStart);
     expect(layers).toEqual(expected.map(expect.objectContaining));
@@ -520,7 +586,13 @@ const mockedIndices = [
 ] as unknown as DataView[];
 
 const indexPatternsService = {
-  getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
+  getDefault: jest.fn(() =>
+    Promise.resolve({
+      id: 'default',
+      title: 'index',
+      getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
+    })
+  ),
   get: jest.fn((id) => Promise.resolve({ ...mockedIndices[0], id })),
   find: jest.fn((search: string, size: number) => {
     if (size !== 1) {
