@@ -86,6 +86,7 @@ export const FeatureTableExpandedRow = ({
         <EuiFlexItem grow={false}>
           <div>
             <EuiIconTip
+              data-test-subj="subFeaturesTip"
               position='right'
               aria-label="sub-feature-information-tip"
               size="l"
