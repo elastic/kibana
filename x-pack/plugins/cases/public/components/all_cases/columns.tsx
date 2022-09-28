@@ -122,30 +122,31 @@ export const useCasesColumns = ({
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const { mutate: deleteCases } = useDeleteCases();
   const refreshCases = useRefreshCases();
-
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
-
   const [caseToBeDeleted, setCaseToBeDeleted] = useState<string>();
-
   const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
 
-  const onDeleteAction = useCallback((theCase: Case) => {
-    setIsModalVisible(true);
-    setCaseToBeDeleted(theCase.id);
-  }, []);
-
   const closeModal = useCallback(() => setIsModalVisible(false), []);
+  const openModal = useCallback(() => setIsModalVisible(true), []);
+
+  const onDeleteAction = useCallback(
+    (theCase: Case) => {
+      openModal();
+      setCaseToBeDeleted(theCase.id);
+    },
+    [openModal]
+  );
 
   const onConfirmDeletion = useCallback(() => {
-    setIsModalVisible(false);
+    closeModal();
     if (caseToBeDeleted) {
       deleteCases({
         caseIds: [caseToBeDeleted],
         successToasterTitle: i18n.DELETED_CASES(1),
       });
     }
-  }, [caseToBeDeleted, deleteCases]);
+  }, [caseToBeDeleted, closeModal, deleteCases]);
 
   const handleDispatchUpdate = useCallback(
     ({ updateKey, updateValue, caseData }: UpdateByKey) => {
