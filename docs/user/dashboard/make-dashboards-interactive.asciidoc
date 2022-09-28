@@ -92,9 +92,7 @@ To add interactive time slider controls, create the control, then add it to your
 
 . Open or create a new dashboard. 
 
-* If you are adding a *Control* to an existing dashboard, click *Edit*, click *Controls* in the dashboard toolbar, then select *Add time slider control*.
-
-* If you are adding a *Control* to a new dashboard, click *Controls* in the dashboard toolbar, then select *Add time slider control*.
+. In the dashboard toolbar, click *Controls*, then select *Add time slider control*.
 
 . The time slider control uses the time range from the global time filter. To change the time range in the time slider control, <<set-time-filter,change the global time filter>>. 
 
