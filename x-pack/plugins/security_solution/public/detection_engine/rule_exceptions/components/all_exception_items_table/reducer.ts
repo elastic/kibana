@@ -27,6 +27,8 @@ export interface State {
   // Flyout to be opened (edit vs add vs none)
   currenFlyout: ViewerFlyoutName;
   viewerState: ViewerState;
+  isReadOnly: boolean;
+  lastUpdated: string | number;
 }
 
 export type Action =
@@ -43,6 +45,14 @@ export type Action =
   | {
       type: 'setViewerState';
       state: ViewerState;
+    }
+  | {
+      type: 'setIsReadOnly';
+      readOnly: boolean;
+    }
+  | {
+      type: 'setLastUpdateTime';
+      lastUpdate: string | number;
     };
 
 export const allExceptionItemsReducer =
@@ -80,6 +90,18 @@ export const allExceptionItemsReducer =
         return {
           ...state,
           viewerState: action.state,
+        };
+      }
+      case 'setIsReadOnly': {
+        return {
+          ...state,
+          isReadOnly: action.readOnly,
+        };
+      }
+      case 'setLastUpdateTime': {
+        return {
+          ...state,
+          lastUpdated: action.lastUpdate,
         };
       }
       default:

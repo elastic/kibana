@@ -8,7 +8,7 @@
 const { Client } = require('@elastic/elasticsearch');
 const faker = require('faker');
 
-const THREAT_INDEX = 'ti-logs';
+const THREAT_INDEX = 'logs-ti';
 
 /** Drop the index first? */
 const CLEANUP_FIRST = true;
@@ -82,7 +82,7 @@ const main = async () => {
     for (let i = 0; i < CHUNK_SIZE; i++) {
       const RANDOM_OFFSET_WITHIN_ONE_MONTH = Math.floor(Math.random() * 3600 * 24 * 30 * 1000);
 
-      const timestamp = Date.now() - RANDOM_OFFSET_WITHIN_ONE_MONTH;
+      const timestamp = new Date(Date.now() - RANDOM_OFFSET_WITHIN_ONE_MONTH).toISOString();
 
       operations.push(
         ...[

@@ -48,15 +48,22 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * State related logic
    */
-  const { data$, dataView, inspectorAdapters, onChangeDataView, stateContainer } = useDiscoverState(
-    {
-      services,
-      history: usedHistory,
-      savedSearch,
-      setExpandedDoc,
-      dataViewList,
-    }
-  );
+  const {
+    data$,
+    dataView,
+    inspectorAdapters,
+    onChangeDataView,
+    stateContainer,
+    persistDataView,
+    updateAdHocDataViewId,
+    adHocDataViewList,
+  } = useDiscoverState({
+    services,
+    history: usedHistory,
+    savedSearch,
+    setExpandedDoc,
+    dataViewList,
+  });
 
   /**
    * Url / Routing logic
@@ -96,6 +103,9 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         navigateTo={navigateTo}
         savedSearchData$={data$}
         stateContainer={stateContainer}
+        persistDataView={persistDataView}
+        updateAdHocDataViewId={updateAdHocDataViewId}
+        adHocDataViewList={adHocDataViewList}
       />
     </Provider>
   );

@@ -6,13 +6,11 @@
  */
 
 import React, { useEffect, useState, FC } from 'react';
-import { min, max } from 'd3-array';
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { WindowParameters } from '@kbn/aiops-utils';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
@@ -28,9 +26,9 @@ const clearSelectionLabel = i18n.translate(
 export interface DocumentCountContentProps {
   brushSelectionUpdateHandler: (d: WindowParameters) => void;
   clearSelectionHandler: () => void;
-  changePoint?: ChangePoint;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
+  documentCountStatsSplitLabel?: string;
   totalCount: number;
   windowParameters?: WindowParameters;
 }
@@ -38,9 +36,9 @@ export interface DocumentCountContentProps {
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   brushSelectionUpdateHandler,
   clearSelectionHandler,
-  changePoint,
   documentCountStats,
   documentCountStatsSplit,
+  documentCountStatsSplitLabel = '',
   totalCount,
   windowParameters,
 }) => {
@@ -51,8 +49,8 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   }, [windowParameters]);
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
-  const timeRangeEarliest = min(bucketTimestamps);
-  const timeRangeLatest = max(bucketTimestamps);
+  const timeRangeEarliest = Math.min(...bucketTimestamps);
+  const timeRangeLatest = Math.max(...bucketTimestamps);
 
   if (
     documentCountStats === undefined ||
@@ -118,7 +116,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           timeRangeEarliest={timeRangeEarliest}
           timeRangeLatest={timeRangeLatest}
           interval={documentCountStats.interval}
-          changePoint={changePoint}
+          chartPointsSplitLabel={documentCountStatsSplitLabel}
           isBrushCleared={isBrushCleared}
         />
       )}

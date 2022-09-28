@@ -29,6 +29,7 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
 import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
+import { HistoryLocationState } from '../../locator';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -38,6 +39,7 @@ interface DiscoverLandingParams {
 
 interface Props {
   isDev: boolean;
+  historyLocationState?: HistoryLocationState;
 }
 
 export function DiscoverMainRoute(props: Props) {
@@ -99,7 +101,12 @@ export function DiscoverMainRoute(props: Props) {
           services,
         });
         const { index } = appStateContainer.getState();
-        const ip = await loadDataView(index || '', data.dataViews, config);
+        const ip = await loadDataView(
+          data.dataViews,
+          config,
+          index,
+          props.historyLocationState?.dataViewSpec
+        );
 
         const ipList = ip.list;
         const dataViewData = resolveDataView(ip, nextSavedSearch.searchSource, toastNotifications);
@@ -111,7 +118,15 @@ export function DiscoverMainRoute(props: Props) {
         setError(e);
       }
     },
-    [config, data.dataViews, history, isDev, toastNotifications, services]
+    [
+      data.dataViews,
+      isDev,
+      history,
+      services,
+      config,
+      props.historyLocationState?.dataViewSpec,
+      toastNotifications,
+    ]
   );
 
   const loadSavedSearch = useCallback(async () => {

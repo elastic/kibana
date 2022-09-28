@@ -53,7 +53,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
   }
 
   const [isPopoverOpen, setPopover] = useState(false);
-  const [frozenDataPreference, setFrozenDataPreference] = useStorage<FrozenTierPreference>(
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage(
     ML_FROZEN_TIER_PREFERENCE,
     FROZEN_TIER_PREFERENCE.EXCLUDE
   );

@@ -12,11 +12,12 @@ import {
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
 } from '@kbn/ui-actions-plugin/public';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getUiActions } from '../../../../../kibana_services';
+import { PLUGIN_ID } from '../../../../../../common';
 
-function getTriggerConstant(type: string) {
+export function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
     ? VISUALIZE_GEO_FIELD_TRIGGER
     : VISUALIZE_FIELD_TRIGGER;
@@ -30,12 +31,12 @@ function getTrigger(type: string) {
 
 async function getCompatibleActions(
   fieldName: string,
-  dataViewId: string,
+  dataView: DataView,
   contextualFields: string[],
   trigger: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
   const compatibleActions = await getUiActions().getTriggerCompatibleActions(trigger, {
-    indexPatternId: dataViewId,
+    dataViewSpec: dataView.toSpec(false),
     fieldName,
     contextualFields,
   });
@@ -44,15 +45,16 @@ async function getCompatibleActions(
 
 export function triggerVisualizeActions(
   field: DataViewField,
-  dataViewId: string | undefined,
-  contextualFields: string[]
+  contextualFields: string[],
+  dataView?: DataView
 ) {
-  if (!dataViewId) return;
+  if (!dataView) return;
   const trigger = getTriggerConstant(field.type);
   const triggerOptions = {
-    indexPatternId: dataViewId,
+    dataViewSpec: dataView.toSpec(false),
     fieldName: field.name,
     contextualFields,
+    originatingApp: PLUGIN_ID,
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
@@ -68,11 +70,11 @@ export interface VisualizeInformation {
  */
 export async function getVisualizeInformation(
   field: DataViewField,
-  dataViewId: string | undefined,
+  dataView: DataView | undefined,
   contextualFields: string[],
   multiFields: DataViewField[] = []
 ): Promise<VisualizeInformation | undefined> {
-  if (field.name === '_id' || !dataViewId) {
+  if (field.name === '_id' || !dataView?.id) {
     // _id fields are not visualizeable in ES
     return undefined;
   }
@@ -84,7 +86,7 @@ export async function getVisualizeInformation(
     // Retrieve compatible actions for the specific field
     const actions = await getCompatibleActions(
       f.name,
-      dataViewId,
+      dataView,
       contextualFields,
       getTriggerConstant(f.type)
     );
@@ -92,7 +94,7 @@ export async function getVisualizeInformation(
     // if the field has compatible actions use this field for visualizing
     if (actions.length > 0) {
       const triggerOptions = {
-        indexPatternId: dataViewId,
+        dataViewSpec: dataView?.toSpec(),
         fieldName: f.name,
         contextualFields,
         trigger: getTrigger(f.type),

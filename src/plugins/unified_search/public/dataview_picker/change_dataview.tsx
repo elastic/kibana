@@ -26,8 +26,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IUnifiedSearchPluginServices } from '../types';
 import type { DataViewPickerPropsExtended } from '.';
 import { DataViewsList } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
@@ -82,7 +82,7 @@ export function ChangeDataView({
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, storage } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>

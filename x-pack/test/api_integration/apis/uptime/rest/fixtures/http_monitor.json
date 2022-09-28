@@ -77,5 +77,6 @@
   "namespace": "testnamespace",
   "revision": 1,
   "origin": "ui",
-  "form_monitor_type": "http"
+  "form_monitor_type": "http",
+  "journey_id": ""
 }

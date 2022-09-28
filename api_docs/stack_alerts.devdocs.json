@@ -63,7 +63,7 @@
         "signature": [
           "\"stackAlerts\""
         ],
-        "path": "x-pack/plugins/stack_alerts/common/index.ts",
+        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -16,7 +16,10 @@ import { useDiscoverState } from './use_discover_state';
 import { FetchStatus } from '../../types';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { setUrlTracker } from '../../../kibana_services';
+import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 
+setUrlTracker(urlTrackerMock);
 describe('test useSavedSearch', () => {
   test('useSavedSearch return is valid', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();

@@ -9,51 +9,51 @@
 import _ from 'lodash';
 
 import { isFilterPinned } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+
 import { convertTimeToUTCString } from '.';
-import { NotificationsStart } from '../../services/core';
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { DashboardRedirect, DashboardState } from '../../types';
-import { SavedObjectSaveOpts } from '../../services/saved_objects';
+import type { DashboardSavedObject } from '../../saved_dashboards';
 import { dashboardSaveToastStrings } from '../../dashboard_strings';
 import { getHasTaggingCapabilitiesGuard } from './dashboard_tagging';
-import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
-import { RefreshInterval, TimefilterContract } from '../../services/data';
-import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
-import { DashboardSessionStorage } from './dashboard_session_storage';
+import type { DashboardRedirect, DashboardState } from '../../types';
 import { serializeControlGroupToDashboardSavedObject } from './dashboard_control_group';
+import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
+import { pluginServices } from '../../services/plugin_services';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
 
 interface SaveDashboardProps {
-  version: string;
   redirectTo: DashboardRedirect;
   currentState: DashboardState;
-  timefilter: TimefilterContract;
   saveOptions: SavedDashboardSaveOpts;
-  toasts: NotificationsStart['toasts'];
   savedDashboard: DashboardSavedObject;
-  savedObjectsTagging?: SavedObjectsTaggingApi;
-  dashboardSessionStorage: DashboardSessionStorage;
 }
 
 export const saveDashboard = async ({
-  toasts,
-  version,
   redirectTo,
-  timefilter,
   saveOptions,
   currentState,
   savedDashboard,
-  savedObjectsTagging,
-  dashboardSessionStorage,
 }: SaveDashboardProps): Promise<{ id?: string; redirected?: boolean; error?: any }> => {
+  const {
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+    dashboardSessionStorage,
+    initializerContext: { kibanaVersion },
+    notifications,
+  } = pluginServices.getServices();
+
   const lastDashboardId = savedDashboard.id;
-  const hasTaggingCapabilities = getHasTaggingCapabilitiesGuard(savedObjectsTagging);
+  const hasTaggingCapabilities = getHasTaggingCapabilitiesGuard();
 
   const { panels, title, tags, description, timeRestore, options } = currentState;
 
   const savedDashboardPanels = Object.values(panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, version)
+    convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
   );
 
   savedDashboard.title = title;
@@ -88,7 +88,7 @@ export const saveDashboard = async ({
   try {
     const newId = await savedDashboard.save(saveOptions);
     if (newId) {
-      toasts.addSuccess({
+      notifications.toasts.addSuccess({
         title: dashboardSaveToastStrings.getSuccessString(currentState.title),
         'data-test-subj': 'saveDashboardSuccess',
       });
@@ -109,10 +109,12 @@ export const saveDashboard = async ({
     }
     return { id: newId };
   } catch (error) {
-    toasts.addDanger({
-      title: dashboardSaveToastStrings.getFailureString(currentState.title, error.message),
-      'data-test-subj': 'saveDashboardFailure',
-    });
+    notifications.toasts.addDanger(
+      dashboardSaveToastStrings.getFailureString(currentState.title, error.message),
+      {
+        'data-test-subj': 'saveDashboardFailure',
+      }
+    );
     return { error };
   }
 };

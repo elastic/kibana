@@ -66,7 +66,7 @@ const AssigneeComponent: React.FC<{
   numOfAssigness: number;
 }> = ({ assignee, index, numOfAssigness }) => (
   <FormatListItem index={index} listSize={numOfAssigness}>
-    <UserToolTip profile={assignee.profile}>
+    <UserToolTip userInfo={assignee.profile}>
       <strong>{getName(assignee.profile?.user)}</strong>
     </UserToolTip>
   </FormatListItem>
@@ -159,6 +159,7 @@ export const createAssigneesUserActionBuilder: UserActionBuilder = ({
     const label = getLabelTitle(assigneesUserAction, userProfiles);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
+      userProfiles,
       handleOutlineComment,
       label,
       icon: 'userAvatar',

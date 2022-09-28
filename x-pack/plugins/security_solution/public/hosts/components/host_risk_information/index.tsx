@@ -13,7 +13,6 @@ import {
   EuiFlyoutHeader,
   EuiText,
   EuiTitle,
-  EuiLink,
   EuiBasicTable,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -30,8 +29,8 @@ import React from 'react';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
-import { RiskSeverity } from '../../../../common/search_strategy';
-import { RISKY_HOSTS_DOC_LINK } from '../../../../common/constants';
+import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
@@ -131,12 +130,16 @@ const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
           defaultMessage="You can learn more about host risk {HostRiskScoreDocumentationLink}"
           values={{
             HostRiskScoreDocumentationLink: (
-              <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
-                <FormattedMessage
-                  id="xpack.securitySolution.hosts.hostRiskInformation.link"
-                  defaultMessage="here"
-                />
-              </EuiLink>
+              <RiskScoreDocLink
+                external={false}
+                riskScoreEntity={RiskScoreEntity.host}
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.hosts.hostRiskInformation.link"
+                    defaultMessage="here"
+                  />
+                }
+              />
             ),
           }}
         />

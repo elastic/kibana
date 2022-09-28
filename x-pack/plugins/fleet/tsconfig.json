@@ -6,8 +6,9 @@
     "declaration": true,
     "declarationMap": true,
   },
+  "exclude": ["cypress.config.ts"],
   "include": [
-    // add all the folders containg files to be compiled
+    // add all the folders containing files to be compiled
     ".storybook/**/*",
     "common/**/*",
     "public/**/*",
@@ -15,6 +16,7 @@
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
+    "cypress.config.ts",
     "../../../typings/**/*"
   ],
   "references": [

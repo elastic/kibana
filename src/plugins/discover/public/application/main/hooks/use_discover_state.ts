@@ -15,6 +15,7 @@ import { addLog } from '../../../utils/addLog';
 import { updateSavedSearch } from '../utils/persist_saved_search';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { getDiscoverStateContainer } from '../services/discover_state';
+import { useUrlTracking } from './use_url_tracking';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView } from '../utils/resolve_data_view';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
@@ -22,6 +23,7 @@ import { useSearchSession } from './use_search_session';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { FetchStatus } from '../../types';
+import { useAdHocDataViews } from './use_adhoc_data_views';
 
 export function useDiscoverState({
   services,
@@ -41,6 +43,8 @@ export function useDiscoverState({
   const [savedSearch, setSavedSearch] = useState(rootSavedSearch);
   const dataView = useMemo(() => savedSearch.searchSource.getField('index')!, [savedSearch]);
 
+  const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
+
   const stateContainer = useMemo(
     () =>
       getDiscoverStateContainer({
@@ -55,6 +59,45 @@ export function useDiscoverState({
    * Search session logic
    */
   useSearchSession({ services, stateContainer, savedSearch });
+
+  /**
+   * Function triggered when user changes data view in the sidebar
+   */
+  const onChangeDataView = useCallback(
+    async (id: string) => {
+      addLog('Change data view start', id);
+      const prevAppState = stateContainer.appStateContainer.getState();
+      const prevDataView = await dataViews.get(prevAppState.index!);
+      const nextDataView = await dataViews.get(id);
+      if (nextDataView && prevDataView) {
+        const nextAppState = getDataViewAppState(
+          prevDataView,
+          nextDataView,
+          prevAppState.columns || [],
+          (prevAppState.sort || []) as SortOrder[],
+          uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+          uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+          prevAppState.query
+        );
+        addLog('Change data view next app state', nextAppState);
+        stateContainer.setAppState(nextAppState);
+        setUrlTracking(nextDataView);
+      }
+      setExpandedDoc(undefined);
+    },
+    [stateContainer, dataViews, setExpandedDoc, uiSettings, setUrlTracking]
+  );
+
+  /**
+   * Adhoc data views functionality
+   */
+  const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
+    dataView,
+    dataViews,
+    stateContainer,
+    savedSearch,
+    onChangeDataView,
+  });
 
   /**
    * Data fetching logic
@@ -114,7 +157,7 @@ export function useDiscoverState({
          *  The following line of code catches this, but should be improved
          */
         nextDataView = (
-          await loadDataView(nextState.index, services.dataViews, services.uiSettings)
+          await loadDataView(services.dataViews, services.uiSettings, nextState.index)
         ).loaded;
         stateContainer.dataStateContainer.reset();
         savedSearch.searchSource.setField('index', nextDataView);
@@ -139,33 +182,6 @@ export function useDiscoverState({
     });
     return () => unsubscribe();
   }, [dataView, refetch$, savedSearch, services, stateContainer]);
-
-  /**
-   * Function triggered when user changes data view in the sidebar
-   */
-  const onChangeDataView = useCallback(
-    async (id: string) => {
-      addLog('Change data view start', id);
-      const prevAppState = stateContainer.appStateContainer.getState();
-      const prevDataView = await dataViews.get(prevAppState.index!);
-      const nextDataView = await dataViews.get(id);
-      if (nextDataView && prevDataView) {
-        const nextAppState = getDataViewAppState(
-          prevDataView,
-          nextDataView,
-          prevAppState.columns || [],
-          (prevAppState.sort || []) as SortOrder[],
-          uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
-          uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
-          prevAppState.query
-        );
-        addLog('Change data view next app state', nextAppState);
-        stateContainer.setAppState(nextAppState);
-      }
-      setExpandedDoc(undefined);
-    },
-    [uiSettings, dataViews, setExpandedDoc, stateContainer]
-  );
 
   /**
    * Trigger data fetching on dataView or savedSearch changes
@@ -197,5 +213,8 @@ export function useDiscoverState({
     inspectorAdapters,
     onChangeDataView,
     stateContainer,
+    adHocDataViewList,
+    persistDataView,
+    updateAdHocDataViewId,
   };
 }

@@ -23,4 +23,7 @@ export interface DiscoverLayoutProps {
   setExpandedDoc: (doc?: DataTableRecord) => void;
   savedSearchData$: SavedSearchData;
   stateContainer: DiscoverStateContainer;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  adHocDataViewList: DataView[];
 }

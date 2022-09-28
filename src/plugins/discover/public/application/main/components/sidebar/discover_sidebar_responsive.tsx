@@ -62,7 +62,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
    * Callback function when changing an data view
    */

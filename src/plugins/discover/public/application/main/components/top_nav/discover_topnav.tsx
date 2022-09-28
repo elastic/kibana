@@ -7,7 +7,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -26,6 +26,9 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'naviga
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => void;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  adHocDataViewList: DataView[];
 };
 
 export const DiscoverTopNav = ({
@@ -39,6 +42,9 @@ export const DiscoverTopNav = ({
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
+  persistDataView,
+  updateAdHocDataViewId,
+  adHocDataViewList,
 }: DiscoverTopNavProps) => {
   const savedSearch = stateContainer.savedSearchContainer.savedSearch$.getValue();
 
@@ -104,6 +110,7 @@ export const DiscoverTopNav = ({
                   onChangeDataView(dataViewToSave.id);
                 }
               },
+              allowAdHocDataView: true,
             });
           }
         : undefined,
@@ -120,8 +127,20 @@ export const DiscoverTopNav = ({
         stateContainer,
         onOpenInspector,
         isPlainRecord,
+        persistDataView,
+        updateAdHocDataViewId,
       }),
-    [stateContainer, dataView, navigateTo, savedSearch, services, onOpenInspector, isPlainRecord]
+    [
+      dataView,
+      navigateTo,
+      savedSearch,
+      services,
+      stateContainer,
+      onOpenInspector,
+      isPlainRecord,
+      persistDataView,
+      updateAdHocDataViewId,
+    ]
   );
   const setMenuMountPoint = useMemo(() => {
     return getHeaderActionMenuMounter();
@@ -142,11 +161,12 @@ export const DiscoverTopNav = ({
     onDataViewCreated: createNewDataView,
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
+    adHocDataViews: adHocDataViewList,
   };
 
   const onTextBasedSavedAndExit = useCallback(
-    async ({ onSave, onCancel }) => {
-      await onSaveSearch({
+    ({ onSave, onCancel }) => {
+      onSaveSearch({
         savedSearch,
         services,
         dataView,
@@ -154,9 +174,10 @@ export const DiscoverTopNav = ({
         stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
+        updateAdHocDataViewId,
       });
     },
-    [dataView, navigateTo, savedSearch, services, stateContainer]
+    [dataView, navigateTo, savedSearch, services, stateContainer, updateAdHocDataViewId]
   );
 
   return (

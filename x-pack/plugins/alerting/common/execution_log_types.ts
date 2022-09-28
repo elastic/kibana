@@ -49,6 +49,7 @@ export interface IExecutionLog {
   schedule_delay_ms: number;
   timed_out: boolean;
   rule_id: string;
+  rule_name: string;
 }
 
 export interface IExecutionErrors {

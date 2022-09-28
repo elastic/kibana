@@ -7,16 +7,17 @@
  */
 
 import type { EuiPopoverProps, EuiContextMenuPanelProps } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiPopover, EuiContextMenuPanel, useGeneratedHtmlId } from '@elastic/eui';
 
 import { UserProfilesSelectable, UserProfilesSelectableProps } from './user_profiles_selectable';
+import type { UserProfileWithAvatar } from './user_avatar';
 
 /**
  * Props of {@link UserProfilesPopover} component
  */
-export interface UserProfilesPopoverProps extends EuiPopoverProps {
+export interface UserProfilesPopoverProps<Option extends UserProfileWithAvatar | null>
+  extends EuiPopoverProps {
   /**
    * Title of the popover
    * @see EuiContextMenuPanelProps
@@ -27,17 +28,17 @@ export interface UserProfilesPopoverProps extends EuiPopoverProps {
    * Props forwarded to selectable component
    * @see UserProfilesSelectableProps
    */
-  selectableProps: UserProfilesSelectableProps;
+  selectableProps: UserProfilesSelectableProps<Option>;
 }
 
 /**
  * Renders a selectable component inside a popover given a list of user profiles
  */
-export const UserProfilesPopover: FunctionComponent<UserProfilesPopoverProps> = ({
+export const UserProfilesPopover = <Option extends UserProfileWithAvatar | null>({
   title,
   selectableProps,
   ...popoverProps
-}) => {
+}: UserProfilesPopoverProps<Option>) => {
   const searchInputId = useGeneratedHtmlId({
     prefix: 'searchInput',
     conditionalId: selectableProps.searchInputId,
