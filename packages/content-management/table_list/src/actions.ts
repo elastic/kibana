@@ -71,7 +71,10 @@ export interface ShowConfirmDeleteItemsModalAction {
 /** Action to update the search bar query text */
 export interface OnSearchQueryChangeAction {
   type: 'onSearchQueryChange';
-  data: string;
+  data: {
+    query: Query | null;
+    text: string;
+  };
 }
 
 export type Action<T> =

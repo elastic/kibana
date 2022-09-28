@@ -16,6 +16,7 @@ import {
   PropertySort,
   SearchFilterConfig,
   Direction,
+  Query,
 } from '@elastic/eui';
 
 import { useServices } from '../services';
@@ -97,6 +98,14 @@ export function Table<T extends UserContentCommonSchema>({
       }
     : undefined;
 
+  const onSearchQueryChange = useCallback(
+    (arg: { query: Query | null; queryText: string }) => {
+      const { queryText, query } = arg;
+      dispatch({ type: 'onSearchQueryChange', data: { query, text: queryText } });
+    },
+    [dispatch]
+  );
+
   const searchFilters = useMemo(() => {
     const tableSortSelectFilter: SearchFilterConfig = {
       type: 'custom_component',
@@ -118,17 +127,16 @@ export function Table<T extends UserContentCommonSchema>({
 
   const search = useMemo(() => {
     return {
-      onChange: ({ queryText }: { queryText: string }) =>
-        dispatch({ type: 'onSearchQueryChange', data: queryText }),
+      onChange: onSearchQueryChange,
       toolsLeft: renderToolsLeft(),
-      defaultQuery: searchQuery,
+      query: searchQuery.query ?? undefined,
       box: {
         incremental: true,
         'data-test-subj': 'tableListSearchBox',
       },
       filters: searchFilters,
     };
-  }, [dispatch, renderToolsLeft, searchFilters, searchQuery]);
+  }, [onSearchQueryChange, renderToolsLeft, searchFilters, searchQuery.query]);
 
   const noItemsMessage = (
     <FormattedMessage
@@ -148,6 +156,7 @@ export function Table<T extends UserContentCommonSchema>({
       message={noItemsMessage}
       selection={selection}
       search={search}
+      executeQueryOptions={{ disabled: true }}
       sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
       onChange={onTableChange}
       data-test-subj="itemsInMemTable"

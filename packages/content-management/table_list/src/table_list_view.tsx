@@ -18,6 +18,8 @@ import {
   EuiSpacer,
   EuiTableActionsColumnType,
   CriteriaWithPagination,
+  Query,
+  Ast,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +45,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   entityNamePlural: string;
   tableListTitle: string;
   listingLimit: number;
-  initialFilter: string;
+  initialFilter?: string;
   initialPageSize: number;
   emptyPrompt?: JSX.Element;
   /** Add an additional custom column */
@@ -79,7 +81,10 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   isDeletingItems: boolean;
   showDeleteModal: boolean;
   fetchError?: IHttpFetchError<Error>;
-  searchQuery: string;
+  searchQuery: {
+    text: string;
+    query: Query | null;
+  };
   selectedIds: string[];
   totalItems: number;
   hasUpdatedAtMetadata: boolean;
@@ -156,7 +161,9 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     showDeleteModal: false,
     hasUpdatedAtMetadata: false,
     selectedIds: [],
-    searchQuery: initialQuery,
+    searchQuery: Boolean(initialQuery)
+      ? { text: initialQuery!, query: null }
+      : { text: '', query: null },
     pagination: {
       pageIndex: 0,
       totalItemCount: 0,
@@ -188,6 +195,10 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
+  const initializeQuery = useCallback(() => {
+    const ast = Ast.create([]);
+    return new Query(ast, undefined, searchQuery.text);
+  }, [searchQuery]);
   const tableColumns = useMemo(() => {
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
@@ -203,7 +214,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
               item={record}
               getDetailViewLink={getDetailViewLink}
               onClickTitle={onClickTitle}
-              searchTerm={searchQuery}
+              onClickTag={(tag) => {
+              searchTerm={searchQuery.text}
             />
           );
         },
@@ -270,7 +282,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     id,
     getDetailViewLink,
     onClickTitle,
-    searchQuery,
+    searchQuery.text,
     DateFormatterComp,
   ]);
 
