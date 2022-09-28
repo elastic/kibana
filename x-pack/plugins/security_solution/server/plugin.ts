@@ -307,7 +307,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       NEW_TERMS_RULE_TYPE_ID,
     ];
 
-    plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
+    plugins.features.registerKibanaFeature(
+      getKibanaPrivilegesFeaturePrivileges(ruleTypes, experimentalFeatures)
+    );
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     if (plugins.alerting != null) {
@@ -471,6 +473,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
+      experimentalFeatures: config.experimentalFeatures,
     });
 
     this.telemetryReceiver.start(

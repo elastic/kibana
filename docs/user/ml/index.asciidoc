@@ -94,16 +94,16 @@ If you have a license that includes the {ml-features}, you can create
 {kib}. For example:
 
 [role="screenshot"]
-image::user/ml/images/outliers.png[{oldetection-cap} results in {kib}]
+image::user/ml/images/classification.png[{classification-cap} results in {kib}]
 
 For more information about the {dfanalytics} feature, see
 {ml-docs}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].
 
 [[xpack-ml-aiops]]
-== AIOps
+== AIOps Labs
 
-AIOps is a part of {ml-app} in {kib} which provides features that use advanced 
-statistical methods to help you interpret your data and its behavior.
+AIOps Labs is a part of {ml-app} in {kib} which provides features that use 
+advanced statistical methods to help you interpret your data and its behavior.
 
 [discrete]
 [[explain-log-rate-spikes]]
@@ -126,12 +126,14 @@ image::user/ml/images/ml-explain-log-rate-before.png[Log event histogram chart]
 
 Select a spike in the log event histogram chart to start the analysis. It 
 identifies statistically significant field-value combinations that contribute to 
-the spike and displays them in a table. The table also shows an indicator of the 
-level of impact and a sparkline showing the shape of the impact in the chart. 
-Hovering over a row displays the impact on the histogram chart in more detail. 
-You can also pin a table row by clicking on it then move the cursor to the 
-histogram chart. It displays a tooltip with exact count values for the pinned 
-field which enables closer investigation.
+the spike and displays them in a table. You can optionally choose to summarize 
+the results into groups. The table also shows an indicator of the level of 
+impact and a sparkline showing the shape of the impact in the chart. Hovering 
+over a row displays the impact on the histogram chart in more detail. You can 
+inspect a field in **Discover** by selecting this option under the **Actions** 
+column. You can also pin a table row by clicking on it then move the cursor to 
+the histogram chart. It displays a tooltip with exact count values for the 
+pinned field which enables closer investigation.
 
 Brushes in the chart show the baseline time range and the deviation in the 
 analyzed data. You can move the brushes to redefine both the baseline and the 
@@ -139,7 +141,4 @@ deviation and rerun the analysis with the modified values.
 
 [role="screenshot"]
 image::user/ml/images/ml-explain-log-rate.png[Log rate spike explained]
-
-
-
 
