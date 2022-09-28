@@ -42,7 +42,7 @@ import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_ma
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version }) =>
+  ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version, isPreview }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -283,6 +283,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ruleExecutionLogger
             );
 
+            const alertTimestampOverride = isPreview ? startedAt : undefined;
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
             const wrapHits = wrapHitsFactory({
               ignoreFields: [...ignoreFields, ...legacySignalFields],
@@ -290,7 +291,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               completeRule,
               spaceId,
               indicesToQuery: inputIndex,
-              alertTimestampOverride: startedAt,
+              alertTimestampOverride,
             });
 
             const wrapSequences = wrapSequencesFactory({
@@ -300,7 +301,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               completeRule,
               spaceId,
               indicesToQuery: inputIndex,
-              alertTimestampOverride: startedAt,
+              alertTimestampOverride,
             });
 
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({

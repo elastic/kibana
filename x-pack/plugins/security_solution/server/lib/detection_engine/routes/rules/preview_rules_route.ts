@@ -154,6 +154,7 @@ export const previewRulesRoute = async (
           ...securityRuleTypeOptions,
           ruleDataClient: previewRuleDataClient,
           ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
+          isPreview: true,
         });
 
         const runExecutors = async <
