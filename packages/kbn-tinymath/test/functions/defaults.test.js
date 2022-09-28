@@ -28,4 +28,12 @@ describe('Defaults', () => {
   it('arrays with null, number', () => {
     expect(defaults([null, 20, 30, null], 10)).toEqual([10, 20, 30, 10]);
   });
+
+  it('empty array, number', () => {
+    expect(defaults([], 10)).toEqual([]);
+  });
+
+  it('skips number validation', () => {
+    expect(defaults).toHaveProperty('skipNumberValidation', true);
+  });
 });

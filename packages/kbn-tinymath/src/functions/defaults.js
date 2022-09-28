@@ -7,10 +7,10 @@
  */
 
 /**
- * Returns the default provided value when the first value if null. If at least one array of numbers is passed into the function, the function will be applied index-wise to each element.
- * @param {(number|number[])} a a number or an array of numbers
- * @param {(number)} b a number to use as fallback value.
- * @return {(number|number[])} The `a` value if not null, `b` otherwise. Returns an array where each element is default to `b` when null, or kept the original value if `a` is an array.
+ * Returns the default provided value when the first value if null. If at least one array is passed into the function, the function will be applied index-wise to each element.
+ * @param {(any|any[])} a array of any values
+ * @param {(any)} b a value to use as fallback.
+ * @return {(any|any[])} The `a` value if not null, `b` otherwise. Returns an array where each element is default to `b` when null, or kept the original value if `a` is an array.
  *
  * @example
  * defaults(null, 1) // returns 1
