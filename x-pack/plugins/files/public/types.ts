@@ -117,8 +117,10 @@ export interface FilesClient extends GlobalEndpoints {
   /**
    * Get a string for downloading a file that can be passed to a button element's
    * href for download.
+   *
+   * @param args - get download URL args
    */
-  getDownloadHref: (file: FileJSON) => string;
+  getDownloadHref: (args: Pick<FileJSON, 'id' | 'fileKind'>) => string;
   /**
    * Share a file by creating a new file share instance.
    *
