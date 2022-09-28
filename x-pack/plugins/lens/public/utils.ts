@@ -126,7 +126,7 @@ export function getIndexPatternsIds({
   const references: SavedObjectReference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
-    const indexPatternId = datasource.getCurrentIndexPatternId(datasourceStates[id].state);
+    const indexPatternId = datasource.getUsedDataView(datasourceStates[id].state);
     currentIndexPatternId = indexPatternId;
     references.push(...savedObjectReferences);
   });
