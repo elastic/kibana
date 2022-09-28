@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
+import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
-import type { PaletteOutput } from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { LegendSize } from '../../constants';
 
@@ -170,4 +170,51 @@ export interface XYConfiguration {
   valuesInLegend?: boolean;
 }
 
-export type Configuration = XYConfiguration;
+export interface SortingState {
+  columnId: string | undefined;
+  direction: 'asc' | 'desc' | 'none';
+}
+
+export interface PagingState {
+  size: number;
+  enabled: boolean;
+}
+
+export interface ColumnState {
+  columnId: string;
+  summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
+  alignment?: 'left' | 'right' | 'center';
+  collapseFn?: string;
+}
+
+export interface TableVisConfiguration {
+  columns: ColumnState[];
+  layerId: string;
+  layerType: 'data';
+  sorting?: SortingState;
+  rowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  rowHeightLines?: number;
+  headerRowHeightLines?: number;
+  paging?: PagingState;
+}
+
+export interface MetricVisConfiguration {
+  layerId: string;
+  layerType: 'data';
+  metricAccessor?: string;
+  secondaryMetricAccessor?: string;
+  maxAccessor?: string;
+  breakdownByAccessor?: string;
+  // the dimensions can optionally be single numbers
+  // computed by collapsing all rows
+  collapseFn?: string;
+  subtitle?: string;
+  secondaryPrefix?: string;
+  progressDirection?: LayoutDirection;
+  color?: string;
+  palette?: PaletteOutput<CustomPaletteParams>;
+  maxCols?: number;
+}
+
+export type Configuration = XYConfiguration | TableVisConfiguration | MetricVisConfiguration;
