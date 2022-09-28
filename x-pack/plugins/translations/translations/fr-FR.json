@@ -11548,7 +11548,6 @@
     "xpack.enterpriseSearch.content.searchIndex.totalStats.domainCountCardLabel": "Nombre de domaines",
     "xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel": "Type d’ingestion",
     "xpack.enterpriseSearch.content.searchIndices.actions.columnTitle": "Actions",
-    "xpack.enterpriseSearch.content.searchIndices.content.breadcrumb": "Contenu",
     "xpack.enterpriseSearch.content.searchIndices.create.buttonTitle": "Créer un nouvel index",
     "xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle": "Nombre de documents",
     "xpack.enterpriseSearch.content.searchIndices.health.columnTitle": "Intégrité des index",
