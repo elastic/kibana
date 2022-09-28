@@ -351,7 +351,7 @@ describe('LayerPanel', () => {
       ${2}          | ${2}
     `(
       'should not render the required warning when only one group is configured with requiredMinDimensionCount: $minDimensions and $accessors accessors',
-      async ({ minDimensions, accessors, errors }) => {
+      async ({ minDimensions, accessors }) => {
         mockVisualization.getConfiguration.mockReturnValue({
           groups: [
             {
