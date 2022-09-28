@@ -102,9 +102,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickDataTab('metric');
       });
 
-      it('should hide the "Edit Visualization in Lens" menu item', async () => {
+      it('should show the "Edit Visualization in Lens" menu item', async () => {
         const button = await testSubjects.exists('visualizeEditInLensButton');
-        expect(button).to.eql(false);
+        expect(button).to.eql(true);
+      });
+
+      it('should convert to Lens', async () => {
+        const button = await testSubjects.find('visualizeEditInLensButton');
+        await button.click();
+        await lens.waitForVisualization('mtrVis');
+
+        const metricData = await lens.getMetricVisualizationData();
+        expect(metricData[0].title).to.eql('Count of records');
       });
     });
 

@@ -18,6 +18,7 @@ import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { TimelineId } from '../../../../common/types';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
@@ -107,6 +108,9 @@ interface Props {
   truncate?: boolean;
   onFilterAdded?: () => void;
 }
+
+export const disableHoverActions = (timelineId: string | undefined): boolean =>
+  [TimelineId.rulePreview, ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID].includes(timelineId ?? '');
 
 /**
  * Wraps a draggable component to handle registration / unregistration of the
@@ -370,7 +374,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       <WithHoverActions
         alwaysShow={showTopN || hoverActionsOwnFocus}
         closePopOverTrigger={closePopOverTrigger}
-        hoverContent={hoverContent}
+        hoverContent={disableHoverActions(timelineId) ? undefined : hoverContent}
         onCloseRequested={onCloseRequested}
         render={renderContent}
       />
