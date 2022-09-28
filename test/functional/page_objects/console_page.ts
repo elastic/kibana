@@ -15,6 +15,7 @@ export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  private readonly common = this.ctx.getPageObject('common');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -248,5 +249,159 @@ export class ConsolePageObject extends FtrService {
         await this.collapseHelp();
       }
     });
+  }
+
+  public async collapseJsonBlock(blockNumber: number) {
+    const blocks = await this.find.allByCssSelector('.ace_fold-widget');
+
+    if (blocks.length < blockNumber) {
+      throw new Error(`No block with index: ${blockNumber}`);
+    }
+
+    await blocks[blockNumber].click();
+    await this.retry.waitFor('json block to be collapsed', async () => {
+      return blocks[blockNumber].getAttribute('class').then((classes) => {
+        return classes.includes('ace_closed');
+      });
+    });
+  }
+
+  public async expandJsonBlock(blockNumber: number) {
+    const blocks = await this.find.allByCssSelector('.ace_fold-widget');
+
+    if (blocks.length < blockNumber) {
+      throw new Error(`No block with index: ${blockNumber}`);
+    }
+
+    await blocks[blockNumber].click();
+    await this.retry.waitFor('json block to be expanded', async () => {
+      return blocks[blockNumber].getAttribute('class').then((classes) => {
+        return classes.includes('ace_open');
+      });
+    });
+  }
+
+  public async isJsonBlockExpanded(blockNumber: number) {
+    const blocks = await this.find.allByCssSelector('.ace_fold-widget');
+
+    if (blocks.length < blockNumber) {
+      throw new Error(`No block with index: ${blockNumber}`);
+    }
+
+    const classes = await blocks[blockNumber].getAttribute('class');
+    return classes.includes('ace_open');
+  }
+
+  public async selectCurrentRequest() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.clickMouseButton();
+  }
+
+  public async getRequestAtLine(lineNumber: number) {
+    const editor = await this.getEditor();
+    const lines = await editor.findAllByClassName('ace_line_group');
+    if (lines.length < lineNumber) {
+      throw new Error(`No line with index: ${lineNumber}`);
+    }
+
+    const line = lines[lineNumber];
+    const text = await line.getVisibleText();
+
+    return text.trim();
+  }
+
+  public async getCurrentLineNumber() {
+    const editor = await this.getRequestEditor();
+    let line = await editor.findByCssSelector('.ace_active-line');
+
+    await this.retry.try(async () => {
+      const firstInnerHtml = await line.getAttribute('innerHTML');
+      // The line number is not updated immediately after the click, so we need to wait for it.
+      this.common.sleep(500);
+      line = await editor.findByCssSelector('.ace_active-line');
+      const secondInnerHtml = await line.getAttribute('innerHTML');
+      // The line number will change as the user types, but we want to wait until it's stable.
+      return firstInnerHtml === secondInnerHtml;
+    });
+
+    // style attribute looks like this: "top: 0px; height: 18.5px;" height is the line height
+    const styleAttribute = await line.getAttribute('style');
+    const height = parseFloat(styleAttribute.replace(/.*height: ([+-]?\d+(\.\d+)?).*/, '$1'));
+    const top = parseFloat(styleAttribute.replace(/.*top: ([+-]?\d+(\.\d+)?).*/, '$1'));
+    // calculate the line number by dividing the top position by the line height
+    // and adding 1 because line numbers start at 1
+    return Math.ceil(top / height) + 1;
+  }
+
+  public async pressCtrlEnter() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.ENTER,
+    ]);
+  }
+
+  public async pressCtrlI() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'i']);
+  }
+
+  public async pressCtrlUp() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], Key.UP]);
+  }
+
+  public async pressCtrlDown() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.DOWN,
+    ]);
+  }
+
+  public async pressCtrlL() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'l']);
+  }
+
+  public async pressCtrlSlash() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], '/']);
+  }
+
+  public async clickContextMenu() {
+    const contextMenu = await this.testSubjects.find('toggleConsoleMenu');
+    await contextMenu.click();
+  }
+
+  public async isContextMenuOpen() {
+    return await this.testSubjects.exists('consoleMenu');
+  }
+
+  public async isCopyAsCurlButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuCopyAsCurl');
+  }
+
+  public async isOpenDocumentationButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuOpenDocs');
+  }
+
+  public async isAutoIndentButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuAutoIndent');
+  }
+
+  public async clickCopyAsCurlButton() {
+    const button = await this.testSubjects.find('consoleMenuCopyAsCurl');
+    await button.click();
+  }
+
+  public async clickOpenDocumentationButton() {
+    const button = await this.testSubjects.find('consoleMenuOpenDocs');
+    await button.click();
+  }
+
+  public async clickAutoIndentButton() {
+    const button = await this.testSubjects.find('consoleMenuAutoIndent');
+    await button.click();
   }
 }

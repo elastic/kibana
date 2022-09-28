@@ -80,6 +80,7 @@ export async function getTraceSampleIds({
       events,
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query,
       aggs: {
