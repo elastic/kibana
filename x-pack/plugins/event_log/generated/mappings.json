@@ -45,6 +45,7 @@
                             "type": "text"
                         }
                     },
+                    "ignore_above": 1024,
                     "index": false,
                     "type": "keyword"
                 },
@@ -57,10 +58,6 @@
         "event": {
             "properties": {
                 "action": {
-                    "ignore_above": 1024,
-                    "type": "keyword"
-                },
-                "agent_id_status": {
                     "ignore_above": 1024,
                     "type": "keyword"
                 },
@@ -109,6 +106,7 @@
                 },
                 "original": {
                     "doc_values": false,
+                    "ignore_above": 1024,
                     "index": false,
                     "type": "keyword"
                 },
