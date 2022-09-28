@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, get } from 'lodash';
+import { omit } from 'lodash';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
   BrowserFields,
@@ -86,13 +86,6 @@ export const getCustomHeartbeatId = (
   namespace: string
 ) => {
   return `${monitor.id}-${projectId}-${namespace}`;
-};
-
-export const getAPMServiceName = (monitor: ProjectMonitor, defaultValue: string) => {
-  if (monitor.apmServiceName) {
-    return monitor.apmServiceName;
-  }
-  return get(monitor, ConfigKey.APM_SERVICE_NAME) || defaultValue;
 };
 
 export const getMonitorLocations = ({
