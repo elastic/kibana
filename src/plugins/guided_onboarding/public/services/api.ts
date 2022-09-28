@@ -77,7 +77,7 @@ export class ApiService {
    * @param {boolean} panelState boolean to determine whether the dropdown panel should open or not
    * @return {Promise} a promise with the updated guide state
    */
-  public async updateGuide(
+  public async updateGuideState(
     newState: GuideState,
     panelState: boolean
   ): Promise<{ state: GuideState } | undefined> {
@@ -113,7 +113,7 @@ export class ApiService {
     // If we already have the guide state (i.e., user has already started the guide at some point),
     // simply pass it through so they can continue where they left off, and update the guide to active
     if (guide) {
-      return await this.updateGuide(
+      return await this.updateGuideState(
         {
           ...guide,
           isActive: true,
@@ -142,7 +142,7 @@ export class ApiService {
         guideId,
       };
 
-      return await this.updateGuide(updatedGuide, true);
+      return await this.updateGuideState(updatedGuide, true);
     }
   }
 
@@ -167,7 +167,7 @@ export class ApiService {
       status: 'complete',
     };
 
-    return await this.updateGuide(updatedGuide, false);
+    return await this.updateGuideState(updatedGuide, false);
   }
 
   /**
@@ -231,7 +231,7 @@ export class ApiService {
       steps: updatedSteps,
     };
 
-    return await this.updateGuide(currentGuide, false);
+    return await this.updateGuideState(currentGuide, false);
   }
 
   /**
@@ -289,7 +289,7 @@ export class ApiService {
         steps: updatedSteps,
       };
 
-      return await this.updateGuide(currentGuide, true);
+      return await this.updateGuideState(currentGuide, true);
     }
 
     return undefined;

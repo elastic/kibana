@@ -14,11 +14,32 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
 
 import { guidesConfig } from '../../common/guides_config';
+import { GuideState } from '../../common/types';
 import { apiService } from '../services/api';
 import { GuidePanel } from './guide_panel';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 const applicationMock = applicationServiceMock.createStartContract();
+
+const mockActiveSearchGuideState: GuideState = {
+  guideId: 'search',
+  isActive: true,
+  status: 'in_progress',
+  steps: [
+    {
+      id: 'add_data',
+      status: 'active',
+    },
+    {
+      id: 'browse_docs',
+      status: 'inactive',
+    },
+    {
+      id: 'search_experience',
+      status: 'inactive',
+    },
+  ],
+};
 
 const getGuidePanel = () => () => {
   return <GuidePanel application={applicationMock} api={apiService} />;
@@ -32,7 +53,7 @@ describe('GuidePanel', () => {
     httpClient = httpServiceMock.createStartContract({ basePath: '/base/path' });
     // Set default state on initial request (no active guides)
     httpClient.get.mockResolvedValue({
-      state: { activeGuide: 'unset', activeStep: 'unset' },
+      state: [],
     });
     apiService.setup(httpClient);
 
@@ -60,10 +81,7 @@ describe('GuidePanel', () => {
 
     await act(async () => {
       // Enable the "search" guide
-      await apiService.updateGuideState({
-        activeGuide: 'search',
-        activeStep: guidesConfig.search.steps[0].id,
-      });
+      await apiService.updateGuideState(mockActiveSearchGuideState, true);
     });
 
     component.update();

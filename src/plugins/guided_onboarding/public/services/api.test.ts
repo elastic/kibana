@@ -12,13 +12,31 @@ import { firstValueFrom, Subscription } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { guidesConfig } from '../../common/guides_config';
-import { GuidedOnboardingState } from '..';
+import { GuideState } from '../../common/types';
 import { ApiService } from './api';
 
 const searchGuide = 'search';
 const firstStep = guidesConfig[searchGuide].steps[0].id;
-const secondStep = guidesConfig[searchGuide].steps[1].id;
-const lastStep = guidesConfig[searchGuide].steps[2].id;
+
+const mockActiveSearchGuideState: GuideState = {
+  guideId: searchGuide,
+  isActive: true,
+  status: 'in_progress',
+  steps: [
+    {
+      id: 'add_data',
+      status: 'active',
+    },
+    {
+      id: 'browse_docs',
+      status: 'inactive',
+    },
+    {
+      id: 'search_experience',
+      status: 'inactive',
+    },
+  ],
+};
 
 describe('GuidedOnboarding ApiService', () => {
   let httpClient: jest.Mocked<HttpSetup>;
@@ -41,40 +59,59 @@ describe('GuidedOnboarding ApiService', () => {
     jest.restoreAllMocks();
   });
 
-  describe('fetchGuideState$', () => {
+  describe('fetchActiveGuideState$', () => {
     it('sends a request to the get API', () => {
-      subscription = apiService.fetchGuideState$().subscribe();
+      subscription = apiService.fetchActiveGuideState$().subscribe();
       expect(httpClient.get).toHaveBeenCalledTimes(1);
-      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/state`);
+      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        query: { active: true },
+      });
     });
 
     it('broadcasts the updated state', async () => {
-      await apiService.updateGuideState({
-        activeGuide: searchGuide,
-        activeStep: secondStep,
-      });
+      await apiService.activateGuide(searchGuide);
 
-      const state = await firstValueFrom(apiService.fetchGuideState$());
-      expect(state).toEqual({ activeGuide: searchGuide, activeStep: secondStep });
+      const state = await firstValueFrom(apiService.fetchActiveGuideState$());
+      expect(state).toEqual(mockActiveSearchGuideState);
     });
   });
 
   describe('updateGuideState', () => {
     it('sends a request to the put API', async () => {
-      const state = {
-        activeGuide: searchGuide,
-        activeStep: secondStep,
+      const updatedState: GuideState = {
+        ...mockActiveSearchGuideState,
+        steps: [
+          {
+            id: mockActiveSearchGuideState.steps[0].id,
+            status: 'in_progress', // update the first step status
+          },
+          mockActiveSearchGuideState.steps[1],
+          mockActiveSearchGuideState.steps[2],
+        ],
       };
-      await apiService.updateGuideState(state as GuidedOnboardingState);
+      await apiService.updateGuideState(updatedState, false);
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify(state),
+        body: JSON.stringify(updatedState),
       });
     });
   });
 
   describe('isGuideStepActive$', () => {
-    it('returns true if the step is active', async (done) => {
+    it('returns true if the step has been started', async (done) => {
+      const updatedState: GuideState = {
+        ...mockActiveSearchGuideState,
+        steps: [
+          {
+            id: mockActiveSearchGuideState.steps[0].id,
+            status: 'in_progress',
+          },
+          mockActiveSearchGuideState.steps[1],
+          mockActiveSearchGuideState.steps[2],
+        ],
+      };
+      await apiService.updateGuideState(updatedState, false);
+
       subscription = apiService
         .isGuideStepActive$(searchGuide, firstStep)
         .subscribe((isStepActive) => {
@@ -85,8 +122,9 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('returns false if the step is not active', async (done) => {
+      await apiService.updateGuideState(mockActiveSearchGuideState, false);
       subscription = apiService
-        .isGuideStepActive$(searchGuide, secondStep)
+        .isGuideStepActive$(searchGuide, firstStep)
         .subscribe((isStepActive) => {
           if (!isStepActive) {
             done();
@@ -96,39 +134,49 @@ describe('GuidedOnboarding ApiService', () => {
   });
 
   describe('completeGuideStep', () => {
-    it(`completes the step when it's active`, async () => {
+    it(`completes the step when it's in progress`, async () => {
+      const updatedState: GuideState = {
+        ...mockActiveSearchGuideState,
+        steps: [
+          {
+            id: mockActiveSearchGuideState.steps[0].id,
+            status: 'in_progress', // Mark a step as in_progress in order to test the "completeGuideStep" behavior
+          },
+          mockActiveSearchGuideState.steps[1],
+          mockActiveSearchGuideState.steps[2],
+        ],
+      };
+      await apiService.updateGuideState(updatedState, false);
+
       await apiService.completeGuideStep(searchGuide, firstStep);
-      expect(httpClient.put).toHaveBeenCalledTimes(1);
-      // this assertion depends on the guides config, we are checking for the next step
-      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+
+      // Once on update, once on complete
+      expect(httpClient.put).toHaveBeenCalledTimes(2);
+      // Verify the completed step now has a "complete" status, and the subsequent step is "active"
+      expect(httpClient.put).toHaveBeenLastCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
-          activeGuide: searchGuide,
-          activeStep: secondStep,
+          ...updatedState,
+          steps: [
+            {
+              id: mockActiveSearchGuideState.steps[0].id,
+              status: 'complete',
+            },
+            {
+              id: mockActiveSearchGuideState.steps[1].id,
+              status: 'active',
+            },
+            mockActiveSearchGuideState.steps[2],
+          ],
         }),
       });
     });
 
-    it(`completes the guide when the last step is active`, async () => {
-      httpClient.get.mockResolvedValue({
-        // this state depends on the guides config
-        state: { activeGuide: searchGuide, activeStep: lastStep },
-      });
-      apiService.setup(httpClient);
+    it('does nothing if the step is not in progress', async () => {
+      await apiService.updateGuideState(mockActiveSearchGuideState, false);
 
-      await apiService.completeGuideStep(searchGuide, lastStep);
+      await apiService.completeGuideStep(searchGuide, firstStep);
+      // Expect only 1 call for the updateGuideState call
       expect(httpClient.put).toHaveBeenCalledTimes(1);
-      // this assertion depends on the guides config, we are checking for the last step
-      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify({
-          activeGuide: searchGuide,
-          activeStep: 'completed',
-        }),
-      });
-    });
-
-    it(`does nothing if the step is not active`, async () => {
-      await apiService.completeGuideStep(searchGuide, secondStep);
-      expect(httpClient.put).not.toHaveBeenCalled();
     });
   });
 });

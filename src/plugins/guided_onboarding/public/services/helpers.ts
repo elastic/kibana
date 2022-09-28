@@ -15,7 +15,7 @@ export const getGuideConfig = (guideID?: string): GuideConfig | undefined => {
   }
 };
 
-export const getStepIndex = (guideID: string, stepID: string): number => {
+const getStepIndex = (guideID: string, stepID: string): number => {
   const guide = getGuideConfig(guideID);
   if (guide) {
     return guide.steps.findIndex((step: StepConfig) => step.id === stepID);
