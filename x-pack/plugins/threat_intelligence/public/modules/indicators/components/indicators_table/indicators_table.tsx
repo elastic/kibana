@@ -19,14 +19,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { CellActions } from './cell_actions';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
-import { Indicator } from '../../../../../common/types/indicator';
+import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { cellRendererFactory } from './cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
-import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
-import { Pagination } from '../../hooks/use_indicators';
+import { IndicatorsFlyout } from '../flyout';
 import { useToolbarOptions } from './hooks/use_toolbar_options';
-import { useColumnSettings } from './hooks/use_column_settings';
+import { ColumnSettingsValue } from './hooks/use_column_settings';
+import { useFieldTypes } from '../../../../hooks/use_field_types';
+import { getFieldSchema } from '../../utils/get_field_schema';
+import { Pagination } from '../../services/fetch_indicators';
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];
@@ -34,9 +36,13 @@ export interface IndicatorsTableProps {
   pagination: Pagination;
   onChangeItemsPerPage: (value: number) => void;
   onChangePage: (value: number) => void;
-  loading: boolean;
+  /**
+   * If true, no data is available yet
+   */
+  isLoading: boolean;
   indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
+  columnSettings: ColumnSettingsValue;
 }
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
@@ -54,10 +60,13 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangePage,
   onChangeItemsPerPage,
   pagination,
-  loading,
+  isLoading,
   browserFields,
+  columnSettings: { columns, columnVisibility, handleResetColumns, handleToggleColumn, sorting },
 }) => {
   const [expanded, setExpanded] = useState<Indicator>();
+
+  const fieldTypes = useFieldTypes();
 
   const renderCellValue = useMemo(
     () => cellRendererFactory(pagination.pageIndex * pagination.pageSize),
@@ -89,24 +98,28 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     [renderCellValue]
   );
 
-  const { columns, columnVisibility, handleResetColumns, handleToggleColumn } = useColumnSettings();
-
-  useMemo(() => {
-    columns.forEach(
-      (col: EuiDataGridColumn) =>
-        (col.cellActions = [
-          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => (
-            <CellActions
-              rowIndex={rowIndex}
-              columnId={columnId}
-              Component={Component}
-              indicators={indicators}
-              pagination={pagination}
-            />
-          ),
-        ])
-    );
-  }, [columns, indicators, pagination]);
+  const mappedColumns = useMemo(
+    () =>
+      columns.map((col: EuiDataGridColumn) => {
+        return {
+          ...col,
+          isSortable: col.id !== RawIndicatorFieldId.Id && browserFields[col.id]?.aggregatable,
+          schema: getFieldSchema(fieldTypes[col.id]),
+          cellActions: [
+            ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => (
+              <CellActions
+                rowIndex={rowIndex}
+                columnId={columnId}
+                Component={Component}
+                indicators={indicators}
+                pagination={pagination}
+              />
+            ),
+          ],
+        };
+      }),
+    [browserFields, columns, fieldTypes, indicators, pagination]
+  );
 
   const toolbarOptions = useToolbarOptions({
     browserFields,
@@ -127,7 +140,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   );
 
   const gridFragment = useMemo(() => {
-    if (loading) {
+    if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
@@ -147,8 +160,6 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
       <EuiDataGrid
         aria-labelledby="indicators-table"
         leadingControlColumns={leadingControlColumns}
-        columns={columns}
-        columnVisibility={columnVisibility}
         rowCount={indicatorCount}
         renderCellValue={renderCellValue}
         toolbarVisibility={toolbarOptions}
@@ -159,18 +170,22 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
         }}
         gridStyle={gridStyle}
         data-test-subj={TABLE_TEST_ID}
+        sorting={sorting}
+        columnVisibility={columnVisibility}
+        columns={mappedColumns}
       />
     );
   }, [
     columnVisibility,
-    columns,
+    mappedColumns,
     indicatorCount,
     leadingControlColumns,
-    loading,
+    isLoading,
     onChangeItemsPerPage,
     onChangePage,
     pagination,
     renderCellValue,
+    sorting,
     toolbarOptions,
   ]);
 

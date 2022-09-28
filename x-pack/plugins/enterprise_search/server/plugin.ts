@@ -31,6 +31,7 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
+  ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
 } from '../common/constants';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -222,6 +223,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       logIndices: {
         type: 'index_name',
         indexName: 'logs-enterprise_search*',
+      },
+    });
+
+    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
+      name: 'Enterprise Search Behaviorial Analytics Logs',
+      logIndices: {
+        type: 'index_name',
+        indexName: 'logs-elastic_analytics.events-*',
       },
     });
   }

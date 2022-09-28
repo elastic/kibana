@@ -13,6 +13,7 @@ import {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   MonitorFields,
@@ -20,7 +21,6 @@ import {
   SyntheticsMonitorWithSecrets,
   SyntheticsMonitor,
   ConfigKey,
-  FormMonitorType,
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
@@ -58,6 +58,8 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
+
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
 
     try {
       const previousMonitor: SavedObject<EncryptedSyntheticsMonitor> = await savedObjectsClient.get(
@@ -102,6 +104,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         request,
         normalizedMonitor: editedMonitor,
         monitorWithRevision: formattedMonitor,
+        spaceId,
       });
 
       // Return service sync errors in OK response
@@ -132,6 +135,7 @@ export const syncEditedMonitor = async ({
   syntheticsMonitorClient,
   savedObjectsClient,
   request,
+  spaceId,
 }: {
   normalizedMonitor: SyntheticsMonitor;
   monitorWithRevision: SyntheticsMonitorWithSecrets;
@@ -141,22 +145,23 @@ export const syncEditedMonitor = async ({
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
+  spaceId: string;
 }) => {
   try {
     const editedSOPromise = savedObjectsClient.update<MonitorFields>(
       syntheticsMonitorType,
       previousMonitor.id,
-      monitorWithRevision.type === 'browser' &&
-        monitorWithRevision[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE
-        ? { ...monitorWithRevision, urls: '' }
-        : monitorWithRevision
+      monitorWithRevision
     );
 
-    const editSyncPromise = syntheticsMonitorClient.editMonitor(
-      normalizedMonitor as MonitorFields,
-      previousMonitor.id,
+    const allPrivateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
+
+    const editSyncPromise = syntheticsMonitorClient.editMonitors(
+      [{ monitor: normalizedMonitor as MonitorFields, id: previousMonitor.id, previousMonitor }],
       request,
-      savedObjectsClient
+      savedObjectsClient,
+      allPrivateLocations,
+      spaceId
     );
 
     const [editedMonitorSavedObject, errors] = await Promise.all([

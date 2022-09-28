@@ -63,20 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('settings should allow changing the text size', async () => {
-      await PageObjects.console.setFontSizeSetting(20);
-      await retry.try(async () => {
-        // the settings are not applied synchronously, so we retry for a time
-        expect(await PageObjects.console.getRequestFontSize()).to.be('20px');
-      });
-
-      await PageObjects.console.setFontSizeSetting(24);
-      await retry.try(async () => {
-        // the settings are not applied synchronously, so we retry for a time
-        expect(await PageObjects.console.getRequestFontSize()).to.be('24px');
-      });
-    });
-
     it('should resize the editor', async () => {
       const editor = await PageObjects.console.getEditor();
       await browser.setWindowSize(1300, 1100);
@@ -144,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('multiple requests output', () => {
+    describe('multiple requests output', function () {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
           await PageObjects.console.enterRequest(request);

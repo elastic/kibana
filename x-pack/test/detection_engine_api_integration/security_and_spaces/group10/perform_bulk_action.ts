@@ -18,7 +18,7 @@ import {
   BulkAction,
   BulkActionEditType,
 } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
+import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -375,7 +375,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(rulesResponse.total).to.eql(2);
 
-      rulesResponse.data.forEach((rule: RulesSchema) => {
+      rulesResponse.data.forEach((rule: FullResponseSchema) => {
         expect(rule.actions).to.eql([
           {
             action_type_id: '.slack',
@@ -1050,6 +1050,10 @@ export default ({ getService }: FtrProviderContext): void => {
             type: BulkActionEditType.set_timeline,
             value: { timeline_id: 'mock-id', timeline_title: 'mock-title' },
           },
+          {
+            type: BulkActionEditType.set_schedule,
+            value: { interval: '1m', lookback: '1m' },
+          },
         ];
         cases.forEach(({ type, value }) => {
           it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
@@ -1509,10 +1513,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('throttle', () => {
+          // For bulk editing of rule actions, NOTIFICATION_THROTTLE_NO_ACTIONS
+          // is not available as payload, because "Perform No Actions" is not a valid option
           const casesForEmptyActions = [
-            {
-              payloadThrottle: NOTIFICATION_THROTTLE_NO_ACTIONS,
-            },
             {
               payloadThrottle: NOTIFICATION_THROTTLE_RULE,
             },
@@ -1557,10 +1560,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const casesForNonEmptyActions = [
-            {
-              payloadThrottle: NOTIFICATION_THROTTLE_NO_ACTIONS,
-              expectedThrottle: NOTIFICATION_THROTTLE_NO_ACTIONS,
-            },
             {
               payloadThrottle: NOTIFICATION_THROTTLE_RULE,
               expectedThrottle: NOTIFICATION_THROTTLE_RULE,
@@ -1612,12 +1611,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('notifyWhen', () => {
+          // For bulk editing of rule actions, NOTIFICATION_THROTTLE_NO_ACTIONS
+          // is not available as payload, because "Perform No Actions" is not a valid option
           const cases = [
-            {
-              payload: { throttle: NOTIFICATION_THROTTLE_NO_ACTIONS },
-              // keeps existing default value which is onActiveAlert
-              expected: { notifyWhen: 'onActiveAlert' },
-            },
             {
               payload: { throttle: '1d' },
               expected: { notifyWhen: 'onThrottleInterval' },
@@ -1653,6 +1649,71 @@ export default ({ getService }: FtrProviderContext): void => {
               expect(rule.notify_when).to.eql(expected.notifyWhen);
             });
           });
+        });
+      });
+
+      describe('schedule actions', () => {
+        it('should return bad request error if payload is invalid', async () => {
+          const ruleId = 'ruleId';
+          const intervalMinutes = 0;
+          const interval = `${intervalMinutes}m`;
+          const lookbackMinutes = -1;
+          const lookback = `${lookbackMinutes}m`;
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_schedule,
+                  value: {
+                    interval,
+                    lookback,
+                  },
+                },
+              ],
+            })
+            .expect(400);
+
+          expect(body.statusCode).to.eql(400);
+          expect(body.error).to.eql('Bad Request');
+          expect(body.message).to.contain('Invalid value "0m" supplied to "edit,value,interval"');
+          expect(body.message).to.contain('Invalid value "-1m" supplied to "edit,value,lookback"');
+        });
+
+        it('should update schedule values in rules with a valid payload', async () => {
+          const ruleId = 'ruleId';
+          const intervalMinutes = 15;
+          const interval = `${intervalMinutes}m`;
+          const lookbackMinutes = 10;
+          const lookback = `${lookbackMinutes}m`;
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_schedule,
+                  value: {
+                    interval,
+                    lookback,
+                  },
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+          expect(body.attributes.results.updated[0].interval).to.eql(interval);
+          expect(body.attributes.results.updated[0].meta).to.eql({ from: `${lookbackMinutes}m` });
+          expect(body.attributes.results.updated[0].from).to.eql(
+            `now-${(intervalMinutes + lookbackMinutes) * 60}s`
+          );
         });
       });
     });
@@ -1766,6 +1827,42 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(setIndexRule.index).to.eql(['initial-index-*']);
         expect(setIndexRule.data_view_id).to.eql(undefined);
+      });
+
+      it('should return error when set an empty index pattern to a rule and overwrite the data view when overwrite_data_views is true', async () => {
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        const rule = await createRule(supertest, log, simpleRule);
+
+        const { body } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_index_patterns,
+                value: [],
+                overwrite_data_views: true,
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0]).to.eql({
+          message: "Mutated params invalid: Index patterns can't be empty",
+          status_code: 500,
+          rules: [
+            {
+              id: rule.id,
+              name: rule.name,
+            },
+          ],
+        });
       });
 
       it('should NOT set an index pattern to a rule and overwrite the data view when overwrite_data_views is false', async () => {

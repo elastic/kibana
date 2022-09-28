@@ -71,7 +71,7 @@ export const convertToBuildEsQuery = ({
   filters,
 }: {
   config: EsQueryConfig;
-  indexPattern: DataViewBase;
+  indexPattern: DataViewBase | undefined;
   queries: Query[];
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {

@@ -66,6 +66,7 @@ import {
   getTSDBRollupWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
+  cloneLayer,
 } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
@@ -189,6 +190,20 @@ export function getIndexPatternDatasource({
       };
     },
 
+    createEmptyLayer(indexPatternId: string) {
+      return {
+        currentIndexPatternId: indexPatternId,
+        layers: {},
+      };
+    },
+
+    cloneLayer(state, layerId, newLayerId, getNewId) {
+      return {
+        ...state,
+        layers: cloneLayer(state.layers, layerId, newLayerId, getNewId),
+      };
+    },
+
     removeLayer(state: IndexPatternPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
@@ -210,7 +225,7 @@ export function getIndexPatternDatasource({
     },
 
     getLayers(state: IndexPatternPrivateState) {
-      return Object.keys(state.layers);
+      return Object.keys(state?.layers);
     },
 
     removeColumn({ prevState, layerId, columnId, indexPatterns }) {
@@ -266,6 +281,7 @@ export function getIndexPatternDatasource({
                 dataViews,
                 fieldFormats,
                 charts,
+                unifiedSearch,
               }}
             >
               <IndexPatternDataPanel
@@ -305,7 +321,6 @@ export function getIndexPatternDatasource({
         counts[uniqueLabel] = 0;
         return uniqueLabel;
       };
-
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
@@ -342,6 +357,7 @@ export function getIndexPatternDatasource({
                 fieldFormats,
                 savedObjects: core.savedObjects,
                 docLinks: core.docLinks,
+                unifiedSearch,
               }}
             >
               <IndexPatternDimensionTrigger
@@ -374,6 +390,7 @@ export function getIndexPatternDatasource({
                 savedObjects: core.savedObjects,
                 docLinks: core.docLinks,
                 http: core.http,
+                unifiedSearch,
               }}
             >
               <IndexPatternDimensionEditor
@@ -426,11 +443,16 @@ export function getIndexPatternDatasource({
     getDropProps,
     onDrop,
 
-    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, dragging: DraggingIdentifier) => {
+    getCustomWorkspaceRenderer: (
+      state: IndexPatternPrivateState,
+      dragging: DraggingIdentifier,
+      indexPatterns: Record<string, IndexPattern>
+    ) => {
       if (dragging.field === undefined || dragging.indexPatternId === undefined) {
         return undefined;
       }
 
+      const indexPattern = indexPatterns[dragging.indexPatternId as string];
       const draggedField = dragging as DraggingIdentifier & {
         field: IndexPatternField;
         indexPatternId: string;
@@ -446,7 +468,7 @@ export function getIndexPatternDatasource({
               <GeoFieldWorkspacePanel
                 uiActions={uiActions}
                 fieldType={geoFieldType}
-                indexPatternId={draggedField.indexPatternId}
+                indexPattern={indexPattern}
                 fieldName={draggedField.field.name}
               />
             );
@@ -484,7 +506,7 @@ export function getIndexPatternDatasource({
         filter: false,
       };
       const operations = flatten(
-        Object.values(state.layers ?? {}).map((l) =>
+        Object.values(state?.layers ?? {}).map((l) =>
           Object.values(l.columns).map((c) => {
             if (c.timeShift) {
               additionalEvents.time_shift = true;
@@ -552,6 +574,7 @@ export function getIndexPatternDatasource({
             fields: [...new Set(fieldsPerColumn[colId] || [])],
           }));
         },
+        isTextBasedLanguage: () => false,
         getOperationForColumnId: (columnId: string) => {
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {

@@ -19,8 +19,6 @@ import {
   deleteSignalsIndex,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
-  getSimpleRuleOutputWithoutRuleId,
-  removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleUpdate,
   createRule,
   getSimpleRule,
@@ -152,12 +150,12 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
         updatedRule1.actions = [action1];
-        updatedRule1.throttle = '1m';
+        updatedRule1.throttle = '1d';
 
         const updatedRule2 = getSimpleRuleUpdate('rule-2');
         updatedRule2.name = 'some other name';
         updatedRule2.actions = [action1];
-        updatedRule2.throttle = '1m';
+        updatedRule2.throttle = '1d';
 
         // update both rule names
         const { body }: { body: FullResponseSchema[] } = await supertest
@@ -181,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           ];
-          outputRule.throttle = '1m';
+          outputRule.throttle = '1d';
           const bodyToCompare = removeServerGeneratedProperties(response);
           expect(bodyToCompare).to.eql(outputRule);
         });
@@ -282,16 +280,16 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
-        const outputRule1 = getSimpleRuleOutputWithoutRuleId('rule-1');
+        const outputRule1 = getSimpleRuleOutput('rule-1');
         outputRule1.name = 'some other name';
         outputRule1.version = 2;
 
-        const outputRule2 = getSimpleRuleOutputWithoutRuleId('rule-2');
+        const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
         outputRule2.version = 2;
 
-        const bodyToCompare1 = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        const bodyToCompare2 = removeServerGeneratedPropertiesIncludingRuleId(body[1]);
+        const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
+        const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
         expect(bodyToCompare1).to.eql(outputRule1);
         expect(bodyToCompare2).to.eql(outputRule2);
       });

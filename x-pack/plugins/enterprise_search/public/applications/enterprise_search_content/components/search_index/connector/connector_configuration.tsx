@@ -43,6 +43,8 @@ import { SearchIndexTabId } from '../search_index';
 
 import { ApiKeyConfig } from './api_key_configuration';
 import { ConnectorConfigurationConfig } from './connector_configuration_config';
+import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
+import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
@@ -51,6 +53,10 @@ export const ConnectorConfiguration: React.FC = () => {
   const { recheckIndex } = useActions(IndexViewLogic);
   if (!isConnectorIndex(indexData)) {
     return <></>;
+  }
+
+  if (indexData.connector.is_native && indexData.connector.service_type) {
+    return <NativeConnectorConfiguration />;
   }
 
   const hasApiKey = !!(indexData.connector.api_key_id ?? apiKeyData);
@@ -75,6 +81,17 @@ export const ConnectorConfiguration: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.generateApiKey.title',
                     {
                       defaultMessage: 'Generate an API key',
+                    }
+                  ),
+                  titleSize: 'xs',
+                },
+                {
+                  children: <ConnectorNameAndDescription />,
+                  status: indexData.connector.description ? 'complete' : 'incomplete',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.nameAndDescriptionTitle',
+                    {
+                      defaultMessage: 'Name and description',
                     }
                   ),
                   titleSize: 'xs',

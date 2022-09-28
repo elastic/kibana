@@ -17,6 +17,7 @@ type ArchiveName =
   | 'apm_8.0.0'
   | '8.0.0'
   | 'metrics_8.0.0'
+  | 'infra_metrics_and_apm'
   | 'ml_8.0.0'
   | 'observability_overview'
   | 'rum_8.0.0'

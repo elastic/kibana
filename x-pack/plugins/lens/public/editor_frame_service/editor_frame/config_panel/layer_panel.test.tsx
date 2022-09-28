@@ -24,6 +24,16 @@ import { createIndexPatternServiceMock } from '../../../mocks/data_views_service
 
 jest.mock('../../../id_generator');
 
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
+  return {
+    ...original,
+    Storage: class Storage {
+      get = () => ({ skipDeleteModal: true });
+    },
+  };
+});
+
 let container: HTMLDivElement | undefined;
 
 beforeEach(() => {
@@ -90,6 +100,7 @@ describe('LayerPanel', () => {
       framePublicAPI: frame,
       isOnlyLayer: true,
       onRemoveLayer: jest.fn(),
+      onCloneLayer: jest.fn(),
       dispatch: jest.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
@@ -137,8 +148,8 @@ describe('LayerPanel', () => {
     it('should show the reset button when single layer', async () => {
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
-      ).toContain('Reset layer');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
+      ).toContain('Clear layer');
     });
 
     it('should show the delete button when multiple layers', async () => {
@@ -146,7 +157,7 @@ describe('LayerPanel', () => {
         <LayerPanel {...getDefaultProps()} isOnlyLayer={false} />
       );
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
       ).toContain('Delete layer');
     });
 
@@ -155,7 +166,7 @@ describe('LayerPanel', () => {
       delete layerPanelAttributes.activeVisualization.removeLayer;
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
       ).toContain('Reset visualization');
     });
 
@@ -165,12 +176,9 @@ describe('LayerPanel', () => {
         <LayerPanel {...getDefaultProps()} onRemoveLayer={cb} />
       );
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
       expect(cb).toHaveBeenCalled();
     });
   });

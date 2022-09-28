@@ -9,13 +9,17 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { ExplainLogRateSpikesProvider } from './explain_log_rate_spikes';
 import { ExplainLogRateSpikesAnalysisTableProvider } from './explain_log_rate_spikes_analysis_table';
+import { ExplainLogRateSpikesAnalysisGroupsTableProvider } from './explain_log_rate_spikes_analysis_groups_table';
 
 export function AiopsProvider(context: FtrProviderContext) {
   const explainLogRateSpikes = ExplainLogRateSpikesProvider(context);
   const explainLogRateSpikesAnalysisTable = ExplainLogRateSpikesAnalysisTableProvider(context);
+  const explainLogRateSpikesAnalysisGroupsTable =
+    ExplainLogRateSpikesAnalysisGroupsTableProvider(context);
 
   return {
     explainLogRateSpikes,
     explainLogRateSpikesAnalysisTable,
+    explainLogRateSpikesAnalysisGroupsTable,
   };
 }

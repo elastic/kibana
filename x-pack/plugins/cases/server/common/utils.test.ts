@@ -783,6 +783,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": "elastic@elastic.co",
             "full_name": "Elastic",
+            "profile_uid": undefined,
             "username": "elastic",
           },
           "owner": "securitySolution",
@@ -812,6 +813,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": undefined,
             "full_name": undefined,
+            "profile_uid": undefined,
             "username": undefined,
           },
           "owner": "securitySolution",
@@ -844,6 +846,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": null,
             "full_name": null,
+            "profile_uid": undefined,
             "username": null,
           },
           "owner": "securitySolution",

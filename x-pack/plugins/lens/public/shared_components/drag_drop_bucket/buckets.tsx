@@ -25,11 +25,13 @@ export const NewBucketButton = ({
   onClick,
   ['data-test-subj']: dataTestSubj,
   isDisabled,
+  className,
 }: {
   label: string;
   onClick: () => void;
   'data-test-subj'?: string;
   isDisabled?: boolean;
+  className?: string;
 }) => (
   <EuiButtonEmpty
     data-test-subj={dataTestSubj ?? 'lns-newBucket-add'}
@@ -38,6 +40,7 @@ export const NewBucketButton = ({
     onClick={onClick}
     isDisabled={isDisabled}
     flush="left"
+    className={className}
   >
     {label}
   </EuiButtonEmpty>

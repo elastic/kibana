@@ -2538,13 +2538,7 @@
             "text": "DataPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "data",
@@ -2593,13 +2587,7 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/public/plugin.ts",
@@ -2619,13 +2607,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               "DataStartDependencies",
               ", ",
@@ -2659,13 +2641,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   "DataStartDependencies",
                   ", ",
@@ -2710,13 +2686,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", { uiActions, fieldFormats, dataViews, screenshotMode }: ",
               "DataStartDependencies",
               ") => ",
@@ -2740,13 +2710,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/data/public/plugin.ts",
                 "deprecated": false,
@@ -3532,16 +3496,16 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -7336,181 +7300,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.IDataPluginServices",
-        "type": "Interface",
-        "tags": [],
-        "label": "IDataPluginServices",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataPluginApi",
-            "section": "def-public.IDataPluginServices",
-            "text": "IDataPluginServices"
-          },
-          " extends Partial<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
-          ">"
-        ],
-        "path": "src/plugins/data/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IDataPluginServices.appName",
-            "type": "string",
-            "tags": [],
-            "label": "appName",
-            "description": [],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IDataPluginServices.uiSettings",
-            "type": "Object",
-            "tags": [],
-            "label": "uiSettings",
-            "description": [],
-            "signature": [
-              "IUiSettingsClient"
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IDataPluginServices.savedObjects",
-            "type": "Object",
-            "tags": [],
-            "label": "savedObjects",
-            "description": [],
-            "signature": [
-              "SavedObjectsStart"
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IDataPluginServices.notifications",
-            "type": "Object",
-            "tags": [],
-            "label": "notifications",
-            "description": [],
-            "signature": [
-              "NotificationsStart"
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IDataPluginServices.application",
-            "type": "Object",
-            "tags": [],
-            "label": "application",
-            "description": [],
-            "signature": [
-              "ApplicationStart"
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IDataPluginServices.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              "HttpSetup"
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IDataPluginServices.storage",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.IStorageWrapper",
-                "text": "IStorageWrapper"
-              },
-              "<any, void>"
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IDataPluginServices.data",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataPluginApi",
-                "section": "def-public.DataPublicPluginStart",
-                "text": "DataPublicPluginStart"
-              }
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IDataPluginServices.usageCollection",
-            "type": "Object",
-            "tags": [],
-            "label": "usageCollection",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "usageCollection",
-                "scope": "public",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-public.UsageCollectionStart",
-                "text": "UsageCollectionStart"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.IEsSearchRequest",
         "type": "Interface",
         "tags": [],
@@ -7915,6 +7704,24 @@
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ISearchOptions.transport",
+            "type": "Object",
+            "tags": [],
+            "label": "transport",
+            "description": [
+              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
+            ],
+            "signature": [
+              "Omit<",
+              "TransportRequestOptions",
+              ", \"signal\"> | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8234,7 +8041,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "T"
@@ -8769,7 +8576,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ type: ",
+          "{ schema?: string | undefined; type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -8779,7 +8586,7 @@
           },
           "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -9246,6 +9053,102 @@
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.ExpressionFunctionKql",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionFunctionKql",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"kql\", null, Arguments, ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.KibanaQueryOutput",
+            "text": "KibanaQueryOutput"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/data/common/search/expressions/kql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.ExpressionFunctionLucene",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionFunctionLucene",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"lucene\", null, Arguments, ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.KibanaQueryOutput",
+            "text": "KibanaQueryOutput"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/data/common/search/expressions/lucene.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11576,11 +11479,11 @@
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
             },
             {
               "plugin": "stackAlerts",
@@ -11676,7 +11579,15 @@
           "references": [
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/application/actions/export_csv_action.tsx"
+              "path": "src/plugins/dashboard/public/services/data/types.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/data/data_service.ts"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
             },
             {
               "plugin": "stackAlerts",
@@ -15578,7 +15489,7 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  "{ get: { <TDocument = unknown>(this: That, params: ",
+                  "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
                   "GetRequest",
                   " | ",
                   "GetRequest",
@@ -15696,7 +15607,7 @@
                   "default",
                   "; security: ",
                   "default",
-                  "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+                  "; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
                   "<TDocument> | ",
                   "IndexRequest",
@@ -17169,6 +17080,24 @@
                 "text": "DataView"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.ISearchOptions.transport",
+            "type": "Object",
+            "tags": [],
+            "label": "transport",
+            "description": [
+              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
+            ],
+            "signature": [
+              "Omit<",
+              "TransportRequestOptions",
+              ", \"signal\"> | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
@@ -23305,83 +23234,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.FilterValueFormatter",
-        "type": "Interface",
-        "tags": [],
-        "label": "FilterValueFormatter",
-        "description": [],
-        "path": "src/plugins/data/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterValueFormatter.convert",
-            "type": "Function",
-            "tags": [],
-            "label": "convert",
-            "description": [],
-            "signature": [
-              "(value: any) => string"
-            ],
-            "path": "src/plugins/data/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.FilterValueFormatter.convert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/plugins/data/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterValueFormatter.getConverterFor",
-            "type": "Function",
-            "tags": [],
-            "label": "getConverterFor",
-            "description": [],
-            "signature": [
-              "(type: string) => FilterFormatterFunction"
-            ],
-            "path": "src/plugins/data/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.FilterValueFormatter.getConverterFor.$1",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.GetFieldsOptions",
         "type": "Interface",
         "tags": [],
@@ -23826,7 +23678,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "T"

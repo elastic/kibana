@@ -36,12 +36,14 @@ const getLabelTitle = (userAction: UserActionResponse<SeverityUserAction>) => {
 
 export const createSeverityUserActionBuilder: UserActionBuilder = ({
   userAction,
+  userProfiles,
   handleOutlineComment,
 }) => ({
   build: () => {
     const severityUserAction = userAction as UserActionResponse<SeverityUserAction>;
     const label = getLabelTitle(severityUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
+      userProfiles,
       userAction,
       handleOutlineComment,
       label,

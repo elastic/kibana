@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { buildEsQuery, TimeRange } from '@kbn/es-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Subscription } from 'rxjs';
-import {
-  IEsSearchRequest,
-  IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
-  TimeRangeBounds,
-} from '@kbn/data-plugin/common';
+import { TimeRange } from '@kbn/es-query';
+import { useMemo, useState } from 'react';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { useQuery } from '@tanstack/react-query';
+import { useInspector } from '../../../hooks/use_inspector';
 import { useFilters } from '../../query_bar/hooks/use_filters';
-import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { THREAT_QUERY_BASE } from '../../../../common/constants';
-import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
 import { useSourcererDataView } from './use_sourcerer_data_view';
-import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
+import {
+  ChartSeries,
+  createFetchAggregatedIndicators,
+  FetchAggregatedIndicatorsParams,
+} from '../services/fetch_aggregated_indicators';
 
 export interface UseAggregatedIndicatorsParam {
   /**
@@ -54,37 +50,7 @@ export interface UseAggregatedIndicatorsValue {
   selectedField: string;
 }
 
-export interface Aggregation {
-  doc_count: number;
-  key: string;
-  events: {
-    buckets: AggregationValue[];
-  };
-}
-
-export interface AggregationValue {
-  doc_count: number;
-  key: number;
-  key_as_string: string;
-}
-
-export interface ChartSeries {
-  x: string;
-  y: number;
-  g: string;
-}
-
-const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
-export const AGGREGATION_NAME = 'barchartAggregation';
-
-export interface RawAggregatedIndicatorsResponse {
-  aggregations: {
-    [AGGREGATION_NAME]: {
-      buckets: Aggregation[];
-    };
-  };
-}
 
 export const useAggregatedIndicators = ({
   timeRange = DEFAULT_TIME_RANGE,
@@ -97,152 +63,50 @@ export const useAggregatedIndicators = ({
 
   const { selectedPatterns } = useSourcererDataView();
 
-  const searchSubscription$ = useRef(new Subscription());
-  const abortController = useRef(new AbortController());
+  const { inspectorAdapters } = useInspector();
 
-  const [indicators, setIndicators] = useState<ChartSeries[]>([]);
   const [field, setField] = useState<string>(DEFAULT_FIELD);
-
-  const dateRange: TimeRangeBounds = useMemo(
-    () => queryService.timefilter.timefilter.calculateBounds(timeRange),
-    [queryService, timeRange]
-  );
-
   const { filters, filterQuery } = useFilters();
 
-  const loadData = useCallback(async () => {
-    const dateFrom: number = (dateRange.min as moment.Moment).toDate().getTime();
-    const dateTo: number = (dateRange.max as moment.Moment).toDate().getTime();
-    const interval = calculateBarchartColumnTimeInterval(dateFrom, dateTo);
-
-    abortController.current = new AbortController();
-
-    const queryToExecute = buildEsQuery(
-      undefined,
-      [
-        {
-          query: THREAT_QUERY_BASE,
-          language: 'kuery',
-        },
-        {
-          query: filterQuery.query as string,
-          language: 'kuery',
-        },
-      ],
-      [
-        ...filters,
-        {
-          query: {
-            range: {
-              [TIMESTAMP_FIELD]: {
-                gte: timeRange.from,
-                lte: timeRange.to,
-              },
-            },
-          },
-          meta: {},
-        },
-      ]
-    );
-
-    searchSubscription$.current = searchService
-      .search<IEsSearchRequest, IKibanaSearchResponse<RawAggregatedIndicatorsResponse>>(
-        {
-          params: {
-            index: selectedPatterns,
-            body: {
-              aggregations: {
-                [AGGREGATION_NAME]: {
-                  terms: {
-                    field,
-                  },
-                  aggs: {
-                    events: {
-                      date_histogram: {
-                        field: TIMESTAMP_FIELD,
-                        fixed_interval: interval,
-                        min_doc_count: 0,
-                        extended_bounds: {
-                          min: dateFrom,
-                          max: dateTo,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              fields: [TIMESTAMP_FIELD, field], // limit the response to only the fields we need
-              size: 0, // we don't need hits, just aggregations
-              query: queryToExecute,
-              runtime_mappings: {
-                'threat.indicator.name': {
-                  type: 'keyword',
-                  script: {
-                    source: threatIndicatorNamesScript(),
-                  },
-                },
-                'threat.indicator.name_origin': {
-                  type: 'keyword',
-                  script: {
-                    source: threatIndicatorNamesOriginScript(),
-                  },
-                },
-              },
-            },
-          },
-        },
-        {
-          abortSignal: abortController.current.signal,
-        }
-      )
-      .subscribe({
-        next: (response) => {
-          if (isCompleteResponse(response)) {
-            const aggregations: Aggregation[] =
-              response.rawResponse.aggregations[AGGREGATION_NAME]?.buckets;
-            const chartSeries: ChartSeries[] = convertAggregationToChartSeries(aggregations);
-            setIndicators(chartSeries);
-
-            searchSubscription$.current.unsubscribe();
-          } else if (isErrorResponse(response)) {
-            searchSubscription$.current.unsubscribe();
-          }
-        },
-        error: (msg) => {
-          searchService.showError(msg);
-          searchSubscription$.current.unsubscribe();
-        },
-      });
-  }, [
-    dateRange.max,
-    dateRange.min,
-    field,
-    filterQuery,
-    filters,
-    searchService,
-    selectedPatterns,
-    timeRange.from,
-    timeRange.to,
-  ]);
-
-  const onFieldChange = useCallback(
-    async (f: string) => {
-      setField(f);
-      loadData();
-    },
-    [loadData, setField]
+  const aggregatedIndicatorsQuery = useMemo(
+    () =>
+      createFetchAggregatedIndicators({
+        queryService,
+        searchService,
+        inspectorAdapter: inspectorAdapters.requests,
+      }),
+    [inspectorAdapters, queryService, searchService]
   );
 
-  useEffect(() => {
-    loadData();
+  const { data } = useQuery(
+    [
+      'indicatorsBarchart',
+      {
+        filters,
+        field,
+        filterQuery,
+        selectedPatterns,
+        timeRange,
+      },
+    ],
+    ({
+      signal,
+      queryKey: [_key, queryParams],
+    }: {
+      signal?: AbortSignal;
+      queryKey: [string, FetchAggregatedIndicatorsParams];
+    }) => aggregatedIndicatorsQuery(queryParams, signal)
+  );
 
-    return () => abortController.current.abort();
-  }, [loadData]);
+  const dateRange = useMemo(
+    () => queryService.timefilter.timefilter.calculateBounds(timeRange),
+    [queryService.timefilter.timefilter, timeRange]
+  );
 
   return {
     dateRange,
-    indicators,
-    onFieldChange,
+    indicators: data || [],
+    onFieldChange: setField,
     selectedField: field,
   };
 };

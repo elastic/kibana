@@ -28,7 +28,7 @@ interface AnalyticsCollectionIntegrateProps {
 export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrateProps> = ({
   collection,
 }) => {
-  const analyticsDNSUrl = getEnterpriseSearchUrl(`/analytics/${collection.name}`);
+  const analyticsDNSUrl = getEnterpriseSearchUrl(`/analytics/api/collections/${collection.name}`);
   const credentials = [
     {
       title: i18n.translate(
@@ -49,7 +49,7 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
       description: analyticsDNSUrl,
     },
   ];
-  const webclientSrc = getEnterpriseSearchUrl('/analytics.js');
+  const webclientSrc = getEnterpriseSearchUrl('/analytics/client.js');
 
   return (
     <>
@@ -111,9 +111,9 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="js" isCopyable>
-        {`window.elasticAnalytics.trackEvent("ResultClick", {
+        {`window.elasticAnalytics.trackEvent("click", {
   title: "Website Analytics",
-  url: "www.elasitc.co/analytics/website"
+  url: "www.elastic.co/analytics/overview"
 })`}
       </EuiCodeBlock>
     </>

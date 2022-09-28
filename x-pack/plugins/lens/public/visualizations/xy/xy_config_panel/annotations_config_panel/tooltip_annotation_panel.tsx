@@ -7,15 +7,17 @@
 
 import {
   htmlIdGenerator,
-  EuiButton,
   EuiButtonIcon,
   EuiDraggable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPanel,
+  useEuiTheme,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import type { ExistingFieldsMap, IndexPattern } from '../../../../types';
 import {
@@ -58,6 +60,8 @@ export function TooltipSection({
   existingFields,
   invalidFields,
 }: FieldInputsProps) {
+  const { euiTheme } = useEuiTheme();
+  const [isDragging, setIsDragging] = useState(false);
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) => {
       setConfig({
@@ -96,6 +100,7 @@ export function TooltipSection({
 
   const newBucketButton = (
     <NewBucketButton
+      className="lnsConfigPanelAnnotations__addButton"
       data-test-subj={`lnsXY-annotation-tooltip-add_field`}
       onClick={() => {
         handleInputChange([...localValues, { id: generateId(), value: undefined, isNew: true }]);
@@ -110,11 +115,17 @@ export function TooltipSection({
     return (
       <>
         <EuiFlexItem grow={true}>
-          <EuiButton isDisabled fullWidth onClick={() => {}}>
-            {i18n.translate('xpack.lens.xyChart.annotation.tooltip.noFields', {
-              defaultMessage: 'None selected',
-            })}
-          </EuiButton>
+          <EuiPanel
+            color="subdued"
+            paddingSize="s"
+            className="lnsConfigPanelAnnotations__noFieldsPrompt"
+          >
+            <EuiText color="subdued" size="s" textAlign="center">
+              {i18n.translate('xpack.lens.xyChart.annotation.tooltip.noFields', {
+                defaultMessage: 'None selected',
+              })}
+            </EuiText>
+          </EuiPanel>
         </EuiFlexItem>
         {newBucketButton}
       </>
@@ -143,90 +154,107 @@ export function TooltipSection({
     )
     .sort((a, b) => a.label.localeCompare(b.label));
 
+  const isDragDisabled = localValues.length < 2;
+
   return (
     <>
-      <DragDropBuckets
-        onDragEnd={(updatedValues: WrappedValue[]) => {
-          handleInputChange(updatedValues);
+      <div
+        style={{
+          backgroundColor: isDragging ? 'transparent' : euiTheme.colors.lightestShade,
+          borderRadius: euiTheme.border.radius.small,
         }}
-        onDragStart={() => {}}
-        droppableId="ANNOTATION_TOOLTIP_DROPPABLE_AREA"
-        items={localValues}
       >
-        {localValues.map(({ id, value, isNew }, index) => {
-          const fieldIsValid = value ? Boolean(indexPattern.getFieldByName(value)) : true;
-          return (
-            <EuiDraggable
-              style={{ marginBottom: 4 }}
-              spacing="none"
-              index={index}
-              draggableId={value || 'newField'}
-              key={id}
-              disableInteractiveElementBlocking
-            >
-              {(provided) => (
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      size="s"
-                      color="subdued"
-                      type="grab"
-                      title={i18n.translate(
-                        'xpack.lens.xyChart.annotation..tooltip.dragToReorder',
-                        {
-                          defaultMessage: 'Drag to reorder',
-                        }
-                      )}
-                      data-test-subj={`lnsXY-annotation-tooltip-dragToReorder-${index}`}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                    <FieldPicker
-                      selectedOptions={
-                        value
-                          ? [
-                              {
-                                label: value,
-                                value: { type: 'field', field: value },
-                              },
-                            ]
-                          : []
-                      }
-                      options={options}
-                      onChoose={function (choice: FieldOptionValue | undefined): void {
-                        onFieldSelectChange(choice, index);
-                      }}
-                      fieldIsInvalid={!fieldIsValid}
-                      autoFocus={isNew && value == null}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="trash"
-                      color="danger"
-                      aria-label={i18n.translate(
-                        'xpack.lens.indexPattern.terms.deleteButtonAriaLabel',
-                        {
-                          defaultMessage: 'Delete',
-                        }
-                      )}
-                      title={i18n.translate('xpack.lens.indexPattern.terms.deleteButtonLabel', {
-                        defaultMessage: 'Delete',
-                      })}
-                      onClick={() => {
-                        handleInputChange(localValues.filter((_, i) => i !== index));
-                      }}
-                      data-test-subj={`lnsXY-annotation-tooltip-removeField-${index}`}
-                      isDisabled={disableActions && !isNew}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-            </EuiDraggable>
-          );
-        })}
-      </DragDropBuckets>
+        <DragDropBuckets
+          onDragEnd={(updatedValues: WrappedValue[]) => {
+            handleInputChange(updatedValues);
+            setIsDragging(false);
+          }}
+          onDragStart={() => {
+            setIsDragging(true);
+          }}
+          droppableId="ANNOTATION_TOOLTIP_DROPPABLE_AREA"
+          items={localValues}
+          className="lnsConfigPanelAnnotations__droppable"
+        >
+          {localValues.map(({ id, value, isNew }, index) => {
+            const fieldIsValid = value ? Boolean(indexPattern.getFieldByName(value)) : true;
+            return (
+              <EuiDraggable
+                spacing="none"
+                index={index}
+                draggableId={value || 'newField'}
+                key={id}
+                disableInteractiveElementBlocking
+                isDragDisabled={isDragDisabled}
+              >
+                {(provided) => (
+                  <EuiPanel paddingSize="xs" hasShadow={false} color="transparent">
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          size="s"
+                          color={isDragDisabled ? euiTheme.colors.disabled : 'subdued'}
+                          type="grab"
+                          title={i18n.translate(
+                            'xpack.lens.xyChart.annotation..tooltip.dragToReorder',
+                            {
+                              defaultMessage: 'Drag to reorder',
+                            }
+                          )}
+                          data-test-subj={`lnsXY-annotation-tooltip-dragToReorder-${index}`}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+                        <FieldPicker
+                          selectedOptions={
+                            value
+                              ? [
+                                  {
+                                    label: value,
+                                    value: { type: 'field', field: value },
+                                  },
+                                ]
+                              : []
+                          }
+                          options={options}
+                          onChoose={function (choice: FieldOptionValue | undefined): void {
+                            onFieldSelectChange(choice, index);
+                          }}
+                          fieldIsInvalid={!fieldIsValid}
+                          className="lnsConfigPanelAnnotations__fieldPicker"
+                          data-test-subj={`lnsXY-annotation-tooltip-field-picker--${index}`}
+                          autoFocus={isNew && value == null}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="trash"
+                          color="danger"
+                          aria-label={i18n.translate(
+                            'xpack.lens.indexPattern.terms.deleteButtonAriaLabel',
+                            {
+                              defaultMessage: 'Delete',
+                            }
+                          )}
+                          title={i18n.translate('xpack.lens.indexPattern.terms.deleteButtonLabel', {
+                            defaultMessage: 'Delete',
+                          })}
+                          onClick={() => {
+                            handleInputChange(localValues.filter((_, i) => i !== index));
+                          }}
+                          data-test-subj={`lnsXY-annotation-tooltip-removeField-${index}`}
+                          isDisabled={disableActions && !isNew}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                )}
+              </EuiDraggable>
+            );
+          })}
+        </DragDropBuckets>
+      </div>
       {newBucketButton}
     </>
   );

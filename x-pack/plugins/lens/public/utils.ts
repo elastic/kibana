@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { uniq } from 'lodash';
+import { set, uniq, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+import type { Serializable } from '@kbn/utility-types';
 
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
@@ -193,6 +194,46 @@ export function inferTimeField(
       }
     })
     .find(Boolean);
+}
+
+export function renewIDs<T = unknown>(
+  obj: T,
+  forRenewIds: string[],
+  getNewId: (id: string) => string | undefined
+): T {
+  obj = cloneDeep(obj);
+  const recursiveFn = (
+    item: Serializable,
+    parent?: Record<string, Serializable> | Serializable[],
+    key?: string | number
+  ) => {
+    if (typeof item === 'object') {
+      if (Array.isArray(item)) {
+        item.forEach((a, k, ref) => recursiveFn(a, ref, k));
+      } else {
+        if (item) {
+          Object.keys(item).forEach((k) => {
+            let newId = k;
+            if (forRenewIds.includes(k)) {
+              newId = getNewId(k) ?? k;
+              item[newId] = item[k];
+              delete item[k];
+            }
+            recursiveFn(item[newId], item, newId);
+          });
+        }
+      }
+    } else if (
+      parent &&
+      key !== undefined &&
+      typeof item === 'string' &&
+      forRenewIds.includes(item)
+    ) {
+      set(parent, key, getNewId(item) ?? item);
+    }
+  };
+  recursiveFn(obj as unknown as Serializable);
+  return obj;
 }
 
 /**

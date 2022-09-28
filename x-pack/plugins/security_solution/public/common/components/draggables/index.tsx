@@ -207,6 +207,7 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   name,
   color = 'hollow',
   children,
+  timelineId,
   tooltipContent,
   queryValue,
 }) =>
@@ -219,6 +220,7 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
       field={field}
       name={name}
       value={value}
+      timelineId={timelineId}
       tooltipContent={tooltipContent}
       queryValue={queryValue}
     >
