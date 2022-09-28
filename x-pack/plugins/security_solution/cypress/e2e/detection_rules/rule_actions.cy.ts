@@ -76,7 +76,7 @@ describe('Rule actions', () => {
     waitForTheRuleToBeExecuted();
 
     /* Once the action is triggered we wait for the new document to be indexed */
-    waitForNewDocumentToBeIndexed(index, initialNumberofDocuments);
+    waitForNewDocumentToBeIndexed(index, initialNumberOfDocuments);
 
     /* We assert that the new indexed document is the one set on the index action */
     cy.request({
