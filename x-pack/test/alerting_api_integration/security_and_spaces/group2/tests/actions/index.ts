@@ -26,7 +26,6 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/cases/servicenow_sir'));
     loadTestFile(require.resolve('./connector_types/cases/servicenow_itom'));
     loadTestFile(require.resolve('./connector_types/cases/swimlane'));
-    loadTestFile(require.resolve('./connector_types/cases/xmatters'));
     loadTestFile(require.resolve('./connector_types/stack/email'));
     loadTestFile(require.resolve('./connector_types/stack/es_index'));
     loadTestFile(require.resolve('./connector_types/stack/es_index_preconfigured'));
@@ -34,6 +33,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/stack/server_log'));
     loadTestFile(require.resolve('./connector_types/stack/slack'));
     loadTestFile(require.resolve('./connector_types/stack/webhook'));
+    loadTestFile(require.resolve('./connector_types/stack/xmatters'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));
