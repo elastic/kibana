@@ -23,6 +23,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   datastore: 'Datastore',
   elastic_stack: 'Elastic Stack',
   google_cloud: 'Google Cloud',
+  infrastructure: 'Infrastructure',
   kubernetes: 'Kubernetes',
   languages: 'Languages',
   message_queue: 'Message queue',
