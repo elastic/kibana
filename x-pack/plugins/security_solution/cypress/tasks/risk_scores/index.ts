@@ -73,7 +73,7 @@ export const deleteRiskScore = async ({
       ]
     : legacyScriptIds;
 
-  await deleteTransforms(transformIds);
+  deleteTransforms(transformIds);
   deleteRiskScoreIngestPipelines(ingestPipelinesNames);
   deleteStoredScripts(scripts);
   deleteSavedObjects(`${riskScoreEntity}RiskScoreDashboards`, deleteAll);

@@ -75,7 +75,7 @@ export const deleteTransform = (transformId: string) => {
   });
 };
 
-export const deleteTransforms = async (transformIds: string[]) => {
+export const deleteTransforms = (transformIds: string[]) => {
   const deleteSingleTransform = (transformId: string) =>
     getTransformState(transformId)
       .then(({ body: result }) => {
@@ -85,5 +85,5 @@ export const deleteTransforms = async (transformIds: string[]) => {
         deleteTransform(transformId);
       });
 
-  await Promise.all(transformIds.map((transformId) => deleteSingleTransform(transformId)));
+  transformIds.map((transformId) => deleteSingleTransform(transformId));
 };
