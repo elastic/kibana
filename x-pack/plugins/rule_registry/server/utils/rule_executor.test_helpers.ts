@@ -18,6 +18,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { Logger } from '@kbn/logging';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -34,11 +35,13 @@ export const createDefaultAlertExecutorOptions = <
   startedAt = new Date(),
   updatedAt = new Date(),
   shouldWriteAlerts = true,
+  logger,
 }: {
   alertId?: string;
   ruleName?: string;
   params: Params;
   state: State;
+  logger: Logger;
   createdAt?: Date;
   startedAt?: Date;
   updatedAt?: Date;
@@ -83,4 +86,5 @@ export const createDefaultAlertExecutorOptions = <
   previousStartedAt: null,
   namespace: undefined,
   executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
+  logger,
 });
