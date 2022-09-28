@@ -158,6 +158,9 @@ export const goBackToAllRulesTable = () => {
 export const getDetails = (title: string | RegExp) =>
   cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
 
+export const assertDetailsNotExist = (title: string | RegExp) =>
+  cy.get(DETAILS_TITLE).contains(title).should('not.exist');
+
 export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
