@@ -363,7 +363,11 @@ export function getTextBasedLanguagesDatasource({
       const columnExists = props.state.fieldList.some((f) => f.name === selectedField?.fieldName);
 
       render(
-        <EuiButtonEmpty color={columnExists ? 'primary' : 'danger'} onClick={() => {}}>
+        <EuiButtonEmpty
+          color={columnExists ? 'primary' : 'danger'}
+          onClick={() => {}}
+          data-test-subj="lns-dimensionTrigger-textBased"
+        >
           {customLabel ??
             i18n.translate('xpack.lens.textBasedLanguages.missingField', {
               defaultMessage: 'Missing field',
