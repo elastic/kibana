@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-
-const SPACE_1 = {
+export const SPACE_1 = {
   id: 'space_1',
   name: 'Space 1',
   description: 'This is the first test space',
   disabledFeatures: [],
 };
 
-const SPACE_2 = {
+export const SPACE_2 = {
   id: 'space_2',
   name: 'Space 2',
   description: 'This is the second test space',
@@ -64,7 +62,8 @@ const OBJECTS_TO_SHARE: Array<{
   },
 ];
 
-export function getTestDataLoader({ getService }: FtrProviderContext) {
+// @ts-ignore
+export function getTestDataLoader({ getService }) {
   const spacesService = getService('spaces');
   const kbnServer = getService('kibanaServer');
   const supertest = getService('supertest');
@@ -79,21 +78,20 @@ export function getTestDataLoader({ getService }: FtrProviderContext) {
       await Promise.all([spacesService.delete(SPACE_1.id), spacesService.delete(SPACE_2.id)]);
     },
 
-    beforeEach: async () => {
+    beforeEach: async (spaceData: Array<{ spaceName: string | null; dataUrl: string }>) => {
       log.debug('Loading test data for the following spaces: default, space_1 and space_2');
-      await Promise.all([
-        kbnServer.importExport.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/default_space.json'
-        ),
-        kbnServer.importExport.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_1.json',
-          { space: SPACE_1.id }
-        ),
-        kbnServer.importExport.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2.json',
-          { space: SPACE_2.id }
-        ),
-      ]);
+
+      await Promise.all(
+        spaceData.map((spaceDataObj) => {
+          if (spaceDataObj.spaceName) {
+            return kbnServer.importExport.load(spaceDataObj.dataUrl, {
+              space: spaceDataObj.spaceName,
+            });
+          } else {
+            return kbnServer.importExport.load(spaceDataObj.dataUrl);
+          }
+        })
+      );
 
       // Adjust spaces for the imported saved objects.
       for (const { objects, spacesToAdd = [], spacesToRemove = [] } of OBJECTS_TO_SHARE) {
@@ -113,7 +111,7 @@ export function getTestDataLoader({ getService }: FtrProviderContext) {
 
     afterEach: async () => {
       const allSpacesIds = [
-        ...(await spacesService.getAll()).map((space) => space.id),
+        ...(await spacesService.getAll()).map((space: { id: string }) => space.id),
         'non_existent_space',
       ];
       log.debug(`Removing data from the following spaces: ${allSpacesIds.join(', ')}`);

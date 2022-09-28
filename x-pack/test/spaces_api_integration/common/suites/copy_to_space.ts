@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
-import { getTestDataLoader } from '../lib/test_data_loader';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 type TestResponse = Record<string, any>;
@@ -73,6 +73,21 @@ const INITIAL_COUNTS: Record<string, Record<string, number>> = {
 const UUID_PATTERN = new RegExp(
   /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
 );
+
+const SPACE_DATA_TO_LOAD: Array<{ spaceName: string | null; dataUrl: string }> = [
+  {
+    spaceName: null,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/default_space.json',
+  },
+  {
+    spaceName: SPACE_1.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_1.json',
+  },
+  {
+    spaceName: SPACE_2.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2.json',
+  },
+];
 
 const getDestinationWithoutConflicts = () => 'space_2';
 const getDestinationWithConflicts = (originSpaceId?: string) =>
@@ -756,7 +771,10 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
         });
 
         describe('single-namespace types', () => {
-          beforeEach(async () => await testDataLoader.beforeEach());
+          beforeEach(async () => {
+            await testDataLoader.beforeEach(SPACE_DATA_TO_LOAD);
+          });
+
           afterEach(async () => await testDataLoader.afterEach());
 
           const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
@@ -898,7 +916,7 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           const spaces = ['space_2'];
           const includeReferences = false;
           describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-            before(async () => await testDataLoader.beforeEach());
+            before(async () => await testDataLoader.beforeEach(SPACE_DATA_TO_LOAD));
             after(async () => await testDataLoader.afterEach());
 
             const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
