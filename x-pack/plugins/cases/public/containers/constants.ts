@@ -30,6 +30,7 @@ export const casesQueriesKeys = {
   currentUser: () => [...casesQueriesKeys.users, 'current-user'] as const,
   suggestUsers: (params: unknown) => [...casesQueriesKeys.users, 'suggest', params] as const,
   connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
+  license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
 };
 

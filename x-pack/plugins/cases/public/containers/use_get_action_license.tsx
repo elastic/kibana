@@ -18,7 +18,7 @@ const MINIMUM_LICENSE_REQUIRED_CONNECTOR = ConnectorTypes.jira;
 export const useGetActionLicense = () => {
   const toasts = useToasts();
   return useQuery(
-    casesQueriesKeys.connectorTypes(),
+    casesQueriesKeys.license(),
     async () => {
       const abortCtrl = new AbortController();
       const response = await getActionLicense(abortCtrl.signal);
