@@ -273,6 +273,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return state;
     },
 
+    async getJobMemoryStatus(jobId: string): Promise<'hard_limit' | 'soft_limit' | 'ok'> {
+      const jobStats = await this.getADJobStats(jobId);
+
+      expect(jobStats.jobs).to.have.length(
+        1,
+        `Expected job stats to have exactly one job (got '${jobStats.length}')`
+      );
+      return jobStats.jobs[0].model_size_stats.memory_status;
+    },
+
     async getADJobStats(jobId: string): Promise<any> {
       log.debug(`Fetching anomaly detection job stats for job ${jobId}...`);
       const { body: jobStats, status } = await esSupertest.get(
@@ -297,6 +307,27 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           throw new Error(`expected job state to be ${expectedJobState} but got ${state}`);
         }
       });
+    },
+
+    async waitForJobMemoryStatus(
+      jobId: string,
+      expectedMemoryStatus: 'hard_limit' | 'soft_limit' | 'ok',
+      timeout: number = 2 * 60 * 1000
+    ) {
+      await retry.waitForWithTimeout(
+        `job memory status to be ${expectedMemoryStatus}`,
+        timeout,
+        async () => {
+          const memoryStatus = await this.getJobMemoryStatus(jobId);
+          if (memoryStatus === expectedMemoryStatus) {
+            return true;
+          } else {
+            throw new Error(
+              `expected job memory status to be ${expectedMemoryStatus} but got ${memoryStatus}`
+            );
+          }
+        }
+      );
     },
 
     async getDatafeedState(datafeedId: string): Promise<DATAFEED_STATE> {
@@ -576,6 +607,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async hasNotifications(query: object) {
+      const body = await es.search({
+        index: '.ml-notifications*',
+        body: {
+          size: 10000,
+          query,
+        },
+      });
+
+      return body.hits.hits.length > 0;
+    },
+
     async adJobExist(jobId: string) {
       this.validateJobId(jobId);
       try {
@@ -604,6 +647,24 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           return true;
         } else {
           throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
+        }
+      });
+    },
+
+    async waitForJobNotificationsToIndex(jobId: string, timeout: number = 60 * 1000) {
+      await retry.waitForWithTimeout(`Notifications for '${jobId}' to exist`, timeout, async () => {
+        if (
+          await this.hasNotifications({
+            term: {
+              job_id: {
+                value: jobId,
+              },
+            },
+          })
+        ) {
+          return true;
+        } else {
+          throw new Error(`expected '${jobId}' notifications to exist`);
         }
       });
     },

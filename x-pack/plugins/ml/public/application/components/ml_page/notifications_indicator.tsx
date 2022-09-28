@@ -16,7 +16,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { combineLatest, of, timer } from 'rxjs';
-import { catchError, filter, switchMap } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
+import moment from 'moment';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useAsObservable } from '../../hooks';
 import { NotificationsCountResponse } from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
@@ -31,21 +34,26 @@ export const NotificationsIndicator: FC = () => {
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
-  const [lastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
+  const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
+  const [lastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
   const lastCheckedAt$ = useAsObservable(lastCheckedAt);
 
+  /** Holds the value used for the actual request */
+  const [lastCheckRequested, setLastCheckRequested] = useState<number>();
   const [notificationsCounts, setNotificationsCounts] = useState<NotificationsCountResponse>();
 
   useEffect(function startPollingNotifications() {
-    const subscription = combineLatest([
-      lastCheckedAt$.pipe(filter((v): v is number => !!v)),
-      timer(0, NOTIFICATIONS_CHECK_INTERVAL),
-    ])
+    const subscription = combineLatest([lastCheckedAt$, timer(0, NOTIFICATIONS_CHECK_INTERVAL)])
       .pipe(
-        switchMap(([lastChecked]) =>
-          mlApiServices.notifications.countMessages$({ lastCheckedAt: lastChecked })
-        ),
+        switchMap(([lastChecked]) => {
+          const lastCheckedAtQuery = lastChecked ?? moment().subtract(7, 'd').valueOf();
+          setLastCheckRequested(lastCheckedAtQuery);
+          // Use the latest check time or 7 days ago by default.
+          return mlApiServices.notifications.countMessages$({
+            lastCheckedAt: lastCheckedAtQuery,
+          });
+        }),
         catchError((error) => {
           // Fail silently for now
           return of({} as NotificationsCountResponse);
@@ -80,12 +88,22 @@ export const NotificationsIndicator: FC = () => {
             content={
               <FormattedMessage
                 id="xpack.ml.notificationsIndicator.errorsAndWarningLabel"
-                defaultMessage="There {count, plural, one {is # notification} other {are # notifications}} with error or warning level"
-                values={{ count: errorsAndWarningCount }}
+                defaultMessage="There {count, plural, one {is # notification} other {are # notifications}} with error or warning level since {lastCheckedAt}"
+                values={{
+                  count: errorsAndWarningCount,
+                  lastCheckedAt: dateFormatter(lastCheckRequested),
+                }}
               />
             }
           >
-            <EuiNotificationBadge>{errorsAndWarningCount}</EuiNotificationBadge>
+            <EuiNotificationBadge
+              aria-label={i18n.translate('xpack.ml.notificationsIndicator.unreadErrors', {
+                defaultMessage: 'Unread errors or warnings indicator.',
+              })}
+              data-test-subj={'mlNotificationErrorsIndicator'}
+            >
+              {errorsAndWarningCount}
+            </EuiNotificationBadge>
           </EuiToolTip>
         </EuiFlexItem>
       ) : null}
@@ -96,7 +114,8 @@ export const NotificationsIndicator: FC = () => {
             content={
               <FormattedMessage
                 id="xpack.ml.notificationsIndicator.unreadLabel"
-                defaultMessage="You have unread notifications"
+                defaultMessage="You have unread notifications since {lastCheckedAt}"
+                values={{ lastCheckedAt: dateFormatter(lastCheckRequested) }}
               />
             }
           >
@@ -106,6 +125,7 @@ export const NotificationsIndicator: FC = () => {
               aria-label={i18n.translate('xpack.ml.notificationsIndicator.unreadIcon', {
                 defaultMessage: 'Unread notifications indicator.',
               })}
+              data-test-subj={'mlNotificationsIndicator'}
             />
           </EuiToolTip>
         </EuiFlexItem>
