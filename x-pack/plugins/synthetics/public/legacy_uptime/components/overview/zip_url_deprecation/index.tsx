@@ -56,7 +56,7 @@ export const ZipUrlDeprecation = () => {
                     <EuiLink target="_blank" href="" external>
                       <FormattedMessage
                         id="xpack.synthetics.browser.zipUrl.deprecation.link"
-                        defaultMessage="read the documentation"
+                        defaultMessage="Learn more"
                       />
                     </EuiLink>
                   ),
