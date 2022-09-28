@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 
-import { init } from './client_integration/helpers/http_requests';
+import { init } from '../integration_tests/helpers/http_requests';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { Index } from '../common/types';
