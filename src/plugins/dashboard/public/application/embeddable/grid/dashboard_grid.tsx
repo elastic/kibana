@@ -22,9 +22,9 @@ import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container'
 import { GridData } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { DashboardLoadedEventStatus, DashboardPanelState } from '../types';
-import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
+import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
-import { dashboardLoadingErrorStrings } from '../../../dashboard_strings';
+import { dashboardSavedObjectErrorStrings } from '../../../dashboard_strings';
 
 let lastValidGridSize = 0;
 
@@ -153,7 +153,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     } catch (error) {
       console.error(error); // eslint-disable-line no-console
       isLayoutInvalid = true;
-      toasts.addDanger(dashboardLoadingErrorStrings.getDashboardGridError(error.message));
+      toasts.addDanger(dashboardSavedObjectErrorStrings.getDashboardGridError(error.message));
     }
     this.setState({
       layout,

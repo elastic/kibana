@@ -6,27 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { getSampleDashboardInput } from '../test_helpers';
-import { DashboardContainer } from '../embeddable/dashboard_container';
-
-import { FiltersNotificationBadge } from '.';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
 import {
-  ErrorEmbeddable,
-  FilterableEmbeddable,
   IContainer,
+  ErrorEmbeddable,
   isErrorEmbeddable,
+  FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-
 import {
   ContactCardEmbeddable,
-  ContactCardEmbeddableFactory,
+  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+
+import { getSampleDashboardInput } from '../test_helpers';
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import { FiltersNotificationBadge } from './filters_notification_badge';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest

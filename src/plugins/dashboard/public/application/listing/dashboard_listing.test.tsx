@@ -9,19 +9,15 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
-import { SimpleSavedObject } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
 } from '@kbn/content-management-table-list';
+import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardAppServices } from '../../types';
-import { DashboardListing, DashboardListingProps } from './dashboard_listing';
-import { makeDefaultServices } from '../test_helpers';
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 function makeDefaultProps(): DashboardListingProps {
@@ -31,14 +27,7 @@ function makeDefaultProps(): DashboardListingProps {
   };
 }
 
-function mountWith({
-  props: incomingProps,
-  services: incomingServices,
-}: {
-  props?: DashboardListingProps;
-  services?: DashboardAppServices;
-}) {
-  const services = incomingServices ?? makeDefaultServices();
+function mountWith({ props: incomingProps }: { props?: DashboardListingProps }) {
   const props = incomingProps ?? makeDefaultProps();
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
@@ -47,35 +36,32 @@ function mountWith({
 
     return (
       <I18nProvider>
-        {/* Can't get rid of KibanaContextProvider here yet because of 'call to action when no dashboards exist' tests below */}
-        <KibanaContextProvider services={services}>
-          <TableListViewKibanaProvider
-            core={{
-              application:
-                application as unknown as TableListViewKibanaDependencies['core']['application'],
-              notifications,
-            }}
-            savedObjectsTagging={
-              {
-                ui: {
-                  ...savedObjectsTagging,
-                  components: {
-                    TagList: () => null,
-                  },
+        <TableListViewKibanaProvider
+          core={{
+            application:
+              application as unknown as TableListViewKibanaDependencies['core']['application'],
+            notifications,
+          }}
+          savedObjectsTagging={
+            {
+              ui: {
+                ...savedObjectsTagging,
+                components: {
+                  TagList: () => null,
                 },
-              } as unknown as TableListViewKibanaDependencies['savedObjectsTagging']
-            }
-            FormattedRelative={FormattedRelative}
-            toMountPoint={() => () => () => undefined}
-          >
-            {children}
-          </TableListViewKibanaProvider>
-        </KibanaContextProvider>
+              },
+            } as unknown as TableListViewKibanaDependencies['savedObjectsTagging']
+          }
+          FormattedRelative={FormattedRelative}
+          toMountPoint={() => () => () => undefined}
+        >
+          {children}
+        </TableListViewKibanaProvider>
       </I18nProvider>
     );
   };
   const component = mount(<DashboardListing {...props} />, { wrappingComponent });
-  return { component, props, services };
+  return { component, props };
 }
 
 describe('after fetch', () => {
@@ -89,14 +75,14 @@ describe('after fetch', () => {
   });
 
   test('renders call to action when no dashboards exist', async () => {
-    const services = makeDefaultServices();
-    services.savedDashboards.find = () => {
-      return Promise.resolve({
-        total: 0,
-        hits: [],
-      });
-    };
-    const { component } = mountWith({ services });
+    (
+      pluginServices.getServices().dashboardSavedObject.findDashboards.findSavedObjects as jest.Mock
+    ).mockResolvedValue({
+      total: 0,
+      hits: [],
+    });
+
+    const { component } = mountWith({});
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
@@ -105,18 +91,18 @@ describe('after fetch', () => {
   });
 
   test('renders call to action with continue when no dashboards exist but one is in progress', async () => {
-    const services = makeDefaultServices();
-    services.savedDashboards.find = () => {
-      return Promise.resolve({
-        total: 0,
-        hits: [],
-      });
-    };
     pluginServices.getServices().dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = jest
       .fn()
       .mockReturnValueOnce([DASHBOARD_PANELS_UNSAVED_ID])
       .mockReturnValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']);
-    const { component } = mountWith({ services });
+    (
+      pluginServices.getServices().dashboardSavedObject.findDashboards.findSavedObjects as jest.Mock
+    ).mockResolvedValue({
+      total: 0,
+      hits: [],
+    });
+
+    const { component } = mountWith({});
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
@@ -139,17 +125,9 @@ describe('after fetch', () => {
     const title = 'search by title';
     const props = makeDefaultProps();
     props.title = title;
-    pluginServices.getServices().savedObjects.client.find = <T extends unknown>() => {
-      return Promise.resolve({
-        perPage: 10,
-        total: 2,
-        page: 0,
-        savedObjects: [
-          { attributes: { title: `${title}_number1` }, id: 'hello there' } as SimpleSavedObject<T>,
-          { attributes: { title: `${title}_number2` }, id: 'goodbye' } as SimpleSavedObject<T>,
-        ],
-      });
-    };
+    (
+      pluginServices.getServices().dashboardSavedObject.findDashboards.findByTitle as jest.Mock
+    ).mockResolvedValue(undefined);
     const { component } = mountWith({ props });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -163,14 +141,9 @@ describe('after fetch', () => {
     const title = 'search by title';
     const props = makeDefaultProps();
     props.title = title;
-    pluginServices.getServices().savedObjects.client.find = <T extends unknown>() => {
-      return Promise.resolve({
-        perPage: 10,
-        total: 1,
-        page: 0,
-        savedObjects: [{ attributes: { title }, id: 'you_found_me' } as SimpleSavedObject<T>],
-      });
-    };
+    (
+      pluginServices.getServices().dashboardSavedObject.findDashboards.findByTitle as jest.Mock
+    ).mockResolvedValue({ id: 'you_found_me' });
     const { component } = mountWith({ props });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

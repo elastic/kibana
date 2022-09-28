@@ -6,37 +6,21 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { ControlGroupInput } from '@kbn/controls-plugin/public';
-import { type EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  isFilterPinned,
-  TimeRange,
-} from '@kbn/es-query';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { type EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { Filter, isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 
-import type { DashboardSavedObject } from '../../saved_dashboards';
-import { getTagsFromSavedDashboard, migrateAppState } from '.';
-import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
-import type { DashboardState, RawDashboardState, DashboardContainerInput } from '../../types';
-import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
-import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
 import { pluginServices } from '../../services/plugin_services';
-
-interface SavedObjectToDashboardStateProps {
-  savedDashboard: DashboardSavedObject;
-}
+import { convertPanelStateToSavedDashboardPanel } from '../../../common';
+import type { DashboardState, RawDashboardState, DashboardContainerInput } from '../../types';
 
 interface StateToDashboardContainerInputProps {
   searchSessionId?: string;
   isEmbeddedExternally?: boolean;
   dashboardState: DashboardState;
-  savedDashboard: DashboardSavedObject;
   incomingEmbeddable?: EmbeddablePackageState;
   executionContext?: KibanaExecutionContext;
 }
@@ -44,40 +28,6 @@ interface StateToDashboardContainerInputProps {
 interface StateToRawDashboardStateProps {
   state: DashboardState;
 }
-/**
- * Converts a dashboard saved object to a dashboard state by extracting raw state from the given Dashboard
- * Saved Object migrating the panel states to the latest version, then converting each panel from a saved
- * dashboard panel to a panel state.
- */
-export const savedObjectToDashboardState = ({
-  savedDashboard,
-}: SavedObjectToDashboardStateProps): DashboardState => {
-  const {
-    dashboardCapabilities: { showWriteControls },
-  } = pluginServices.getServices();
-
-  const rawState = migrateAppState({
-    fullScreenMode: false,
-    title: savedDashboard.title,
-    query: savedDashboard.getQuery(),
-    filters: savedDashboard.getFilters(),
-    timeRestore: savedDashboard.timeRestore,
-    description: savedDashboard.description || '',
-    tags: getTagsFromSavedDashboard(savedDashboard),
-    panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
-    viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
-    options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
-  });
-
-  if (rawState.timeRestore) {
-    rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
-  }
-
-  rawState.controlGroupInput = deserializeControlGroupFromDashboardSavedObject(
-    savedDashboard
-  ) as ControlGroupInput;
-  return { ...rawState, panels: convertSavedPanelsToPanelMap(rawState.panels) };
-};
 
 /**
  * Converts a dashboard state object to dashboard container input
@@ -85,7 +35,6 @@ export const savedObjectToDashboardState = ({
 export const stateToDashboardContainerInput = ({
   isEmbeddedExternally,
   searchSessionId,
-  savedDashboard,
   dashboardState,
   executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
@@ -111,7 +60,7 @@ export const stateToDashboardContainerInput = ({
     filters: dashboardFilters,
   } = dashboardState;
 
-  const migratedDashboardFilters = mapAndFlattenFilters(_.cloneDeep(dashboardFilters));
+  const migratedDashboardFilters = mapAndFlattenFilters(cloneDeep(dashboardFilters));
   return {
     refreshConfig: timefilter.getRefreshInterval(),
     filters: filterManager
@@ -124,7 +73,7 @@ export const stateToDashboardContainerInput = ({
           )
       ),
     isFullScreenMode: fullScreenMode,
-    id: savedDashboard.id || '',
+    id: dashboardState.savedObjectId ?? '',
     isEmbeddedExternally,
     ...(options || {}),
     controlGroupInput,
@@ -136,7 +85,7 @@ export const stateToDashboardContainerInput = ({
     query,
     title,
     timeRange: {
-      ..._.cloneDeep(timefilter.getTime()),
+      ...cloneDeep(timefilter.getTime()),
     },
     timeslice,
     timeRestore,
@@ -161,5 +110,5 @@ export const stateToRawDashboardState = ({
   const savedDashboardPanels = Object.values(state.panels).map((panel) =>
     convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
   );
-  return { ..._.omit(state, 'panels'), panels: savedDashboardPanels };
+  return { ...omit(state, 'panels'), panels: savedDashboardPanels };
 };

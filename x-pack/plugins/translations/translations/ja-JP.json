@@ -986,7 +986,6 @@
     "dashboard.panel.copyToDashboard.goToDashboard": "コピーしてダッシュボードを開く",
     "dashboard.panel.copyToDashboard.newDashboardOptionLabel": "新規ダッシュボード",
     "dashboard.panel.copyToDashboard.title": "ダッシュボードにコピー",
-    "dashboard.panel.invalidData": "URL の無効なデータ",
     "dashboard.panel.LibraryNotification": "Visualize ライブラリ通知",
     "dashboard.panel.libraryNotification.ariaLabel": "ライブラリ情報を表示し、このパネルのリンクを解除します",
     "dashboard.panel.libraryNotification.toolTip": "このパネルを編集すると、他のダッシュボードに影響する場合があります。このパネルのみを変更するには、ライブラリからリンクを解除します。",

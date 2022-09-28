@@ -9,9 +9,9 @@
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import type { DashboardContainerInput } from '../..';
+import { DashboardContainerInput, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { dashboardExpandPanelAction } from '../../dashboard_strings';
-import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../embeddable';
+import { type DashboardContainer } from '../embeddable';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 

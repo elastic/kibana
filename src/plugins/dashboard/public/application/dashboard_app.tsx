@@ -9,24 +9,23 @@
 import { History } from 'history';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { EmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { EmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
-import { useDashboardSelector } from './state';
-import { useDashboardAppState } from './hooks';
 import {
   dashboardFeatureCatalog,
   getDashboardBreadcrumb,
   getDashboardTitle,
   leaveConfirmStrings,
 } from '../dashboard_strings';
-import { createDashboardEditUrl } from '../dashboard_constants';
-import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
-import { DashboardEmbedSettings, DashboardRedirect } from '../types';
-import { DashboardAppNoDataPage } from './dashboard_app_no_data';
+import { useDashboardAppState } from './hooks';
+import { useDashboardSelector } from './state';
 import { pluginServices } from '../services/plugin_services';
+import { DashboardAppNoDataPage } from './dashboard_app_no_data';
+import { DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
+import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -43,13 +42,12 @@ export function DashboardApp({
   const { onAppLeave } = useDashboardMountContext();
   const {
     chrome: { setBreadcrumbs, setIsVisible },
+    screenshotMode: { isScreenshotMode },
     coreContext: { executionContext },
-    data: { search },
     embeddable: { getStateTransfer },
     notifications: { toasts },
-    screenshotMode: { isScreenshotMode },
     settings: { uiSettings },
-    spaces: { getLegacyUrlConflict },
+    data: { search },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -160,17 +158,7 @@ export function DashboardApp({
             dashboardAppState={dashboardAppState}
           />
 
-          {dashboardAppState.savedDashboard.outcome === 'conflict' &&
-          dashboardAppState.savedDashboard.id &&
-          dashboardAppState.savedDashboard.aliasId
-            ? getLegacyUrlConflict?.({
-                currentObjectId: dashboardAppState.savedDashboard.id,
-                otherObjectId: dashboardAppState.savedDashboard.aliasId,
-                otherObjectPath: `#${createDashboardEditUrl(
-                  dashboardAppState.savedDashboard.aliasId
-                )}${history.location.search}`,
-              })
-            : null}
+          {dashboardAppState.createConflictWarning?.()}
           <div
             className={`dashboardViewport ${
               isScreenshotMode() ? 'dashboardViewport--screenshotMode' : ''

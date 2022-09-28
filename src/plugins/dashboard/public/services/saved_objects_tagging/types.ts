@@ -12,9 +12,10 @@ export interface DashboardSavedObjectsTaggingService {
   hasApi: boolean; // remove this once the entire service is optional
 
   components?: SavedObjectsTaggingApi['ui']['components'];
-  getSearchBarFilter?: SavedObjectsTaggingApi['ui']['getSearchBarFilter'];
-  getTableColumnDefinition?: SavedObjectsTaggingApi['ui']['getTableColumnDefinition'];
   hasTagDecoration?: SavedObjectsTaggingApi['ui']['hasTagDecoration'];
   parseSearchQuery?: SavedObjectsTaggingApi['ui']['parseSearchQuery'];
+  getSearchBarFilter?: SavedObjectsTaggingApi['ui']['getSearchBarFilter'];
+  updateTagsReferences?: SavedObjectsTaggingApi['ui']['updateTagsReferences'];
   getTagIdsFromReferences?: SavedObjectsTaggingApi['ui']['getTagIdsFromReferences'];
+  getTableColumnDefinition?: SavedObjectsTaggingApi['ui']['getTableColumnDefinition'];
 }

@@ -988,7 +988,6 @@
     "dashboard.panel.copyToDashboard.goToDashboard": "Copier et accéder au tableau de bord",
     "dashboard.panel.copyToDashboard.newDashboardOptionLabel": "Nouveau tableau de bord",
     "dashboard.panel.copyToDashboard.title": "Copier dans le tableau de bord",
-    "dashboard.panel.invalidData": "Données non valides dans l'url",
     "dashboard.panel.LibraryNotification": "Notification de la bibliothèque Visualize",
     "dashboard.panel.libraryNotification.ariaLabel": "Afficher les informations de la bibliothèque et dissocier ce panneau",
     "dashboard.panel.libraryNotification.toolTip": "La modification de ce panneau pourrait affecter d’autres tableaux de bord. Pour modifier ce panneau uniquement, dissociez-le de la bibliothèque.",

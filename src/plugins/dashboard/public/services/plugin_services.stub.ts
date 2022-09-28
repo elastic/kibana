@@ -29,7 +29,6 @@ import { initializerContextServiceFactory } from './initializer_context/initiali
 import { navigationServiceFactory } from './navigation/navigation.stub';
 import { notificationsServiceFactory } from './notifications/notifications.stub';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
-import { savedObjectsServiceFactory } from './saved_objects/saved_objects.stub';
 import { savedObjectsTaggingServiceFactory } from './saved_objects_tagging/saved_objects_tagging.stub';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode.stub';
 import { settingsServiceFactory } from './settings/settings.stub';
@@ -38,8 +37,10 @@ import { usageCollectionServiceFactory } from './usage_collection/usage_collecti
 import { spacesServiceFactory } from './spaces/spaces.stub';
 import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub';
 import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
+import { dashboardSavedObjectServiceFactory } from './dashboard_saved_object/dashboard_saved_object.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
+  dashboardSavedObject: new PluginServiceProvider(dashboardSavedObjectServiceFactory),
   analytics: new PluginServiceProvider(analyticsServiceFactory),
   application: new PluginServiceProvider(applicationServiceFactory),
   chrome: new PluginServiceProvider(chromeServiceFactory),
@@ -55,7 +56,6 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   navigation: new PluginServiceProvider(navigationServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
-  savedObjects: new PluginServiceProvider(savedObjectsServiceFactory),
   savedObjectsTagging: new PluginServiceProvider(savedObjectsTaggingServiceFactory),
   screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),

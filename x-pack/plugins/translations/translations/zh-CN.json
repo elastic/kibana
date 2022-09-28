@@ -988,7 +988,6 @@
     "dashboard.panel.copyToDashboard.goToDashboard": "复制并前往仪表板",
     "dashboard.panel.copyToDashboard.newDashboardOptionLabel": "新仪表板",
     "dashboard.panel.copyToDashboard.title": "复制到仪表板",
-    "dashboard.panel.invalidData": "url 中的数据无效",
     "dashboard.panel.LibraryNotification": "可视化库通知",
     "dashboard.panel.libraryNotification.ariaLabel": "查看库信息并取消链接此面板",
     "dashboard.panel.libraryNotification.toolTip": "编辑此面板可能会影响其他仪表板。要仅更改此面板，请取消其与库的链接。",
