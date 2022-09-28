@@ -16,11 +16,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const fieldEditor = getService('fieldEditor');
   const kibanaServer = getService('kibanaServer');
-  const browser = getService('browser');
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
-  const fieldEditor = getService('fieldEditor');
   const PageObjects = getPageObjects([
     'common',
     'unifiedSearch',
@@ -33,22 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const find = getService('find');
   const security = getService('security');
-
-  const getCurrentDataViewId = async () => {
-    const currentUrl = await browser.getCurrentUrl();
-    const [indexSubstring] = currentUrl.match(/index:[^,]*/)!;
-    const dataViewId = indexSubstring.replace('index:', '');
-    return dataViewId;
-  };
-
-  const addRuntimeField = async (name: string, script: string) => {
-    await PageObjects.discover.clickAddField();
-    await fieldEditor.setName(name);
-    await fieldEditor.enableValue();
-    await fieldEditor.typeScript(script);
-    await fieldEditor.save();
-    await PageObjects.header.waitUntilLoadingHasFinished();
-  };
 
   const addSearchToDashboard = async (name: string) => {
     await dashboardAddPanel.addSavedSearch(name);
@@ -114,35 +96,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not update data view id when saving search first time', async () => {
-      const prevDataViewId = await getCurrentDataViewId();
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       await PageObjects.discover.saveSearch('logstash*-ss');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const newDataViewId = await getCurrentDataViewId();
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       expect(prevDataViewId).to.equal(newDataViewId);
     });
 
     it('should update data view id when saving new search copy', async () => {
-      const prevDataViewId = await getCurrentDataViewId();
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       await PageObjects.discover.saveSearch('logstash*-ss-new', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const newDataViewId = await getCurrentDataViewId();
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       expect(prevDataViewId).not.to.equal(newDataViewId);
     });
 
     it('should update data view id when saving data view from hoc one', async () => {
-      const prevDataViewId = await getCurrentDataViewId();
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       await testSubjects.click('discoverAlertsButton');
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const newDataViewId = await getCurrentDataViewId();
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       expect(prevDataViewId).not.to.equal(newDataViewId);
     });
@@ -152,7 +134,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
-      await addRuntimeField('_bytes-runtimefield', `emit(doc["bytes"].value.toString())`);
+      await PageObjects.discover.addRuntimeField(
+        '_bytes-runtimefield',
+        `emit(doc["bytes"].value.toString())`
+      );
       await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
@@ -166,7 +151,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.removeField('_bytes-runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await addRuntimeField('_bytes-runtimefield', `emit((doc["bytes"].value * 2).toString())`);
+      await PageObjects.discover.addRuntimeField(
+        '_bytes-runtimefield',
+        `emit((doc["bytes"].value * 2).toString())`
+      );
       await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
 
       // save second search
