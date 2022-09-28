@@ -130,7 +130,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     tooltip: () => {
       if (isInspectDisabled) {
         return i18n.translate('xpack.graph.topNavMenu.inspectButton.disabledTooltip', {
-          defaultMessage: 'Click Graph to enable Inspect',
+          defaultMessage: 'Perform a search or expand a node to enable Inspect',
         });
       }
     },
