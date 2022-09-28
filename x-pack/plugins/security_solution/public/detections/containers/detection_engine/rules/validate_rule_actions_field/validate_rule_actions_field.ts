@@ -30,7 +30,6 @@ export const validateRuleActionsField =
     ...data: Parameters<ValidationFunc>
   ): Promise<ValidationError<ERROR_CODE> | void | undefined> => {
     const [{ value, path }] = data as [{ value: RuleAction[]; path: string }];
-    console.log('validateRuleActionsField', JSON.stringify(value, null, 2));
     const errors = [];
     for (const actionItem of value) {
       const errorsArray = await validateSingleAction(actionItem, actionTypeRegistry);
