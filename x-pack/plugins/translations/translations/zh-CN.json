@@ -2161,7 +2161,6 @@
     "discover.fieldChooser.searchPlaceHolder": "搜索字段名称",
     "discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel": "隐藏字段筛选设置",
     "discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel": "显示字段筛选设置",
-    "discover.fieldChooser.visualizeButton.label": "Visualize",
     "discover.fieldList.flyoutBackIcon": "返回",
     "discover.fieldList.flyoutHeading": "字段列表",
     "discover.fieldNameDescription.booleanField": "True 和 False 值。",

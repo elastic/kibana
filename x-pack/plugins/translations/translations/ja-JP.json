@@ -2157,7 +2157,6 @@
     "discover.fieldChooser.searchPlaceHolder": "検索フィールド名",
     "discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel": "フィールド設定を非表示",
     "discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel": "フィールド設定を表示",
-    "discover.fieldChooser.visualizeButton.label": "可視化",
     "discover.fieldList.flyoutBackIcon": "戻る",
     "discover.fieldList.flyoutHeading": "フィールドリスト",
     "discover.fieldNameDescription.booleanField": "True および False 値。",

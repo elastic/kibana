@@ -2161,7 +2161,6 @@
     "discover.fieldChooser.searchPlaceHolder": "Rechercher les noms de champs",
     "discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel": "Masquer les paramètres de filtre de champs",
     "discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel": "Afficher les paramètres de filtre de champs",
-    "discover.fieldChooser.visualizeButton.label": "Visualiser",
     "discover.fieldList.flyoutBackIcon": "Retour",
     "discover.fieldList.flyoutHeading": "Liste des champs",
     "discover.fieldNameDescription.booleanField": "Valeurs vraies ou fausses.",
