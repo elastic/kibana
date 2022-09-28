@@ -128,6 +128,7 @@ export class ConsoleMenu extends Component<Props, State> {
     const items = [
       <EuiContextMenuItem
         key="Copy as cURL"
+        data-test-subj="consoleMenuCopyAsCurl"
         id="ConCopyAsCurl"
         disabled={!window.navigator?.clipboard}
         onClick={() => {
@@ -174,7 +175,7 @@ export class ConsoleMenu extends Component<Props, State> {
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenuPanel items={items} />
+          <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
         </EuiPopover>
       </span>
     );
