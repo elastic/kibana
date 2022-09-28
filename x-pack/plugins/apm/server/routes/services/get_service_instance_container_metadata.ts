@@ -19,7 +19,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
-import { InfraClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
+import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 type ServiceInstanceContainerMetadataDetails =
   | {
@@ -33,7 +33,7 @@ export const getServiceInstanceContainerMetadata = async ({
   start,
   end,
 }: {
-  infraMetricsClient: InfraClient;
+  infraMetricsClient: InfraMetricsClient;
   containerId: string;
   start: number;
   end: number;

@@ -17,7 +17,7 @@ import {
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { InfraClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
+import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 type ServiceOverviewContainerMetadataDetails =
   | {
@@ -36,7 +36,7 @@ export const getServiceOverviewContainerMetadata = async ({
   start,
   end,
 }: {
-  infraMetricsClient: InfraClient;
+  infraMetricsClient: InfraMetricsClient;
   containerIds: string[];
   start: number;
   end: number;
@@ -98,16 +98,16 @@ export const getServiceOverviewContainerMetadata = async ({
   return {
     kubernetes: {
       deployments: response.aggregations?.deployments?.buckets.map(
-        (bucket: { key: string }) => bucket.key
+        (bucket) => bucket.key
       ),
       replicasets: response.aggregations?.replicasets?.buckets.map(
-        (bucket: { key: string }) => bucket.key
+        (bucket) => bucket.key
       ),
       namespaces: response.aggregations?.namespaces?.buckets.map(
-        (bucket: { key: string }) => bucket.key
+        (bucket) => bucket.key
       ),
       containerImages: response.aggregations?.containerImages?.buckets.map(
-        (bucket: { key: string }) => bucket.key
+        (bucket) => bucket.key
       ),
     },
   };

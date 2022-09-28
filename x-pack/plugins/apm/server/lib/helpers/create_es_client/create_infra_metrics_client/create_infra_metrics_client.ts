@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ESSearchRequest } from '@kbn/es-types';
 import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
 import { ApmPluginRequestHandlerContext } from '../../../../routes/typings';
@@ -15,14 +16,11 @@ interface InfraPlugin {
   start: () => Promise<InfraPluginStart>;
 }
 
-interface InfraMetricsResponse {
-  aggregations?: any;
-  hits?: any;
-}
+type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'>;
 
-export type InfraClient = Awaited<ReturnType<typeof createInfraMetricsClient>>;
+export type InfraMetricsClient = ReturnType<typeof createInfraMetricsClient>;
 
-export async function createInfraMetricsClient({
+export function createInfraMetricsClient({
   infraPlugin,
   context,
 }: {
@@ -30,9 +28,9 @@ export async function createInfraMetricsClient({
   context: ApmPluginRequestHandlerContext;
 }) {
   return {
-    search: async <TParams extends Omit<ESSearchRequest, 'index'>>(
+    async search<TDocument, TParams extends InfraMetricsSearchParams>(
       opts: TParams
-    ) => {
+    ): Promise<SearchResponse<TDocument, TParams>> {
       const {
         savedObjects: { client: savedObjectsClient },
         elasticsearch: { client: esClient },
@@ -48,10 +46,10 @@ export async function createInfraMetricsClient({
         ...opts,
       };
 
-      return esClient.asCurrentUser.search(
+      const res = await esClient.asCurrentUser.search<TDocument, TParams>(
         searchParams
-      ) as unknown as Promise<InfraMetricsResponse>;
-      // return unwrapEsResponse(res);
+      );
+      return res;
     },
   };
 }

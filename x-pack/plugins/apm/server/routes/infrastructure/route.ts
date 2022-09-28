@@ -31,7 +31,7 @@ const infrastructureRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { plugins, context } = resources;
-    const infraMetricsClient = await createInfraMetricsClient({
+    const infraMetricsClient = createInfraMetricsClient({
       infraPlugin: plugins.infra,
       context,
     });
