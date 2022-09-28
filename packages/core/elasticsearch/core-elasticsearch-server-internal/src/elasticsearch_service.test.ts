@@ -146,7 +146,7 @@ describe('#preboot', () => {
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
       expect(MockClusterClient.mock.calls[0][0]).toEqual(
         // eslint-disable-next-line dot-notation
-        expect.objectContaining({ agentManager: elasticsearchService['agentManager'] })
+        expect.objectContaining({ agentFactoryProvider: elasticsearchService['agentManager'] })
       );
     });
 
