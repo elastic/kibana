@@ -410,16 +410,27 @@ export class Authenticator {
           existingSessionValue,
         });
 
-        // FIXME: Clean session storage client side!!!
-        if (existingSessionValueRaw instanceof SessionExpiredError) {
-          authenticationResult.options.redirectURL += '&msg=SESSION_EXPIRED';
+        if (requestIsRedirectable) {
+          if (
+            // TODO: Should this just be `instanceof SessionError`?
+            existingSessionValueRaw instanceof SessionExpiredError &&
+            authenticationResult.redirectURL?.startsWith(
+              `${this.options.basePath.get(request)}/login`
+            )
+          ) {
+            // FIXME: Clean session storage client side!!!
+            authenticationResult.options.redirectURL += '&msg=SESSION_EXPIRED';
+          }
+          return enrichWithUserProfileId(
+            this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult),
+            sessionUpdateResult ? sessionUpdateResult.value : null
+          );
+        } else {
+          return enrichWithUserProfileId(
+            authenticationResult,
+            sessionUpdateResult ? sessionUpdateResult.value : null
+          );
         }
-        return enrichWithUserProfileId(
-          requestIsRedirectable
-            ? this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult)
-            : authenticationResult,
-          sessionUpdateResult ? sessionUpdateResult.value : null
-        );
       }
     }
 
