@@ -11,7 +11,7 @@ import { useSpaceId } from './use_space_id';
 
 export const useEnableRiskScoreViaDevTools = (moduleName: RiskScoreEntity) => {
   const spaceId = useSpaceId();
-  const riskScoreConsoleId = `enable_${moduleName}_risk_score`;
+  const riskScoreConsoleId: `enable_${RiskScoreEntity}_risk_score` = `enable_${moduleName}_risk_score`;
   const loadFromUrl = useMemo(() => {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
