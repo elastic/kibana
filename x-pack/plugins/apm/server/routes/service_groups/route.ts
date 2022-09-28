@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
-import { keyBy, mapValues } from 'lodash';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
@@ -52,50 +51,26 @@ const serviceGroupsWithServiceCountRoute = createApmServerRoute({
     const { context, params } = resources;
     const {
       savedObjects: { client: savedObjectsClient },
-      uiSettings: { client: uiSettingsClient },
     } = await context.core;
 
     const {
       query: { start, end },
     } = params;
 
-    const [setup, maxNumberOfServices] = await Promise.all([
-      setupRequest(resources),
-      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-    ]);
+    const setup = await setupRequest(resources);
 
     const serviceGroups = await getServiceGroups({
       savedObjectsClient,
     });
 
-    const serviceGroupsWithServiceCount = await Promise.all(
-      serviceGroups.map(
-        async ({
-          id,
-          kuery,
-        }): Promise<{ id: string; servicesCount: number }> => {
-          const servicesCount = await getServicesCounts({
-            setup,
-            kuery,
-            maxNumberOfServices,
-            start,
-            end,
-          });
-
-          return {
-            id,
-            servicesCount,
-          };
-        }
-      )
-    );
-
-    const servicesCounts = mapValues(
-      keyBy(serviceGroupsWithServiceCount, 'id'),
-      'servicesCount'
-    );
-
-    return { servicesCounts };
+    return {
+      servicesCounts: await getServicesCounts({
+        setup,
+        serviceGroups,
+        start,
+        end,
+      }),
+    };
   },
 });
 
