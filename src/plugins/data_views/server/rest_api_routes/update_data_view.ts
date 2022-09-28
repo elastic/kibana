@@ -37,6 +37,7 @@ const indexPatternUpdateSchema = schema.object({
   fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
   allowNoIndex: schema.maybe(schema.boolean()),
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
+  name: schema.maybe(schema.string()),
 });
 
 interface UpdateDataViewArgs {
@@ -67,6 +68,7 @@ export const updateDataView = async ({
     typeMeta,
     fields,
     runtimeFieldMap,
+    name,
   } = spec;
 
   let changeCount = 0;
@@ -100,6 +102,11 @@ export const updateDataView = async ({
   if (typeMeta !== undefined) {
     changeCount++;
     dataView.typeMeta = typeMeta;
+  }
+
+  if (name !== undefined) {
+    changeCount++;
+    dataView.name = name;
   }
 
   if (fields !== undefined) {

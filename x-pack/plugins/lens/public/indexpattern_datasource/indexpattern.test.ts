@@ -1718,6 +1718,15 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#createEmptyLayer', () => {
+    it('creates state with empty layers', () => {
+      expect(indexPatternDatasource.createEmptyLayer('index-pattern-id')).toEqual({
+        currentIndexPatternId: 'index-pattern-id',
+        layers: {},
+      });
+    });
+  });
+
   describe('#getLayers', () => {
     it('should list the current layers', () => {
       expect(

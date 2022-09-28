@@ -30,13 +30,13 @@ export const EDR_COMPLETE = i18n.translate(
 export const ENDPOINT = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOption',
   {
-    defaultMessage: 'Endpoint',
+    defaultMessage: 'Traditional Endpoints (desktops, laptops, virtual machines)',
   }
 );
 export const CLOUD_SECURITY = i18n.translate(
-  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudSecurityDropdownOption',
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudDropdownOption',
   {
-    defaultMessage: 'Cloud Security',
+    defaultMessage: 'Cloud Workloads (Linux servers or Kubernetes environments)',
   }
 );
 export const INTERACTIVE_ONLY = i18n.translate(
@@ -51,15 +51,9 @@ export const ALL_EVENTS = i18n.translate(
     defaultMessage: 'All events',
   }
 );
-export const PREVENT_MALWARE = i18n.translate(
-  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersPreventionMalware',
+export const PREVENT_MALICIOUS_BEHAVIOR = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersPreventionMaliciousBehavior',
   {
-    defaultMessage: 'Prevent Malware',
-  }
-);
-export const PREVENT_MALICIOUS_BEHAVIOUR = i18n.translate(
-  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersPreventionMaliciousBehaviour',
-  {
-    defaultMessage: 'Prevent Malicious Behaviour',
+    defaultMessage: 'Prevent Malicious Behavior',
   }
 );
