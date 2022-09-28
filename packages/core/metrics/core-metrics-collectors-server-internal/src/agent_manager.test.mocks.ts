@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-export const AgentManagerMock = jest.fn(() => ({
+import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+
+export const AgentManagerMock: typeof AgentManager = jest.fn(() => ({
   getAgentFactory: jest.fn(),
   getAgents: jest.fn(),
+  agentOptions: {},
+  agents: [],
 }));
 
 jest.doMock('@kbn/core-elasticsearch-client-server-internal', () => {
