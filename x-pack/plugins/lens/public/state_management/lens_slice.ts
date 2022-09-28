@@ -57,10 +57,12 @@ export const getPreloadedState = ({
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
   if (initialDatasourceId) {
-    datasourceStates[initialDatasourceId] = {
-      state: null,
-      isLoading: true,
-    };
+    Object.keys(datasourceMap).forEach((datasourceId) => {
+      datasourceStates[datasourceId] = {
+        state: null,
+        isLoading: true,
+      };
+    });
   }
 
   const state = {
@@ -130,6 +132,11 @@ export const submitSuggestion = createAction<void>('lens/submitSuggestion');
 export const switchDatasource = createAction<{
   newDatasourceId: string;
 }>('lens/switchDatasource');
+export const switchAndCleanDatasource = createAction<{
+  newDatasourceId: string;
+  visualizationId: string | null;
+  currentIndexPatternId?: string;
+}>('lens/switchAndCleanDatasource');
 export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
   initialInput?: LensEmbeddableInput;
@@ -211,6 +218,7 @@ export const lensActions = {
   setToggleFullscreen,
   submitSuggestion,
   switchDatasource,
+  switchAndCleanDatasource,
   navigateAway,
   loadInitial,
   initEmpty,
@@ -359,9 +367,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           const datasource = datasourceMap[datasourceId!];
           return {
             ...datasourceState,
-            state: isOnlyLayer
-              ? datasource.clearLayer(datasourceState.state, layerId)
-              : datasource.removeLayer(datasourceState.state, layerId),
+            ...(datasourceId === state.activeDatasourceId && {
+              state: isOnlyLayer
+                ? datasource.clearLayer(datasourceState.state, layerId)
+                : datasource.removeLayer(datasourceState.state, layerId),
+            }),
           };
         }
       );
@@ -661,6 +671,55 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           },
         },
         activeDatasourceId: payload.newDatasourceId,
+      };
+    },
+    [switchAndCleanDatasource.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          newDatasourceId: string;
+          visualizationId?: string;
+          currentIndexPatternId?: string;
+        };
+      }
+    ) => {
+      const activeVisualization =
+        payload.visualizationId && visualizationMap[payload.visualizationId];
+      const visualization = state.visualization;
+      let newVizState = visualization.state;
+      const ids: string[] = [];
+      if (activeVisualization && activeVisualization.getLayerIds) {
+        const layerIds = activeVisualization.getLayerIds(visualization.state);
+        ids.push(...Object.values(layerIds));
+        newVizState = activeVisualization.initialize(() => ids[0]);
+      }
+      const currentVizId = ids[0];
+
+      const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
+        ? current(state).datasourceStates[payload.newDatasourceId]?.state
+        : datasourceMap[payload.newDatasourceId].createEmptyLayer(
+            payload.currentIndexPatternId ?? ''
+          );
+      const updatedState = datasourceMap[payload.newDatasourceId].insertLayer(
+        datasourceState,
+        currentVizId
+      );
+
+      return {
+        ...state,
+        datasourceStates: {
+          [payload.newDatasourceId]: {
+            state: updatedState,
+            isLoading: false,
+          },
+        },
+        activeDatasourceId: payload.newDatasourceId,
+        visualization: {
+          ...visualization,
+          state: newVizState,
+        },
       };
     },
     [navigateAway.type]: (state) => state,
