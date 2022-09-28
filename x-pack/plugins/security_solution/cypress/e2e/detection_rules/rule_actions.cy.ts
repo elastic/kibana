@@ -76,9 +76,6 @@ describe('Rule actions', () => {
     goToRuleDetails();
     waitForTheRuleToBeExecuted();
 
-    /* We wait for the alerts to be populated first because is when the action is going to be triggered */
-    waitForAlertsToPopulate();
-
     /* Once the action is triggered we wait for the new document to be indexed */
     waitForNewDocumentToBeIndexed(index, initialNumberofDocuments);
 
