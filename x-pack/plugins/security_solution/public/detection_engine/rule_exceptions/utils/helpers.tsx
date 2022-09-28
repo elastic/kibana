@@ -173,10 +173,10 @@ export const prepareExceptionItemsForBulkClose = (
  * @param comments new Comment
  */
 export const enrichNewExceptionItemsWithComments = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
   comments: Array<Comment | CreateComment>
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
     return {
       ...item,
       comments,
@@ -230,10 +230,10 @@ export const enrichExistingExceptionItemWithComments = (
  * @param osTypes array of os values
  */
 export const enrichExceptionItemsWithOS = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
   osTypes: OsTypeArray
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
     return {
       ...item,
       os_types: osTypes,
@@ -259,8 +259,8 @@ export const retrieveAlertOsTypes = (alertData?: AlertData): OsTypeArray => {
  * Returns given exceptionItems with all hash-related entries lowercased
  */
 export const lowercaseHashValues = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[]
+): ExceptionsBuilderReturnExceptionItem[] => {
   return exceptionItems.map((item) => {
     const newEntries = item.entries.map((itemEntry) => {
       if (itemEntry.field.includes('.hash')) {
@@ -285,9 +285,7 @@ export const lowercaseHashValues = (
   });
 };
 
-export const entryHasListType = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-) => {
+export const entryHasListType = (exceptionItems: ExceptionsBuilderReturnExceptionItem[]) => {
   for (const { entries } of exceptionItems) {
     for (const exceptionEntry of entries ?? []) {
       if (getOperatorType(exceptionEntry) === OperatorTypeEnum.LIST) {
@@ -759,7 +757,7 @@ export const getPrepopulatedBehaviorException = ({
  * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
  */
 export const entryHasNonEcsType = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
   indexPatterns: DataViewBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
@@ -873,10 +871,8 @@ export const enrichRuleExceptions = (
   exceptionItems: ExceptionsBuilderReturnExceptionItem[]
 ): ExceptionsBuilderReturnExceptionItem[] => {
   return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
-    const entries = item.entries.map(({ id, ...rest }) => ({ ...rest }));
     return {
       ...item,
-      entries,
       list_id: undefined,
       namespace_type: 'single',
     };
@@ -894,11 +890,8 @@ export const enrichSharedExceptions = (
 ): ExceptionsBuilderReturnExceptionItem[] => {
   return lists.flatMap((list) => {
     return exceptionItems.map((item) => {
-      const entries = item.entries.map(({ id, ...rest }) => ({ ...rest }));
-
       return {
         ...item,
-        entries,
         list_id: list.list_id,
         namespace_type: list.namespace_type,
       };

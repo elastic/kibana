@@ -9,6 +9,7 @@
 import { DataViewFieldBase } from '@kbn/es-query';
 import type {
   CreateExceptionListItemSchema,
+  CreateRuleExceptionListItemSchema,
   Entry,
   EntryExists,
   EntryMatch,
@@ -102,6 +103,11 @@ export type CreateExceptionListItemBuilderSchema = Omit<
 export type ExceptionsBuilderExceptionItem =
   | ExceptionListItemBuilderSchema
   | CreateExceptionListItemBuilderSchema;
+
+export type ExceptionsBuilderReturnExceptionItem =
+  | ExceptionListItemSchema
+  | CreateExceptionListItemSchema
+  | CreateRuleExceptionListItemSchema;
 
 export const exceptionListSavedObjectType = EXCEPTION_LIST_NAMESPACE;
 export const exceptionListAgnosticSavedObjectType = EXCEPTION_LIST_NAMESPACE_AGNOSTIC;

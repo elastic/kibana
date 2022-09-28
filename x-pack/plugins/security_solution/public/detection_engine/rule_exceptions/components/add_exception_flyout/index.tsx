@@ -29,13 +29,11 @@ import {
   EuiComboBox,
   EuiFlexGroup,
 } from '@elastic/eui';
+import type { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import type {
-  ExceptionListType,
-  OsTypeArray,
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
+} from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
@@ -146,7 +144,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
-    Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+    ExceptionsBuilderReturnExceptionItem[]
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
@@ -190,7 +188,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionItems,
       errorExists,
     }: {
-      exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+      exceptionItems: ExceptionsBuilderReturnExceptionItem[];
       errorExists: boolean;
     }) => {
       setExceptionItemsToAdd(exceptionItems);
@@ -337,10 +335,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
   }, [hasAlertData, alertData, selectedOs]);
 
-  const enrichExceptionItems = useCallback((): Array<
-    ExceptionListItemSchema | CreateExceptionListItemSchema
-  > => {
-    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
+  const enrichExceptionItems = useCallback((): ExceptionsBuilderReturnExceptionItem[] => {
+    let enriched: ExceptionsBuilderReturnExceptionItem[] = [];
     enriched =
       comment !== ''
         ? enrichNewExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])

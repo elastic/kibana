@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { HttpStart } from '@kbn/core/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
-  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListType,
   NamespaceType,
@@ -24,6 +23,7 @@ import {
 import {
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
   OperatorOption,
   containsValueListEntry,
   filterExceptionItems,
@@ -68,7 +68,7 @@ const initialState: State = {
 
 export interface OnChangeProps {
   errorExists: boolean;
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
   warningExists: boolean;
 }
