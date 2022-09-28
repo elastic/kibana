@@ -33,6 +33,7 @@ describe('DeleteSLO', () => {
 
       await deleteSLO.execute(slo.id);
 
+      expect(mockRepository.findById).toHaveBeenCalledWith(slo.id);
       expect(mockTransformManager.stop).toHaveBeenCalledWith(getSLOTransformId(slo.id));
       expect(mockTransformManager.uninstall).toHaveBeenCalledWith(getSLOTransformId(slo.id));
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
