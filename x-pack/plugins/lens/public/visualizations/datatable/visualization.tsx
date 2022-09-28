@@ -277,12 +277,12 @@ export const getDatatableVisualization = ({
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
-              const stops = columnConfig.palette?.params?.stops;
-              const hasColoring = Boolean(columnConfig.colorMode !== 'none' && stops);
+              const stops = columnConfig?.palette?.params?.stops;
+              const hasColoring = Boolean(columnConfig?.colorMode !== 'none' && stops);
 
               return {
                 columnId: accessor,
-                triggerIcon: columnConfig.hidden
+                triggerIcon: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring
                   ? 'colorBy'
