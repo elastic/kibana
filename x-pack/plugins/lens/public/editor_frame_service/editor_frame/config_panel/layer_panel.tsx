@@ -302,6 +302,8 @@ export function LayerPanel(
   );
 
   const { dataViews } = props.framePublicAPI;
+  const [datasource] = Object.values(framePublicAPI.datasourceLayers);
+  const isTextBasedLanguage = Boolean(datasource?.isTextBasedLanguage());
 
   return (
     <>
@@ -332,6 +334,7 @@ export function LayerPanel(
                   layerType={activeVisualization.getLayerType(layerId, visualizationState)}
                   onRemoveLayer={onRemoveLayer}
                   onCloneLayer={onCloneLayer}
+                  isTextBasedLanguage={isTextBasedLanguage}
                   core={core}
                 />
               </EuiFlexItem>

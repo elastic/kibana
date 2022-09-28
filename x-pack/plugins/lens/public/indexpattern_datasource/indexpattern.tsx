@@ -191,6 +191,13 @@ export function getIndexPatternDatasource({
       };
     },
 
+    createEmptyLayer(indexPatternId: string) {
+      return {
+        currentIndexPatternId: indexPatternId,
+        layers: {},
+      };
+    },
+
     cloneLayer(state, layerId, newLayerId, getNewId) {
       return {
         ...state,
@@ -219,7 +226,7 @@ export function getIndexPatternDatasource({
     },
 
     getLayers(state: IndexPatternPrivateState) {
-      return Object.keys(state.layers);
+      return Object.keys(state?.layers);
     },
 
     removeColumn({ prevState, layerId, columnId, indexPatterns }) {
@@ -338,7 +345,6 @@ export function getIndexPatternDatasource({
         counts[uniqueLabel] = 0;
         return uniqueLabel;
       };
-
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
@@ -533,7 +539,7 @@ export function getIndexPatternDatasource({
         filter: false,
       };
       const operations = flatten(
-        Object.values(state.layers ?? {}).map((l) =>
+        Object.values(state?.layers ?? {}).map((l) =>
           Object.values(l.columns).map((c) => {
             if (c.timeShift) {
               additionalEvents.time_shift = true;
@@ -601,6 +607,7 @@ export function getIndexPatternDatasource({
             fields: [...new Set(fieldsPerColumn[colId] || [])],
           }));
         },
+        isTextBasedLanguage: () => false,
         getOperationForColumnId: (columnId: string) => {
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {

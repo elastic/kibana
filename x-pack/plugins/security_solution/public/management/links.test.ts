@@ -7,10 +7,13 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+
 import { SecurityPageName } from '../app/types';
 import { licenseService } from '../common/hooks/use_license';
 import type { StartPlugins } from '../types';
 import { links, getManagementFilteredLinks } from './links';
+import { allowedExperimentalValues } from '../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 jest.mock('../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -30,6 +33,12 @@ describe('links', () => {
   let getPlugins: (roles: string[]) => StartPlugins;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
 
+  beforeAll(() => {
+    ExperimentalFeaturesService.init({
+      experimentalFeatures: { ...allowedExperimentalValues },
+    });
+  });
+
   beforeEach(() => {
     coreMockStarted = coreMock.createStart();
     fakeHttpServices = coreMockStarted.http as jest.Mocked<HttpSetup>;
@@ -39,6 +48,13 @@ describe('links', () => {
         security: {
           authc: {
             getCurrentUser: jest.fn().mockReturnValue({ roles }),
+          },
+        },
+        fleet: {
+          authz: {
+            fleet: {
+              all: true,
+            },
           },
         },
       } as unknown as StartPlugins);

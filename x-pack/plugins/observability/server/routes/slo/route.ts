@@ -38,19 +38,13 @@ const createSLORoute = createObservabilityServerRoute({
     tags: [],
   },
   params: createSLOParamsSchema,
-  handler: async ({ context, request, params, logger, spacesService }) => {
+  handler: async ({ context, params, logger }) => {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
-    const spaceId = spacesService.getSpaceId(request);
 
-    const resourceInstaller = new DefaultResourceInstaller(esClient, logger, spaceId);
+    const resourceInstaller = new DefaultResourceInstaller(esClient, logger);
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      esClient,
-      logger,
-      spaceId
-    );
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
     const createSLO = new CreateSLO(resourceInstaller, repository, transformManager);
 
     const response = await createSLO.execute(params.body);
@@ -65,18 +59,12 @@ const deleteSLORoute = createObservabilityServerRoute({
     tags: [],
   },
   params: deleteSLOParamsSchema,
-  handler: async ({ context, request, params, logger, spacesService }) => {
+  handler: async ({ context, params, logger }) => {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
-    const spaceId = spacesService.getSpaceId(request);
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      esClient,
-      logger,
-      spaceId
-    );
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
 
     const deleteSLO = new DeleteSLO(repository, transformManager, esClient);
 
