@@ -24,8 +24,6 @@ export interface ElasticFlameGraph {
   CountExclusive: number[];
 
   TotalSeconds: number;
-  TotalTraces: number;
-  SampledTraces: number;
 }
 
 export enum FlameGraphComparisonMode {
@@ -82,12 +80,7 @@ function normalize(n: number, lower: number, upper: number): number {
 }
 
 // createFlameGraph encapsulates the tree representation into a serialized form.
-export function createFlameGraph(
-  tree: CalleeTree,
-  totalSeconds: number,
-  totalTraces: number,
-  sampledTraces: number
-): ElasticFlameGraph {
+export function createFlameGraph(tree: CalleeTree, totalSeconds: number): ElasticFlameGraph {
   const graph: ElasticFlameGraph = {
     Size: tree.Size,
     Edges: new Array<number[]>(tree.Size),
@@ -103,8 +96,6 @@ export function createFlameGraph(
     CountExclusive: tree.CountExclusive.slice(0, tree.Size),
 
     TotalSeconds: totalSeconds,
-    TotalTraces: totalTraces,
-    SampledTraces: sampledTraces,
   };
 
   for (let i = 0; i < tree.Size; i++) {

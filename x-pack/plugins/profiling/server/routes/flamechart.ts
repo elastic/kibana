@@ -79,12 +79,7 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
           // Do the same for single entries in the events array.
 
           const t1 = Date.now();
-          const fg = createFlameGraph(
-            tree,
-            totalSeconds,
-            Math.floor(totalCount / eventsIndex.sampleRate),
-            totalCount
-          );
+          const fg = createFlameGraph(tree, totalSeconds);
           logger.info(`creating flamegraph took ${Date.now() - t1} ms`);
 
           return fg;

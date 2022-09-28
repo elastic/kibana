@@ -13,11 +13,10 @@ import { events, stackTraces, stackFrames, executables } from './__fixtures__/st
 
 describe('Flamegraph operations', () => {
   test('1', () => {
-    const totalSamples = sum([...events.values()]);
     const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
 
     const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
-    const graph = createFlameGraph(tree, 60, totalSamples, totalSamples);
+    const graph = createFlameGraph(tree, 60);
 
     expect(graph.Size).toEqual(totalFrames - 2);
 
