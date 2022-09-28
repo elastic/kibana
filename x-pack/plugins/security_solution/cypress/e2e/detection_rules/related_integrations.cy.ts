@@ -123,7 +123,7 @@ describe('Related integrations', () => {
       });
 
       it('should display a badge with the installed integrations on the rule management page', () => {
-        console.log('test')
+        console.log('test');
         cy.get(INTEGRATIONS_POPOVER).should(
           'have.text',
           `${rule.enabledIntegrations}/${rule.integrations.length} integrations`
