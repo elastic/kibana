@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
+
 import { PageError } from './page_error';
 import { errorTitle } from '../../../../translations';
 import { InfraHttpError } from '../../../../types';
@@ -17,26 +18,30 @@ jest.mock('../../../../hooks/use_document_title', () => ({
   useDocumentTitle: jest.fn(),
 }));
 
+const renderErrorPage = () =>
+  render(
+    <I18nProvider>
+      <PageError
+        name={'test'}
+        error={
+          {
+            body: {
+              statusCode: 500,
+              message: 'Error Message',
+            },
+            message: 'Error Message',
+          } as InfraHttpError
+        }
+      />
+    </I18nProvider>
+  );
+
 describe('PageError component', () => {
-  const mountError = (name: string, error: InfraHttpError) =>
-    mount(
-      <I18nProvider>
-        <PageError name={name} error={error} />
-      </I18nProvider>
-    ).find('PageError');
-
   it('renders correctly and set title', () => {
-    const mounted = mountError('test', {
-      body: {
-        statusCode: 500,
-        message: 'Error Message',
-      },
-      message: 'Error Message',
-    } as InfraHttpError);
-
-    const callOut = mounted.find('EuiCallOut');
-    expect(callOut.render()).toMatchSnapshot();
-
+    const { getByText } = renderErrorPage();
     expect(useDocumentTitle).toHaveBeenCalledWith([{ text: `${errorTitle}` }]);
+
+    expect(getByText('Error Message')).toBeInTheDocument();
+    expect(getByText('Please click the back button and try again.')).toBeInTheDocument();
   });
 });
