@@ -228,6 +228,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           }}
           onClosePopover={() => {
             setIsTagAddVisible(false);
+            closeMenu();
           }}
         />
       )}
