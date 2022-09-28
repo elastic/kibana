@@ -17,6 +17,7 @@ import type { FindExceptionReferencesOnRuleSchemaDecoded } from '../../../../../
 import { findExceptionReferencesOnRuleSchema } from '../../../../../common/detection_engine/schemas/request/find_exception_list_references_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { rulesReferencedByExceptionListsSchema } from '../../../../../common/detection_engine/schemas/response/find_exception_list_references_schema';
+import type { RuleParams } from '../../schemas/rule_schemas';
 
 export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
@@ -74,7 +75,7 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
 
         const references = await Promise.all(
           foundExceptionLists.data.map(async (list, index) => {
-            const foundRules = await rulesClient.find({
+            const foundRules = await rulesClient.find<RuleParams>({
               options: {
                 perPage: 10000,
                 filter: enrichFilterWithRuleTypeMapping(null),
