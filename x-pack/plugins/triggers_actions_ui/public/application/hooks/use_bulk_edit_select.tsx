@@ -192,14 +192,13 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
       });
 
       if (idsToExclude && idsToExclude.length) {
+        const excludeFilter = fromKueryExpression(
+          `NOT (${idsToExclude.map((id) => `alert.id: "alert:${id}"`).join(' or ')})`
+        );
         if (ruleFilterKueryNode) {
-          return nodeBuilder.and([
-            ruleFilterKueryNode,
-            fromKueryExpression(
-              `NOT (${idsToExclude.map((id) => `alert.id: "alert:${id}"`).join(' or ')})`
-            ),
-          ]);
+          return nodeBuilder.and([ruleFilterKueryNode, excludeFilter]);
         }
+        return excludeFilter;
       }
 
       return ruleFilterKueryNode;
