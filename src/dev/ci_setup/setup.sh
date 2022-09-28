@@ -42,21 +42,3 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
     exit 1
   fi
 fi
-
-###
-### Generate event log mappings
-###
-echo " -- generating event log mappings"
-node x-pack/plugins/event_log/scripts/create_schemas.js
-
-###
-### verify no git modifications caused by event log mapping generation
-###
-GIT_CHANGES="$(git ls-files --modified)"
-if [ "$GIT_CHANGES" ]; then
-  echo -e "\n${RED}ERROR: 'event_log/scripts/create_schemas.js' caused changes to the following files:${C_RESET}\n"
-  echo -e "$GIT_CHANGES\n"
-  echo -e "Ensure you are not directly making changes to the files in x-pack/plugins/event_log/generated/."
-  echo -e "Follow the directions in x-pack/plugins/event_log/generated/README.md to make schema changes for the event log."
-  exit 1
-fi
