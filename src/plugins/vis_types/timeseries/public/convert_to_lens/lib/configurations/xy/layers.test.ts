@@ -451,6 +451,14 @@ describe('getLayers', () => {
               timeField: 'timestamp',
               type: 'query',
             },
+          ],
+          indexPatternId: 'test',
+        },
+        {
+          layerId: 'test-id',
+          layerType: 'annotations',
+          ignoreGlobalFilters: false,
+          annotations: [
             {
               color: '#0000FF',
               filter: {
@@ -513,7 +521,7 @@ const mockedIndices = [
 
 const indexPatternsService = {
   getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
-  get: jest.fn(() => Promise.resolve(mockedIndices[0])),
+  get: jest.fn((id) => Promise.resolve({ ...mockedIndices[0], id })),
   find: jest.fn((search: string, size: number) => {
     if (size !== 1) {
       // shouldn't request more than one data view since there is a significant performance penalty
