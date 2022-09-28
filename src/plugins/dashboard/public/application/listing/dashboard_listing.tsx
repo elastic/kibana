@@ -261,7 +261,16 @@ export const DashboardListing = ({
   ]);
 
   const fetchItems = useCallback(
-    (searchTerm: string, references?: SavedObjectsFindOptionsReference[]) => {
+    (
+      searchTerm: string,
+      {
+        references,
+        referencesToExclude,
+      }: {
+        references?: SavedObjectsFindOptionsReference[];
+        referencesToExclude?: SavedObjectsFindOptionsReference[];
+      } = {}
+    ) => {
       return findDashboards
         .findSavedObjects({
           search: searchTerm,

@@ -316,6 +316,7 @@ export interface GetSearchBarFilterOptions {
 export interface ParsedSearchQuery {
   searchTerm: string;
   tagReferences: SavedObjectsFindOptionsReference[];
+  tagReferencesToExclude: SavedObjectsFindOptionsReference[];
   valid: boolean;
 }
 

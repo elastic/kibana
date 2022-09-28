@@ -148,7 +148,16 @@ export const VisualizeListing = () => {
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
 
   const fetchItems = useCallback(
-    (searchTerm: string, references?: SavedObjectsFindOptionsReference[]) => {
+    (
+      searchTerm: string,
+      {
+        references,
+        referencesToExclude,
+      }: {
+        references?: SavedObjectsFindOptionsReference[];
+        referencesToExclude?: SavedObjectsFindOptionsReference[];
+      } = {}
+    ) => {
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return findListItems(
         savedObjects.client,

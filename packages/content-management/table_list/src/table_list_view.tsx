@@ -58,7 +58,10 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
-    references?: SavedObjectsFindOptionsReference[]
+    refs: {
+      references?: SavedObjectsFindOptionsReference[];
+      referencesToExclude?: SavedObjectsFindOptionsReference[];
+    }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
   getDetailViewLink?: (entity: T) => string | undefined;
@@ -288,11 +291,15 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     try {
       const idx = ++fetchIdx.current;
 
-      const { searchQuery: searchQueryParsed, references } = searchQueryParser
-        ? searchQueryParser(searchQuery)
-        : { searchQuery, references: undefined };
+      const {
+        searchQuery: searchQueryParsed,
+        references,
+        referencesToExclude,
+      } = searchQueryParser
+        ? searchQueryParser(searchQuery.text)
+        : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
 
-      const response = await findItems(searchQueryParsed, references);
+      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
 
       if (!isMounted.current) {
         return;

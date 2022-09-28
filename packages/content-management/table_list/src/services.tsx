@@ -41,6 +41,7 @@ export interface Services {
   searchQueryParser?: (searchQuery: string) => {
     searchQuery: string;
     references?: SavedObjectsFindOptionsReference[];
+    referencesToExclude?: SavedObjectsFindOptionsReference[];
   };
   getSearchBarFilters?: () => SearchFilterConfig[];
   DateFormatterComp?: DateFormatter;
@@ -118,6 +119,7 @@ export interface TableListViewKibanaDependencies {
       ) => {
         searchTerm: string;
         tagReferences: SavedObjectsFindOptionsReference[];
+        tagReferencesToExclude: SavedObjectsFindOptionsReference[];
         valid: boolean;
       };
       getSearchBarFilter: (options?: {
@@ -153,6 +155,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
         return {
           searchQuery: res.searchTerm,
           references: res.tagReferences,
+          referencesToExclude: res.tagReferencesToExclude,
         };
       };
     }
