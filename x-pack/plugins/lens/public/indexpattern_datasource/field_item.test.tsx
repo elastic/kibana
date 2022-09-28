@@ -206,7 +206,7 @@ describe('IndexPattern Field Item', () => {
           {popoverContent as ReactElement}
         </KibanaContextProvider>
       )
-        .find('[data-test-subj="fieldPopoverTitle_editField-bytes"]')
+        .find('[data-test-subj="fieldPopoverHeader_editField-bytes"]')
         .first()
         .simulate('click');
     });
@@ -230,7 +230,7 @@ describe('IndexPattern Field Item', () => {
           {popoverContent as ReactElement}
         </KibanaContextProvider>
       )
-        .find('[data-test-subj="fieldPopoverTitle_editField-bytes"]')
+        .find('[data-test-subj="fieldPopoverHeader_editField-bytes"]')
         .exists()
     ).toBeFalsy();
   });

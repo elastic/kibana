@@ -277,7 +277,7 @@ describe('discover sidebar field', function () {
 
     expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
     expect(
-      comp.find('[data-test-subj="fieldPopoverTitle_addField-extension.keyword"]').exists()
+      comp.find('[data-test-subj="fieldPopoverHeader_addField-extension.keyword"]').exists()
     ).toBeTruthy();
     expect(
       comp
@@ -292,7 +292,7 @@ describe('discover sidebar field', function () {
     ).toBeFalsy();
 
     await act(async () => {
-      const fieldItem = findTestSubject(comp, 'fieldPopoverTitle_addField-extension.keyword');
+      const fieldItem = findTestSubject(comp, 'fieldPopoverHeader_addField-extension.keyword');
       await fieldItem.simulate('click');
       await comp.update();
     });
@@ -329,7 +329,7 @@ describe('discover sidebar field', function () {
 
     expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
     expect(
-      comp.find('[data-test-subj="fieldPopoverTitle_addField-extension.keyword"]').exists()
+      comp.find('[data-test-subj="fieldPopoverHeader_addField-extension.keyword"]').exists()
     ).toBeFalsy();
   });
 });

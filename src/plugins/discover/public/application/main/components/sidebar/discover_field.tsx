@@ -15,15 +15,21 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { FieldStats, FieldPopover, FieldPopoverProps } from '@kbn/unified-field-list-plugin/public';
+import {
+  FieldStats,
+  FieldPopover,
+  FieldPopoverHeader,
+  FieldPopoverHeaderProps,
+  FieldVisualizeButton,
+} from '@kbn/unified-field-list-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
 import { getFieldTypeName } from '../../../../utils/get_field_type_name';
-import { DiscoverFieldVisualize } from './discover_field_visualize';
 import type { AppState } from '../../services/discover_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { SHOW_LEGACY_FIELD_TOP_VALUES } from '../../../../../common';
+import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
+import { getUiActions } from '../../../../kibana_services';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -312,12 +318,16 @@ function DiscoverFieldComponent({
   );
 
   const togglePopover = useCallback(() => {
-    setOpen(!infoIsOpen);
-  }, [infoIsOpen]);
+    setOpen((value) => !value);
+  }, [setOpen]);
+
+  const closePopover = useCallback(() => {
+    setOpen(false);
+  }, [setOpen]);
 
   const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
 
-  const customPopoverProps: Partial<FieldPopoverProps> = useMemo(
+  const customPopoverHeaderProps: Partial<FieldPopoverHeaderProps> = useMemo(
     () => ({
       buttonAddFieldToWorkspaceProps: {
         'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
@@ -442,14 +452,6 @@ function DiscoverFieldComponent({
             />
           </>
         )}
-
-        <DiscoverFieldVisualize
-          field={field}
-          dataView={dataView}
-          multiFields={rawMultiFields}
-          trackUiMetric={trackUiMetric}
-          contextualFields={contextualFields}
-        />
       </>
     );
   };
@@ -457,19 +459,33 @@ function DiscoverFieldComponent({
   return (
     <FieldPopover
       isOpen={infoIsOpen}
-      field={field}
       button={button}
-      closePopover={() => setOpen(false)}
+      closePopover={closePopover}
       data-test-subj="discoverFieldListPanelPopover"
-      panelClassName="dscSidebarItem__fieldPopoverPanel"
-      onAddFieldToWorkspace={!selected ? toggleDisplay : undefined}
-      onAddFilter={onAddFilter}
-      onEditField={onEditField}
-      onDeleteField={onDeleteField}
-      {...customPopoverProps}
-    >
-      {infoIsOpen && renderPopover()}
-    </FieldPopover>
+      renderHeader={() => (
+        <FieldPopoverHeader
+          field={field}
+          closePopover={closePopover}
+          onAddFieldToWorkspace={!selected ? toggleDisplay : undefined}
+          onAddFilter={onAddFilter}
+          onEditField={onEditField}
+          onDeleteField={onDeleteField}
+          {...customPopoverHeaderProps}
+        />
+      )}
+      renderContent={renderPopover}
+      renderFooter={() => (
+        <FieldVisualizeButton
+          field={field}
+          dataView={dataView}
+          multiFields={rawMultiFields}
+          trackUiMetric={trackUiMetric}
+          contextualFields={contextualFields}
+          originatingApp={PLUGIN_ID}
+          uiActions={getUiActions()}
+        />
+      )}
+    />
   );
 }
 

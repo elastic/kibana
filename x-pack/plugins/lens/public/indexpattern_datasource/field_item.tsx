@@ -22,7 +22,8 @@ import {
   AddFieldFilterHandler,
   FieldStats,
   FieldPopover,
-  FieldPopoverProps,
+  FieldPopoverHeader,
+  FieldPopoverHeaderProps,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DragDrop } from '../drag_drop';
@@ -144,7 +145,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     [field, indexPattern.id, itemIndex]
   );
 
-  const buttonAddToWorkspaceProps: FieldPopoverProps['buttonAddFieldToWorkspaceProps'] =
+  const buttonAddToWorkspaceProps: FieldPopoverHeaderProps['buttonAddFieldToWorkspaceProps'] =
     useMemo(() => {
       const isEnabled = hasSuggestionForField(value);
       const buttonTitle = isEnabled
@@ -203,7 +204,10 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   return (
     <li>
       <FieldPopover
-        field={dataViewField}
+        isOpen={infoIsOpen}
+        closePopover={closePopover}
+        panelClassName="lnsFieldItem__fieldPanel"
+        initialFocus=".lnsFieldItem__fieldPanel"
         className="lnsFieldItem__popoverAnchor"
         data-test-subj="lnsFieldListPanelField"
         container={document.querySelector<HTMLElement>('.application') || undefined}
@@ -243,24 +247,27 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             />
           </DragDrop>
         }
-        isOpen={infoIsOpen}
-        closePopover={closePopover}
-        panelClassName="lnsFieldItem__fieldPanel"
-        initialFocus=".lnsFieldItem__fieldPanel"
-        buttonAddFieldToWorkspaceProps={buttonAddToWorkspaceProps}
-        onAddFieldToWorkspace={dropOntoWorkspaceAndClose}
-        onAddFilter={addFilterAndClose}
-        onEditField={editFieldAndClose}
-        onDeleteField={removeFieldAndClose}
-      >
-        {!hideDetails && infoIsOpen && (
-          <FieldItemPopoverContents
-            {...props}
-            dataViewField={dataViewField}
+        renderHeader={() => (
+          <FieldPopoverHeader
+            field={dataViewField}
+            closePopover={closePopover}
+            buttonAddFieldToWorkspaceProps={buttonAddToWorkspaceProps}
+            onAddFieldToWorkspace={dropOntoWorkspaceAndClose}
             onAddFilter={addFilterAndClose}
+            onEditField={editFieldAndClose}
+            onDeleteField={removeFieldAndClose}
           />
         )}
-      </FieldPopover>
+        renderContent={() =>
+          !hideDetails ? (
+            <FieldItemPopoverContents
+              {...props}
+              dataViewField={dataViewField}
+              onAddFilter={addFilterAndClose}
+            />
+          ) : null
+        }
+      />
     </li>
   );
 };

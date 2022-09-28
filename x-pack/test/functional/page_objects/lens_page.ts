@@ -292,15 +292,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async editField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click(`fieldPopoverTitle_editField-${field}`);
-        await testSubjects.missingOrFail(`fieldPopoverTitle_editField-${field}`);
+        await testSubjects.click(`fieldPopoverHeader_editField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_editField-${field}`);
       });
     },
 
     async removeField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click(`fieldPopoverTitle_deleteField-${field}`);
-        await testSubjects.missingOrFail(`fieldPopoverTitle_deleteField-${field}`);
+        await testSubjects.click(`fieldPopoverHeader_deleteField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_deleteField-${field}`);
       });
     },
 

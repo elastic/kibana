@@ -25,7 +25,7 @@ const titleStyles = css`
   text-transform: none;
 `;
 
-export interface FieldPopoverTitleProps {
+export interface FieldPopoverHeaderProps {
   field: DataViewField;
   closePopover: EuiPopoverProps['closePopover'];
   buttonAddFieldToWorkspaceProps?: Partial<EuiButtonIconProps>;
@@ -38,7 +38,7 @@ export interface FieldPopoverTitleProps {
   onDeleteField?: (fieldName: string) => unknown;
 }
 
-export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
+const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   field,
   closePopover,
   buttonAddFieldToWorkspaceProps,
@@ -85,12 +85,12 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
         </EuiTitle>
       </EuiFlexItem>
       {onAddFieldToWorkspace && (
-        <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_addField">
+        <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addField">
           <EuiToolTip
             content={buttonAddFieldToWorkspaceProps?.['aria-label'] ?? addFieldToWorkspaceTooltip}
           >
             <EuiButtonIcon
-              data-test-subj={`fieldPopoverTitle_addField-${field.name}`}
+              data-test-subj={`fieldPopoverHeader_addField-${field.name}`}
               aria-label={addFieldToWorkspaceTooltip}
               {...(buttonAddFieldToWorkspaceProps || {})}
               iconType="plusInCircleFilled"
@@ -103,10 +103,10 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
         </EuiFlexItem>
       )}
       {onAddFilter && field.filterable && !field.scripted && (
-        <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_addExistsFilter">
+        <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addExistsFilter">
           <EuiToolTip content={buttonAddFilterProps?.['aria-label'] ?? addExistsFilterTooltip}>
             <EuiButtonIcon
-              data-test-subj={`fieldPopoverTitle_addExistsFilter-${field.name}`}
+              data-test-subj={`fieldPopoverHeader_addExistsFilter-${field.name}`}
               aria-label={addExistsFilterTooltip}
               {...(buttonAddFilterProps || {})}
               iconType="filter"
@@ -120,10 +120,10 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
       )}
       {onEditField &&
         (field.isRuntimeField || !['unknown', 'unknown_selected'].includes(field.type)) && (
-          <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_editField">
+          <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_editField">
             <EuiToolTip content={buttonEditFieldProps?.['aria-label'] ?? editFieldTooltip}>
               <EuiButtonIcon
-                data-test-subj={`fieldPopoverTitle_editField-${field.name}`}
+                data-test-subj={`fieldPopoverHeader_editField-${field.name}`}
                 aria-label={editFieldTooltip}
                 {...(buttonEditFieldProps || {})}
                 iconType="pencil"
@@ -136,10 +136,10 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
           </EuiFlexItem>
         )}
       {onDeleteField && field.isRuntimeField && (
-        <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_deleteField">
+        <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_deleteField">
           <EuiToolTip content={buttonDeleteFieldProps?.['aria-label'] ?? deleteFieldTooltip}>
             <EuiButtonIcon
-              data-test-subj={`fieldPopoverTitle_deleteField-${field.name}`}
+              data-test-subj={`fieldPopoverHeader_deleteField-${field.name}`}
               aria-label={deleteFieldTooltip}
               {...(buttonDeleteFieldProps || {})}
               color="danger"
@@ -155,3 +155,7 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
     </EuiFlexGroup>
   );
 };
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FieldPopoverHeader;

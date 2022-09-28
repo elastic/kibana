@@ -129,8 +129,10 @@ describe('discover sidebar', function () {
     expect(props.editField).toHaveBeenCalledWith();
   });
 
-  it('should render "Edit field" button', () => {
+  it('should render "Edit field" button', async () => {
     findTestSubject(comp, 'field-bytes').simulate('click');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await comp.update();
     const editFieldButton = findTestSubject(comp, 'discoverFieldListPanelEdit-bytes');
     expect(editFieldButton.length).toBe(1);
     editFieldButton.simulate('click');

@@ -16,7 +16,19 @@ export type {
 } from '../common/types';
 export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
 export { FieldStats } from './components/field_stats';
-export { FieldPopover, type FieldPopoverProps } from './components/field_popover';
+export {
+  FieldPopover,
+  type FieldPopoverProps,
+  FieldPopoverHeader,
+  FieldPopoverHeaderProps,
+} from './components/field_popover';
+export {
+  FieldVisualizeButton,
+  type FieldVisualizeButtonProps,
+  getVisualizeInformation,
+  triggerVisualizeActions,
+  type VisualizeInformation,
+} from './components/field_visualize_button';
 export { loadFieldStats } from './services/field_stats';
 export { loadFieldExisting } from './services/field_existing';
 

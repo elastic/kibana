@@ -7,6 +7,7 @@
  */
 
 import {
+  type UiActionsStart,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeFieldTrigger,
@@ -14,8 +15,6 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { getUiActions } from '../../../../../kibana_services';
-import { PLUGIN_ID } from '../../../../../../common';
 
 export function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
@@ -30,12 +29,13 @@ function getTrigger(type: string) {
 }
 
 async function getCompatibleActions(
+  uiActions: UiActionsStart,
   fieldName: string,
   dataView: DataView,
   contextualFields: string[],
   trigger: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
-  const compatibleActions = await getUiActions().getTriggerCompatibleActions(trigger, {
+  const compatibleActions = await uiActions.getTriggerCompatibleActions(trigger, {
     dataViewSpec: dataView.toSpec(false),
     fieldName,
     contextualFields,
@@ -44,8 +44,10 @@ async function getCompatibleActions(
 }
 
 export function triggerVisualizeActions(
+  uiActions: UiActionsStart,
   field: DataViewField,
   contextualFields: string[],
+  originatingApp: string,
   dataView?: DataView
 ) {
   if (!dataView) return;
@@ -54,9 +56,9 @@ export function triggerVisualizeActions(
     dataViewSpec: dataView.toSpec(false),
     fieldName: field.name,
     contextualFields,
-    originatingApp: PLUGIN_ID,
+    originatingApp,
   };
-  getUiActions().getTrigger(trigger).exec(triggerOptions);
+  uiActions.getTrigger(trigger).exec(triggerOptions);
 }
 
 export interface VisualizeInformation {
@@ -69,6 +71,7 @@ export interface VisualizeInformation {
  * that has a compatible visualize uiAction.
  */
 export async function getVisualizeInformation(
+  uiActions: UiActionsStart,
   field: DataViewField,
   dataView: DataView | undefined,
   contextualFields: string[],
@@ -85,6 +88,7 @@ export async function getVisualizeInformation(
     }
     // Retrieve compatible actions for the specific field
     const actions = await getCompatibleActions(
+      uiActions,
       f.name,
       dataView,
       contextualFields,
