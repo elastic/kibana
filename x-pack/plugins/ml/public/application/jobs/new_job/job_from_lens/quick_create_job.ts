@@ -11,6 +11,8 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DashboardAppLocatorParams } from '@kbn/dashboard-plugin/public';
 
 import { Filter, Query, DataViewBase } from '@kbn/es-query';
 
@@ -33,6 +35,8 @@ import { createQueries } from '../utils/new_job_utils';
 import { isCompatibleLayer, createDetectors, getJobsItemsFromEmbeddable } from './utils';
 import { VisualizationExtractor } from './visualization_extractor';
 
+type Dashboard = Embeddable['parent'];
+
 interface CreationState {
   success: boolean;
   error?: ErrorType;
@@ -47,10 +51,11 @@ interface CreateState {
 
 export class QuickJobCreator {
   constructor(
-    private dataViewClient: DataViewsContract,
-    private kibanaConfig: IUiSettingsClient,
-    private timeFilter: TimefilterContract,
-    private mlApiServices: MlApiServices
+    private readonly dataViewClient: DataViewsContract,
+    private readonly kibanaConfig: IUiSettingsClient,
+    private readonly timeFilter: TimefilterContract,
+    private readonly share: SharePluginStart,
+    private readonly mlApiServices: MlApiServices
   ) {}
 
   public async createAndSaveJob(
@@ -61,7 +66,7 @@ export class QuickJobCreator {
     runInRealTime: boolean,
     layerIndex: number
   ): Promise<CreateState> {
-    const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
+    const { query, filters, to, from, vis, dashboard } = getJobsItemsFromEmbeddable(embeddable);
     if (query === undefined || filters === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');
     }
@@ -73,10 +78,10 @@ export class QuickJobCreator {
       query,
       filters,
       bucketSpan,
-
       layerIndex
     );
-    const job = {
+
+    const job: estypes.MlJob = {
       ...jobConfig,
       job_id: jobId,
       custom_settings: {
@@ -84,6 +89,7 @@ export class QuickJobCreator {
           jobType === JOB_TYPE.SINGLE_METRIC
             ? CREATED_BY_LABEL.SINGLE_METRIC_FROM_LENS
             : CREATED_BY_LABEL.MULTI_METRIC_FROM_LENS,
+        ...(await this.getCustomUrls(dashboard)),
       },
     };
 
@@ -329,5 +335,28 @@ export class QuickJobCreator {
     );
 
     return mergedQueries;
+  }
+
+  private async createDashboardLink(dashboard: Dashboard) {
+    if (dashboard === undefined) {
+      return null;
+    }
+
+    const _g = "&_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))";
+    const params: DashboardAppLocatorParams = {
+      dashboardId: dashboard.id,
+      timeRange: {
+        from: '$earliest$',
+        to: '$latest$',
+        mode: 'absolute',
+      },
+    };
+    const dashboardLocator = this.share.url.locators.get('DASHBOARD_APP_LOCATOR');
+    const url = await dashboardLocator?.getUrl(params);
+    return { url_name: 'Data dashboard', url_value: url };
+  }
+
+  private async getCustomUrls(dashboard?: Dashboard) {
+    return dashboard ? { custom_urls: [await this.createDashboardLink(dashboard)] } : {};
   }
 }
