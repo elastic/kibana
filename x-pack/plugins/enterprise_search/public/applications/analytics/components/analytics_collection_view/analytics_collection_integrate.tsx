@@ -49,7 +49,7 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
       description: analyticsDNSUrl,
     },
   ];
-  const webclientSrc = getEnterpriseSearchUrl('/analytics.js');
+  const webclientSrc = getEnterpriseSearchUrl('/analytics/client.js');
 
   return (
     <>

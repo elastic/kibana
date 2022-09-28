@@ -22,7 +22,7 @@ import type {
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
 } from '@kbn/core-rendering-server-internal';
-import { RequestHandlerContext } from '..';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import {
   InternalHttpResourcesSetup,
   HttpResources,
