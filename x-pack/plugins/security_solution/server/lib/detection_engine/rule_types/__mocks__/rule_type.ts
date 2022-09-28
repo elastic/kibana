@@ -114,7 +114,6 @@ export const createRuleTypeMocks = (
           params,
           alertId: v4(),
           state: {},
-          logger: loggerMock,
         }),
         runOpts: {
           completeRule: getCompleteRuleMock(params as QueryRuleParams),

@@ -55,19 +55,6 @@ const initialRuleState: TestRuleState = {
   groups: [],
 };
 
-const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
-
-const logger = {
-  trace: fakeLogger,
-  debug: fakeLogger,
-  info: fakeLogger,
-  warn: fakeLogger,
-  error: fakeLogger,
-  fatal: fakeLogger,
-  log: () => void 0,
-  get: () => logger,
-} as unknown as Logger;
-
 const mockOptions = {
   alertId: '',
   executionId: '',
@@ -112,7 +99,6 @@ const mockOptions = {
     ruleTypeId: '',
     ruleTypeName: '',
   },
-  logger,
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
@@ -1620,6 +1606,19 @@ const createMockStaticConfiguration = (sources: any) => ({
   },
   sources,
 });
+
+const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
+
+const logger = {
+  trace: fakeLogger,
+  debug: fakeLogger,
+  info: fakeLogger,
+  warn: fakeLogger,
+  error: fakeLogger,
+  fatal: fakeLogger,
+  log: () => void 0,
+  get: () => logger,
+} as unknown as Logger;
 
 const mockLibs: any = {
   sources: new InfraSources({
