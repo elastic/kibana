@@ -19,7 +19,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useHostRiskScore, useHostRiskScoreKpi } from '../../../../risk_score/containers';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
@@ -30,12 +30,14 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { hostsActions } from '../../../../hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import { RISKY_HOSTS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
+import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
+const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
 
 const EntityAnalyticsHostRiskScoresComponent = () => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -52,11 +54,6 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     return filter ? JSON.stringify(filter.query) : undefined;
   }, [selectedSeverity]);
 
-  const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
-    filterQuery: severityFilter,
-    skip: !toggleStatus,
-  });
-
   const timerange = useMemo(
     () => ({
       from,
@@ -65,6 +62,25 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     [from, to]
   );
 
+  const {
+    severityCount,
+    loading: isKpiLoading,
+    refetch: refetchKpi,
+    inspect: inspectKpi,
+  } = useHostRiskScoreKpi({
+    filterQuery: severityFilter,
+    skip: !toggleStatus,
+    timerange,
+  });
+
+  useQueryInspector({
+    queryId: HOST_RISK_KPI_QUERY_ID,
+    loading: isKpiLoading,
+    refetch: refetchKpi,
+    setQuery,
+    deleteQuery,
+    inspect: inspectKpi,
+  });
   const [
     isTableLoading,
     { data, inspect, refetch, isDeprecated, isLicenseValid, isModuleEnabled },
@@ -107,26 +123,28 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
+  const refreshPage = useRefetchQueries();
+
   if (!isLicenseValid) {
     return null;
   }
 
-  if (!isModuleEnabled) {
-    return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  if (!isModuleEnabled && !isTableLoading) {
+    return <EntityAnalyticsHostRiskScoreDisable refetch={refreshPage} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !isTableLoading) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.host}
-        refetch={refetch}
+        refetch={refreshPage}
         timerange={timerange}
       />
     );
   }
 
   if (isModuleEnabled && selectedSeverity.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} refetch={refreshPage} />;
   }
 
   return (
@@ -147,7 +165,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
               <EuiFlexItem>
                 <EuiButtonEmpty
                   rel="noopener nofollow noreferrer"
-                  href={RISKY_HOSTS_EXTERNAL_DOC_LINK}
+                  href={RISKY_HOSTS_DOC_LINK}
                   target="_blank"
                 >
                   {i18n.LEARN_MORE}
@@ -156,7 +174,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
               <EuiFlexItem grow={false}>
                 <SeverityFilterGroup
                   selectedSeverities={selectedSeverity}
-                  severityCount={severityCount}
+                  severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
                   title={i18n.HOST_RISK}
                   onSelect={setSelectedSeverity}
                 />
@@ -176,11 +194,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
         {toggleStatus && (
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
-              <RiskScoreDonutChart
-                severityCount={severityCount}
-                onClick={goToHostRiskTab}
-                href={hostRiskTabUrl}
-              />
+              <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
             </EuiFlexItem>
             <EuiFlexItem>
               <BasicTableWithoutBorderBottom
