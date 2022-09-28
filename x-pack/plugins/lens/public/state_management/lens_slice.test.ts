@@ -24,7 +24,13 @@ import {
 } from '.';
 import { layerTypes } from '../../common';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
-import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../types';
+import {
+  Datasource,
+  DatasourceMap,
+  Visualization,
+  VisualizationDimensionGroupConfig,
+  VisualizationMap,
+} from '../types';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
 import { DataViewsState, LensAppState } from './types';
 
@@ -109,7 +115,7 @@ describe('lensSlice', () => {
         })
       );
 
-      expect(store.getState().lens.visualization.state).toBe(newVisState);
+      expect(store.getState().lens.visualization.state).toEqual(newVisState);
     });
     it('should update the datasource state with passed in reducer', () => {
       const datasourceUpdater = jest.fn(() => ({ changed: true }));
@@ -301,8 +307,10 @@ describe('lensSlice', () => {
         testDatasource: testDatasource('testDatasource'),
         testDatasource2: testDatasource('testDatasource2'),
       };
+
+      const activeVisId = 'testVis';
       const visualizationMap = {
-        testVis: {
+        [activeVisId]: {
           clearLayer: (layerIds: unknown, layerId: string) =>
             (layerIds as string[]).map((id: string) =>
               id === layerId ? `vis_clear_${layerId}` : id
@@ -323,12 +331,12 @@ describe('lensSlice', () => {
             activeDatasourceId: 'testDatasource',
             datasourceStates,
             visualization: {
-              activeId: 'testVis',
+              activeId: activeVisId,
               state: ['layer1', 'layer2'],
             },
             stagedPreview: {
               visualization: {
-                activeId: 'testVis',
+                activeId: activeVisId,
                 state: ['layer1', 'layer2'],
               },
               datasourceStates,
@@ -358,6 +366,74 @@ describe('lensSlice', () => {
         ]);
         expect(state.datasourceStates.testDatasource2.state).toEqual(['layer2']);
         expect(state.stagedPreview).not.toBeDefined();
+      });
+
+      it('addLayer: syncs linked dimensions', () => {
+        const activeVisualization = visualizationMap[activeVisId];
+
+        activeVisualization.getLinkedDimensions = jest.fn(() => [
+          {
+            from: {
+              layerId: 'from-layer',
+              columnId: 'from-column',
+              groupId: 'from-group',
+            },
+            to: {
+              layerId: 'from-layer',
+              columnId: 'from-column',
+              groupId: 'from-group',
+            },
+          },
+        ]);
+        activeVisualization.getConfiguration = jest.fn(() => ({
+          groups: [{ groupId: 'to-group' } as VisualizationDimensionGroupConfig],
+        }));
+        activeVisualization.onDrop = jest.fn(({ prevState }) => prevState);
+        (datasourceMap.testDatasource as unknown as Datasource).onDrop = jest.fn(
+          ({ state, setState: setDatasourceState }) => {
+            setDatasourceState(state);
+            return true;
+          }
+        );
+
+        customStore.dispatch(
+          addLayer({
+            layerId: 'foo',
+            layerType: layerTypes.DATA,
+          })
+        );
+
+        expect(activeVisualization.onDrop).toHaveBeenCalledTimes(1);
+        expect({
+          ...(activeVisualization.onDrop as jest.Mock<Visualization['onDrop']>).mock.calls[0][0],
+          frame: undefined,
+        }).toMatchInlineSnapshot(`
+          Object {
+            "dropType": "duplicate_compatible",
+            "frame": undefined,
+            "group": undefined,
+            "prevState": Array [
+              "layer1",
+              "layer2",
+              "foo",
+            ],
+            "source": Object {
+              "columnId": "from-column",
+              "groupId": "from-group",
+              "humanData": Object {
+                "label": "",
+              },
+              "id": "from-column",
+              "layerId": "from-layer",
+            },
+            "target": Object {
+              "columnId": "from-column",
+              "filterOperations": [Function],
+              "groupId": "from-group",
+              "layerId": "from-layer",
+            },
+          }
+        `);
       });
 
       it('removeLayer: should remove the layer if it is not the only layer', () => {
@@ -494,6 +570,36 @@ describe('lensSlice', () => {
           })
         );
         expect(state.visualization.state).toEqual([otherCol]);
+      });
+
+      it('removes linked dimensions', () => {
+        visualizationMap[activeVisId].getLinkedDimensions = jest.fn(() => [
+          {
+            from: {
+              columnId: colToRemove,
+              layerId,
+              groupId: '',
+            },
+            to: {
+              columnId: otherCol,
+              layerId,
+              groupId: '',
+            },
+          },
+        ]);
+
+        customStore.dispatch(
+          removeDimension({
+            layerId,
+            columnId: colToRemove,
+            datasourceId,
+          })
+        );
+
+        const state = customStore.getState().lens;
+
+        expect(state.visualization.state).toEqual([]);
+        expect((state.datasourceStates[datasourceId].state as DatasourceState).cols).toEqual([]);
       });
     });
   });

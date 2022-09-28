@@ -466,6 +466,53 @@ export const getMetricVisualization = ({
     return newLayerId === state.trendlineLayerId ? [state.layerId] : [];
   },
 
+  getLinkedDimensions(state) {
+    if (!state.trendlineLayerId) {
+      return [];
+    }
+
+    const links: Array<{
+      from: { columnId: string; groupId: string; layerId: string };
+      to: {
+        columnId?: string;
+        groupId: string;
+        layerId: string;
+      };
+    }> = [];
+
+    if (state.metricAccessor) {
+      links.push({
+        from: {
+          columnId: state.metricAccessor,
+          groupId: GROUP_ID.METRIC,
+          layerId: state.layerId,
+        },
+        to: {
+          columnId: state.trendlineMetricAccessor,
+          groupId: GROUP_ID.TREND_METRIC,
+          layerId: state.trendlineLayerId,
+        },
+      });
+    }
+
+    if (state.breakdownByAccessor) {
+      links.push({
+        from: {
+          columnId: state.breakdownByAccessor,
+          groupId: GROUP_ID.BREAKDOWN_BY,
+          layerId: state.layerId,
+        },
+        to: {
+          columnId: state.trendlineBreakdownByAccessor,
+          groupId: GROUP_ID.TREND_BREAKDOWN_BY,
+          layerId: state.trendlineLayerId,
+        },
+      });
+    }
+
+    return links;
+  },
+
   toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
 

@@ -662,6 +662,67 @@ describe('metric visualization', () => {
     expect(visualization.getLayersToLinkTo!(fullStateWTrend, 'foo-id')).toEqual([]);
   });
 
+  describe('linked dimensions', () => {
+    it('doesnt report links when no trendline layer', () => {
+      expect(visualization.getLinkedDimensions!(fullState)).toHaveLength(0);
+    });
+
+    it('links metrics when present on leader layer', () => {
+      expect(
+        visualization.getLinkedDimensions!({ ...fullStateWTrend, breakdownByAccessor: undefined })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "from": Object {
+              "columnId": "metric-col-id",
+              "groupId": "metric",
+              "layerId": "first",
+            },
+            "to": Object {
+              "columnId": "trendline-metric-col-id",
+              "groupId": "trendMetric",
+              "layerId": "second",
+            },
+          },
+        ]
+      `);
+
+      const newColumnId = visualization.getLinkedDimensions!({
+        ...fullStateWTrend,
+        trendlineMetricAccessor: undefined,
+        breakdownByAccessor: undefined,
+      })[0].to.columnId;
+      expect(newColumnId).toBeUndefined();
+    });
+
+    it('links breakdowns when present', () => {
+      expect(visualization.getLinkedDimensions!({ ...fullStateWTrend, metricAccessor: undefined }))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "from": Object {
+              "columnId": "breakdown-col-id",
+              "groupId": "breakdownBy",
+              "layerId": "first",
+            },
+            "to": Object {
+              "columnId": "trendline-breakdown-col-id",
+              "groupId": "trendBreakdownBy",
+              "layerId": "second",
+            },
+          },
+        ]
+      `);
+
+      const newColumnId = visualization.getLinkedDimensions!({
+        ...fullStateWTrend,
+        metricAccessor: undefined,
+        trendlineBreakdownByAccessor: undefined,
+      })[0].to.columnId;
+      expect(newColumnId).toBeUndefined();
+    });
+  });
+
   it('gives a description', () => {
     expect(visualization.getDescription(fullState)).toMatchInlineSnapshot(`
       Object {

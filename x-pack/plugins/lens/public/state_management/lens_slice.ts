@@ -12,7 +12,14 @@ import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import type { VisualizeEditorContext, Suggestion, IndexPattern } from '../types';
+import type {
+  VisualizeEditorContext,
+  Suggestion,
+  IndexPattern,
+  VisualizationMap,
+  DatasourceMap,
+  IndexPatternMap,
+} from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import type { Datasource, Visualization } from '../types';
@@ -21,7 +28,8 @@ import type { LayerType } from '../../common/types';
 import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
-import { selectFramePublicAPI } from './selectors';
+import { selectDataViews, selectFramePublicAPI } from './selectors';
+import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -554,7 +562,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
     ) => {
-      return {
+      const newAppState = {
         ...state,
         datasourceStates: {
           ...state.datasourceStates,
@@ -567,6 +575,32 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           },
         },
         stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
+      };
+
+      const {
+        datasourceState: syncedDatasourceState,
+        visualizationState: syncedVisualizationState,
+      } = syncLinkedDimensions(
+        newAppState,
+        payload.datasourceId,
+        visualizationMap,
+        datasourceMap,
+        selectDataViews({ lens: state }).indexPatterns
+      );
+
+      return {
+        ...newAppState,
+        visualization: {
+          ...newAppState.visualization,
+          state: syncedVisualizationState,
+        },
+        datasourceStates: {
+          ...newAppState.datasourceStates,
+          [payload.datasourceId]: {
+            state: syncedDatasourceState,
+            isLoading: false,
+          },
+        },
       };
     },
     [updateVisualizationState.type]: (
@@ -589,13 +623,27 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       if (state.visualization.activeId !== payload.visualizationId) {
         return state;
       }
-      return {
-        ...state,
-        visualization: {
-          ...state.visualization,
-          state: payload.newState,
-        },
-      };
+
+      state.visualization.state = payload.newState;
+
+      if (!state.activeDatasourceId) {
+        return;
+      }
+
+      // TODO - consolidate into applySyncLinkedDimensions
+      const {
+        datasourceState: syncedDatasourceState,
+        visualizationState: syncedVisualizationState,
+      } = syncLinkedDimensions(
+        current(state),
+        state.activeDatasourceId,
+        visualizationMap,
+        datasourceMap,
+        selectDataViews({ lens: state }).indexPatterns
+      );
+
+      state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
+      state.visualization.state = syncedVisualizationState;
     },
 
     [switchVisualization.type]: (
@@ -976,6 +1024,20 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state.visualization.state = activeVisualizationState;
       state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
       state.stagedPreview = undefined;
+
+      const {
+        datasourceState: syncedDatasourceState,
+        visualizationState: syncedVisualizationState,
+      } = syncLinkedDimensions(
+        current(state),
+        state.activeDatasourceId,
+        visualizationMap,
+        datasourceMap,
+        framePublicAPI.dataViews.indexPatterns
+      );
+
+      state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
+      state.visualization.state = syncedVisualizationState;
     },
     [setLayerDefaultDimension.type]: (
       state,
@@ -1029,12 +1091,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       const activeVisualization = visualizationMap[state.visualization.activeId];
 
-      // TODO - should this logic be part of syncLinkedDimensionsFunction?
-      // const links = activeVisualization.getLinkedDimensions?.(state.visualization.state);
+      const links = activeVisualization.getLinkedDimensions?.(state.visualization.state);
 
-      // const linkedDimension = links?.find(
-      //   ({ from: { columnId: fromId } }) => columnId === fromId
-      // )?.to;
+      const linkedDimensions = links
+        ?.filter(({ from: { columnId: fromId } }) => columnId === fromId)
+        ?.map(({ to }) => to);
 
       const datasource = datasourceId ? datasourceMap[datasourceId] : undefined;
 
@@ -1042,27 +1103,41 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       const remove = (dimensionProps: { layerId: string; columnId: string }) => {
         if (datasource && datasourceId) {
+          let datasourceState;
+          try {
+            datasourceState = current(state.datasourceStates[datasourceId].state);
+          } catch {
+            datasourceState = state.datasourceStates[datasourceId].state;
+          }
           state.datasourceStates[datasourceId].state = datasource?.removeColumn({
             layerId: dimensionProps.layerId,
             columnId: dimensionProps.columnId,
-            prevState: current(state.datasourceStates[datasourceId].state),
+            prevState: datasourceState,
             indexPatterns: frame.dataViews.indexPatterns,
           });
         }
 
+        let visualizationState;
+        try {
+          visualizationState = current(state.visualization.state);
+        } catch {
+          visualizationState = state.visualization.state;
+        }
         state.visualization.state = activeVisualization.removeDimension({
           layerId: dimensionProps.layerId,
           columnId: dimensionProps.columnId,
-          prevState: current(state.visualization.state),
+          prevState: visualizationState,
           frame,
         });
       };
 
       remove({ layerId, columnId });
 
-      // if (linkedDimension && linkedDimension.columnId) {
-      //   remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId });
-      // }
+      linkedDimensions?.forEach(
+        (linkedDimension) =>
+          linkedDimension.columnId && // if there's no columnId, there's no dimension to remove
+          remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId })
+      );
     },
   });
 };
@@ -1138,4 +1213,72 @@ function addInitialValueIfAvailable({
     activeDatasourceState: datasourceState,
     activeVisualizationState: visualizationState,
   };
+}
+
+function syncLinkedDimensions(
+  state: LensAppState,
+  activeDatasourceId: string,
+  visualizationMap: VisualizationMap,
+  datasourceMap: DatasourceMap,
+  indexPatterns: IndexPatternMap
+) {
+  let datasourceState: unknown = state.datasourceStates[activeDatasourceId].state;
+  let visualizationState: unknown = state.visualization.state;
+
+  const activeVisualization = visualizationMap[state.visualization.activeId!]; // TODO - double check the safety of this coercion
+  const linkedDimensions = activeVisualization.getLinkedDimensions?.(visualizationState);
+  const frame = selectFramePublicAPI({ lens: state }, datasourceMap);
+
+  linkedDimensions?.forEach(({ from, to }) => {
+    const columnId = to.columnId ?? generateId();
+
+    const dropSource = {
+      ...from,
+      id: from.columnId,
+      // don't need to worry about accessibility here
+      humanData: { label: '' },
+    };
+
+    const dropTarget = {
+      ...to,
+      columnId,
+      filterOperations: () => true,
+    };
+
+    const dropType = 'duplicate_compatible';
+
+    // TODO - always call onDrop with the TARGET's dimension groups throughout Lens
+    const getDimensionGroups = () =>
+      activeVisualization.getConfiguration({
+        state: visualizationState,
+        layerId: to.layerId,
+        frame,
+      }).groups;
+
+    visualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
+      {
+        prevState: visualizationState,
+        frame,
+        target: dropTarget,
+        source: dropSource,
+        dropType,
+        group: getDimensionGroups().find(({ groupId }) => groupId === dropTarget.groupId),
+      },
+      activeVisualization
+    );
+
+    datasourceMap[activeDatasourceId].onDrop({
+      source: dropSource,
+      target: dropTarget,
+      state: datasourceState,
+      setState: (s) => {
+        datasourceState = s;
+      },
+      dimensionGroups: getDimensionGroups(),
+      dropType,
+      indexPatterns,
+    });
+  });
+
+  return { datasourceState, visualizationState };
 }

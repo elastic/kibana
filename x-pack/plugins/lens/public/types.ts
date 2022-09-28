@@ -969,10 +969,24 @@ export interface Visualization<T = unknown, P = unknown> {
     hideFromMenu?: boolean;
   }>;
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
+
   /**
    * Get the layers this one should be linked to (currently that means just keeping the data view in sync)
    */
   getLayersToLinkTo?: (state: T, newLayerId: string) => string[];
+
+  /**
+   * Returns a set of dimensions that should be kept in sync
+   */
+  getLinkedDimensions?: (state: T) => Array<{
+    from: { columnId: string; groupId: string; layerId: string };
+    to: {
+      columnId?: string;
+      groupId: string;
+      layerId: string;
+    };
+  }>;
+
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
 
