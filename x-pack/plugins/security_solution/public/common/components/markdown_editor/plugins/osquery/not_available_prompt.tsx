@@ -29,8 +29,7 @@ export const OsqueryNotAvailablePrompt = () => (
           id="xpack.securitySolution.markdown.osquery.missingPrivilleges"
           defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
           values={{
-            // eslint-disable-next-line react/jsx-no-literals
-            osquery: <EuiCode>osquery</EuiCode>,
+            osquery: <EuiCode>{'osquery'}</EuiCode>,
           }}
         />
       </p>

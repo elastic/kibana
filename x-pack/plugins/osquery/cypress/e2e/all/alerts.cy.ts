@@ -8,7 +8,6 @@
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
-  checkResults,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
@@ -117,15 +116,15 @@ describe('Alert Event Details', () => {
     cy.contains('select * from uptime');
   });
   // TODO think on how to get these actions triggered faster (because now they are not triggered during the test).
-  it.skip('sees osquery results from last action', () => {
-    cy.visit('/app/security/alerts');
-    cy.getBySel('header-page-title').contains('Alerts').should('exist');
-    cy.getBySel('expand-event').first().click({ force: true });
-    cy.contains('Osquery Results').click();
-    cy.getBySel('osquery-results').should('exist');
-    cy.contains('select * from uptime');
-    cy.getBySel('osqueryResultsTable').within(() => {
-      checkResults();
-    });
-  });
+  // it.skip('sees osquery results from last action', () => {
+  //   cy.visit('/app/security/alerts');
+  //   cy.getBySel('header-page-title').contains('Alerts').should('exist');
+  //   cy.getBySel('expand-event').first().click({ force: true });
+  //   cy.contains('Osquery Results').click();
+  //   cy.getBySel('osquery-results').should('exist');
+  //   cy.contains('select * from uptime');
+  //   cy.getBySel('osqueryResultsTable').within(() => {
+  //     checkResults();
+  //   });
+  // });
 });
