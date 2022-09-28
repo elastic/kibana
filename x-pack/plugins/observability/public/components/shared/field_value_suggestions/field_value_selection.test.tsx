@@ -48,7 +48,7 @@ describe('FieldValueSelection', () => {
       </EuiThemeProvider>
     );
 
-    const btn = wrapper.find(EuiButton);
+    const btn = wrapper.find('button[data-test-subj="fieldValueSelectionBtn"]');
     btn.simulate('click');
 
     const list = wrapper.find(EuiSelectableList);
