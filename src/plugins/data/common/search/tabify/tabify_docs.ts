@@ -12,7 +12,7 @@ import { IndexPattern } from '../..';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
 // meta fields we won't merge with our result hit
-const EXCLUDED_META_FIELDS: string[] = ['_type', '_source'];
+const EXCLUDED_META_FIELDS: string[] = ['_source'];
 
 export interface TabifyDocsOptions {
   shallow?: boolean;
