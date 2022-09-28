@@ -136,14 +136,14 @@ describe('Related integrations', () => {
         waitForRulesTableToShow();
       });
 
-      it.skip('should display a badge with the installed integrations on the rule management page', () => {
+      it('should display a badge with the installed integrations on the rule management page', () => {
         cy.get(INTEGRATIONS_POPOVER).should(
           'have.text',
           `${rule.enabledIntegrations}/${rule.integrations.length} integrations`
         );
       });
 
-      it.skip('should display a popover when clicking the badge with the installed integrations on the rule management page', () => {
+      it('should display a popover when clicking the badge with the installed integrations on the rule management page', () => {
         openIntegrationsPopover();
 
         cy.get(INTEGRATIONS_POPOVER_TITLE).should(
@@ -162,7 +162,7 @@ describe('Related integrations', () => {
         });
       });
 
-      it.skip('should display the integrations on the definition section', () => {
+      it('should display the integrations on the definition section', () => {
         goToTheRuleDetailsOf(rule.name);
 
         cy.get(INTEGRATIONS).should('have.length', rule.integrations.length);
