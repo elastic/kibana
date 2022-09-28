@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KueryNode } from '@kbn/es-query';
 import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
@@ -21,7 +22,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 export type ComponentOpts = {
   selectedItems: RuleTableItem[];
   isAllSelected?: boolean;
-  getFilter: () => string;
+  getFilter: () => KueryNode | null;
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
   isSnoozingRules?: boolean;
@@ -35,11 +36,11 @@ export type ComponentOpts = {
   setRulesToUnsnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
   setRulesToSchedule: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
   setRulesToUnschedule: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
-  setRulesToSnoozeFilter: React.Dispatch<React.SetStateAction<string>>;
-  setRulesToUnsnoozeFilter: React.Dispatch<React.SetStateAction<string>>;
-  setRulesToScheduleFilter: React.Dispatch<React.SetStateAction<string>>;
-  setRulesToUnscheduleFilter: React.Dispatch<React.SetStateAction<string>>;
-  setRulesToUpdateAPIKeyFilter: React.Dispatch<React.SetStateAction<string>>;
+  setRulesToSnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToUnsnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToScheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToUnscheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToUpdateAPIKeyFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
 } & BulkOperationsComponentOpts;
 
 const ButtonWithTooltip = ({
