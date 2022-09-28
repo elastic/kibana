@@ -67,7 +67,6 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     return {
       ...response,
       data: fieldsData,
-      fields,
       ecs,
       inspect,
       rawEventData,

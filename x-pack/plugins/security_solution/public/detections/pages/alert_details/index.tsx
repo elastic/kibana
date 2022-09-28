@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { Switch, useParams } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
+import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -30,14 +31,7 @@ export const AlertDetailsPage = memo(() => {
   // TODO: We should update useTimelineEventDetails to use useQuery and have a refetching tracker
   const { runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   const spaceAlertsIndexAlias = `${DEFAULT_ALERTS_INDEX}-${currentSpaceId}`;
-  const [
-    loading,
-    detailsData,
-    rawEventData,
-    ecsData,
-    refetchEventData,
-    eventDetailsFieldsResponse,
-  ] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData, ecsData, refetchEventData] = useTimelineEventsDetails({
     indexName: spaceAlertsIndexAlias,
     eventId,
     runtimeMappings,
@@ -46,11 +40,9 @@ export const AlertDetailsPage = memo(() => {
   const dataNotFound = !loading && !detailsData;
   const hasData = !loading && detailsData;
 
-  const getFieldsData = useGetFieldsData(eventDetailsFieldsResponse);
-  if (!eventDetailsFieldsResponse) return null;
-
-  const timestamp = getFieldsData('@timestamp');
-  const ruleName = getFieldsData('kibana.alert.rule.name');
+  const getFieldsData = useGetFieldsData(rawEventData?.fields);
+  const timestamp = getFieldsData(TIMESTAMP);
+  const ruleName = getFieldsData(ALERT_RULE_NAME);
 
   return (
     <>

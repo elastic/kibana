@@ -6,14 +6,20 @@
  */
 
 import { useMemo } from 'react';
+import type { SearchHit } from '../../../../../common/search_strategy';
 
 export const useGetFieldsData = (
-  fieldsData: Record<string, string[]> | null
+  fieldsData: SearchHit['fields'] | undefined
 ): ((field: string) => string | undefined) => {
   const cachedFieldsData = useMemo(() => fieldsData, [fieldsData]);
 
   return (field: string) => {
-    const fieldArray = cachedFieldsData ? cachedFieldsData[field] : undefined;
-    return fieldArray ? fieldArray[0] : undefined;
+    const fieldValue = cachedFieldsData ? cachedFieldsData[field] : undefined;
+    if (Array.isArray(fieldValue)) {
+      if (fieldValue.length === 0) return null;
+      if (fieldValue.length === 1) return fieldValue[0];
+      if (fieldValue.length > 1) return fieldValue;
+    }
+    return fieldValue;
   };
 };
