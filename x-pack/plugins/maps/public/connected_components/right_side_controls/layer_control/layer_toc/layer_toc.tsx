@@ -14,6 +14,7 @@ import { ILayer } from '../../../../classes/layers/layer';
 export interface Props {
   isReadOnly: boolean;
   layerList: ILayer[];
+  createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) => void;
   updateLayerOrder: (newOrder: number[]) => void;
 }
 
@@ -29,7 +30,12 @@ export class LayerTOC extends Component<Props> {
 
   _updateDebounced = _.debounce(this.forceUpdate, 100);
 
-  _onDragEnd = ({ source, destination }: DropResult) => {
+  _onDragEnd = ({ combine, destination, source }: DropResult) => {
+    if (combine) {
+      this.props.createLayerGroup(this.props.layerList[source.index].getId(), combine.draggableId);
+      return;
+    }
+
     // Dragging item out of EuiDroppable results in destination of null
     if (!destination) {
       return;
@@ -64,7 +70,7 @@ export class LayerTOC extends Component<Props> {
 
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
-        <EuiDroppable droppableId="mapLayerTOC" spacing="none">
+        <EuiDroppable droppableId="mapLayerTOC" spacing="none" isCombineEnabled={true}>
           {(droppableProvided, snapshot) => {
             const tocEntries = reverseLayerList.map((layer, idx: number) => (
               <EuiDraggable
@@ -75,14 +81,20 @@ export class LayerTOC extends Component<Props> {
                 customDragHandle={true}
                 disableInteractiveElementBlocking // Allows button to be drag handle
               >
-                {(provided, state) => (
+                {(provided, state) => {
+                  if (state.combineWith) {
+                    //console.log('state.combineWith', state.combineWith);
+                    //console.log('state.combineTargetFor', state.combineTargetFor);
+                  }
+                  return (
                   <TOCEntry
                     layer={layer}
                     dragHandleProps={provided.dragHandleProps}
                     isDragging={state.isDragging}
+                    isCombining={!!state.combineWith}
                     isDraggingOver={snapshot.isDraggingOver}
                   />
-                )}
+                )}}
               </EuiDraggable>
             ));
             return <div>{tocEntries}</div>;

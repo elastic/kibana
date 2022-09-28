@@ -9,7 +9,7 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { LayerTOC } from './layer_toc';
-import { updateLayerOrder } from '../../../../actions';
+import { createLayerGroup, updateLayerOrder } from '../../../../actions';
 import { getLayerList } from '../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../selectors/ui_selectors';
 import { MapStoreState } from '../../../../reducers/store';
@@ -23,6 +23,7 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
+    createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) => dispatch(createLayerGroup(draggedLayerId, combineWithLayerId)),
     updateLayerOrder: (newOrder: number[]) => dispatch(updateLayerOrder(newOrder)),
   };
 }

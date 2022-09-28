@@ -811,3 +811,9 @@ function hasByValueStyling(styleDescriptor: StyleDescriptor) {
     })
   );
 }
+
+export function createLayerGroup(draggedLayerId: string, combineWithLayerId: string) {
+  console.log('draggedLayerId: ', draggedLayerId);
+  console.log('combineWithLayerId: ', combineWithLayerId);
+  return;
+}

@@ -48,6 +48,7 @@ export interface OwnProps {
   dragHandleProps?: DraggableProvidedDragHandleProps;
   isDragging?: boolean;
   isDraggingOver?: boolean;
+  isCombining?: boolean;
 }
 
 type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
@@ -226,7 +227,7 @@ export class TOCEntry extends Component<Props, State> {
   }
 
   _renderDetailsToggle() {
-    if (!this.state.hasLegendDetails) {
+    if (this.props.isDragging || !this.state.hasLegendDetails) {
       return null;
     }
 
@@ -312,6 +313,7 @@ export class TOCEntry extends Component<Props, State> {
   render() {
     const classes = classNames('mapTocEntry', {
       'mapTocEntry-isDragging': this.props.isDragging,
+      'mapTocEntry-isCombining': this.props.isCombining,
       'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
       'mapTocEntry-isSelected':
         this.props.layer.isPreviewLayer() ||
