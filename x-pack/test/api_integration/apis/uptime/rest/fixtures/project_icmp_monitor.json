@@ -14,7 +14,6 @@
       "schedule": 1,
       "tags": [ "service:smtp", "org:google" ],
       "privateLocations": [ "Test private location 0" ],
-      "content": "",
       "wait": "30s"
     },
     {
@@ -26,7 +25,6 @@
       "schedule": 1,
       "tags": "tag1,tag2",
       "privateLocations": [ "Test private location 0" ],
-      "content": "",
       "wait": "1m"
     },
     {
@@ -34,11 +32,10 @@
       "type": "icmp",
       "id": "Cloudflare-DNS-3",
       "name": "Cloudflare DNS 3",
-      "hosts": "1.1.1.1",
+      "hosts": "1.1.1.1,2.2.2.2",
       "schedule": 1,
       "tags": "tag1,tag2",
       "privateLocations": [ "Test private location 0" ],
-      "content": "",
       "unsupportedKey": {
         "nestedUnsupportedKey": "unnsuportedValue"
       }

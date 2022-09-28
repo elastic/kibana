@@ -79,7 +79,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
         resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
         resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
-        resetField('removed');
+        resetField('removed', { defaultValue: savedQuery.removed });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
       }
     },
