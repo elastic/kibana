@@ -54,7 +54,7 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
   return conditionalOperationType ? (
     <>
       <span className={paddingLeft}>
-        <EuiTextColor color="rgb(0, 113, 194)"> ( </EuiTextColor>
+        <EuiTextColor color="rgb(0, 113, 194)">(</EuiTextColor>
       </span>
       <FilterBadgeGroup
         filters={Array.isArray(filter) ? filter : filter.meta?.params}
@@ -62,7 +62,7 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
         conditionType={conditionalOperationType}
       />
       <span className={paddingRight}>
-        <EuiTextColor color="rgb(0, 113, 194)"> ) </EuiTextColor>
+        <EuiTextColor color="rgb(0, 113, 194)">)</EuiTextColor>
       </span>
     </>
   ) : (
