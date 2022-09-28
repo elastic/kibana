@@ -84,7 +84,6 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     (id: string, index: number) => {
       const updatedActions = [...(actions as Array<Partial<RuleAction>>)];
       updatedActions[index] = deepMerge(updatedActions[index], { id });
-      console.log('setActionIdByIndex', JSON.stringify(updatedActions, null, 2));
       field.setValue(updatedActions);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,8 +107,6 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
             [key]: value,
           },
         };
-        console.log('setActionParamsProperty', JSON.stringify(updatedActions, null, 2));
-
         return updatedActions;
       });
     },
