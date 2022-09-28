@@ -13,19 +13,9 @@ describe('selectors', () => {
   describe('timelineBodySelector', () => {
     it('returns the expected results', () => {
       const expected = mockGlobalState.timeline.timelineById[TimelineId.test];
-      const { dataViewId, documentType, defaultColumns, isLoading, queryFields, title } = expected;
-
       const id = TimelineId.test;
 
       expect(timelineBodySelector(mockGlobalState, id)).toEqual({
-        manageTimelineById: {
-          dataViewId,
-          documentType,
-          defaultColumns,
-          isLoading,
-          queryFields,
-          title,
-        },
         timeline: expected,
       });
     });

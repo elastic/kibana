@@ -169,7 +169,7 @@ describe('HostName', () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
-      timelineID: 'detection',
+      timelineID: TimelineId.test,
       tabType: TimelineTabs.query,
     };
     const wrapper = mount(

@@ -6,7 +6,6 @@
  */
 
 import { createSelector } from 'reselect';
-import { getTableByIdSelector } from '../../../../store/data_table/selectors';
 
 import { getTimelineByIdSelector } from '../../../../store/timeline/selectors';
 
@@ -22,11 +21,6 @@ import { getTimelineByIdSelector } from '../../../../store/timeline/selectors';
  *  `useSelector((state: State) => timelineBodySelector(state, id))`
  */
 
-export const timelineBodySelector = createSelector(
-  getTableByIdSelector(),
-  getTimelineByIdSelector(),
-  (tGrid, timeline) => ({
-    tGrid,
-    timeline,
-  })
-);
+export const timelineBodySelector = createSelector(getTimelineByIdSelector(), (timeline) => ({
+  timeline,
+}));

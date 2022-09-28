@@ -81,7 +81,6 @@ export const StatefulBody = React.memo<Props>(
     const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const {
-      // tGrid: { queryFields },
       timeline: {
         columns,
         eventIdToNoteIds,

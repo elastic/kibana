@@ -15,7 +15,7 @@ import type {
   ColumnHeaderOptions,
   CellValueElementProps,
 } from '../../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 
 import { StatefulCell } from './stateful_cell';
 import { useGetMappedNonEcsValue } from '.';
@@ -56,7 +56,7 @@ describe('StatefulCell', () => {
   const eventId = '_id-123';
   const linkValues = ['foo', 'bar', '@baz'];
   const tabType = TimelineTabs.query;
-  const timelineId = 'test';
+  const timelineId = TimelineId.test;
 
   let header: ColumnHeaderOptions;
   let data: TimelineNonEcsData[];
@@ -94,7 +94,7 @@ describe('StatefulCell', () => {
         linkValues,
         rowIndex,
         colIndex,
-        timelineId: `${timelineId}-${tabType}`,
+        scopeId: timelineId,
       })
     );
   });
@@ -127,7 +127,7 @@ describe('StatefulCell', () => {
         linkValues,
         rowIndex,
         colIndex,
-        timelineId,
+        scopeId: timelineId,
       })
     );
   });

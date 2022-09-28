@@ -143,7 +143,7 @@ describe('StatefulTimeline', () => {
     );
     expect(
       wrapper
-        .find(`[data-timeline-id="test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
         .first()
         .exists()
     ).toEqual(true);
@@ -229,7 +229,7 @@ describe('StatefulTimeline', () => {
     expect(mockDispatch).toBeCalledTimes(1);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
       payload: {
-        id: [TimelineId.test],
+        id: TimelineId.test,
         dataViewId: mockDataView.dataViewId,
         indexNames: mockIndexNames,
       },
