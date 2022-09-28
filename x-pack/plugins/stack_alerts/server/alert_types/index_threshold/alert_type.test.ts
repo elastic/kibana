@@ -22,7 +22,7 @@ describe('alertType', () => {
   };
   const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-  const alertType = getAlertType(logger, Promise.resolve(data));
+  const alertType = getAlertType(Promise.resolve(data));
 
   afterEach(() => {
     data.timeSeriesQuery.mockReset();
@@ -206,6 +206,7 @@ describe('alertType', () => {
         throttle: null,
         notifyWhen: null,
       },
+      logger,
     });
 
     expect(alertServices.alertFactory.create).toHaveBeenCalledWith('all documents');
@@ -272,6 +273,7 @@ describe('alertType', () => {
         throttle: null,
         notifyWhen: null,
       },
+      logger,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -338,6 +340,7 @@ describe('alertType', () => {
         throttle: null,
         notifyWhen: null,
       },
+      logger,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();

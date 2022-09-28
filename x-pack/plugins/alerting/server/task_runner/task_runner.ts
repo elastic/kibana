@@ -392,6 +392,7 @@ export class TaskRunner<
                 throttle,
                 notifyWhen,
               },
+              logger: this.logger.get(rule.alertTypeId.substring(1)),
             })
           );
 
