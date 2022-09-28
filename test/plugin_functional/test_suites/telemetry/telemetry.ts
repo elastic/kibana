@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common']);
 
-  describe('Telemetry service', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/107034
+  describe.skip('Telemetry service', () => {
     const checkCanSendTelemetry = (): Promise<boolean> => {
       return browser.executeAsync<boolean>((cb) => {
         (window as unknown as Record<string, () => Promise<boolean>>)
