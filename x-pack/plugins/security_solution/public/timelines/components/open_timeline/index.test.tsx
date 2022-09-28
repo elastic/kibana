@@ -372,7 +372,7 @@ describe('StatefulOpenTimeline', () => {
       );
       wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
       wrapper.find('[data-test-subj="delete-timeline"]').first().simulate('click');
-      wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
       await waitFor(() => {
         wrapper.update();

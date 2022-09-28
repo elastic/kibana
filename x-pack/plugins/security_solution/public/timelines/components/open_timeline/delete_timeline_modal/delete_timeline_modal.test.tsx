@@ -126,7 +126,7 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
     expect(onDelete).toBeCalled();
   });
