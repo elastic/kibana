@@ -163,3 +163,7 @@ export const hasIndexPatterns = (indexPatterns: string) => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
   });
 };
+
+export const goToRuleEditSettings = () => {
+  cy.contains('Edit rule settings').click();
+};
