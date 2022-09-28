@@ -14,10 +14,12 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiFormRow,
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { useLicense } from '../../../../../../common/hooks/use_license';
 import {
   ALL_EVENTS,
   CLOUD_SECURITY,
@@ -26,6 +28,8 @@ import {
   EDR_ESSENTIAL,
   ENDPOINT,
   INTERACTIVE_ONLY,
+  NGAV_NOTE,
+  EDR_NOTE,
 } from './translations';
 
 const PREFIX = 'endpoint_policy_create_extension';
@@ -38,9 +42,18 @@ const environmentMapping = {
 };
 
 const endpointPresetsMapping = {
-  NGAV,
-  EDREssential: EDR_ESSENTIAL,
-  EDRComplete: EDR_COMPLETE,
+  NGAV: {
+    label: NGAV,
+    note: NGAV_NOTE,
+  },
+  EDREssential: {
+    label: EDR_ESSENTIAL,
+    note: EDR_NOTE,
+  },
+  EDRComplete: {
+    label: EDR_COMPLETE,
+    note: EDR_NOTE,
+  },
 };
 
 const cloudEventMapping = {
@@ -67,11 +80,20 @@ const HelpTextWithPadding = styled.div`
  */
 export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isEnterprise = useLicense().isEnterprise();
+
     // / Endpoint Radio Options (NGAV and EDRs)
     const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('NGAV');
     const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('ALL_EVENTS');
     const [selectedEnvironment, setSelectedEnvironment] = useState<Environment>('endpoint');
     const initialRender = useRef(true);
+
+    // Show NGAV license note when Gold and below
+    // Show other licenses note when Platinum and Below
+    const showNote =
+      (endpointPreset === 'NGAV' && !isPlatinumPlus) ||
+      (endpointPreset !== 'NGAV' && !isEnterprise);
 
     // Fleet will initialize the create form with a default name for the integrating policy, however,
     // for endpoint security, we want the user to explicitly type in a name, so we blank it out
@@ -156,7 +178,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     const getEndpointPresetsProps = useCallback(
       (preset: EndpointPreset) => ({
         id: `${PREFIX}_endpoint_preset_${preset}`,
-        label: endpointPresetsMapping[preset],
+        label: endpointPresetsMapping[preset].label,
         value: preset,
         checked: endpointPreset === preset,
         onChange: onChangeEndpointPreset,
@@ -196,7 +218,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   <strong>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.environments"
-                      defaultMessage="protect your tranditional endpoints or dynamic cloud environments"
+                      defaultMessage="protect your traditional endpoints or dynamic cloud environments"
                     />
                   </strong>
                 ),
@@ -231,7 +253,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <HelpTextWithPadding>
                   <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointNGAV"
-                    defaultMessage="Prevents Malware, Ransomware and Memory Threats and provides process telemetry"
+                    defaultMessage="Machine learning malware, ransomware, memory threat, malicious behavior, and credential theft preventions, with process telemetry"
                   />
                 </HelpTextWithPadding>
               }
@@ -245,7 +267,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <HelpTextWithPadding>
                   <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDREssential"
-                    defaultMessage="Endpoint Alerts, Process Events, Network Events, File Events"
+                    defaultMessage="Everything in NGAV, with file and network telemetry"
                   />
                 </HelpTextWithPadding>
               }
@@ -259,13 +281,23 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <HelpTextWithPadding>
                   <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDRComplete"
-                    defaultMessage="Endpoint Alerts, Full Event capture"
+                    defaultMessage="Everything in EDR Essential, plus full telemetry"
                   />
                 </HelpTextWithPadding>
               }
             >
               <EuiRadio {...getEndpointPresetsProps('EDRComplete')} />
             </EuiFormRow>
+            {showNote && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut iconType="iInCircle">
+                  <EuiText size="s">
+                    <p>{endpointPresetsMapping[endpointPreset].note}</p>
+                  </EuiText>
+                </EuiCallOut>
+              </>
+            )}
           </>
         ) : (
           <>
