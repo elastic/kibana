@@ -18,12 +18,17 @@ const metricAggFilter: string[] = [
   '!percentile_ranks',
   '!median',
   '!std_dev',
+  '!sum_bucket',
+  '!avg_bucket',
+  '!min_bucket',
+  '!max_bucket',
   '!derivative',
   '!moving_avg',
   '!serial_diff',
   '!cumulative_sum',
   '!geo_bounds',
   '!geo_centroid',
+  '!filtered_metric',
   '!single_percentile',
 ];
 const bucketAggFilter: string[] = ['!filter', '!sampler', '!diversified_sampler', '!multi_terms'];

@@ -191,6 +191,90 @@ describe('AggConfig', () => {
       expect(dsl.aggs[medianConfig.id]).toHaveProperty('percentiles');
       expect(dsl.aggs[medianConfig.id].percentiles).toBe(football);
     });
+
+    it('properly handles nested sibling pipeline aggregations', () => {
+      const customBucket = {
+        id: '1-bucket',
+        type: 'date_histogram',
+        params: {
+          field: '@timestamp',
+          interval: '1h',
+        },
+      };
+      const customMetric = {
+        id: '1-metric',
+        type: 'avg_bucket',
+        params: {
+          customBucket: {
+            id: '1-metric-bucket',
+            type: 'date_histogram',
+            params: {
+              field: '@timestamp',
+              interval: '30m',
+            },
+          },
+          customMetric: {
+            id: '1-metric-metric',
+            type: 'sum',
+            params: {
+              field: 'bytes',
+            },
+          },
+        },
+      };
+      const configStates = [
+        {
+          id: '1',
+          type: 'avg_bucket',
+          params: {
+            customBucket,
+            customMetric,
+          },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+      const dsl = ac.toDsl();
+
+      expect(dsl).toMatchInlineSnapshot(`
+        Object {
+          "1": Object {
+            "avg_bucket": Object {
+              "buckets_path": "1-bucket>1-metric",
+            },
+          },
+          "1-bucket": Object {
+            "aggs": Object {
+              "1-metric": Object {
+                "avg_bucket": Object {
+                  "buckets_path": "1-metric-bucket>1-metric-metric",
+                },
+              },
+              "1-metric-bucket": Object {
+                "aggs": Object {
+                  "1-metric-metric": Object {
+                    "sum": Object {
+                      "field": "bytes",
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "field": "@timestamp",
+                  "fixed_interval": "30m",
+                  "min_doc_count": 1,
+                  "time_zone": "dateFormat:tz",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "calendar_interval": "1h",
+              "field": "@timestamp",
+              "min_doc_count": 1,
+              "time_zone": "dateFormat:tz",
+            },
+          },
+        }
+      `);
+    });
   });
 
   describe('::ensureIds', () => {
