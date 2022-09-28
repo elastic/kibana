@@ -270,6 +270,59 @@ describe('TagsAddRemove', () => {
     );
   });
 
+  it('should add new tag twice quickly when not found in search and button clicked - bulk selection', () => {
+    mockBulkUpdateTags.mockImplementation((agents, tagsToAdd, tagsToRemove, onSuccess) =>
+      onSuccess(false)
+    );
+
+    const result = renderComponent(undefined, 'query');
+    const searchInput = result.getByRole('combobox');
+
+    fireEvent.input(searchInput, {
+      target: { value: 'newTag' },
+    });
+
+    fireEvent.click(result.getAllByText('Create a new tag "newTag"')[0].closest('button')!);
+
+    fireEvent.input(searchInput, {
+      target: { value: 'newTag2' },
+    });
+
+    fireEvent.click(result.getAllByText('Create a new tag "newTag2"')[0].closest('button')!);
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      'query',
+      ['newTag2', 'newTag'],
+      [],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
+    );
+  });
+
+  it('should remove tags twice quickly on bulk selection', () => {
+    selectedTags = ['tag1', 'tag2'];
+    mockBulkUpdateTags.mockImplementation((agents, tagsToAdd, tagsToRemove, onSuccess) =>
+      onSuccess(false)
+    );
+
+    const result = renderComponent(undefined, '');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag1'));
+
+    fireEvent.click(getTag('tag2'));
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      '',
+      [],
+      ['tag2', 'tag1'],
+      expect.anything(),
+      undefined,
+      undefined
+    );
+  });
+
   it('should make tag options button visible on mouse enter', async () => {
     const result = renderComponent('agent1');
 
