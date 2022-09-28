@@ -277,12 +277,11 @@ export function DashboardTopNav({
       }
 
       if (
-        newCopyOnSave &&
         !(await checkForDuplicateDashboardTitle({
           title: newTitle,
           onTitleDuplicate,
           lastSavedTitle: currentState.title,
-          copyOnSave: true,
+          copyOnSave: newCopyOnSave,
           isTitleDuplicateConfirmed,
         }))
       ) {
