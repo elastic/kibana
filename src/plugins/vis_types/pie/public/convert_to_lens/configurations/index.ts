@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
+import { LegendDisplay, PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
 
@@ -16,6 +16,9 @@ const getLayers = (
   metrics: string[],
   buckets: string[]
 ) => {
+  const legendOpen = vis.uiState.get('vis.legendOpen');
+  const legendDisplayFromUiState =
+    legendOpen !== undefined ? (legendOpen ? LegendDisplay.SHOW : LegendDisplay.HIDE) : undefined;
   return [
     {
       layerId,
@@ -26,7 +29,10 @@ const getLayers = (
       numberDisplay:
         vis.params.labels.valuesFormat ?? vis.type.visConfig.defaults.labels.valuesFormat,
       categoryDisplay: vis.params.labels.position ?? vis.type.visConfig.defaults.labels.position,
-      legendDisplay: vis.params.legendDisplay ?? vis.type.visConfig.defaults.legendDisplay,
+      legendDisplay:
+        legendDisplayFromUiState ??
+        vis.params.legendDisplay ??
+        vis.type.visConfig.defaults.legendDisplay,
       legendPosition: vis.params.legendPosition ?? vis.type.visConfig.defaults.legendPosition,
       showValuesInLegend:
         vis.params.showValuesInLegend ?? vis.type.visConfig.defaults.showValuesInLegend,
