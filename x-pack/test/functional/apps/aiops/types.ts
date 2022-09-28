@@ -10,7 +10,16 @@ export interface TestData {
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;
   rowsPerPage?: 10 | 25 | 50;
+  brushTargetTimestamp: number;
   expected: {
     totalDocCountFormatted: string;
+    analysisGroupsTable: Array<{ group: string; docCount: string }>;
+    analysisTable: Array<{
+      fieldName: string;
+      fieldValue: string;
+      logRate: string;
+      pValue: string;
+      impact: string;
+    }>;
   };
 }

@@ -53,6 +53,10 @@ export interface BoundsRequestMeta {
   applyGlobalTime: boolean;
   filters: Filter[];
   query?: Query;
+  embeddableSearchContext?: {
+    query?: Query;
+    filters: Filter[];
+  };
   sourceQuery?: Query;
   timeFilters: TimeRange;
   timeslice?: Timeslice;

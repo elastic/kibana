@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { set as lodashSet } from '@elastic/safer-lodash-set';
+import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';

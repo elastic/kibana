@@ -219,21 +219,13 @@ describe('EditConnector ', () => {
     expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeFalsy();
   });
 
-  it('displays the callout message when none is selected', async () => {
+  it('display the callout message when none is selected', async () => {
     const defaultProps = getDefaultProps();
     const props = { ...defaultProps, connectors: [] };
-    const wrapper = mount(
-      <TestProviders>
-        <EditConnector {...props} />
-      </TestProviders>
-    );
-    wrapper.update();
+    const result = appMockRender.render(<EditConnector {...props} />);
+
     await waitFor(() => {
-      expect(true).toBeTruthy();
-    });
-    wrapper.update();
-    await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="push-callouts"]`).exists()).toEqual(true);
+      expect(result.getByTestId('push-callouts')).toBeInTheDocument();
     });
   });
 

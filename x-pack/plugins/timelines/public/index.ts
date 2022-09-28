@@ -93,3 +93,7 @@ export function plugin() {
 
 export { StatefulEventContext } from './components/stateful_event_context';
 export { TimelineContext } from './components/t_grid/shared';
+
+export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';
+
+export { combineQueries } from './components/t_grid/helpers';

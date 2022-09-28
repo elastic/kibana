@@ -14,19 +14,21 @@ import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { IconChartDatatable } from '@kbn/chart-icons';
 import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
   DatasourceLayers,
+  Suggestion,
 } from '../../types';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import { LayerType, layerTypes } from '../../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../../common/expressions';
 import type { ColumnState, SortingState } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
+import { IndexPatternLayer } from '../../indexpattern_datasource/types';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -38,6 +40,16 @@ export interface DatatableVisualizationState {
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
+}
+
+interface DatatableDatasourceState {
+  [prop: string]: unknown;
+  layers: IndexPatternLayer[];
+}
+
+export interface DatatableSuggestion extends Suggestion {
+  datasourceState: DatatableDatasourceState;
+  visualizationState: DatatableVisualizationState;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -56,7 +68,7 @@ export const getDatatableVisualization = ({
   visualizationTypes: [
     {
       id: 'lnsDatatable',
-      icon: LensIconChartDatatable,
+      icon: IconChartDatatable,
       label: visualizationLabel,
       groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
         defaultMessage: 'Tabular',
@@ -82,7 +94,7 @@ export const getDatatableVisualization = ({
 
   getDescription() {
     return {
-      icon: LensIconChartDatatable,
+      icon: IconChartDatatable,
       label: visualizationLabel,
     };
   },
@@ -164,7 +176,7 @@ export const getDatatableVisualization = ({
             columnId: col.columnId,
           })),
         },
-        previewIcon: LensIconChartDatatable,
+        previewIcon: IconChartDatatable,
         // tables are hidden from suggestion bar, but used for drag & drop and chart switching
         hide: true,
       },
@@ -223,10 +235,10 @@ export const getDatatableVisualization = ({
         {
           groupId: 'columns',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
-            defaultMessage: 'Columns',
+            defaultMessage: 'Split metrics by',
           }),
           dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownColumn', {
-            defaultMessage: 'Column',
+            defaultMessage: 'Split metrics by',
           }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
             defaultMessage:
@@ -265,12 +277,12 @@ export const getDatatableVisualization = ({
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
-              const stops = columnConfig.palette?.params?.stops;
-              const hasColoring = Boolean(columnConfig.colorMode !== 'none' && stops);
+              const stops = columnConfig?.palette?.params?.stops;
+              const hasColoring = Boolean(columnConfig?.colorMode !== 'none' && stops);
 
               return {
                 columnId: accessor,
-                triggerIcon: columnConfig.hidden
+                triggerIcon: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring
                   ? 'colorBy'
@@ -449,6 +461,10 @@ export const getDatatableVisualization = ({
                       arguments: {
                         columnId: [column.columnId],
                         hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
+                        oneClickFilter:
+                          typeof column.oneClickFilter === 'undefined'
+                            ? []
+                            : [column.oneClickFilter],
                         width: typeof column.width === 'undefined' ? [] : [column.width],
                         isTransposed:
                           typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
@@ -578,6 +594,26 @@ export const getDatatableVisualization = ({
       default:
         return state;
     }
+  },
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as DatatableSuggestion[];
+    return {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...context.configuration,
+      },
+    };
   },
 });
 

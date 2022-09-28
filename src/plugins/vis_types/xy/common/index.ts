@@ -14,8 +14,3 @@ export enum ChartType {
   Area = 'area',
   Histogram = 'histogram',
 }
-
-/**
- * Type of xy visualizations
- */
-export type XyVisType = ChartType | 'horizontal_bar';

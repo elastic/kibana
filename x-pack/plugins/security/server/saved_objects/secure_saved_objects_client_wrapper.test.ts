@@ -23,11 +23,12 @@ import { Actions } from '../authorization';
 import type { SavedObjectActions } from '../authorization/actions/saved_object';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
-jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => {
-  const { SavedObjectsUtils } = jest.requireActual(
-    '@kbn/core/server/saved_objects/service/lib/utils'
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const { SavedObjectsUtils, ...actual } = jest.requireActual(
+    '@kbn/core-saved-objects-utils-server'
   );
   return {
+    ...actual,
     SavedObjectsUtils: {
       ...SavedObjectsUtils,
       createEmptyFindResponse: SavedObjectsUtils.createEmptyFindResponse,
@@ -587,6 +588,67 @@ describe('#bulkUpdate', () => {
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
     expectAuditEvent('saved_object_update', 'failure', { type: obj1.type, id: obj1.id });
     expectAuditEvent('saved_object_update', 'failure', { type: obj2.type, id: obj2.id });
+  });
+});
+
+describe('#bulkDelete', () => {
+  const obj1 = Object.freeze({ type: 'foo', id: 'foo-id' });
+  const obj2 = Object.freeze({ type: 'bar', id: 'bar-id' });
+  const namespace = 'some-ns';
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const objects = [obj1];
+    await expectGeneralError(client.bulkDelete, { objects });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectForbiddenError(client.bulkDelete, { objects, options });
+  });
+
+  test(`returns result of baseClient.bulkDelete when authorized`, async () => {
+    const apiCallReturnValue = {
+      statuses: [obj1, obj2].map((obj) => {
+        return { ...obj, success: true };
+      }),
+    };
+    clientOpts.baseClient.bulkDelete.mockReturnValue(apiCallReturnValue as any);
+
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    const result = await expectSuccess(client.bulkDelete, { objects, options });
+    expect(result).toEqual(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectPrivilegeCheck(client.bulkDelete, { objects, options }, namespace);
+  });
+
+  test(`adds audit event when successful`, async () => {
+    const apiCallReturnValue = {
+      statuses: [obj1, obj2].map((obj) => {
+        return { ...obj, success: true };
+      }),
+    };
+    clientOpts.baseClient.bulkDelete.mockReturnValue(apiCallReturnValue as any);
+
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectSuccess(client.bulkDelete, { objects, options });
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
+    expectAuditEvent('saved_object_delete', 'success', { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_delete', 'success', { type: obj2.type, id: obj2.id });
+  });
+
+  test(`adds audit event when not successful`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
+    await expect(() => client.bulkDelete([obj1, obj2], { namespace })).rejects.toThrow();
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
+    expectAuditEvent('saved_object_delete', 'failure', { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_delete', 'failure', { type: obj2.type, id: obj2.id });
   });
 });
 

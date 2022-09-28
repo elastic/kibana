@@ -5,75 +5,81 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
+import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
+import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from './indicators_table';
+import { IndicatorsFiltersContext } from '../../context';
+import { DEFAULT_COLUMNS } from './hooks/use_column_settings';
 
 export default {
   component: IndicatorsTable,
   title: 'IndicatorsTable',
 };
 
-const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
-const mockIndexPattern: DataView[] = [];
+const mockIndexPattern: DataView = undefined as unknown as DataView;
 
 const stub = () => void 0;
 
-const coreMock = {
-  uiSettings: {
-    get: (key: string) => {
-      const settings = {
-        [DEFAULT_DATE_FORMAT]: '',
-        [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
-      };
-      // @ts-expect-error
-      return settings[key];
-    },
+const columnSettings = {
+  columnVisibility: {
+    visibleColumns: DEFAULT_COLUMNS.map(({ id }) => id),
+    setVisibleColumns: stub,
   },
-} as unknown as CoreStart;
-
-const KibanaReactContext = createKibanaReactContext(coreMock);
-
+  columns: DEFAULT_COLUMNS,
+  handleResetColumns: stub,
+  handleToggleColumn: stub,
+  sorting: {
+    columns: [],
+    onSort: stub,
+  },
+};
 export function WithIndicators() {
+  const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
+
   return (
-    <KibanaReactContext.Provider>
-      <IndicatorsTable
-        firstLoad={false}
-        loading={false}
-        pagination={{
-          pageSize: 10,
-          pageIndex: 0,
-          pageSizeOptions: [10, 25, 50],
-        }}
-        indicators={indicatorsFixture}
-        onChangePage={stub}
-        onChangeItemsPerPage={stub}
-        indicatorCount={indicatorsFixture.length * 2}
-        indexPatterns={mockIndexPattern}
-      />
-    </KibanaReactContext.Provider>
+    <StoryProvidersComponent>
+      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+        <IndicatorsTable
+          browserFields={{}}
+          isLoading={false}
+          pagination={{
+            pageSize: 10,
+            pageIndex: 0,
+            pageSizeOptions: [10, 25, 50],
+          }}
+          indicators={indicatorsFixture}
+          onChangePage={stub}
+          onChangeItemsPerPage={stub}
+          indicatorCount={indicatorsFixture.length * 2}
+          indexPattern={mockIndexPattern}
+          columnSettings={columnSettings}
+        />
+      </IndicatorsFiltersContext.Provider>
+    </StoryProvidersComponent>
   );
 }
 
 export function WithNoIndicators() {
   return (
-    <IndicatorsTable
-      firstLoad={false}
-      pagination={{
-        pageSize: 10,
-        pageIndex: 0,
-        pageSizeOptions: [10, 25, 50],
-      }}
-      indicators={[]}
-      onChangePage={stub}
-      onChangeItemsPerPage={stub}
-      indicatorCount={0}
-      loading={false}
-      indexPatterns={[]}
-    />
+    <StoryProvidersComponent>
+      <IndicatorsTable
+        browserFields={{}}
+        pagination={{
+          pageSize: 10,
+          pageIndex: 0,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        indicators={[]}
+        onChangePage={stub}
+        onChangeItemsPerPage={stub}
+        indicatorCount={0}
+        isLoading={false}
+        indexPattern={mockIndexPattern}
+        columnSettings={columnSettings}
+      />
+    </StoryProvidersComponent>
   );
 }

@@ -62,9 +62,7 @@ export const useNetworkTls = ({
   type,
 }: UseNetworkTls): [boolean, NetworkTlsArgs] => {
   const getTlsSelector = useMemo(() => networkSelectors.tlsSelector(), []);
-  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
-    getTlsSelector(state, type, flowTarget)
-  );
+  const { activePage, limit, sort } = useDeepEqualSelector((state) => getTlsSelector(state, type));
 
   const [networkTlsRequest, setNetworkTlsRequest] = useState<NetworkTlsRequestOptions | null>(null);
 

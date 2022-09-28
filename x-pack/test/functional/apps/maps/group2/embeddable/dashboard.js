@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
 
   describe('embed in dashboard', () => {
     before(async () => {
@@ -25,7 +26,8 @@ export default function ({ getPageObjects, getService }) {
           'test_logstash_reader',
           'geoshape_data_reader',
           'meta_for_geoshape_data_reader',
-          'global_dashboard_read',
+          'global_dashboard_all',
+          'global_maps_all',
         ],
         { skipBrowserRefresh: true }
       );
@@ -97,16 +99,15 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should apply new container state (time, query, filters) to embeddable', async () => {
-      await filterBar.selectIndexPattern('logstash-*');
-      await filterBar.addFilter('machine.os', 'is', 'win 8');
+      await filterBar.addFilterAndSelectDataView('logstash-*', 'machine.os', 'is', 'win 8');
       await PageObjects.maps.waitForLayersToLoad();
 
-      // retry is fix for flaky test https://github.com/elastic/kibana/issues/113993
-      // timing issue where click for addFilter opens filter pill created above instead of clicking addFilter
-      await retry.try(async () => {
-        await filterBar.selectIndexPattern('meta_for_geo_shapes*');
-        await filterBar.addFilter('shape_name', 'is', 'alpha'); // runtime fields do not have autocomplete
-      });
+      await filterBar.addFilterAndSelectDataView(
+        'meta_for_geo_shapes*',
+        'shape_name',
+        'is',
+        'alpha'
+      );
       await PageObjects.maps.waitForLayersToLoad();
 
       const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
@@ -119,6 +120,24 @@ export default function ({ getPageObjects, getService }) {
         'meta_for_geo_shapes*.runtime_shape_name'
       );
       expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
+    });
+
+    it('should apply embeddable query and filters to panel', async () => {
+      // clear filters from previous test
+      await filterBar.removeAllFilters();
+
+      await PageObjects.dashboard.switchToEditMode();
+
+      await dashboardPanelActions.editPanelByTitle('geo grid vector grid example');
+      await PageObjects.maps.waitForLayersToLoad();
+
+      await filterBar.addFilter('machine.os', 'is', 'ios');
+      await PageObjects.maps.waitForLayersToLoad();
+      await testSubjects.click('mapSaveAndReturnButton');
+      const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
+        'geo grid vector grid example'
+      );
+      expect(gridResponse.aggregations.gridSplit.buckets.length).to.equal(2);
     });
 
     it('should re-fetch query when "refresh" is clicked', async () => {

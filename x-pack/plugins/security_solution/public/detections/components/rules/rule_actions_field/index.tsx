@@ -98,18 +98,20 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   const setActionParamsProperty = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (key: string, value: any, index: number) => {
-      const updatedActions = [...actions];
-      updatedActions[index] = {
-        ...updatedActions[index],
-        params: {
-          ...updatedActions[index].params,
-          [key]: value,
-        },
-      };
-      field.setValue(updatedActions);
+      field.setValue((prevValue: RuleAction[]) => {
+        const updatedActions = [...prevValue];
+        updatedActions[index] = {
+          ...updatedActions[index],
+          params: {
+            ...updatedActions[index].params,
+            [key]: value,
+          },
+        };
+        return updatedActions;
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [field.setValue, actions]
+    [field.setValue]
   );
 
   const actionForm = useMemo(
@@ -123,6 +125,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActionParamsProperty,
         featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
+        hideActionHeader: true,
       }),
     [
       actions,
@@ -150,7 +153,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         <>
           <FieldErrorsContainer>
             <EuiCallOut title={FORM_ERRORS_TITLE} color="danger" iconType="alert">
-              <ReactMarkdown source={fieldErrors} />
+              <ReactMarkdown>{fieldErrors}</ReactMarkdown>
             </EuiCallOut>
           </FieldErrorsContainer>
           <EuiSpacer />

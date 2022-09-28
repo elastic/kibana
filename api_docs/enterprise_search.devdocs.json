@@ -16,6 +16,36 @@
     "misc": [
       {
         "parentPluginId": "enterpriseSearch",
+        "id": "def-server.ANALYTICS_COLLECTIONS_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "ANALYTICS_COLLECTIONS_INDEX",
+        "description": [],
+        "signature": [
+          "\".elastic-analytics-collections\""
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-server.ANALYTICS_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "ANALYTICS_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "enterpriseSearch",
         "id": "def-server.ConfigType",
         "type": "Type",
         "tags": [],
@@ -26,6 +56,7 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -40,6 +71,7 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -54,6 +86,7 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -68,6 +101,7 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -82,6 +116,22 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-server.CURRENT_CONNECTORS_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "CURRENT_CONNECTORS_INDEX",
+        "description": [],
+        "signature": [
+          "\".elastic-connectors-v1\""
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -113,6 +163,7 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

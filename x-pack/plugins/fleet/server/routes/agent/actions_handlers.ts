@@ -16,7 +16,7 @@ import type {
 } from '../../types/rest_spec';
 import type { ActionsService } from '../../services/agents';
 import type { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 
 export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService
@@ -45,7 +45,7 @@ export const postNewAgentActionHandlerBuilder = function (
 
       return response.ok({ body });
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   };
 };
@@ -65,7 +65,7 @@ export const postCancelActionHandlerBuilder = function (
 
       return response.ok({ body });
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   };
 };

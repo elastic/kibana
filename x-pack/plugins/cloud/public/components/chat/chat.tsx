@@ -36,14 +36,14 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
     return null;
   }
 
-  const { isReady, style } = config;
+  const { isReady, isResized, style } = config;
   const { bottom, height, right } = style;
 
   const buttonCSS = css`
     bottom: calc(${bottom} + ${height});
     position: fixed;
     right: calc(${right} + ${euiThemeVars.euiSizeXS});
-    visibility: hidden;
+    visibility: ${isReady && isResized ? 'visible' : 'hidden'};
   `;
 
   const button = (
@@ -52,8 +52,8 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
       data-test-subj="cloud-chat-hide"
       name="cloudChatHide"
       onClick={() => {
-        setIsClosed(true);
         onHide();
+        setIsClosed(true);
       }}
       size="xs"
     >
@@ -67,7 +67,6 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
     bottom: ${euiThemeVars.euiSizeXL};
     position: fixed;
     right: ${euiThemeVars.euiSizeXL};
-    visibility: ${isReady ? 'visible' : 'hidden'};
     z-index: ${euiThemeVars.euiZMaskBelowHeader - 1};
 
     &:focus [name='cloudChatHide'],

@@ -95,10 +95,8 @@ it('builds a generated plugin into a viable archive', async () => {
       "kibana/fooTestPlugin/server/types.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.br",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.gz",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",
       "kibana/fooTestPlugin/translations/ja-JP.json",
       "kibana/fooTestPlugin/tsconfig.json",
     ]

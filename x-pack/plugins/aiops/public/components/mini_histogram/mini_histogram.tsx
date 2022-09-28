@@ -14,7 +14,7 @@ import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePointHistogramItem } from '@kbn/ml-agg-utils';
 
-import { useAiOpsKibana } from '../../kibana_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 interface MiniHistogramProps {
@@ -24,9 +24,7 @@ interface MiniHistogramProps {
 }
 
 export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, label }) => {
-  const {
-    services: { charts },
-  } = useAiOpsKibana();
+  const { charts } = useAiopsAppContext();
 
   const euiTheme = useEuiTheme();
   const defaultChartTheme = charts.theme.useChartsTheme();

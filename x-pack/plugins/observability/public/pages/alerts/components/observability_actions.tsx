@@ -19,6 +19,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { ActionProps } from '@kbn/timelines-plugin/common';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { parseAlert } from './parse_alert';
@@ -29,8 +30,9 @@ import {
 } from '../containers/alerts_table_t_grid/translations';
 import { ObservabilityAppServices } from '../../../application/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/types';
-import type { TopAlert } from '../containers/alerts_page/alerts_page';
+import type { TopAlert } from '../containers/alerts_page/types';
 import { ObservabilityRuleTypeRegistry } from '../../..';
+import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/types';
 
 export type ObservabilityActionsProps = Pick<
   ActionProps,
@@ -52,6 +54,7 @@ export function ObservabilityActions({
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const [openActionsPopoverId, setActionsPopover] = useState(null);
   const { cases, http } = useKibana<ObservabilityAppServices>().services;
+  const { config } = usePluginContext();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -73,6 +76,11 @@ export function ObservabilityActions({
   const linkToRule =
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? http.basePath.prepend(paths.observability.ruleDetails(ruleId))
+      : null;
+  const alertId = alert.fields['kibana.alert.uuid'] ?? null;
+  const linkToAlert =
+    pageId !== ALERT_DETAILS_PAGE_ID && alertId
+      ? http.basePath.prepend(paths.observability.alertDetails(alertId))
       : null;
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
@@ -135,16 +143,26 @@ export function ObservabilityActions({
         : []),
 
       ...[
-        <EuiContextMenuItem
-          key="viewAlertDetails"
-          data-test-subj="viewAlertDetails"
-          onClick={() => {
-            closeActionsPopover();
-            setFlyoutAlert(alert);
-          }}
-        >
-          {translations.alertsTable.viewAlertDetailsButtonText}
-        </EuiContextMenuItem>,
+        config.unsafe.alertDetails.enabled && linkToAlert ? (
+          <EuiContextMenuItem
+            key="viewAlertDetailsPage"
+            data-test-subj="viewAlertDetailsPage"
+            href={linkToAlert}
+          >
+            {translations.alertsTable.viewAlertDetailsButtonText}
+          </EuiContextMenuItem>
+        ) : (
+          <EuiContextMenuItem
+            key="viewAlertDetailsFlyout"
+            data-test-subj="viewAlertDetailsFlyout"
+            onClick={() => {
+              closeActionsPopover();
+              setFlyoutAlert(alert);
+            }}
+          >
+            {translations.alertsTable.viewAlertDetailsButtonText}
+          </EuiContextMenuItem>
+        ),
       ],
     ];
   }, [
@@ -153,9 +171,11 @@ export function ObservabilityActions({
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
     linkToRule,
-    alert,
-    setFlyoutAlert,
+    config.unsafe.alertDetails.enabled,
+    linkToAlert,
     closeActionsPopover,
+    setFlyoutAlert,
+    alert,
   ]);
 
   const actionsToolTip =

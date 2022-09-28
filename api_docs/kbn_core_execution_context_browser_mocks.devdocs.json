@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-browser-mocks",
@@ -49,6 +50,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -66,6 +68,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -83,6 +86,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -100,6 +104,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -117,6 +122,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

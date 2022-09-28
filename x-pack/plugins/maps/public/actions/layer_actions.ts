@@ -284,6 +284,32 @@ export function toggleLayerVisible(layerId: string) {
   };
 }
 
+export function hideAllLayers() {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      if (layer.isVisible() && !layer.isBasemap(index)) {
+        dispatch(setLayerVisibility(layer.getId(), false));
+      }
+    });
+  };
+}
+
+export function showAllLayers() {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      if (!layer.isVisible()) {
+        dispatch(setLayerVisibility(layer.getId(), true));
+      }
+    });
+  };
+}
+
 export function showThisLayerOnly(layerId: string) {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -551,6 +577,15 @@ export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
     id,
     propName: 'includeInFitToBounds',
     newValue: includeInFitToBounds,
+  };
+}
+
+export function updateDisableTooltips(id: string, disableTooltips: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'disableTooltips',
+    newValue: disableTooltips,
   };
 }
 

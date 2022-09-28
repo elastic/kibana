@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import deepEqual from 'fast-deep-equal';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -15,12 +15,12 @@ import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
-import { buildHostNamesFilter } from '../../../../../common/search_strategy';
-import type { HostRisk } from '../../../../risk_score/containers';
-import { useHostRiskScore } from '../../../../risk_score/containers';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
-import { useBasicDataFromDetailsData } from './helpers';
+import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
+import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -51,10 +51,13 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
   isReadOnly,
 }) => {
+  const currentSpaceId = useSpaceId();
+  const { indexName } = expandedEvent;
+  const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
   const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
     {
       entityType,
-      indexName: expandedEvent.indexName ?? '',
+      indexName: eventIndex ?? '',
       eventId: expandedEvent.eventId ?? '',
       runtimeMappings,
       skip: !expandedEvent.eventId,
@@ -73,57 +76,134 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
 
-  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
-    pagination: {
-      cursorStart: 0,
-      querySize: 1,
-    },
-  });
+  const header = useMemo(
+    () =>
+      isFlyoutView || isHostIsolationPanelOpen ? (
+        <FlyoutHeader
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          isAlert={isAlert}
+          isolateAction={isolateAction}
+          loading={loading}
+          ruleName={ruleName}
+          showAlertDetails={showAlertDetails}
+          timestamp={timestamp}
+        />
+      ) : (
+        <ExpandableEventTitle
+          isAlert={isAlert}
+          loading={loading}
+          ruleName={ruleName}
+          handleOnEventClosed={handleOnEventClosed}
+        />
+      ),
+    [
+      handleOnEventClosed,
+      isAlert,
+      isFlyoutView,
+      isHostIsolationPanelOpen,
+      isolateAction,
+      loading,
+      ruleName,
+      showAlertDetails,
+      timestamp,
+    ]
+  );
 
-  const hostRisk: HostRisk | null = data
-    ? {
-        loading: hostRiskLoading,
-        isModuleEnabled,
-        result: data,
-      }
-    : null;
+  const body = useMemo(() => {
+    if (isFlyoutView) {
+      return (
+        <FlyoutBody
+          alertId={alertId}
+          browserFields={browserFields}
+          detailsData={detailsData}
+          detailsEcsData={ecsData}
+          event={expandedEvent}
+          hostName={hostName}
+          handleIsolationActionSuccess={handleIsolationActionSuccess}
+          handleOnEventClosed={handleOnEventClosed}
+          isAlert={isAlert}
+          isDraggable={isDraggable}
+          isolateAction={isolateAction}
+          isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          loading={loading}
+          rawEventData={rawEventData}
+          showAlertDetails={showAlertDetails}
+          timelineId={timelineId}
+          isReadOnly={isReadOnly}
+        />
+      );
+    } else if (isHostIsolationPanelOpen) {
+      return (
+        <>
+          {isIsolateActionSuccessBannerVisible && (
+            <EndpointIsolateSuccess
+              hostName={hostName}
+              alertId={alertId}
+              isolateAction={isolateAction}
+            />
+          )}
+          <EuiFlyoutBody>
+            <HostIsolationPanel
+              details={detailsData}
+              cancelCallback={showAlertDetails}
+              successCallback={handleIsolationActionSuccess}
+              isolateAction={isolateAction}
+            />
+          </EuiFlyoutBody>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <EuiSpacer size="m" />
+          <ExpandableEvent
+            browserFields={browserFields}
+            detailsData={detailsData}
+            detailsEcsData={ecsData}
+            event={expandedEvent}
+            isAlert={isAlert}
+            isDraggable={isDraggable}
+            loading={loading}
+            rawEventData={rawEventData}
+            timelineId={timelineId}
+            timelineTabType={tabType}
+            handleOnEventClosed={handleOnEventClosed}
+          />
+        </>
+      );
+    }
+  }, [
+    alertId,
+    browserFields,
+    detailsData,
+    ecsData,
+    expandedEvent,
+    handleIsolationActionSuccess,
+    handleOnEventClosed,
+    hostName,
+    isAlert,
+    isDraggable,
+    isFlyoutView,
+    isHostIsolationPanelOpen,
+    isIsolateActionSuccessBannerVisible,
+    isReadOnly,
+    isolateAction,
+    loading,
+    rawEventData,
+    showAlertDetails,
+    tabType,
+    timelineId,
+  ]);
 
   if (!expandedEvent?.eventId) {
     return null;
   }
 
-  return isFlyoutView ? (
+  return (
     <>
-      <FlyoutHeader
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        isAlert={isAlert}
-        isolateAction={isolateAction}
-        loading={loading}
-        ruleName={ruleName}
-        showAlertDetails={showAlertDetails}
-        timestamp={timestamp}
-      />
-      <FlyoutBody
-        alertId={alertId}
-        browserFields={browserFields}
-        detailsData={detailsData}
-        event={expandedEvent}
-        hostName={hostName}
-        hostRisk={hostRisk}
-        handleIsolationActionSuccess={handleIsolationActionSuccess}
-        handleOnEventClosed={handleOnEventClosed}
-        isAlert={isAlert}
-        isDraggable={isDraggable}
-        isolateAction={isolateAction}
-        isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        loading={loading}
-        rawEventData={rawEventData}
-        showAlertDetails={showAlertDetails}
-        timelineId={timelineId}
-        isReadOnly={isReadOnly}
-      />
+      {header}
+      {body}
       <FlyoutFooter
         detailsData={detailsData}
         detailsEcsData={ecsData}
@@ -134,41 +214,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         isReadOnly={isReadOnly}
         loadingEventDetails={loading}
         onAddIsolationStatusClick={showHostIsolationPanel}
-        timelineId={timelineId}
-      />
-    </>
-  ) : (
-    <>
-      <ExpandableEventTitle
-        isAlert={isAlert}
-        loading={loading}
-        ruleName={ruleName}
-        handleOnEventClosed={handleOnEventClosed}
-      />
-      <EuiSpacer size="m" />
-      <ExpandableEvent
-        browserFields={browserFields}
-        detailsData={detailsData}
-        event={expandedEvent}
-        isAlert={isAlert}
-        isDraggable={isDraggable}
-        loading={loading}
-        rawEventData={rawEventData}
-        timelineId={timelineId}
-        timelineTabType={tabType}
-        hostRisk={hostRisk}
-        handleOnEventClosed={handleOnEventClosed}
-      />
-      <FlyoutFooter
-        detailsData={detailsData}
-        detailsEcsData={ecsData}
-        expandedEvent={expandedEvent}
-        handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        isReadOnly={isReadOnly}
-        loadingEventDetails={loading}
-        onAddIsolationStatusClick={showHostIsolationPanel}
-        refetchFlyoutData={refetchFlyoutData}
         timelineId={timelineId}
       />
     </>

@@ -37,7 +37,7 @@ export function useLast50DurationChart({
     const coords = hits
       .reverse() // results are returned in desc order by timestamp. Reverse to ensure the data is in asc order by timestamp
       .map((hit, index) => {
-        const duration = hit['monitor.duration.us']?.[0];
+        const duration = hit?.['monitor.duration.us']?.[0];
         totalDuration += duration || 0;
         if (duration === undefined) {
           return null;

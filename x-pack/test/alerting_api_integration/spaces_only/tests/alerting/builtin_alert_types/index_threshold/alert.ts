@@ -15,7 +15,7 @@ import {
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../../common/lib';
-import { createEsDocuments } from './create_test_data';
+import { createEsDocumentsWithGroups } from '../lib/create_test_data';
 import { createDataStream, deleteDataStream } from '../lib/create_test_data';
 
 const RULE_TYPE_ID = '.index-threshold';
@@ -442,15 +442,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       groups: number,
       indexName: string = ES_TEST_INDEX_NAME
     ) {
-      await createEsDocuments(
+      await createEsDocumentsWithGroups({
         es,
         esTestIndexTool,
         endDate,
-        RULE_INTERVALS_TO_WRITE,
-        RULE_INTERVAL_MILLIS,
+        intervals: RULE_INTERVALS_TO_WRITE,
+        intervalMillis: RULE_INTERVAL_MILLIS,
         groups,
-        indexName
-      );
+        indexName,
+      });
     }
 
     async function waitForDocs(count: number): Promise<any[]> {

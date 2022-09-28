@@ -7,6 +7,10 @@
 
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
 
+/**
+ * Make sure this aligns with the index in step 6, 9 in
+ * prebuilt_dev_tool_content/console_templates/enable_host_risk_score.console
+ */
 export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
   return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
@@ -24,8 +28,12 @@ export const buildUserNamesFilter = (userNames: string[]) => {
 };
 
 export enum RiskQueries {
-  riskScore = 'riskScore',
+  hostsRiskScore = 'hostsRiskScore',
+  usersRiskScore = 'usersRiskScore',
   kpiRiskScore = 'kpiRiskScore',
 }
 
-export type RiskScoreAggByFields = 'host.name' | 'user.name';
+export const enum RiskScoreEntity {
+  host = 'host',
+  user = 'user',
+}

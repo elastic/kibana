@@ -10,7 +10,6 @@ export type {
   SortField,
   TimerangeInput,
   PaginationInputPaginated,
-  DocValueFields,
   CursorType,
   TotalValue,
 } from '@kbn/timelines-plugin/common';

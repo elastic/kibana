@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { SecurityPageName } from '../../../../app/types';
@@ -92,17 +92,6 @@ describe('useSecuritySolutionNavigation', () => {
     expect(result.current).toMatchSnapshot();
   });
 
-  // TODO: Steph/users remove when no longer experimental
-  it('should include users when feature flag is on', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
-      () => useSecuritySolutionNavigation(),
-      { wrapper: TestProviders }
-    );
-
-    expect(result?.current?.items?.[4].items?.[2].id).toEqual(SecurityPageName.users);
-  });
-
   // TODO: [kubernetes] remove when no longer experimental
   it('should include kubernetes when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
@@ -110,7 +99,7 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-    expect(result?.current?.items?.[1].items?.[3].id).toEqual(SecurityPageName.kubernetes);
+    expect(result?.current?.items?.[1].items?.[4].id).toEqual(SecurityPageName.kubernetes);
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {

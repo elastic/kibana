@@ -2,7 +2,133 @@
   "id": "files",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "files",
+        "id": "def-public.FilesContext",
+        "type": "Function",
+        "tags": [],
+        "label": "FilesContext",
+        "description": [],
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/files/public/components/context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              "{ children?: React.ReactNode; }"
+            ],
+            "path": "x-pack/plugins/files/public/components/context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.Image",
+        "type": "Function",
+        "tags": [
+          "note"
+        ],
+        "label": "Image",
+        "description": [
+          "\nA viewport-aware component that displays an image. This component is a very\nthin wrapper around the img tag.\n"
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          " & React.RefAttributes<HTMLImageElement>>"
+        ],
+        "path": "x-pack/plugins/files/public/components/image/image.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Image.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.UploadFile",
+        "type": "Function",
+        "tags": [],
+        "label": "UploadFile",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          "<string>) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/files/public/components/upload_file/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.UploadFile.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "files",
+                "scope": "public",
+                "docId": "kibFilesPluginApi",
+                "section": "def-public.Props",
+                "text": "Props"
+              },
+              "<string>"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "files",
@@ -13,8 +139,19 @@
         "description": [
           "\nA client that can be used to manage a specific {@link FileKind}."
         ],
+        "signature": [
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.FilesClient",
+            "text": "FilesClient"
+          },
+          " extends GlobalEndpoints"
+        ],
         "path": "x-pack/plugins/files/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -26,7 +163,7 @@
               "\nCreate a new file object with the provided metadata.\n"
             ],
             "signature": [
-              "(args: { name: string; alt?: string | undefined; meta?: Record<string, unknown> | undefined; mimeType?: string | undefined; }) => Promise<{ file: ",
+              "(args: Readonly<{ meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; mimeType?: string | undefined; } & { name: string; }> & { kind: string; }) => Promise<{ file: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -38,6 +175,7 @@
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -50,10 +188,11 @@
                   "- create file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -67,10 +206,11 @@
               "\nDelete a file object and all associated share and content objects.\n"
             ],
             "signature": [
-              "(args: { id: string; }) => Promise<{ ok: true; }>"
+              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ ok: true; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -83,10 +223,11 @@
                   "- delete file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -100,7 +241,7 @@
               "\nGet a file object by ID.\n"
             ],
             "signature": [
-              "(args: { id: string; }) => Promise<{ file: ",
+              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ file: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -112,6 +253,7 @@
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -124,10 +266,11 @@
                   "- get file by ID args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -141,15 +284,7 @@
               "\nList all file objects, of a given {@link FileKind}.\n"
             ],
             "signature": [
-              "(args: ",
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.Pagination",
-                "text": "Pagination"
-              },
-              ") => Promise<{ files: ",
+              "(args: Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }) => Promise<{ files: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -161,6 +296,7 @@
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -173,10 +309,11 @@
                   "- list files args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -190,7 +327,7 @@
               "\nUpdate a set of of metadata values of the file object.\n"
             ],
             "signature": [
-              "(args: { name?: string | undefined; alt?: string | undefined; meta?: Record<string, unknown> | undefined; } & { id: string; }) => Promise<{ file: ",
+              "(args: Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ file: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -202,6 +339,7 @@
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -214,10 +352,11 @@
                   "- update file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -231,11 +370,11 @@
               "\nStream the contents of the file to Kibana server for storage.\n"
             ],
             "signature": [
-              "(args: any) => Promise<{ ok: true; size: number; }>"
+              "(args: Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }) => Promise<{ ok: true; size: number; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -247,12 +386,15 @@
                   "- upload file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                  "Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "files",
@@ -264,10 +406,11 @@
               "\nStream a download of the file object's content.\n"
             ],
             "signature": [
-              "(args: { id: string; fileName?: string | undefined; }) => Promise<any>"
+              "(args: Readonly<{ fileName?: string | undefined; } & { id: string; }> & { kind: string; }) => Promise<any>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -280,10 +423,229 @@
                   "- download file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.getDownloadHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getDownloadHref",
+            "description": [
+              "\nGet a string for downloading a file that can be passed to a button element's\nhref for download.\n"
+            ],
+            "signature": [
+              "(args: Pick<",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<unknown>, \"id\" | \"fileKind\">) => string"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.getDownloadHref.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- get download URL args"
+                ],
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "files",
+                    "scope": "common",
+                    "docId": "kibFilesPluginApi",
+                    "section": "def-common.FileJSON",
+                    "text": "FileJSON"
+                  },
+                  "<unknown>, \"id\" | \"fileKind\">"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.share",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "share",
+            "description": [
+              "\nShare a file by creating a new file share instance.\n"
+            ],
+            "signature": [
+              "(args: Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { kind: string; }) => Promise<",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSONWithToken",
+                "text": "FileShareJSONWithToken"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.share.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- File share arguments"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.unshare",
+            "type": "Function",
+            "tags": [],
+            "label": "unshare",
+            "description": [
+              "\nDelete a file share instance.\n"
+            ],
+            "signature": [
+              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ ok: true; }>"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.unshare.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- File unshare arguments"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.getShare",
+            "type": "Function",
+            "tags": [],
+            "label": "getShare",
+            "description": [
+              "\nGet a file share instance.\n"
+            ],
+            "signature": [
+              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ share: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              "; }>"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.getShare.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Get file share arguments"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.listShares",
+            "type": "Function",
+            "tags": [],
+            "label": "listShares",
+            "description": [
+              "\nList all file shares. Optionally scoping to a specific\nfile.\n"
+            ],
+            "signature": [
+              "(args: Readonly<{ page?: number | undefined; perPage?: number | undefined; forFileId?: string | undefined; } & {}> & { kind: string; }) => Promise<{ shares: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              "[]; }>"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.listShares.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Get file share arguments"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -297,22 +659,23 @@
         "tags": [],
         "label": "FilesClientFactory",
         "description": [
-          "\nA factory for creating a {@link FilesClient}"
+          "\nA factory for creating a {@link ScopedFilesClient}"
         ],
         "path": "x-pack/plugins/files/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
-            "id": "def-public.FilesClientFactory.asScoped",
+            "id": "def-public.FilesClientFactory.asUnscoped",
             "type": "Function",
             "tags": [],
-            "label": "asScoped",
+            "label": "asUnscoped",
             "description": [
-              "\nCreate a {@link FileClient} for a given {@link FileKind}.\n"
+              "\nCreate a files client."
             ],
             "signature": [
-              "(fileKind: string) => ",
+              "() => ",
               {
                 "pluginId": "files",
                 "scope": "public",
@@ -323,6 +686,32 @@
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClientFactory.asScoped",
+            "type": "Function",
+            "tags": [],
+            "label": "asScoped",
+            "description": [
+              "\nCreate a {@link ScopedFileClient} for a given {@link FileKind}.\n"
+            ],
+            "signature": [
+              "(fileKind: string) => ",
+              {
+                "pluginId": "files",
+                "scope": "public",
+                "docId": "kibFilesPluginApi",
+                "section": "def-public.ScopedFilesClient",
+                "text": "ScopedFilesClient"
+              }
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -338,6 +727,271 @@
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          " extends React.ImgHTMLAttributes<HTMLImageElement>"
+        ],
+        "path": "x-pack/plugins/files/public/components/image/image.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.src",
+            "type": "string",
+            "tags": [],
+            "label": "src",
+            "description": [],
+            "path": "x-pack/plugins/files/public/components/image/image.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.alt",
+            "type": "string",
+            "tags": [],
+            "label": "alt",
+            "description": [],
+            "path": "x-pack/plugins/files/public/components/image/image.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onFirstVisible",
+            "type": "Function",
+            "tags": [],
+            "label": "onFirstVisible",
+            "description": [
+              "\nEmits when the image first becomes visible"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/image/image.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [
+          "\nUploadFile component props"
+        ],
+        "signature": [
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          "<Kind>"
+        ],
+        "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.kind",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "kind",
+            "description": [
+              "\nA file kind that should be registered during plugin startup. See {@link FileServiceStart}."
+            ],
+            "signature": [
+              "Kind"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA files client that will be used process uploads."
+            ],
+            "signature": [
+              {
+                "pluginId": "files",
+                "scope": "public",
+                "docId": "kibFilesPluginApi",
+                "section": "def-public.FilesClient",
+                "text": "FilesClient"
+              }
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.allowClear",
+            "type": "CompoundType",
+            "tags": [
+              "note"
+            ],
+            "label": "allowClear",
+            "description": [
+              "\nAllow users to clear a file after uploading.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.immediate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "immediate",
+            "description": [
+              "\nStart uploading the file as soon as it is provided\nby the user."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nMetadata that you want to associate with any uploaded files"
+            ],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.allowRepeatedUploads",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "allowRepeatedUploads",
+            "description": [
+              "\nWhether this component should display a \"done\" state after processing an\nupload or return to the initial state to allow for another upload.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onDone",
+            "type": "Function",
+            "tags": [],
+            "label": "onDone",
+            "description": [
+              "\nCalled when the an upload process fully completes"
+            ],
+            "signature": [
+              "(files: UploadedFile[]) => void"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.Props.onDone.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "files",
+                "description": [],
+                "signature": [
+                  "UploadedFile[]"
+                ],
+                "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onError",
+            "type": "Function",
+            "tags": [],
+            "label": "onError",
+            "description": [
+              "\nCalled when an error occurs during upload"
+            ],
+            "signature": [
+              "((e: Error) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.Props.onError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "e",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -348,8 +1002,309 @@
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "files",
+        "id": "def-public.FilesClientResponses",
+        "type": "Type",
+        "tags": [],
+        "label": "FilesClientResponses",
+        "description": [],
+        "signature": [
+          "{ create: { file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }; delete: { ok: true; }; getById: { file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }; list: { files: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>[]; }; update: { file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }; upload: { ok: true; size: number; }; download: any; getDownloadHref: string; share: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          " & { token: string; }; unshare: { ok: true; }; getShare: { share: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          "; }; listShares: { shares: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          "[]; }; getMetrics: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FilesMetrics",
+            "text": "FilesMetrics"
+          },
+          "; publicDownload: any; find: { files: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>[]; }; }"
+        ],
+        "path": "x-pack/plugins/files/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.ScopedFilesClient",
+        "type": "Type",
+        "tags": [],
+        "label": "ScopedFilesClient",
+        "description": [
+          "\nA files client that is scoped to a specific {@link FileKind}.\n\nMore convenient if you want to re-use the same client for the same file kind\nand not specify the kind every time."
+        ],
+        "signature": [
+          "{ create: (arg: Omit<Readonly<{ meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; mimeType?: string | undefined; } & { name: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }>; delete: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getById: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }>; list: (arg?: Omit<Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }, \"kind\"> | undefined) => Promise<{ files: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>[]; }>; update: (arg: Omit<Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }>; upload: (arg: Omit<Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<Readonly<{ fileName?: string | undefined; } & { id: string; }> & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<Pick<",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>, \"id\" | \"fileKind\">, \"kind\">) => string; share: (arg: Omit<Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { kind: string; }, \"kind\">) => Promise<",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSONWithToken",
+            "text": "FileShareJSONWithToken"
+          },
+          ">; unshare: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getShare: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ share: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          "; }>; listShares: (arg: Omit<Readonly<{ page?: number | undefined; perPage?: number | undefined; forFileId?: string | undefined; } & {}> & { kind: string; }, \"kind\">) => Promise<{ shares: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          "[]; }>; getMetrics: (arg: Omit<undefined, \"kind\">) => Promise<",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FilesMetrics",
+            "text": "FilesMetrics"
+          },
+          ">; publicDownload: (arg: Omit<Readonly<{ fileName?: string | undefined; } & {}> & Readonly<{} & { token: string; }>, \"kind\">) => Promise<any>; find: (arg: Omit<Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; kind?: string | string[] | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}>, \"kind\">) => Promise<{ files: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>[]; }>; }"
+        ],
+        "path": "x-pack/plugins/files/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "files",
+      "id": "def-public.FilesSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "FilesSetup",
+      "description": [
+        "\nPublic setup-phase contract"
+      ],
+      "path": "x-pack/plugins/files/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "files",
+          "id": "def-public.FilesSetup.filesClientFactory",
+          "type": "Object",
+          "tags": [
+            "track-adoption"
+          ],
+          "label": "filesClientFactory",
+          "description": [
+            "\nA factory for creating an {@link FilesClient} instance. This requires a\nregistered {@link FileKind}.\n"
+          ],
+          "signature": [
+            {
+              "pluginId": "files",
+              "scope": "public",
+              "docId": "kibFilesPluginApi",
+              "section": "def-public.FilesClientFactory",
+              "text": "FilesClientFactory"
+            }
+          ],
+          "path": "x-pack/plugins/files/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": true,
+          "references": []
+        },
+        {
+          "parentPluginId": "files",
+          "id": "def-public.FilesSetup.registerFileKind",
+          "type": "Function",
+          "tags": [],
+          "label": "registerFileKind",
+          "description": [
+            "\nRegister a {@link FileKind} which allows for specifying details about the files\nthat will be uploaded.\n"
+          ],
+          "signature": [
+            "(fileKind: ",
+            {
+              "pluginId": "files",
+              "scope": "common",
+              "docId": "kibFilesPluginApi",
+              "section": "def-common.FileKind",
+              "text": "FileKind"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/plugins/files/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "files",
+              "id": "def-public.FilesSetup.registerFileKind.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "fileKind",
+              "description": [
+                "- the file kind to register"
+              ],
+              "signature": [
+                {
+                  "pluginId": "files",
+                  "scope": "common",
+                  "docId": "kibFilesPluginApi",
+                  "section": "def-common.FileKind",
+                  "text": "FileKind"
+                }
+              ],
+              "path": "x-pack/plugins/files/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "files",
+      "id": "def-public.FilesStart",
+      "type": "Type",
+      "tags": [],
+      "label": "FilesStart",
+      "description": [],
+      "signature": [
+        "{ filesClientFactory: ",
+        {
+          "pluginId": "files",
+          "scope": "public",
+          "docId": "kibFilesPluginApi",
+          "section": "def-public.FilesClientFactory",
+          "text": "FilesClientFactory"
+        },
+        "; }"
+      ],
+      "path": "x-pack/plugins/files/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -385,6 +1340,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -406,6 +1362,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -425,6 +1382,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -436,7 +1394,8 @@
               "\nThe name of the ES index that will store file metadata."
             ],
             "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -448,7 +1407,8 @@
               "\nThe name of the ES index that will store file contents."
             ],
             "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -460,7 +1420,61 @@
               "\nAn elasticsearch client that will be used to interact with the cluster"
             ],
             "signature": [
-              "{ name: string | symbol; transform: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; }; delete: { (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -494,11 +1508,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; cluster: ",
-              "default",
-              "; eql: ",
-              "default",
-              "; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -554,33 +1564,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; get: { <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
-              "GetRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "GetResponse",
-              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
-              "GetRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "GetResponse",
-              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
-              "GetRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "GetResponse",
-              "<TDocument>>; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
               "UpdateRequest",
               "<TDocument, TPartialDocument> | ",
               "UpdateRequest",
@@ -606,33 +1590,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; delete: { (this: That, params: ",
-              "DeleteRequest",
-              " | ",
-              "DeleteRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
-              "DeleteRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "WriteResponseBase",
-              ", unknown>>; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
-              "DeleteRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -1592,6 +2550,8 @@
               "TermvectorsResponse",
               ">; }; textStructure: ",
               "default",
+              "; transform: ",
+              "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
               " | ",
@@ -1651,7 +2611,8 @@
               "; }"
             ],
             "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1666,7 +2627,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1681,7 +2643,8 @@
               "Logger"
             ],
             "path": "x-pack/plugins/files/server/file_client/create_es_file_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1707,6 +2670,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -1718,7 +2682,8 @@
               "\nFile name"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1730,7 +2695,8 @@
               "\nFile kind, must correspond to a registered {@link FileKind}."
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1745,7 +2711,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1760,7 +2727,8 @@
               "Meta | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1775,7 +2743,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1791,6 +2760,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -1805,7 +2775,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1822,7 +2793,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1844,7 +2816,8 @@
               "<unknown>"
             ],
             "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1858,6 +2831,7 @@
         "description": [],
         "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -1871,7 +2845,8 @@
               "\nUnique ID of file metadata to delete\n"
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1887,6 +2862,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -1898,7 +2874,8 @@
               "\nFile ID."
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1910,7 +2887,8 @@
               "\nFile kind, must correspond to a registered {@link FileKind}."
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1926,28 +2904,20 @@
         ],
         "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
-            "id": "def-server.DeleteForFileArgs.file",
-            "type": "Object",
+            "id": "def-server.DeleteForFileArgs.id",
+            "type": "string",
             "tags": [],
-            "label": "file",
+            "label": "id",
             "description": [
-              "\nThe file object to delete the shares for."
-            ],
-            "signature": [
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.File",
-                "text": "File"
-              },
-              "<unknown>"
+              "\nThe file id to delete the shares for."
             ],
             "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1961,8 +2931,9 @@
         "description": [
           "\nWraps the {@link FileMetadataClient} and {@link BlobStorageClient} client\nto provide basic file CRUD functionality.\n\nFor now this is just a shallow type of the implementation for export purposes."
         ],
-        "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+        "path": "x-pack/plugins/files/server/file_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -1973,8 +2944,9 @@
             "description": [
               "See {@link FileMetadata.FileKind}."
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
-            "deprecated": false
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -1986,20 +2958,21 @@
               "\nSee {@link FileMetadataClient.create}.\n"
             ],
             "signature": [
-              "(arg: ",
+              "<M = unknown>(arg: ",
               "CreateArgs",
               ") => Promise<",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
+                "section": "def-common.File",
+                "text": "File"
               },
-              "<unknown>>"
+              "<M>>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2013,8 +2986,9 @@
                 "signature": [
                   "CreateArgs"
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2030,7 +3004,7 @@
               "\nSee {@link FileMetadataClient.get}\n"
             ],
             "signature": [
-              "(arg: ",
+              "<M = unknown>(arg: ",
               {
                 "pluginId": "files",
                 "scope": "server",
@@ -2041,16 +3015,16 @@
               ") => Promise<",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
+                "section": "def-common.File",
+                "text": "File"
               },
-              "<unknown>>"
+              "<M>>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
-            "returnComment": [],
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2070,10 +3044,13 @@
                     "text": "GetArg"
                   }
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-                "deprecated": false
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "files",
@@ -2085,51 +3062,63 @@
               "\n{@link FileMetadataClient.update}\n"
             ],
             "signature": [
-              "(arg: ",
+              "<M = unknown>(id: string, metadata: ",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.UpdateArgs",
-                "text": "UpdateArgs"
+                "section": "def-common.UpdatableFileMetadata",
+                "text": "UpdatableFileMetadata"
               },
-              "<unknown>) => Promise<",
-              {
-                "pluginId": "files",
-                "scope": "server",
-                "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
-              },
-              "<unknown>>"
+              "<M>) => Promise<void>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
-            "returnComment": [],
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
                 "id": "def-server.FileClient.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- File id"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-server.FileClient.update.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "arg",
+                "label": "metadata",
                 "description": [
-                  "- Argument to get a file"
+                  "- new file metadata"
                 ],
                 "signature": [
                   {
                     "pluginId": "files",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibFilesPluginApi",
-                    "section": "def-server.UpdateArgs",
-                    "text": "UpdateArgs"
+                    "section": "def-common.UpdatableFileMetadata",
+                    "text": "UpdatableFileMetadata"
                   },
-                  "<unknown>"
+                  "<M>"
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-                "deprecated": false
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "files",
@@ -2151,8 +3140,9 @@
               },
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2172,42 +3162,13 @@
                     "text": "DeleteArgs"
                   }
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-server.FileClient.deleteContent",
-            "type": "Function",
-            "tags": [],
-            "label": "deleteContent",
-            "description": [
-              "\nSee {@link BlobStorageClient.delete}\n"
-            ],
-            "signature": [
-              "(id: string) => Promise<void>"
-            ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileClient.deleteContent.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- Argument to delete a file"
-                ],
-                "path": "x-pack/plugins/files/server/blob_storage_service/types.ts",
-                "deprecated": false
-              }
-            ]
           },
           {
             "parentPluginId": "files",
@@ -2230,16 +3191,16 @@
               " | undefined) => Promise<",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
+                "section": "def-common.File",
+                "text": "File"
               },
               "<unknown>[]>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
-            "returnComment": [],
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2260,10 +3221,13 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-                "deprecated": false
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "files",
@@ -2286,16 +3250,16 @@
               ") => Promise<",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
+                "section": "def-common.File",
+                "text": "File"
               },
               "<unknown>[]>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
-            "returnComment": [],
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2315,114 +3279,155 @@
                     "text": "FindFileArgs"
                   }
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-server.FileClient.upload",
-            "type": "Function",
-            "tags": [],
-            "label": "upload",
-            "description": [
-              "\nSee {@link BlobStorageClient.upload}\n"
-            ],
-            "signature": [
-              "(id: string, rs: ",
-              "Readable",
-              ", opts?: ",
-              "UploadOptions",
-              " | undefined) => Promise<{ id: string; size: number; }>"
-            ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileClient.upload.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- Readable stream to upload"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileClient.upload.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "rs",
-                "description": [
-                  "- Readable stream to upload"
-                ],
-                "signature": [
-                  "Readable"
-                ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileClient.upload.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "opts",
-                "description": [
-                  "- Argument for uploads"
-                ],
-                "signature": [
-                  "UploadOptions",
-                  " | undefined"
-                ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
-                "deprecated": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "files",
-            "id": "def-server.FileClient.download",
+            "id": "def-server.FileClient.share",
             "type": "Function",
-            "tags": [],
-            "label": "download",
+            "tags": [
+              "note"
+            ],
+            "label": "share",
             "description": [
-              "\nSee {@link BlobStorageClient.download}\n"
+              "\nCreate a file share instance for this file.\n"
             ],
             "signature": [
-              "(args: { id: string; size?: number | undefined; }) => Promise<",
-              "Readable",
+              "(args: ",
+              "ShareArgs",
+              ") => Promise<",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSONWithToken",
+                "text": "FileShareJSONWithToken"
+              },
               ">"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
-            "returnComment": [],
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
-                "id": "def-server.FileClient.download.$1",
+                "id": "def-server.FileClient.share.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "args",
                 "description": [
-                  "- to download a file"
+                  "- Arguments to create a file share"
                 ],
                 "signature": [
-                  "{ id: string; size?: number | undefined; }"
+                  "ShareArgs"
                 ],
-                "path": "x-pack/plugins/files/server/blob_storage_service/types.ts",
-                "deprecated": false
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-server.FileClient.unshare",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "unshare",
+            "description": [
+              "\nCreate a file share instance for this file.\n"
+            ],
+            "signature": [
+              "(args: IdArg) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-server.FileClient.unshare.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Arguments to remove a file share"
+                ],
+                "signature": [
+                  "IdArg"
+                ],
+                "path": "x-pack/plugins/files/server/file_share_service/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-server.FileClient.listShares",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "listShares",
+            "description": [
+              "\nCreate a file share instance for this file.\n"
+            ],
+            "signature": [
+              "(arg: ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.ListArgs",
+                "text": "ListArgs"
+              },
+              ") => Promise<{ shares: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              "[]; }>"
+            ],
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-server.FileClient.listShares.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "arg",
+                "description": [
+                  "- Arguments to remove a file share"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "files",
+                    "scope": "server",
+                    "docId": "kibFilesPluginApi",
+                    "section": "def-server.ListArgs",
+                    "text": "ListArgs"
+                  }
+                ],
+                "path": "x-pack/plugins/files/server/file_share_service/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2450,6 +3455,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -2461,7 +3467,8 @@
               "\nUnique ID of a file, used to locate a file."
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -2492,7 +3499,8 @@
               " & { FileKind: string; Meta?: M | undefined; }"
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2508,6 +3516,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -2539,6 +3548,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2561,6 +3571,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2596,6 +3607,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2617,6 +3629,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2652,6 +3665,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2674,6 +3688,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2701,6 +3716,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2722,6 +3738,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2757,6 +3774,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2779,6 +3797,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2814,6 +3833,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2835,6 +3855,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2870,6 +3891,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2891,6 +3913,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2910,6 +3933,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_service/file_service_factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -2934,6 +3958,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -2950,6 +3975,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2978,6 +4004,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2995,6 +4022,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_service/file_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -3026,6 +4054,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3048,6 +4077,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3063,7 +4093,7 @@
               "\nUpdate updatable file attributes like name and meta.\n"
             ],
             "signature": [
-              "<M>(args: ",
+              "(args: ",
               {
                 "pluginId": "files",
                 "scope": "server",
@@ -3071,18 +4101,11 @@
                 "section": "def-server.UpdateFileArgs",
                 "text": "UpdateFileArgs"
               },
-              ") => Promise<",
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.File",
-                "text": "File"
-              },
-              "<M>>"
+              ") => Promise<void>"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3104,6 +4127,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3131,6 +4155,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3152,6 +4177,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3187,6 +4213,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3208,6 +4235,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3243,6 +4271,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3264,6 +4293,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3299,6 +4329,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3320,6 +4351,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3347,6 +4379,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -3362,7 +4395,8 @@
                   "IdArg"
                 ],
                 "path": "x-pack/plugins/files/server/file_share_service/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3396,6 +4430,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -3417,7 +4452,8 @@
                   }
                 ],
                 "path": "x-pack/plugins/files/server/file_share_service/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3451,6 +4487,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -3472,7 +4509,8 @@
                   }
                 ],
                 "path": "x-pack/plugins/files/server/file_share_service/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3490,6 +4528,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -3505,7 +4544,8 @@
                   "IdArg"
                 ],
                 "path": "x-pack/plugins/files/server/file_share_service/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3531,6 +4571,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3556,6 +4597,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3571,6 +4613,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3590,6 +4633,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_share_service/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -3613,6 +4657,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_share_service/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3628,6 +4673,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3663,6 +4709,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_share_service/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3684,6 +4731,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3719,6 +4767,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_share_service/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3740,6 +4789,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3759,6 +4809,7 @@
             ],
             "path": "x-pack/plugins/files/server/file_share_service/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -3774,6 +4825,7 @@
                 ],
                 "path": "x-pack/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3808,6 +4860,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -3822,7 +4875,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3857,6 +4911,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -3871,7 +4926,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -3886,7 +4942,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -3901,7 +4958,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -3916,7 +4974,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -3931,7 +4990,8 @@
               "Record<string, string> | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3947,6 +5007,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -3958,7 +5019,8 @@
               "\nUnique ID of file metadata"
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3974,6 +5036,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -3985,7 +5048,8 @@
               "\nFile ID."
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -3997,7 +5061,8 @@
               "\nFile kind, must correspond to a registered {@link FileKind}."
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4013,6 +5078,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -4027,7 +5093,8 @@
               "{ capacity: number; }"
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4058,6 +5125,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -4072,7 +5140,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4105,6 +5174,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -4119,7 +5189,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4152,6 +5223,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -4163,7 +5235,8 @@
               "\nFile kind, must correspond to a registered {@link FileKind}."
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4189,6 +5262,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -4200,7 +5274,8 @@
               "\nA unique file ID."
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4223,7 +5298,8 @@
               " | undefined; FileKind?: string | undefined; Meta?: M | undefined; }"
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4239,6 +5315,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -4250,7 +5327,8 @@
               "\nThe file share ID."
             ],
             "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4265,7 +5343,8 @@
               "{ name?: string | undefined; }"
             ],
             "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4281,6 +5360,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -4292,7 +5372,8 @@
               "\nFile ID."
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4304,7 +5385,8 @@
               "\nFile kind, must correspond to a registered {@link FileKind}."
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4319,7 +5401,8 @@
               "{ name: string; meta: unknown; alt: string | undefined; }"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4341,6 +5424,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4357,6 +5441,7 @@
         ],
         "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -4372,12 +5457,15 @@
       ],
       "path": "x-pack/plugins/files/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "files",
           "id": "def-server.FilesSetup.registerFileKind",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "track-adoption"
+          ],
           "label": "registerFileKind",
           "description": [
             "\nRegister a {@link FileKind} which allows for specifying details about the files\nthat will be uploaded.\n"
@@ -4395,6 +5483,8 @@
           ],
           "path": "x-pack/plugins/files/server/types.ts",
           "deprecated": false,
+          "trackAdoption": true,
+          "references": [],
           "children": [
             {
               "parentPluginId": "files",
@@ -4416,6 +5506,7 @@
               ],
               "path": "x-pack/plugins/files/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -4436,15 +5527,18 @@
       ],
       "path": "x-pack/plugins/files/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "files",
           "id": "def-server.FilesStart.fileServiceFactory",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "track-adoption"
+          ],
           "label": "fileServiceFactory",
           "description": [
-            "\nCreate an instance of {@link FileServiceStart}."
+            "\nCreate an instance of {@link FileServiceStart}.\n"
           ],
           "signature": [
             {
@@ -4456,7 +5550,9 @@
             }
           ],
           "path": "x-pack/plugins/files/server/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": true,
+          "references": []
         }
       ],
       "lifecycle": "start",
@@ -4478,6 +5574,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -4492,7 +5589,8 @@
               "{ index: string; } | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4514,19 +5612,48 @@
             "section": "def-common.File",
             "text": "File"
           },
-          "<Meta> extends ",
-          {
-            "pluginId": "files",
-            "scope": "common",
-            "docId": "kibFilesPluginApi",
-            "section": "def-common.FileJSON",
-            "text": "FileJSON"
-          },
           "<Meta>"
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-common.File.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe file ID"
+            ],
+            "path": "x-pack/plugins/files/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.File.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nFile metadata in camelCase form."
+            ],
+            "signature": [
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<Meta>"
+            ],
+            "path": "x-pack/plugins/files/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "files",
             "id": "def-common.File.update",
@@ -4557,6 +5684,7 @@
             ],
             "path": "x-pack/plugins/files/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -4580,6 +5708,7 @@
                 ],
                 "path": "x-pack/plugins/files/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4597,10 +5726,21 @@
             "signature": [
               "(content: ",
               "Readable",
-              ") => Promise<void>"
+              ", abort$?: ",
+              "Observable",
+              "<unknown> | undefined) => Promise<",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.File",
+                "text": "File"
+              },
+              "<Meta>>"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -4616,7 +5756,26 @@
                 ],
                 "path": "x-pack/plugins/files/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.File.uploadContent.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "abort$",
+                "description": [
+                  "- An observable that can be used to abort the upload at any time."
+                ],
+                "signature": [
+                  "Observable",
+                  "<unknown> | undefined"
+                ],
+                "path": "x-pack/plugins/files/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4637,6 +5796,7 @@
             ],
             "path": "x-pack/plugins/files/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -4656,6 +5816,7 @@
             ],
             "path": "x-pack/plugins/files/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -4691,6 +5852,7 @@
             ],
             "path": "x-pack/plugins/files/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -4713,6 +5875,7 @@
                 ],
                 "path": "x-pack/plugins/files/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4740,6 +5903,7 @@
             ],
             "path": "x-pack/plugins/files/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -4765,6 +5929,7 @@
             ],
             "path": "x-pack/plugins/files/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "files",
@@ -4786,6 +5951,7 @@
                 ],
                 "path": "x-pack/plugins/files/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4813,6 +5979,7 @@
             ],
             "path": "x-pack/plugins/files/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -4840,6 +6007,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -4851,7 +6019,8 @@
               "\nUnique file ID."
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4863,7 +6032,8 @@
               "\nISO string of when this file was created"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4875,7 +6045,8 @@
               "\nISO string of when the file was updated"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4889,7 +6060,8 @@
               "\nFile name.\n"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4904,7 +6076,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4919,7 +6092,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4936,7 +6110,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4951,7 +6126,8 @@
               "Meta | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4966,7 +6142,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4980,7 +6157,8 @@
               "\nA unique kind that governs various aspects of the file. A consumer of the\nfiles service must register a file kind and link their files to a specific\nkind.\n"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -4995,7 +6173,8 @@
               "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5013,6 +6192,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -5024,22 +6204,26 @@
               "\nUnique file kind ID"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
             "id": "def-common.FileKind.maxSizeBytes",
             "type": "number",
-            "tags": [],
+            "tags": [
+              "default"
+            ],
             "label": "maxSizeBytes",
             "description": [
-              "\nMaximum size, in bytes, a file of this kind can be."
+              "\nMaximum size, in bytes, a file of this kind can be.\n"
             ],
             "signature": [
               "number | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5056,7 +6240,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5078,22 +6263,26 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
             "id": "def-common.FileKind.http",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "note"
+            ],
             "label": "http",
             "description": [
-              "\nOptionally specify which HTTP routes to create for the file kind"
+              "\nSpecify which HTTP routes to create for the file kind.\n\nYou can always create your own HTTP routes for working with files but\nthis interface allows you to expose basic CRUD operations, upload, download\nand sharing of files over a RESTful-like interface.\n"
             ],
             "signature": [
               "{ create?: HttpEndpointDefinition | undefined; update?: HttpEndpointDefinition | undefined; delete?: HttpEndpointDefinition | undefined; getById?: HttpEndpointDefinition | undefined; list?: HttpEndpointDefinition | undefined; download?: HttpEndpointDefinition | undefined; share?: HttpEndpointDefinition | undefined; }"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5109,6 +6298,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -5120,7 +6310,8 @@
               "\nUnique ID share instance"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5132,7 +6323,8 @@
               "\nISO timestamp the share was created"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5144,7 +6336,8 @@
               "\nUnix timestamp (in milliseconds) of when this share expires"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5159,7 +6352,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5171,7 +6365,8 @@
               "\nThe ID of the file this share is linked to"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5187,6 +6382,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -5201,7 +6397,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5218,7 +6415,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5234,6 +6432,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -5248,7 +6447,8 @@
               "{ esFixedSizeIndex: { capacity: number; used: number; available: number; }; }"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5263,7 +6463,8 @@
               "{ AWAITING_UPLOAD: number; UPLOADING: number; READY: number; UPLOAD_ERROR: number; DELETED: number; }"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5278,7 +6479,8 @@
               "{ [x: string]: number; }"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5294,6 +6496,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -5305,7 +6508,8 @@
               "\nSpecify the share instance to remove"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5321,6 +6525,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "files",
@@ -5335,7 +6540,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "files",
@@ -5350,7 +6556,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5388,6 +6595,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5404,6 +6612,7 @@
         ],
         "path": "x-pack/plugins/files/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5420,6 +6629,7 @@
         ],
         "path": "x-pack/plugins/files/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5436,6 +6646,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5468,6 +6679,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5493,6 +6705,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5509,6 +6722,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5534,6 +6748,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5550,6 +6765,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5566,6 +6782,7 @@
         ],
         "path": "x-pack/plugins/files/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5582,6 +6799,7 @@
         ],
         "path": "x-pack/plugins/files/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5598,6 +6816,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5614,6 +6833,7 @@
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

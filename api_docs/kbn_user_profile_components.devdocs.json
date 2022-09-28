@@ -21,6 +21,57 @@
     "functions": [
       {
         "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.getUserDisplayName",
+        "type": "Function",
+        "tags": [],
+        "label": "getUserDisplayName",
+        "description": [
+          "\nDetermines the display name for the provided user information."
+        ],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.GetUserDisplayNameParams",
+            "text": "GetUserDisplayNameParams"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.getUserDisplayName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "Set of available user's name-related fields."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.GetUserDisplayNameParams",
+                "text": "GetUserDisplayNameParams"
+              }
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
         "id": "def-common.UserAvatar",
         "type": "Function",
         "tags": [],
@@ -41,6 +92,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -62,6 +114,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -78,7 +131,15 @@
           "\nRenders a selectable component inside a popover given a list of user profiles"
         ],
         "signature": [
-          "({ title, selectableProps, ...popoverProps }: React.PropsWithChildren<",
+          "<Option extends ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfileWithAvatar",
+            "text": "UserProfileWithAvatar"
+          },
+          " | null>({ title, selectableProps, ...popoverProps }: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -86,20 +147,20 @@
             "section": "def-common.UserProfilesPopoverProps",
             "text": "UserProfilesPopoverProps"
           },
-          ">) => JSX.Element"
+          "<Option>) => JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserProfilesPopover.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  title,\n  selectableProps,\n  ...popoverProps\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/user-profile-components",
                 "scope": "common",
@@ -107,10 +168,11 @@
                 "section": "def-common.UserProfilesPopoverProps",
                 "text": "UserProfilesPopoverProps"
               },
-              ">"
+              "<Option>"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -127,7 +189,15 @@
           "\nRenders a selectable component given a list of user profiles"
         ],
         "signature": [
-          "({ selectedOptions, defaultOptions, options, onChange, onSearchChange, isLoading, singleSelection, height, loadingMessage, noMatchesMessage, emptyMessage, errorMessage, searchPlaceholder, selectedStatusMessage, clearButtonLabel, }: React.PropsWithChildren<",
+          "<Option extends ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfileWithAvatar",
+            "text": "UserProfileWithAvatar"
+          },
+          " | null>({ selectedOptions, defaultOptions, options, onChange, onSearchChange, isLoading, singleSelection, height, loadingMessage, noMatchesMessage, emptyMessage, errorMessage, searchPlaceholder, searchInputId, selectedStatusMessage, nullOptionLabel, defaultOptionsLabel, clearButtonLabel, }: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -135,20 +205,20 @@
             "section": "def-common.UserProfilesSelectableProps",
             "text": "UserProfilesSelectableProps"
           },
-          ">) => JSX.Element"
+          "<Option>) => JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserProfilesSelectable.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  selectedOptions,\n  defaultOptions,\n  options,\n  onChange,\n  onSearchChange,\n  isLoading = false,\n  singleSelection = false,\n  height,\n  loadingMessage,\n  noMatchesMessage,\n  emptyMessage,\n  errorMessage,\n  searchPlaceholder,\n  selectedStatusMessage,\n  clearButtonLabel,\n}",
+            "label": "{\n  selectedOptions,\n  defaultOptions,\n  options,\n  onChange,\n  onSearchChange,\n  isLoading = false,\n  singleSelection = false,\n  height,\n  loadingMessage,\n  noMatchesMessage,\n  emptyMessage,\n  errorMessage,\n  searchPlaceholder,\n  searchInputId,\n  selectedStatusMessage,\n  nullOptionLabel,\n  defaultOptionsLabel,\n  clearButtonLabel,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/user-profile-components",
                 "scope": "common",
@@ -156,10 +226,11 @@
                 "section": "def-common.UserProfilesSelectableProps",
                 "text": "UserProfilesSelectableProps"
               },
-              ">"
+              "<Option>"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -168,6 +239,67 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.GetUserDisplayNameParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetUserDisplayNameParams",
+        "description": [
+          "\nSet of available name-related fields to pick as display name."
+        ],
+        "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.GetUserDisplayNameParams.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [
+              "\nUsername of the user."
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.GetUserDisplayNameParams.email",
+            "type": "string",
+            "tags": [],
+            "label": "email",
+            "description": [
+              "\nOptional email of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.GetUserDisplayNameParams.full_name",
+            "type": "string",
+            "tags": [],
+            "label": "full_name",
+            "description": [
+              "\nOptional full name of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/user-profile-components",
         "id": "def-common.UserAvatarProps",
@@ -187,10 +319,11 @@
           },
           " extends Omit<",
           "EuiAvatarProps",
-          ", \"type\" | \"color\" | \"name\" | \"iconColor\" | \"iconType\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
+          ", \"name\" | \"type\" | \"color\" | \"iconColor\" | \"iconType\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -212,7 +345,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -234,7 +368,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -260,6 +395,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -271,7 +407,8 @@
               "\nUnique ID for of the user profile."
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -283,7 +420,8 @@
               "\nIndicates whether user profile is enabled or not."
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -304,7 +442,8 @@
               }
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -319,7 +458,8 @@
               "{ [P in keyof D]?: D[P] | undefined; }"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -335,6 +475,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -349,7 +490,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -364,7 +506,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -379,7 +522,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -401,11 +545,12 @@
             "section": "def-common.UserProfilesPopoverProps",
             "text": "UserProfilesPopoverProps"
           },
-          " extends ",
+          "<Option> extends ",
           "EuiPopoverProps"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -422,7 +567,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -442,10 +588,12 @@
                 "docId": "kibKbnUserProfileComponentsPluginApi",
                 "section": "def-common.UserProfilesSelectableProps",
                 "text": "UserProfilesSelectableProps"
-              }
+              },
+              "<Option>"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -467,12 +615,13 @@
             "section": "def-common.UserProfilesSelectableProps",
             "text": "UserProfilesSelectableProps"
           },
-          " extends Pick<",
+          "<Option> extends Pick<",
           "EuiSelectableProps",
           "<{}>, \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -484,17 +633,11 @@
               "\nList of users to be rendered as suggestions."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/user-profile-components",
-                "scope": "common",
-                "docId": "kibKbnUserProfileComponentsPluginApi",
-                "section": "def-common.UserProfileWithAvatar",
-                "text": "UserProfileWithAvatar"
-              },
-              "[] | undefined"
+              "Option[] | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -503,20 +646,14 @@
             "tags": [],
             "label": "selectedOptions",
             "description": [
-              "\nList of selected users."
+              "\nList of selected users or `null` (no users)."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/user-profile-components",
-                "scope": "common",
-                "docId": "kibKbnUserProfileComponentsPluginApi",
-                "section": "def-common.UserProfileWithAvatar",
-                "text": "UserProfileWithAvatar"
-              },
-              "[] | undefined"
+              "Option[] | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -528,17 +665,11 @@
               "\nList of users from search results. Should be updated based on the search term provided by `onSearchChange` callback."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/user-profile-components",
-                "scope": "common",
-                "docId": "kibKbnUserProfileComponentsPluginApi",
-                "section": "def-common.UserProfileWithAvatar",
-                "text": "UserProfileWithAvatar"
-              },
-              "[] | undefined"
+              "Option[] | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -547,21 +678,14 @@
             "tags": [],
             "label": "onChange",
             "description": [
-              "\nPasses back the list of selected users."
+              "\nPasses back the current selection."
             ],
             "signature": [
-              "((options: ",
-              {
-                "pluginId": "@kbn/user-profile-components",
-                "scope": "common",
-                "docId": "kibKbnUserProfileComponentsPluginApi",
-                "section": "def-common.UserProfileWithAvatar",
-                "text": "UserProfileWithAvatar"
-              },
-              "[]) => void) | undefined"
+              "((options: Option[]) => void) | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/user-profile-components",
@@ -570,20 +694,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "List of selected users"
+                  "Either the list of selected users or `null` (no users)."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/user-profile-components",
-                    "scope": "common",
-                    "docId": "kibKbnUserProfileComponentsPluginApi",
-                    "section": "def-common.UserProfileWithAvatar",
-                    "text": "UserProfileWithAvatar"
-                  },
-                  "[]"
+                  "Option[]"
                 ],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -603,6 +721,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/user-profile-components",
@@ -618,6 +737,7 @@
                 ],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -636,7 +756,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -645,13 +766,30 @@
             "tags": [],
             "label": "searchPlaceholder",
             "description": [
-              "\nPlaceholder text for search box."
+              "\nPlaceholder text of search field."
             ],
             "signature": [
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserProfilesSelectableProps.searchInputId",
+            "type": "string",
+            "tags": [],
+            "label": "searchInputId",
+            "description": [
+              "\nIdentifier of search field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -667,6 +805,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/user-profile-components",
@@ -682,6 +821,7 @@
                 ],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -694,13 +834,46 @@
             "tags": [],
             "label": "clearButtonLabel",
             "description": [
-              "\nText for label of clear button."
+              "\nLabel for clear button."
             ],
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserProfilesSelectableProps.nullOptionLabel",
+            "type": "string",
+            "tags": [],
+            "label": "nullOptionLabel",
+            "description": [
+              "\nLabel of \"no users\" option."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserProfilesSelectableProps.defaultOptionsLabel",
+            "type": "string",
+            "tags": [],
+            "label": "defaultOptionsLabel",
+            "description": [
+              "\nLabel for default options group separator."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -716,6 +889,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -727,7 +901,8 @@
               "\nUsername of the user."
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -742,7 +917,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -757,22 +933,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/user-profile-components",
-            "id": "def-common.UserProfileUserInfo.display_name",
-            "type": "string",
-            "tags": [],
-            "label": "display_name",
-            "description": [
-              "\nOptional display name of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -809,6 +971,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

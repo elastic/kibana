@@ -552,4 +552,60 @@ storiesOf('SearchBar', module)
       ],
       query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
     } as unknown as SearchBarProps<Query>)
+  )
+  .add('in disabled state', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      isDisabled: true,
+    } as SearchBarProps)
+  )
+  .add('no submit button', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      showSubmitButton: false,
+    } as SearchBarProps)
+  )
+  .add('submit button always as icon', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      submitButtonStyle: 'iconOnly',
+    } as SearchBarProps)
+  )
+  .add('submit button always as a full button', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      submitButtonStyle: 'full',
+    } as SearchBarProps)
   );

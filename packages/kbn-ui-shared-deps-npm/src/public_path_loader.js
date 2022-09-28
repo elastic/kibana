@@ -7,6 +7,7 @@
  */
 
 const Qs = require('querystring');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const { stringifyRequest } = require('loader-utils');
 
 const VAL_LOADER = require.resolve('val-loader');

@@ -28,10 +28,24 @@ export const THREAT_QUERY_LABEL = i18n.translate(
   }
 );
 
-export const SAVED_ID_LABEL = i18n.translate(
+export const SAVED_QUERY_NAME_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.savedIdLabel',
   {
     defaultMessage: 'Saved query name',
+  }
+);
+
+export const SAVED_QUERY_FILTERS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.savedQueryFiltersLabel',
+  {
+    defaultMessage: 'Saved query filters',
+  }
+);
+
+export const SAVED_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.savedQueryLabel',
+  {
+    defaultMessage: 'Saved query',
   }
 );
 

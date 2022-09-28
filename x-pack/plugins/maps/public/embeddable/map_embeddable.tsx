@@ -36,6 +36,7 @@ import {
   setReadOnly,
   updateLayerById,
   setGotoWithCenter,
+  setEmbeddableSearchContext,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -48,6 +49,7 @@ import {
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getEmbeddableSearchContext,
   getLayerList,
   getGoto,
   getMapCenter,
@@ -116,6 +118,7 @@ export class MapEmbeddable
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
   private _prevTimeRange?: TimeRange;
+  private _prevTimeslice?: [number, number];
   private _prevQuery?: Query;
   private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
@@ -194,6 +197,21 @@ export class MapEmbeddable
       forceRefresh: false,
     });
 
+    const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
+    if (mapStateJSON) {
+      try {
+        const mapState = JSON.parse(mapStateJSON);
+        store.dispatch(
+          setEmbeddableSearchContext({
+            filters: mapState.filters ? mapState.filters : [],
+            query: mapState.query,
+          })
+        );
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+
     this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();
     });
@@ -249,20 +267,18 @@ export class MapEmbeddable
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
-  /**
-   * TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
-   * @returns []
-   */
   public async getFilters() {
-    return [];
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext ? embeddableSearchContext.filters : [];
   }
 
-  /**
-   * TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
-   * @returns undefined
-   */
   public async getQuery() {
-    return undefined;
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext?.query;
   }
 
   public supportedTriggers(): string[] {
@@ -295,6 +311,7 @@ export class MapEmbeddable
   onUpdate() {
     if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
+      !_.isEqual(this.input.timeslice, this._prevTimeslice) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
       !compareFilters(this._getFilters(), this._prevFilters) ||
       this._getSearchSessionId() !== this._prevSearchSessionId
@@ -386,6 +403,7 @@ export class MapEmbeddable
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
     const filters = this._getFilters();
     this._prevTimeRange = this.input.timeRange;
+    this._prevTimeslice = this.input.timeslice;
     this._prevQuery = this.input.query;
     this._prevFilters = filters;
     this._prevSearchSessionId = this._getSearchSessionId();
@@ -394,6 +412,9 @@ export class MapEmbeddable
         filters,
         query: this.input.query,
         timeFilters: this.input.timeRange,
+        timeslice: this.input.timeslice
+          ? { from: this.input.timeslice[0], to: this.input.timeslice[1] }
+          : undefined,
         forceRefresh,
         searchSessionId: this._getSearchSessionId(),
         searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())

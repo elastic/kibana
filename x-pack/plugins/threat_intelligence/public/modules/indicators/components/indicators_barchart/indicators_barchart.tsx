@@ -9,28 +9,51 @@ import React, { VFC } from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { IndicatorBarchartLegendAction } from '../indicator_barchart_legend_action/indicator_barchart_legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../common/utils/dates';
-import { ChartSeries } from '../../hooks/use_aggregated_indicators';
+import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
 
 const ID = 'tiIndicator';
 const DEFAULT_CHART_HEIGHT = '200px';
 const DEFAULT_CHART_WIDTH = '100%';
 
 export interface IndicatorsBarChartProps {
+  /**
+   * Array of indicators already processed to be consumed by the BarSeries component from the @elastic/charts library.
+   */
   indicators: ChartSeries[];
+  /**
+   * Min and max dates to nicely format the label in the @elastic/charts Axis component.
+   */
   dateRange: TimeRangeBounds;
+  /**
+   * Indicator field selected in the IndicatorFieldSelector component, passed to the {@link AddToTimeline} to populate the timeline.
+   */
+  field: string;
+  /**
+   * Option height value to override the default {@link DEFAULT_CHART_HEIGHT} default barchart height.
+   */
   height?: string;
 }
 
+/**
+ * Displays a barchart of aggregated indicators using the @elastic/charts library.
+ */
 export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
   indicators,
   dateRange,
+  field,
   height = DEFAULT_CHART_HEIGHT,
 }) => {
   return (
     <EuiThemeProvider>
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
-        <Settings showLegend showLegendExtra legendPosition={Position.Right} />
+        <Settings
+          showLegend
+          showLegendExtra
+          legendPosition={Position.Right}
+          legendAction={({ label }) => <IndicatorBarchartLegendAction field={field} data={label} />}
+        />
         <Axis
           id={`${ID}TimeAxis`}
           position={Position.Bottom}

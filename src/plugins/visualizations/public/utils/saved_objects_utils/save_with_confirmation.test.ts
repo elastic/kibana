@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/public';
 import type { SavedObjectsClientContract } from '@kbn/core/public';
 import { saveWithConfirmation } from './save_with_confirmation';
+import { VisSavedObject } from '../../types';
 import * as deps from './confirm_modal_promise';
 import { OVERWRITE_REJECTED } from './constants';
 
@@ -25,7 +26,7 @@ describe('saveWithConfirmation', () => {
     getEsType: () => 'test type',
     title: 'test title',
     displayName: 'test display name',
-  };
+  } as VisSavedObject;
 
   beforeEach(() => {
     savedObjectsClient.create = jest.fn();

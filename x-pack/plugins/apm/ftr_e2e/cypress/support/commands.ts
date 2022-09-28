@@ -21,10 +21,12 @@ Cypress.Commands.add('loginAsEditorUser', () => {
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    cy.log(`Logging in as ${username}`);
+    // cy.session(username, () => {
     const kibanaUrl = Cypress.env('KIBANA_URL');
-    return cy.request({
-      log: false,
+    cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+    cy.visit('/');
+    cy.request({
+      log: true,
       method: 'POST',
       url: `${kibanaUrl}/internal/security/login`,
       body: {
@@ -36,13 +38,23 @@ Cypress.Commands.add(
       headers: {
         'kbn-xsrf': 'e2e_test',
       },
+      // });
     });
+    cy.visit('/');
   }
 );
 
 Cypress.Commands.add('changeTimeRange', (value: string) => {
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
   cy.contains(value).click();
+});
+
+Cypress.Commands.add('visitKibana', (url: string) => {
+  cy.visit(url);
+  cy.get('[data-test-subj="kbnLoadingMessage"]').should('exist');
+  cy.get('[data-test-subj="kbnLoadingMessage"]').should('not.exist', {
+    timeout: 50000,
+  });
 });
 
 Cypress.Commands.add(
@@ -96,6 +108,7 @@ Cypress.Commands.add(
       headers: {
         'kbn-xsrf': 'e2e_test',
       },
+      auth: { user: 'editor', pass: 'changeme' },
     });
   }
 );

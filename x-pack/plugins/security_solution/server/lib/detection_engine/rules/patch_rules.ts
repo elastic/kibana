@@ -13,39 +13,39 @@ import { convertPatchAPIToInternalSchema } from '../schemas/rule_converters';
 
 export const patchRules = async ({
   rulesClient,
-  rule,
-  params,
+  existingRule,
+  nextParams,
 }: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
-  if (rule == null) {
+  if (existingRule == null) {
     return null;
   }
 
-  const patchedRule = convertPatchAPIToInternalSchema(params, rule);
+  const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
 
   const update = await rulesClient.update({
-    id: rule.id,
+    id: existingRule.id,
     data: patchedRule,
   });
 
-  if (params.throttle !== undefined) {
+  if (nextParams.throttle !== undefined) {
     await maybeMute({
       rulesClient,
-      muteAll: rule.muteAll,
-      throttle: params.throttle,
+      muteAll: existingRule.muteAll,
+      throttle: nextParams.throttle,
       id: update.id,
     });
   }
 
-  if (rule.enabled && params.enabled === false) {
-    await rulesClient.disable({ id: rule.id });
-  } else if (!rule.enabled && params.enabled === true) {
-    await rulesClient.enable({ id: rule.id });
+  if (existingRule.enabled && nextParams.enabled === false) {
+    await rulesClient.disable({ id: existingRule.id });
+  } else if (!existingRule.enabled && nextParams.enabled === true) {
+    await rulesClient.enable({ id: existingRule.id });
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
 
-  if (params.enabled != null) {
-    return { ...update, enabled: params.enabled };
+  if (nextParams.enabled != null) {
+    return { ...update, enabled: nextParams.enabled };
   } else {
     return update;
   }

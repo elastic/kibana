@@ -29,12 +29,12 @@ import {
 } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { IconChartDatatable } from '@kbn/chart-icons';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common';
 import type { LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId } from '../../../shared_components';
-import { LensIconChartDatatable } from '../../../assets/chart_datatable';
 import type {
   DataContextType,
   DatatableRenderProps,
@@ -113,6 +113,25 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const firstTableRef = useRef(firstLocalTable);
   firstTableRef.current = firstLocalTable;
+
+  useEffect(() => {
+    if (!pagination?.pageIndex && !pagination?.pageSize) return;
+    const lastPageIndex = Math.ceil(firstLocalTable.rows.length / pagination.pageSize) - 1;
+    /**
+     * When the underlying data changes, there might be a case when actual pagination page
+     * doesn't exist anymore - if the number of rows has decreased.
+     * Set the last page as an actual.
+     */
+    setPagination((pag) => {
+      if (!pag) {
+        return pag;
+      }
+      return {
+        pageIndex: pag.pageIndex > lastPageIndex ? lastPageIndex : pag.pageIndex,
+        pageSize: pag.pageSize,
+      };
+    });
+  }, [pagination?.pageIndex, pagination?.pageSize, firstLocalTable.rows.length]);
 
   const untransposedDataRef = useRef(props.untransposedData);
   untransposedDataRef.current = props.untransposedData;
@@ -413,7 +432,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   if (isEmpty) {
     return (
       <VisualizationContainer className="lnsDataTableContainer">
-        <EmptyPlaceholder icon={LensIconChartDatatable} />
+        <EmptyPlaceholder icon={IconChartDatatable} />
       </VisualizationContainer>
     );
   }
@@ -433,6 +452,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           alignments,
           minMaxByColumnId,
           getColorForValue: props.paletteService.get(CUSTOM_PALETTE).getColorForValue!,
+          handleFilterClick,
         }}
       >
         <EuiDataGrid
@@ -441,7 +461,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHeightsOptions={{
             defaultHeight: props.args.fitRowToContent
               ? 'auto'
-              : props.args.rowHeightLines
+              : props.args.rowHeightLines && props.args.rowHeightLines !== 1
               ? {
                   lineCount: props.args.rowHeightLines,
                 }

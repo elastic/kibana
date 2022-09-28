@@ -97,7 +97,7 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `alert.attributes.enabled: true and
+          `alert.attributes.enabled: true or
           (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
@@ -112,7 +112,7 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `alert.attributes.enabled: false and
+          `alert.attributes.enabled: false or
           (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
@@ -127,8 +127,8 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `alert.attributes.enabled: true and
-          alert.attributes.enabled: false and
+          `alert.attributes.enabled: true or
+          alert.attributes.enabled: false or
           (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
@@ -200,6 +200,48 @@ describe('mapFiltersToKueryNode', () => {
                         "alert.attributes.tags",
                       ],
                       "query": "fo*",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('should handle exact match search Text on rule name and tag', () => {
+    expect(
+      toElasticsearchQuery(
+        mapFiltersToKueryNode({
+          searchText: '"fo"',
+        }) as KueryNode
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "alert.attributes.name": "\\"fo\\"",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "alert.attributes.tags": "\\"fo\\"",
                     },
                   },
                 ],

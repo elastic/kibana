@@ -66,7 +66,7 @@ export class CountAggField implements IESAggField {
   }
 
   async getLabel(): Promise<string> {
-    return this._label ? this._label : this._source.getAggLabel(AGG_TYPE.COUNT, '');
+    return this._label ? this._label : await this._source.getAggLabel(AGG_TYPE.COUNT, '');
   }
 
   isValid(): boolean {

@@ -8,7 +8,7 @@
 import { getSuggestions } from './suggestions';
 import { layerTypes } from '../../../common';
 import { MetricVisualizationState } from './visualization';
-import { LensIconChartMetric } from '../../assets/chart_metric';
+import { IconChartMetric } from '@kbn/chart-icons';
 
 const metricColumn = {
   columnId: 'metric-column',
@@ -79,6 +79,10 @@ describe('metric suggestions', () => {
                 ...metricColumn,
                 columnId: 'metric-column2',
               },
+              {
+                ...metricColumn,
+                columnId: 'metric-column3',
+              },
             ],
             changeType: 'unchanged',
           },
@@ -98,6 +102,10 @@ describe('metric suggestions', () => {
               {
                 ...metricColumn,
                 columnId: 'metric-column2',
+              },
+              {
+                ...metricColumn,
+                columnId: 'metric-column3',
               },
             ],
             changeType: 'unchanged',
@@ -152,7 +160,7 @@ describe('metric suggestions', () => {
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.51,
           },
         ]);
@@ -182,7 +190,7 @@ describe('metric suggestions', () => {
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.51,
           },
         ]);
@@ -214,7 +222,7 @@ describe('metric suggestions', () => {
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.51,
           },
         ]);
@@ -287,7 +295,7 @@ describe('metric suggestions', () => {
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.52,
           },
         ]);
@@ -319,7 +327,7 @@ describe('metric suggestions', () => {
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.52,
           },
         ]);
@@ -350,7 +358,7 @@ describe('metric suggestions', () => {
           },
           title: 'Metric',
           hide: true,
-          previewIcon: LensIconChartMetric,
+          previewIcon: IconChartMetric,
           score: 0.52,
         },
       ]);
