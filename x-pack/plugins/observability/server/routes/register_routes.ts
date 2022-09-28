@@ -14,7 +14,6 @@ import { CoreSetup, CoreStart, Logger, RouteRegistrar } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
@@ -24,7 +23,6 @@ export function registerRoutes({
   core,
   logger,
   ruleDataService,
-  spacesService,
 }: {
   core: {
     setup: CoreSetup;
@@ -33,7 +31,6 @@ export function registerRoutes({
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
   ruleDataService: RuleDataPluginService;
-  spacesService: SpacesServiceStart;
 }) {
   const routes = Object.values(repository);
 
@@ -67,7 +64,6 @@ export function registerRoutes({
             logger,
             params: decodedParams,
             ruleDataService,
-            spacesService,
           })) as any;
 
           if (data === undefined) {

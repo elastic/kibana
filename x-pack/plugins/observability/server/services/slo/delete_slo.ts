@@ -19,6 +19,9 @@ export class DeleteSLO {
   ) {}
 
   public async execute(sloId: string): Promise<void> {
+    // ensure the slo exists on the request's space.
+    await this.repository.findById(sloId);
+
     const sloTransformId = getSLOTransformId(sloId);
     await this.transformManager.stop(sloTransformId);
     await this.transformManager.uninstall(sloTransformId);

@@ -23,8 +23,6 @@ import {
 import { SLO, SLITypes } from '../../types/models';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 
-const SPACE_ID = 'space-id';
-
 describe('TransformManager', () => {
   let esClientMock: ElasticsearchClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
@@ -41,7 +39,7 @@ describe('TransformManager', () => {
         const generators: Record<SLITypes, TransformGenerator> = {
           'slo.apm.transaction_duration': new DummyTransformGenerator(),
         };
-        const service = new DefaultTransformManager(generators, esClientMock, loggerMock, SPACE_ID);
+        const service = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
         await expect(
           service.install(
@@ -63,12 +61,7 @@ describe('TransformManager', () => {
         const generators: Record<SLITypes, TransformGenerator> = {
           'slo.apm.transaction_duration': new FailTransformGenerator(),
         };
-        const transformManager = new DefaultTransformManager(
-          generators,
-          esClientMock,
-          loggerMock,
-          SPACE_ID
-        );
+        const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
         await expect(
           transformManager.install(
@@ -92,12 +85,7 @@ describe('TransformManager', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        esClientMock,
-        loggerMock,
-        SPACE_ID
-      );
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
       const slo = createSLO(createAPMTransactionErrorRateIndicator());
 
       const transformId = await transformManager.install(slo);
@@ -113,12 +101,7 @@ describe('TransformManager', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        esClientMock,
-        loggerMock,
-        SPACE_ID
-      );
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
       await transformManager.start('slo-transform-id');
 
@@ -132,12 +115,7 @@ describe('TransformManager', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        esClientMock,
-        loggerMock,
-        SPACE_ID
-      );
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
       await transformManager.stop('slo-transform-id');
 
@@ -151,12 +129,7 @@ describe('TransformManager', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        esClientMock,
-        loggerMock,
-        SPACE_ID
-      );
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
       await transformManager.uninstall('slo-transform-id');
 
@@ -171,12 +144,7 @@ describe('TransformManager', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        esClientMock,
-        loggerMock,
-        SPACE_ID
-      );
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
       await transformManager.uninstall('slo-transform-id');
 

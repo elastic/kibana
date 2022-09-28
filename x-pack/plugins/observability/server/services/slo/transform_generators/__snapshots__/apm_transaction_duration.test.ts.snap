@@ -20,8 +20,8 @@ Object {
     "version": 1,
   },
   "dest": Object {
-    "index": "slo-observability.sli-v1-my-namespace",
-    "pipeline": "slo-observability.sli.monthly-my-namespace",
+    "index": "slo-observability.sli-v1",
+    "pipeline": "slo-observability.sli.monthly",
   },
   "frequency": "1m",
   "pivot": Object {

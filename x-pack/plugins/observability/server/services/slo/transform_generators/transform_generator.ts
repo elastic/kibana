@@ -9,5 +9,5 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import { SLO } from '../../../types/models';
 
 export interface TransformGenerator {
-  getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest;
+  getTransformParams(slo: SLO): TransformPutTransformRequest;
 }
