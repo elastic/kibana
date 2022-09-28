@@ -38,9 +38,7 @@ let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
-  connectorType = getConnectorType({
-    logger: mockedLogger,
-  });
+  connectorType = getConnectorType();
 });
 
 describe('connectorType', () => {
@@ -414,6 +412,7 @@ describe('execute()', () => {
         tags: 'test1, test2',
       },
       configurationUtilities,
+      logger: mockedLogger,
     });
 
     expect(postxMattersMock.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -462,6 +461,7 @@ describe('execute()', () => {
         tags: 'test1, test2',
       },
       configurationUtilities,
+      logger: mockedLogger,
     });
     expect(mockedLogger.warn).toBeCalledWith(
       'Error thrown triggering xMatters workflow: maxContentLength size of 1000000 exceeded'
@@ -493,6 +493,7 @@ describe('execute()', () => {
         tags: 'test1, test2',
       },
       configurationUtilities,
+      logger: mockedLogger,
     });
 
     expect(postxMattersMock.mock.calls[0][0]).toMatchInlineSnapshot(`

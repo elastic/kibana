@@ -228,6 +228,7 @@ export class ActionExecutor {
             isEphemeral,
             taskInfo,
             configurationUtilities,
+            logger: logger.get(actionTypeId.substring(1)),
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {

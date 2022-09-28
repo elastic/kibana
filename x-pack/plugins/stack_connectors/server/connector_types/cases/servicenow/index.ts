@@ -8,7 +8,6 @@
 import { curry } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
 
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -77,10 +76,6 @@ export type ActionParamsType =
   | TypeOf<typeof ExecutorParamsSchemaITSM>
   | TypeOf<typeof ExecutorParamsSchemaSIR>;
 
-interface GetConnectorTypeParams {
-  logger: Logger;
-}
-
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
   T extends Record<string, unknown> = ExecutorParams
@@ -92,10 +87,10 @@ export type ServiceNowConnectorTypeExecutorOptions<
 > = ConnectorTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // connector type definition
-export function getServiceNowITSMConnectorType(
-  params: GetConnectorTypeParams
-): ServiceNowConnectorType<ServiceNowPublicConfigurationType, ExecutorParams> {
-  const { logger } = params;
+export function getServiceNowITSMConnectorType(): ServiceNowConnectorType<
+  ServiceNowPublicConfigurationType,
+  ExecutorParams
+> {
   return {
     id: ServiceNowITSMConnectorTypeId,
     minimumLicenseRequired: 'platinum',
@@ -121,7 +116,6 @@ export function getServiceNowITSMConnectorType(
       },
     },
     executor: curry(executor)({
-      logger,
       actionTypeId: ServiceNowITSMConnectorTypeId,
       createService: createExternalService,
       api: commonAPI,
@@ -129,10 +123,10 @@ export function getServiceNowITSMConnectorType(
   };
 }
 
-export function getServiceNowSIRConnectorType(
-  params: GetConnectorTypeParams
-): ServiceNowConnectorType<ServiceNowPublicConfigurationType, ExecutorParams> {
-  const { logger } = params;
+export function getServiceNowSIRConnectorType(): ServiceNowConnectorType<
+  ServiceNowPublicConfigurationType,
+  ExecutorParams
+> {
   return {
     id: ServiceNowSIRConnectorTypeId,
     minimumLicenseRequired: 'platinum',
@@ -157,7 +151,6 @@ export function getServiceNowSIRConnectorType(
       },
     },
     executor: curry(executor)({
-      logger,
       actionTypeId: ServiceNowSIRConnectorTypeId,
       createService: createExternalServiceSIR,
       api: apiSIR,
@@ -165,10 +158,10 @@ export function getServiceNowSIRConnectorType(
   };
 }
 
-export function getServiceNowITOMConnectorType(
-  params: GetConnectorTypeParams
-): ServiceNowConnectorType<ServiceNowPublicConfigurationBaseType, ExecutorParamsITOM> {
-  const { logger } = params;
+export function getServiceNowITOMConnectorType(): ServiceNowConnectorType<
+  ServiceNowPublicConfigurationBaseType,
+  ExecutorParamsITOM
+> {
   return {
     id: ServiceNowITOMConnectorTypeId,
     minimumLicenseRequired: 'platinum',
@@ -189,7 +182,6 @@ export function getServiceNowITOMConnectorType(
       },
     },
     executor: curry(executorITOM)({
-      logger,
       actionTypeId: ServiceNowITOMConnectorTypeId,
       createService: createExternalServiceITOM,
       api: apiITOM,
@@ -201,12 +193,10 @@ export function getServiceNowITOMConnectorType(
 const supportedSubActions: string[] = ['getFields', 'pushToService', 'getChoices', 'getIncident'];
 async function executor(
   {
-    logger,
     actionTypeId,
     createService,
     api,
   }: {
-    logger: Logger;
     actionTypeId: string;
     createService: ServiceFactory;
     api: ExternalServiceAPI;
@@ -216,7 +206,8 @@ async function executor(
     ExecutorParams
   >
 ): Promise<ConnectorTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
-  const { actionId, config, params, secrets, services, configurationUtilities } = execOptions;
+  const { actionId, config, params, secrets, services, configurationUtilities, logger } =
+    execOptions;
   const { subAction, subActionParams } = params;
   const connectorTokenClient = services.connectorTokenClient;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
@@ -277,12 +268,10 @@ const supportedSubActionsITOM = ['addEvent', 'getChoices'];
 
 async function executorITOM(
   {
-    logger,
     actionTypeId,
     createService,
     api,
   }: {
-    logger: Logger;
     actionTypeId: string;
     createService: ServiceFactory<ExternalServiceITOM>;
     api: ExternalServiceApiITOM;
@@ -292,7 +281,7 @@ async function executorITOM(
     ExecutorParamsITOM
   >
 ): Promise<ConnectorTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
-  const { actionId, config, params, secrets, configurationUtilities } = execOptions;
+  const { actionId, config, params, secrets, configurationUtilities, logger } = execOptions;
   const { subAction, subActionParams } = params;
   const connectorTokenClient = execOptions.services.connectorTokenClient;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
