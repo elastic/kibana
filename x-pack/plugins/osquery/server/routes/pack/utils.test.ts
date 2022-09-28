@@ -42,15 +42,45 @@ describe('Pack utils', () => {
   describe('convertSOQueriesToPack', () => {
     test('converts to pack with empty ecs_mapping', () => {
       const convertedQueries = convertSOQueriesToPack(getTestQueries());
-      expect(convertedQueries).toStrictEqual(getTestQueries({}));
+      expect(convertedQueries).toStrictEqual(getTestQueries());
     });
     test('converts to pack with converting query to single line', () => {
       const convertedQueries = convertSOQueriesToPack(getTestQueries(), { removeMultiLines: true });
-      expect(convertedQueries).toStrictEqual(oneLiner);
+      expect(convertedQueries).toStrictEqual({
+        ...oneLiner,
+      });
     });
     test('converts to object with pack names after query.id', () => {
       const convertedQueries = convertSOQueriesToPack(getTestQueries({ id: 'testId' }));
       expect(convertedQueries).toStrictEqual(getTestQueries({}, 'testId'));
+    });
+    test('converts with results snapshot set false', () => {
+      const convertedQueries = convertSOQueriesToPack(
+        getTestQueries({ snapshot: false, removed: true }),
+        { removeResultType: true }
+      );
+      expect(convertedQueries).toStrictEqual(getTestQueries({ removed: true, snapshot: false }));
+    });
+    test('converts with results snapshot set true and removed false', () => {
+      const convertedQueries = convertSOQueriesToPack(
+        getTestQueries({ snapshot: true, removed: true }),
+        { removeResultType: true }
+      );
+      expect(convertedQueries).toStrictEqual(getTestQueries({}));
+    });
+    test('converts with results snapshot set true but removed false', () => {
+      const convertedQueries = convertSOQueriesToPack(
+        getTestQueries({ snapshot: true, removed: false }),
+        { removeResultType: true }
+      );
+      expect(convertedQueries).toStrictEqual(getTestQueries({}));
+    });
+    test('converts with both results set to false', () => {
+      const convertedQueries = convertSOQueriesToPack(
+        getTestQueries({ snapshot: false, removed: false }),
+        { removeResultType: true }
+      );
+      expect(convertedQueries).toStrictEqual(getTestQueries({ removed: false, snapshot: false }));
     });
   });
 });

@@ -10,12 +10,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { AddToCaseButton } from '../../../cases/add_to_cases_button';
+import styled from 'styled-components';
+import { AddToCaseWrapper } from '../../../cases/add_to_cases';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
+
+const StyledTableWrapper = styled(EuiFlexItem)`
+  padding-left: 10px;
+`;
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
@@ -55,7 +60,7 @@ const LiveQueryDetailsPageComponent = () => {
   }, [data?.status]);
   const addToCaseButton = useCallback(
     (payload) => (
-      <AddToCaseButton
+      <AddToCaseWrapper
         queryId={payload.queryId}
         actionId={actionId}
         agentIds={data?.agents}
@@ -69,15 +74,17 @@ const LiveQueryDetailsPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      <PackQueriesStatusTable
-        actionId={actionId}
-        data={data?.queries}
-        startDate={data?.['@timestamp']}
-        expirationDate={data?.expiration}
-        agentIds={data?.agents}
-        addToCase={addToCaseButton}
-        showResultsHeader
-      />
+      <StyledTableWrapper>
+        <PackQueriesStatusTable
+          actionId={actionId}
+          data={data?.queries}
+          startDate={data?.['@timestamp']}
+          expirationDate={data?.expiration}
+          agentIds={data?.agents}
+          addToCase={addToCaseButton}
+          showResultsHeader
+        />
+      </StyledTableWrapper>
     </WithHeaderLayout>
   );
 };

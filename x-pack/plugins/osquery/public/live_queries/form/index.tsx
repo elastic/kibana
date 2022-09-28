@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy } from 'lodash';
 
+import { AddToCaseWrapper } from '../../cases/add_to_cases';
 import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { QueryPackSelectable } from './query_pack_selectable';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
@@ -25,7 +26,6 @@ import type { AgentSelection } from '../../agents/types';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
-import { AddToCaseButton } from '../../cases/add_to_cases_button';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 
 export interface LiveQueryFormFields {
@@ -213,7 +213,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     (payload) => {
       if (liveQueryActionId) {
         return (
-          <AddToCaseButton
+          <AddToCaseWrapper
             queryId={payload.queryId}
             agentIds={agentIds}
             actionId={liveQueryActionId}

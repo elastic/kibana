@@ -19,7 +19,7 @@ const ADD_TO_CASE = i18n.translate(
   }
 );
 
-interface IProps {
+export interface AddToCaseButtonProps {
   queryId: string;
   agentIds?: string[];
   actionId: string;
@@ -28,7 +28,7 @@ interface IProps {
   iconProps?: Record<string, string>;
 }
 
-export const AddToCaseButton: React.FC<IProps> = ({
+export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   actionId,
   agentIds = [],
   queryId = '',

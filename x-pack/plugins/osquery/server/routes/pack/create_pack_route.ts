@@ -144,7 +144,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   }
 
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                    queries: convertSOQueriesToPack(queries, { removeMultiLines: true }),
+                    queries: convertSOQueriesToPack(queries, {
+                      removeMultiLines: true,
+                      removeResultType: true,
+                    }),
                   });
 
                   return draft;

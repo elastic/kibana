@@ -35,7 +35,7 @@ describe('Add to Cases', () => {
       cy.contains('Test Obs case').click();
       checkResults();
       cy.contains('attached Osquery results');
-      cy.contains('SELECT * FROM users;');
+      cy.contains('select * from uptime;');
       cy.contains('View in Discover').should('exist');
       cy.contains('View in Lens').should('exist');
       cy.contains('Add to Case').should('not.exist');
@@ -66,7 +66,7 @@ describe('Add to Cases', () => {
       cy.contains('Test Security Case').click();
       checkResults();
       cy.contains('attached Osquery results');
-      cy.contains('SELECT * FROM users;');
+      cy.contains('select * from uptime;');
       cy.contains('View in Discover').should('exist');
       cy.contains('View in Lens').should('exist');
       cy.contains('Add to Case').should('not.exist');

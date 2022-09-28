@@ -72,11 +72,6 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
       draft.interval = draft.interval + '';
     }
 
-    if (draft.snapshot) {
-      delete draft.snapshot;
-      delete draft.removed;
-    }
-
     return draft;
   });
 
