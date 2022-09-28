@@ -202,7 +202,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
      */
     const showActions = permissions.delete && !isSelectorView;
 
-    const columns = useCasesColumns({
+    const { columns, modals } = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
       userProfiles: userProfiles ?? new Map(),
       currentUserProfile,
@@ -288,6 +288,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           tableRowProps={tableRowProps}
           deselectCases={deselectCases}
         />
+        {modals}
       </>
     );
   }

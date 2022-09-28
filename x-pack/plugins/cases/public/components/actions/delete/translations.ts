@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+export { DELETED_CASES } from '../../../common/translations';
 
 export const BULK_ACTION_DELETE_SELECTED = i18n.translate(
   'xpack.cases.caseTable.bulkActions.deleteSelectedTitle',
@@ -13,3 +14,7 @@ export const BULK_ACTION_DELETE_SELECTED = i18n.translate(
     defaultMessage: 'Delete selected',
   }
 );
+
+export const DELETE_ACTION_LABEL = i18n.translate('xpack.cases.caseTable.action.deleteCase', {
+  defaultMessage: 'Delete case',
+});

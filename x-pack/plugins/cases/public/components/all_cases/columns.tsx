@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBadgeGroup,
   EuiBadge,
@@ -32,9 +32,7 @@ import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { ALERTS } from '../../common/translations';
-import { getActions } from './actions';
-import { useDeleteCases } from '../../containers/use_delete_cases';
-import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useActions } from './use_actions';
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
@@ -107,9 +105,14 @@ export interface GetCasesColumn {
   isSelectorView: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
-
   showSolutionColumn?: boolean;
 }
+
+interface UseCasesColumnsReturnValue {
+  columns: CasesColumns[];
+  modals: JSX.Element;
+}
+
 export const useCasesColumns = ({
   filterStatus,
   userProfiles,
@@ -118,35 +121,11 @@ export const useCasesColumns = ({
   connectors = [],
   onRowClick,
   showSolutionColumn,
-}: GetCasesColumn): CasesColumns[] => {
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const { mutate: deleteCases } = useDeleteCases();
+}: GetCasesColumn): UseCasesColumnsReturnValue => {
   const refreshCases = useRefreshCases();
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
-  const [caseToBeDeleted, setCaseToBeDeleted] = useState<string>();
   const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
-
-  const closeModal = useCallback(() => setIsModalVisible(false), []);
-  const openModal = useCallback(() => setIsModalVisible(true), []);
-
-  const onDeleteAction = useCallback(
-    (theCase: Case) => {
-      openModal();
-      setCaseToBeDeleted(theCase.id);
-    },
-    [openModal]
-  );
-
-  const onConfirmDeletion = useCallback(() => {
-    closeModal();
-    if (caseToBeDeleted) {
-      deleteCases({
-        caseIds: [caseToBeDeleted],
-        successToasterTitle: i18n.DELETED_CASES(1),
-      });
-    }
-  }, [caseToBeDeleted, closeModal, deleteCases]);
 
   const handleDispatchUpdate = useCallback(
     ({ updateKey, updateValue, caseData }: UpdateByKey) => {
@@ -162,13 +141,7 @@ export const useCasesColumns = ({
     [refreshCases, updateCaseProperty]
   );
 
-  const actions = useMemo(
-    () =>
-      getActions({
-        deleteCaseOnClick: onDeleteAction,
-      }),
-    [onDeleteAction]
-  );
+  const { actions, modals } = useActions({ permissions });
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {
@@ -179,7 +152,7 @@ export const useCasesColumns = ({
     [onRowClick]
   );
 
-  return [
+  const columns = [
     {
       name: i18n.NAME,
       render: (theCase: Case) => {
@@ -402,26 +375,17 @@ export const useCasesColumns = ({
           },
         ]
       : []),
-    ...(permissions.delete && !isSelectorView
+    ...(!isSelectorView && actions.length > 0
       ? [
           {
-            name: (
-              <>
-                {i18n.ACTIONS}
-                {isModalVisible ? (
-                  <ConfirmDeleteCaseModal
-                    totalCasesToBeDeleted={1}
-                    onCancel={closeModal}
-                    onConfirm={onConfirmDeletion}
-                  />
-                ) : null}
-              </>
-            ),
+            name: i18n.ACTIONS,
             actions,
           },
         ]
       : []),
   ];
+
+  return { columns, modals };
 };
 
 interface Props {
