@@ -19,13 +19,20 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
-import { Visualization, OperationMetadata, DatasourceLayers, AccessorConfig } from '../../types';
+import {
+  Visualization,
+  OperationMetadata,
+  DatasourceLayers,
+  AccessorConfig,
+  Suggestion,
+} from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { FormatSelectorOptions } from '../../indexpattern_datasource/dimension_panel/format_selector';
+import { IndexPatternLayer } from '../../indexpattern_datasource/types';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -48,6 +55,16 @@ export interface MetricVisualizationState {
   color?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
+}
+
+interface MetricDatasourceState {
+  [prop: string]: unknown;
+  layers: IndexPatternLayer[];
+}
+
+export interface MetricSuggestion extends Suggestion {
+  datasourceState: MetricDatasourceState;
+  visualizationState: MetricVisualizationState;
 }
 
 export const supportedDataTypes = new Set(['number']);
@@ -482,6 +499,27 @@ export const getMetricVisualization = ({
     return {
       noPanelTitle: true,
       noPadding: true,
+    };
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as MetricSuggestion[];
+    return {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...context.configuration,
+      },
     };
   },
 });

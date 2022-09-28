@@ -86,7 +86,9 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       return null;
     }
     // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum);
+    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
+      isStaticValueColumnSupported: true,
+    });
     if (metricsColumns === null) {
       return null;
     }

@@ -62,7 +62,12 @@ export type SupportedMetrics = LocalSupportedMetrics & {
   [Key in UnsupportedSupportedMetrics]?: null;
 };
 
-const supportedPanelTypes: readonly PANEL_TYPES[] = [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N];
+const supportedPanelTypes: readonly PANEL_TYPES[] = [
+  PANEL_TYPES.TIMESERIES,
+  PANEL_TYPES.TOP_N,
+  PANEL_TYPES.METRIC,
+];
+
 const supportedTimeRangeModes: readonly TIME_RANGE_DATA_MODES[] = [
   TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
   TIME_RANGE_DATA_MODES.LAST_VALUE,

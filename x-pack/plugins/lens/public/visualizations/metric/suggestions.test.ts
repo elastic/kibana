@@ -79,6 +79,10 @@ describe('metric suggestions', () => {
                 ...metricColumn,
                 columnId: 'metric-column2',
               },
+              {
+                ...metricColumn,
+                columnId: 'metric-column3',
+              },
             ],
             changeType: 'unchanged',
           },
@@ -98,6 +102,10 @@ describe('metric suggestions', () => {
               {
                 ...metricColumn,
                 columnId: 'metric-column2',
+              },
+              {
+                ...metricColumn,
+                columnId: 'metric-column3',
               },
             ],
             changeType: 'unchanged',
