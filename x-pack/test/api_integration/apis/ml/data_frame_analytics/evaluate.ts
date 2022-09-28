@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function createJobs(mockJobConfigs: TestConfig[]) {
     for (const jobConfig of mockJobConfigs) {
-      await ml.api.createAndRunDFAJob(jobConfig.config as DataFrameAnalyticsConfig);
+      await ml.api.createAndRunDFAJobWoSync(jobConfig.config as DataFrameAnalyticsConfig);
     }
   }
 
