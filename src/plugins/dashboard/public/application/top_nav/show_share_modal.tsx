@@ -43,7 +43,11 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
   return !!dashboard.show;
 };
 
-export function ShowShareModal({ isDirty, anchorElement, savedDashboard }: ShowShareModalProps) {
+export function ShowShareModal({
+  isDirty,
+  anchorElement,
+  currentDashboardState,
+}: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
     dashboardSessionStorage,
@@ -54,6 +58,7 @@ export function ShowShareModal({ isDirty, anchorElement, savedDashboard }: ShowS
         },
       },
     },
+    initializerContext: { kibanaVersion },
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -120,7 +125,8 @@ export function ShowShareModal({ isDirty, anchorElement, savedDashboard }: ShowS
     DashboardAppLocatorParams,
     'options' | 'query' | 'savedQuery' | 'filters' | 'panels' | 'controlGroupInput'
   > = {};
-  const unsavedDashboardState = dashboardSessionStorage.getState(savedDashboard.id);
+  const { savedObjectId, title } = currentDashboardState;
+  const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
@@ -167,7 +173,7 @@ export function ShowShareModal({ isDirty, anchorElement, savedDashboard }: ShowS
     allowEmbed: true,
     allowShortUrl,
     shareableUrl,
-    objectId: savedDashboard.id,
+    objectId: savedObjectId,
     objectType: 'dashboard',
     sharingData: {
       title:

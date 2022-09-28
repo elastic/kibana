@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';

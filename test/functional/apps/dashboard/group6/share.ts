@@ -17,11 +17,10 @@ interface UrlState {
 type TestingModes = 'snapshot' | 'savedObject';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  // const log = getService('log');
-  const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const PageObjects = getPageObjects(['dashboard', 'common', 'share', 'timePicker']);
 
@@ -45,6 +44,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         appState,
       };
     };
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.loadSavedDashboard('few panels');
+
+      await PageObjects.dashboard.switchToEditMode();
+      const from = 'Sep 19, 2017 @ 06:31:44.000';
+      const to = 'Sep 23, 2018 @ 18:31:44.000';
+      await PageObjects.timePicker.setAbsoluteRange(from, to);
+      await PageObjects.dashboard.waitForRenderComplete();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     const testSharedState = async (mode: TestingModes) => {
       describe('test "filters" state', async () => {
@@ -72,32 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(appState).to.not.contain('filters');
         });
       });
-
-      // describe('test "timeRange" state', async () => {});
     };
-
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
-      );
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-      });
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-
-      await PageObjects.dashboard.switchToEditMode();
-      const from = 'Sep 19, 2017 @ 06:31:44.000';
-      const to = 'Sep 23, 2018 @ 18:31:44.000';
-      await PageObjects.timePicker.setAbsoluteRange(from, to);
-      await PageObjects.dashboard.waitForRenderComplete();
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
 
     describe('snapshot share', async () => {
       describe('test local state', async () => {
