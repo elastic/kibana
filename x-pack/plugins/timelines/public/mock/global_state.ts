@@ -6,12 +6,12 @@
  */
 
 import { Direction } from '../../common/search_strategy';
-import { TableState } from '../types';
+import { TableId, TableState } from '../types';
 import { defaultHeaders } from './header';
 
 export const mockGlobalState: TableState = {
   tableById: {
-    'table-test': {
+    [TableId.test]: {
       columns: defaultHeaders,
       dateRange: {
         start: '2020-07-07T08:20:18.966Z',

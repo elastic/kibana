@@ -246,7 +246,7 @@ describe('Body', () => {
       addaNoteToEvent(wrapper, 'hello world');
 
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        2,
+        3,
         expect.objectContaining({
           payload: {
             eventId: '1',
@@ -261,7 +261,7 @@ describe('Body', () => {
         })
       );
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        3,
+        4,
         timelineActions.pinEvent({
           eventId: '1',
           id: 'timeline-test',
@@ -342,8 +342,8 @@ describe('Body', () => {
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
           panelView: 'eventDetail',
           params: {
@@ -367,8 +367,8 @@ describe('Body', () => {
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
           panelView: 'eventDetail',
           params: {
@@ -392,8 +392,8 @@ describe('Body', () => {
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
           panelView: 'eventDetail',
           params: {

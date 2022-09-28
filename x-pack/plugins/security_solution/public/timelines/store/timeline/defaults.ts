@@ -76,6 +76,7 @@ export const timelineDefaults: SubsetTimelineModel &
   deletedEventIds: [],
   selectedEventIds: {},
   isSelectAllChecked: false,
+  filters: [],
 };
 
 export const tableDefaults: SubsetTGridModel = {

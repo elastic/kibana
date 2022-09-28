@@ -140,8 +140,8 @@ describe('useDetailPanel', () => {
         <Memo(DetailsPanel)
           browserFields={Object {}}
           handleOnPanelClosed={[Function]}
+          scopeId="timeline-test"
           tabType="session"
-          timelineId="test"
         />
       `);
     });

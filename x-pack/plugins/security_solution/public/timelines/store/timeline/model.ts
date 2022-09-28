@@ -182,6 +182,7 @@ export type SubsetTimelineModel = Readonly<
     | 'savedObjectId'
     | 'version'
     | 'status'
+    | 'filters'
   >
 >;
 
