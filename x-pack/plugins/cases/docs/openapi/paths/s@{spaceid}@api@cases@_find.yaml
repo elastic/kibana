@@ -74,7 +74,16 @@ get:
           - type: array
             items:
               type: string
-    - $ref: '../components/parameters/severity.yaml' 
+    - in: query
+      name: severity
+      description: The severity of the case.
+      schema:
+        type: string
+        enum:
+          - critical
+          - high
+          - low
+          - medium
     - name: sortField
       in: query
       description: Determines which field is used to sort the results.

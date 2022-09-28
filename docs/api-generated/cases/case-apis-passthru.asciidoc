@@ -48,7 +48,7 @@ Any modifications made to this file will be overwritten.
     <a class="up" href="#__Methods">Up</a>
     <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/comments</code></pre></div>
     <div class="method-summary">Adds a comment or alert to a case. (<span class="nickname">addCaseComment</span>)</div>
-    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're creating.</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're updating.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -67,7 +67,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Request body</h3>
     <div class="field-items">
-      <div class="param">addCaseComment_request <a href="#addCaseComment_request">addCaseComment_request</a> (optional)</div>
+      <div class="param">Add_case_comment_request <a href="#Add_case_comment_request">Add_case_comment_request</a> (optional)</div>
 
       <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
 
@@ -2004,14 +2004,14 @@ Any modifications made to this file will be overwritten.
 
   <h3>Table of Contents</h3>
   <ol>
+    <li><a href="#Add_case_comment_request"><code>Add_case_comment_request</code> - Add case comment request</a></li>
     <li><a href="#action_types"><code>action_types</code> - </a></li>
     <li><a href="#actions"><code>actions</code> - </a></li>
-    <li><a href="#addCaseComment_request"><code>addCaseComment_request</code> - </a></li>
     <li><a href="#add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - </a></li>
     <li><a href="#add_alert_comment_request_properties_alertId"><code>add_alert_comment_request_properties_alertId</code> - </a></li>
     <li><a href="#add_alert_comment_request_properties_index"><code>add_alert_comment_request_properties_index</code> - </a></li>
     <li><a href="#add_alert_comment_request_properties_rule"><code>add_alert_comment_request_properties_rule</code> - </a></li>
-    <li><a href="#add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - </a></li>
+    <li><a href="#add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add comment to case request</a></li>
     <li><a href="#alert_comment_response_properties"><code>alert_comment_response_properties</code> - </a></li>
     <li><a href="#alert_comment_response_properties_rule"><code>alert_comment_response_properties_rule</code> - </a></li>
     <li><a href="#alert_response_properties"><code>alert_response_properties</code> - </a></li>
@@ -2071,19 +2071,7 @@ Any modifications made to this file will be overwritten.
   </ol>
 
   <div class="model">
-    <h3><a name="action_types"><code>action_types</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The type of action.</div>
-    <div class="field-items">
-          </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="actions"><code>actions</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-          </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="addCaseComment_request"><code>addCaseComment_request</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="Add_case_comment_request"><code>Add_case_comment_request</code> - Add case comment request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_alertId">add_alert_comment_request_properties_alertId</a></span>  </div>
@@ -2095,6 +2083,18 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum">user</div>
 <div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
     </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="action_types"><code>action_types</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The type of action.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions"><code>actions</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
@@ -2130,7 +2130,7 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add comment to case request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>

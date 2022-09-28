@@ -1,4 +1,5 @@
 type: object
+title: Add comment to case request
 properties:
   comment:
     description: The new comment. It is required only when `type` is `user`.

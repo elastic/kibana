@@ -884,7 +884,16 @@ paths:
               - type: array
                 items:
                   type: string
-        - $ref: '#/components/parameters/severity'
+        - in: query
+          name: severity
+          description: The severity of the case.
+          schema:
+            type: string
+            enum:
+              - critical
+              - high
+              - low
+              - medium
         - name: sortField
           in: query
           description: Determines which field is used to sort the results.
@@ -1197,7 +1206,13 @@ paths:
       tags:
         - cases
       parameters:
-        - $ref: '#/components/parameters/alert_id'
+        - in: path
+          name: alertId
+          description: An identifier for the alert.
+          required: true
+          schema:
+            type: string
+            example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/owner'
       responses:
@@ -1749,7 +1764,13 @@ paths:
         - cases
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/configuration_id'
+        - in: path
+          name: configurationId
+          description: An identifier for the configuration.
+          required: true
+          schema:
+            type: string
+            example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
         - $ref: '#/components/parameters/space_id'
       requestBody:
         content:
@@ -2501,7 +2522,7 @@ paths:
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case you're creating.
+        feature privileges, depending on the owner of the case you're updating.
       tags:
         - cases
       parameters:
@@ -2512,6 +2533,7 @@ paths:
         content:
           application/json:
             schema:
+              title: Add case comment request
               oneOf:
                 - $ref: '#/components/schemas/add_alert_comment_request_properties'
                 - $ref: '#/components/schemas/add_user_comment_request_properties'
@@ -3407,33 +3429,6 @@ components:
             items:
               $ref: '#/components/schemas/owners'
       example: cases
-    severity:
-      in: query
-      name: severity
-      description: The severity of the case.
-      schema:
-        type: string
-        enum:
-          - critical
-          - high
-          - low
-          - medium
-    alert_id:
-      in: path
-      name: alertId
-      description: An identifier for the alert.
-      required: true
-      schema:
-        type: string
-        example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
-    configuration_id:
-      in: path
-      name: configurationId
-      description: An identifier for the configuration.
-      required: true
-      schema:
-        type: string
-        example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
     case_id:
       in: path
       name: caseId
@@ -3801,6 +3796,7 @@ components:
         - type
     add_user_comment_request_properties:
       type: object
+      title: Add comment to case request
       properties:
         comment:
           description: The new comment. It is required only when `type` is `user`.
