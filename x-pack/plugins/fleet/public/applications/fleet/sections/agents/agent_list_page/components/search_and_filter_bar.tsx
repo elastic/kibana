@@ -376,19 +376,22 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AgentBulkActions
-                totalAgents={totalAgents}
-                totalInactiveAgents={totalInactiveAgents}
-                selectionMode={selectionMode}
-                currentQuery={currentQuery}
-                selectedAgents={selectedAgents}
-                visibleAgents={visibleAgents}
-                refreshAgents={refreshAgents}
-                allTags={tags}
-                agentPolicies={agentPolicies}
-              />
-            </EuiFlexItem>
+            {(selectionMode === 'manual' && selectedAgents.length) ||
+            (selectionMode === 'query' && totalAgents > 0) ? (
+              <EuiFlexItem grow={false}>
+                <AgentBulkActions
+                  totalAgents={totalAgents}
+                  totalInactiveAgents={totalInactiveAgents}
+                  selectionMode={selectionMode}
+                  currentQuery={currentQuery}
+                  selectedAgents={selectedAgents}
+                  visibleAgents={visibleAgents}
+                  refreshAgents={refreshAgents}
+                  allTags={tags}
+                  agentPolicies={agentPolicies}
+                />
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
