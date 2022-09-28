@@ -115,7 +115,6 @@ export function isValidCustomUrlSettings(settings, savedCustomUrls) {
 }
 
 export function buildCustomUrlFromSettings(settings) {
-  console.log('settings', settings);
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
