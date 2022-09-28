@@ -104,7 +104,7 @@ export interface RuleExecutorOptions<
   tags: string[];
   createdBy: string | null;
   updatedBy: string | null;
-  logger?: Logger;
+  logger: Logger;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
