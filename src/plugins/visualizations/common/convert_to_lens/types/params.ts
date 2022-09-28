@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { $Values } from '@kbn/utility-types';
+import { RANGE_MODES } from '../constants';
 import { Column } from './columns';
 import { Filter, NumberValueFormat } from './common';
+
+export type RangeMode = $Values<typeof RANGE_MODES>;
 
 export interface FormatParams {
   format?: NumberValueFormat;
@@ -15,21 +19,6 @@ export interface FormatParams {
 
 export interface FiltersParams {
   filters: Filter[];
-}
-
-export interface RangeParams extends FormatParams {
-  type: 'histogram' | 'range';
-  maxBars: 'auto' | number;
-  ranges: Range[];
-  includeEmptyRows?: boolean;
-  parentFormat?: {
-    id: string;
-    params?: {
-      id?: string;
-      template?: string;
-      replaceInfinity?: boolean;
-    };
-  };
 }
 
 export interface TermsParams extends FormatParams {
@@ -56,6 +45,22 @@ export interface DateHistogramParams {
   ignoreTimeRange?: boolean;
   includeEmptyRows?: boolean;
   dropPartials?: boolean;
+}
+
+interface Range {
+  from: number | null;
+  to: number | null;
+  label?: string;
+}
+export interface RangeParams extends FormatParams {
+  type: RangeMode;
+  maxBars: 'auto' | number;
+  ranges: Range[];
+  includeEmptyRows?: boolean;
+  parentFormat?: {
+    id: string;
+    params?: { id?: string; template?: string; replaceInfinity?: boolean };
+  };
 }
 
 export type MinParams = FormatParams;

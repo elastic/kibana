@@ -1007,6 +1007,7 @@ describe('when on the endpoint list page', () => {
     let agentId: string;
     let agentPolicyId: string;
     let renderResult: ReturnType<AppContextTestRender['render']>;
+    let endpointActionsButton: HTMLElement;
 
     // 2nd endpoint only has isolation capabilities
     const mockEndpointListApi = () => {
@@ -1081,13 +1082,7 @@ describe('when on the endpoint list page', () => {
 
     beforeEach(async () => {
       mockEndpointListApi();
-      (useUserPrivileges as jest.Mock).mockReturnValue({
-        ...mockInitialUserPrivilegesState(),
-        endpointPrivileges: {
-          ...mockInitialUserPrivilegesState().endpointPrivileges,
-          canAccessResponseConsole: true,
-        },
-      });
+      (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
 
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/endpoints`);
@@ -1097,9 +1092,7 @@ describe('when on the endpoint list page', () => {
       await middlewareSpy.waitForAction('serverReturnedEndpointList');
       await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
 
-      const endpointActionsButton = (
-        await renderResult.findAllByTestId('endpointTableRowActions')
-      )[0];
+      endpointActionsButton = (await renderResult.findAllByTestId('endpointTableRowActions'))[0];
 
       reactTestingLibrary.act(() => {
         reactTestingLibrary.fireEvent.click(endpointActionsButton);
@@ -1108,7 +1101,6 @@ describe('when on the endpoint list page', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
-      (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
     });
 
     it('shows the Responder option when all 3 processes capabilities are present in the endpoint', async () => {
@@ -1116,7 +1108,7 @@ describe('when on the endpoint list page', () => {
       expect(responderButton).not.toHaveAttribute('disabled');
     });
 
-    it('navigates to the Actions log flyout', async () => {
+    it('navigates to the Response actions history flyout', async () => {
       const actionsLink = await renderResult.findByTestId('actionsLink');
 
       expect(actionsLink.getAttribute('href')).toEqual(
@@ -1139,6 +1131,24 @@ describe('when on the endpoint list page', () => {
           selected_endpoint: hostInfo[0].metadata.agent.id,
         })}`
       );
+    });
+
+    it('hides isolate host option if canIsolateHost is false', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canIsolateHost: false,
+        },
+      });
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+      const isolateLink = screen.queryByTestId('isolateLink');
+      expect(isolateLink).toBeNull();
     });
 
     it('navigates to the Security Solution Host Details page', async () => {
