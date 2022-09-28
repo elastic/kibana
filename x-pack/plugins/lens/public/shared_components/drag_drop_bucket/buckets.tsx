@@ -43,9 +43,8 @@ export const DraggableBucketContainer = ({
       customDragHandle={true}
       index={bucketContainerProps.idx}
       isDragDisabled={bucketContainerProps.isNotDraggable}
-      style={{
-        [isInsidePanel ? 'margin' : 'marginBottom']: euiTheme.size.xs,
-      }}
+      style={!isInsidePanel ? { marginBottom: euiTheme.size.xs } : {}}
+      spacing={isInsidePanel ? 'm' : 'none'}
       disableInteractiveElementBlocking
     >
       {(provided) => (
