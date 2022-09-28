@@ -16,6 +16,7 @@ import {
   getSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
+  getXmattersConnectorType,
 } from './stack';
 import {
   getCasesWebhookConnectorType,
@@ -24,7 +25,6 @@ import {
   getServiceNowITSMConnectorType,
   getServiceNowSIRConnectorType,
   getSwimlaneConnectorType,
-  getXmattersConnectorType,
 } from './cases';
 
 export type {
@@ -35,6 +35,7 @@ export type {
   SlackActionParams,
   TeamsActionParams,
   WebhookActionParams,
+  XmattersActionParams,
 } from './stack';
 export {
   EmailConnectorTypeId,
@@ -45,13 +46,13 @@ export {
   SlackConnectorTypeId,
   TeamsConnectorTypeId,
   WebhookConnectorTypeId,
+  XmattersConnectorTypeId,
 } from './stack';
 export type {
   CasesWebhookActionParams,
   JiraActionParams,
   ResilientActionParams,
   ServiceNowActionParams,
-  XmattersActionParams,
 } from './cases';
 export {
   CasesWebhookConnectorTypeId,
@@ -59,7 +60,6 @@ export {
   ResilientConnectorTypeId,
   ServiceNowITSMConnectorTypeId,
   ServiceNowSIRConnectorTypeId,
-  XmattersConnectorTypeId,
 } from './cases';
 
 export function registerConnectorTypes({

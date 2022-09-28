@@ -48,3 +48,9 @@ export {
   ConnectorTypeId as WebhookConnectorTypeId,
 } from './webhook';
 export type { ActionParamsType as WebhookActionParams } from './webhook';
+
+export {
+  getConnectorType as getXmattersConnectorType,
+  ConnectorTypeId as XmattersConnectorTypeId,
+} from './xmatters';
+export type { ActionParamsType as XmattersActionParams } from './xmatters';

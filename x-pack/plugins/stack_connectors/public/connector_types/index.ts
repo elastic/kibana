@@ -16,6 +16,7 @@ import {
   getSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
+  getXmattersConnectorType,
 } from './stack';
 
 import {
@@ -25,7 +26,6 @@ import {
   getServiceNowITSMConnectorType,
   getServiceNowSIRConnectorType,
   getSwimlaneConnectorType,
-  getXmattersConnectorType,
 } from './cases';
 
 export interface RegistrationServices {

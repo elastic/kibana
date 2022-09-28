@@ -29,9 +29,3 @@ import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow
 export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
-
-export {
-  getConnectorType as getXmattersConnectorType,
-  ConnectorTypeId as XmattersConnectorTypeId,
-} from './xmatters';
-export type { ActionParamsType as XmattersActionParams } from './xmatters';
