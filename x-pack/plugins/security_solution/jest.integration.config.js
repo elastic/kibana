@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/security_solution'],
+  setupFilesAfterEnv: [
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/react_testing_library.js',
+  ],
 };
