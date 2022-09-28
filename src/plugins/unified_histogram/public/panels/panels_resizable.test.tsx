@@ -66,12 +66,12 @@ describe('Panels resizable', () => {
     topPanelHeight: number
   ) => {
     const topPanelSize = (topPanelHeight / currentContainerHeight) * 100;
-    expect(component.find('[data-test-subj="dscResizablePanelTop"]').at(0).prop('size')).toBe(
-      topPanelSize
-    );
-    expect(component.find('[data-test-subj="dscResizablePanelMain"]').at(0).prop('size')).toBe(
-      100 - topPanelSize
-    );
+    expect(
+      component.find('[data-test-subj="unifiedHistogramResizablePanelTop"]').at(0).prop('size')
+    ).toBe(topPanelSize);
+    expect(
+      component.find('[data-test-subj="unifiedHistogramResizablePanelMain"]').at(0).prop('size')
+    ).toBe(100 - topPanelSize);
   };
 
   const forceRender = (component: ReactWrapper) => {
@@ -105,7 +105,7 @@ describe('Panels resizable', () => {
     expectCorrectPanelSizes(component, containerHeight, initialTopPanelHeight);
     const newTopPanelSize = 30;
     const onPanelSizeChange = component
-      .find('[data-test-subj="dscResizableContainer"]')
+      .find('[data-test-subj="unifiedHistogramResizableContainer"]')
       .at(0)
       .prop('onPanelWidthChange') as Function;
     act(() => {
@@ -159,12 +159,12 @@ describe('Panels resizable', () => {
     const newContainerHeight = 200;
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: newContainerHeight, width: 0 });
     forceRender(component);
-    expect(component.find('[data-test-subj="dscResizablePanelTop"]').at(0).prop('size')).toBe(
-      (minTopPanelHeight / newContainerHeight) * 100
-    );
-    expect(component.find('[data-test-subj="dscResizablePanelMain"]').at(0).prop('size')).toBe(
-      (minMainPanelHeight / newContainerHeight) * 100
-    );
+    expect(
+      component.find('[data-test-subj="unifiedHistogramResizablePanelTop"]').at(0).prop('size')
+    ).toBe((minTopPanelHeight / newContainerHeight) * 100);
+    expect(
+      component.find('[data-test-subj="unifiedHistogramResizablePanelMain"]').at(0).prop('size')
+    ).toBe((minMainPanelHeight / newContainerHeight) * 100);
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerHeight, width: 0 });
     forceRender(component);
     expectCorrectPanelSizes(component, containerHeight, initialTopPanelHeight);
@@ -174,9 +174,11 @@ describe('Panels resizable', () => {
     const attachTo = document.createElement('div');
     document.body.appendChild(attachTo);
     const component = mountComponent({ attachTo });
-    const wrapper = component.find('[data-test-subj="dscResizableContainerWrapper"]');
-    const resizeButton = component.find('button[data-test-subj="dsc-resizable-button"]');
-    const resizeButtonInner = component.find('[data-test-subj="dscResizableButtonInner"]');
+    const wrapper = component.find('[data-test-subj="unifiedHistogramResizableContainerWrapper"]');
+    const resizeButton = component.find('button[data-test-subj="unifiedHistogramResizableButton"]');
+    const resizeButtonInner = component.find(
+      '[data-test-subj="unifiedHistogramResizableButtonInner"]'
+    );
     const mouseEvent = {
       pageX: 0,
       pageY: 0,

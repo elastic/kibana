@@ -143,7 +143,7 @@ export function DiscoverHistogram({
 
   if (!chartData && fetchStatus === FetchStatus.LOADING) {
     return (
-      <div className="dscHistogram" data-test-subj="discoverChart">
+      <div className="dscHistogram" data-test-subj="unifiedHistogramChart">
         <div className="dscChart__loading">
           <EuiText size="xs" color="subdued">
             <EuiLoadingChart mono size="l" />
@@ -272,7 +272,11 @@ export function DiscoverHistogram({
 
   return (
     <React.Fragment>
-      <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
+      <div
+        className="dscHistogram"
+        data-test-subj="unifiedHistogramChart"
+        data-time-range={timeRangeText}
+      >
         <Chart size="100%">
           <Settings
             xDomain={xDomain}

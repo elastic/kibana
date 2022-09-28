@@ -105,7 +105,7 @@ describe('Histogram', () => {
       },
     }));
     const component = mountComponent(FetchStatus.COMPLETE);
-    expect(component.find('[data-test-subj="discoverChart"]').exists()).toBe(true);
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
   });
 
   it('renders error correctly', () => {
@@ -114,7 +114,7 @@ describe('Histogram', () => {
       error: new Error('Loading error'),
     }));
     const component = mountComponent(FetchStatus.ERROR);
-    expect(component.find('[data-test-subj="discoverChart"]').exists()).toBe(false);
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(false);
     expect(component.find('.dscHistogram__errorChartContainer').exists()).toBe(true);
     expect(component.find('.dscHistogram__errorChart__text').get(1).props.children).toBe(
       'Loading error'
@@ -127,7 +127,7 @@ describe('Histogram', () => {
       chartData: null,
     }));
     const component = mountComponent(FetchStatus.LOADING);
-    expect(component.find('[data-test-subj="discoverChart"]').exists()).toBe(true);
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
     expect(component.find('.dscChart__loading').exists()).toBe(true);
   });
 });

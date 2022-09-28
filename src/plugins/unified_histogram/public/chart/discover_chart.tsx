@@ -158,7 +158,7 @@ export function DiscoverChart({
                         size="xs"
                         iconType="lensApp"
                         onClick={onEditVisualization}
-                        data-test-subj="discoverEditVisualization"
+                        data-test-subj="unifiedHistogramEditVisualization"
                         aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
                           defaultMessage: 'Edit visualization',
                         })}
@@ -179,7 +179,7 @@ export function DiscoverChart({
                           size="xs"
                           iconType="gear"
                           onClick={onShowChartOptions}
-                          data-test-subj="discoverChartOptionsToggle"
+                          data-test-subj="unifiedHistogramChartOptionsToggle"
                           aria-label={i18n.translate('unifiedHistogram.chartOptionsButton', {
                             defaultMessage: 'Chart options',
                           })}

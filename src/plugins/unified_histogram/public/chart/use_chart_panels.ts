@@ -47,7 +47,7 @@ export function useChartPanels({
         toggleHideChart();
         closePopover();
       },
-      'data-test-subj': 'discoverChartToggle',
+      'data-test-subj': 'unifiedHistogramChartToggle',
     },
   ];
   if (!hideChart) {
@@ -61,7 +61,7 @@ export function useChartPanels({
           onResetChartHeight();
           closePopover();
         },
-        'data-test-subj': 'discoverChartResetHeight',
+        'data-test-subj': 'unifiedHistogramChartResetHeight',
       });
     }
 
@@ -73,7 +73,7 @@ export function useChartPanels({
         },
       }),
       panel: 1,
-      'data-test-subj': 'discoverTimeIntervalPanel',
+      'data-test-subj': 'unifiedHistogramTimeIntervalPanel',
     });
   }
 
@@ -104,7 +104,7 @@ export function useChartPanels({
               onChangeInterval(val);
               closePopover();
             },
-            'data-test-subj': `discoverTimeInterval-${display}`,
+            'data-test-subj': `unifiedHistogramTimeInterval-${display}`,
             className: val === interval ? 'discoverIntervalSelected' : '',
           };
         }),

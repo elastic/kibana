@@ -142,20 +142,30 @@ describe('Discover chart', () => {
   });
   test('render without timefield', async () => {
     const component = await mountComponent();
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+    ).toBeFalsy();
   });
 
   test('render with timefield without visualize permissions', async () => {
     const component = await mountComponent(true);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="discoverEditVisualization"]').exists()).toBeFalsy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+    ).toBeTruthy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditVisualization"]').exists()
+    ).toBeFalsy();
   });
 
   test('render with timefield with visualize permissions', async () => {
     triggerActions = [{}];
     const component = await mountComponent(true);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="discoverEditVisualization"]').exists()).toBeTruthy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+    ).toBeTruthy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditVisualization"]').exists()
+    ).toBeTruthy();
   });
 
   test('triggers ui action on click', async () => {
@@ -171,7 +181,7 @@ describe('Discover chart', () => {
     const component = await mountComponent(true);
     await act(async () => {
       await component
-        .find('[data-test-subj="discoverEditVisualization"]')
+        .find('[data-test-subj="unifiedHistogramEditVisualization"]')
         .first()
         .simulate('click');
     });

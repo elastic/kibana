@@ -132,13 +132,13 @@ export const PanelsResizable = ({
       onMouseUp={onResizeEnd}
       onMouseLeave={onResizeEnd}
       onTouchEnd={onResizeEnd}
-      data-test-subj="dscResizableContainerWrapper"
+      data-test-subj="unifiedHistogramResizableContainerWrapper"
     >
       <EuiResizableContainer
         className={className}
         direction="vertical"
         onPanelWidthChange={onPanelSizeChange}
-        data-test-subj="dscResizableContainer"
+        data-test-subj="unifiedHistogramResizableContainer"
       >
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
@@ -147,26 +147,26 @@ export const PanelsResizable = ({
               minSize={`${minTopPanelHeight}px`}
               size={panelSizes.topPanelSize}
               paddingSize="none"
-              data-test-subj="dscResizablePanelTop"
+              data-test-subj="unifiedHistogramResizablePanelTop"
             >
               {topPanel}
             </EuiResizablePanel>
             <EuiResizableButton
               css={resizeWithPortalsHackButtonCss}
-              data-test-subj="dsc-resizable-button"
+              data-test-subj="unifiedHistogramResizableButton"
             >
               <span
                 onMouseDown={enableResizeWithPortalsHack}
                 onTouchStart={enableResizeWithPortalsHack}
                 css={resizeWithPortalsHackButtonInnerCss}
-                data-test-subj="dscResizableButtonInner"
+                data-test-subj="unifiedHistogramResizableButtonInner"
               />
             </EuiResizableButton>
             <EuiResizablePanel
               minSize={`${minMainPanelHeight}px`}
               size={panelSizes.mainPanelSize}
               paddingSize="none"
-              data-test-subj="dscResizablePanelMain"
+              data-test-subj="unifiedHistogramResizablePanelMain"
             >
               {mainPanel}
             </EuiResizablePanel>
