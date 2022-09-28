@@ -253,9 +253,14 @@ export const sortByEnabledRules = () => {
   cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
 };
 
+export const waitForRulesTableToShow = () => {
+  // Wait up to 5 minutes for the rules to show up as in CI containers this can be very slow
+  cy.get(RULES_TABLE, { timeout: 300000 }).should('exist');
+};
+
 export const waitForRulesTableToBeLoaded = () => {
-  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('exist');
   // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
+  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('exist');
   cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 
