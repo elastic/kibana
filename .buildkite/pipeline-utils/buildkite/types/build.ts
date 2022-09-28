@@ -26,6 +26,7 @@ export interface BuildStatus {
   success: boolean;
   hasRetries: boolean;
   hasNonPreemptionRetries: boolean;
+  hasSoftFailure: boolean;
 }
 
 export interface Build {
