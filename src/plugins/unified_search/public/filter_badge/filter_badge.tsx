@@ -9,8 +9,8 @@
 import React, { useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { ConditionTypes } from '../utils';
 

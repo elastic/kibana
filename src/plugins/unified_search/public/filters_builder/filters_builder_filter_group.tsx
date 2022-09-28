@@ -17,7 +17,7 @@ import {
   useEuiBackgroundColor,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { css, cx } from '@emotion/css';
 import type { Path } from './filters_builder_types';
 import { ConditionTypes, getConditionalOperationType } from '../utils';

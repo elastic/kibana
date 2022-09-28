@@ -9,11 +9,11 @@
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { EuiTextColor, useEuiTheme } from '@elastic/eui';
-import { css, cx } from '@emotion/css';
+import { EuiTextColor, useEuiPaddingCSS, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { FilterBadgeGroup } from './filter_badge_group';
 import type { LabelOptions } from './filter_badge_utils';
-import { FILTER_ITEM_OK, getValueLabel } from './filter_badge_utils';
+import { FILTER_LABLE_STATUS, getValueLabel } from './filter_badge_utils';
 import { FilterContent } from './filter_badge_expression_filter_content';
 import { ConditionTypes, getConditionalOperationType } from '../utils';
 
@@ -24,27 +24,24 @@ export interface FilterBadgeExpressionProps {
 }
 
 export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressionProps) {
-  const { euiTheme } = useEuiTheme();
   const conditionalOperationType = getConditionalOperationType(filter);
 
-  const paddingLeft = useMemo(
-    () => css`
-      padding-left: ${euiTheme.size.xxs};
-    `,
-    [euiTheme.size.xxs]
-  );
+  const paddingLeft = useEuiPaddingCSS('left').xs;
+  const paddingRight = useEuiPaddingCSS('right').xs;
 
-  const paddingRight = useMemo(
+  const { euiTheme } = useEuiTheme();
+
+  const bracketСolor = useMemo(
     () => css`
-      padding-right: ${euiTheme.size.xxs};
+      color: ${euiTheme.colors.primary};
     `,
-    [euiTheme.size.xxs]
+    [euiTheme.colors.primary]
   );
 
   let label: LabelOptions = {
     title: '',
     message: '',
-    status: FILTER_ITEM_OK,
+    status: FILTER_LABLE_STATUS.FILTER_ITEM_OK,
   };
 
   if (!conditionalOperationType) {
@@ -53,20 +50,20 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
 
   return conditionalOperationType ? (
     <>
-      <span className={paddingLeft}>
-        <EuiTextColor color="rgb(0, 113, 194)">(</EuiTextColor>
+      <span css={paddingLeft}>
+        <EuiTextColor className={bracketСolor}>(</EuiTextColor>
       </span>
       <FilterBadgeGroup
         filters={Array.isArray(filter) ? filter : filter.meta?.params}
         dataView={dataView}
         conditionType={conditionalOperationType}
       />
-      <span className={paddingRight}>
-        <EuiTextColor color="rgb(0, 113, 194)">)</EuiTextColor>
+      <span css={paddingRight}>
+        <EuiTextColor className={bracketСolor}>)</EuiTextColor>
       </span>
     </>
   ) : (
-    <span className={cx(paddingLeft, paddingRight)}>
+    <span css={[paddingLeft, paddingRight]}>
       <FilterContent filter={filter} label={label} />
     </span>
   );

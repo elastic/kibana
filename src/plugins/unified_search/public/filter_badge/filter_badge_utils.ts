@@ -11,18 +11,15 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
-export const FILTER_ITEM_OK = '';
-export const FILTER_ITEM_WARNING = 'warn';
-export const FILTER_ITEM_ERROR = 'error';
-
-export type FilterLabelStatus =
-  | typeof FILTER_ITEM_OK
-  | typeof FILTER_ITEM_WARNING
-  | typeof FILTER_ITEM_ERROR;
+export enum FILTER_LABLE_STATUS {
+  FILTER_ITEM_OK = '',
+  FILTER_ITEM_WARNING = 'warn',
+  FILTER_ITEM_ERROR = 'error',
+}
 
 export interface LabelOptions {
   title: string;
-  status: FilterLabelStatus;
+  status: FILTER_LABLE_STATUS;
   message?: string;
 }
 
@@ -31,17 +28,17 @@ export interface LabelOptions {
  * Because if so, a filter for the wrong index pattern may still be applied.
  * This function makes this behavior explicit, but it needs to be revised.
  */
-function isFilterApplicable(filter: Filter, dataView: DataView[]) {
+function isFilterApplicable(filter: Filter, dataViews: DataView[]) {
   // Any filter is applicable if no index patterns were provided to FilterBar.
-  if (!dataView.length) return true;
+  if (!dataViews.length) return true;
 
-  const ip = getIndexPatternFromFilter(filter, dataView);
+  const ip = getIndexPatternFromFilter(filter, dataViews);
   if (ip) return true;
 
-  const allFields = dataView.map((indexPattern) => {
-    return indexPattern.fields.map((field) => field.name);
+  const allFields = dataViews.map((dataView) => {
+    return dataView.fields.map((field) => field.name);
   });
-  const flatFields = allFields.reduce((acc: string[], it: string[]) => [...acc, ...it], []);
+  const flatFields = allFields.flat();
   return flatFields.includes(filter.meta?.key || '');
 }
 
@@ -49,7 +46,7 @@ export function getValueLabel(filter: Filter, dataView: DataView): LabelOptions 
   const label: LabelOptions = {
     title: '',
     message: '',
-    status: FILTER_ITEM_OK,
+    status: FILTER_LABLE_STATUS.FILTER_ITEM_OK,
   };
 
   if (filter.meta?.isMultiIndex) {
@@ -60,14 +57,14 @@ export function getValueLabel(filter: Filter, dataView: DataView): LabelOptions 
     try {
       label.title = getDisplayValueFromFilter(filter, [dataView]);
     } catch (e) {
-      label.status = FILTER_ITEM_WARNING;
+      label.status = FILTER_LABLE_STATUS.FILTER_ITEM_WARNING;
       label.title = i18n.translate('unifiedSearch.filter.filterBar.labelWarningText', {
         defaultMessage: `Warning`,
       });
       label.message = e.message;
     }
   } else {
-    label.status = FILTER_ITEM_WARNING;
+    label.status = FILTER_LABLE_STATUS.FILTER_ITEM_WARNING;
     label.title = i18n.translate('unifiedSearch.filter.filterBar.labelWarningText', {
       defaultMessage: `Warning`,
     });

@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { FilterExpressionBadge } from './filter_badge_expression';
 import { ConditionTypes } from '../utils';
 
@@ -20,7 +21,15 @@ export interface FilterBadgeGroupProps {
 }
 
 const ConditionalTypeDelimiter = ({ conditional }: { conditional: ConditionTypes }) => {
-  return <EuiTextColor color="rgb(0, 113, 194)">{conditional}</EuiTextColor>;
+  const { euiTheme } = useEuiTheme();
+  const bracketСolor = useMemo(
+    () => css`
+      color: ${euiTheme.colors.primary};
+    `,
+    [euiTheme.colors.primary]
+  );
+
+  return <EuiTextColor className={bracketСolor}>{conditional}</EuiTextColor>;
 };
 
 export function FilterBadgeGroup({ filters, dataView, conditionType }: FilterBadgeGroupProps) {

@@ -14,9 +14,18 @@ import { i18n } from '@kbn/i18n';
 import type { LabelOptions } from './filter_badge_utils';
 import { existsOperator, isOneOfOperator } from '../filter_bar/filter_editor';
 
-const FilterBadgeExpressionValue = ({ value }: { value: string | number }) => {
+const FilterBadgeExpressionValueRightPart = ({ value }: { value: string | number }) => {
   return (
-    <EuiTextColor color={typeof value === 'string' ? '#387765' : '#ac4e6d'}> {value}</EuiTextColor>
+    <EuiTextColor color={typeof value === 'string' ? 'success' : 'accent'}> {value}</EuiTextColor>
+  );
+};
+
+const FilterBadgeExpressionValueLeftPart = ({ filter }: { filter: Filter }) => {
+  return (
+    <>
+      <Prefix prefix={filter.meta.negate} />
+      {filter.meta.key}:
+    </>
   );
 };
 
@@ -34,39 +43,39 @@ export const FilterContent = ({ filter, label }: { filter: Filter; label: LabelO
     case FILTERS.EXISTS:
       return (
         <>
-          <Prefix prefix={filter.meta.negate} />
-          {filter.meta.key}:
-          <FilterBadgeExpressionValue value={`${existsOperator.message}`} />
+          <FilterBadgeExpressionValueLeftPart filter={filter} />
+          <FilterBadgeExpressionValueRightPart value={`${existsOperator.message}`} />
         </>
       );
     case FILTERS.PHRASES:
       return (
         <>
-          <Prefix prefix={filter.meta.negate} />
-          {filter.meta.key}:
-          <FilterBadgeExpressionValue value={`${isOneOfOperator.message} ${label.title}`} />
+          <FilterBadgeExpressionValueLeftPart filter={filter} />
+          <FilterBadgeExpressionValueRightPart
+            value={`${isOneOfOperator.message} ${label.title}`}
+          />
         </>
       );
     case FILTERS.QUERY_STRING:
       return (
         <>
-          <Prefix prefix={filter.meta.negate} /> <FilterBadgeExpressionValue value={label.title} />
+          <Prefix prefix={filter.meta.negate} />{' '}
+          <FilterBadgeExpressionValueRightPart value={label.title} />
         </>
       );
     case FILTERS.PHRASE:
     case FILTERS.RANGE:
       return (
         <>
-          <Prefix prefix={filter.meta.negate} />
-          {filter.meta.key}:
-          <FilterBadgeExpressionValue value={label.title} />
+          <FilterBadgeExpressionValueLeftPart filter={filter} />
+          <FilterBadgeExpressionValueRightPart value={label.title} />
         </>
       );
     default:
       return (
         <>
           <Prefix prefix={filter.meta.negate} />
-          <FilterBadgeExpressionValue
+          <FilterBadgeExpressionValueRightPart
             value={`${JSON.stringify(filter.query) || filter.meta.value}`}
           />
         </>
