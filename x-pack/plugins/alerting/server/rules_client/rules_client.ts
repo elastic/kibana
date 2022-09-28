@@ -22,7 +22,7 @@ import {
 } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Logger,
@@ -1110,7 +1110,7 @@ export class RulesClient {
       filter:
         (authorizationFilter && filterKueryNode
           ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
-          : authorizationFilter) ?? options.filter,
+          : authorizationFilter) ?? filterKueryNode,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
@@ -1569,14 +1569,7 @@ export class RulesClient {
       );
     }
 
-    let qNodeQueryFilter: null | KueryNode;
-    if (!queryFilter) {
-      qNodeQueryFilter = null;
-    } else if (typeof queryFilter === 'string') {
-      qNodeQueryFilter = fromKueryExpression(queryFilter);
-    } else {
-      qNodeQueryFilter = queryFilter;
-    }
+    const qNodeQueryFilter = buildKueryNodeFilter(queryFilter);
 
     const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
     let authorizationTuple;
@@ -1797,7 +1790,7 @@ export class RulesClient {
                     break;
                   }
                   if (operation.operation === 'set') {
-                    const snoozeAttributes = getSnoozeAttributes(attributes, operation.value);
+                    const snoozeAttributes = getBulkSnoozeAttributes(attributes, operation.value);
                     try {
                       verifySnoozeScheduleLimit(snoozeAttributes);
                     } catch (error) {
@@ -1819,7 +1812,7 @@ export class RulesClient {
                     }
                     attributes = {
                       ...attributes,
-                      ...getUnsnoozeAttributes(attributes, idsToDelete),
+                      ...getBulkUnsnoozeAttributes(attributes, idsToDelete),
                     };
                   }
                   break;
@@ -3254,6 +3247,33 @@ function getSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSnoozeSche
   };
 }
 
+function getBulkSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSnoozeSchedule) {
+  // If duration is -1, instead mute all
+  const { id: snoozeId, duration } = snoozeSchedule;
+
+  if (duration === -1) {
+    return {
+      muteAll: true,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
+    };
+  }
+
+  // Bulk adding snooze schedule, don't touch the existing snooze/indefinite snooze
+  if (snoozeId) {
+    const existingSnoozeSchedules = attributes.snoozeSchedule || [];
+    return {
+      muteAll: attributes.muteAll,
+      snoozeSchedule: [...existingSnoozeSchedules, snoozeSchedule],
+    };
+  }
+
+  // Bulk snoozing, don't touch the existing snooze schedules
+  return {
+    muteAll: false,
+    snoozeSchedule: [...clearUnscheduledSnooze(attributes), snoozeSchedule],
+  };
+}
+
 function getUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
   const snoozeSchedule = scheduleIds
     ? clearScheduledSnoozesById(attributes, scheduleIds)
@@ -3262,6 +3282,27 @@ function getUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
   return {
     snoozeSchedule,
     ...(!scheduleIds ? { muteAll: false } : {}),
+  };
+}
+
+function getBulkUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
+  // Bulk removing snooze schedules, don't touch the current snooze/indefinite snooze
+  if (scheduleIds) {
+    const newSchedules = clearScheduledSnoozesById(attributes, scheduleIds);
+    // Unscheduled snooze is also known as snooze now
+    const unscheduledSnooze =
+      attributes.snoozeSchedule?.filter((s) => typeof s.id === 'undefined') || [];
+
+    return {
+      snoozeSchedule: [...unscheduledSnooze, ...newSchedules],
+      muteAll: attributes.muteAll,
+    };
+  }
+
+  // Bulk unsnoozing, don't touch current snooze schedules that are NOT active
+  return {
+    snoozeSchedule: clearCurrentActiveSnooze(attributes),
+    muteAll: false,
   };
 }
 
