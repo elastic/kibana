@@ -1,41 +1,49 @@
 title: Add case comment request properties for alerts
 description: Defines the properties for case comment requests when type is alert
-allOf: # Combines the general comment request schema with the alert-specific properties
-  - $ref: '../../entrypoint.yaml#/components/schemas/caseCommentRequest'
-  - type: object
-    title: Add alert to case request
-    properties:
-      alertId: 
-        description: >
-          The alert identifier. It is required only when `type` is `alert`. If it is
-          an array, `index` must also be an array. This functionality is in
-          technical preview and may be changed or removed in a future release.
-          Elastic will apply best effort to fix any issues, but features in
-          technical preview are not subject to the support SLA of official GA
-          features.
-        oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-        x-technical-preview: true
-        example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
-      index:
-        description: >
-          The alert index. It is required only when `type` is `alert`. If it is an
-          array, `alertId` must also be an array. This functionality is in technical
-          preview and may be changed or removed in a future release. Elastic will
-          apply best effort to fix any issues, but features in technical preview are
-          not subject to the support SLA of official GA features.
-        oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-        x-technical-preview: true
-      rule:
-        $ref: '../../entrypoint.yaml#/components/schemas/ruleObject'
-    required:
-      - alertId
-      - index
-      - rule
+#allOf: # Combines the general comment request schema with the alert-specific properties
+#  - $ref: '../../entrypoint.yaml#/components/schemas/caseCommentRequest'
+#  - type: object
+type: object
+properties:
+  alertId: 
+    description: >
+      The alert identifier. It is required only when `type` is `alert`. If it is
+      an array, `index` must also be an array. This functionality is in
+      technical preview and may be changed or removed in a future release.
+      Elastic will apply best effort to fix any issues, but features in
+      technical preview are not subject to the support SLA of official GA
+      features.
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+    x-technical-preview: true
+    example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+  index:
+    description: >
+      The alert index. It is required only when `type` is `alert`. If it is an
+      array, `alertId` must also be an array. This functionality is in technical
+      preview and may be changed or removed in a future release. Elastic will
+      apply best effort to fix any issues, but features in technical preview are
+      not subject to the support SLA of official GA features.
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+    x-technical-preview: true
+  owner:
+    $ref: '../../entrypoint.yaml#/components/schemas/ownerProperty'
+  rule:
+    $ref: '../../entrypoint.yaml#/components/schemas/ruleObject'
+  type:
+    description: The type of comment.
+    type: string
+    example: alert
+required:
+  - alertId
+  - index
+  - owner
+  - rule
+  - type

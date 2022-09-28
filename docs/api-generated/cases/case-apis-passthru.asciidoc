@@ -92,7 +92,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "owner" : "cases",
   "totalComment" : 0,
@@ -101,7 +101,7 @@ Any modifications made to this file will be overwritten.
   },
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
-  "comments" : [ ],
+  "comments" : [ null, null ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -170,7 +170,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -226,7 +226,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "owner" : "cases",
   "totalComment" : 0,
@@ -235,7 +235,7 @@ Any modifications made to this file will be overwritten.
   },
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
-  "comments" : [ ],
+  "comments" : [ null, null ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -304,7 +304,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -466,7 +466,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>null</code></pre>
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: examples</div>
@@ -476,7 +476,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
       <li><code>examples</code></li>
     </ul>
 
@@ -522,7 +522,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "owner" : "cases",
   "totalComment" : 0,
@@ -531,7 +531,7 @@ Any modifications made to this file will be overwritten.
   },
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
-  "comments" : [ ],
+  "comments" : [ null, null ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -600,7 +600,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -639,7 +639,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "owner" : "cases",
   "action_id" : "22fd3e30-03b1-11ed-920c-974bfa104448",
@@ -660,7 +660,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -699,7 +699,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "index" : "index",
   "id" : "id",
@@ -710,7 +710,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -751,14 +751,14 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>null</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -801,7 +801,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "closure_type" : "close-by-user",
   "owner" : "cases",
@@ -857,7 +857,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -894,7 +894,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "isPreconfigured" : true,
   "isDeprecated" : true,
@@ -913,7 +913,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -956,7 +956,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "full_name" : "full_name",
   "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
@@ -968,7 +968,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1011,7 +1011,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "count_in_progress_cases" : 6,
   "count_open_cases" : 1,
@@ -1022,7 +1022,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1065,14 +1065,14 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>""</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1143,7 +1143,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "count_in_progress_cases" : 6,
   "per_page" : 5,
@@ -1156,7 +1156,7 @@ Any modifications made to this file will be overwritten.
     },
     "totalAlerts" : 0,
     "closed_at" : "2000-01-23T04:56:07.000+00:00",
-    "comments" : [ ],
+    "comments" : [ null, null ],
     "created_at" : "2022-05-13T09:16:17.416Z",
     "description" : "A case description.",
     "title" : "Case title 1",
@@ -1227,7 +1227,7 @@ Any modifications made to this file will be overwritten.
     },
     "totalAlerts" : 0,
     "closed_at" : "2000-01-23T04:56:07.000+00:00",
-    "comments" : [ ],
+    "comments" : [ null, null ],
     "created_at" : "2022-05-13T09:16:17.416Z",
     "description" : "A case description.",
     "title" : "Case title 1",
@@ -1300,7 +1300,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1345,7 +1345,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>[ {
   "id" : "06116b80-e1c3-11ec-be9b-9b1838238ee6",
   "title" : "security_case"
@@ -1355,7 +1355,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1415,7 +1415,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "owner" : "cases",
   "totalComment" : 0,
@@ -1424,7 +1424,7 @@ Any modifications made to this file will be overwritten.
   },
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
-  "comments" : [ ],
+  "comments" : [ null, null ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -1493,7 +1493,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1549,7 +1549,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "closure_type" : "close-by-user",
   "owner" : "cases",
@@ -1605,7 +1605,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1661,7 +1661,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "owner" : "cases",
   "totalComment" : 0,
@@ -1670,7 +1670,7 @@ Any modifications made to this file will be overwritten.
   },
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
-  "comments" : [ ],
+  "comments" : [ null, null ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -1739,7 +1739,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1797,7 +1797,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "owner" : "cases",
   "totalComment" : 0,
@@ -1806,7 +1806,7 @@ Any modifications made to this file will be overwritten.
   },
   "totalAlerts" : 0,
   "closed_at" : "2000-01-23T04:56:07.000+00:00",
-  "comments" : [ ],
+  "comments" : [ null, null ],
   "created_at" : "2022-05-13T09:16:17.416Z",
   "description" : "A case description.",
   "title" : "Case title 1",
@@ -1875,7 +1875,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1933,7 +1933,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "closure_type" : "close-by-user",
   "owner" : "cases",
@@ -1989,7 +1989,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -2004,16 +2004,14 @@ Any modifications made to this file will be overwritten.
 
   <h3>Table of Contents</h3>
   <ol>
-    <li><a href="#Add_alert_to_case_request"><code>Add_alert_to_case_request</code> - Add alert to case request</a></li>
-    <li><a href="#Add_alert_to_case_request_rule"><code>Add_alert_to_case_request_rule</code> - </a></li>
     <li><a href="#Add_case_comment_request"><code>Add_case_comment_request</code> - Add case comment request</a></li>
-    <li><a href="#Add_comment_to_case_request"><code>Add_comment_to_case_request</code> - Add comment to case request</a></li>
-    <li><a href="#alert"><code>alert</code> - Add case comment request properties for alerts</a></li>
+    <li><a href="#add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - Add case comment request properties for alerts</a></li>
+    <li><a href="#add_alert_comment_request_properties_alertId"><code>add_alert_comment_request_properties_alertId</code> - </a></li>
+    <li><a href="#add_alert_comment_request_properties_index"><code>add_alert_comment_request_properties_index</code> - </a></li>
+    <li><a href="#add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add case comment request properties for user comments</a></li>
     <li><a href="#alert_comment_response_properties"><code>alert_comment_response_properties</code> - </a></li>
-    <li><a href="#alert_comment_response_properties_rule"><code>alert_comment_response_properties_rule</code> - </a></li>
     <li><a href="#alert_response_properties"><code>alert_response_properties</code> - </a></li>
     <li><a href="#closure_types"><code>closure_types</code> - </a></li>
-    <li><a href="#commentRequest"><code>commentRequest</code> - Add case comment request properties</a></li>
     <li><a href="#connector_types"><code>connector_types</code> - </a></li>
     <li><a href="#createCase_200_response"><code>createCase_200_response</code> - </a></li>
     <li><a href="#createCase_200_response_closed_by"><code>createCase_200_response_closed_by</code> - </a></li>
@@ -2036,7 +2034,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#getCases_200_response"><code>getCases_200_response</code> - </a></li>
     <li><a href="#getCases_owner_parameter"><code>getCases_owner_parameter</code> - </a></li>
     <li><a href="#getCases_reporters_parameter"><code>getCases_reporters_parameter</code> - </a></li>
-    <li><a href="#owners"><code>owners</code> - </a></li>
+    <li><a href="#owners"><code>owners</code> - Owner applications</a></li>
     <li><a href="#payload_alert_comment"><code>payload_alert_comment</code> - </a></li>
     <li><a href="#payload_alert_comment_comment"><code>payload_alert_comment_comment</code> - </a></li>
     <li><a href="#payload_alert_comment_comment_alertId"><code>payload_alert_comment_comment_alertId</code> - </a></li>
@@ -2052,6 +2050,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#payload_title"><code>payload_title</code> - </a></li>
     <li><a href="#payload_user_comment"><code>payload_user_comment</code> - </a></li>
     <li><a href="#payload_user_comment_comment"><code>payload_user_comment_comment</code> - </a></li>
+    <li><a href="#rule"><code>rule</code> - Alerting rule</a></li>
     <li><a href="#setCaseConfiguration_request"><code>setCaseConfiguration_request</code> - </a></li>
     <li><a href="#setCaseConfiguration_request_settings"><code>setCaseConfiguration_request_settings</code> - </a></li>
     <li><a href="#settings"><code>settings</code> - </a></li>
@@ -2062,65 +2061,54 @@ Any modifications made to this file will be overwritten.
     <li><a href="#updateCase_request"><code>updateCase_request</code> - </a></li>
     <li><a href="#updateCase_request_cases_inner"><code>updateCase_request_cases_inner</code> - </a></li>
     <li><a href="#update_alert_comment_request_properties"><code>update_alert_comment_request_properties</code> - </a></li>
-    <li><a href="#update_alert_comment_request_properties_alertId"><code>update_alert_comment_request_properties_alertId</code> - </a></li>
-    <li><a href="#update_alert_comment_request_properties_index"><code>update_alert_comment_request_properties_index</code> - </a></li>
-    <li><a href="#update_alert_comment_request_properties_rule"><code>update_alert_comment_request_properties_rule</code> - </a></li>
     <li><a href="#update_user_comment_request_properties"><code>update_user_comment_request_properties</code> - </a></li>
-    <li><a href="#user"><code>user</code> - Add case comment request properties for alerts</a></li>
     <li><a href="#user_actions_response_properties"><code>user_actions_response_properties</code> - </a></li>
     <li><a href="#user_actions_response_properties_payload"><code>user_actions_response_properties_payload</code> - </a></li>
     <li><a href="#user_comment_response_properties"><code>user_comment_response_properties</code> - </a></li>
   </ol>
 
   <div class="model">
-    <h3><a name="Add_alert_to_case_request"><code>Add_alert_to_case_request</code> - Add alert to case request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
-<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
-<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#Add_alert_to_case_request_rule">Add_alert_to_case_request_rule</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="Add_alert_to_case_request_rule"><code>Add_alert_to_case_request_rule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The rule that is associated with the alert. It is required only when <code>type</code> is <code>alert</code>. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
-    <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule name. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
     <h3><a name="Add_case_comment_request"><code>Add_case_comment_request</code> - Add case comment request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The add comment to case API request body varies depending on whether you are adding an alert or a comment.</div>
     <div class="field-items">
-      <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_alertId">add_alert_comment_request_properties_alertId</a></span>  </div>
+<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_index">add_alert_comment_request_properties_index</a></span>  </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#rule">rule</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">alert</div><div class="param-enum">user</div>
-<div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
-<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
-<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#Add_alert_to_case_request_rule">Add_alert_to_case_request_rule</a></span>  </div>
 <div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="Add_comment_to_case_request"><code>Add_comment_to_case_request</code> - Add comment to case request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
+    <h3><a name="add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - Add case comment request properties for alerts</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines the properties for case comment requests when type is alert</div>
     <div class="field-items">
-      <div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
+      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_alertId">add_alert_comment_request_properties_alertId</a></span>  </div>
+<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_index">add_alert_comment_request_properties_index</a></span>  </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#rule">rule</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="alert"><code>alert</code> - Add case comment request properties for alerts</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
+    <h3><a name="add_alert_comment_request_properties_alertId"><code>add_alert_comment_request_properties_alertId</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
-      <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="add_alert_comment_request_properties_index"><code>add_alert_comment_request_properties_index</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add case comment request properties for user comments</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines the properties for case comment requests when type is user</div>
+    <div class="field-items">
+      <div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">alert</div><div class="param-enum">user</div>
-<div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
-<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. </div>
-<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#Add_alert_to_case_request_rule">Add_alert_to_case_request_rule</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2135,19 +2123,11 @@ Any modifications made to this file will be overwritten.
 <div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">pushed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#createCase_200_response_closed_by">createCase_200_response_closed_by</a></span>  </div>
-<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_rule">alert_comment_response_properties_rule</a></span>  </div>
+<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#rule">rule</a></span>  </div>
 <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#createCase_200_response_created_by">createCase_200_response_created_by</a></span>  </div>
 <div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="alert_comment_response_properties_rule"><code>alert_comment_response_properties_rule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule name. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2164,16 +2144,6 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>Indicates whether a case is automatically closed when it is pushed to external systems (<code>close-by-pushing</code>) or not automatically closed (<code>close-by-user</code>).</div>
     <div class="field-items">
           </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="commentRequest"><code>commentRequest</code> - Add case comment request properties</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">alert</div><div class="param-enum">user</div>
-    </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="connector_types"><code>connector_types</code> - </a> <a class="up" href="#__Models">Up</a></h3>
@@ -2230,7 +2200,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">pushed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#createCase_200_response_closed_by">createCase_200_response_closed_by</a></span>  </div>
-<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_rule">alert_comment_response_properties_rule</a></span>  </div>
+<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#rule">rule</a></span>  </div>
 <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#createCase_200_response_closed_by">createCase_200_response_closed_by</a></span>  </div>
@@ -2327,7 +2297,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">pushed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#createCase_200_response_closed_by">createCase_200_response_closed_by</a></span>  </div>
-<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_rule">alert_comment_response_properties_rule</a></span>  </div>
+<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#rule">rule</a></span>  </div>
 <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#createCase_200_response_closed_by">createCase_200_response_closed_by</a></span>  </div>
@@ -2444,7 +2414,7 @@ Any modifications made to this file will be overwritten.
           </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="owners"><code>owners</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="owners"><code>owners</code> - Owner applications</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The application that owns the cases: Stack Management, Observability, or Elastic Security.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
@@ -2463,7 +2433,7 @@ Any modifications made to this file will be overwritten.
       <div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_alert_comment_comment_alertId">payload_alert_comment_comment_alertId</a></span>  </div>
 <div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_alert_comment_comment_index">payload_alert_comment_comment_index</a></span>  </div>
 <div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_rule">alert_comment_response_properties_rule</a></span>  </div>
+<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#rule">rule</a></span>  </div>
 <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">alert</div>
@@ -2570,6 +2540,14 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="rule"><code>rule</code> - Alerting rule</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The rule that is associated with the alert. It is required only when <code>type</code> is <code>alert</code>. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule name. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="setCaseConfiguration_request"><code>setCaseConfiguration_request</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -2609,11 +2587,11 @@ Any modifications made to this file will be overwritten.
     <h3><a name="updateCaseComment_request"><code>updateCaseComment_request</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_alertId">update_alert_comment_request_properties_alertId</a></span>  </div>
+      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_alertId">add_alert_comment_request_properties_alertId</a></span>  </div>
 <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the comment. To retrieve comment IDs, use the get comments API. </div>
-<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_index">update_alert_comment_request_properties_index</a></span>  </div>
+<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_index">add_alert_comment_request_properties_index</a></span>  </div>
 <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_rule">update_alert_comment_request_properties_rule</a></span>  </div>
+<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#rule">rule</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">user</div>
@@ -2656,35 +2634,15 @@ Any modifications made to this file will be overwritten.
     <h3><a name="update_alert_comment_request_properties"><code>update_alert_comment_request_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_alertId">update_alert_comment_request_properties_alertId</a></span>  </div>
+      <div class="param">alertId </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_alertId">add_alert_comment_request_properties_alertId</a></span>  </div>
 <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the comment. To retrieve comment IDs, use the get comments API. </div>
-<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_index">update_alert_comment_request_properties_index</a></span>  </div>
+<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#add_alert_comment_request_properties_index">add_alert_comment_request_properties_index</a></span>  </div>
 <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#update_alert_comment_request_properties_rule">update_alert_comment_request_properties_rule</a></span>  </div>
+<div class="param">rule </div><div class="param-desc"><span class="param-type"><a href="#rule">rule</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">alert</div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current comment version. To retrieve version values, use the get comments API. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_alert_comment_request_properties_alertId"><code>update_alert_comment_request_properties_alertId</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
-    <div class="field-items">
-          </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_alert_comment_request_properties_index"><code>update_alert_comment_request_properties_index</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
-    <div class="field-items">
-          </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_alert_comment_request_properties_rule"><code>update_alert_comment_request_properties_rule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The rule that is associated with the alert. It is required only when <code>type</code> is <code>alert</code>. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
-    <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule name. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2698,17 +2656,6 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">user</div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current comment version. To retrieve version values, use the get comments API. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="user"><code>user</code> - Add case comment request properties for alerts</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of comment. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">alert</div><div class="param-enum">user</div>
-<div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

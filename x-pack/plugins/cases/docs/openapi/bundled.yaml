@@ -21,11 +21,8 @@ paths:
     post:
       summary: Creates a case.
       operationId: createCase
-      description: >
-        You must have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the
-        Kibana  feature privileges, depending on the owner of the case you're
-        creating.
+      description: |
+        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're creating.
       tags:
         - cases
       parameters:
@@ -42,10 +39,7 @@ paths:
                   type: object
                   properties:
                     fields:
-                      description: >-
-                        An object containing the connector fields. To create a
-                        case without a connector, specify null. If you want to
-                        omit any individual field, specify null as its value.
+                      description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                       nullable: true
                       type: object
                       properties:
@@ -53,19 +47,13 @@ paths:
                           description: The case identifier for Swimlane connectors.
                           type: string
                         category:
-                          description: >-
-                            The category of the incident for ServiceNow ITSM and
-                            ServiceNow SecOps connectors.
+                          description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                           type: string
                         destIp:
-                          description: >-
-                            A comma-separated list of destination IPs for
-                            ServiceNow SecOps connectors.
+                          description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                           type: string
                         impact:
-                          description: >-
-                            The effect an incident had on business for
-                            ServiceNow ITSM connectors.
+                          description: The effect an incident had on business for ServiceNow ITSM connectors.
                           type: string
                         issueType:
                           description: The type of issue for Jira connectors.
@@ -76,61 +64,39 @@ paths:
                           items:
                             type: number
                         malwareHash:
-                          description: >-
-                            A comma-separated list of malware hashes for
-                            ServiceNow SecOps connectors.
+                          description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                           type: string
                         malwareUrl:
-                          description: >-
-                            A comma-separated list of malware URLs for
-                            ServiceNow SecOps connectors.
+                          description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                           type: string
                         parent:
-                          description: >-
-                            The key of the parent issue, when the issue type is
-                            sub-task for Jira connectors.
+                          description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                           type: string
                         priority:
-                          description: >-
-                            The priority of the issue for Jira and ServiceNow
-                            SecOps connectors.
+                          description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                           type: string
                         severity:
-                          description: >-
-                            The severity of the incident for ServiceNow ITSM
-                            connectors.
+                          description: The severity of the incident for ServiceNow ITSM connectors.
                           type: string
                         severityCode:
-                          description: >-
-                            The severity code of the incident for IBM Resilient
-                            connectors.
+                          description: The severity code of the incident for IBM Resilient connectors.
                           type: number
                         sourceIp:
-                          description: >-
-                            A comma-separated list of source IPs for ServiceNow
-                            SecOps connectors.
+                          description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                           type: string
                         subcategory:
-                          description: >-
-                            The subcategory of the incident for ServiceNow ITSM
-                            connectors.
+                          description: The subcategory of the incident for ServiceNow ITSM connectors.
                           type: string
                         urgency:
-                          description: >-
-                            The extent to which the incident resolution can be
-                            delayed for ServiceNow ITSM connectors.
+                          description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                           type: string
                       example: null
                     id:
-                      description: >-
-                        The identifier for the connector. To create a case
-                        without a connector, use `none`.
+                      description: The identifier for the connector. To create a case without a connector, use `none`.
                       type: string
                       example: none
                     name:
-                      description: >-
-                        The name of the connector. To create a case without a
-                        connector, use `none`.
+                      description: The name of the connector. To create a case without a connector, use `none`.
                       type: string
                       example: none
                     type:
@@ -150,9 +116,7 @@ paths:
                 severity:
                   $ref: '#/components/schemas/severity_property'
                 tags:
-                  description: >-
-                    The words and phrases that help categorize cases. It can be
-                    an empty array.
+                  description: The words and phrases that help categorize cases. It can be an empty array.
                   type: array
                   items:
                     type: string
@@ -173,7 +137,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -188,9 +152,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -203,19 +169,13 @@ paths:
                     type: array
                     items:
                       oneOf:
-                        - $ref: >-
-                            #/components/schemas/alert_comment_response_properties
-                        - $ref: >-
-                            #/components/schemas/user_comment_response_properties
-                    example: []
+                        - $ref: '#/components/schemas/alert_comment_response_properties'
+                        - $ref: '#/components/schemas/user_comment_response_properties'
                   connector:
                     type: object
                     properties:
                       fields:
-                        description: >-
-                          An object containing the connector fields. To create a
-                          case without a connector, specify null. If you want to
-                          omit any individual field, specify null as its value.
+                        description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                         nullable: true
                         type: object
                         properties:
@@ -223,19 +183,13 @@ paths:
                             description: The case identifier for Swimlane connectors.
                             type: string
                           category:
-                            description: >-
-                              The category of the incident for ServiceNow ITSM
-                              and ServiceNow SecOps connectors.
+                            description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                             type: string
                           destIp:
-                            description: >-
-                              A comma-separated list of destination IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                             type: string
                           impact:
-                            description: >-
-                              The effect an incident had on business for
-                              ServiceNow ITSM connectors.
+                            description: The effect an incident had on business for ServiceNow ITSM connectors.
                             type: string
                           issueType:
                             description: The type of issue for Jira connectors.
@@ -246,61 +200,39 @@ paths:
                             items:
                               type: number
                           malwareHash:
-                            description: >-
-                              A comma-separated list of malware hashes for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                             type: string
                           malwareUrl:
-                            description: >-
-                              A comma-separated list of malware URLs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                             type: string
                           parent:
-                            description: >-
-                              The key of the parent issue, when the issue type
-                              is sub-task for Jira connectors.
+                            description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                             type: string
                           priority:
-                            description: >-
-                              The priority of the issue for Jira and ServiceNow
-                              SecOps connectors.
+                            description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                             type: string
                           severity:
-                            description: >-
-                              The severity of the incident for ServiceNow ITSM
-                              connectors.
+                            description: The severity of the incident for ServiceNow ITSM connectors.
                             type: string
                           severityCode:
-                            description: >-
-                              The severity code of the incident for IBM
-                              Resilient connectors.
+                            description: The severity code of the incident for IBM Resilient connectors.
                             type: number
                           sourceIp:
-                            description: >-
-                              A comma-separated list of source IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                             type: string
                           subcategory:
-                            description: >-
-                              The subcategory of the incident for ServiceNow
-                              ITSM connectors.
+                            description: The subcategory of the incident for ServiceNow ITSM connectors.
                             type: string
                           urgency:
-                            description: >-
-                              The extent to which the incident resolution can be
-                              delayed for ServiceNow ITSM connectors.
+                            description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                             type: string
                         example: null
                       id:
-                        description: >-
-                          The identifier for the connector. To create a case
-                          without a connector, use `none`.
+                        description: The identifier for the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       name:
-                        description: >-
-                          The name of the connector. To create a case without a
-                          connector, use `none`.
+                        description: The name of the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       type:
@@ -315,9 +247,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -329,12 +263,10 @@ paths:
                     example: A case description.
                   duration:
                     type: integer
-                    description: >
-                      The elapsed time from the creation of the case to its
-                      closure (in seconds). If the case has not been closed, the
-                      duration is set to null. If the case was closed after less
-                      than half a second, the duration is rounded down to zero.
+                    description: |
+                      The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
                     example: 120
+                    nullable: true
                   external_service:
                     $ref: '#/components/schemas/external_service'
                   id:
@@ -374,9 +306,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -396,20 +330,15 @@ paths:
     delete:
       summary: Deletes one or more cases.
       operationId: deleteCase
-      description: >
-        You must have `read` or `all` privileges and the `delete` sub-feature
-        privilege for the **Cases** feature in the **Management**,
-        **Observability**, or **Security** section of the Kibana feature
-        privileges, depending on the owner of the cases you're deleting.
+      description: |
+        You must have `read` or `all` privileges and the `delete` sub-feature privilege for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
         - name: ids
-          description: >-
-            The cases that you want to removed. All non-ASCII characters must be
-            URL encoded.
+          description: The cases that you want to removed. All non-ASCII characters must be URL encoded.
           in: query
           required: true
           schema:
@@ -423,11 +352,8 @@ paths:
     patch:
       summary: Updates one or more cases.
       operationId: updateCase
-      description: >
-        You must have `all` privileges for the **Cases** feature in the 
-        **Management**, **Observability**, or **Security** section of the
-        Kibana  feature privileges, depending on the owner of the case you're
-        updating.
+      description: |
+        You must have `all` privileges for the **Cases** feature in the  **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're updating.
       tags:
         - cases
       parameters:
@@ -449,11 +375,7 @@ paths:
                         type: object
                         properties:
                           fields:
-                            description: >-
-                              An object containing the connector fields. To
-                              create a case without a connector, specify null.
-                              If you want to omit any individual field, specify
-                              null as its value.
+                            description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                             nullable: true
                             type: object
                             properties:
@@ -461,86 +383,56 @@ paths:
                                 description: The case identifier for Swimlane connectors.
                                 type: string
                               category:
-                                description: >-
-                                  The category of the incident for ServiceNow
-                                  ITSM and ServiceNow SecOps connectors.
+                                description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                                 type: string
                               destIp:
-                                description: >-
-                                  A comma-separated list of destination IPs for
-                                  ServiceNow SecOps connectors.
+                                description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                                 type: string
                               impact:
-                                description: >-
-                                  The effect an incident had on business for
-                                  ServiceNow ITSM connectors.
+                                description: The effect an incident had on business for ServiceNow ITSM connectors.
                                 type: string
                               issueType:
                                 description: The type of issue for Jira connectors.
                                 type: string
                               issueTypes:
-                                description: >-
-                                  The type of incident for IBM Resilient
-                                  connectors.
+                                description: The type of incident for IBM Resilient connectors.
                                 type: array
                                 items:
                                   type: number
                               malwareHash:
-                                description: >-
-                                  A comma-separated list of malware hashes for
-                                  ServiceNow SecOps connectors.
+                                description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                                 type: string
                               malwareUrl:
-                                description: >-
-                                  A comma-separated list of malware URLs for
-                                  ServiceNow SecOps connectors.
+                                description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                                 type: string
                               parent:
-                                description: >-
-                                  The key of the parent issue, when the issue
-                                  type is sub-task for Jira connectors.
+                                description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                                 type: string
                               priority:
-                                description: >-
-                                  The priority of the issue for Jira and
-                                  ServiceNow SecOps connectors.
+                                description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                                 type: string
                               severity:
-                                description: >-
-                                  The severity of the incident for ServiceNow
-                                  ITSM connectors.
+                                description: The severity of the incident for ServiceNow ITSM connectors.
                                 type: string
                               severityCode:
-                                description: >-
-                                  The severity code of the incident for IBM
-                                  Resilient connectors.
+                                description: The severity code of the incident for IBM Resilient connectors.
                                 type: number
                               sourceIp:
-                                description: >-
-                                  A comma-separated list of source IPs for
-                                  ServiceNow SecOps connectors.
+                                description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                                 type: string
                               subcategory:
-                                description: >-
-                                  The subcategory of the incident for ServiceNow
-                                  ITSM connectors.
+                                description: The subcategory of the incident for ServiceNow ITSM connectors.
                                 type: string
                               urgency:
-                                description: >-
-                                  The extent to which the incident resolution
-                                  can be delayed for ServiceNow ITSM connectors.
+                                description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                                 type: string
                             example: null
                           id:
-                            description: >-
-                              The identifier for the connector. To create a case
-                              without a connector, use `none`.
+                            description: The identifier for the connector. To create a case without a connector, use `none`.
                             type: string
                             example: none
                           name:
-                            description: >-
-                              The name of the connector. To create a case
-                              without a connector, use `none`.
+                            description: The name of the connector. To create a case without a connector, use `none`.
                             type: string
                             example: none
                           type:
@@ -583,7 +475,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -598,9 +490,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -613,19 +507,13 @@ paths:
                     type: array
                     items:
                       oneOf:
-                        - $ref: >-
-                            #/components/schemas/alert_comment_response_properties
-                        - $ref: >-
-                            #/components/schemas/user_comment_response_properties
-                    example: []
+                        - $ref: '#/components/schemas/alert_comment_response_properties'
+                        - $ref: '#/components/schemas/user_comment_response_properties'
                   connector:
                     type: object
                     properties:
                       fields:
-                        description: >-
-                          An object containing the connector fields. To create a
-                          case without a connector, specify null. If you want to
-                          omit any individual field, specify null as its value.
+                        description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                         nullable: true
                         type: object
                         properties:
@@ -633,19 +521,13 @@ paths:
                             description: The case identifier for Swimlane connectors.
                             type: string
                           category:
-                            description: >-
-                              The category of the incident for ServiceNow ITSM
-                              and ServiceNow SecOps connectors.
+                            description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                             type: string
                           destIp:
-                            description: >-
-                              A comma-separated list of destination IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                             type: string
                           impact:
-                            description: >-
-                              The effect an incident had on business for
-                              ServiceNow ITSM connectors.
+                            description: The effect an incident had on business for ServiceNow ITSM connectors.
                             type: string
                           issueType:
                             description: The type of issue for Jira connectors.
@@ -656,61 +538,39 @@ paths:
                             items:
                               type: number
                           malwareHash:
-                            description: >-
-                              A comma-separated list of malware hashes for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                             type: string
                           malwareUrl:
-                            description: >-
-                              A comma-separated list of malware URLs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                             type: string
                           parent:
-                            description: >-
-                              The key of the parent issue, when the issue type
-                              is sub-task for Jira connectors.
+                            description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                             type: string
                           priority:
-                            description: >-
-                              The priority of the issue for Jira and ServiceNow
-                              SecOps connectors.
+                            description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                             type: string
                           severity:
-                            description: >-
-                              The severity of the incident for ServiceNow ITSM
-                              connectors.
+                            description: The severity of the incident for ServiceNow ITSM connectors.
                             type: string
                           severityCode:
-                            description: >-
-                              The severity code of the incident for IBM
-                              Resilient connectors.
+                            description: The severity code of the incident for IBM Resilient connectors.
                             type: number
                           sourceIp:
-                            description: >-
-                              A comma-separated list of source IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                             type: string
                           subcategory:
-                            description: >-
-                              The subcategory of the incident for ServiceNow
-                              ITSM connectors.
+                            description: The subcategory of the incident for ServiceNow ITSM connectors.
                             type: string
                           urgency:
-                            description: >-
-                              The extent to which the incident resolution can be
-                              delayed for ServiceNow ITSM connectors.
+                            description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                             type: string
                         example: null
                       id:
-                        description: >-
-                          The identifier for the connector. To create a case
-                          without a connector, use `none`.
+                        description: The identifier for the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       name:
-                        description: >-
-                          The name of the connector. To create a case without a
-                          connector, use `none`.
+                        description: The name of the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       type:
@@ -725,9 +585,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -739,12 +601,10 @@ paths:
                     example: A case description.
                   duration:
                     type: integer
-                    description: >
-                      The elapsed time from the creation of the case to its
-                      closure (in seconds). If the case has not been closed, the
-                      duration is set to null. If the case was closed after less
-                      than half a second, the duration is rounded down to zero.
+                    description: |
+                      The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
                     example: 120
+                    nullable: true
                   external_service:
                     $ref: '#/components/schemas/external_service'
                   id:
@@ -784,9 +644,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -809,10 +671,8 @@ paths:
     get:
       summary: Retrieves a paginated subset of cases.
       operationId: getCases
-      description: >
-        You must have `read` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're seeking.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       tags:
         - cases
       parameters:
@@ -833,13 +693,8 @@ paths:
               type: string
         - name: from
           in: query
-          description: >
-            [preview] Returns only cases that were created after a specific
-            date. The date must be specified as a KQL data range or date match
-            expression. This functionality is in technical preview and may be
-            changed or removed in a future release. Elastic will apply best
-            effort to fix any issues, but features in technical preview are not
-            subject to the support SLA of official GA features.
+          description: |
+            [preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
           schema:
             type: string
           example: now-1d
@@ -870,9 +725,7 @@ paths:
           example: elastic
         - name: search
           in: query
-          description: >-
-            An Elasticsearch simple_query_string query that filters the objects
-            in the response.
+          description: An Elasticsearch simple_query_string query that filters the objects in the response.
           schema:
             type: string
         - name: searchFields
@@ -936,13 +789,8 @@ paths:
           example: tag-1
         - name: to
           in: query
-          description: >
-            [preview] Returns only cases that were created before a specific
-            date. The date must be specified as a KQL data range or date match
-            expression. This functionality is in technical preview and may be
-            changed or removed in a future release. Elastic will apply best
-            effort to fix any issues, but features in technical preview are not
-            subject to the support SLA of official GA features.
+          description: |
+            [preview] Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
           schema:
             type: string
           example: now+1d
@@ -950,7 +798,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -970,9 +818,11 @@ paths:
                             email:
                               type: string
                               example: null
+                              nullable: true
                             full_name:
                               type: string
                               example: null
+                              nullable: true
                             username:
                               type: string
                               example: elastic
@@ -985,20 +835,13 @@ paths:
                           type: array
                           items:
                             oneOf:
-                              - $ref: >-
-                                  #/components/schemas/alert_comment_response_properties
-                              - $ref: >-
-                                  #/components/schemas/user_comment_response_properties
-                          example: []
+                              - $ref: '#/components/schemas/alert_comment_response_properties'
+                              - $ref: '#/components/schemas/user_comment_response_properties'
                         connector:
                           type: object
                           properties:
                             fields:
-                              description: >-
-                                An object containing the connector fields. To
-                                create a case without a connector, specify null.
-                                If you want to omit any individual field,
-                                specify null as its value.
+                              description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                               nullable: true
                               type: object
                               properties:
@@ -1006,87 +849,56 @@ paths:
                                   description: The case identifier for Swimlane connectors.
                                   type: string
                                 category:
-                                  description: >-
-                                    The category of the incident for ServiceNow
-                                    ITSM and ServiceNow SecOps connectors.
+                                  description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                                   type: string
                                 destIp:
-                                  description: >-
-                                    A comma-separated list of destination IPs
-                                    for ServiceNow SecOps connectors.
+                                  description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                                   type: string
                                 impact:
-                                  description: >-
-                                    The effect an incident had on business for
-                                    ServiceNow ITSM connectors.
+                                  description: The effect an incident had on business for ServiceNow ITSM connectors.
                                   type: string
                                 issueType:
                                   description: The type of issue for Jira connectors.
                                   type: string
                                 issueTypes:
-                                  description: >-
-                                    The type of incident for IBM Resilient
-                                    connectors.
+                                  description: The type of incident for IBM Resilient connectors.
                                   type: array
                                   items:
                                     type: number
                                 malwareHash:
-                                  description: >-
-                                    A comma-separated list of malware hashes for
-                                    ServiceNow SecOps connectors.
+                                  description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                                   type: string
                                 malwareUrl:
-                                  description: >-
-                                    A comma-separated list of malware URLs for
-                                    ServiceNow SecOps connectors.
+                                  description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                                   type: string
                                 parent:
-                                  description: >-
-                                    The key of the parent issue, when the issue
-                                    type is sub-task for Jira connectors.
+                                  description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                                   type: string
                                 priority:
-                                  description: >-
-                                    The priority of the issue for Jira and
-                                    ServiceNow SecOps connectors.
+                                  description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                                   type: string
                                 severity:
-                                  description: >-
-                                    The severity of the incident for ServiceNow
-                                    ITSM connectors.
+                                  description: The severity of the incident for ServiceNow ITSM connectors.
                                   type: string
                                 severityCode:
-                                  description: >-
-                                    The severity code of the incident for IBM
-                                    Resilient connectors.
+                                  description: The severity code of the incident for IBM Resilient connectors.
                                   type: number
                                 sourceIp:
-                                  description: >-
-                                    A comma-separated list of source IPs for
-                                    ServiceNow SecOps connectors.
+                                  description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                                   type: string
                                 subcategory:
-                                  description: >-
-                                    The subcategory of the incident for
-                                    ServiceNow ITSM connectors.
+                                  description: The subcategory of the incident for ServiceNow ITSM connectors.
                                   type: string
                                 urgency:
-                                  description: >-
-                                    The extent to which the incident resolution
-                                    can be delayed for ServiceNow ITSM
-                                    connectors.
+                                  description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                                   type: string
                               example: null
                             id:
-                              description: >-
-                                The identifier for the connector. To create a
-                                case without a connector, use `none`.
+                              description: The identifier for the connector. To create a case without a connector, use `none`.
                               type: string
                               example: none
                             name:
-                              description: >-
-                                The name of the connector. To create a case
-                                without a connector, use `none`.
+                              description: The name of the connector. To create a case without a connector, use `none`.
                               type: string
                               example: none
                             type:
@@ -1101,9 +913,11 @@ paths:
                             email:
                               type: string
                               example: null
+                              nullable: true
                             full_name:
                               type: string
                               example: null
+                              nullable: true
                             username:
                               type: string
                               example: elastic
@@ -1115,13 +929,10 @@ paths:
                           example: A case description.
                         duration:
                           type: integer
-                          description: >
-                            The elapsed time from the creation of the case to
-                            its closure (in seconds). If the case has not been
-                            closed, the duration is set to null. If the case was
-                            closed after less than half a second, the duration
-                            is rounded down to zero.
+                          description: |
+                            The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
                           example: 120
+                          nullable: true
                         external_service:
                           $ref: '#/components/schemas/external_service'
                         id:
@@ -1161,9 +972,11 @@ paths:
                             email:
                               type: string
                               example: null
+                              nullable: true
                             full_name:
                               type: string
                               example: null
+                              nullable: true
                             username:
                               type: string
                               example: elastic
@@ -1198,10 +1011,8 @@ paths:
     get:
       summary: Returns the cases associated with a specific alert.
       operationId: getCasesByAlert
-      description: >
-        You must have `read` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're seeking.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       x-technical-preview: true
       tags:
         - cases
@@ -1219,7 +1030,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -1240,14 +1051,10 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure:
     get:
-      summary: >-
-        Retrieves external connection details, such as the closure type and
-        default connector for cases.
+      summary: Retrieves external connection details, such as the closure type and default connector for cases.
       operationId: getCaseConfiguration
-      description: >
-        You must have `read` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case configuration.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.
       tags:
         - cases
       parameters:
@@ -1257,7 +1064,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -1269,11 +1076,7 @@ paths:
                       type: object
                       properties:
                         fields:
-                          description: >-
-                            An object containing the connector fields. To create
-                            a case without a connector, specify null. If you
-                            want to omit any individual field, specify null as
-                            its value.
+                          description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                           nullable: true
                           type: object
                           properties:
@@ -1281,86 +1084,56 @@ paths:
                               description: The case identifier for Swimlane connectors.
                               type: string
                             category:
-                              description: >-
-                                The category of the incident for ServiceNow ITSM
-                                and ServiceNow SecOps connectors.
+                              description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                               type: string
                             destIp:
-                              description: >-
-                                A comma-separated list of destination IPs for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                               type: string
                             impact:
-                              description: >-
-                                The effect an incident had on business for
-                                ServiceNow ITSM connectors.
+                              description: The effect an incident had on business for ServiceNow ITSM connectors.
                               type: string
                             issueType:
                               description: The type of issue for Jira connectors.
                               type: string
                             issueTypes:
-                              description: >-
-                                The type of incident for IBM Resilient
-                                connectors.
+                              description: The type of incident for IBM Resilient connectors.
                               type: array
                               items:
                                 type: number
                             malwareHash:
-                              description: >-
-                                A comma-separated list of malware hashes for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                               type: string
                             malwareUrl:
-                              description: >-
-                                A comma-separated list of malware URLs for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                               type: string
                             parent:
-                              description: >-
-                                The key of the parent issue, when the issue type
-                                is sub-task for Jira connectors.
+                              description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                               type: string
                             priority:
-                              description: >-
-                                The priority of the issue for Jira and
-                                ServiceNow SecOps connectors.
+                              description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                               type: string
                             severity:
-                              description: >-
-                                The severity of the incident for ServiceNow ITSM
-                                connectors.
+                              description: The severity of the incident for ServiceNow ITSM connectors.
                               type: string
                             severityCode:
-                              description: >-
-                                The severity code of the incident for IBM
-                                Resilient connectors.
+                              description: The severity code of the incident for IBM Resilient connectors.
                               type: number
                             sourceIp:
-                              description: >-
-                                A comma-separated list of source IPs for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                               type: string
                             subcategory:
-                              description: >-
-                                The subcategory of the incident for ServiceNow
-                                ITSM connectors.
+                              description: The subcategory of the incident for ServiceNow ITSM connectors.
                               type: string
                             urgency:
-                              description: >-
-                                The extent to which the incident resolution can
-                                be delayed for ServiceNow ITSM connectors.
+                              description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                               type: string
                           example: null
                         id:
-                          description: >-
-                            The identifier for the connector. To create a case
-                            without a connector, use `none`.
+                          description: The identifier for the connector. To create a case without a connector, use `none`.
                           type: string
                           example: none
                         name:
-                          description: >-
-                            The name of the connector. To create a case without
-                            a connector, use `none`.
+                          description: The name of the connector. To create a case without a connector, use `none`.
                           type: string
                           example: none
                         type:
@@ -1375,9 +1148,11 @@ paths:
                         email:
                           type: string
                           example: null
+                          nullable: true
                         full_name:
                           type: string
                           example: null
+                          nullable: true
                         username:
                           type: string
                           example: elastic
@@ -1414,9 +1189,11 @@ paths:
                         email:
                           type: string
                           example: null
+                          nullable: true
                         full_name:
                           type: string
                           example: null
+                          nullable: true
                         username:
                           type: string
                           example: elastic
@@ -1427,19 +1204,10 @@ paths:
       servers:
         - url: https://localhost:5601
     post:
-      summary: >-
-        Sets external connection details, such as the closure type and default
-        connector for cases.
+      summary: Sets external connection details, such as the closure type and default connector for cases.
       operationId: setCaseConfiguration
-      description: >
-        You must have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case configuration.
-        Connectors are used to interface with external systems. You must create
-        a connector before you can use it in your cases. Refer to the add
-        connectors API. If you set a default connector, it is automatically
-        selected when you create cases in Kibana. If you use the create case
-        API, however, you must still specify all of the connector details.
+      description: |
+        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.
       tags:
         - cases
       parameters:
@@ -1458,10 +1226,7 @@ paths:
                   type: object
                   properties:
                     fields:
-                      description: >-
-                        An object containing the connector fields. To create a
-                        case without a connector, specify null. If you want to
-                        omit any individual field, specify null as its value.
+                      description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                       nullable: true
                       type: object
                       properties:
@@ -1469,19 +1234,13 @@ paths:
                           description: The case identifier for Swimlane connectors.
                           type: string
                         category:
-                          description: >-
-                            The category of the incident for ServiceNow ITSM and
-                            ServiceNow SecOps connectors.
+                          description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                           type: string
                         destIp:
-                          description: >-
-                            A comma-separated list of destination IPs for
-                            ServiceNow SecOps connectors.
+                          description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                           type: string
                         impact:
-                          description: >-
-                            The effect an incident had on business for
-                            ServiceNow ITSM connectors.
+                          description: The effect an incident had on business for ServiceNow ITSM connectors.
                           type: string
                         issueType:
                           description: The type of issue for Jira connectors.
@@ -1492,61 +1251,39 @@ paths:
                           items:
                             type: number
                         malwareHash:
-                          description: >-
-                            A comma-separated list of malware hashes for
-                            ServiceNow SecOps connectors.
+                          description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                           type: string
                         malwareUrl:
-                          description: >-
-                            A comma-separated list of malware URLs for
-                            ServiceNow SecOps connectors.
+                          description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                           type: string
                         parent:
-                          description: >-
-                            The key of the parent issue, when the issue type is
-                            sub-task for Jira connectors.
+                          description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                           type: string
                         priority:
-                          description: >-
-                            The priority of the issue for Jira and ServiceNow
-                            SecOps connectors.
+                          description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                           type: string
                         severity:
-                          description: >-
-                            The severity of the incident for ServiceNow ITSM
-                            connectors.
+                          description: The severity of the incident for ServiceNow ITSM connectors.
                           type: string
                         severityCode:
-                          description: >-
-                            The severity code of the incident for IBM Resilient
-                            connectors.
+                          description: The severity code of the incident for IBM Resilient connectors.
                           type: number
                         sourceIp:
-                          description: >-
-                            A comma-separated list of source IPs for ServiceNow
-                            SecOps connectors.
+                          description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                           type: string
                         subcategory:
-                          description: >-
-                            The subcategory of the incident for ServiceNow ITSM
-                            connectors.
+                          description: The subcategory of the incident for ServiceNow ITSM connectors.
                           type: string
                         urgency:
-                          description: >-
-                            The extent to which the incident resolution can be
-                            delayed for ServiceNow ITSM connectors.
+                          description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                           type: string
                       example: null
                     id:
-                      description: >-
-                        The identifier for the connector. To create a case
-                        without a connector, use `none`.
+                      description: The identifier for the connector. To create a case without a connector, use `none`.
                       type: string
                       example: none
                     name:
-                      description: >-
-                        The name of the connector. To create a case without a
-                        connector, use `none`.
+                      description: The name of the connector. To create a case without a connector, use `none`.
                       type: string
                       example: none
                     type:
@@ -1576,7 +1313,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -1588,11 +1325,7 @@ paths:
                       type: object
                       properties:
                         fields:
-                          description: >-
-                            An object containing the connector fields. To create
-                            a case without a connector, specify null. If you
-                            want to omit any individual field, specify null as
-                            its value.
+                          description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                           nullable: true
                           type: object
                           properties:
@@ -1600,86 +1333,56 @@ paths:
                               description: The case identifier for Swimlane connectors.
                               type: string
                             category:
-                              description: >-
-                                The category of the incident for ServiceNow ITSM
-                                and ServiceNow SecOps connectors.
+                              description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                               type: string
                             destIp:
-                              description: >-
-                                A comma-separated list of destination IPs for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                               type: string
                             impact:
-                              description: >-
-                                The effect an incident had on business for
-                                ServiceNow ITSM connectors.
+                              description: The effect an incident had on business for ServiceNow ITSM connectors.
                               type: string
                             issueType:
                               description: The type of issue for Jira connectors.
                               type: string
                             issueTypes:
-                              description: >-
-                                The type of incident for IBM Resilient
-                                connectors.
+                              description: The type of incident for IBM Resilient connectors.
                               type: array
                               items:
                                 type: number
                             malwareHash:
-                              description: >-
-                                A comma-separated list of malware hashes for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                               type: string
                             malwareUrl:
-                              description: >-
-                                A comma-separated list of malware URLs for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                               type: string
                             parent:
-                              description: >-
-                                The key of the parent issue, when the issue type
-                                is sub-task for Jira connectors.
+                              description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                               type: string
                             priority:
-                              description: >-
-                                The priority of the issue for Jira and
-                                ServiceNow SecOps connectors.
+                              description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                               type: string
                             severity:
-                              description: >-
-                                The severity of the incident for ServiceNow ITSM
-                                connectors.
+                              description: The severity of the incident for ServiceNow ITSM connectors.
                               type: string
                             severityCode:
-                              description: >-
-                                The severity code of the incident for IBM
-                                Resilient connectors.
+                              description: The severity code of the incident for IBM Resilient connectors.
                               type: number
                             sourceIp:
-                              description: >-
-                                A comma-separated list of source IPs for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                               type: string
                             subcategory:
-                              description: >-
-                                The subcategory of the incident for ServiceNow
-                                ITSM connectors.
+                              description: The subcategory of the incident for ServiceNow ITSM connectors.
                               type: string
                             urgency:
-                              description: >-
-                                The extent to which the incident resolution can
-                                be delayed for ServiceNow ITSM connectors.
+                              description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                               type: string
                           example: null
                         id:
-                          description: >-
-                            The identifier for the connector. To create a case
-                            without a connector, use `none`.
+                          description: The identifier for the connector. To create a case without a connector, use `none`.
                           type: string
                           example: none
                         name:
-                          description: >-
-                            The name of the connector. To create a case without
-                            a connector, use `none`.
+                          description: The name of the connector. To create a case without a connector, use `none`.
                           type: string
                           example: none
                         type:
@@ -1694,9 +1397,11 @@ paths:
                         email:
                           type: string
                           example: null
+                          nullable: true
                         full_name:
                           type: string
                           example: null
+                          nullable: true
                         username:
                           type: string
                           example: elastic
@@ -1733,9 +1438,11 @@ paths:
                         email:
                           type: string
                           example: null
+                          nullable: true
                         full_name:
                           type: string
                           example: null
+                          nullable: true
                         username:
                           type: string
                           example: elastic
@@ -1749,17 +1456,10 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure/{configurationId}:
     patch:
-      summary: >-
-        Updates external connection details, such as the closure type and
-        default connector for cases.
+      summary: Updates external connection details, such as the closure type and default connector for cases.
       operationId: updateCaseConfiguration
-      description: >
-        You must have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case configuration.
-        Connectors are used to interface with external systems. You must create
-        a connector before you can use it in your cases. Refer to the add
-        connectors API.
+      description: |
+        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API.
       tags:
         - cases
       parameters:
@@ -1785,10 +1485,7 @@ paths:
                   type: object
                   properties:
                     fields:
-                      description: >-
-                        An object containing the connector fields. To create a
-                        case without a connector, specify null. If you want to
-                        omit any individual field, specify null as its value.
+                      description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                       nullable: true
                       type: object
                       properties:
@@ -1796,19 +1493,13 @@ paths:
                           description: The case identifier for Swimlane connectors.
                           type: string
                         category:
-                          description: >-
-                            The category of the incident for ServiceNow ITSM and
-                            ServiceNow SecOps connectors.
+                          description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                           type: string
                         destIp:
-                          description: >-
-                            A comma-separated list of destination IPs for
-                            ServiceNow SecOps connectors.
+                          description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                           type: string
                         impact:
-                          description: >-
-                            The effect an incident had on business for
-                            ServiceNow ITSM connectors.
+                          description: The effect an incident had on business for ServiceNow ITSM connectors.
                           type: string
                         issueType:
                           description: The type of issue for Jira connectors.
@@ -1819,61 +1510,39 @@ paths:
                           items:
                             type: number
                         malwareHash:
-                          description: >-
-                            A comma-separated list of malware hashes for
-                            ServiceNow SecOps connectors.
+                          description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                           type: string
                         malwareUrl:
-                          description: >-
-                            A comma-separated list of malware URLs for
-                            ServiceNow SecOps connectors.
+                          description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                           type: string
                         parent:
-                          description: >-
-                            The key of the parent issue, when the issue type is
-                            sub-task for Jira connectors.
+                          description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                           type: string
                         priority:
-                          description: >-
-                            The priority of the issue for Jira and ServiceNow
-                            SecOps connectors.
+                          description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                           type: string
                         severity:
-                          description: >-
-                            The severity of the incident for ServiceNow ITSM
-                            connectors.
+                          description: The severity of the incident for ServiceNow ITSM connectors.
                           type: string
                         severityCode:
-                          description: >-
-                            The severity code of the incident for IBM Resilient
-                            connectors.
+                          description: The severity code of the incident for IBM Resilient connectors.
                           type: number
                         sourceIp:
-                          description: >-
-                            A comma-separated list of source IPs for ServiceNow
-                            SecOps connectors.
+                          description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                           type: string
                         subcategory:
-                          description: >-
-                            The subcategory of the incident for ServiceNow ITSM
-                            connectors.
+                          description: The subcategory of the incident for ServiceNow ITSM connectors.
                           type: string
                         urgency:
-                          description: >-
-                            The extent to which the incident resolution can be
-                            delayed for ServiceNow ITSM connectors.
+                          description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                           type: string
                       example: null
                     id:
-                      description: >-
-                        The identifier for the connector. To create a case
-                        without a connector, use `none`.
+                      description: The identifier for the connector. To create a case without a connector, use `none`.
                       type: string
                       example: none
                     name:
-                      description: >-
-                        The name of the connector. To create a case without a
-                        connector, use `none`.
+                      description: The name of the connector. To create a case without a connector, use `none`.
                       type: string
                       example: none
                     type:
@@ -1884,9 +1553,8 @@ paths:
                     - name
                     - type
                 version:
-                  description: >
-                    The version of the connector. To retrieve the version value,
-                    use the get configuration API.
+                  description: |
+                    The version of the connector. To retrieve the version value, use the get configuration API.
                   type: string
                   example: WzIwMiwxXQ==
               required:
@@ -1895,7 +1563,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -1907,11 +1575,7 @@ paths:
                       type: object
                       properties:
                         fields:
-                          description: >-
-                            An object containing the connector fields. To create
-                            a case without a connector, specify null. If you
-                            want to omit any individual field, specify null as
-                            its value.
+                          description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                           nullable: true
                           type: object
                           properties:
@@ -1919,86 +1583,56 @@ paths:
                               description: The case identifier for Swimlane connectors.
                               type: string
                             category:
-                              description: >-
-                                The category of the incident for ServiceNow ITSM
-                                and ServiceNow SecOps connectors.
+                              description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                               type: string
                             destIp:
-                              description: >-
-                                A comma-separated list of destination IPs for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                               type: string
                             impact:
-                              description: >-
-                                The effect an incident had on business for
-                                ServiceNow ITSM connectors.
+                              description: The effect an incident had on business for ServiceNow ITSM connectors.
                               type: string
                             issueType:
                               description: The type of issue for Jira connectors.
                               type: string
                             issueTypes:
-                              description: >-
-                                The type of incident for IBM Resilient
-                                connectors.
+                              description: The type of incident for IBM Resilient connectors.
                               type: array
                               items:
                                 type: number
                             malwareHash:
-                              description: >-
-                                A comma-separated list of malware hashes for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                               type: string
                             malwareUrl:
-                              description: >-
-                                A comma-separated list of malware URLs for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                               type: string
                             parent:
-                              description: >-
-                                The key of the parent issue, when the issue type
-                                is sub-task for Jira connectors.
+                              description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                               type: string
                             priority:
-                              description: >-
-                                The priority of the issue for Jira and
-                                ServiceNow SecOps connectors.
+                              description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                               type: string
                             severity:
-                              description: >-
-                                The severity of the incident for ServiceNow ITSM
-                                connectors.
+                              description: The severity of the incident for ServiceNow ITSM connectors.
                               type: string
                             severityCode:
-                              description: >-
-                                The severity code of the incident for IBM
-                                Resilient connectors.
+                              description: The severity code of the incident for IBM Resilient connectors.
                               type: number
                             sourceIp:
-                              description: >-
-                                A comma-separated list of source IPs for
-                                ServiceNow SecOps connectors.
+                              description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                               type: string
                             subcategory:
-                              description: >-
-                                The subcategory of the incident for ServiceNow
-                                ITSM connectors.
+                              description: The subcategory of the incident for ServiceNow ITSM connectors.
                               type: string
                             urgency:
-                              description: >-
-                                The extent to which the incident resolution can
-                                be delayed for ServiceNow ITSM connectors.
+                              description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                               type: string
                           example: null
                         id:
-                          description: >-
-                            The identifier for the connector. To create a case
-                            without a connector, use `none`.
+                          description: The identifier for the connector. To create a case without a connector, use `none`.
                           type: string
                           example: none
                         name:
-                          description: >-
-                            The name of the connector. To create a case without
-                            a connector, use `none`.
+                          description: The name of the connector. To create a case without a connector, use `none`.
                           type: string
                           example: none
                         type:
@@ -2013,9 +1647,11 @@ paths:
                         email:
                           type: string
                           example: null
+                          nullable: true
                         full_name:
                           type: string
                           example: null
+                          nullable: true
                         username:
                           type: string
                           example: elastic
@@ -2052,9 +1688,11 @@ paths:
                         email:
                           type: string
                           example: null
+                          nullable: true
                         full_name:
                           type: string
                           example: null
+                          nullable: true
                         username:
                           type: string
                           example: elastic
@@ -2070,11 +1708,8 @@ paths:
     get:
       summary: Retrieves information about connectors.
       operationId: getCaseConnectors
-      description: >
-        In particular, only the connectors that are supported for use in cases
-        are returned. You must have `read` privileges for the **Actions and
-        Connectors** feature in the **Management** section of the Kibana feature
-        privileges.
+      description: |
+        In particular, only the connectors that are supported for use in cases are returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
       tags:
         - cases
       parameters:
@@ -2083,7 +1718,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -2122,14 +1757,8 @@ paths:
     get:
       summary: Returns information about the users who opened cases.
       operationId: getCaseReporters
-      description: >
-        You must have read privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases. The API returns
-        information about the users as they existed at the time of the case
-        creation, including their name, full name, and email address. If any of
-        those details change thereafter or if a user is deleted, the information
-        returned by this API is unchanged.
+      description: |
+        You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases. The API returns information about the users as they existed at the time of the case creation, including their name, full name, and email address. If any of those details change thereafter or if a user is deleted, the information returned by this API is unchanged.
       tags:
         - cases
       parameters:
@@ -2139,7 +1768,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -2148,9 +1777,11 @@ paths:
                     email:
                       type: string
                       example: null
+                      nullable: true
                     full_name:
                       type: string
                       example: null
+                      nullable: true
                     username:
                       type: string
                       example: elastic
@@ -2168,10 +1799,8 @@ paths:
     get:
       summary: Returns the number of cases that are open, closed, and in progress.
       operationId: getCaseStatus
-      description: >
-        You must have `read` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're seeking.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       deprecated: true
       tags:
         - cases
@@ -2182,7 +1811,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -2203,20 +1832,15 @@ paths:
     get:
       summary: Aggregates and returns a list of case tags.
       operationId: getCaseTags
-      description: >
-        You must have read privileges for the **Cases*** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're seeking.
+      description: |
+        You must have read privileges for the **Cases*** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       tags:
         - cases
       parameters:
         - $ref: '#/components/parameters/space_id'
         - in: query
           name: owner
-          description: >-
-            A filter to limit the retrieved case statistics to a specific set of
-            applications. If this parameter is omitted, the response contains
-            tags from all cases that the user has access to read.
+          description: A filter to limit the retrieved case statistics to a specific set of applications. If this parameter is omitted, the response contains tags from all cases that the user has access to read.
           schema:
             oneOf:
               - $ref: '#/components/schemas/owners'
@@ -2227,7 +1851,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -2243,10 +1867,8 @@ paths:
     get:
       summary: Retrieves information about a case.
       operationId: getCase
-      description: >
-        You must have `read` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case you're seeking.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       tags:
         - cases
       parameters:
@@ -2263,7 +1885,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -2278,9 +1900,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -2293,19 +1917,13 @@ paths:
                     type: array
                     items:
                       oneOf:
-                        - $ref: >-
-                            #/components/schemas/alert_comment_response_properties
-                        - $ref: >-
-                            #/components/schemas/user_comment_response_properties
-                    example: []
+                        - $ref: '#/components/schemas/alert_comment_response_properties'
+                        - $ref: '#/components/schemas/user_comment_response_properties'
                   connector:
                     type: object
                     properties:
                       fields:
-                        description: >-
-                          An object containing the connector fields. To create a
-                          case without a connector, specify null. If you want to
-                          omit any individual field, specify null as its value.
+                        description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                         nullable: true
                         type: object
                         properties:
@@ -2313,19 +1931,13 @@ paths:
                             description: The case identifier for Swimlane connectors.
                             type: string
                           category:
-                            description: >-
-                              The category of the incident for ServiceNow ITSM
-                              and ServiceNow SecOps connectors.
+                            description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                             type: string
                           destIp:
-                            description: >-
-                              A comma-separated list of destination IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                             type: string
                           impact:
-                            description: >-
-                              The effect an incident had on business for
-                              ServiceNow ITSM connectors.
+                            description: The effect an incident had on business for ServiceNow ITSM connectors.
                             type: string
                           issueType:
                             description: The type of issue for Jira connectors.
@@ -2336,61 +1948,39 @@ paths:
                             items:
                               type: number
                           malwareHash:
-                            description: >-
-                              A comma-separated list of malware hashes for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                             type: string
                           malwareUrl:
-                            description: >-
-                              A comma-separated list of malware URLs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                             type: string
                           parent:
-                            description: >-
-                              The key of the parent issue, when the issue type
-                              is sub-task for Jira connectors.
+                            description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                             type: string
                           priority:
-                            description: >-
-                              The priority of the issue for Jira and ServiceNow
-                              SecOps connectors.
+                            description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                             type: string
                           severity:
-                            description: >-
-                              The severity of the incident for ServiceNow ITSM
-                              connectors.
+                            description: The severity of the incident for ServiceNow ITSM connectors.
                             type: string
                           severityCode:
-                            description: >-
-                              The severity code of the incident for IBM
-                              Resilient connectors.
+                            description: The severity code of the incident for IBM Resilient connectors.
                             type: number
                           sourceIp:
-                            description: >-
-                              A comma-separated list of source IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                             type: string
                           subcategory:
-                            description: >-
-                              The subcategory of the incident for ServiceNow
-                              ITSM connectors.
+                            description: The subcategory of the incident for ServiceNow ITSM connectors.
                             type: string
                           urgency:
-                            description: >-
-                              The extent to which the incident resolution can be
-                              delayed for ServiceNow ITSM connectors.
+                            description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                             type: string
                         example: null
                       id:
-                        description: >-
-                          The identifier for the connector. To create a case
-                          without a connector, use `none`.
+                        description: The identifier for the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       name:
-                        description: >-
-                          The name of the connector. To create a case without a
-                          connector, use `none`.
+                        description: The name of the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       type:
@@ -2405,9 +1995,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -2419,12 +2011,10 @@ paths:
                     example: A case description.
                   duration:
                     type: integer
-                    description: >
-                      The elapsed time from the creation of the case to its
-                      closure (in seconds). If the case has not been closed, the
-                      duration is set to null. If the case was closed after less
-                      than half a second, the duration is rounded down to zero.
+                    description: |
+                      The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
                     example: 120
+                    nullable: true
                   external_service:
                     $ref: '#/components/schemas/external_service'
                   id:
@@ -2464,9 +2054,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -2488,10 +2080,8 @@ paths:
   /s/{spaceId}/api/cases/{caseId}/alerts:
     get:
       summary: Gets all alerts attached to a case.
-      description: >
-        You must have `read` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're seeking.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       x-technical-preview: true
       operationId: getCaseAlerts
       tags:
@@ -2503,7 +2093,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -2519,10 +2109,8 @@ paths:
     post:
       summary: Adds a comment or alert to a case.
       operationId: addCaseComment
-      description: >
-        You must have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case you're updating.
+      description: |
+        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.
       tags:
         - cases
       parameters:
@@ -2534,22 +2122,18 @@ paths:
           application/json:
             schema:
               title: Add case comment request
-              description: >
-                The add comment to case API request body varies depending on
-                whether you are adding an alert or a comment.
-              oneOf:
-                - $ref: '#/components/schemas/alert'
-                - $ref: '#/components/schemas/user'
+              description: |
+                The add comment to case API request body varies depending on whether you are adding an alert or a comment.
               discriminator:
                 propertyName: type
-            examples:
-              createCaseCommentRequest:
-                $ref: '#/components/examples/add_comment_request'
+              oneOf:
+                - $ref: '#/components/schemas/add_alert_comment_request_properties'
+                - $ref: '#/components/schemas/add_user_comment_request_properties'
       responses:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -2564,9 +2148,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -2579,19 +2165,13 @@ paths:
                     type: array
                     items:
                       oneOf:
-                        - $ref: >-
-                            #/components/schemas/alert_comment_response_properties
-                        - $ref: >-
-                            #/components/schemas/user_comment_response_properties
-                    example: []
+                        - $ref: '#/components/schemas/alert_comment_response_properties'
+                        - $ref: '#/components/schemas/user_comment_response_properties'
                   connector:
                     type: object
                     properties:
                       fields:
-                        description: >-
-                          An object containing the connector fields. To create a
-                          case without a connector, specify null. If you want to
-                          omit any individual field, specify null as its value.
+                        description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                         nullable: true
                         type: object
                         properties:
@@ -2599,19 +2179,13 @@ paths:
                             description: The case identifier for Swimlane connectors.
                             type: string
                           category:
-                            description: >-
-                              The category of the incident for ServiceNow ITSM
-                              and ServiceNow SecOps connectors.
+                            description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                             type: string
                           destIp:
-                            description: >-
-                              A comma-separated list of destination IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                             type: string
                           impact:
-                            description: >-
-                              The effect an incident had on business for
-                              ServiceNow ITSM connectors.
+                            description: The effect an incident had on business for ServiceNow ITSM connectors.
                             type: string
                           issueType:
                             description: The type of issue for Jira connectors.
@@ -2622,61 +2196,39 @@ paths:
                             items:
                               type: number
                           malwareHash:
-                            description: >-
-                              A comma-separated list of malware hashes for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                             type: string
                           malwareUrl:
-                            description: >-
-                              A comma-separated list of malware URLs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                             type: string
                           parent:
-                            description: >-
-                              The key of the parent issue, when the issue type
-                              is sub-task for Jira connectors.
+                            description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                             type: string
                           priority:
-                            description: >-
-                              The priority of the issue for Jira and ServiceNow
-                              SecOps connectors.
+                            description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                             type: string
                           severity:
-                            description: >-
-                              The severity of the incident for ServiceNow ITSM
-                              connectors.
+                            description: The severity of the incident for ServiceNow ITSM connectors.
                             type: string
                           severityCode:
-                            description: >-
-                              The severity code of the incident for IBM
-                              Resilient connectors.
+                            description: The severity code of the incident for IBM Resilient connectors.
                             type: number
                           sourceIp:
-                            description: >-
-                              A comma-separated list of source IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                             type: string
                           subcategory:
-                            description: >-
-                              The subcategory of the incident for ServiceNow
-                              ITSM connectors.
+                            description: The subcategory of the incident for ServiceNow ITSM connectors.
                             type: string
                           urgency:
-                            description: >-
-                              The extent to which the incident resolution can be
-                              delayed for ServiceNow ITSM connectors.
+                            description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                             type: string
                         example: null
                       id:
-                        description: >-
-                          The identifier for the connector. To create a case
-                          without a connector, use `none`.
+                        description: The identifier for the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       name:
-                        description: >-
-                          The name of the connector. To create a case without a
-                          connector, use `none`.
+                        description: The name of the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       type:
@@ -2691,9 +2243,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -2705,12 +2259,10 @@ paths:
                     example: A case description.
                   duration:
                     type: integer
-                    description: >
-                      The elapsed time from the creation of the case to its
-                      closure (in seconds). If the case has not been closed, the
-                      duration is set to null. If the case was closed after less
-                      than half a second, the duration is rounded down to zero.
+                    description: |
+                      The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
                     example: 120
+                    nullable: true
                   external_service:
                     $ref: '#/components/schemas/external_service'
                   id:
@@ -2750,9 +2302,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -2772,10 +2326,8 @@ paths:
     delete:
       summary: Deletes all comments and alerts from a case.
       operationId: deleteCaseComments
-      description: >
-        You must have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're deleting.
+      description: |
+        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
       parameters:
@@ -2790,11 +2342,8 @@ paths:
     patch:
       summary: Updates a comment or alert in a case.
       operationId: updateCaseComment
-      description: >
-        You must have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case you're updating.
-        NOTE: You cannot change the comment type or the owner of a comment.
+      description: |
+        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.
       tags:
         - cases
       parameters:
@@ -2815,7 +2364,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -2830,9 +2379,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -2845,19 +2396,13 @@ paths:
                     type: array
                     items:
                       oneOf:
-                        - $ref: >-
-                            #/components/schemas/alert_comment_response_properties
-                        - $ref: >-
-                            #/components/schemas/user_comment_response_properties
-                    example: []
+                        - $ref: '#/components/schemas/alert_comment_response_properties'
+                        - $ref: '#/components/schemas/user_comment_response_properties'
                   connector:
                     type: object
                     properties:
                       fields:
-                        description: >-
-                          An object containing the connector fields. To create a
-                          case without a connector, specify null. If you want to
-                          omit any individual field, specify null as its value.
+                        description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                         nullable: true
                         type: object
                         properties:
@@ -2865,19 +2410,13 @@ paths:
                             description: The case identifier for Swimlane connectors.
                             type: string
                           category:
-                            description: >-
-                              The category of the incident for ServiceNow ITSM
-                              and ServiceNow SecOps connectors.
+                            description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                             type: string
                           destIp:
-                            description: >-
-                              A comma-separated list of destination IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                             type: string
                           impact:
-                            description: >-
-                              The effect an incident had on business for
-                              ServiceNow ITSM connectors.
+                            description: The effect an incident had on business for ServiceNow ITSM connectors.
                             type: string
                           issueType:
                             description: The type of issue for Jira connectors.
@@ -2888,61 +2427,39 @@ paths:
                             items:
                               type: number
                           malwareHash:
-                            description: >-
-                              A comma-separated list of malware hashes for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                             type: string
                           malwareUrl:
-                            description: >-
-                              A comma-separated list of malware URLs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                             type: string
                           parent:
-                            description: >-
-                              The key of the parent issue, when the issue type
-                              is sub-task for Jira connectors.
+                            description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                             type: string
                           priority:
-                            description: >-
-                              The priority of the issue for Jira and ServiceNow
-                              SecOps connectors.
+                            description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                             type: string
                           severity:
-                            description: >-
-                              The severity of the incident for ServiceNow ITSM
-                              connectors.
+                            description: The severity of the incident for ServiceNow ITSM connectors.
                             type: string
                           severityCode:
-                            description: >-
-                              The severity code of the incident for IBM
-                              Resilient connectors.
+                            description: The severity code of the incident for IBM Resilient connectors.
                             type: number
                           sourceIp:
-                            description: >-
-                              A comma-separated list of source IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                             type: string
                           subcategory:
-                            description: >-
-                              The subcategory of the incident for ServiceNow
-                              ITSM connectors.
+                            description: The subcategory of the incident for ServiceNow ITSM connectors.
                             type: string
                           urgency:
-                            description: >-
-                              The extent to which the incident resolution can be
-                              delayed for ServiceNow ITSM connectors.
+                            description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                             type: string
                         example: null
                       id:
-                        description: >-
-                          The identifier for the connector. To create a case
-                          without a connector, use `none`.
+                        description: The identifier for the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       name:
-                        description: >-
-                          The name of the connector. To create a case without a
-                          connector, use `none`.
+                        description: The name of the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       type:
@@ -2957,9 +2474,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -2971,12 +2490,10 @@ paths:
                     example: A case description.
                   duration:
                     type: integer
-                    description: >
-                      The elapsed time from the creation of the case to its
-                      closure (in seconds). If the case has not been closed, the
-                      duration is set to null. If the case was closed after less
-                      than half a second, the duration is rounded down to zero.
+                    description: |
+                      The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
                     example: 120
+                    nullable: true
                   external_service:
                     $ref: '#/components/schemas/external_service'
                   id:
@@ -3016,9 +2533,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -3038,11 +2557,8 @@ paths:
     get:
       summary: Retrieves all the comments from a case.
       operationId: getAllCaseComments
-      description: >
-        You must have `read` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases with the
-        comments you're seeking.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
       deprecated: true
       tags:
         - cases
@@ -3053,7 +2569,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -3069,10 +2585,8 @@ paths:
     delete:
       summary: Deletes a comment or alert from a case.
       operationId: deleteCaseComment
-      description: >
-        You must have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're deleting.
+      description: |
+        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
       parameters:
@@ -3088,11 +2602,8 @@ paths:
     get:
       summary: Retrieves a comment from a case.
       operationId: getCaseComment
-      description: >
-        You must have `read` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security*** section of the
-        Kibana feature privileges, depending on the owner of the cases with the
-        comments you're seeking.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security*** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
       tags:
         - cases
       parameters:
@@ -3103,7 +2614,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/alert_comment_response_properties'
@@ -3118,12 +2629,8 @@ paths:
   /s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push:
     post:
       summary: Pushes a case to an external service.
-      description: >
-        You must have `all` privileges for the **Actions and Connectors**
-        feature in the **Management** section of the Kibana feature privileges.
-        You must also have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case you're pushing.
+      description: |
+        You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. You must also have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're pushing.
       operationId: pushCase
       tags:
         - cases
@@ -3142,7 +2649,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -3157,9 +2664,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -3172,19 +2681,13 @@ paths:
                     type: array
                     items:
                       oneOf:
-                        - $ref: >-
-                            #/components/schemas/alert_comment_response_properties
-                        - $ref: >-
-                            #/components/schemas/user_comment_response_properties
-                    example: []
+                        - $ref: '#/components/schemas/alert_comment_response_properties'
+                        - $ref: '#/components/schemas/user_comment_response_properties'
                   connector:
                     type: object
                     properties:
                       fields:
-                        description: >-
-                          An object containing the connector fields. To create a
-                          case without a connector, specify null. If you want to
-                          omit any individual field, specify null as its value.
+                        description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
                         nullable: true
                         type: object
                         properties:
@@ -3192,19 +2695,13 @@ paths:
                             description: The case identifier for Swimlane connectors.
                             type: string
                           category:
-                            description: >-
-                              The category of the incident for ServiceNow ITSM
-                              and ServiceNow SecOps connectors.
+                            description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                             type: string
                           destIp:
-                            description: >-
-                              A comma-separated list of destination IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                             type: string
                           impact:
-                            description: >-
-                              The effect an incident had on business for
-                              ServiceNow ITSM connectors.
+                            description: The effect an incident had on business for ServiceNow ITSM connectors.
                             type: string
                           issueType:
                             description: The type of issue for Jira connectors.
@@ -3215,61 +2712,39 @@ paths:
                             items:
                               type: number
                           malwareHash:
-                            description: >-
-                              A comma-separated list of malware hashes for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                             type: string
                           malwareUrl:
-                            description: >-
-                              A comma-separated list of malware URLs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                             type: string
                           parent:
-                            description: >-
-                              The key of the parent issue, when the issue type
-                              is sub-task for Jira connectors.
+                            description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                             type: string
                           priority:
-                            description: >-
-                              The priority of the issue for Jira and ServiceNow
-                              SecOps connectors.
+                            description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                             type: string
                           severity:
-                            description: >-
-                              The severity of the incident for ServiceNow ITSM
-                              connectors.
+                            description: The severity of the incident for ServiceNow ITSM connectors.
                             type: string
                           severityCode:
-                            description: >-
-                              The severity code of the incident for IBM
-                              Resilient connectors.
+                            description: The severity code of the incident for IBM Resilient connectors.
                             type: number
                           sourceIp:
-                            description: >-
-                              A comma-separated list of source IPs for
-                              ServiceNow SecOps connectors.
+                            description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                             type: string
                           subcategory:
-                            description: >-
-                              The subcategory of the incident for ServiceNow
-                              ITSM connectors.
+                            description: The subcategory of the incident for ServiceNow ITSM connectors.
                             type: string
                           urgency:
-                            description: >-
-                              The extent to which the incident resolution can be
-                              delayed for ServiceNow ITSM connectors.
+                            description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                             type: string
                         example: null
                       id:
-                        description: >-
-                          The identifier for the connector. To create a case
-                          without a connector, use `none`.
+                        description: The identifier for the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       name:
-                        description: >-
-                          The name of the connector. To create a case without a
-                          connector, use `none`.
+                        description: The name of the connector. To create a case without a connector, use `none`.
                         type: string
                         example: none
                       type:
@@ -3284,9 +2759,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -3298,12 +2775,10 @@ paths:
                     example: A case description.
                   duration:
                     type: integer
-                    description: >
-                      The elapsed time from the creation of the case to its
-                      closure (in seconds). If the case has not been closed, the
-                      duration is set to null. If the case was closed after less
-                      than half a second, the duration is rounded down to zero.
+                    description: |
+                      The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
                     example: 120
+                    nullable: true
                   external_service:
                     $ref: '#/components/schemas/external_service'
                   id:
@@ -3343,9 +2818,11 @@ paths:
                       email:
                         type: string
                         example: null
+                        nullable: true
                       full_name:
                         type: string
                         example: null
+                        nullable: true
                       username:
                         type: string
                         example: elastic
@@ -3367,10 +2844,8 @@ paths:
   /s/{spaceId}/api/cases/{caseId}/user_actions:
     get:
       summary: Returns all user activity for a case.
-      description: >
-        You must have `read` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case you're seeking.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       deprecated: true
       operationId: getCaseActivity
       tags:
@@ -3382,7 +2857,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -3404,95 +2879,18 @@ components:
       in: header
       name: ApiKey
   schemas:
-    commentRequest:
-      title: Add case comment request properties
-      type: object
-      required:
-        - owner
-        - type
-      properties:
-        owner:
-          $ref: '#/components/schemas/owners'
-        type:
-          description: The type of comment.
-          type: string
-          enum:
-            - alert
-            - user
-      discriminator:
-        propertyName: type
-    alert:
-      title: Add case comment request properties for alerts
-      allOf:
-        - $ref: '#/components/schemas/commentRequest'
-        - type: object
-          title: Add alert to case request
-          properties:
-            alertId:
-              description: >
-                The alert identifier. It is required only when `type` is
-                `alert`. If it is an array, `index` must also be an array. This
-                functionality is in technical preview and may be changed or
-                removed in a future release. Elastic will apply best effort to
-                fix any issues, but features in technical preview are not
-                subject to the support SLA of official GA features.
-              oneOf:
-                - type: string
-                - type: array
-                  items:
-                    type: string
-              x-technical-preview: true
-              example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
-            index:
-              description: >
-                The alert index. It is required only when `type` is `alert`. If
-                it is an array, `alertId` must also be an array. This
-                functionality is in technical preview and may be changed or
-                removed in a future release. Elastic will apply best effort to
-                fix any issues, but features in technical preview are not
-                subject to the support SLA of official GA features.
-              oneOf:
-                - type: string
-                - type: array
-                  items:
-                    type: string
-              x-technical-preview: true
-            rule:
-              description: >
-                The rule that is associated with the alert. It is required only
-                when `type` is `alert`. This functionality is in technical
-                preview and may be changed or removed in a future release.
-                Elastic will apply best effort to fix any issues, but features
-                in technical preview are not subject to the support SLA of
-                official GA features.
-              type: object
-              x-technical-preview: true
-              properties:
-                id:
-                  description: The rule identifier.
-                  type: string
-                  example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-                name:
-                  description: The rule name.
-                  type: string
-                  example: security_rule
-              required:
-                - alertId
-                - index
-                - rule
-    user:
-      title: Add case comment request properties for alerts
-      allOf:
-        - $ref: '#/components/schemas/commentRequest'
-        - type: object
-          title: Add comment to case request
-          properties:
-            comment:
-              description: The new comment. It is required only when `type` is `user`.
-              type: string
-              example: A new comment.
-          required:
-            - comment
+    alertCaseCommentRequest:
+      $ref: '#/components/schemas/add_alert_comment_request_properties'
+    alertCaseCommentResponse:
+      $ref: '#/components/schemas/alert_comment_response_properties'
+    userCaseCommentRequest:
+      $ref: '#/components/schemas/add_user_comment_request_properties'
+    userCaseCommentResponse:
+      $ref: '#/components/schemas/user_comment_response_properties'
+    ownerProperty:
+      $ref: '#/components/schemas/owners'
+    ruleObject:
+      $ref: '#/components/schemas/rule'
     connector_types:
       type: string
       description: The type of connector.
@@ -3506,10 +2904,10 @@ components:
         - .swimlane
       example: .none
     owners:
+      title: Owner applications
       type: string
-      description: >
-        The application that owns the cases: Stack Management, Observability, or
-        Elastic Security.
+      description: |
+        The application that owns the cases: Stack Management, Observability, or Elastic Security.
       enum:
         - cases
         - observability
@@ -3532,6 +2930,21 @@ components:
         - low
         - medium
       default: low
+    rule:
+      title: Alerting rule
+      description: |
+        The rule that is associated with the alert. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      type: object
+      x-technical-preview: true
+      properties:
+        id:
+          description: The rule identifier.
+          type: string
+          example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+        name:
+          description: The rule name.
+          type: string
+          example: security_rule
     alert_comment_response_properties:
       type: object
       properties:
@@ -3548,9 +2961,11 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
@@ -3576,9 +2991,11 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
@@ -3587,16 +3004,7 @@ components:
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
           nullable: true
         rule:
-          type: object
-          properties:
-            id:
-              description: The rule identifier.
-              type: string
-              example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-            name:
-              description: The rule name.
-              type: string
-              example: security_rule
+          $ref: '#/components/schemas/rule'
         type:
           type: string
           example: alert
@@ -3604,15 +3012,18 @@ components:
           type: string
           format: date-time
           example: null
+          nullable: true
         updated_by:
           type: object
           properties:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
@@ -3638,9 +3049,11 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
@@ -3663,9 +3076,11 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
@@ -3688,9 +3103,11 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
@@ -3724,9 +3141,11 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
@@ -3734,6 +3153,7 @@ components:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
           nullable: true
+      nullable: true
     status:
       type: string
       description: The status of the case.
@@ -3743,10 +3163,7 @@ components:
         - open
     closure_types:
       type: string
-      description: >-
-        Indicates whether a case is automatically closed when it is pushed to
-        external systems (`close-by-pushing`) or not automatically closed
-        (`close-by-user`).
+      description: Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
       enum:
         - close-by-pushing
         - close-by-user
@@ -3763,17 +3180,14 @@ components:
         index:
           description: The alert index.
           type: string
-    update_alert_comment_request_properties:
+    add_alert_comment_request_properties:
+      title: Add case comment request properties for alerts
+      description: Defines the properties for case comment requests when type is alert
       type: object
       properties:
         alertId:
-          description: >
-            The alert identifier. It is required only when `type` is `alert`. If
-            it is an array, `index` must also be an array. This functionality is
-            in technical preview and may be changed or removed in a future
-            release. Elastic will apply best effort to fix any issues, but
-            features in technical preview are not subject to the support SLA of
-            official GA features.
+          description: |
+            The alert identifier. It is required only when `type` is `alert`. If it is an array, `index` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
           oneOf:
             - type: string
             - type: array
@@ -3781,20 +3195,9 @@ components:
                 type: string
           x-technical-preview: true
           example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
-        id:
-          type: string
-          description: >
-            The identifier for the comment. To retrieve comment IDs, use the get
-            comments API.
-          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
         index:
-          description: >
-            The alert index. It is required only when `type` is `alert`. If it
-            is an array, `alertId` must also be an array. This functionality is
-            in technical preview and may be changed or removed in a future
-            release. Elastic will apply best effort to fix any issues, but
-            features in technical preview are not subject to the support SLA of
-            official GA features.
+          description: |
+            The alert index. It is required only when `type` is `alert`. If it is an array, `alertId` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
           oneOf:
             - type: string
             - type: array
@@ -3804,23 +3207,67 @@ components:
         owner:
           $ref: '#/components/schemas/owners'
         rule:
-          description: >
-            The rule that is associated with the alert. It is required only when
-            `type` is `alert`. This functionality is in technical preview and
-            may be changed or removed in a future release. Elastic will apply
-            best effort to fix any issues, but features in technical preview are
-            not subject to the support SLA of official GA features.
-          type: object
+          $ref: '#/components/schemas/rule'
+        type:
+          description: The type of comment.
+          type: string
+          example: alert
+      required:
+        - alertId
+        - index
+        - owner
+        - rule
+        - type
+    add_user_comment_request_properties:
+      title: Add case comment request properties for user comments
+      description: Defines the properties for case comment requests when type is user
+      type: object
+      properties:
+        comment:
+          description: The new comment. It is required only when `type` is `user`.
+          type: string
+          example: A new comment.
+        owner:
+          $ref: '#/components/schemas/owners'
+        type:
+          description: The type of comment.
+          type: string
+          example: user
+      required:
+        - comment
+        - owner
+        - type
+    update_alert_comment_request_properties:
+      type: object
+      properties:
+        alertId:
+          description: |
+            The alert identifier. It is required only when `type` is `alert`. If it is an array, `index` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
           x-technical-preview: true
-          properties:
-            id:
-              description: The rule identifier.
-              type: string
-              example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-            name:
-              description: The rule name.
-              type: string
-              example: security_rule
+          example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+        id:
+          type: string
+          description: |
+            The identifier for the comment. To retrieve comment IDs, use the get comments API.
+          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+        index:
+          description: |
+            The alert index. It is required only when `type` is `alert`. If it is an array, `alertId` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          x-technical-preview: true
+        owner:
+          $ref: '#/components/schemas/owners'
+        rule:
+          $ref: '#/components/schemas/rule'
         type:
           description: The type of comment.
           type: string
@@ -3828,9 +3275,8 @@ components:
             - alert
           example: alert
         version:
-          description: >
-            The current comment version. To retrieve version values, use the get
-            comments API.
+          description: |
+            The current comment version. To retrieve version values, use the get comments API.
           type: string
           example: Wzk1LDFd
       required:
@@ -3850,9 +3296,8 @@ components:
           example: A new comment.
         id:
           type: string
-          description: >
-            The identifier for the comment. To retrieve comment IDs, use the get
-            comments API.
+          description: |
+            The identifier for the comment. To retrieve comment IDs, use the get comments API.
           example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
         owner:
           $ref: '#/components/schemas/owners'
@@ -3863,9 +3308,8 @@ components:
             - user
           example: user
         version:
-          description: >
-            The current comment version. To retrieve version values, use the get
-            comments API.
+          description: |
+            The current comment version. To retrieve version values, use the get comments API.
           type: string
           example: Wzk1LDFd
       required:
@@ -3897,16 +3341,7 @@ components:
             owner:
               $ref: '#/components/schemas/owners'
             rule:
-              type: object
-              properties:
-                id:
-                  description: The rule identifier.
-                  type: string
-                  example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-                name:
-                  description: The rule name.
-                  type: string
-                  example: security_rule
+              $ref: '#/components/schemas/rule'
             type:
               type: string
               enum:
@@ -3918,10 +3353,7 @@ components:
           type: object
           properties:
             fields:
-              description: >-
-                An object containing the connector fields. To create a case
-                without a connector, specify null. If you want to omit any
-                individual field, specify null as its value.
+              description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
               nullable: true
               type: object
               properties:
@@ -3929,19 +3361,13 @@ components:
                   description: The case identifier for Swimlane connectors.
                   type: string
                 category:
-                  description: >-
-                    The category of the incident for ServiceNow ITSM and
-                    ServiceNow SecOps connectors.
+                  description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                   type: string
                 destIp:
-                  description: >-
-                    A comma-separated list of destination IPs for ServiceNow
-                    SecOps connectors.
+                  description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                   type: string
                 impact:
-                  description: >-
-                    The effect an incident had on business for ServiceNow ITSM
-                    connectors.
+                  description: The effect an incident had on business for ServiceNow ITSM connectors.
                   type: string
                 issueType:
                   description: The type of issue for Jira connectors.
@@ -3952,59 +3378,39 @@ components:
                   items:
                     type: number
                 malwareHash:
-                  description: >-
-                    A comma-separated list of malware hashes for ServiceNow
-                    SecOps connectors.
+                  description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                   type: string
                 malwareUrl:
-                  description: >-
-                    A comma-separated list of malware URLs for ServiceNow SecOps
-                    connectors.
+                  description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                   type: string
                 parent:
-                  description: >-
-                    The key of the parent issue, when the issue type is sub-task
-                    for Jira connectors.
+                  description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                   type: string
                 priority:
-                  description: >-
-                    The priority of the issue for Jira and ServiceNow SecOps
-                    connectors.
+                  description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                   type: string
                 severity:
                   description: The severity of the incident for ServiceNow ITSM connectors.
                   type: string
                 severityCode:
-                  description: >-
-                    The severity code of the incident for IBM Resilient
-                    connectors.
+                  description: The severity code of the incident for IBM Resilient connectors.
                   type: number
                 sourceIp:
-                  description: >-
-                    A comma-separated list of source IPs for ServiceNow SecOps
-                    connectors.
+                  description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                   type: string
                 subcategory:
-                  description: >-
-                    The subcategory of the incident for ServiceNow ITSM
-                    connectors.
+                  description: The subcategory of the incident for ServiceNow ITSM connectors.
                   type: string
                 urgency:
-                  description: >-
-                    The extent to which the incident resolution can be delayed
-                    for ServiceNow ITSM connectors.
+                  description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                   type: string
               example: null
             id:
-              description: >-
-                The identifier for the connector. To create a case without a
-                connector, use `none`.
+              description: The identifier for the connector. To create a case without a connector, use `none`.
               type: string
               example: none
             name:
-              description: >-
-                The name of the connector. To create a case without a connector,
-                use `none`.
+              description: The name of the connector. To create a case without a connector, use `none`.
               type: string
               example: none
             type:
@@ -4016,10 +3422,7 @@ components:
           type: object
           properties:
             fields:
-              description: >-
-                An object containing the connector fields. To create a case
-                without a connector, specify null. If you want to omit any
-                individual field, specify null as its value.
+              description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
               nullable: true
               type: object
               properties:
@@ -4027,19 +3430,13 @@ components:
                   description: The case identifier for Swimlane connectors.
                   type: string
                 category:
-                  description: >-
-                    The category of the incident for ServiceNow ITSM and
-                    ServiceNow SecOps connectors.
+                  description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
                   type: string
                 destIp:
-                  description: >-
-                    A comma-separated list of destination IPs for ServiceNow
-                    SecOps connectors.
+                  description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
                   type: string
                 impact:
-                  description: >-
-                    The effect an incident had on business for ServiceNow ITSM
-                    connectors.
+                  description: The effect an incident had on business for ServiceNow ITSM connectors.
                   type: string
                 issueType:
                   description: The type of issue for Jira connectors.
@@ -4050,59 +3447,39 @@ components:
                   items:
                     type: number
                 malwareHash:
-                  description: >-
-                    A comma-separated list of malware hashes for ServiceNow
-                    SecOps connectors.
+                  description: A comma-separated list of malware hashes for ServiceNow SecOps connectors.
                   type: string
                 malwareUrl:
-                  description: >-
-                    A comma-separated list of malware URLs for ServiceNow SecOps
-                    connectors.
+                  description: A comma-separated list of malware URLs for ServiceNow SecOps connectors.
                   type: string
                 parent:
-                  description: >-
-                    The key of the parent issue, when the issue type is sub-task
-                    for Jira connectors.
+                  description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                   type: string
                 priority:
-                  description: >-
-                    The priority of the issue for Jira and ServiceNow SecOps
-                    connectors.
+                  description: The priority of the issue for Jira and ServiceNow SecOps connectors.
                   type: string
                 severity:
                   description: The severity of the incident for ServiceNow ITSM connectors.
                   type: string
                 severityCode:
-                  description: >-
-                    The severity code of the incident for IBM Resilient
-                    connectors.
+                  description: The severity code of the incident for IBM Resilient connectors.
                   type: number
                 sourceIp:
-                  description: >-
-                    A comma-separated list of source IPs for ServiceNow SecOps
-                    connectors.
+                  description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
                   type: string
                 subcategory:
-                  description: >-
-                    The subcategory of the incident for ServiceNow ITSM
-                    connectors.
+                  description: The subcategory of the incident for ServiceNow ITSM connectors.
                   type: string
                 urgency:
-                  description: >-
-                    The extent to which the incident resolution can be delayed
-                    for ServiceNow ITSM connectors.
+                  description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                   type: string
               example: null
             id:
-              description: >-
-                The identifier for the connector. To create a case without a
-                connector, use `none`.
+              description: The identifier for the connector. To create a case without a connector, use `none`.
               type: string
               example: none
             name:
-              description: >-
-                The name of the connector. To create a case without a connector,
-                use `none`.
+              description: The name of the connector. To create a case without a connector, use `none`.
               type: string
               example: none
             type:
@@ -4209,9 +3586,11 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
@@ -4260,9 +3639,7 @@ components:
     space_id:
       in: path
       name: spaceId
-      description: >-
-        An identifier for the space. If `/s/` and the identifier are omitted
-        from the path, the default space is used.
+      description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
       required: true
       schema:
         type: string
@@ -4270,10 +3647,8 @@ components:
     owner:
       in: query
       name: owner
-      description: >
-        A filter to limit the response to a specific set of applications. If
-        this parameter is omitted, the response contains information about all
-        the cases that the user has access to read.
+      description: |
+        A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read.
       schema:
         oneOf:
           - $ref: '#/components/schemas/owners'
@@ -4284,9 +3659,7 @@ components:
     case_id:
       in: path
       name: caseId
-      description: >-
-        The identifier for the case. To retrieve case IDs, use the find cases
-        API. All non-ASCII characters must be URL encoded.
+      description: The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.
       required: true
       schema:
         type: string
@@ -4294,9 +3667,8 @@ components:
     comment_id:
       in: path
       name: commentId
-      description: >
-        The identifier for the comment. To retrieve comment IDs, use the get
-        case or find cases APIs.
+      description: |
+        The identifier for the comment. To retrieve comment IDs, use the get case or find cases APIs.
       required: true
       schema:
         type: string
@@ -4304,9 +3676,7 @@ components:
     connector_id:
       in: path
       name: connectorId
-      description: >-
-        An identifier for the connector. To retrieve connector IDs, use the find
-        connectors API.
+      description: An identifier for the connector. To retrieve connector IDs, use the find connectors API.
       required: true
       schema:
         type: string
@@ -4331,9 +3701,7 @@ components:
           syncAlerts: true
         owner: cases
     create_case_response:
-      summary: >-
-        The create case API returns a JSON object that includes the user who
-        created the case and the case identifier, version, and creation time.
+      summary: The create case API returns a JSON object that includes the user who created the case and the case identifier, version, and creation time.
       value:
         id: 66b9aa00-94fa-11ea-9f74-e7e108796192
         version: WzUzMiwxXQ==
@@ -4388,9 +3756,7 @@ components:
             settings:
               syncAlerts: true
     update_case_response:
-      summary: >-
-        This is an example response when the case description, tags, and
-        connector were updated.
+      summary: This is an example response when the case description, tags, and connector were updated.
       value:
         - id: 66b9aa00-94fa-11ea-9f74-e7e108796192
           version: WzU0OCwxXQ==
@@ -4439,9 +3805,7 @@ components:
             external_id: '10003'
             connector_name: Jira
     find_case_response:
-      summary: >-
-        Retrieve the first five cases with the `tag-1` tag, in ascending order
-        by last update time.
+      summary: Retrieve the first five cases with the `tag-1` tag, in ascending order by last update time.
       value:
         page: 1
         per_page: 5
@@ -4577,16 +3941,8 @@ components:
         - id: f6a7d0c3-d52d-432c-b2e6-447cd7fce04d
           index: .alerts-observability.logs.alerts-default
           attached_at: '2022-07-25T20:09:40.963Z'
-    add_comment_request:
-      summary: Adds a comment to a case.
-      value:
-        type: user
-        comment: A new comment.
-        owner: cases
     add_comment_response:
-      summary: >-
-        The add comment to case API returns a JSON object that contains details
-        about the case and its comments.
+      summary: The add comment to case API returns a JSON object that contains details about the case and its comments.
       value:
         comments:
           - id: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
@@ -4643,9 +3999,7 @@ components:
         type: user
         comment: An updated comment.
     update_comment_response:
-      summary: >-
-        The add comment to case API returns a JSON object that contains details
-        about the case and its comments.
+      summary: The add comment to case API returns a JSON object that contains details about the case and its comments.
       value:
         comments:
           - id: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
@@ -4715,9 +4069,7 @@ components:
         updated_at: null
         updated_by: null
     push_case_response:
-      summary: >-
-        The push case API returns a JSON object with details about the case and
-        the external service.
+      summary: The push case API returns a JSON object with details about the case and the external service.
       value:
         id: b917f300-0ed9-11ed-bd18-65557fe66949
         version: WzE3NjgsM10=

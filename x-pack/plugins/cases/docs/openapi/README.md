@@ -27,3 +27,9 @@ Then you can generate the `bundled` files by running the following commands:
     npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
   ```
 
+You can run additional linting with the following command:
+
+  ```
+     npx @redocly/cli lint bundled.json
+  ```
+

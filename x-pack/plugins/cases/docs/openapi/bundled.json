@@ -193,7 +193,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -208,11 +208,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -237,8 +239,7 @@
                             "$ref": "#/components/schemas/user_comment_response_properties"
                           }
                         ]
-                      },
-                      "example": []
+                      }
                     },
                     "connector": {
                       "type": "object",
@@ -339,11 +340,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -362,7 +365,8 @@
                     "duration": {
                       "type": "integer",
                       "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-                      "example": 120
+                      "example": 120,
+                      "nullable": true
                     },
                     "external_service": {
                       "$ref": "#/components/schemas/external_service"
@@ -415,11 +419,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -665,7 +671,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -680,11 +686,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -709,8 +717,7 @@
                             "$ref": "#/components/schemas/user_comment_response_properties"
                           }
                         ]
-                      },
-                      "example": []
+                      }
                     },
                     "connector": {
                       "type": "object",
@@ -811,11 +818,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -834,7 +843,8 @@
                     "duration": {
                       "type": "integer",
                       "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-                      "example": 120
+                      "example": 120,
+                      "nullable": true
                     },
                     "external_service": {
                       "$ref": "#/components/schemas/external_service"
@@ -887,11 +897,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -1131,7 +1143,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -1151,11 +1163,13 @@
                             "properties": {
                               "email": {
                                 "type": "string",
-                                "example": null
+                                "example": null,
+                                "nullable": true
                               },
                               "full_name": {
                                 "type": "string",
-                                "example": null
+                                "example": null,
+                                "nullable": true
                               },
                               "username": {
                                 "type": "string",
@@ -1180,8 +1194,7 @@
                                   "$ref": "#/components/schemas/user_comment_response_properties"
                                 }
                               ]
-                            },
-                            "example": []
+                            }
                           },
                           "connector": {
                             "type": "object",
@@ -1282,11 +1295,13 @@
                             "properties": {
                               "email": {
                                 "type": "string",
-                                "example": null
+                                "example": null,
+                                "nullable": true
                               },
                               "full_name": {
                                 "type": "string",
-                                "example": null
+                                "example": null,
+                                "nullable": true
                               },
                               "username": {
                                 "type": "string",
@@ -1305,7 +1320,8 @@
                           "duration": {
                             "type": "integer",
                             "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-                            "example": 120
+                            "example": 120,
+                            "nullable": true
                           },
                           "external_service": {
                             "$ref": "#/components/schemas/external_service"
@@ -1358,11 +1374,13 @@
                             "properties": {
                               "email": {
                                 "type": "string",
-                                "example": null
+                                "example": null,
+                                "nullable": true
                               },
                               "full_name": {
                                 "type": "string",
-                                "example": null
+                                "example": null,
+                                "nullable": true
                               },
                               "username": {
                                 "type": "string",
@@ -1455,7 +1473,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -1514,7 +1532,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -1622,11 +1640,13 @@
                         "properties": {
                           "email": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "full_name": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "username": {
                             "type": "string",
@@ -1676,11 +1696,13 @@
                         "properties": {
                           "email": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "full_name": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "username": {
                             "type": "string",
@@ -1857,7 +1879,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -1965,11 +1987,13 @@
                         "properties": {
                           "email": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "full_name": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "username": {
                             "type": "string",
@@ -2019,11 +2043,13 @@
                         "properties": {
                           "email": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "full_name": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "username": {
                             "type": "string",
@@ -2203,7 +2229,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -2311,11 +2337,13 @@
                         "properties": {
                           "email": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "full_name": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "username": {
                             "type": "string",
@@ -2365,11 +2393,13 @@
                         "properties": {
                           "email": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "full_name": {
                             "type": "string",
-                            "example": null
+                            "example": null,
+                            "nullable": true
                           },
                           "username": {
                             "type": "string",
@@ -2418,7 +2448,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -2501,7 +2531,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -2509,11 +2539,13 @@
                     "properties": {
                       "email": {
                         "type": "string",
-                        "example": null
+                        "example": null,
+                        "nullable": true
                       },
                       "full_name": {
                         "type": "string",
-                        "example": null
+                        "example": null,
+                        "nullable": true
                       },
                       "username": {
                         "type": "string",
@@ -2568,7 +2600,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -2639,7 +2671,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -2697,7 +2729,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -2712,11 +2744,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -2741,8 +2775,7 @@
                             "$ref": "#/components/schemas/user_comment_response_properties"
                           }
                         ]
-                      },
-                      "example": []
+                      }
                     },
                     "connector": {
                       "type": "object",
@@ -2843,11 +2876,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -2866,7 +2901,8 @@
                     "duration": {
                       "type": "integer",
                       "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-                      "example": 120
+                      "example": 120,
+                      "nullable": true
                     },
                     "external_service": {
                       "$ref": "#/components/schemas/external_service"
@@ -2919,11 +2955,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -2985,7 +3023,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -3038,22 +3076,17 @@
               "schema": {
                 "title": "Add case comment request",
                 "description": "The add comment to case API request body varies depending on whether you are adding an alert or a comment.\n",
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/alert"
-                  },
-                  {
-                    "$ref": "#/components/schemas/user"
-                  }
-                ],
                 "discriminator": {
                   "propertyName": "type"
-                }
-              },
-              "examples": {
-                "createCaseCommentRequest": {
-                  "$ref": "#/components/examples/add_comment_request"
-                }
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/add_alert_comment_request_properties"
+                  },
+                  {
+                    "$ref": "#/components/schemas/add_user_comment_request_properties"
+                  }
+                ]
               }
             }
           }
@@ -3062,7 +3095,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -3077,11 +3110,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -3106,8 +3141,7 @@
                             "$ref": "#/components/schemas/user_comment_response_properties"
                           }
                         ]
-                      },
-                      "example": []
+                      }
                     },
                     "connector": {
                       "type": "object",
@@ -3208,11 +3242,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -3231,7 +3267,8 @@
                     "duration": {
                       "type": "integer",
                       "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-                      "example": 120
+                      "example": 120,
+                      "nullable": true
                     },
                     "external_service": {
                       "$ref": "#/components/schemas/external_service"
@@ -3284,11 +3321,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -3395,7 +3434,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -3410,11 +3449,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -3439,8 +3480,7 @@
                             "$ref": "#/components/schemas/user_comment_response_properties"
                           }
                         ]
-                      },
-                      "example": []
+                      }
                     },
                     "connector": {
                       "type": "object",
@@ -3541,11 +3581,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -3564,7 +3606,8 @@
                     "duration": {
                       "type": "integer",
                       "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-                      "example": 120
+                      "example": 120,
+                      "nullable": true
                     },
                     "external_service": {
                       "$ref": "#/components/schemas/external_service"
@@ -3617,11 +3660,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -3676,7 +3721,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -3762,7 +3807,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "oneOf": [
                     {
@@ -3830,7 +3875,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -3845,11 +3890,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -3874,8 +3921,7 @@
                             "$ref": "#/components/schemas/user_comment_response_properties"
                           }
                         ]
-                      },
-                      "example": []
+                      }
                     },
                     "connector": {
                       "type": "object",
@@ -3976,11 +4022,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -3999,7 +4047,8 @@
                     "duration": {
                       "type": "integer",
                       "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-                      "example": 120
+                      "example": 120,
+                      "nullable": true
                     },
                     "external_service": {
                       "$ref": "#/components/schemas/external_service"
@@ -4052,11 +4101,13 @@
                       "properties": {
                         "email": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "full_name": {
                           "type": "string",
-                          "example": null
+                          "example": null,
+                          "nullable": true
                         },
                         "username": {
                           "type": "string",
@@ -4118,7 +4169,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -4160,118 +4211,23 @@
       }
     },
     "schemas": {
-      "commentRequest": {
-        "title": "Add case comment request properties",
-        "type": "object",
-        "required": [
-          "owner",
-          "type"
-        ],
-        "properties": {
-          "owner": {
-            "$ref": "#/components/schemas/owners"
-          },
-          "type": {
-            "description": "The type of comment.",
-            "type": "string",
-            "enum": [
-              "alert",
-              "user"
-            ]
-          }
-        },
-        "discriminator": {
-          "propertyName": "type"
-        }
+      "alertCaseCommentRequest": {
+        "$ref": "#/components/schemas/add_alert_comment_request_properties"
       },
-      "alert": {
-        "title": "Add case comment request properties for alerts",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/commentRequest"
-          },
-          {
-            "type": "object",
-            "title": "Add alert to case request",
-            "properties": {
-              "alertId": {
-                "description": "The alert identifier. It is required only when `type` is `alert`. If it is an array, `index` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-                "oneOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                ],
-                "x-technical-preview": true,
-                "example": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
-              },
-              "index": {
-                "description": "The alert index. It is required only when `type` is `alert`. If it is an array, `alertId` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-                "oneOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                ],
-                "x-technical-preview": true
-              },
-              "rule": {
-                "description": "The rule that is associated with the alert. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-                "type": "object",
-                "x-technical-preview": true,
-                "properties": {
-                  "id": {
-                    "description": "The rule identifier.",
-                    "type": "string",
-                    "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
-                  },
-                  "name": {
-                    "description": "The rule name.",
-                    "type": "string",
-                    "example": "security_rule"
-                  }
-                },
-                "required": [
-                  "alertId",
-                  "index",
-                  "rule"
-                ]
-              }
-            }
-          }
-        ]
+      "alertCaseCommentResponse": {
+        "$ref": "#/components/schemas/alert_comment_response_properties"
       },
-      "user": {
-        "title": "Add case comment request properties for alerts",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/commentRequest"
-          },
-          {
-            "type": "object",
-            "title": "Add comment to case request",
-            "properties": {
-              "comment": {
-                "description": "The new comment. It is required only when `type` is `user`.",
-                "type": "string",
-                "example": "A new comment."
-              }
-            },
-            "required": [
-              "comment"
-            ]
-          }
-        ]
+      "userCaseCommentRequest": {
+        "$ref": "#/components/schemas/add_user_comment_request_properties"
+      },
+      "userCaseCommentResponse": {
+        "$ref": "#/components/schemas/user_comment_response_properties"
+      },
+      "ownerProperty": {
+        "$ref": "#/components/schemas/owners"
+      },
+      "ruleObject": {
+        "$ref": "#/components/schemas/rule"
       },
       "connector_types": {
         "type": "string",
@@ -4288,6 +4244,7 @@
         "example": ".none"
       },
       "owners": {
+        "title": "Owner applications",
         "type": "string",
         "description": "The application that owns the cases: Stack Management, Observability, or Elastic Security.\n",
         "enum": [
@@ -4319,6 +4276,24 @@
         ],
         "default": "low"
       },
+      "rule": {
+        "title": "Alerting rule",
+        "description": "The rule that is associated with the alert. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "type": "object",
+        "x-technical-preview": true,
+        "properties": {
+          "id": {
+            "description": "The rule identifier.",
+            "type": "string",
+            "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
+          },
+          "name": {
+            "description": "The rule name.",
+            "type": "string",
+            "example": "security_rule"
+          }
+        }
+      },
       "alert_comment_response_properties": {
         "type": "object",
         "properties": {
@@ -4336,11 +4311,13 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
@@ -4374,11 +4351,13 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
@@ -4392,19 +4371,7 @@
             "nullable": true
           },
           "rule": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "The rule identifier.",
-                "type": "string",
-                "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
-              },
-              "name": {
-                "description": "The rule name.",
-                "type": "string",
-                "example": "security_rule"
-              }
-            }
+            "$ref": "#/components/schemas/rule"
           },
           "type": {
             "type": "string",
@@ -4413,18 +4380,21 @@
           "updated_at": {
             "type": "string",
             "format": "date-time",
-            "example": null
+            "example": null,
+            "nullable": true
           },
           "updated_by": {
             "type": "object",
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
@@ -4459,11 +4429,13 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
@@ -4493,11 +4465,13 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
@@ -4526,11 +4500,13 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
@@ -4577,11 +4553,13 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
@@ -4594,7 +4572,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "nullable": true
       },
       "status": {
         "type": "string",
@@ -4630,6 +4609,87 @@
             "type": "string"
           }
         }
+      },
+      "add_alert_comment_request_properties": {
+        "title": "Add case comment request properties for alerts",
+        "description": "Defines the properties for case comment requests when type is alert",
+        "type": "object",
+        "properties": {
+          "alertId": {
+            "description": "The alert identifier. It is required only when `type` is `alert`. If it is an array, `index` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "x-technical-preview": true,
+            "example": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
+          },
+          "index": {
+            "description": "The alert index. It is required only when `type` is `alert`. If it is an array, `alertId` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "x-technical-preview": true
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/rule"
+          },
+          "type": {
+            "description": "The type of comment.",
+            "type": "string",
+            "example": "alert"
+          }
+        },
+        "required": [
+          "alertId",
+          "index",
+          "owner",
+          "rule",
+          "type"
+        ]
+      },
+      "add_user_comment_request_properties": {
+        "title": "Add case comment request properties for user comments",
+        "description": "Defines the properties for case comment requests when type is user",
+        "type": "object",
+        "properties": {
+          "comment": {
+            "description": "The new comment. It is required only when `type` is `user`.",
+            "type": "string",
+            "example": "A new comment."
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "type": {
+            "description": "The type of comment.",
+            "type": "string",
+            "example": "user"
+          }
+        },
+        "required": [
+          "comment",
+          "owner",
+          "type"
+        ]
       },
       "update_alert_comment_request_properties": {
         "type": "object",
@@ -4674,21 +4734,7 @@
             "$ref": "#/components/schemas/owners"
           },
           "rule": {
-            "description": "The rule that is associated with the alert. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-            "type": "object",
-            "x-technical-preview": true,
-            "properties": {
-              "id": {
-                "description": "The rule identifier.",
-                "type": "string",
-                "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
-              },
-              "name": {
-                "description": "The rule name.",
-                "type": "string",
-                "example": "security_rule"
-              }
-            }
+            "$ref": "#/components/schemas/rule"
           },
           "type": {
             "description": "The type of comment.",
@@ -4790,19 +4836,7 @@
                 "$ref": "#/components/schemas/owners"
               },
               "rule": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "description": "The rule identifier.",
-                    "type": "string",
-                    "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
-                  },
-                  "name": {
-                    "description": "The rule name.",
-                    "type": "string",
-                    "example": "security_rule"
-                  }
-                }
+                "$ref": "#/components/schemas/rule"
               },
               "type": {
                 "type": "string",
@@ -5149,11 +5183,13 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
@@ -5631,14 +5667,6 @@
             "attached_at": "2022-07-25T20:09:40.963Z"
           }
         ]
-      },
-      "add_comment_request": {
-        "summary": "Adds a comment to a case.",
-        "value": {
-          "type": "user",
-          "comment": "A new comment.",
-          "owner": "cases"
-        }
       },
       "add_comment_response": {
         "summary": "The add comment to case API returns a JSON object that contains details about the case and its comments.",
