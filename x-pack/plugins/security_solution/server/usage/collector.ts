@@ -414,6 +414,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -487,6 +501,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -586,6 +614,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -659,6 +701,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -758,6 +814,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -831,6 +901,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -946,6 +1030,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1019,6 +1117,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1118,6 +1230,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1191,6 +1317,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1290,6 +1430,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1363,6 +1517,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1478,6 +1646,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1551,6 +1733,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1650,6 +1846,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1723,6 +1933,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1822,6 +2046,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1895,6 +2133,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
