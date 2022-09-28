@@ -221,7 +221,7 @@ export class DiscoverPageObject extends FtrService {
   public async getChartInterval() {
     await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
     await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
-    const selectedOption = await this.find.byCssSelector(`.discoverIntervalSelected`);
+    const selectedOption = await this.find.byCssSelector(`.unifiedHistogramIntervalSelected`);
     return selectedOption.getVisibleText();
   }
 

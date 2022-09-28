@@ -132,11 +132,11 @@ export function DiscoverChart({
       gutterSize="none"
       responsive={false}
     >
-      <EuiFlexItem grow={false} className="dscResultCount">
+      <EuiFlexItem grow={false} className="unifiedHistogramResultCount">
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
           <EuiFlexItem
             grow={false}
-            className="dscResultCount__title eui-textTruncate eui-textNoWrap"
+            className="unifiedHistogramResultCount__title eui-textTruncate eui-textNoWrap"
           >
             <HitsCounter
               savedSearchData$={savedSearchDataTotalHits$}
@@ -145,7 +145,7 @@ export function DiscoverChart({
             />
           </EuiFlexItem>
           {isTimeBased && (
-            <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+            <EuiFlexItem className="unifiedHistogramResultCount__toggle" grow={false}>
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                 {canVisualize && (
                   <EuiFlexItem grow={false}>
@@ -168,7 +168,7 @@ export function DiscoverChart({
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiPopover
-                    id="dscChartOptions"
+                    id="unifiedHistogramChartOptions"
                     button={
                       <EuiToolTip
                         content={i18n.translate('unifiedHistogram.chartOptionsButton', {
@@ -207,7 +207,7 @@ export function DiscoverChart({
             aria-label={i18n.translate('unifiedHistogram.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
-            className="dscTimechart"
+            className="unifiedHistogramTimechart"
           >
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}

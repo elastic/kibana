@@ -105,7 +105,7 @@ export function useChartPanels({
               closePopover();
             },
             'data-test-subj': `unifiedHistogramTimeInterval-${display}`,
-            className: val === interval ? 'discoverIntervalSelected' : '',
+            className: val === interval ? 'unifiedHistogramIntervalSelected' : '',
           };
         }),
     });

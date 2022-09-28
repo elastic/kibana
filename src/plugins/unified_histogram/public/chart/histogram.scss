@@ -1,4 +1,4 @@
-.dscChart__loading {
+.unifiedHistogramChart__loading {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -7,23 +7,19 @@
   height: 100%;
   width: 100%;
 }
-.dscHistogram__header--partial {
-  font-weight: $euiFontWeightRegular;
-  min-width: $euiSize * 12;
-}
 
-.dscHistogram__errorChartContainer {
+.unifiedHistogram__errorChartContainer {
   padding: 0 $euiSizeS 0 $euiSizeS;
 }
 
-.dscHistogram__errorChart {
+.unifiedHistogram__errorChart {
   margin-left: $euiSizeXS !important;
 }
 
-.dscHistogram__errorChart__text {
+.unifiedHistogram__errorChart__text {
   margin-top: $euiSizeS;
 }
 
-.dscHistogram__errorChart__icon {
+.unifiedHistogram__errorChart__icon {
   padding-top: .5 * $euiSizeXS;
 }

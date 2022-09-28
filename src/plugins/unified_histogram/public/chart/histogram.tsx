@@ -143,8 +143,8 @@ export function DiscoverHistogram({
 
   if (!chartData && fetchStatus === FetchStatus.LOADING) {
     return (
-      <div className="dscHistogram" data-test-subj="unifiedHistogramChart">
-        <div className="dscChart__loading">
+      <div className="unifiedHistogramChart" data-test-subj="unifiedHistogramChart">
+        <div className="unifiedHistogramChart__loading">
           <EuiText size="xs" color="subdued">
             <EuiLoadingChart mono size="l" />
             <EuiSpacer size="s" />
@@ -160,12 +160,12 @@ export function DiscoverHistogram({
 
   if (fetchStatus === FetchStatus.ERROR && error) {
     return (
-      <div className="dscHistogram__errorChartContainer">
+      <div className="unifiedHistogram__errorChartContainer">
         <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false} className="dscHistogram__errorChart__icon">
+          <EuiFlexItem grow={false} className="unifiedHistogram__errorChart__icon">
             <EuiIcon type="visBarVertical" color="danger" size="m" />
           </EuiFlexItem>
-          <EuiFlexItem className="dscHistogram__errorChart">
+          <EuiFlexItem className="unifiedHistogram__errorChart">
             <EuiText size="s" color="danger">
               <FormattedMessage
                 id="unifiedHistogram.errorLoadingChart"
@@ -174,7 +174,7 @@ export function DiscoverHistogram({
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiText className="dscHistogram__errorChart__text" size="s">
+        <EuiText className="unifiedHistogram__errorChart__text" size="s">
           {error.message}
         </EuiText>
       </div>
@@ -250,7 +250,7 @@ export function DiscoverHistogram({
   });
 
   let timeRange = (
-    <EuiText size="xs" className="dscHistogramTimeRange" textAlign="center">
+    <EuiText size="xs" className="unifiedHistogramTimeRange" textAlign="center">
       {timeRangeText}
     </EuiText>
   );
@@ -273,7 +273,7 @@ export function DiscoverHistogram({
   return (
     <React.Fragment>
       <div
-        className="dscHistogram"
+        className="unifiedHistogramChart"
         data-test-subj="unifiedHistogramChart"
         data-time-range={timeRangeText}
       >
@@ -288,14 +288,14 @@ export function DiscoverHistogram({
             allowBrushingLastHistogramBin={true}
           />
           <Axis
-            id="discover-histogram-left-axis"
+            id="unifiedHistogramLeftAxis"
             position={Position.Left}
             ticks={2}
             integersOnly
             tickFormat={(value) => xAxisFormatter.convert(value)}
           />
           <Axis
-            id="discover-histogram-bottom-axis"
+            id="unifiedHistogramBottomAxis"
             position={Position.Bottom}
             tickFormat={formatXValue}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
@@ -311,7 +311,7 @@ export function DiscoverHistogram({
             domainMax={xDomain.max}
           />
           <HistogramBarSeries
-            id="discover-histogram"
+            id="unifiedHistogramBarSeries"
             minBarHeight={2}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
