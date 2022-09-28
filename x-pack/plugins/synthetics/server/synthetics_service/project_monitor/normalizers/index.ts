@@ -14,14 +14,7 @@ import { getNormalizeBrowserFields } from './browser_monitor';
 import { getNormalizeICMPFields } from './icmp_monitor';
 import { getNormalizeTCPFields } from './tcp_monitor';
 import { getNormalizeHTTPFields } from './http_monitor';
-
-export interface NormalizedProjectProps {
-  locations: Locations;
-  privateLocations: PrivateLocation[];
-  monitor: ProjectMonitor;
-  projectId: string;
-  namespace: string;
-}
+import { NormalizedProjectProps } from './common_fields';
 
 export const normalizeProjectMonitor = (props: NormalizedProjectProps) => {
   const { monitor } = props;
@@ -50,14 +43,23 @@ export const normalizeProjectMonitors = ({
   monitors = [],
   projectId,
   namespace,
+  version,
 }: {
   locations: Locations;
   privateLocations: PrivateLocation[];
   monitors: ProjectMonitor[];
   projectId: string;
   namespace: string;
+  version: string;
 }) => {
   return monitors.map((monitor) => {
-    return normalizeProjectMonitor({ monitor, locations, privateLocations, projectId, namespace });
+    return normalizeProjectMonitor({
+      monitor,
+      locations,
+      privateLocations,
+      projectId,
+      namespace,
+      version,
+    });
   });
 };

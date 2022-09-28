@@ -109,7 +109,6 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKey.IGNORE_HTTPS_ERRORS]: getBrowserNormalizer(ConfigKey.IGNORE_HTTPS_ERRORS),
   [ConfigKey.PROJECT_ID]: getBrowserNormalizer(ConfigKey.PROJECT_ID),
   [ConfigKey.PLAYWRIGHT_OPTIONS]: getBrowserNormalizer(ConfigKey.PLAYWRIGHT_OPTIONS),
-  [ConfigKey.CUSTOM_HEARTBEAT_ID]: getBrowserNormalizer(ConfigKey.CUSTOM_HEARTBEAT_ID),
   [ConfigKey.ORIGINAL_SPACE]: getBrowserNormalizer(ConfigKey.ORIGINAL_SPACE),
   [ConfigKey.TEXT_ASSERTION]: getBrowserNormalizer(ConfigKey.TEXT_ASSERTION),
   ...commonNormalizers,

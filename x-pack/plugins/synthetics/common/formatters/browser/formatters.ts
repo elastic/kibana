@@ -74,7 +74,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PROJECT_ID]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
-  [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
   [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.TEXT_ASSERTION]: null,
   ...commonFormatters,

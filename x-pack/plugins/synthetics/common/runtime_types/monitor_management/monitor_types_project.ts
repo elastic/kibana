@@ -30,7 +30,6 @@ export const ProjectMonitorCodec = t.intersection([
     screenshot: ScreenshotOptionCodec,
     tags: t.union([t.string, t.array(t.string)]),
     ignoreHTTPSErrors: t.boolean,
-    apmServiceName: t.string,
     playwrightOptions: t.record(t.string, t.unknown),
     filter: t.interface({
       match: t.string,

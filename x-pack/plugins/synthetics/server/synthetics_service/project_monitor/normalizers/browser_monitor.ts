@@ -10,20 +10,14 @@ import {
   ConfigKey,
   DataStream,
   FormMonitorType,
-  Locations,
-  PrivateLocation,
-  ProjectMonitor,
 } from '../../../../common/runtime_types';
-import { getNormalizeCommonFields, getValueInSeconds } from './common_fields';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-
-export interface NormalizedProjectProps {
-  locations: Locations;
-  privateLocations: PrivateLocation[];
-  monitor: ProjectMonitor;
-  projectId: string;
-  namespace: string;
-}
+import {
+  NormalizedProjectProps,
+  NormalizerResult,
+  getNormalizeCommonFields,
+  getValueInSeconds,
+} from './common_fields';
 
 export const getNormalizeBrowserFields = ({
   locations = [],
@@ -31,7 +25,8 @@ export const getNormalizeBrowserFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): { normalizedFields: BrowserFields; unsupportedKeys: string[] } => {
+  version,
+}: NormalizedProjectProps): NormalizerResult<BrowserFields> => {
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
 
   const commonFields = getNormalizeCommonFields({
@@ -40,6 +35,7 @@ export const getNormalizeBrowserFields = ({
     monitor,
     projectId,
     namespace,
+    version,
   });
 
   const normalizedFields = {
@@ -81,5 +77,6 @@ export const getNormalizeBrowserFields = ({
       ...normalizedFields,
     },
     unsupportedKeys: [],
+    errors: [],
   };
 };
