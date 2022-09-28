@@ -12,6 +12,7 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   ADD_LAYER,
+  ADD_LAYER_GROUP,
   SET_LAYER_ERROR_STATUS,
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_LAYER_PROP,
@@ -81,6 +82,7 @@ export const DEFAULT_MAP_STATE: MapState = {
   },
   selectedLayerId: null,
   layerList: [],
+  layerGroups: [],
   waitingForMapReadyLayerList: [],
   settings: getDefaultMapSettings(),
   __rollbackSettings: null,
@@ -263,7 +265,20 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
     case ADD_LAYER:
       return {
         ...state,
-        layerList: [...state.layerList, action.layer],
+        layerList: [
+          ...state.layerList,
+          {
+            ...action.layer,
+            order: 'order' in action.layer && typeof action.layer.order === 'number'
+              ? action.layer.order
+              : state.layerList.length,
+          }
+        ],
+      };
+    case ADD_LAYER_GROUP: 
+      return {
+        ...state,
+        layerGroups: [...state.layerGroups, action.group]
       };
     case REMOVE_LAYER:
       return {

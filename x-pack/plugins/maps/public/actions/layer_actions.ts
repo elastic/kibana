@@ -7,6 +7,7 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
+import uuid from 'uuid/v4';
 import type { Query } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
@@ -27,6 +28,7 @@ import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializabl
 import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
+  ADD_LAYER_GROUP,
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_LAYER_PROP,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
@@ -54,6 +56,7 @@ import {
   Attribution,
   JoinDescriptor,
   LayerDescriptor,
+  LayerGroup,
   StyleDescriptor,
   TileMetaFeature,
   VectorLayerDescriptor,
@@ -813,7 +816,51 @@ function hasByValueStyling(styleDescriptor: StyleDescriptor) {
 }
 
 export function createLayerGroup(draggedLayerId: string, combineWithLayerId: string) {
-  console.log('draggedLayerId: ', draggedLayerId);
-  console.log('combineWithLayerId: ', combineWithLayerId);
-  return;
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const combineWithLayerDescriptor = getLayerDescriptor(getState(), combineWithLayerId);
+    if (!combineWithLayerDescriptor) {
+      return;
+    }
+    const group: LayerGroup = {
+      id: uuid(),
+      order: combineWithLayerDescriptor.order,
+      visible: true,
+    }
+    if (combineWithLayerDescriptor.parent) {
+      group.parent = combineWithLayerDescriptor.parent;
+    }
+    dispatch({
+      type: ADD_LAYER_GROUP,
+      group
+    });
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: draggedLayerId,
+      propName: 'parent',
+      newValue: group.id,
+    });
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: draggedLayerId,
+      propName: 'order',
+      newValue: 0,
+    });
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: combineWithLayerId,
+      propName: 'parent',
+      newValue: group.id,
+    });
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: combineWithLayerId,
+      propName: 'order',
+      newValue: 1,
+    });
+  };
 }
