@@ -21,7 +21,8 @@ export {
   builtInAggregationTypes,
   builtInGroupByTypes,
 } from './constants';
+export { connectorDeprecatedMessage, deprecatedMessage } from './connectors_selection';
 export type { IOption } from './index_controls';
 export { getFields, getIndexOptions, firstFieldOption } from './index_controls';
-export { getTimeFieldOptions } from './lib';
+export { getTimeFieldOptions, useKibana } from './lib';
 export type { Comparator, AggregationType, GroupByType, RuleStatus } from './types';

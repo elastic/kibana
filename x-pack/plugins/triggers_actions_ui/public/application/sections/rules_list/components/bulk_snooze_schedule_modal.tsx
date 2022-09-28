@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiConfirmModal,
   EuiModal,
   EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiModalHeaderTitle,
-  EuiConfirmModal,
 } from '@elastic/eui';
 import {
   withBulkRuleOperations,
@@ -49,24 +50,30 @@ const deleteConfirmSingle = (ruleName: string) =>
 
 export type BulkSnoozeScheduleModalProps = {
   rulesToSchedule: RuleTableItem[];
-  rulesToScheduleFilter?: string;
+  rulesToUnschedule: RuleTableItem[];
+  rulesToScheduleFilter?: KueryNode | null | undefined;
+  rulesToUnscheduleFilter?: KueryNode | null | undefined;
   numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
-  setIsLoading: (isLoading: boolean) => void;
+  setIsSchedulingRule: (isLoading: boolean) => void;
+  setIsUnschedulingRule: (isLoading: boolean) => void;
   onSearchPopulate?: (filter: string) => void;
 } & BulkOperationsComponentOpts;
 
 export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => {
   const {
     rulesToSchedule,
+    rulesToUnschedule,
     rulesToScheduleFilter,
+    rulesToUnscheduleFilter,
     numberOfSelectedRules = 0,
     onClose,
     onSave,
     bulkSnoozeRules,
     bulkUnsnoozeRules,
-    setIsLoading,
+    setIsSchedulingRule,
+    setIsUnschedulingRule,
     onSearchPopulate,
   } = props;
 
@@ -76,18 +83,23 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
 
   const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
-  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
-
   const isScheduleModalOpen = useMemo(() => {
-    if (rulesToScheduleFilter) {
+    if (typeof rulesToScheduleFilter !== 'undefined') {
       return true;
     }
     return rulesToSchedule.length > 0;
   }, [rulesToSchedule, rulesToScheduleFilter]);
 
+  const isUnscheduleModalOpen = useMemo(() => {
+    if (typeof rulesToUnscheduleFilter !== 'undefined') {
+      return true;
+    }
+    return rulesToUnschedule.length > 0;
+  }, [rulesToUnschedule, rulesToUnscheduleFilter]);
+
   const onAddSnoozeSchedule = async (schedule: SnoozeSchedule) => {
     onClose();
-    setIsLoading(true);
+    setIsSchedulingRule(true);
     try {
       const response = await bulkSnoozeRules({
         ids: rulesToSchedule.map((item) => item.id),
@@ -100,18 +112,17 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         title: failureMessage,
       });
     }
-    setIsLoading(false);
+    setIsSchedulingRule(false);
     onSave();
   };
 
   const onRemoveSnoozeSchedule = async () => {
-    setShowConfirmation(false);
     onClose();
-    setIsLoading(true);
+    setIsUnschedulingRule(true);
     try {
       const response = await bulkUnsnoozeRules({
-        ids: rulesToSchedule.map((item) => item.id),
-        filter: rulesToScheduleFilter,
+        ids: rulesToUnschedule.map((item) => item.id),
+        filter: rulesToUnscheduleFilter,
         scheduleIds: [],
       });
       showToast(response, 'snoozeSchedule');
@@ -120,7 +131,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         title: failureMessage,
       });
     }
-    setIsLoading(false);
+    setIsUnschedulingRule(false);
     onSave();
   };
 
@@ -131,14 +142,11 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
     return deleteConfirmPlural(numberOfSelectedRules);
   }, [rulesToSchedule, rulesToScheduleFilter, numberOfSelectedRules]);
 
-  if (showConfirmation) {
+  if (isUnscheduleModalOpen) {
     return (
       <EuiConfirmModal
         title={confirmationTitle}
-        onCancel={() => {
-          setShowConfirmation(false);
-          onClose();
-        }}
+        onCancel={onClose}
         onConfirm={onRemoveSnoozeSchedule}
         confirmButtonText={i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkDeleteConfirmButton',
@@ -154,6 +162,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         )}
         buttonColor="danger"
         defaultFocusedButton="confirm"
+        data-test-subj="bulkRemoveScheduleConfirmationModal"
       />
     );
   }
@@ -172,13 +181,12 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         </EuiModalHeader>
         <EuiModalBody>
           <RuleSnoozeScheduler
-            showDelete
             bulkSnoozeSchedule
             hasTitle={false}
             isLoading={false}
             initialSchedule={null}
             onSaveSchedule={onAddSnoozeSchedule}
-            onCancelSchedules={() => setShowConfirmation(true)}
+            onCancelSchedules={onRemoveSnoozeSchedule}
             onClose={() => {}}
           />
         </EuiModalBody>
