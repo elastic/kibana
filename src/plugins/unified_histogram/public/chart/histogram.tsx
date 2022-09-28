@@ -126,12 +126,12 @@ export function DiscoverHistogram({
       from: dateMath.parse(from),
       to: dateMath.parse(to, { roundUp: true }),
     };
-    const intervalText = i18n.translate('discover.histogramTimeRangeIntervalDescription', {
+    const intervalText = i18n.translate('unifiedHistogram.histogramTimeRangeIntervalDescription', {
       defaultMessage: '(interval: {value})',
       values: {
         value: `${
           stateContainer.appStateContainer.getState().interval === 'auto'
-            ? `${i18n.translate('discover.histogramTimeRangeIntervalAuto', {
+            ? `${i18n.translate('unifiedHistogram.histogramTimeRangeIntervalAuto', {
                 defaultMessage: 'Auto',
               })} - `
             : ''
@@ -148,7 +148,10 @@ export function DiscoverHistogram({
           <EuiText size="xs" color="subdued">
             <EuiLoadingChart mono size="l" />
             <EuiSpacer size="s" />
-            <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading chart" />
+            <FormattedMessage
+              id="unifiedHistogram.loadingChartResults"
+              defaultMessage="Loading chart"
+            />
           </EuiText>
         </div>
       </div>
@@ -165,7 +168,7 @@ export function DiscoverHistogram({
           <EuiFlexItem className="dscHistogram__errorChart">
             <EuiText size="s" color="danger">
               <FormattedMessage
-                id="discover.errorLoadingChart"
+                id="unifiedHistogram.errorLoadingChart"
                 defaultMessage="Error loading chart"
               />
             </EuiText>
@@ -226,20 +229,20 @@ export function DiscoverHistogram({
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 
-  const toolTipTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
+  const toolTipTitle = i18n.translate('unifiedHistogram.timeIntervalWithValueWarning', {
     defaultMessage: 'Warning',
   });
 
-  const toolTipContent = i18n.translate('discover.bucketIntervalTooltip', {
+  const toolTipContent = i18n.translate('unifiedHistogram.bucketIntervalTooltip', {
     defaultMessage:
       'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
     values: {
       bucketsDescription:
         bucketInterval!.scale && bucketInterval!.scale > 1
-          ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
+          ? i18n.translate('unifiedHistogram.bucketIntervalTooltip.tooLargeBucketsText', {
               defaultMessage: 'buckets that are too large',
             })
-          : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
+          : i18n.translate('unifiedHistogram.bucketIntervalTooltip.tooManyBucketsText', {
               defaultMessage: 'too many buckets',
             }),
       bucketIntervalDescription: bucketInterval?.description,

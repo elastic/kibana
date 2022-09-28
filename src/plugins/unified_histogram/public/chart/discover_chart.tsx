@@ -150,7 +150,7 @@ export function DiscoverChart({
                 {canVisualize && (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
-                      content={i18n.translate('discover.editVisualizationButton', {
+                      content={i18n.translate('unifiedHistogram.editVisualizationButton', {
                         defaultMessage: 'Edit visualization',
                       })}
                     >
@@ -159,7 +159,7 @@ export function DiscoverChart({
                         iconType="lensApp"
                         onClick={onEditVisualization}
                         data-test-subj="discoverEditVisualization"
-                        aria-label={i18n.translate('discover.editVisualizationButton', {
+                        aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
                           defaultMessage: 'Edit visualization',
                         })}
                       />
@@ -171,7 +171,7 @@ export function DiscoverChart({
                     id="dscChartOptions"
                     button={
                       <EuiToolTip
-                        content={i18n.translate('discover.chartOptionsButton', {
+                        content={i18n.translate('unifiedHistogram.chartOptionsButton', {
                           defaultMessage: 'Chart options',
                         })}
                       >
@@ -180,7 +180,7 @@ export function DiscoverChart({
                           iconType="gear"
                           onClick={onShowChartOptions}
                           data-test-subj="discoverChartOptionsToggle"
-                          aria-label={i18n.translate('discover.chartOptionsButton', {
+                          aria-label={i18n.translate('unifiedHistogram.chartOptionsButton', {
                             defaultMessage: 'Chart options',
                           })}
                         />
@@ -204,7 +204,7 @@ export function DiscoverChart({
           <section
             ref={(element) => (chartRef.current.element = element)}
             tabIndex={-1}
-            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+            aria-label={i18n.translate('unifiedHistogram.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
             className="dscTimechart"

@@ -36,10 +36,10 @@ export function useChartPanels({
   const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: !hideChart
-        ? i18n.translate('discover.hideChart', {
+        ? i18n.translate('unifiedHistogram.hideChart', {
             defaultMessage: 'Hide chart',
           })
-        : i18n.translate('discover.showChart', {
+        : i18n.translate('unifiedHistogram.showChart', {
             defaultMessage: 'Show chart',
           }),
       icon: !hideChart ? 'eyeClosed' : 'eye',
@@ -53,7 +53,7 @@ export function useChartPanels({
   if (!hideChart) {
     if (onResetChartHeight) {
       mainPanelItems.push({
-        name: i18n.translate('discover.resetChartHeight', {
+        name: i18n.translate('unifiedHistogram.resetChartHeight', {
           defaultMessage: 'Reset to default height',
         }),
         icon: 'refresh',
@@ -66,7 +66,7 @@ export function useChartPanels({
     }
 
     mainPanelItems.push({
-      name: i18n.translate('discover.timeIntervalWithValue', {
+      name: i18n.translate('unifiedHistogram.timeIntervalWithValue', {
         defaultMessage: 'Time interval: {timeInterval}',
         values: {
           timeInterval: intervalDisplay,
@@ -80,7 +80,7 @@ export function useChartPanels({
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
-      title: i18n.translate('discover.chartOptions', {
+      title: i18n.translate('unifiedHistogram.chartOptions', {
         defaultMessage: 'Chart options',
       }),
       items: mainPanelItems,
@@ -90,7 +90,7 @@ export function useChartPanels({
     panels.push({
       id: 1,
       initialFocusedItemIndex: selectedOptionIdx > -1 ? selectedOptionIdx : 0,
-      title: i18n.translate('discover.timeIntervals', {
+      title: i18n.translate('unifiedHistogram.timeIntervals', {
         defaultMessage: 'Time intervals',
       }),
       items: search.aggs.intervalOptions
