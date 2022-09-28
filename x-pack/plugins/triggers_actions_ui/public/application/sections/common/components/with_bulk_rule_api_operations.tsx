@@ -7,7 +7,11 @@
 
 import React from 'react';
 
-import { IExecutionLogResult, IExecutionErrorsResult } from '@kbn/alerting-plugin/common';
+import {
+  IExecutionLogResult,
+  IExecutionErrorsResult,
+  IExecutionKPIResult,
+} from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleType,
@@ -46,6 +50,10 @@ import {
   bulkSnoozeRules,
   BulkSnoozeRulesProps,
   unsnoozeRule,
+  loadExecutionKPIAggregations,
+  LoadExecutionKPIAggregationsProps,
+  loadGlobalExecutionKPIAggregations,
+  LoadGlobalExecutionKPIAggregationsProps,
   bulkUnsnoozeRules,
   BulkUnsnoozeRulesProps,
 } from '../../../lib/rule_api';
@@ -74,12 +82,18 @@ export interface ComponentOpts {
   loadRuleState: (id: Rule['id']) => Promise<RuleTaskState>;
   loadRuleSummary: (id: Rule['id'], numberOfExecutions?: number) => Promise<RuleSummary>;
   loadRuleTypes: () => Promise<RuleType[]>;
+  loadExecutionKPIAggregations: (
+    props: LoadExecutionKPIAggregationsProps
+  ) => Promise<IExecutionKPIResult>;
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
   loadGlobalExecutionLogAggregations: (
     props: LoadGlobalExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
+  loadGlobalExecutionKPIAggregations: (
+    props: LoadGlobalExecutionKPIAggregationsProps
+  ) => Promise<IExecutionKPIResult>;
   loadActionErrorLog: (props: LoadActionErrorLogProps) => Promise<IExecutionErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
@@ -174,6 +188,22 @@ export function withBulkRuleOperations<T>(
         loadActionErrorLog={async (loadProps: LoadActionErrorLogProps) =>
           loadActionErrorLog({
             ...loadProps,
+            http,
+          })
+        }
+        loadExecutionKPIAggregations={async (
+          loadExecutionKPIAggregationProps: LoadExecutionKPIAggregationsProps
+        ) =>
+          loadExecutionKPIAggregations({
+            ...loadExecutionKPIAggregationProps,
+            http,
+          })
+        }
+        loadGlobalExecutionKPIAggregations={async (
+          loadGlobalExecutionKPIAggregationsProps: LoadGlobalExecutionKPIAggregationsProps
+        ) =>
+          loadGlobalExecutionKPIAggregations({
+            ...loadGlobalExecutionKPIAggregationsProps,
             http,
           })
         }
