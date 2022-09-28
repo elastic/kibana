@@ -6,3 +6,4 @@
  */
 
 export { useIsFirstTimeAgentUser } from './use_is_first_time_agent_user';
+export { useIsGuidedOnboardingActive } from './use_is_guided_onboarding_active';

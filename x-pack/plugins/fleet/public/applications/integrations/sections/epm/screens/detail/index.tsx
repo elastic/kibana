@@ -47,7 +47,9 @@ import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { useIsFirstTimeAgentUser } from './hooks';
+import { WithGuidedOnboardingTour } from './components/with_guided_onboarding_tour';
+
+import { useIsFirstTimeAgentUser, useIsGuidedOnboardingActive } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
   IntegrationAgentPolicyCount,
@@ -154,6 +156,7 @@ export function Detail() {
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUser();
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgkey);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
@@ -292,6 +295,7 @@ export function Detail() {
         isCloud,
         isExperimentalAddIntegrationPageEnabled,
         isFirstTimeAgentUser,
+        isGuidedOnboardingActive,
         pkgkey,
       });
 
@@ -305,6 +309,7 @@ export function Detail() {
       isCloud,
       isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
+      isGuidedOnboardingActive,
       pathname,
       pkgkey,
       search,
@@ -349,19 +354,25 @@ export function Detail() {
               { isDivider: true },
               {
                 content: (
-                  <AddIntegrationButton
-                    userCanInstallPackages={userCanInstallPackages}
-                    href={getHref('add_integration_to_policy', {
-                      pkgkey,
-                      ...(integration ? { integration } : {}),
-                      ...(agentPolicyIdFromContext
-                        ? { agentPolicyId: agentPolicyIdFromContext }
-                        : {}),
-                    })}
-                    missingSecurityConfiguration={missingSecurityConfiguration}
-                    packageName={integrationInfo?.title || packageInfo.title}
-                    onClick={handleAddIntegrationPolicyClick}
-                  />
+                  <WithGuidedOnboardingTour
+                    packageKey={pkgkey}
+                    tourType={'addIntegrationButton'}
+                    isGuidedOnboardingActive={isGuidedOnboardingActive}
+                  >
+                    <AddIntegrationButton
+                      userCanInstallPackages={userCanInstallPackages}
+                      href={getHref('add_integration_to_policy', {
+                        pkgkey,
+                        ...(integration ? { integration } : {}),
+                        ...(agentPolicyIdFromContext
+                          ? { agentPolicyId: agentPolicyIdFromContext }
+                          : {}),
+                      })}
+                      missingSecurityConfiguration={missingSecurityConfiguration}
+                      packageName={integrationInfo?.title || packageInfo.title}
+                      onClick={handleAddIntegrationPolicyClick}
+                    />
+                  </WithGuidedOnboardingTour>
                 ),
               },
             ].map((item, index) => (
@@ -385,6 +396,7 @@ export function Detail() {
       packageInfo,
       updateAvailable,
       isInstalled,
+      isGuidedOnboardingActive,
       userCanInstallPackages,
       getHref,
       pkgkey,
