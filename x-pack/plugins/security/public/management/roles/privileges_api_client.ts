@@ -13,10 +13,16 @@ export class PrivilegesAPIClient {
   constructor(private readonly http: HttpStart) {}
 
   /*
-  * respectLicenseLevel is an internal optional parameter soley for getting all sub-feature
-  * privilieges to use in the UI. It is not meant for any other use.
-  */
-  async getAll({ includeActions, respectLicenseLevel = true }: { includeActions: boolean, respectLicenseLevel: boolean }) {
+   * respectLicenseLevel is an internal optional parameter soley for getting all sub-feature
+   * privilieges to use in the UI. It is not meant for any other use.
+   */
+  async getAll({
+    includeActions,
+    respectLicenseLevel = true,
+  }: {
+    includeActions: boolean;
+    respectLicenseLevel: boolean;
+  }) {
     return await this.http.get<RawKibanaPrivileges>('/api/security/privileges', {
       query: { includeActions, respectLicenseLevel },
     });

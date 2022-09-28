@@ -89,7 +89,9 @@ describe('FeatureTableExpandedRow', () => {
       />
     );
 
-    expect(wrapper.find('EuiIconTip[data-test-subj="cannotCustomizeSubFeaturesTooltip"]').length).toBe(0);
+    expect(
+      wrapper.find('EuiIconTip[data-test-subj="cannotCustomizeSubFeaturesTooltip"]').length
+    ).toBe(0);
   });
 
   it('indicates sub-feature privileges are being customized if a minimal feature privilege is set', () => {

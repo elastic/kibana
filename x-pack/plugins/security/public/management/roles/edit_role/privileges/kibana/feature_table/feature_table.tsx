@@ -7,10 +7,11 @@
 
 import './feature_table.scss';
 
-import { EuiAccordionProps, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiAccordionProps,
   EuiButtonGroup,
+  EuiButtonGroupOptionProps,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -227,12 +228,8 @@ export class FeatureTable extends Component<Props, State> {
               data-test-subj="featurePrivilegeControls"
               buttonContent={buttonContent}
               extraAction={extraAction}
-              forceState={
-                hasSubFeaturePrivileges ? undefined : 'closed'
-              }
-              arrowDisplay={
-                hasSubFeaturePrivileges ? 'left' : 'none'
-              }
+              forceState={hasSubFeaturePrivileges ? undefined : 'closed'}
+              arrowDisplay={hasSubFeaturePrivileges ? 'left' : 'none'}
               onToggle={(isOpen: boolean) => {
                 if (isOpen) {
                   this.state.expandedPrivilegeControls.add(feature.id);
@@ -255,7 +252,9 @@ export class FeatureTable extends Component<Props, State> {
                     this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
                   }
                   disabled={this.props.disabled}
-                  licenseAllowsSubFeatPrivCustomization={this.props.canCustomizeSubFeaturePrivileges}
+                  licenseAllowsSubFeatPrivCustomization={
+                    this.props.canCustomizeSubFeaturePrivileges
+                  }
                 />
               </div>
             </EuiAccordion>

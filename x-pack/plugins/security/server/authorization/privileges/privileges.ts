@@ -82,7 +82,10 @@ export function privilegesFactory(
           ];
         }
 
-        if ((!respectLicenseLevel || allowSubFeaturePrivileges) && feature.subFeatures?.length > 0) {
+        if (
+          (!respectLicenseLevel || allowSubFeaturePrivileges) &&
+          feature.subFeatures?.length > 0
+        ) {
           for (const subFeaturePrivilege of featuresService.subFeaturePrivilegeIterator(
             feature,
             licenseHasAtLeast

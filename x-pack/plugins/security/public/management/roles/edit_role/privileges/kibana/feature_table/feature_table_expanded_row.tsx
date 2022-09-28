@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { EuiIconTip, EuiSwitchEvent } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecuredFeature } from '../../../../model';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { SubFeatureForm } from './sub_feature_form';
-import { i18n } from '@kbn/i18n';
 
 interface Props {
   feature: SecuredFeature;
@@ -36,9 +35,10 @@ export const FeatureTableExpandedRow = ({
   licenseAllowsSubFeatPrivCustomization,
 }: Props) => {
   const [isCustomizing, setIsCustomizing] = useState(() => {
-    return licenseAllowsSubFeatPrivCustomization && feature
-      .getMinimalFeaturePrivileges()
-      .some((p) => selectedFeaturePrivileges.includes(p.id));
+    return (
+      licenseAllowsSubFeatPrivCustomization &&
+      feature.getMinimalFeaturePrivileges().some((p) => selectedFeaturePrivileges.includes(p.id))
+    );
   });
 
   useEffect(() => {
@@ -46,7 +46,10 @@ export const FeatureTableExpandedRow = ({
       .getMinimalFeaturePrivileges()
       .some((p) => selectedFeaturePrivileges.includes(p.id));
 
-    if ((!licenseAllowsSubFeatPrivCustomization || !hasMinimalFeaturePrivilegeSelected) && isCustomizing) {
+    if (
+      (!licenseAllowsSubFeatPrivCustomization || !hasMinimalFeaturePrivilegeSelected) &&
+      isCustomizing
+    ) {
       setIsCustomizing(false);
     }
   }, [feature, isCustomizing, selectedFeaturePrivileges]);
@@ -83,11 +86,12 @@ export const FeatureTableExpandedRow = ({
               !privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id, privilegeIndex)
             }
           />
-          {licenseAllowsSubFeatPrivCustomization ?
-            <></> :
+          {licenseAllowsSubFeatPrivCustomization ? (
+            <></>
+          ) : (
             <EuiIconTip
               data-test-subj="subFeaturesTip"
-              position='right'
+              position="right"
               aria-label="sub-feature-information-tip"
               size="m"
               type="iInCircle"
@@ -98,11 +102,12 @@ export const FeatureTableExpandedRow = ({
               content={i18n.translate(
                 'xpack.security.management.editRole.featureTable.cannotCustomizeSubFeaturesTooltip',
                 {
-                  defaultMessage: 'Customization of sub-feature privileges is a subscription feature.',
+                  defaultMessage:
+                    'Customization of sub-feature privileges is a subscription feature.',
                 }
               )}
             />
-          }
+          )}
         </div>
       </EuiFlexItem>
       {feature.getSubFeatures().map((subFeature) => {
