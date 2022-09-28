@@ -69,6 +69,7 @@ export const DefaultBucketContainer = ({
             title={removeTitle}
             disabled={isNotRemovable}
             data-test-subj={`${dataTestSubj}-remove-${idx}`}
+            style={{ marginRight: euiTheme.size.xs }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
