@@ -78,7 +78,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     removeField,
   } = props;
 
-  const dataViewField = new DataViewField(field);
+  const dataViewField = useMemo(() => new DataViewField(field), [field]);
   const services = useKibana<LensAppServices>().services;
   const filterManager = services?.data?.query?.filterManager;
   const [infoIsOpen, setOpen] = useState(false);
