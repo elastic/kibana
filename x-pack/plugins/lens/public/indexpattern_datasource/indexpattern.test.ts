@@ -3139,6 +3139,7 @@ describe('IndexPattern Data Source', () => {
         indexPatternDatasource.initializeDimension!(state, 'first', indexPatterns, {
           columnId: 'newStatic',
           groupId: 'a',
+          visualizationGroups: [],
         })
       ).toBe(state);
     });
@@ -3167,6 +3168,7 @@ describe('IndexPattern Data Source', () => {
           columnId: 'newStatic',
           groupId: 'a',
           staticValue: 0, // use a falsy value to check also this corner case
+          visualizationGroups: [],
         })
       ).toEqual({
         ...state,
@@ -3187,6 +3189,57 @@ describe('IndexPattern Data Source', () => {
                 params: { value: '0' },
                 references: [],
                 scale: 'ratio',
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should add a new date histogram column if autoTimeField is passed', () => {
+      const state = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      } as IndexPatternPrivateState;
+      expect(
+        indexPatternDatasource.initializeDimension!(state, 'first', indexPatterns, {
+          columnId: 'newTime',
+          groupId: 'a',
+          autoTimeField: true,
+          visualizationGroups: [],
+        })
+      ).toEqual({
+        ...state,
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {},
+            columnOrder: ['newTime', 'metric'],
+            columns: {
+              ...state.layers.first.columns,
+              newTime: {
+                dataType: 'date',
+                isBucketed: true,
+                label: 'timestampLabel',
+                operationType: 'date_histogram',
+                params: { dropPartials: false, includeEmptyRows: true, interval: 'auto' },
+                scale: 'interval',
+                sourceField: 'timestamp',
               },
             },
           },

@@ -283,7 +283,9 @@ export interface Datasource<T = unknown, P = unknown> {
     value: {
       columnId: string;
       groupId: string;
+      visualizationGroups: VisualizationDimensionGroupConfig[];
       staticValue?: unknown;
+      autoTimeField?: boolean;
     }
   ) => T;
 
@@ -956,6 +958,7 @@ export interface Visualization<T = unknown, P = unknown> {
       columnId: string;
       groupId: string;
       staticValue?: unknown;
+      autoTimeField?: boolean;
     }>;
     hideFromMenu?: boolean;
   }>;

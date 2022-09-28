@@ -694,6 +694,13 @@ describe('metric visualization', () => {
           "type": "metricTrendline",
         }
       `);
+
+      expect(supportedLayers[1].initialDimensions).toHaveLength(1);
+      expect(supportedLayers[1].initialDimensions![0]).toMatchObject({
+        groupId: GROUP_ID.TREND_TIME,
+        autoTimeField: true,
+        columnId: expect.any(String),
+      });
     });
 
     it('includes max static value dimension when state provided', () => {

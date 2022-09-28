@@ -420,6 +420,9 @@ export const getMetricVisualization = ({
         label: i18n.translate('xpack.lens.metric.layerType.trendLine', {
           defaultMessage: 'Trendline',
         }),
+        initialDimensions: [
+          { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
+        ],
         disabled: Boolean(state?.trendlineLayerId),
         hideFromMenu: true,
       },

@@ -998,6 +998,11 @@ function addInitialValueIfAvailable({
             {
               ...info,
               columnId: columnId || info.columnId,
+              visualizationGroups: activeVisualization.getConfiguration({
+                layerId,
+                frame: framePublicAPI,
+                state: activeVisualizationState,
+              }).groups,
             }
           ),
           activeVisualizationState,

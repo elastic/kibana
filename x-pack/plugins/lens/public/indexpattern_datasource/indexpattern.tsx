@@ -235,26 +235,49 @@ export function getIndexPatternDatasource({
       });
     },
 
-    initializeDimension(state, layerId, indexPatterns, { columnId, groupId, staticValue }) {
+    initializeDimension(
+      state,
+      layerId,
+      indexPatterns,
+      { columnId, groupId, staticValue, autoTimeField, visualizationGroups }
+    ) {
       const indexPattern = indexPatterns[state.layers[layerId]?.indexPatternId];
-      if (staticValue == null) {
-        return state;
+      let ret = state;
+
+      if (staticValue != null) {
+        ret = mergeLayer({
+          state,
+          layerId,
+          newLayer: insertNewColumn({
+            layer: state.layers[layerId],
+            op: 'static_value',
+            columnId,
+            field: undefined,
+            indexPattern,
+            visualizationGroups,
+            initialParams: { params: { value: staticValue } },
+            targetGroup: groupId,
+          }),
+        });
       }
 
-      return mergeLayer({
-        state,
-        layerId,
-        newLayer: insertNewColumn({
-          layer: state.layers[layerId],
-          op: 'static_value',
-          columnId,
-          field: undefined,
-          indexPattern,
-          visualizationGroups: [],
-          initialParams: { params: { value: staticValue } },
-          targetGroup: groupId,
-        }),
-      });
+      if (autoTimeField && indexPattern.timeFieldName) {
+        ret = mergeLayer({
+          state,
+          layerId,
+          newLayer: insertNewColumn({
+            layer: state.layers[layerId],
+            op: 'date_histogram',
+            columnId,
+            field: indexPattern.fields.find((field) => field.name === indexPattern.timeFieldName),
+            indexPattern,
+            visualizationGroups,
+            targetGroup: groupId,
+          }),
+        });
+      }
+
+      return ret;
     },
 
     toExpression: (state, layerId, indexPatterns) =>
