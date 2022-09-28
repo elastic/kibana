@@ -258,7 +258,7 @@ export const SourceField = ({
           >
             <FormattedMessage
               id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.deprecation.content"
-              defaultMessage="Zip URL source is deprecated and will be removed in a future version. Project monitors are now available to create monitors from a remote repository. For more information, {link}"
+              defaultMessage="Zip URL is deprecated and will be removed in a future version. Use project monitors instead to create monitors from a remote repository and to migrate existing Zip URL monitors. {link}"
               values={{
                 link: (
                   <EuiLink target="_blank" href="" external>
