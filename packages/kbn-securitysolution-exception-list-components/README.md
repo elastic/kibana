@@ -13,7 +13,7 @@ TODO
 component
     index.tsx
     index.styles.ts <-- to hold styles if the component has many custom styles
-    useComponent.ts <-- for logic if the Presentational Component has logic
+    use_component.ts <-- for logic if the Presentational Component has logic
     index.test.tsx
     useComponent.test.tsx
 ```
