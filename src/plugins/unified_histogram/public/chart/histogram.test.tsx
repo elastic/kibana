@@ -10,8 +10,8 @@ import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { DataCharts$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import { Chart } from './point_series';
-import { DiscoverHistogram } from './histogram';
+import { ChartData } from './point_series';
+import { Histogram } from './histogram';
 import React from 'react';
 import * as hooks from '../../hooks/use_data_state';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -54,7 +54,7 @@ const chartData = {
     { x: 1625004000000, y: 137 },
     { x: 1625090400000, y: 66 },
   ],
-} as unknown as Chart;
+} as unknown as ChartData;
 
 function mountComponent(fetchStatus: FetchStatus) {
   const services = discoverServiceMock;
@@ -88,7 +88,7 @@ function mountComponent(fetchStatus: FetchStatus) {
 
   return mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverHistogram {...props} />
+      <Histogram {...props} />
     </KibanaContextProvider>
   );
 }

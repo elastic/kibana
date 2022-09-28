@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DiscoverChart } from './discover_chart';
+export { Chart } from './chart';

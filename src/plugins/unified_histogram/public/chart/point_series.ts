@@ -57,7 +57,7 @@ interface Ordered {
   min: Moment;
   max: Moment;
 }
-export interface Chart {
+export interface ChartData {
   values: Array<{
     x: number;
     y: number;
@@ -70,11 +70,11 @@ export interface Chart {
   ordered: Ordered;
 }
 
-export const buildPointSeriesData = (table: Table, dimensions: Dimensions): Chart => {
+export const buildPointSeriesData = (table: Table, dimensions: Dimensions): ChartData => {
   const { x, y } = dimensions;
   const xAccessor = table.columns[x.accessor].id;
   const yAccessor = table.columns[y.accessor].id;
-  const chart = {} as Chart;
+  const chart = {} as ChartData;
 
   chart.xAxisOrderedValues = uniq(table.rows.map((r) => r[xAccessor] as number));
   chart.xAxisFormat = x.format;

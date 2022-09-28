@@ -47,7 +47,7 @@ import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
 
-export interface DiscoverHistogramProps {
+export interface HistogramProps {
   savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   stateContainer: GetStateReturn;
@@ -63,11 +63,11 @@ function getTimezone(uiSettings: IUiSettingsClient) {
   }
 }
 
-export function DiscoverHistogram({
+export function Histogram({
   savedSearchData$,
   timefilterUpdateHandler,
   stateContainer,
-}: DiscoverHistogramProps) {
+}: HistogramProps) {
   const { data, theme, uiSettings, fieldFormats } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();

@@ -20,7 +20,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { GetStateReturn } from '../../services/discover_state';
-import { DiscoverHistogram } from './histogram';
+import { Histogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -29,10 +29,10 @@ import {
   triggerVisualizeActions,
 } from '../sidebar/lib/visualize_trigger_utils';
 
-const DiscoverHistogramMemoized = memo(DiscoverHistogram);
+const HistogramMemoized = memo(Histogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 
-export function DiscoverChart({
+export function Chart({
   className,
   resetSavedSearch,
   savedSearch,
@@ -209,7 +209,7 @@ export function DiscoverChart({
             })}
             className="unifiedHistogramTimechart"
           >
-            <DiscoverHistogramMemoized
+            <HistogramMemoized
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
               stateContainer={stateContainer}

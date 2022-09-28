@@ -19,8 +19,8 @@ import { GetStateReturn } from '../../services/discover_state';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { Chart } from './point_series';
-import { DiscoverChart } from './discover_chart';
+import { ChartData } from './point_series';
+import { Chart } from './chart';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -77,7 +77,7 @@ async function mountComponent(isTimeBased: boolean = false) {
       { x: 1625004000000, y: 137 },
       { x: 1625090400000, y: 66 },
     ],
-  } as unknown as Chart;
+  } as unknown as ChartData;
 
   const charts$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -121,7 +121,7 @@ async function mountComponent(isTimeBased: boolean = false) {
   await act(async () => {
     instance = mountWithIntl(
       <KibanaContextProvider services={services}>
-        <DiscoverChart {...props} />
+        <Chart {...props} />
       </KibanaContextProvider>
     );
     // wait for initial async loading to complete
@@ -131,7 +131,7 @@ async function mountComponent(isTimeBased: boolean = false) {
   return instance;
 }
 
-describe('Discover chart', () => {
+describe('Chart', () => {
   let triggerActions: unknown[] = [];
   beforeEach(() => {
     setUiActions({
