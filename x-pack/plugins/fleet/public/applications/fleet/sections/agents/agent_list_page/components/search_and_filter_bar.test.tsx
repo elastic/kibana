@@ -20,8 +20,7 @@ import { FleetStatusProvider, ConfigContext, KibanaVersionContext } from '../../
 
 import { getMockTheme } from '../../../../../../mocks';
 
-import { AgentBulkActions } from './bulk_actions';
-import type { Props } from './bulk_actions';
+import { SearchAndFilterBar } from './search_and_filter_bar';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -29,13 +28,19 @@ const mockTheme = getMockTheme({
   },
 });
 
-const TestComponent = (props: Props) => (
+jest.mock('../../../../components', () => {
+  return {
+    SearchBar: () => <div />,
+  };
+});
+
+const TestComponent = (props: any) => (
   <KibanaContextProvider services={coreMock.createStart()}>
     <ConfigContext.Provider value={{ agents: { enabled: true, elasticsearch: {} }, enabled: true }}>
       <KibanaVersionContext.Provider value={'8.2.0'}>
         <ThemeProvider theme={mockTheme}>
           <FleetStatusProvider>
-            <AgentBulkActions {...props} />
+            <SearchAndFilterBar {...props} />
           </FleetStatusProvider>
         </ThemeProvider>
       </KibanaVersionContext.Provider>
@@ -43,10 +48,10 @@ const TestComponent = (props: Props) => (
   </KibanaContextProvider>
 );
 
-describe('AgentBulkActions', () => {
+describe('SearchAndFilterBar', () => {
   it('should show no Actions button when no agent is selected', async () => {
     const selectedAgents: Agent[] = [];
-    const props: Props = {
+    const props: any = {
       totalAgents: 10,
       totalInactiveAgents: 2,
       selectionMode: 'manual',
@@ -54,8 +59,12 @@ describe('AgentBulkActions', () => {
       selectedAgents,
       refreshAgents: () => undefined,
       visibleAgents: [],
-      allTags: [],
+      tags: [],
       agentPolicies: [],
+      selectedStatus: [],
+      selectedTags: [],
+      selectedAgentPolicies: [],
+      showAgentActivityTour: {},
     };
     const testBed = registerTestBed(TestComponent)(props);
     const { exists } = testBed;
@@ -76,7 +85,7 @@ describe('AgentBulkActions', () => {
         local_metadata: {},
       },
     ];
-    const props: Props = {
+    const props: any = {
       totalAgents: 10,
       totalInactiveAgents: 2,
       selectionMode: 'manual',
@@ -84,8 +93,34 @@ describe('AgentBulkActions', () => {
       selectedAgents,
       refreshAgents: () => undefined,
       visibleAgents: [],
-      allTags: [],
+      tags: [],
       agentPolicies: [],
+      selectedStatus: [],
+      selectedTags: [],
+      selectedAgentPolicies: [],
+      showAgentActivityTour: {},
+    };
+    const testBed = registerTestBed(TestComponent)(props);
+    const { exists } = testBed;
+
+    expect(exists('agentBulkActionsButton')).not.toBeNull();
+  });
+
+  it('should show an Actions button when agents selected in query mode', async () => {
+    const props: any = {
+      totalAgents: 10,
+      totalInactiveAgents: 2,
+      selectionMode: 'query',
+      currentQuery: '',
+      selectedAgents: [],
+      refreshAgents: () => undefined,
+      visibleAgents: [],
+      tags: [],
+      agentPolicies: [],
+      selectedStatus: [],
+      selectedTags: [],
+      selectedAgentPolicies: [],
+      showAgentActivityTour: {},
     };
     const testBed = registerTestBed(TestComponent)(props);
     const { exists } = testBed;
