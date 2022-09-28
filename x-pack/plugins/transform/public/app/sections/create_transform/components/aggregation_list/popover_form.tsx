@@ -100,8 +100,8 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       ...aggConfigDef,
       agg,
       aggName,
-      field: resultField,
       dropDownName: defaultData.dropDownName,
+      ...(isUnsupportedAgg ? {} : { field: resultField }),
     };
 
     return updatedItem;
@@ -153,7 +153,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   }
 
   return (
-    <EuiForm style={{ width: '300px' }} data-test-subj={'transformAggPopoverForm_' + aggName}>
+    <EuiForm css={{ width: '300px' }} data-test-subj={'transformAggPopoverForm_' + aggName}>
       <EuiFormRow
         error={!validAggName && [aggNameError]}
         isInvalid={!validAggName}
