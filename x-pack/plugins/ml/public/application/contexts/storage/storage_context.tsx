@@ -115,7 +115,7 @@ export function useStorage<K extends MlStorageKey, T extends TMlStorageMapped<K>
     : Exclude<TMlStorageMapped<K>, undefined>,
   (value: TMlStorageMapped<K>) => void
 ] {
-  const { value, setValue } = useContext(MlStorageContext);
+  const { value, setValue, removeValue } = useContext(MlStorageContext);
 
   const resultValue = useMemo(() => {
     return (value?.[key] ?? initValue) as typeof initValue extends undefined
@@ -125,9 +125,13 @@ export function useStorage<K extends MlStorageKey, T extends TMlStorageMapped<K>
 
   const setVal = useCallback(
     (v: TMlStorageMapped<K>) => {
-      setValue(key, v);
+      if (isDefined(v)) {
+        setValue(key, v);
+      } else {
+        removeValue(key);
+      }
     },
-    [setValue, key]
+    [setValue, removeValue, key]
   );
 
   return [resultValue, setVal];
