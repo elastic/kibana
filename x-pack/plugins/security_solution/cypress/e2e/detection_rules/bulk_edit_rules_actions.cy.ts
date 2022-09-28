@@ -10,18 +10,13 @@ import {
   RULES_BULK_EDIT_ACTIONS_WARNING,
 } from '../../screens/rules_bulk_edit';
 
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
-  EMAIL_ACTION_BTN,
-  CREATE_ACTION_CONNECTOR_BTN,
-  SAVE_ACTION_CONNECTOR_BTN,
-  EMAIL_ACTION_TO_INPUT,
-  EMAIL_ACTION_SUBJECT_INPUT,
-} from '../../screens/create_new_rule';
-
-import { SLACK_ACTION_MESSAGE_TEXTAREA } from '../../screens/common/rule_actions';
-
-import { fillEmailConnectorForm } from '../../tasks/create_new_rule';
-import { addSlackRuleAction } from '../../tasks/common/rule_actions';
+  addSlackRuleAction,
+  assertSlackRuleAction,
+  addEmailConnectorAndRuleAction,
+  assertEmailRuleAction,
+} from '../../tasks/common/rule_actions';
 import {
   waitForRulesTableToBeLoaded,
   selectNumberOfRules,
@@ -37,8 +32,10 @@ import {
 } from '../../tasks/rules_bulk_edit';
 import { assertSelectedActionFrequency } from '../../tasks/edit_rule';
 import { login, visitWithoutDateRange } from '../../tasks/login';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+
 import {
   createMachineLearningRule,
   createCustomIndicatorRule,
@@ -48,8 +45,7 @@ import {
   createSavedQueryRule,
   createCustomRuleEnabled,
 } from '../../tasks/api_calls/rules';
-import { createConnector } from '../../tasks/api_calls/the_connectors';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { createSlackConnector } from '../../tasks/api_calls/the_connectors';
 
 import {
   getEqlRule,
@@ -60,26 +56,12 @@ import {
   getNewTermsRule,
 } from '../../objects/rule';
 
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
-
-const RULE_NAME = 'Custom rule for bulk actions';
-
 const expectedNumberOfCustomRulesToBeEdited = 7;
-// 7 custom rules of different types + 3 prebuilt
+// 7 custom rules of different types + 3 prebuilt.
+// number of selected rules doesn't matter, we only want to make sure they will be edited an no modal window displayed as for other actions
 const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 3;
 
 const expectedSlackMessage = 'Slack action test message';
-
-const defaultRuleData = {};
-
-const createSlackConnector = () =>
-  createConnector({
-    actionTypeId: '.slack',
-    secrets: {
-      webhookUrl: 'http://localhost:123',
-    },
-    name: 'Slack connector',
-  });
 
 describe('Detection rules, bulk edit', () => {
   before(() => {
@@ -89,20 +71,14 @@ describe('Detection rules, bulk edit', () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     esArchiverResetKibana();
-    createCustomRuleEnabled(
-      {
-        ...getNewRule(),
-        name: RULE_NAME,
-        ...defaultRuleData,
-      },
-      '1'
-    );
-    createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
-    createMachineLearningRule({ ...getMachineLearningRule(), ...defaultRuleData });
-    createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '4');
-    createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '5');
-    createNewTermsRule({ ...getNewTermsRule(), ...defaultRuleData }, '6');
-    createSavedQueryRule({ ...getNewRule(), ...defaultRuleData, savedId: 'mocked' }, '7');
+
+    createCustomRuleEnabled(getNewRule(), '1');
+    createEventCorrelationRule(getEqlRule(), '2');
+    createMachineLearningRule(getMachineLearningRule(), '3');
+    createCustomIndicatorRule(getNewThreatIndicatorRule(), '4');
+    createThresholdRule(getNewThresholdRule(), '5');
+    createNewTermsRule(getNewTermsRule(), '6');
+    createSavedQueryRule({ ...getNewRule(), savedId: 'mocked' }, '7');
 
     createSlackConnector();
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
@@ -121,7 +97,7 @@ describe('Detection rules, bulk edit', () => {
       selectNumberOfRules(expectedNumberOfRulesToBeEdited);
       openBulkEditRuleActionsForm();
 
-      // ensure rule actions info callout is shown on the form
+      // ensure rule actions info callout displayed on the form
       cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
 
       pickActionFrequency(expectedActionFrequency);
@@ -134,7 +110,7 @@ describe('Detection rules, bulk edit', () => {
       goToEditRuleActionsSettings();
 
       assertSelectedActionFrequency(expectedActionFrequency);
-      cy.get(SLACK_ACTION_MESSAGE_TEXTAREA).should('have.value', expectedSlackMessage);
+      assertSlackRuleAction(expectedSlackMessage);
     });
 
     it('Overwrite rule actions in rules', () => {
@@ -162,7 +138,7 @@ describe('Detection rules, bulk edit', () => {
       goToEditRuleActionsSettings();
 
       assertSelectedActionFrequency(expectedActionFrequency);
-      cy.get(SLACK_ACTION_MESSAGE_TEXTAREA).should('have.value', expectedSlackMessage);
+      assertSlackRuleAction(expectedSlackMessage);
     });
 
     it('Add rule actions to rules when creating connector', () => {
@@ -174,26 +150,16 @@ describe('Detection rules, bulk edit', () => {
       openBulkEditRuleActionsForm();
 
       pickActionFrequency(expectedActionFrequency);
-
-      cy.get(EMAIL_ACTION_BTN).click();
-      cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
-      fillEmailConnectorForm();
-      cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
-
-      cy.get(EMAIL_ACTION_TO_INPUT).type(expectedEmail);
-      cy.get(EMAIL_ACTION_SUBJECT_INPUT).type(expectedSubject);
+      addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
 
       submitBulkEditForm();
-
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
       // check if rule has been updated
       goToEditRuleActionsSettings();
 
       assertSelectedActionFrequency(expectedActionFrequency);
-
-      cy.get(EMAIL_ACTION_TO_INPUT).contains(expectedEmail);
-      cy.get(EMAIL_ACTION_SUBJECT_INPUT).should('have.value', expectedSubject);
+      assertEmailRuleAction(expectedEmail, expectedSubject);
     });
   });
 });

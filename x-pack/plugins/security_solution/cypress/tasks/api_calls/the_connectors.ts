@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-export const createConnector = (connector: Record<string, any>) =>
+export const createConnector = (connector: Record<string, unknown>) =>
   cy.request({
     method: 'POST',
     url: '/api/actions/action',
     body: connector,
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
+
+const slackConnectorAPIPayload = {
+  actionTypeId: '.slack',
+  secrets: {
+    webhookUrl: 'http://localhost:123',
+  },
+  name: 'Slack cypress test e2e connector',
+};
+
+export const createSlackConnector = () => createConnector(slackConnectorAPIPayload);

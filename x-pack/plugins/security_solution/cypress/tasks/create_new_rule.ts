@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { EmailConnector } from '../objects/connector';
-import { getEmailConnector } from '../objects/connector';
 import type {
   CustomRule,
   MachineLearningRule,
@@ -92,13 +90,6 @@ import {
   THREAT_MATCH_QUERY_INPUT,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  CONNECTOR_NAME_INPUT,
-  EMAIL_CONNECTOR_FROM_INPUT,
-  EMAIL_CONNECTOR_HOST_INPUT,
-  EMAIL_CONNECTOR_PORT_INPUT,
-  EMAIL_CONNECTOR_USER_INPUT,
-  EMAIL_CONNECTOR_PASSWORD_INPUT,
-  EMAIL_CONNECTOR_SERVICE_SELECTOR,
   PREVIEW_HISTOGRAM,
   DATA_VIEW_COMBO_BOX,
   DATA_VIEW_OPTION,
@@ -437,16 +428,6 @@ export const fillIndexAndIndicatorIndexPattern = (
 
   getIndicatorIndex().type(`${indexPattern}{enter}`);
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
-};
-
-export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
-  cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
-  cy.get(EMAIL_CONNECTOR_SERVICE_SELECTOR).select(connector.service);
-  cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
-  cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
-  cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);
-  cy.get(EMAIL_CONNECTOR_USER_INPUT).type(connector.user);
-  cy.get(EMAIL_CONNECTOR_PASSWORD_INPUT).type(connector.password);
 };
 
 /** Returns the indicator index drop down field. Pass in row number, default is 1 */
