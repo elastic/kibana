@@ -381,7 +381,10 @@ export function LayerPanel(
             let errorText: string = '';
 
             if (!isEmptyLayer) {
-              if (group.requiredMinDimensionCount) {
+              if (
+                group.requiredMinDimensionCount &&
+                group.requiredMinDimensionCount > group.accessors.length
+              ) {
                 if (group.requiredMinDimensionCount > 1) {
                   errorText = i18n.translate(
                     'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
@@ -392,7 +395,7 @@ export function LayerPanel(
                       },
                     }
                   );
-                } else if (group.requiredMinDimensionCount && group.accessors.length === 0) {
+                } else {
                   errorText = i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
                     defaultMessage: 'Requires field',
                   });
