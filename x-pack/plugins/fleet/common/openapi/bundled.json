@@ -1254,23 +1254,8 @@
                   "type": "object",
                   "properties": {
                     "actionId": {
-                      "type": "string",
-                      "description": "action id when running in async mode (>10k agents)"
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
                   }
                 }
               }
@@ -1849,23 +1834,8 @@
                   "type": "object",
                   "properties": {
                     "actionId": {
-                      "type": "string",
-                      "description": "action id when running in async mode (>10k agents)"
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
                   }
                 }
               }
@@ -1931,23 +1901,8 @@
                   "type": "object",
                   "properties": {
                     "actionId": {
-                      "type": "string",
-                      "description": "action id when running in async mode (>10k agents)"
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
                   }
                 }
               }
@@ -2020,23 +1975,8 @@
                   "type": "object",
                   "properties": {
                     "actionId": {
-                      "type": "string",
-                      "description": "action id when running in async mode (>10k agents)"
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
                   }
                 }
               }
