@@ -121,6 +121,15 @@ export interface SingleExecutionMetricAgg {
   minTotalSearchDuration: {
     value: number | null;
   };
+  maxTotalEnrichmentDuration: {
+    value: number | null;
+  };
+  avgTotalEnrichmentDuration: {
+    value: number | null;
+  };
+  minTotalEnrichmentDuration: {
+    value: number | null;
+  };
 }
 
 export interface EventLogTypeStatusAggs {

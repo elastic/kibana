@@ -130,6 +130,9 @@ exports.EcsCustomPropertyMappings = {
                       total_run_duration_ms: {
                         type: 'long',
                       },
+                      total_enrichment_duration_ms: {
+                        type: 'long',
+                      },
                     },
                   },
                 },

@@ -343,6 +343,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
                 result = {
                   bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
+                  enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
                   errors: result.errors.concat(runResult.errors),
@@ -358,6 +359,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             } else {
               result = {
                 bulkCreateTimes: [],
+                enrichmentTimes: [],
                 createdSignals: [],
                 createdSignalsCount: 0,
                 errors: [],
@@ -434,6 +436,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
                   },
                 });
               }
@@ -452,6 +455,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
                 },
               });
             }
@@ -464,6 +468,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               metrics: {
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,
+                enrichmentDurations: result.enrichmentTimes,
               },
             });
 
