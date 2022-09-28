@@ -11,7 +11,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common';
 const getId = (object: { type: string; id: string }) => `${object.type}:${object.id}`;
 
 export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
-  const path = new Set<string>();
+  const traversed = new Set<string>();
   const sorted = new Set<SavedObject>();
   const objectsByTypeId = new Map(
     savedObjects.map((object) => [getId(object), object] as [string, SavedObject])
@@ -20,7 +20,7 @@ export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
   function includeObjects(objects: SavedObject[]) {
     for (const object of objects) {
       const objectId = getId(object);
-      if (path.has(objectId)) {
+      if (traversed.has(objectId)) {
         continue;
       }
 
@@ -28,7 +28,7 @@ export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
         .map((ref) => objectsByTypeId.get(getId(ref)))
         .filter((ref): ref is SavedObject => !!ref);
 
-      path.add(objectId);
+      traversed.add(objectId);
       if (objectRefs.length) {
         includeObjects(objectRefs);
       }
