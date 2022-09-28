@@ -206,12 +206,8 @@ export const PreviewHistogram = ({
             dataProviders,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            // Fix for https://github.com/elastic/kibana/issues/135511, until we start writing proper
-            // simulated @timestamp values to the preview alerts. The preview alerts will have @timestamp values
-            // close to the server's `now` time, but the client clock could be out of sync with the server. So we
-            // avoid computing static dates for this time range filter and instead pass in a small relative time window.
-            end: 'now+5m',
-            start: 'now-5m',
+            end: endDate,
+            start: startDate,
             entityType: 'events',
             filters: [],
             globalFullScreen,

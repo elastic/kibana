@@ -290,6 +290,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               completeRule,
               spaceId,
               indicesToQuery: inputIndex,
+              alertTimestampOverride: startedAt,
             });
 
             const wrapSequences = wrapSequencesFactory({
@@ -299,6 +300,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               completeRule,
               spaceId,
               indicesToQuery: inputIndex,
+              alertTimestampOverride: startedAt,
             });
 
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
