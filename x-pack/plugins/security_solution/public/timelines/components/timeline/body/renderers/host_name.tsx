@@ -10,6 +10,10 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
+import {
+  isInTableScope,
+  isTimelineScope,
+} from '../../../../../common/components/event_details/helpers';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import type { TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
@@ -18,6 +22,7 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
+import { dataTableActions } from '../../../../store/data_table';
 
 interface Props {
   contextId: string;
@@ -67,13 +72,23 @@ const HostNameComponent: React.FC<Props> = ({
           },
         };
 
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            ...updatedExpandedDetail,
-            timelineId: timelineID,
-            tabType: tabType as TimelineTabs,
-          })
-        );
+        if (isTimelineScope(timelineID)) {
+          dispatch(
+            timelineActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              timelineId: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
+        } else if (isInTableScope(timelineID)) {
+          dispatch(
+            dataTableActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              tableId: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
+        }
 
         if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
           activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });

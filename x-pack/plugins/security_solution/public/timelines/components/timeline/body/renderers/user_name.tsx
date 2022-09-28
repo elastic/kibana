@@ -10,6 +10,11 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
+import { dataTableActions } from '../../../../store/data_table';
+import {
+  isInTableScope,
+  isTimelineScope,
+} from '../../../../../common/components/event_details/helpers';
 import type { TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -66,14 +71,23 @@ const UserNameComponent: React.FC<Props> = ({
             userName,
           },
         };
-
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            ...updatedExpandedDetail,
-            timelineId: timelineID,
-            tabType: tabType as TimelineTabs,
-          })
-        );
+        if (isTimelineScope(timelineID)) {
+          dispatch(
+            timelineActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              timelineId: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
+        } else if (isInTableScope(timelineID)) {
+          dispatch(
+            dataTableActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              tableId: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
+        }
 
         if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
           activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
