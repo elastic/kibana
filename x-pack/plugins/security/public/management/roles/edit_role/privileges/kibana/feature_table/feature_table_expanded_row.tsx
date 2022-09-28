@@ -52,7 +52,7 @@ export const FeatureTableExpandedRow = ({
     ) {
       setIsCustomizing(false);
     }
-  }, [feature, isCustomizing, selectedFeaturePrivileges]);
+  }, [feature, isCustomizing, selectedFeaturePrivileges, licenseAllowsSubFeatPrivCustomization]);
 
   const onCustomizeSubFeatureChange = (e: EuiSwitchEvent) => {
     onChange(
