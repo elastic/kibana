@@ -86,8 +86,7 @@ export function FieldInputs({
   );
 
   const disableActions =
-    (localValues.length === 2 && localValues.some(({ isNew }) => isNew)) ||
-    localValues.length === 1;
+    localValues.length === 1 || localValues.filter(({ isNew }) => !isNew).length < 2;
   const localValuesFilled = localValues.filter(({ isNew }) => !isNew);
   return (
     <>

@@ -22,6 +22,8 @@ import {
   FieldsBucketContainer,
 } from '../../../../shared_components';
 
+export const MAX_TOOLTIP_FIELDS_SIZE = 2;
+
 const generateId = htmlIdGenerator();
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -98,6 +100,7 @@ export function TooltipSection({
       label={i18n.translate('xpack.lens.xyChart.annotation.tooltip.addField', {
         defaultMessage: 'Add field',
       })}
+      isDisabled={localValues.length > MAX_TOOLTIP_FIELDS_SIZE}
     />
   );
 
@@ -122,7 +125,7 @@ export function TooltipSection({
     );
   }
   const currentExistingField = existingFields[indexPattern.title];
-  const disableActions = localValues.length === 2 && localValues.some(({ isNew }) => isNew);
+
   const options = indexPattern.fields
     .filter(
       ({ displayName, type }) =>
@@ -171,7 +174,6 @@ export function TooltipSection({
                   defaultMessage: 'Delete',
                 }
               )}
-              isNotRemovable={disableActions && !isNew}
               isNotDraggable={arrayRef.length < 2}
               Container={FieldsBucketContainer}
               isInsidePanel={true}
