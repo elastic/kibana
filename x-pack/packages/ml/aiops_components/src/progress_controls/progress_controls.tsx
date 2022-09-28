@@ -17,6 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
+import './progress_controls.scss';
+
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 
@@ -53,6 +55,7 @@ export function ProgressControls({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiProgress
+              className={isRunning ? 'aiopsActiveProgress' : ''}
               aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
                 defaultMessage: 'Progress',
               })}
