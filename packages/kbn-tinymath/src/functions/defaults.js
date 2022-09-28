@@ -9,8 +9,7 @@
 /**
  * Returns the default provided value when the first value if null. If at least one array of numbers is passed into the function, the function will be applied index-wise to each element.
  * @param {(number|number[])} a a number or an array of numbers
- * @param {(number|number[])} b a number of an array of numbers to use as fallback value.
- * @throws `'Array length mismatch'` if `args` contains arrays of different lengths
+ * @param {(number)} b a number to use as fallback value.
  * @return {(number|number[])} The `a` value if not null, `b` otherwise. Returns an array where each element is default to `b` when null, or kept the original value if `a` is an array.
  *
  * @example
@@ -23,12 +22,9 @@ module.exports = { defaults };
 
 function defaults(a, b) {
   if (Array.isArray(a)) {
-    const bArray = Array.isArray(b) ? b : Array(a.length).fill(b);
-    if (bArray.length < a.length) {
-      throw new Error('Array length mismatch');
-    }
-    return a.map((v, i) => (v == null ? bArray[i] : v));
+    return a.map((v) => (v == null ? b : v));
   }
-  const fallback = Array.isArray(b) ? b[0] : b;
-  return a == null ? fallback : a;
+  return a == null ? b : a;
 }
+
+defaults.skipNumberValidation = true;
