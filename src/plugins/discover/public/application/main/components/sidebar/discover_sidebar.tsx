@@ -185,7 +185,8 @@ export function DiscoverSidebarComponent({
         // In this case the fieldsPerPage needs to be adapted
         const fieldsRenderedHeight = availableFieldsContainer.current.clientHeight;
         const avgHeightPerItem = Math.round(fieldsRenderedHeight / fieldsToRender);
-        const newFieldsPerPage = Math.round(clientHeight / avgHeightPerItem) + 10;
+        const newFieldsPerPage =
+          (avgHeightPerItem > 0 ? Math.round(clientHeight / avgHeightPerItem) : 0) + 10;
         if (newFieldsPerPage >= FIELDS_PER_PAGE && newFieldsPerPage !== fieldsPerPage) {
           setFieldsPerPage(newFieldsPerPage);
           setFieldsToRender(newFieldsPerPage);
