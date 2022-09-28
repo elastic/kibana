@@ -7,7 +7,7 @@
 
 import './feature_table.scss';
 
-import { EuiAccordionProps, EuiButtonGroupOptionProps, EuiToolTip } from '@elastic/eui';
+import { EuiAccordionProps, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonGroup,
@@ -246,29 +246,19 @@ export class FeatureTable extends Component<Props, State> {
                 });
               }}
             >
-              <EuiToolTip position='right'
-                  content={canCustomizeSubFeaturePrivileges ? ""
-                    : i18n.translate(
-                      'xpack.security.management.editRole.featureTable.subFeatureSubscriptionTooltip',
-                      {
-                        defaultMessage: 'Customization of sub-feature privileges is a subscription feature.',
-                      }
-                  )}
-              >
-                <div className="subFeaturePrivilegeExpandedRegion">
-                  <FeatureTableExpandedRow
-                    feature={feature}
-                    privilegeIndex={this.props.privilegeIndex}
-                    onChange={this.props.onChange}
-                    privilegeCalculator={this.props.privilegeCalculator}
-                    selectedFeaturePrivileges={
-                      this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
-                    }
-                    disabled={this.props.disabled}
-                    canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
-                  />
-                </div>
-              </EuiToolTip>
+              <div className="subFeaturePrivilegeExpandedRegion">
+                <FeatureTableExpandedRow
+                  feature={feature}
+                  privilegeIndex={this.props.privilegeIndex}
+                  onChange={this.props.onChange}
+                  privilegeCalculator={this.props.privilegeCalculator}
+                  selectedFeaturePrivileges={
+                    this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
+                  }
+                  disabled={this.props.disabled}
+                  canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
+                />
+              </div>
             </EuiAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
