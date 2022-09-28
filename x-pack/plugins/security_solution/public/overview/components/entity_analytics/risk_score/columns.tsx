@@ -37,7 +37,10 @@ export const getRiskScoreColumns = (riskEntity: RiskScoreEntity): HostRiskScoreC
     },
   },
   {
-    field: RiskScoreEntity.host ? RiskScoreFields.hostRiskScore : RiskScoreFields.userRiskScore,
+    field:
+      riskEntity === RiskScoreEntity.host
+        ? RiskScoreFields.hostRiskScore
+        : RiskScoreFields.userRiskScore,
     name: i18n.RISK_SCORE_TITLE(riskEntity),
     truncateText: true,
     mobileOptions: { show: true },
@@ -53,7 +56,8 @@ export const getRiskScoreColumns = (riskEntity: RiskScoreEntity): HostRiskScoreC
     },
   },
   {
-    field: RiskScoreEntity.host ? RiskScoreFields.hostRisk : RiskScoreFields.userRisk,
+    field:
+      riskEntity === RiskScoreEntity.host ? RiskScoreFields.hostRisk : RiskScoreFields.userRisk,
     name: (
       <EuiToolTip content={i18n.ENTITY_RISK_TOOLTIP(riskEntity)}>
         <>
