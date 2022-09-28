@@ -52,7 +52,7 @@ describe('StartCrawlContextMenu', () => {
     beforeEach(() => {
       wrapper = mountWithIntl(<StartCrawlContextMenu />);
 
-      wrapper.find(EuiButton).simulate('click');
+      wrapper.find('button').simulate('click');
 
       menuItems = wrapper
         .find(EuiContextMenuPanel)

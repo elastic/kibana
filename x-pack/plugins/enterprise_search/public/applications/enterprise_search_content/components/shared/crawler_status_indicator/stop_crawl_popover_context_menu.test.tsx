@@ -41,7 +41,7 @@ describe('StopCrawlsPopoverContextMenu', () => {
   it('can be opened to stop crawls', () => {
     const wrapper = mountWithIntl(<StopCrawlPopoverContextMenu />);
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button').simulate('click');
 
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
 
