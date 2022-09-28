@@ -31,7 +31,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
   const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
-  const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}`;
+  const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
 
   return deepFreeze({
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
