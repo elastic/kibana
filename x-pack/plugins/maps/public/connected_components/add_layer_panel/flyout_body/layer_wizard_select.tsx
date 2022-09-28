@@ -157,7 +157,7 @@ export class LayerWizardSelect extends Component<Props, State> {
           <EuiCard
             title={layerWizard.title}
             titleSize="xs"
-            betaBadgeProps={{ label: layerWizard.isBeta ? 'beta' : undefined }}
+            betaBadgeProps={{ label: layerWizard.isBeta ? 'beta' : '' }}
             icon={icon}
             onClick={onClick}
             description={layerWizard.description}
