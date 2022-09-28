@@ -6,61 +6,32 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsAddToListsTable } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { useFindExceptionListReferences } from '../../../logic/use_find_references';
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { act } from 'react-dom/test-utils';
+import { mount } from 'enzyme';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 jest.mock('../../../logic/use_find_references');
-jest.mock('@kbn/securitysolution-list-api', () => {
-  const actual = jest.requireActual('@kbn/securitysolution-list-api');
-  return {
-    ...actual,
-    fetchExceptionLists: jest.fn().mockResolvedValue({
-      data: [{ name: 'Mock list', id: '123', list_id: 'my_list_id' } as ExceptionListSchema],
-    }),
-  };
-});
 
 describe('ExceptionsAddToListsTable', () => {
-  it('it displays loading state while fetching data', () => {
-    (useFindExceptionListReferences as jest.Mock).mockReturnValue([true, null]);
-    const wrapper = mountWithIntl(
-      <TestProviders>
-        <ExceptionsAddToListsTable sharedExceptionLists={[]} onListSelectionChange={jest.fn()} />
-      </TestProviders>
-    );
+  const mockFn = jest.fn();
 
-    expect(wrapper.find('[data-test-subj="exceptionItemListsTableLoading"]').exists()).toBeTruthy();
-  });
-
-  // HELP: Can't get this one to work after state update removing loading state
-  xit('it displays lists with rule references', async () => {
-    const wrapper = mountWithIntl(
-      <TestProviders>
-        <ExceptionsAddToListsTable
-          sharedExceptionLists={[
-            {
-              id: '123',
-              list_id: 'my_list_id',
-              namespace_type: 'single',
-              type: ExceptionListTypeEnum.DETECTION,
-            },
-          ]}
-          onListSelectionChange={jest.fn()}
-        />
-      </TestProviders>
-    );
-
-    act(() => {
-      (useFindExceptionListReferences as jest.Mock).mockReturnValue([
-        false,
-        {
-          my_list_id: [
+  beforeEach(() => {
+    (useFindExceptionListReferences as jest.Mock).mockReturnValue([
+      false,
+      false,
+      {
+        my_list_id: {
+          ...getExceptionListSchemaMock(),
+          id: '123',
+          list_id: 'my_list_id',
+          namespace_type: 'single',
+          type: ExceptionListTypeEnum.DETECTION,
+          name: 'My exception list',
+          referenced_rules: [
             {
               id: '345',
               name: 'My rule',
@@ -76,12 +47,114 @@ describe('ExceptionsAddToListsTable', () => {
             },
           ],
         },
-      ]);
-    });
+      },
+      jest.fn(),
+    ]);
+  });
 
-    expect(wrapper.find('td[data-test-subj="exceptionListNameCell"]')).toHaveLength(1);
-    expect(wrapper.find('td[data-test-subj="exceptionListRulesLinkedToIdCell"]').text()).toEqual(
-      '1'
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('it displays loading state while fetching data', () => {
+    (useFindExceptionListReferences as jest.Mock).mockReturnValue([true, false, null, mockFn]);
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionsAddToListsTable
+          showAllSharedLists={false}
+          sharedExceptionLists={[
+            {
+              id: '123',
+              list_id: 'my_list_id',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.DETECTION,
+            },
+          ]}
+          onListSelectionChange={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(mockFn).toHaveBeenCalledWith([
+      {
+        id: '123',
+        list_id: 'my_list_id',
+        namespace_type: 'single',
+        type: ExceptionListTypeEnum.DETECTION,
+      },
+    ]);
+    expect(wrapper.find('[data-test-subj="exceptionItemListsTableLoading"]').exists()).toBeTruthy();
+  });
+
+  it('it displays error state if fetching list and references data fails', () => {
+    (useFindExceptionListReferences as jest.Mock).mockReturnValue([false, true, null, jest.fn()]);
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionsAddToListsTable
+          showAllSharedLists={false}
+          sharedExceptionLists={[
+            {
+              id: '123',
+              list_id: 'my_list_id',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.DETECTION,
+            },
+          ]}
+          onListSelectionChange={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('EuiInMemoryTable').prop('error')).toEqual(
+      'Unable to load shared exception lists'
+    );
+  });
+
+  it('it invokes "useFindExceptionListReferences" with empty array to fetch all lists if "showAllSharedLists" is "true"', () => {
+    mount(
+      <TestProviders>
+        <ExceptionsAddToListsTable
+          showAllSharedLists
+          sharedExceptionLists={[
+            {
+              id: '123',
+              list_id: 'my_list_id',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.DETECTION,
+            },
+          ]}
+          onListSelectionChange={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(mockFn).toHaveBeenCalledWith([]);
+  });
+
+  it('it displays lists with rule references', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionsAddToListsTable
+          showAllSharedLists={false}
+          sharedExceptionLists={[
+            {
+              id: '123',
+              list_id: 'my_list_id',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.DETECTION,
+            },
+          ]}
+          onListSelectionChange={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="ruleReferencesDisplayPopoverButton"]').at(1).text()
+    ).toEqual('1');
+    // Formatting is off since doesn't take css into account
+    expect(wrapper.find('[data-test-subj="exceptionListNameCell"]').at(1).text()).toEqual(
+      'NameMy exception list'
     );
   });
 });

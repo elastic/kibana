@@ -52,7 +52,7 @@ const ExceptionsAddToRulesOptionsComponent: React.FC<ExceptionsAddToRulesOptions
           </EuiText>
         ),
         checked: selectedRadioOption === 'add_to_rules',
-        'data-test-subj': "addToRulesOptionsRadio",
+        'data-test-subj': 'addToRulesOptionsRadio',
         onChange: () => {
           onRadioChange('add_to_rules');
           onRuleSelectionChange(possibleRules);
@@ -75,7 +75,7 @@ const ExceptionsAddToRulesOptionsComponent: React.FC<ExceptionsAddToRulesOptions
           </EuiText>
         ),
         checked: selectedRadioOption === 'add_to_rule',
-        'data-test-subj': "addToRuleOptionsRadio",
+        'data-test-subj': 'addToRuleOptionsRadio',
         onChange: () => {
           onRadioChange('add_to_rule');
           onRuleSelectionChange(possibleRules);
@@ -94,7 +94,7 @@ const ExceptionsAddToRulesOptionsComponent: React.FC<ExceptionsAddToRulesOptions
         </EuiText>
       ),
       checked: selectedRadioOption === 'select_rules_to_add_to',
-      'data-test-subj': "selectRulesToAddToOptionRadio",
+      'data-test-subj': 'selectRulesToAddToOptionRadio',
       onChange: () => onRadioChange('select_rules_to_add_to'),
     };
   }, [

@@ -121,7 +121,6 @@ export const ExceptionBuilderComponent = ({
   operatorsList,
   allowCustomFieldOptions = false,
 }: ExceptionBuilderProps): JSX.Element => {
-  console.log('BUILDER', {exceptionListItems})
   const [
     {
       addNested,
@@ -225,7 +224,6 @@ export const ExceptionBuilderComponent = ({
 
   const handleExceptionItemChange = useCallback(
     (item: ExceptionsBuilderExceptionItem, index: number): void => {
-      console.log('BUILDER handleExceptionItemChange', {item})
       const updatedExceptions = [
         ...exceptions.slice(0, index),
         {
@@ -233,8 +231,6 @@ export const ExceptionBuilderComponent = ({
         },
         ...exceptions.slice(index + 1),
       ];
-      console.log('BUILDER handleExceptionItemChange', {updatedExceptions})
-
       setUpdateExceptions(updatedExceptions);
     },
     [setUpdateExceptions, exceptions]
@@ -283,8 +279,6 @@ export const ExceptionBuilderComponent = ({
         ...lastException,
         entries: [...entries, isNested ? getDefaultNestedEmptyEntry() : getDefaultEmptyEntry()],
       };
-      console.log('BUILDER handleAddNewExceptionItemEntry', {updatedException})
-
       setUpdateExceptions([...exceptions.slice(0, exceptions.length - 1), { ...updatedException }]);
     },
     [setUpdateExceptions, exceptions]
@@ -299,7 +293,6 @@ export const ExceptionBuilderComponent = ({
       name: exceptionItemName ?? `${ruleName} - Exception item`,
       namespaceType: listNamespaceType,
     });
-    console.log('BUILDER handleAddNewExceptionItem', {newException})
 
     setUpdateExceptions([...exceptions, { ...newException }]);
   }, [setUpdateExceptions, exceptions, listId, listNamespaceType, ruleName, exceptionItemName]);
@@ -342,11 +335,8 @@ export const ExceptionBuilderComponent = ({
           },
         ],
       };
-      console.log('BUILDER handleAddNestedExceptionItemEntry', {updatedException})
-
       setUpdateExceptions([...exceptions.slice(0, exceptions.length - 1), { ...updatedException }]);
     } else {
-      console.log('BUILDER handleAddNestedExceptionItemEntry', {exceptions})
       setUpdateExceptions(exceptions);
     }
   }, [setUpdateExceptions, exceptions]);
@@ -370,7 +360,6 @@ export const ExceptionBuilderComponent = ({
   }, [handleAddNewExceptionItemEntry, setUpdateOrDisabled, setUpdateAddNested]);
 
   const memoExceptionItems = useMemo(() => {
-    console.log('BUILDER memoExceptionItems', {exceptions: filterExceptionItems(exceptions)})
     return filterExceptionItems(exceptions);
   }, [exceptions]);
 
@@ -403,8 +392,6 @@ export const ExceptionBuilderComponent = ({
 
   useEffect(() => {
     if (exceptionListItems.length > 0) {
-      console.log('BUILDER useEffect', {exceptionListItems})
-
       setUpdateExceptions(exceptionListItems);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

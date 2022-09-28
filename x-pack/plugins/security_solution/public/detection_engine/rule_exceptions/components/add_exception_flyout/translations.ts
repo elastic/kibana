@@ -28,7 +28,21 @@ export const ADD_ENDPOINT_EXCEPTION = i18n.translate(
 export const SUBMIT_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.ruleExceptions.addException.submitError.title',
   {
-    defaultMessage: 'Error adding exception item',
+    defaultMessage: 'An error occured submitting exception',
+  }
+);
+
+export const SUBMIT_ERROR_DISMISS_BUTTON = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.addException.submitError.dismissButton',
+  {
+    defaultMessage: 'Dismiss',
+  }
+);
+
+export const SUBMIT_ERROR_DISMISS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.addException.submitError.message',
+  {
+    defaultMessage: 'View toast for error details.',
   }
 );
 

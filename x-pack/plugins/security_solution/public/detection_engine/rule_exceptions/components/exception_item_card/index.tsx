@@ -16,14 +16,14 @@ import * as i18n from './translations';
 import { ExceptionItemCardHeader } from './header';
 import { ExceptionItemCardConditions } from './conditions';
 import { ExceptionItemCardMetaInfo } from './meta';
-import type { RuleReferenceSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { ExceptionItemCardComments } from './comments';
 
 export interface ExceptionItemProps {
   exceptionItem: ExceptionListItemSchema;
   isEndpoint: boolean;
   disableActions: boolean;
-  ruleReferences: RuleReferenceSchema[];
+  listAndReferences: ExceptionListRuleReferencesSchema | null;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
   dataTestSubj: string;
@@ -33,7 +33,7 @@ const ExceptionItemCardComponent = ({
   disableActions,
   exceptionItem,
   isEndpoint,
-  ruleReferences,
+  listAndReferences,
   onDeleteException,
   onEditException,
   dataTestSubj,
@@ -85,7 +85,7 @@ const ExceptionItemCardComponent = ({
         <EuiFlexItem data-test-subj={`${dataTestSubj}-meta`}>
           <ExceptionItemCardMetaInfo
             item={exceptionItem}
-            references={ruleReferences}
+            listAndReferences={listAndReferences}
             dataTestSubj="exceptionItemCardMetaInfo"
           />
         </EuiFlexItem>

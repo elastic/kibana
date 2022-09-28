@@ -113,7 +113,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
     <div>
       {exceptionItemsExist && expandComments && (
         <>
-          <EuiCommentList comments={formattedComments} />
+          <EuiCommentList comments={formattedComments} data-test-subj="exceptionItemComments" />
           <EuiSpacer size="m" />
         </>
       )}

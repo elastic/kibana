@@ -18,7 +18,10 @@ import type {
   OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
+import type {
+  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
+} from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
 import styled, { css } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -59,7 +62,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
   /* Not all rule types support large value lists */
   allowLargeValueLists: boolean;
   /* Exception items - could be one being edited, or multiple being added */
-  exceptionListItems: ExceptionsBuilderReturnExceptionItem[];
+  exceptionListItems: ExceptionsBuilderExceptionItem[];
   /* Fields used to populate the field option dropdown */
   indexPatterns: DataViewBase;
   /* Exception items can be added to zero (just being added to a shared list), one or more rules */
@@ -112,7 +115,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       rules != null && rules.some((rule) => isEqlRule(rule.type) && hasEqlSequenceQuery(rule.query))
     );
   }, [rules]);
-  console.log('CONDITIONS', {exceptionListItems})
 
   // If editing an item (can only edit a single item at a time), get it's
   // list_id. Otherwise, if it is an item for an endpoint list, the list_id is
@@ -150,7 +152,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       >;
       errorExists: boolean;
     }) => {
-      console.log('CONDITIONS handleBuilderOnChange', {exceptionItems})
       onExceptionItemAdd(exceptionItems);
       onSetErrorExists(errorExists);
     },

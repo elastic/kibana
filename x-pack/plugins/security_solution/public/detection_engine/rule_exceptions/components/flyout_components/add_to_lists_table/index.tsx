@@ -5,86 +5,83 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiText, EuiSpacer, EuiInMemoryTable, EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { fetchExceptionLists } from '@kbn/securitysolution-list-api';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { getAddToListsTableColumns } from './utils';
+import { getSharedListsTableColumns } from '../utils';
 import { useFindExceptionListReferences } from '../../../logic/use_find_references';
-import type { RuleReferenceSchema } from '../../../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/detection_engine/schemas/response';
 
 interface ExceptionsAddToListsComponentProps {
-  isEdit: boolean;
+  /**
+   * Normally if there's no sharedExceptionLists, this opition is disabled, however,
+   * when adding an exception item from the exception lists management page, there is no
+   * list or rule to go off of, so user can select to add the exception to any rule or to any
+   * shared list.
+   */
+  showAllSharedLists: boolean;
+  /* Shared exception lists to display as options to add item to */
   sharedExceptionLists: ListArray;
   onListSelectionChange?: (listsSelectedToAdd: ExceptionListSchema[]) => void;
 }
 
-export interface TableListInterface extends ExceptionListSchema {
-  references: RuleReferenceSchema[];
-}
-
 const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps> = ({
-  isEdit,
+  showAllSharedLists,
   sharedExceptionLists,
   onListSelectionChange,
 }): JSX.Element => {
-  const { http } = useKibana().services;
-  const [listsToDisplay, setListsToDisplay] = useState<TableListInterface[]>([]);
+  const listsToFetch = useMemo(() => {
+    return showAllSharedLists ? [] : sharedExceptionLists;
+  }, [showAllSharedLists, sharedExceptionLists]);
+  const [listsToDisplay, setListsToDisplay] = useState<ExceptionListRuleReferencesSchema[]>([]);
   const [pagination, setPagination] = useState({ pageIndex: 0 });
   const [message, setMessage] = useState<JSX.Element | string | undefined>(
     <EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />
   );
-  const [error, setError] = useState();
-  const [isLoadingReferences, ruleReferences] =
-    useFindExceptionListReferences(sharedExceptionLists);
+  const [error, setError] = useState<string | undefined>(undefined);
 
-  const handleFetchExceptionLists = useCallback(async () => {
-    const abortCtrl = new AbortController();
-
-    if (!sharedExceptionLists.length) return;
-
-    setMessage(<EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />);
-
-    try {
-      const filters = sharedExceptionLists
-        .map((list) => `exception-list.attributes.list_id:${list.list_id}`)
-        .join(' OR ');
-
-      const { data } = await fetchExceptionLists({
-        filters,
-        http,
-        namespaceTypes: 'single,agnostic',
-        pagination: {
-          perPage: 10000,
-        },
-        signal: abortCtrl.signal,
-      });
-      const transformedData = data.map((list) => ({
-        ...list,
-        references: ruleReferences != null ? ruleReferences[list.list_id] : [],
-      }));
-
-      setMessage(undefined);
-      setListsToDisplay(transformedData);
-    } catch (e) {
-      setError(e);
-    }
-  }, [sharedExceptionLists, http, ruleReferences]);
+  const [isLoadingReferences, referenceFetchError, ruleReferences, fetchReferences] =
+    useFindExceptionListReferences();
 
   useEffect(() => {
-    if (!isLoadingReferences && ruleReferences != null) {
-      handleFetchExceptionLists();
+    if (fetchReferences != null) {
+      const listsToQuery = !listsToFetch.length
+        ? [{ namespaceType: 'single' }, { namespaceType: 'agnostic' }]
+        : listsToFetch.map(({ id, list_id: listId, namespace_type: namespaceType }) => ({
+            id,
+            listId,
+            namespaceType,
+          }));
+      fetchReferences(listsToQuery);
     }
-  }, [handleFetchExceptionLists, ruleReferences, isLoadingReferences]);
+  }, [listsToFetch, fetchReferences]);
+
+  useEffect(() => {
+    if (referenceFetchError) {
+      setError(i18n.REFERENCES_FETCH_ERROR);
+    } else if (isLoadingReferences) {
+      setMessage(<EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />);
+    } else if (ruleReferences != null) {
+      const lists: ExceptionListRuleReferencesSchema[] = [];
+      for (const [_, value] of Object.entries(ruleReferences)) {
+        if (value.type === ExceptionListTypeEnum.DETECTION) {
+          lists.push(value);
+        }
+      }
+
+      setMessage(undefined);
+      setListsToDisplay(lists);
+    }
+  }, [isLoadingReferences, referenceFetchError, ruleReferences, showAllSharedLists]);
 
   const selectionValue = {
-    onSelectionChange: (selection: TableListInterface[]) => {
+    onSelectionChange: (selection: ExceptionListRuleReferencesSchema[]) => {
       if (onListSelectionChange != null) {
-        onListSelectionChange(selection.map(({ references, ...rest }) => ({ ...rest })));
+        onListSelectionChange(selection.map(({ referenced_rules: _, ...rest }) => ({ ...rest })));
       }
     },
     initialSelected: [],
@@ -96,13 +93,13 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
         <EuiText size="s">{i18n.ADD_TO_LISTS_DESCRIPTION}</EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer size="s" />
-        <EuiInMemoryTable<TableListInterface>
+        <EuiInMemoryTable<ExceptionListRuleReferencesSchema>
           tableCaption="Table of exception lists"
           itemId="id"
           items={listsToDisplay}
           loading={message != null}
           message={message}
-          columns={getAddToListsTableColumns()}
+          columns={getSharedListsTableColumns()}
           error={error}
           pagination={{
             ...pagination,
@@ -113,7 +110,7 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
             setPagination({ pageIndex: index })
           }
           selection={selectionValue}
-          isSelectable={!isEdit}
+          isSelectable
           sorting
           data-test-subj="addExceptionToSharedListsTable"
         />

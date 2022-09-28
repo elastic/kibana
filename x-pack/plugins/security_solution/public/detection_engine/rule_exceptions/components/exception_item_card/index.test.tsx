@@ -8,10 +8,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { ExceptionItemCard } from '.';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+
 import { TestProviders } from '../../../../common/mock';
+import { ExceptionItemCard } from '.';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -27,27 +29,30 @@ describe('ExceptionItemCard', () => {
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
           isEndpoint={false}
-          ruleReferences={[
-            {
-              exception_lists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: '1a2b3c',
-              name: 'Simple Rule Query',
-              rule_id: 'rule-2',
-            },
-          ]}
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
           dataTestSubj="item"
         />
       </TestProviders>
@@ -73,27 +78,30 @@ describe('ExceptionItemCard', () => {
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint={false}
-          ruleReferences={[
-            {
-              exception_lists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: '1a2b3c',
-              name: 'Simple Rule Query',
-              rule_id: 'rule-2',
-            },
-          ]}
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
         />
       </TestProviders>
     );
@@ -118,27 +126,30 @@ describe('ExceptionItemCard', () => {
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint={false}
-          ruleReferences={[
-            {
-              exception_lists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: '1a2b3c',
-              name: 'Simple Rule Query',
-              rule_id: 'rule-2',
-            },
-          ]}
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
         />
       </TestProviders>
     );
@@ -159,27 +170,30 @@ describe('ExceptionItemCard', () => {
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint={false}
-          ruleReferences={[
-            {
-              exception_lists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: '1a2b3c',
-              name: 'Simple Rule Query',
-              rule_id: 'rule-2',
-            },
-          ]}
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
         />
       </TestProviders>
     );
@@ -214,27 +228,30 @@ describe('ExceptionItemCard', () => {
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint
-          ruleReferences={[
-            {
-              exception_lists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: '1a2b3c',
-              name: 'Simple Rule Query',
-              rule_id: 'rule-2',
-            },
-          ]}
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
         />
       </TestProviders>
     );
@@ -269,27 +286,30 @@ describe('ExceptionItemCard', () => {
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint={false}
-          ruleReferences={[
-            {
-              exception_lists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: '1a2b3c',
-              name: 'Simple Rule Query',
-              rule_id: 'rule-2',
-            },
-          ]}
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
         />
       </TestProviders>
     );
@@ -328,27 +348,30 @@ describe('ExceptionItemCard', () => {
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint
-          ruleReferences={[
-            {
-              exception_lists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: '1a2b3c',
-              name: 'Simple Rule Query',
-              rule_id: 'rule-2',
-            },
-          ]}
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
         />
       </TestProviders>
     );
@@ -386,27 +409,30 @@ describe('ExceptionItemCard', () => {
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint={false}
-          ruleReferences={[
-            {
-              exception_lists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: '1a2b3c',
-              name: 'Simple Rule Query',
-              rule_id: 'rule-2',
-            },
-          ]}
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
         />
       </TestProviders>
     );

@@ -88,13 +88,12 @@ export const updateAlertStatus = async ({
   query,
   status,
   signal,
-}: UpdateAlertStatusProps): Promise<estypes.UpdateByQueryResponse> =>{
-  console.log({query})
-  return KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+}: UpdateAlertStatusProps): Promise<estypes.UpdateByQueryResponse> =>
+  KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     method: 'POST',
     body: JSON.stringify({ conflicts: 'proceed', status, ...query }),
     signal,
-  })};
+  });
 
 /**
  * Fetch Signal Index

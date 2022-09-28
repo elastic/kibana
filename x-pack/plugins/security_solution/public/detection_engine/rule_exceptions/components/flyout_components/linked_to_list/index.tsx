@@ -6,23 +6,17 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable, EuiLoadingContent } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
-import type { RuleReferences } from '../../../logic/use_find_references';
-import { useFindExceptionListReferences } from '../../../logic/use_find_references';
-import type { RuleReferenceSchema } from '../../../../../../common/detection_engine/schemas/response';
-import { getAddToListsTableColumns } from '../add_to_lists_table/utils';
-
-export interface TableListInterface extends ExceptionListSchema {
-  references: RuleReferenceSchema[];
-}
+import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/detection_engine/schemas/response';
+import { getSharedListsTableColumns } from '../utils';
 
 interface ExceptionsLinkedToListComponentProps {
-  list: ExceptionListSchema;
-  updateReferences: (refs: RuleReferences | null) => void;
+  isLoadingReferences: boolean;
+  errorFetchingReferences: boolean;
+  listAndReferences: ExceptionListRuleReferencesSchema[];
 }
 
 const SectionHeader = styled(EuiTitle)`
@@ -32,43 +26,41 @@ const SectionHeader = styled(EuiTitle)`
 `;
 
 const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponentProps> = ({
-  list,
-  updateReferences,
+  isLoadingReferences,
+  errorFetchingReferences,
+  listAndReferences,
 }): JSX.Element => {
-  const [listsToDisplay, setListsToDisplay] = useState<TableListInterface[]>([]);
-
-  const [isLoadingReferences, ruleReferences] = useFindExceptionListReferences([
-    { id: list.id, list_id: list.list_id, namespace_type: list.namespace_type, type: list.type },
-  ]);
+  const [message, setMessage] = useState<JSX.Element | string | undefined>(
+    <EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />
+  );
+  const [error, setError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!isLoadingReferences) {
-      const references = ruleReferences != null ? ruleReferences[list.list_id] : [];
-      const transformedData = {
-        ...list,
-        references,
-      };
-
-      setListsToDisplay([transformedData]);
-      updateReferences(ruleReferences);
+    if (errorFetchingReferences) {
+      setError(i18n.LINKED_TO_LIST_ERROR);
+    } else if (!isLoadingReferences) {
+      setMessage(undefined);
     }
-  }, [list, isLoadingReferences, ruleReferences, updateReferences]);
+  }, [errorFetchingReferences, isLoadingReferences]);
 
   return (
     <EuiPanel
       paddingSize="none"
       hasShadow={false}
-      data-test-subj="exceptionItemAddToRuleOrListSection"
+      data-test-subj="exceptionItemLinkedToListSection"
     >
       <SectionHeader size="xs">
         <h3>{i18n.LINKED_TO_LIST_TITLE}</h3>
       </SectionHeader>
       <EuiSpacer size="s" />
-      <EuiInMemoryTable<TableListInterface>
+      <EuiInMemoryTable<ExceptionListRuleReferencesSchema>
         tableCaption="Table of exception lists"
         itemId="id"
-        items={listsToDisplay}
-        columns={getAddToListsTableColumns()}
+        message={message}
+        loading={isLoadingReferences}
+        items={listAndReferences}
+        error={error}
+        columns={getSharedListsTableColumns()}
         isSelectable={false}
         sorting
         data-test-subj="exceptionItemSharedList"

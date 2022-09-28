@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@ela
 import { indexOf } from 'lodash';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListType, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
@@ -74,6 +74,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   }, []);
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
+  const rule = get(0, ecsRowData?.kibana?.alert?.rule);
 
   const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
@@ -249,15 +250,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
         ruleName != null &&
         ecsRowData?._id != null && (
           <AddExceptionFlyoutWrapper
-            ruleName={ruleName}
-            ruleId={ruleId}
-            ruleIndices={ruleIndices}
-            exceptionListType={exceptionFlyoutType}
+            rules={[rule]}
+            isEndpointItem={exceptionFlyoutType === ExceptionListTypeEnum.ENDPOINT}
             eventId={ecsRowData?._id}
             onCancel={onAddExceptionCancel}
             onConfirm={onAddExceptionConfirm}
             alertStatus={alertStatus}
-            onRuleChange={onRuleChange}
           />
         )}
       {isAddEventFilterModalOpen && ecsRowData != null && (
@@ -301,15 +299,12 @@ type AddExceptionFlyoutWrapperProps = Omit<
  * we cannot use the fetch hook within the flyout component itself
  */
 export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps> = ({
-  ruleName,
-  ruleId,
-  ruleIndices,
-  exceptionListType,
+  rules,
+  isEndpointItem,
   eventId,
   onCancel,
   onConfirm,
   alertStatus,
-  onRuleChange,
 }) => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
@@ -333,43 +328,23 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   /**
    * This should be re-visited after UEBA work is merged
    */
-  const memoRuleIndices = useMemo(() => {
-    if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters']?.index != null) {
-      return Array.isArray(enrichedAlert['kibana.alert.rule.parameters'].index)
-        ? enrichedAlert['kibana.alert.rule.parameters'].index
-        : [enrichedAlert['kibana.alert.rule.parameters'].index];
-    } else if (enrichedAlert != null && enrichedAlert?.signal?.rule?.index != null) {
-      return Array.isArray(enrichedAlert.signal.rule.index)
-        ? enrichedAlert.signal.rule.index
-        : [enrichedAlert.signal.rule.index];
-    }
-    return [];
-  }, [enrichedAlert]);
-
-  const memoDataViewId = useMemo(() => {
-    if (
-      enrichedAlert != null &&
-      enrichedAlert['kibana.alert.rule.parameters']?.data_view_id != null
-    ) {
-      return enrichedAlert['kibana.alert.rule.parameters'].data_view_id;
-    }
-  }, [enrichedAlert]);
-
+  const memoRule = useMemo(() => {
+    return enrichedAlert != null && enrichedAlert['kibana.alert.rule'] != null ? [enrichedAlert['kibana.alert.rule']] : rules;
+  }, [enrichedAlert, rules]);
+  console.log({memoRule}, enrichedAlert['kibana.alert.rule'], rules)
   const isLoading = isLoadingAlertData && isSignalIndexLoading;
 
   return (
     <AddExceptionFlyout
-      ruleName={ruleName}
-      ruleId={ruleId}
-      ruleIndices={memoRuleIndices}
-      dataViewId={memoDataViewId}
-      exceptionListType={exceptionListType}
+      rules={memoRule}
+      isEndpointItem={isEndpointItem}
+      isBulkAction={false}
       alertData={enrichedAlert}
       isAlertDataLoading={isLoading}
       onCancel={onCancel}
       onConfirm={onConfirm}
       alertStatus={alertStatus}
-      onRuleChange={onRuleChange}
+      showAlertCloseOptions
     />
   );
 };

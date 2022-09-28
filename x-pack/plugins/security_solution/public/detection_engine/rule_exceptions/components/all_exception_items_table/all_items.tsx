@@ -66,7 +66,9 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
                     disableActions={disableActions}
                     exceptionItem={exception}
                     isEndpoint={isEndpoint}
-                    ruleReferences={ruleReferences != null ? ruleReferences[exception.list_id] : []}
+                    listAndReferences={
+                      ruleReferences != null ? ruleReferences[exception.list_id] : null
+                    }
                     onDeleteException={onDeleteException}
                     onEditException={onEditExceptionItem}
                     dataTestSubj="exceptionItemsViewerItem"

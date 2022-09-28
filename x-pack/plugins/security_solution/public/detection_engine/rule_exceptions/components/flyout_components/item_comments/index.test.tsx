@@ -74,6 +74,6 @@ describe('ExceptionsFlyoutComments', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionItemCommentsAccordion"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="exceptionItemComments"]').exists()).toBeTruthy();
   });
 });

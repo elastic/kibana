@@ -6,22 +6,23 @@
  */
 
 import React from 'react';
-import type { ReactWrapper, ShallowWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
 import { AddExceptionFlyout } from '.';
-import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
-import { useAsync } from '@kbn/securitysolution-hook-utils';
-import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as helpers from '../../utils/helpers';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
 import * as i18n from './translations';
 
@@ -31,9 +32,9 @@ import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import type { AlertData } from '../../utils/types';
 import { useFindRules } from '../../../../detections/pages/detection_engine/rules/all/rules_table/use_find_rules';
+import { useFindExceptionListReferences } from '../../logic/use_find_references';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
@@ -41,6 +42,7 @@ jest.mock('../../../../common/containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../../logic/use_create_update_exception');
 jest.mock('../../logic/use_exception_flyout_data');
+jest.mock('../../logic/use_find_references');
 jest.mock('@kbn/securitysolution-hook-utils', () => ({
   ...jest.requireActual('@kbn/securitysolution-hook-utils'),
   useAsync: jest.fn(),
@@ -61,6 +63,7 @@ const mockFetchIndexPatterns = useFetchIndexPatterns as jest.Mock<
 const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseFindRules = useFindRules as jest.Mock;
+const mockUseFindExceptionListReferences = useFindExceptionListReferences as jest.Mock;
 
 const alertDataMock: AlertData = {
   '@timestamp': '1234567890',
@@ -96,11 +99,46 @@ describe('When the add exception modal is opened', () => {
     ]);
     mockUseFindRules.mockImplementation(() => ({
       data: {
-        rules: [],
-        total: 0
+        rules: [
+          {
+            ...getRulesSchemaMock(),
+            exceptions_list: [],
+          } as Rule,
+        ],
+        total: 1,
       },
       isFetched: true,
     }));
+    mockUseFindExceptionListReferences.mockImplementation(() => [
+      false,
+      false,
+      {
+        my_list_id: {
+          ...getExceptionListSchemaMock(),
+          id: '123',
+          list_id: 'my_list_id',
+          namespace_type: 'single',
+          type: ExceptionListTypeEnum.DETECTION,
+          name: 'My exception list',
+          referenced_rules: [
+            {
+              id: '345',
+              name: 'My rule',
+              rule_id: 'my_rule_id',
+              exception_lists: [
+                {
+                  id: '123',
+                  list_id: 'my_list_id',
+                  namespace_type: 'single',
+                  type: ExceptionListTypeEnum.DETECTION,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      jest.fn(),
+    ]);
   });
 
   afterEach(() => {
@@ -209,7 +247,7 @@ describe('When the add exception modal is opened', () => {
       });
     });
 
-   describe('alert data is passed in', () => {
+    describe('alert data is passed in', () => {
       let wrapper: ReactWrapper;
       beforeEach(async () => {
         wrapper = mount(
@@ -270,47 +308,49 @@ describe('When the add exception modal is opened', () => {
     describe('bulk closeable alert data is passed in', () => {
       let wrapper: ReactWrapper;
       beforeEach(async () => {
-        mockUseFetchIndex.mockImplementation(() => ([
+        mockUseFetchIndex.mockImplementation(() => [
           false,
-          {indexPatterns: createStubIndexPattern({
-            spec: {
-              id: '1234',
-              title: 'filebeat-*',
-              fields: {
-                'event.code': {
-                  name: 'event.code',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
-                },
-                'file.path.caseless': {
-                  name: 'file.path.caseless',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
-                },
-                subject_name: {
-                  name: 'subject_name',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
-                },
-                trusted: {
-                  name: 'trusted',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
-                },
-                'file.hash.sha256': {
-                  name: 'file.hash.sha256',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
+          {
+            indexPatterns: createStubIndexPattern({
+              spec: {
+                id: '1234',
+                title: 'filebeat-*',
+                fields: {
+                  'event.code': {
+                    name: 'event.code',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
+                  'file.path.caseless': {
+                    name: 'file.path.caseless',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
+                  subject_name: {
+                    name: 'subject_name',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
+                  trusted: {
+                    name: 'trusted',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
+                  'file.hash.sha256': {
+                    name: 'file.hash.sha256',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
                 },
               },
-            },
-          }),
-        }]));
+            }),
+          },
+        ]);
         wrapper = mount(
           <TestProviders>
             <AddExceptionFlyout
@@ -341,7 +381,14 @@ describe('When the add exception modal is opened', () => {
         );
         const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
         await waitFor(() =>
-          callProps.onChange({ exceptionItems: [{...getExceptionListItemSchemaMock(), entries:[{"field":"file.hash.sha256","operator":"included","type":"match"}]}] })
+          callProps.onChange({
+            exceptionItems: [
+              {
+                ...getExceptionListItemSchemaMock(),
+                entries: [{ field: 'file.hash.sha256', operator: 'included', type: 'match' }],
+              },
+            ],
+          })
         );
       });
 
@@ -566,47 +613,49 @@ describe('When the add exception modal is opened', () => {
     describe('bulk closeable alert data is passed in', () => {
       let wrapper: ReactWrapper;
       beforeEach(async () => {
-        mockUseFetchIndex.mockImplementation(() => ([
+        mockUseFetchIndex.mockImplementation(() => [
           false,
-          {indexPatterns: createStubIndexPattern({
-            spec: {
-              id: '1234',
-              title: 'filebeat-*',
-              fields: {
-                'event.code': {
-                  name: 'event.code',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
-                },
-                'file.path.caseless': {
-                  name: 'file.path.caseless',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
-                },
-                subject_name: {
-                  name: 'subject_name',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
-                },
-                trusted: {
-                  name: 'trusted',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
-                },
-                'file.hash.sha256': {
-                  name: 'file.hash.sha256',
-                  type: 'string',
-                  aggregatable: true,
-                  searchable: true,
+          {
+            indexPatterns: createStubIndexPattern({
+              spec: {
+                id: '1234',
+                title: 'filebeat-*',
+                fields: {
+                  'event.code': {
+                    name: 'event.code',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
+                  'file.path.caseless': {
+                    name: 'file.path.caseless',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
+                  subject_name: {
+                    name: 'subject_name',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
+                  trusted: {
+                    name: 'trusted',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
+                  'file.hash.sha256': {
+                    name: 'file.hash.sha256',
+                    type: 'string',
+                    aggregatable: true,
+                    searchable: true,
+                  },
                 },
               },
-            },
-          })},
-        ]));
+            }),
+          },
+        ]);
         wrapper = mount(
           <TestProviders>
             <AddExceptionFlyout
@@ -638,7 +687,14 @@ describe('When the add exception modal is opened', () => {
 
         const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
         await waitFor(() =>
-          callProps.onChange({ exceptionItems: [{...getExceptionListItemSchemaMock(), entries:[{"field":"file.hash.sha256","operator":"included","type":"match"}]}] })
+          callProps.onChange({
+            exceptionItems: [
+              {
+                ...getExceptionListItemSchemaMock(),
+                entries: [{ field: 'file.hash.sha256', operator: 'included', type: 'match' }],
+              },
+            ],
+          })
         );
       });
 
@@ -735,7 +791,8 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
-  xdescribe('when no rules are passed in', () => {
+  /* Say for example, from the lists management or lists details page */
+  describe('when no rules are passed in', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
       wrapper = mount(
@@ -760,78 +817,67 @@ describe('When the add exception modal is opened', () => {
     });
 
     it('allows large value lists', () => {
-      expect(wrapper.find('[data-test-subj="addExceptionToRulesTable"]').exists()).toBeTruthy();
+      expect(wrapper.find('ExceptionsConditions').prop('allowLargeValueLists')).toBeTruthy();
     });
 
     it('defaults to selecting add to rule option, displaying rules selection table', () => {
       expect(wrapper.find('[data-test-subj="addExceptionToRulesTable"]').exists()).toBeTruthy();
       expect(
-        wrapper.find('[data-test-subj="addToRuleOptionsRadio"] input').getDOMNode()
-      ).toHaveAttribute('selected');
-    });
-
-    it('allows user to change selection from add to rules to add to shared lists option', () => {
-      act(() => {
-        wrapper.find('[data-test-subj="addToListsRadioOption"] label').simulate('click');
-      });
-
-      // check that it updates the listType
-      expect(
-        wrapper.find('[data-test-subj="addExceptionToSharedListsTable"]').exists()
-      ).toBeTruthy();
-      expect(wrapper.find('input[id="add_to_lists"]').getDOMNode()).toHaveAttribute('selected');
+        wrapper.find('[data-test-subj="selectRulesToAddToOptionRadio"] input').getDOMNode()
+      ).toHaveAttribute('checked');
     });
   });
 
+  /* Say for example, from the rule details page, exceptions tab, or from an alert */
   describe('when a single rule is passed in', () => {
     let wrapper: ReactWrapper;
-      beforeEach(async () => {
-        wrapper = mount(
-          <TestProviders>
-            <AddExceptionFlyout
-              rules={[
-                {
-                  ...getRulesSchemaMock(),
-                  exceptions_list: [],
-                } as Rule,
-              ]}
-              isBulkAction={false}
-              alertData={undefined}
-              isAlertDataLoading={undefined}
-              alertStatus={undefined}
-              isEndpointItem={false}
-              showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
-            />
-          </TestProviders>
-        );
-        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-        await waitFor(() =>
-          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
-        );
-      });
+    beforeEach(async () => {
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[
+              {
+                ...getRulesSchemaMock(),
+                exceptions_list: [],
+              } as Rule,
+            ]}
+            isBulkAction={false}
+            alertData={undefined}
+            isAlertDataLoading={undefined}
+            alertStatus={undefined}
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+    });
     it('does not allow large value list selection for query rule', () => {
       const shallowWrapper = shallow(
-            <AddExceptionFlyout
-              rules={[
-                {
-                  ...getRulesSchemaMock(),
-                  exceptions_list: [],
-                } as Rule,
-              ]}
-              isBulkAction={false}
-              alertData={alertDataMock}
-              isAlertDataLoading={false}
-              alertStatus="open"
-              isEndpointItem={false}
-              showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
-            />
-        );
-      
-        expect(shallowWrapper.find('ExceptionsConditions').props().allowLargeValueLists).toBeTruthy();
+        <AddExceptionFlyout
+          rules={[
+            {
+              ...getRulesSchemaMock(),
+              exceptions_list: [],
+            } as Rule,
+          ]}
+          isBulkAction={false}
+          alertData={alertDataMock}
+          isAlertDataLoading={false}
+          alertStatus="open"
+          isEndpointItem={false}
+          showAlertCloseOptions
+          onCancel={jest.fn()}
+          onConfirm={jest.fn()}
+        />
+      );
+
+      expect(shallowWrapper.find('ExceptionsConditions').prop('allowLargeValueLists')).toBeTruthy();
     });
 
     it('does not allow large value list selection if EQL rule', () => {
@@ -852,18 +898,18 @@ describe('When the add exception modal is opened', () => {
           onCancel={jest.fn()}
           onConfirm={jest.fn()}
         />
-    );
-  
-    expect(shallowWrapper.find('ExceptionsConditions').props().allowLargeValueLists).toBeFalsy()
+      );
+
+      expect(shallowWrapper.find('ExceptionsConditions').prop('allowLargeValueLists')).toBeFalsy();
     });
-    
+
     it('does not allow large value list selection if threshold rule', () => {
       const shallowWrapper = shallow(
         <AddExceptionFlyout
           rules={[
             {
               ...getRulesSchemaMock(),
-              type: 'threshold'
+              type: 'threshold',
             } as Rule,
           ]}
           isBulkAction={false}
@@ -875,9 +921,9 @@ describe('When the add exception modal is opened', () => {
           onCancel={jest.fn()}
           onConfirm={jest.fn()}
         />
-    );
-  
-    expect(shallowWrapper.find('ExceptionsConditions').props().allowLargeValueLists).toBeFalsy()
+      );
+
+      expect(shallowWrapper.find('ExceptionsConditions').prop('allowLargeValueLists')).toBeFalsy();
     });
 
     it('does not allow large value list selection if new trems rule', () => {
@@ -886,7 +932,7 @@ describe('When the add exception modal is opened', () => {
           rules={[
             {
               ...getRulesSchemaMock(),
-              type: 'new_terms'
+              type: 'new_terms',
             } as Rule,
           ]}
           isBulkAction={false}
@@ -898,9 +944,9 @@ describe('When the add exception modal is opened', () => {
           onCancel={jest.fn()}
           onConfirm={jest.fn()}
         />
-    );
-  
-    expect(shallowWrapper.find('ExceptionsConditions').props().allowLargeValueLists).toBeFalsy()
+      );
+
+      expect(shallowWrapper.find('ExceptionsConditions').prop('allowLargeValueLists')).toBeFalsy();
     });
 
     it('defaults to selecting add to rule radio option', () => {
@@ -953,45 +999,48 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
-  describe('when multiple rules are passed in', () => {
+  /* Say for example, add exception item from rules bulk action */
+  describe('when multiple rules are passed in - bulk action', () => {
     let wrapper: ReactWrapper;
-      beforeEach(async () => {
-        wrapper = mount(
-          <TestProviders>
-            <AddExceptionFlyout
-              rules={[
-                {
-                  ...getRulesSchemaMock(),
-                  exceptions_list: [],
-                } as Rule,
-                {
-                  ...getRulesSchemaMock(),
-                  id: 'foo',
-                  rule_id: 'foo',
-                  exceptions_list: [{
+    beforeEach(async () => {
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[
+              {
+                ...getRulesSchemaMock(),
+                exceptions_list: [],
+              } as Rule,
+              {
+                ...getRulesSchemaMock(),
+                id: 'foo',
+                rule_id: 'foo',
+                exceptions_list: [
+                  {
                     id: 'bar',
                     list_id: 'bar',
                     namespace_type: 'single',
-                    type:'detection'
-                  }],
-                } as Rule,
-              ]}
-              isBulkAction={false}
-              alertData={undefined}
-              isAlertDataLoading={undefined}
-              alertStatus={undefined}
-              isEndpointItem={false}
-              showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
-            />
-          </TestProviders>
-        );
-        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-        await waitFor(() =>
-          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
-        );
-      });
+                    type: 'detection',
+                  },
+                ],
+              } as Rule,
+            ]}
+            isBulkAction
+            alertData={undefined}
+            isAlertDataLoading={undefined}
+            alertStatus={undefined}
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+    });
 
     it('allows large value lists', () => {
       const shallowWrapper = shallow(
@@ -1008,7 +1057,7 @@ describe('When the add exception modal is opened', () => {
               exceptions_list: [],
             } as Rule,
           ]}
-          isBulkAction={false}
+          isBulkAction
           alertData={alertDataMock}
           isAlertDataLoading={false}
           alertStatus="open"
@@ -1017,9 +1066,9 @@ describe('When the add exception modal is opened', () => {
           onCancel={jest.fn()}
           onConfirm={jest.fn()}
         />
-    );
-  
-    expect(shallowWrapper.find('ExceptionsConditions').props().allowLargeValueLists).toBeTruthy()
+      );
+
+      expect(shallowWrapper.find('ExceptionsConditions').prop('allowLargeValueLists')).toBeTruthy();
     });
 
     it('defaults to selecting add to rules radio option', () => {
@@ -1044,26 +1093,30 @@ describe('When the add exception modal is opened', () => {
             rules={[
               {
                 ...getRulesSchemaMock(),
-                exceptions_list: [{
-                  id: 'bar',
-                  list_id: 'bar',
-                  namespace_type: 'single',
-                  type:'detection'
-                }],
+                exceptions_list: [
+                  {
+                    id: 'bar',
+                    list_id: 'bar',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
               } as Rule,
               {
                 ...getRulesSchemaMock(),
                 id: 'foo',
                 rule_id: 'foo',
-                exceptions_list: [{
-                  id: 'bar',
-                  list_id: 'bar',
-                  namespace_type: 'single',
-                  type:'detection'
-                }],
+                exceptions_list: [
+                  {
+                    id: 'bar',
+                    list_id: 'bar',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
               } as Rule,
             ]}
-            isBulkAction={false}
+            isBulkAction
             alertData={undefined}
             isAlertDataLoading={undefined}
             alertStatus={undefined}

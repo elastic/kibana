@@ -13,25 +13,21 @@ import { i18n } from '@kbn/i18n';
 import * as myI18n from './translations';
 import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
 import { useFindRules } from '../../../../../detections/pages/detection_engine/rules/all/rules_table/use_find_rules';
-import { getRulesSchema, getAddToRulesTableColumns } from './utils';
+import { getRulesTableColumn } from '../utils';
 
 interface ExceptionsAddToRulesComponentProps {
-  filter?: string;
-  isEdit: boolean;
   initiallySelectedRules?: Rule[];
   onRuleSelectionChange?: (rulesSelectedToAdd: Rule[]) => void;
 }
 
 const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponentProps> = ({
-  isEdit,
   initiallySelectedRules,
-  filter,
   onRuleSelectionChange,
 }): JSX.Element => {
   const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
     isInMemorySorting: true,
     filterOptions: {
-      filter: filter ?? '',
+      filter: '',
       showCustomRules: false,
       showElasticRules: false,
       tags: [],
@@ -41,7 +37,6 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
     refetchInterval: false,
   });
 
-  const [rulesToDisplay, setRulesToDisplay] = useState<Rule[]>([]);
   const [pagination, setPagination] = useState({ pageIndex: 0 });
   const [message, setMessage] = useState<JSX.Element | string | undefined>(
     <EuiLoadingContent lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
@@ -52,12 +47,12 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
       setMessage(
         <EuiLoadingContent lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
       );
-      setRulesToDisplay([]);
-    } else {
-      setMessage(undefined);
-      setRulesToDisplay(rules);
     }
-  }, [setMessage, isFetched, rules]);
+
+    if (isFetched) {
+      setMessage(undefined);
+    }
+  }, [setMessage, isFetched]);
 
   const ruleSelectionValue = {
     onSelectionChange: (selection: Rule[]) => {
@@ -71,8 +66,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
   const searchOptions = useMemo(
     () => ({
       box: {
-        incremental: false,
-        schema: getRulesSchema(),
+        incremental: true,
       },
       filters: [
         {
@@ -85,7 +79,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
             }
           ),
           multiSelect: true,
-          options: rulesToDisplay.flatMap(({ tags }) => {
+          options: rules.flatMap(({ tags }) => {
             return tags.map((tag) => ({
               value: tag,
               name: tag,
@@ -94,20 +88,20 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
         },
       ],
     }),
-    [rulesToDisplay]
+    [rules]
   );
 
   return (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
       <>
-        {!isEdit && <EuiText size="s">{myI18n.ADD_TO_SELECTED_RULES_DESCRIPTION}</EuiText>}
+        <EuiText size="s">{myI18n.ADD_TO_SELECTED_RULES_DESCRIPTION}</EuiText>
         <EuiSpacer size="s" />
         <EuiInMemoryTable<Rule>
           tableCaption="Rules table"
           itemId="id"
-          items={rulesToDisplay}
+          items={rules}
           loading={!isFetched}
-          columns={getAddToRulesTableColumns()}
+          columns={getRulesTableColumn()}
           pagination={{
             ...pagination,
             itemsPerPage: 5,
@@ -118,9 +112,9 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
             setPagination({ pageIndex: index })
           }
           selection={ruleSelectionValue}
-          search={isEdit ? undefined : searchOptions}
+          search={searchOptions}
           sorting
-          isSelectable={!isEdit}
+          isSelectable
           data-test-subj="addExceptionToRulesTable"
         />
       </>

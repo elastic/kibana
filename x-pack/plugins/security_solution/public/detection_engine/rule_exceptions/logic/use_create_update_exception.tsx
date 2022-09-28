@@ -15,12 +15,8 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 import { formatExceptionItemForUpdate } from '../utils/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 
-export interface UseCreateOrUpdateExceptionProps {
-  items: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
-}
-
 export type CreateOrUpdateExceptionItemsFunc = (
-  args: UseCreateOrUpdateExceptionProps
+  args: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ) => Promise<ExceptionListItemSchema[]>;
 
 export type ReturnUseCreateOrUpdateException = [boolean, CreateOrUpdateExceptionItemsFunc | null];
@@ -39,9 +35,8 @@ export const useCreateOrUpdateException = (): ReturnUseCreateOrUpdateException =
   useEffect(() => {
     const abortCtrl = new AbortController();
 
-    const onCreateOrUpdateExceptionItem: CreateOrUpdateExceptionItemsFunc = async ({ items }) => {
+    const onCreateOrUpdateExceptionItem: CreateOrUpdateExceptionItemsFunc = async (items) => {
       setIsLoading(true);
-      console.log({ items });
       const itemsAdded = await Promise.all(
         items.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
           if ('id' in item && item.id != null) {

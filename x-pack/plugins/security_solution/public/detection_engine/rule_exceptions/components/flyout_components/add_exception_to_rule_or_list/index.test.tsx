@@ -9,10 +9,27 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
 
 import { ExceptionsAddToRulesOrLists } from '.';
 
 describe('ExceptionsAddToRulesOrLists', () => {
+  it('it passes empty array for shared lists attached if no rules passed in', () => {
+    const wrapper = shallow(
+      <ExceptionsAddToRulesOrLists
+        rules={null}
+        isBulkAction={false}
+        selectedRadioOption="add_to_rule"
+        onListSelectionChange={jest.fn()}
+        onRuleSelectionChange={jest.fn()}
+        onRadioChange={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('ExceptionsAddToListsOptions').prop('sharedLists')).toEqual([]);
+    expect(wrapper.find('ExceptionsAddToListsOptions').prop('rulesCount')).toEqual(0);
+  });
+
   it('it passes all shared lists attached to a single rule', () => {
     const wrapper = shallow(
       <ExceptionsAddToRulesOrLists
@@ -22,7 +39,7 @@ describe('ExceptionsAddToRulesOrLists', () => {
             exceptions_list: [
               { id: '123', list_id: 'my_list', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          } as Rule,
         ]}
         isBulkAction={false}
         selectedRadioOption="add_to_rule"
@@ -46,7 +63,7 @@ describe('ExceptionsAddToRulesOrLists', () => {
             exceptions_list: [
               { id: '123', list_id: 'my_list', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          } as Rule,
           {
             ...getRulesSchemaMock(),
             id: '2',
@@ -56,7 +73,7 @@ describe('ExceptionsAddToRulesOrLists', () => {
               { id: '456', list_id: 'my_list_2', namespace_type: 'single', type: 'detection' },
               { id: '789', list_id: 'my_list_3', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          } as Rule,
           {
             ...getRulesSchemaMock(),
             id: '3',
@@ -65,7 +82,7 @@ describe('ExceptionsAddToRulesOrLists', () => {
               { id: '123', list_id: 'my_list', namespace_type: 'single', type: 'detection' },
               { id: '789', list_id: 'my_list_3', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          } as Rule,
         ]}
         isBulkAction={false}
         selectedRadioOption="add_to_rule"
@@ -89,7 +106,7 @@ describe('ExceptionsAddToRulesOrLists', () => {
             exceptions_list: [
               { id: '123', list_id: 'my_list', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          } as Rule,
           {
             ...getRulesSchemaMock(),
             id: '2',
@@ -98,7 +115,7 @@ describe('ExceptionsAddToRulesOrLists', () => {
               { id: '456', list_id: 'my_list_2', namespace_type: 'single', type: 'detection' },
               { id: '789', list_id: 'my_list_3', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          } as Rule,
           {
             ...getRulesSchemaMock(),
             id: '3',
@@ -107,7 +124,7 @@ describe('ExceptionsAddToRulesOrLists', () => {
               { id: '123', list_id: 'my_list', namespace_type: 'single', type: 'detection' },
               { id: '789', list_id: 'my_list_3', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          } as Rule,
         ]}
         isBulkAction={false}
         selectedRadioOption="add_to_rule"

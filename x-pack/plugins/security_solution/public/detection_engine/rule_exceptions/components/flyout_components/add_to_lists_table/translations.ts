@@ -21,3 +21,10 @@ export const VIEW_LIST_DETAIL_ACTION = i18n.translate(
     defaultMessage: 'View list detail',
   }
 );
+
+export const REFERENCES_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptions.flyoutComponents.addToListsTableSelection.referencesFetchError',
+  {
+    defaultMessage: 'Unable to load shared exception lists',
+  }
+);

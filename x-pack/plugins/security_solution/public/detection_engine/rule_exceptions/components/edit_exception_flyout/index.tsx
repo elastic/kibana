@@ -12,24 +12,23 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiFormRow,
-  EuiText,
-  EuiCallOut,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlexGroup,
   EuiTitle,
   EuiFlyout,
   EuiFlyoutFooter,
+  EuiLoadingContent,
 } from '@elastic/eui';
 
 import type {
-  ExceptionListSchema,
   ExceptionListItemSchema,
+  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { isEmpty } from 'lodash/fp';
+import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import * as i18n from './translations';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
 import { createExceptionItemsReducer } from './reducer';
@@ -49,7 +48,7 @@ import { filterIndexPatterns } from '../../utils/helpers';
 import { entrichExceptionItemsForUpdate } from '../flyout_components/utils';
 import { useEditExceptionItems } from './use_edit_exception';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
-import type { RuleReferences } from '../../logic/use_find_references';
+import { useFindExceptionListReferences } from '../../logic/use_find_references';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
@@ -104,7 +103,6 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       disableBulkClose,
       bulkCloseIndex,
       entryErrorExists,
-      listsReferences,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -115,10 +113,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     disableBulkClose: true,
     bulkCloseIndex: undefined,
     entryErrorExists: false,
-    listsReferences: null,
   });
-
-  console.log('EDIT MODAL', { exceptionItems, exceptionItemName });
 
   const allowLargeValueLists = useMemo((): boolean => {
     if (rule != null) {
@@ -131,6 +126,21 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       return true;
     }
   }, [rule]);
+
+  const [isLoadingReferences, referenceFetchError, ruleReferences, fetchReferences] =
+    useFindExceptionListReferences();
+
+  useEffect(() => {
+    if (fetchReferences != null) {
+      fetchReferences([
+        {
+          id: list.id,
+          listId: list.list_id,
+          namespaceType: list.namespace_type,
+        },
+      ]);
+    }
+  }, [list, fetchReferences]);
 
   /**
    * Reducer action dispatchers
@@ -205,16 +215,6 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     [dispatch]
   );
 
-  const setSharedListReferences = useCallback(
-    (refs: RuleReferences | null): void => {
-      dispatch({
-        type: 'setSharedListReferences',
-        listsReferences: refs,
-      });
-    },
-    [dispatch]
-  );
-
   const handleCloseFlyout = useCallback((): void => {
     onCancel(false);
   }, [onCancel]);
@@ -237,8 +237,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
 
       const ruleDefaultRule = rule != null ? [rule.rule_id] : [];
       const referencedRules =
-        listsReferences != null
-          ? listsReferences[list.list_id].map(({ rule_id: ruleId }) => ruleId)
+        ruleReferences != null
+          ? ruleReferences[list.list_id].referenced_rules.map(({ rule_id: ruleId }) => ruleId)
           : [];
       const ruleIdsForBulkClose =
         list.type === ExceptionListTypeEnum.RULE_DEFAULT ? ruleDefaultRule : referencedRules;
@@ -260,7 +260,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     itemToEdit.os_types,
     list.list_id,
     list.type,
-    listsReferences,
+    ruleReferences,
     newComment,
     onCancel,
     onConfirm,
@@ -294,6 +294,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         </EuiTitle>
         <EuiSpacer size="m" />
       </FlyoutHeader>
+      {isLoading && <EuiLoadingContent data-test-subj="loadingEditExceptionFlyout" lines={4} />}
       <FlyoutBodySection className="builder-section">
         <ExceptionsFlyoutMeta
           exceptionItemName={exceptionItemName}
@@ -317,7 +318,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         {list.type === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />
-            <ExceptionsLinkedToLists list={list} updateReferences={setSharedListReferences} />
+            <ExceptionsLinkedToLists
+              isLoadingReferences={isLoadingReferences}
+              errorFetchingReferences={referenceFetchError}
+              listAndReferences={ruleReferences != null ? [ruleReferences[list.list_id]] : []}
+            />
           </>
         )}
         {list.type === ExceptionListTypeEnum.RULE_DEFAULT && rule != null && (

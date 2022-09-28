@@ -32,7 +32,12 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
       <EuiRadio
         id="add_to_lists"
         label={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            ata-test-subj="addToListsRadioOptionLabel"
+          >
             <EuiFlexItem grow={false}>
               <EuiText>{i18n.ADD_TO_LISTS_OPTION}</EuiText>
             </EuiFlexItem>
@@ -44,7 +49,7 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
                     ? i18n.ADD_TO_LISTS_OPTION_DISABLED_TOOLTIP(rulesCount)
                     : i18n.ADD_TO_LISTS_OPTION_TOOLTIP
                 }
-                title={i18n.ADD_TO_LISTS_OPTION_TOOLTIP_TITLE}
+                title={i18n.ADD_TO_LISTS_OPTION}
                 position="top"
                 type="iInCircle"
                 data-test-subj="addToListsOptionTooltip"
@@ -53,12 +58,14 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
           </EuiFlexGroup>
         }
         checked={selectedRadioOption === 'add_to_lists'}
-        disabled={sharedLists.length === 0}
+        disabled={sharedLists.length === 0 && rulesCount > 0}
         onChange={() => onRadioChange('add_to_lists')}
         data-test-subj="addToListsRadioOption"
       />
-      {selectedRadioOption === 'add_to_lists' && sharedLists.length > 0 && (
+
+      {selectedRadioOption === 'add_to_lists' && (sharedLists.length > 0 || rulesCount === 0) && (
         <ExceptionsAddToListsTable
+          showAllSharedLists={rulesCount === 0}
           sharedExceptionLists={sharedLists}
           onListSelectionChange={onListsSelectionChange}
           data-test-subj="exceptionsAddToListTable"

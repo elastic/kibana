@@ -21,23 +21,24 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiLoadingContent,
+  EuiCallOut,
+  EuiText,
 } from '@elastic/eui';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { OsTypeArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
+import type {
+  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
+} from '@kbn/securitysolution-list-utils';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18n from './translations';
-import * as sharedI18n from '../../utils/translations';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
   filterIndexPatterns,
 } from '../../utils/helpers';
-import { ErrorCallout } from '../error_callout';
 import type { AlertData } from '../../utils/types';
 import { initialState, createExceptionItemsReducer } from './reducer';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
@@ -67,11 +68,7 @@ export interface AddExceptionFlyoutProps {
   isAlertDataLoading?: boolean;
   alertStatus?: Status;
   onCancel: (didRuleChange: boolean) => void;
-  onConfirm: (
-    didRuleChange: boolean,
-    didCloseAlert: boolean,
-    didBulkCloseAlert: boolean
-  ) => Promise<void>;
+  onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
@@ -105,9 +102,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
-  const { http } = useKibana().services;
-  const { addError, addSuccess } = useAppToasts();
-
   const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
@@ -129,6 +123,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionItemMeta: { name: exceptionItemName },
       listType,
       selectedOs,
+      initialItems,
       exceptionItems,
       disableBulkClose,
       bulkCloseAlerts,
@@ -139,13 +134,14 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionListsToAddTo,
       newComment,
       itemConditionValidationErrorExists,
+      errorSubmitting,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
     ...initialState,
     addExceptionToRadioSelection: isBulkAction
       ? 'add_to_rules'
-      : rules !== null && rules.length === 1
+      : rules != null && rules.length === 1
       ? 'add_to_rule'
       : 'select_rules_to_add_to',
     listType: isEndpointItem ? ExceptionListTypeEnum.ENDPOINT : ExceptionListTypeEnum.RULE_DEFAULT,
@@ -159,6 +155,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   /**
    * Reducer action dispatchers
    * */
+  const setInitialExceptionItems = useCallback(
+    (items: ExceptionsBuilderExceptionItem[]): void => {
+      dispatch({
+        type: 'setInitialExceptionItems',
+        items,
+      });
+    },
+    [dispatch]
+  );
+
   const setExceptionItemsToAdd = useCallback(
     (items: ExceptionsBuilderReturnExceptionItem[]): void => {
       dispatch({
@@ -279,13 +285,23 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     [dispatch]
   );
 
+  const setErrorSubmitting = useCallback(
+    (err: Error | null): void => {
+      dispatch({
+        type: 'setErrorSubmitting',
+        err,
+      });
+    },
+    [dispatch]
+  );
+
   useEffect((): void => {
     if (listType === ExceptionListTypeEnum.ENDPOINT && alertData != null) {
-      setExceptionItemsToAdd(
+      setInitialExceptionItems(
         defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
       );
     }
-  }, [listType, exceptionItemName, alertData, setExceptionItemsToAdd]);
+  }, [listType, exceptionItemName, alertData, setInitialExceptionItems]);
 
   const osTypesSelection = useMemo((): OsTypeArray => {
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
@@ -330,34 +346,35 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
       // Rule only would have been updated if we had to create a rule default list
       // to attach to it, all shared lists would already be referenced on the rule
-      await onConfirm(addToRules, closeSingleAlert, bulkCloseAlerts);
+      onConfirm(addToRules, closeSingleAlert, bulkCloseAlerts);
     } catch (e) {
-      onCancel(false);
+      setErrorSubmitting(e);
     }
   }, [
     submitNewExceptionItems,
-    rules,
     addExceptionToRadioSelection,
-    exceptionItems,
     exceptionItemName,
     newComment,
     exceptionListsToAddTo,
-    selectedRulesToAddTo,
-    osTypesSelection,
     listType,
-    bulkCloseAlerts,
+    osTypesSelection,
+    exceptionItems,
+    selectedRulesToAddTo,
     closeSingleAlert,
     alertData,
-    bulkCloseIndex,
+    rules,
     closeAlerts,
+    bulkCloseAlerts,
     onConfirm,
-    onCancel,
+    bulkCloseIndex,
+    setErrorSubmitting,
   ]);
 
   const isSubmitButtonDisabled = useMemo(
     (): boolean =>
       isSubmitting ||
       isClosingAlerts ||
+      errorSubmitting != null ||
       exceptionItemName.trim() === '' ||
       exceptionItems.every((item) => item.entries.length === 0) ||
       itemConditionValidationErrorExists ||
@@ -365,6 +382,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     [
       isSubmitting,
       isClosingAlerts,
+      errorSubmitting,
       exceptionItemName,
       exceptionItems,
       itemConditionValidationErrorExists,
@@ -373,21 +391,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     ]
   );
 
-  const handleDissasociationSuccess = useCallback(
-    (id: string): void => {
-      addSuccess(sharedI18n.DISSASOCIATE_LIST_SUCCESS(id));
-      onCancel(true);
-    },
-    [addSuccess, onCancel]
-  );
-
-  const handleDissasociationError = useCallback(
-    (error: Error): void => {
-      addError(error, { title: sharedI18n.DISSASOCIATE_EXCEPTION_LIST_ERROR });
-      onCancel(false);
-    },
-    [addError, onCancel]
-  );
+  const handleDismissError = useCallback((): void => {
+    setErrorSubmitting(null);
+  }, [setErrorSubmitting]);
 
   const handleCloseFlyout = useCallback((): void => {
     onCancel(false);
@@ -417,6 +423,18 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       {isLoading && <EuiLoadingContent data-test-subj="loadingAddExceptionFlyout" lines={4} />}
       {!isLoading && (
         <FlyoutBodySection className="builder-section">
+          {errorSubmitting != null && (
+            <>
+              <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="alert">
+                <EuiText>{i18n.SUBMIT_ERROR_DISMISS_MESSAGE}</EuiText>
+                <EuiSpacer size="s" />
+                <EuiButton color="danger" onClick={handleDismissError}>
+                  {i18n.SUBMIT_ERROR_DISMISS_BUTTON}
+                </EuiButton>
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
           <ExceptionsFlyoutMeta
             exceptionItemName={exceptionItemName}
             onChange={setExceptionItemMeta}
@@ -425,7 +443,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           <ExceptionsConditions
             exceptionItemName={exceptionItemName}
             allowLargeValueLists={allowLargeValueLists}
-            exceptionListItems={exceptionItems}
+            exceptionListItems={initialItems}
             exceptionListType={listType}
             indexPatterns={indexPatterns}
             rules={rules}
@@ -473,17 +491,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             </>
           )}
         </FlyoutBodySection>
-      )}
-      {false && (
-        <ErrorCallout
-          http={http}
-          errorInfo={errorsExist}
-          rule={rules}
-          onCancel={handleCloseFlyout}
-          onSuccess={handleDissasociationSuccess}
-          onError={handleDissasociationError}
-          data-test-subj="addExceptionFlyoutErrorCallout"
-        />
       )}
       <EuiFlyoutFooter>
         <FlyoutFooterGroup justifyContent="spaceBetween">

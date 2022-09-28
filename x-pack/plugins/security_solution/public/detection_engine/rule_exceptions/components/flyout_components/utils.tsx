@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
+import { pipe } from 'lodash/fp';
+
 import type { ExceptionListSchema, OsType } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
-import { pipe } from 'lodash/fp';
 
 import {
   enrichExceptionItemsWithOS,
@@ -18,6 +20,17 @@ import {
   enrichSharedExceptions,
   lowercaseHashValues,
 } from '../../utils/helpers';
+import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { RuleDetailTabs } from '../../../../detections/pages/detection_engine/rules/details';
+import { SecurityPageName } from '../../../../../common/constants';
+import { PopoverItems } from '../../../../common/components/popover_items';
+import type {
+  ExceptionListRuleReferencesInfoSchema,
+  ExceptionListRuleReferencesSchema,
+} from '../../../../../common/detection_engine/schemas/response';
+import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import * as i18n from './translations';
 
 /**
  * Adds user defined name to all new exceptionItems
@@ -160,3 +173,97 @@ export const entrichExceptionItemsForUpdate = ({
 
   return enriched;
 };
+
+/**
+ * Shared lists columns for EuiInMemoryTable
+ */
+export const getSharedListsTableColumns = () => [
+  {
+    field: 'name',
+    name: 'Name',
+    sortable: true,
+    'data-test-subj': 'exceptionListNameCell',
+  },
+  {
+    field: 'referenced_rules',
+    name: '# of rules linked to',
+    sortable: false,
+    'data-test-subj': 'exceptionListRulesLinkedToIdCell',
+    render: (references: ExceptionListRuleReferencesInfoSchema[]) => {
+      if (references.length === 0) return '0';
+
+      const renderItem = (reference: ExceptionListRuleReferencesInfoSchema, i: number) => (
+        <SecuritySolutionLinkAnchor
+          data-test-subj="referencedRuleLink"
+          deepLinkId={SecurityPageName.rules}
+          path={getRuleDetailsTabUrl(reference.id, RuleDetailTabs.alerts)}
+          external
+        >
+          {reference.name}
+        </SecuritySolutionLinkAnchor>
+      );
+
+      return (
+        <PopoverItems
+          items={references}
+          popoverButtonTitle={references.length.toString()}
+          dataTestPrefix="ruleReferences"
+          renderItem={renderItem}
+        />
+      );
+    },
+  },
+  // TODO: This will need to be updated once PR goes in with list details page
+  {
+    name: 'Actions',
+    actions: [
+      {
+        'data-test-subj': 'exceptionListRulesActionCell',
+        render: (list: ExceptionListRuleReferencesSchema) => {
+          return (
+            <SecuritySolutionLinkAnchor
+              data-test-subj="exceptionListActionCell-link"
+              deepLinkId={SecurityPageName.exceptions}
+              path={''}
+              external
+            >
+              {i18n.VIEW_LIST_DETAIL_ACTION}
+            </SecuritySolutionLinkAnchor>
+          );
+        },
+      },
+    ],
+  },
+];
+
+/**
+ * Rules columns for EuiInMemoryTable
+ */
+export const getRulesTableColumn = () => [
+  {
+    field: 'name',
+    name: 'Name',
+    sortable: true,
+    'data-test-subj': 'ruleNameCell',
+  },
+  {
+    name: 'Actions',
+    actions: [
+      {
+        'data-test-subj': 'ruleAction-view',
+        render: (rule: Rule) => {
+          return (
+            <SecuritySolutionLinkAnchor
+              data-test-subj="ruleAction-viewDetails"
+              deepLinkId={SecurityPageName.rules}
+              path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.alerts)}
+              external
+            >
+              {i18n.VIEW_RULE_DETAIL_ACTION}
+            </SecuritySolutionLinkAnchor>
+          );
+        },
+      },
+    ],
+  },
+];

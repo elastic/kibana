@@ -98,15 +98,13 @@ export const useField = ({
   const [touched, setIsTouched] = useState(false);
   const [customOption, setCustomOption] = useState<DataViewFieldBase | null>(null);
 
-  const { availableFields, selectedFields } = useMemo(
-    () => {
-      const indexPatternsToUse = customOption != null && indexPattern != null
-      ? { ...indexPattern, fields: [...indexPattern?.fields, customOption] }
-      : indexPattern;
-      return getComboBoxFields(indexPatternsToUse, selectedField, fieldTypeFilter);
-    },
-    [indexPattern, fieldTypeFilter, selectedField, customOption]
-  );
+  const { availableFields, selectedFields } = useMemo(() => {
+    const indexPatternsToUse =
+      customOption != null && indexPattern != null
+        ? { ...indexPattern, fields: [...indexPattern?.fields, customOption] }
+        : indexPattern;
+    return getComboBoxFields(indexPatternsToUse, selectedField, fieldTypeFilter);
+  }, [indexPattern, fieldTypeFilter, selectedField, customOption]);
 
   const { comboOptions, labels, selectedComboOptions, disabledLabelTooltipTexts } = useMemo(
     () => getComboBoxProps({ availableFields, selectedFields }),

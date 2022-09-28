@@ -1832,11 +1832,22 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
 
-    test('it removes `temporaryId` from items', () => {
+    test('it removes `temporaryId` from "createExceptionListItemSchema" items', () => {
       const { meta, ...rest } = getNewExceptionItem({
         listId: '123',
         name: 'rule name',
         namespaceType: 'single',
+      });
+      const exceptions = filterExceptionItems([{ ...rest, entries: [getEntryMatchMock()], meta }]);
+
+      expect(exceptions).toEqual([{ ...rest, entries: [getEntryMatchMock()], meta: undefined }]);
+    });
+
+    test('it removes `temporaryId` from "createRuleExceptionListItemSchema" items', () => {
+      const { meta, ...rest } = getNewExceptionItem({
+        listId: undefined,
+        name: 'rule name',
+        namespaceType: undefined,
       });
       const exceptions = filterExceptionItems([{ ...rest, entries: [getEntryMatchMock()], meta }]);
 

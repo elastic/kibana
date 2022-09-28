@@ -11,39 +11,7 @@ import styled, { css } from 'styled-components';
 
 import * as i18n from './translations';
 import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
-import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
-import { getRuleDetailsTabUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
-import { SecurityPageName } from '../../../../../../common/constants';
-import { RuleDetailTabs } from '../../../../../detections/pages/detection_engine/rules/details';
-
-const getAddToRulesTableColumns = () => [
-  {
-    field: 'name',
-    name: 'Name',
-    sortable: true,
-    'data-test-subj': 'ruleNameCell',
-  },
-  {
-    name: 'Actions',
-    actions: [
-      {
-        'data-test-subj': 'ruleAction-view',
-        render: (rule: Rule) => {
-          return (
-            <SecuritySolutionLinkAnchor
-              data-test-subj="ruleName"
-              deepLinkId={SecurityPageName.rules}
-              path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.alerts)}
-              external
-            >
-              {'View rule details'}
-            </SecuritySolutionLinkAnchor>
-          );
-        },
-      },
-    ],
-  },
-];
+import { getRulesTableColumn } from '../utils';
 
 interface ExceptionsLinkedToRuleComponentProps {
   rule: Rule;
@@ -60,7 +28,7 @@ const ExceptionsLinkedToRuleComponent: React.FC<ExceptionsLinkedToRuleComponentP
 }): JSX.Element => {
   return (
     <>
-      <SectionHeader size="xs">
+      <SectionHeader size="xs" data-test-subj="exceptionItemLinkedToRuleSection">
         <h3>{i18n.LINKED_TO_RULE_TITLE}</h3>
       </SectionHeader>
       <EuiSpacer size="s" />
@@ -68,7 +36,7 @@ const ExceptionsLinkedToRuleComponent: React.FC<ExceptionsLinkedToRuleComponentP
         tableCaption="Rules table"
         itemId="id"
         items={[rule]}
-        columns={getAddToRulesTableColumns()}
+        columns={getRulesTableColumn()}
         sorting
         data-test-subj="addExceptionToRulesTable"
       />

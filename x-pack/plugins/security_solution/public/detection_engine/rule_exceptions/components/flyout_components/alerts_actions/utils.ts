@@ -11,11 +11,14 @@ import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   EmptyEntry,
   EmptyListEntry,
-  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { getOperatorType } from '@kbn/securitysolution-list-utils';
 
-export const entryHasListType = (exceptionItems: ExceptionsBuilderExceptionItem[]) => {
+/**
+ * Determines if item entries has 'is in list'/'is not in list' entry
+ */
+export const entryHasListType = (exceptionItems: ExceptionsBuilderReturnExceptionItem[]) => {
   for (const { entries } of exceptionItems) {
     for (const exceptionEntry of entries ?? []) {
       if (getOperatorType(exceptionEntry) === ListOperatorTypeEnum.LIST) {
@@ -30,7 +33,7 @@ export const entryHasListType = (exceptionItems: ExceptionsBuilderExceptionItem[
  * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
  */
 export const entryHasNonEcsType = (
-  exceptionItems: ExceptionsBuilderExceptionItem[],
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
   indexPatterns: DataViewBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry | EmptyListEntry | EmptyEntry): boolean => {

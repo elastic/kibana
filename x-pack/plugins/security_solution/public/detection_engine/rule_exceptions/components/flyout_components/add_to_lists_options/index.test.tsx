@@ -49,7 +49,6 @@ describe('ExceptionsAddToListsOptions', () => {
       />
     );
 
-    // expect(wrapper.find('[data-test-subj="addToListsOptionTooltip"]').text()).toEqual();
     expect(
       wrapper.find('[data-test-subj="addToListsRadioOption"]').at(0).props().disabled
     ).toBeFalsy();

@@ -180,9 +180,9 @@ export const AFFECTED_RULES = (numRules: number) =>
     defaultMessage: 'Affects {numRules} {numRules, plural, =1 {rule} other {rules}}',
   });
 
-export const RULE_ITEM_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.exceptionItem.conditions.ruleDefaultItem',
+export const AFFECTED_LIST = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.affectedList',
   {
-    defaultMessage: 'Rule exception',
+    defaultMessage: 'Affects shared list',
   }
 );

@@ -20,7 +20,7 @@ import {
   deleteExceptionListItemById,
   fetchExceptionListsItemsByListIds,
 } from '@kbn/securitysolution-list-api';
-import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
+
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -160,7 +160,17 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [_, allReferences] = useFindExceptionListReferences(exceptionListsToQuery);
+  const [isLoadingReferences, fetchReferenceFailed, allReferences, fetchReferences] =
+    useFindExceptionListReferences();
+
+  useEffect(() => {
+    if (fetchReferences != null && exceptionListsToQuery.length) {
+      const listsToQuery = exceptionListsToQuery.map(
+        ({ id, list_id: listId, namespace_type: namespaceType }) => ({ id, listId, namespaceType })
+      );
+      fetchReferences(listsToQuery);
+    }
+  }, [exceptionListsToQuery, fetchReferences]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -296,12 +306,12 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleConfirmExceptionFlyout = useCallback(
-    async (didRuleChange: boolean): Promise<void> => {
+    (didRuleChange: boolean): void => {
       setFlyoutType(null);
       if (didRuleChange && onRuleChange != null) {
         onRuleChange();
       }
-      await handleGetExceptionListItems();
+      handleGetExceptionListItems();
     },
     [setFlyoutType, handleGetExceptionListItems, onRuleChange]
   );
@@ -342,6 +352,23 @@ const ExceptionsViewerComponent = ({
     setReadOnly(!canUserCRUD || !hasIndexWrite);
   }, [setReadOnly, canUserCRUD, hasIndexWrite]);
 
+  useEffect((): void => {
+    if (fetchReferenceFailed) {
+      setViewerState('error');
+    } else if (isLoadingReferences) {
+      setViewerState('loading');
+    } else {
+      setViewerState(null);
+    }
+  }, [
+    setReadOnly,
+    canUserCRUD,
+    hasIndexWrite,
+    fetchReferenceFailed,
+    isLoadingReferences,
+    setViewerState,
+  ]);
+
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
       handleGetExceptionListItems();
@@ -350,21 +377,30 @@ const ExceptionsViewerComponent = ({
     }
   }, [exceptionListsToQuery.length, handleGetExceptionListItems, setViewerState]);
 
+  const exceptionToEditList = useMemo(
+    () =>
+      allReferences != null && exceptionToEdit != null
+        ? allReferences[exceptionToEdit.list_id]
+        : null,
+    [allReferences, exceptionToEdit]
+  );
+console.log({currenFlyout, exceptionToEditList, rule, exceptionToEdit})
   return (
     <>
-      {currenFlyout === 'editException' && exceptionToEdit != null && rule != null && (
-        <EditExceptionFlyout
-          rule={rule}
-          list={rule.exceptions_list?.find(
-            ({ list_id: listId }) => listId === exceptionToEdit.list_id
-          )}
-          itemToEdit={exceptionToEdit}
-          showAlertCloseOptions
-          onCancel={handleCancelExceptionItemFlyout}
-          onConfirm={handleConfirmExceptionFlyout}
-          data-test-subj="editExceptionItemFlyout"
-        />
-      )}
+      {currenFlyout === 'editException' &&
+        exceptionToEditList != null &&
+        exceptionToEdit != null &&
+        rule != null && (
+          <EditExceptionFlyout
+            rule={rule}
+            list={exceptionToEditList}
+            itemToEdit={exceptionToEdit}
+            showAlertCloseOptions
+            onCancel={handleCancelExceptionItemFlyout}
+            onConfirm={handleConfirmExceptionFlyout}
+            data-test-subj="editExceptionItemFlyout"
+          />
+        )}
 
       {currenFlyout === 'addException' && rule != null && (
         <AddExceptionFlyout

@@ -73,7 +73,7 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
           (listType === ExceptionListTypeEnum.ENDPOINT || addToSharedLists) &&
           addSharedExceptions != null
         ) {
-          await addSharedExceptions({ items: itemsToAdd });
+          await addSharedExceptions(itemsToAdd);
 
           const sharedListNames = sharedLists.map(({ name }) => name);
 

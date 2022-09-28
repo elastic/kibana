@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const VIEW_RULE_DETAIL_ACTION = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.addToRulesTableSelection.loadingListsMessage',
-  {
-    defaultMessage: 'View rule detail',
-  }
-);
-
 export const ADD_TO_SELECTED_RULES_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.exceptions.flyoutComponents.addToRulesTableSelection.addToSelectedRulesDescription',
   {

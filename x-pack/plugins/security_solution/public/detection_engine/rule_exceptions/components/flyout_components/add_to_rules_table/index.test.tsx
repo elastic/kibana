@@ -53,7 +53,6 @@ describe('ExceptionsAddToRulesTable', () => {
     expect(
       wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-loading"]').exists()
     ).toBeFalsy();
-    expect(wrapper.find('td[data-test-subj="ruleNameCell"]')).toHaveLength(2);
     expect(
       wrapper.find('.euiTableRow-isSelected td[data-test-subj="ruleNameCell"]').text()
     ).toEqual('NameMy rule');

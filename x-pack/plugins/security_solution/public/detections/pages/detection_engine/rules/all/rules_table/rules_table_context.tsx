@@ -251,7 +251,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const rulesToDisplay = isInMemorySorting
     ? rules.sort(getRulesComparator(sortingOptions)).slice((page - 1) * perPage, page * perPage)
     : rules;
-console.log({filterOptions})
+
   const providerValue = useMemo(
     () => ({
       state: {
