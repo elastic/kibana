@@ -26,7 +26,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
-    "canNavigateToLens": undefined,
+    "canNavigateToLens": false,
     "params": Object {
       "listenOnChange": true,
     },
@@ -161,7 +161,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
-    "canNavigateToLens": undefined,
+    "canNavigateToLens": false,
     "params": Object {
       "listenOnChange": true,
     },
