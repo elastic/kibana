@@ -48,13 +48,16 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['minimal_read']}
         onChange={jest.fn()}
-        canCustomizeSubFeaturePrivileges={false}
+        licenseAllowsSubFeatPrivCustomization={false}
       />
     );
 
     expect(
-      wrapper.find('EuiSwitch[data-test-subj="customizeSubFeaturePrivileges"]').length
-    ).toBe(0);
+      wrapper.find('EuiSwitch[data-test-subj="customizeSubFeaturePrivileges"]').props()
+    ).toMatchObject({
+      disabled: true,
+      checked: false,
+    });
 
     expect(wrapper.find('EuiIconTip[data-test-subj="subFeaturesTip"]').length).toBe(1);
   });
@@ -82,13 +85,9 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['none']}
         onChange={jest.fn()}
-        canCustomizeSubFeaturePrivileges={true}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
-
-    expect(
-      wrapper.find('EuiSwitch[data-test-subj="customizeSubFeaturePrivileges"]').length
-    ).toBe(1);
 
     expect(wrapper.find('EuiIconTip[data-test-subj="cannotCustomizeSubFeaturesTooltip"]').length).toBe(0);
   });
@@ -116,7 +115,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['minimal_read']}
         onChange={jest.fn()}
-        canCustomizeSubFeaturePrivileges={true}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 
@@ -151,7 +150,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['read']}
         onChange={jest.fn()}
-        canCustomizeSubFeaturePrivileges={true}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 
@@ -184,7 +183,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['read']}
         onChange={jest.fn()}
-        canCustomizeSubFeaturePrivileges={true}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 
@@ -221,7 +220,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['read']}
         onChange={onChange}
-        canCustomizeSubFeaturePrivileges={true}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 
@@ -261,7 +260,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['minimal_read', 'cool_read', 'cool_toggle_2']}
         onChange={onChange}
-        canCustomizeSubFeaturePrivileges={true}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 

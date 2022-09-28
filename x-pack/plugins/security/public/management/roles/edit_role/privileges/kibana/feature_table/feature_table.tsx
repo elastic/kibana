@@ -217,7 +217,6 @@ export class FeatureTable extends Component<Props, State> {
       infoIcon: JSX.Element
     ) => {
       const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
-      const canCustomizeSubFeaturePrivileges = this.props.canCustomizeSubFeaturePrivileges;
 
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -256,7 +255,7 @@ export class FeatureTable extends Component<Props, State> {
                     this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
                   }
                   disabled={this.props.disabled}
-                  canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
+                  licenseAllowsSubFeatPrivCustomization={this.props.canCustomizeSubFeaturePrivileges}
                 />
               </div>
             </EuiAccordion>
@@ -336,14 +335,10 @@ export class FeatureTable extends Component<Props, State> {
       );
     }
 
-    const { canCustomizeSubFeaturePrivileges } = this.props;
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
-
-    const showAccordionArrow = canCustomizeSubFeaturePrivileges && hasSubFeaturePrivileges;
-
     const buttonContent = (
       <>
-        {!showAccordionArrow && <EuiIcon type="empty" size="l" />}{' '}
+        {!hasSubFeaturePrivileges && <EuiIcon type="empty" size="l" />}{' '}
         <FeatureTableCell feature={feature} />
       </>
     );
