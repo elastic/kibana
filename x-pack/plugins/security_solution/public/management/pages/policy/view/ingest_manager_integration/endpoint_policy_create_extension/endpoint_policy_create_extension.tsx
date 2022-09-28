@@ -19,6 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { useLicense } from '../../../../../../common/hooks/use_license';
 import {
   ALL_EVENTS,
   CLOUD_SECURITY,
