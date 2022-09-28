@@ -193,6 +193,11 @@ export const changeIndexPattern = createAction<{
   layerId?: string;
   dataViews: Partial<DataViewsState>;
 }>('lens/changeIndexPattern');
+export const removeDimension = createAction<{
+  layerId: string;
+  columnId: string;
+  datasourceId?: string;
+}>('lens/removeDimension');
 
 export const lensActions = {
   setState,
@@ -223,6 +228,7 @@ export const lensActions = {
   updateIndexPatterns,
   replaceIndexpattern,
   changeIndexPattern,
+  removeDimension,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -945,6 +951,59 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       state.visualization.state = activeVisualizationState;
       state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
+    },
+    [removeDimension.type]: (
+      state,
+      {
+        payload: { layerId, columnId, datasourceId },
+      }: {
+        payload: {
+          layerId: string;
+          columnId: string;
+          datasourceId?: string;
+        };
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        return state;
+      }
+
+      const activeVisualization = visualizationMap[state.visualization.activeId];
+
+      // TODO - should this logic be part of syncLinkedDimensionsFunction?
+      // const links = activeVisualization.getLinkedDimensions?.(state.visualization.state);
+
+      // const linkedDimension = links?.find(
+      //   ({ from: { columnId: fromId } }) => columnId === fromId
+      // )?.to;
+
+      const datasource = datasourceId ? datasourceMap[datasourceId] : undefined;
+
+      const frame = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+
+      const remove = (dimensionProps: { layerId: string; columnId: string }) => {
+        if (datasource && datasourceId) {
+          state.datasourceStates[datasourceId].state = datasource?.removeColumn({
+            layerId: dimensionProps.layerId,
+            columnId: dimensionProps.columnId,
+            prevState: current(state.datasourceStates[datasourceId].state),
+            indexPatterns: frame.dataViews.indexPatterns,
+          });
+        }
+
+        state.visualization.state = activeVisualization.removeDimension({
+          layerId: dimensionProps.layerId,
+          columnId: dimensionProps.columnId,
+          prevState: current(state.visualization.state),
+          frame,
+        });
+      };
+
+      remove({ layerId, columnId });
+
+      // if (linkedDimension && linkedDimension.columnId) {
+      //   remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId });
+      // }
     },
   });
 };

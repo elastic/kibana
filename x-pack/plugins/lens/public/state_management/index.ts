@@ -43,6 +43,7 @@ export const {
   cloneLayer,
   addLayer,
   setLayerDefaultDimension,
+  removeDimension,
 } = lensActions;
 
 export const makeConfigureStore = (

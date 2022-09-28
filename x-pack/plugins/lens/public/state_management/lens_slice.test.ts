@@ -19,12 +19,13 @@ import {
   LensRootStore,
   selectTriggerApplyChanges,
   selectChangesApplied,
+  removeDimension,
 } from '.';
 import { layerTypes } from '../../common';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
-import { DatasourceMap, Visualization, VisualizationMap } from '../types';
+import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../types';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
-import { LensAppState } from './types';
+import { DataViewsState, LensAppState } from './types';
 
 describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;
@@ -321,6 +322,126 @@ describe('lensSlice', () => {
         expect(state.datasourceStates.testDatasource.state).toEqual([]);
         expect(state.datasourceStates.testDatasource2.state).toEqual(['layer2']);
         expect(state.stagedPreview).not.toBeDefined();
+      });
+    });
+
+    describe('removing a dimension', () => {
+      const colToRemove = 'col-id';
+      const otherCol = 'other-col-id';
+      const datasourceId = 'testDatasource';
+
+      interface DatasourceState {
+        cols: string[];
+      }
+
+      const datasourceStates = {
+        [datasourceId]: {
+          isLoading: false,
+          state: {
+            cols: [colToRemove, otherCol],
+          } as DatasourceState,
+        },
+      };
+
+      const datasourceMap = {
+        [datasourceId]: {
+          id: datasourceId,
+          removeColumn: jest.fn(({ prevState: state, columnId }) => ({
+            ...(state as DatasourceState),
+            cols: (state as DatasourceState).cols.filter((id) => id !== columnId),
+          })),
+          getLayers: () => [],
+        } as Partial<Datasource>,
+      };
+
+      const activeVisId = 'testVis';
+
+      const visualizationMap = {
+        [activeVisId]: {
+          removeDimension: jest.fn(({ prevState, columnId }) =>
+            (prevState as string[]).filter((id) => id !== columnId)
+          ),
+        } as Partial<Visualization>,
+      };
+
+      const visualizationState = [colToRemove, otherCol];
+
+      const dataViews = { indexPatterns: {} } as DataViewsState;
+
+      const layerId = 'some-layer-id';
+
+      let customStore: LensRootStore;
+      beforeEach(() => {
+        customStore = makeLensStore({
+          preloadedState: {
+            activeDatasourceId: datasourceId,
+            datasourceStates,
+            visualization: {
+              activeId: activeVisId,
+              state: visualizationState,
+            },
+            dataViews,
+          } as Partial<LensAppState>,
+          storeDeps: mockStoreDeps({
+            visualizationMap: visualizationMap as unknown as VisualizationMap,
+            datasourceMap: datasourceMap as unknown as DatasourceMap,
+          }),
+        }).store;
+
+        jest.clearAllMocks();
+      });
+
+      it('removes a dimension', () => {
+        customStore.dispatch(
+          removeDimension({
+            layerId,
+            columnId: colToRemove,
+            datasourceId,
+          })
+        );
+
+        const state = customStore.getState().lens;
+
+        expect(datasourceMap[datasourceId].removeColumn).toHaveBeenCalledWith({
+          layerId,
+          columnId: colToRemove,
+          prevState: datasourceStates[datasourceId].state,
+          indexPatterns: dataViews.indexPatterns,
+        });
+        expect(visualizationMap[activeVisId].removeDimension).toHaveBeenCalledWith(
+          expect.objectContaining({
+            layerId,
+            columnId: colToRemove,
+            prevState: visualizationState,
+          })
+        );
+        expect(state.visualization.state).toEqual([otherCol]);
+        expect((state.datasourceStates[datasourceId].state as DatasourceState).cols).toEqual([
+          otherCol,
+        ]);
+      });
+
+      it('removes a dimension without touching the datasource', () => {
+        customStore.dispatch(
+          removeDimension({
+            layerId,
+            columnId: colToRemove,
+            datasourceId: undefined,
+          })
+        );
+
+        const state = customStore.getState().lens;
+
+        expect(datasourceMap[datasourceId].removeColumn).not.toHaveBeenCalled();
+
+        expect(visualizationMap[activeVisId].removeDimension).toHaveBeenCalledWith(
+          expect.objectContaining({
+            layerId,
+            columnId: colToRemove,
+            prevState: visualizationState,
+          })
+        );
+        expect(state.visualization.state).toEqual([otherCol]);
       });
     });
   });

@@ -102,6 +102,7 @@ describe('LayerPanel', () => {
       addLayer: jest.fn(),
       onRemoveLayer: jest.fn(),
       onCloneLayer: jest.fn(),
+      onRemoveDimension: jest.fn(),
       dispatch: jest.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
@@ -428,9 +429,6 @@ describe('LayerPanel', () => {
     });
 
     it('should remove the dimension when the datasource marks it as removed', async () => {
-      const updateAll = jest.fn();
-      const updateDatasource = jest.fn();
-
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -444,37 +442,31 @@ describe('LayerPanel', () => {
         ],
       });
 
-      const { instance } = await mountWithProvider(
-        <LayerPanel
-          {...getDefaultProps()}
-          updateDatasource={updateDatasource}
-          updateAll={updateAll}
-        />,
-        {
-          preloadedState: {
-            datasourceStates: {
-              testDatasource: {
-                isLoading: false,
-                state: {
-                  layers: [
-                    {
-                      indexPatternId: '1',
-                      columns: {
-                        y: {
-                          operationType: 'moving_average',
-                          references: ['ref'],
-                        },
+      const props = getDefaultProps();
+      const { instance } = await mountWithProvider(<LayerPanel {...props} />, {
+        preloadedState: {
+          datasourceStates: {
+            testDatasource: {
+              isLoading: false,
+              state: {
+                layers: [
+                  {
+                    indexPatternId: '1',
+                    columns: {
+                      y: {
+                        operationType: 'moving_average',
+                        references: ['ref'],
                       },
-                      columnOrder: ['y'],
-                      incompleteColumns: {},
                     },
-                  ],
-                },
+                    columnOrder: ['y'],
+                    incompleteColumns: {},
+                  },
+                ],
               },
             },
           },
-        }
-      );
+        },
+      });
 
       act(() => {
         instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').last().simulate('click');
@@ -503,12 +495,10 @@ describe('LayerPanel', () => {
           }
         );
       });
-      expect(updateAll).toHaveBeenCalled();
-      expect(mockVisualization.removeDimension).toHaveBeenCalledWith(
-        expect.objectContaining({
-          columnId: 'y',
-        })
-      );
+      expect(props.onRemoveDimension).toHaveBeenCalledWith({
+        layerId: props.layerId,
+        columnId: 'y',
+      });
     });
 
     it('should keep the DimensionContainer open when configuring a new dimension', async () => {

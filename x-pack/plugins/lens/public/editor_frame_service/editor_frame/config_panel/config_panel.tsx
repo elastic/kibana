@@ -13,7 +13,7 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import { LayerType } from '../../../../common';
-import { changeIndexPattern } from '../../../state_management/lens_slice';
+import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
@@ -267,6 +267,11 @@ export function LayerPanels(
               })
             );
             removeLayerRef(layerId);
+          }}
+          onRemoveDimension={(dimensionProps) => {
+            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
+            const datasourceId = datasourcePublicAPI?.datasourceId;
+            dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
           }}
           toggleFullscreen={toggleFullscreen}
           indexPatternService={indexPatternService}
