@@ -11,11 +11,13 @@ import { formatValues, filterObjects } from './format_values';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { EditAlertRule } from '../../../../../alerting/ml_alerting_flyout';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 
 export function extractJobDetails(job, basePath, refreshJobList) {
   if (Object.keys(job).length === 0) {
     return {};
   }
+  const canGetCalendars = checkPermission('canGetCalendars');
 
   const general = {
     id: 'general',
@@ -75,11 +77,19 @@ export function extractJobDetails(job, basePath, refreshJobList) {
     items: [],
   };
   if (job.calendars) {
-    calendars.items = job.calendars.map((c) => [
+    calendars.items = job.calendars.map((calendarId) => [
       '',
-      <EuiLink href={basePath.prepend(`/app/ml/settings/calendars_list/edit_calendar/${c}?_g=()`)}>
-        {c}
-      </EuiLink>,
+      canGetCalendars === true ? (
+        <EuiLink
+          href={basePath.prepend(
+            `/app/ml/settings/calendars_list/edit_calendar/${calendarId}?_g=()`
+          )}
+        >
+          {calendarId}
+        </EuiLink>
+      ) : (
+        calendarId
+      ),
     ]);
     // remove the calendars list from the general section
     // so not to show it twice.

@@ -24,8 +24,6 @@ export const userMlCapabilities = {
   // Anomaly Detection
   canGetJobs: false,
   canGetDatafeeds: false,
-  // Calendars
-  canGetCalendars: false,
   // File Data Visualizer
   canFindFileStructure: false,
   // Data Frame Analytics
@@ -55,12 +53,12 @@ export const adminMlCapabilities = {
   canStartStopDatafeed: false,
   canUpdateDatafeed: false,
   canPreviewDatafeed: false,
-  // Filters
-  canGetFilters: false,
   // Calendars
+  canGetCalendars: false,
   canCreateCalendar: false,
   canDeleteCalendar: false,
   // Filters
+  canGetFilters: false,
   canCreateFilter: false,
   canDeleteFilter: false,
   // Data Frame Analytics
