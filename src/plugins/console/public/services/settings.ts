@@ -49,21 +49,23 @@ enum SettingKeys {
 export class Settings {
   constructor(private readonly storage: Storage) {
     // Migration from old settings to new ones
-    this.migrateSettings();
+    this.addMigrationRule('is_history_disabled', SettingKeys.IS_HISTORY_ENABLED, (value: any) => {
+      return !value;
+    });
+    this.addMigrationRule(
+      'is_keyboard_shortcuts_disabled',
+      SettingKeys.IS_KEYBOARD_SHORTCUTS_ENABLED,
+      (value: any) => {
+        return !value;
+      }
+    );
   }
 
-  private migrateSettings() {
-    // Migrate old settings to new ones
-    const isHistoryDisabled = this.storage.get('is_history_disabled');
-    if (isHistoryDisabled !== undefined) {
-      this.setIsHistoryEnabled(!isHistoryDisabled);
-      this.storage.delete('is_history_disabled');
-    }
-
-    const isKeyboardShortcutsDisabled = this.storage.get('is_keyboard_shortcuts_disabled');
-    if (isKeyboardShortcutsDisabled !== undefined) {
-      this.setIsKeyboardShortcutsEnabled(!isKeyboardShortcutsDisabled);
-      this.storage.delete('is_keyboard_shortcuts_disabled');
+  private addMigrationRule(previousKey: string, newKey: string, migration: (value: any) => any) {
+    const value = this.storage.get(previousKey);
+    if (value !== undefined) {
+      this.storage.set(newKey, migration(value));
+      this.storage.delete(previousKey);
     }
   }
 
