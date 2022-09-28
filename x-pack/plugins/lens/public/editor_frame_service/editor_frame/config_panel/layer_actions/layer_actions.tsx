@@ -35,6 +35,7 @@ export const getSharedActions = ({
   layerType,
   activeVisualization,
   isOnlyLayer,
+  isTextBasedLanguage,
   onCloneLayer,
   onRemoveLayer,
 }: {
@@ -44,12 +45,14 @@ export const getSharedActions = ({
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
   layerType?: LayerType;
+  isTextBasedLanguage?: boolean;
   core: Pick<CoreStart, 'overlays' | 'theme'>;
 }) => [
   getCloneLayerAction({
     execute: onCloneLayer,
     layerIndex,
     activeVisualization,
+    isTextBasedLanguage,
   }),
   getRemoveLayerAction({
     execute: onRemoveLayer,

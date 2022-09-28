@@ -308,6 +308,8 @@ export function LayerPanel(
   );
 
   const { dataViews } = props.framePublicAPI;
+  const [datasource] = Object.values(framePublicAPI.datasourceLayers);
+  const isTextBasedLanguage = Boolean(datasource?.isTextBasedLanguage());
 
   const compatibleActions = useMemo(
     () =>
@@ -323,6 +325,7 @@ export function LayerPanel(
           layerIndex,
           layerType: activeVisualization.getLayerType(layerId, visualizationState),
           isOnlyLayer,
+          isTextBasedLanguage,
           onCloneLayer,
           onRemoveLayer,
         }),
@@ -331,6 +334,7 @@ export function LayerPanel(
       activeVisualization,
       core,
       isOnlyLayer,
+      isTextBasedLanguage,
       layerId,
       layerIndex,
       onCloneLayer,
