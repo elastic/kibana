@@ -6,9 +6,10 @@
  */
 import React from 'react';
 import { useParams, Redirect } from 'react-router-dom';
+import { capitalize } from 'lodash';
 
 import { getCustomIntegrationsStart } from '../../../../../../services/custom_integrations';
-import { useLink } from '../../../../../../hooks';
+import { useLink, useBreadcrumbs } from '../../../../hooks';
 export interface CustomLanguageClientsParams {
   pkgkey: string;
 }
@@ -20,6 +21,7 @@ export interface CustomLanguageClientsParams {
 export const CustomLanguagesOverview = () => {
   const { pkgkey } = useParams<CustomLanguageClientsParams>();
   const { getPath } = useLink();
+  useBreadcrumbs('integration_details_overview', { pkgTitle: capitalize(pkgkey) });
 
   const Component = getCustomIntegrationsStart().languageClientsUiComponents[pkgkey];
 
