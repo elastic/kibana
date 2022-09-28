@@ -743,6 +743,8 @@ packages/core/http/core-http-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-common @elastic/kibana-core
 packages/core/http/core-http-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
+packages/core/http/core-http-request-handler-context-server @elastic/kibana-core
+packages/core/http/core-http-request-handler-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server @elastic/kibana-core
