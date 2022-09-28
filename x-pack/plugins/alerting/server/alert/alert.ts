@@ -23,7 +23,6 @@ interface ScheduledExecutionOptions<
   ActionGroupIds extends string = DefaultActionGroupId
 > {
   actionGroup: ActionGroupIds;
-  subgroup?: string;
   context: Context;
   state: State;
 }
@@ -34,13 +33,7 @@ export type PublicAlert<
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
   Alert<State, Context, ActionGroupIds>,
-  | 'getState'
-  | 'replaceState'
-  | 'scheduleActions'
-  | 'scheduleActionsWithSubGroup'
-  | 'setContext'
-  | 'getContext'
-  | 'hasContext'
+  'getState' | 'replaceState' | 'scheduleActions' | 'setContext' | 'getContext' | 'hasContext'
 >;
 
 export class Alert<
@@ -80,10 +73,6 @@ export class Alert<
         this.meta.lastScheduledActions,
         this.scheduledExecutionOptions
       ) &&
-      this.scheduledActionSubgroupIsUnchanged(
-        this.meta.lastScheduledActions,
-        this.scheduledExecutionOptions
-      ) &&
       this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now()
     ) {
       return true;
@@ -91,7 +80,7 @@ export class Alert<
     return false;
   }
 
-  scheduledActionGroupOrSubgroupHasChanged(): boolean {
+  scheduledActionGroupHasChanged(): boolean {
     if (!this.meta.lastScheduledActions && this.scheduledExecutionOptions) {
       // it is considered a change when there are no previous scheduled actions
       // and new scheduled actions
@@ -100,18 +89,11 @@ export class Alert<
 
     if (this.meta.lastScheduledActions && this.scheduledExecutionOptions) {
       // compare previous and new scheduled actions if both exist
-      return (
-        !this.scheduledActionGroupIsUnchanged(
-          this.meta.lastScheduledActions,
-          this.scheduledExecutionOptions
-        ) ||
-        !this.scheduledActionSubgroupIsUnchanged(
-          this.meta.lastScheduledActions,
-          this.scheduledExecutionOptions
-        )
+      return !this.scheduledActionGroupIsUnchanged(
+        this.meta.lastScheduledActions,
+        this.scheduledExecutionOptions
       );
     }
-
     // no previous and no new scheduled actions
     return false;
   }
@@ -121,15 +103,6 @@ export class Alert<
     scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
   ) {
     return lastScheduledActions.group === scheduledExecutionOptions.actionGroup;
-  }
-
-  private scheduledActionSubgroupIsUnchanged(
-    lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
-    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
-  ) {
-    return lastScheduledActions.subgroup && scheduledExecutionOptions.subgroup
-      ? lastScheduledActions.subgroup === scheduledExecutionOptions.subgroup
-      : true;
   }
 
   getLastScheduledActions() {
@@ -168,22 +141,6 @@ export class Alert<
     return this;
   }
 
-  scheduleActionsWithSubGroup(
-    actionGroup: ActionGroupIds,
-    subgroup: string,
-    context: Context = {} as Context
-  ) {
-    this.ensureHasNoScheduledActions();
-    this.setContext(context);
-    this.scheduledExecutionOptions = {
-      actionGroup,
-      subgroup,
-      context,
-      state: this.state,
-    };
-    return this;
-  }
-
   setContext(context: Context) {
     this.context = context;
     return this;
@@ -200,8 +157,8 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds, subgroup?: string) {
-    this.meta.lastScheduledActions = { group, subgroup, date: new Date() };
+  updateLastScheduledActions(group: ActionGroupIds) {
+    this.meta.lastScheduledActions = { group, date: new Date() };
   }
 
   /**

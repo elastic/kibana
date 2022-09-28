@@ -156,21 +156,18 @@ describe('getAlertSummary()', () => {
         "alerts": Object {
           "alert-currently-active": Object {
             "actionGroupId": "action group A",
-            "actionSubgroup": undefined,
             "activeStartDate": "2019-02-12T21:01:22.479Z",
             "muted": false,
             "status": "Active",
           },
           "alert-muted-no-activity": Object {
             "actionGroupId": undefined,
-            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
           "alert-previously-active": Object {
             "actionGroupId": undefined,
-            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",

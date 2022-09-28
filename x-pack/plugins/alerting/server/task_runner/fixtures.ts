@@ -178,7 +178,7 @@ export const mockTaskInstance = () => ({
   ownerId: null,
 });
 
-export const generateAlertOpts = ({ action, group, subgroup, state, id }: GeneratorParams = {}) => {
+export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams = {}) => {
   id = id ?? '1';
   let message: string = '';
   switch (action) {
@@ -186,9 +186,7 @@ export const generateAlertOpts = ({ action, group, subgroup, state, id }: Genera
       message = `test:1: 'rule-name' created new alert: '${id}'`;
       break;
     case EVENT_LOG_ACTIONS.activeInstance:
-      message = subgroup
-        ? `test:1: 'rule-name' active alert: '${id}' in actionGroup(subgroup): 'default(${subgroup})'`
-        : `test:1: 'rule-name' active alert: '${id}' in actionGroup: 'default'`;
+      message = `test:1: 'rule-name' active alert: '${id}' in actionGroup: 'default'`;
       break;
     case EVENT_LOG_ACTIONS.recoveredInstance:
       message = `test:1: 'rule-name' alert '${id}' has recovered`;
@@ -200,21 +198,14 @@ export const generateAlertOpts = ({ action, group, subgroup, state, id }: Genera
     message,
     state,
     ...(group ? { group } : {}),
-    ...(subgroup ? { subgroup } : {}),
   };
 };
 
-export const generateActionOpts = ({
-  subgroup,
-  id,
-  alertGroup,
-  alertId,
-}: GeneratorParams = {}) => ({
+export const generateActionOpts = ({ id, alertGroup, alertId }: GeneratorParams = {}) => ({
   id: id ?? '1',
   typeId: 'action',
   alertId: alertId ?? '1',
   alertGroup: alertGroup ?? 'default',
-  ...(subgroup ? { alertSubgroup: subgroup } : {}),
 });
 
 export const generateRunnerResult = ({
@@ -280,7 +271,6 @@ export const generateAlertInstance = ({ id, duration, start }: GeneratorParams =
       lastScheduledActions: {
         date: new Date(DATE_1970),
         group: 'default',
-        subgroup: undefined,
       },
     },
     state: {

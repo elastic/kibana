@@ -59,9 +59,8 @@ const contextWithName = { ...contextWithScheduleDelay, ruleName: 'my-super-cool-
 const alert = {
   action: EVENT_LOG_ACTIONS.activeInstance,
   id: 'aaabbb',
-  message: `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup'; actionSubGroup: 'bSubGroup'`,
+  message: `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`,
   group: 'aGroup',
-  subgroup: 'bSubgroup',
   state: {
     start: '2020-01-01T02:00:00.000Z',
     end: '2020-01-01T03:00:00.000Z',
@@ -74,7 +73,6 @@ const action = {
   typeId: '.email',
   alertId: '123',
   alertGroup: 'aGroup',
-  alertSubgroup: 'bSubgroup',
 };
 
 describe('AlertingEventLogger', () => {
@@ -1006,14 +1004,13 @@ describe('createAlertRecord', () => {
     expect(record.event?.end).toEqual(alert.state.end);
     expect(record.event?.duration).toEqual(alert.state.duration);
     expect(record.message).toEqual(
-      `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup'; actionSubGroup: 'bSubGroup'`
+      `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`
     );
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
     expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
     expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
     expect(record.kibana?.alerting?.instance_id).toEqual(alert.id);
     expect(record.kibana?.alerting?.action_group_id).toEqual(alert.group);
-    expect(record.kibana?.alerting?.action_subgroup).toEqual(alert.subgroup);
     expect(record.kibana?.saved_objects).toEqual([
       {
         id: contextWithName.ruleId,
@@ -1059,14 +1056,13 @@ describe('createActionExecuteRecord', () => {
     expect(record.event?.kind).toEqual('alert');
     expect(record.event?.category).toEqual([contextWithName.ruleType.producer]);
     expect(record.message).toEqual(
-      `alert: test:123: 'my-super-cool-rule' instanceId: '123' scheduled actionGroup(subgroup): 'aGroup(bSubgroup)' action: .email:abc`
+      `alert: test:123: 'my-super-cool-rule' instanceId: '123' scheduled actionGroup: 'aGroup' action: .email:abc`
     );
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
     expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
     expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
     expect(record.kibana?.alerting?.instance_id).toEqual(action.alertId);
     expect(record.kibana?.alerting?.action_group_id).toEqual(action.alertGroup);
-    expect(record.kibana?.alerting?.action_subgroup).toEqual(action.alertSubgroup);
     expect(record.kibana?.saved_objects).toEqual([
       {
         id: contextWithName.ruleId,
