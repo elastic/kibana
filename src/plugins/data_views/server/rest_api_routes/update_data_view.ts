@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../common/data_views';
+import { DataViewsService, DataView } from '../../common/data_views';
 import { DataViewSpec } from '../../common/types';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
@@ -71,46 +71,46 @@ export const updateDataView = async ({
     name,
   } = spec;
 
-  let changeCount = 0;
+  let isChanged = false;
   let doRefreshFields = false;
 
   if (title !== undefined && title !== dataView.title) {
-    changeCount++;
+    isChanged = true;
     dataView.title = title;
   }
 
   if (timeFieldName !== undefined && timeFieldName !== dataView.timeFieldName) {
-    changeCount++;
+    isChanged = true;
     dataView.timeFieldName = timeFieldName;
   }
 
   if (sourceFilters !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.sourceFilters = sourceFilters;
   }
 
   if (fieldFormats !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.fieldFormatMap = fieldFormats;
   }
 
   if (type !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.type = type;
   }
 
   if (typeMeta !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.typeMeta = typeMeta;
   }
 
   if (name !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.name = name;
   }
 
   if (fields !== undefined) {
-    changeCount++;
+    isChanged = true;
     doRefreshFields = true;
     dataView.fields.replaceAll(
       Object.values(fields || {}).map((field) => ({
@@ -122,19 +122,19 @@ export const updateDataView = async ({
   }
 
   if (runtimeFieldMap !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.replaceAllRuntimeFields(runtimeFieldMap);
   }
 
-  if (changeCount < 1) {
-    throw new Error('Index pattern change set is empty.');
+  if (isChanged) {
+    const result = (await dataViewsService.updateSavedObject(dataView)) as DataView;
+
+    if (doRefreshFields && refreshFields) {
+      await dataViewsService.refreshFields(dataView);
+    }
+    return result;
   }
 
-  await dataViewsService.updateSavedObject(dataView);
-
-  if (doRefreshFields && refreshFields) {
-    await dataViewsService.refreshFields(dataView);
-  }
   return dataView;
 };
 
