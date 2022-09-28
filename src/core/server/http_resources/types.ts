@@ -15,7 +15,7 @@ import type {
   KibanaResponseFactory,
   RequestHandler,
 } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '..';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 
 /**
  * Allows to configure HTTP response parameters

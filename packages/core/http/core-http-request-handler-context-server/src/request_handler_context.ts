@@ -6,16 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { RequestHandlerContextBase } from '@kbn/core-http-server';
 import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
-import { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
-import { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
 import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
-import { CoreDeprecationsRouteHandlerContext } from '@kbn/core-deprecations-server-internal';
 import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
-import { CoreUiSettingsRouteHandlerContext } from '@kbn/core-ui-settings-server-internal';
-import type { InternalCoreStart } from './internal_types';
 
 /**
  * The `core` context provided to route handler.
@@ -39,27 +34,19 @@ export interface CoreRequestHandlerContext {
 }
 
 /**
- * The concrete implementation for Core's route handler context.
+ * Base context passed to a route handler, containing the `core` context part.
  *
- * @internal
+ * @public
  */
-export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
-  readonly elasticsearch: CoreElasticsearchRouteHandlerContext;
-  readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
-  readonly uiSettings: CoreUiSettingsRouteHandlerContext;
-  readonly deprecations: CoreDeprecationsRouteHandlerContext;
-
-  constructor(coreStart: InternalCoreStart, request: KibanaRequest) {
-    this.elasticsearch = new CoreElasticsearchRouteHandlerContext(coreStart.elasticsearch, request);
-    this.savedObjects = new CoreSavedObjectsRouteHandlerContext(coreStart.savedObjects, request);
-    this.uiSettings = new CoreUiSettingsRouteHandlerContext(
-      coreStart.uiSettings,
-      this.savedObjects
-    );
-    this.deprecations = new CoreDeprecationsRouteHandlerContext(
-      coreStart.deprecations,
-      this.elasticsearch,
-      this.savedObjects
-    );
-  }
+export interface RequestHandlerContext extends RequestHandlerContextBase {
+  core: Promise<CoreRequestHandlerContext>;
 }
+
+/**
+ * Mixin allowing plugins to define their own request handler contexts.
+ *
+ * @public
+ */
+export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
+  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};

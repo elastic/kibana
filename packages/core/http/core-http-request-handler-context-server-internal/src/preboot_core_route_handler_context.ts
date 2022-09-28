@@ -8,13 +8,17 @@
 
 // eslint-disable-next-line max-classes-per-file
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { InternalCorePreboot } from './internal_types';
+import type {
+  PrebootUiSettingsRequestHandlerContext,
+  PrebootCoreRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
+import type { InternalUiSettingsServicePreboot } from '@kbn/core-ui-settings-server-internal';
 
 /**
- * @public
+ * @internal
  */
-export interface PrebootUiSettingsRequestHandlerContext {
-  client: IUiSettingsClient;
+export interface PrebootCoreRouteHandlerContextParams {
+  uiSettings: InternalUiSettingsServicePreboot;
 }
 
 /**
@@ -26,20 +30,13 @@ class PrebootCoreUiSettingsRouteHandlerContext implements PrebootUiSettingsReque
 }
 
 /**
- * @public
- */
-export interface PrebootCoreRequestHandlerContext {
-  uiSettings: PrebootUiSettingsRequestHandlerContext;
-}
-
-/**
  * Implementation of {@link PrebootCoreRequestHandlerContext}.
  * @internal
  */
 export class PrebootCoreRouteHandlerContext implements PrebootCoreRequestHandlerContext {
   readonly uiSettings: PrebootUiSettingsRequestHandlerContext;
 
-  constructor(private readonly corePreboot: InternalCorePreboot) {
+  constructor(private readonly corePreboot: PrebootCoreRouteHandlerContextParams) {
     this.uiSettings = new PrebootCoreUiSettingsRouteHandlerContext(
       this.corePreboot.uiSettings.createDefaultsClient()
     );
