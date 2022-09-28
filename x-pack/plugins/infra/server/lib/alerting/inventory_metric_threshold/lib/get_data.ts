@@ -27,12 +27,12 @@ type Response = Record<string, {
   value: number | null;
   warn: boolean;
   trigger: boolean;
-  cloud?: EcsFieldsResponse | undefined;
-  host?: EcsFieldsResponse | undefined;
+  cloud?: EcsFieldsResponse;
+  host?: EcsFieldsResponse;
   container?: EcsFieldsResponse;
-  orchestrator?: EcsFieldsResponse | undefined;
-  labels?: EcsFieldsResponse | undefined;
-  tags?: EcsFieldsResponse | undefined;
+  orchestrator?: EcsFieldsResponse;
+  labels?: EcsFieldsResponse;
+  tags?: EcsFieldsResponse;
 }>;
 
 type Metric = Record<string, { value: number | null }>;
