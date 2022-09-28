@@ -19,17 +19,6 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
-type ServiceOverviewContainerMetadataDetails =
-  | {
-      kubernetes: {
-        deployments?: string[];
-        replicasets?: string[];
-        namespaces?: string[];
-        containerImages?: string[];
-      };
-    }
-  | undefined;
-
 export const getServiceOverviewContainerMetadata = async ({
   infraMetricsClient,
   containerIds,
@@ -40,7 +29,7 @@ export const getServiceOverviewContainerMetadata = async ({
   containerIds: string[];
   start: number;
   end: number;
-}): Promise<ServiceOverviewContainerMetadataDetails> => {
+}) => {
   const should = [
     { exists: { field: KUBERNETES } },
     { exists: { field: CONTAINER_IMAGE } },
