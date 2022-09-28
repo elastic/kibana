@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { capitalize, isEmpty, sortBy } from 'lodash';
+import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import {
@@ -206,20 +207,31 @@ export const RulesList = ({
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
 
+  // TODO - tech debt: Right now we're using null and undefined to determine if we should
+  // render the bulk edit modal. Refactor this to only keep track of 1 set of rules and types
+  // to determine which modal to show
   const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
-  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<string>('');
+  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<KueryNode | null | undefined>();
 
   const [rulesToUnsnooze, setRulesToUnsnooze] = useState<RuleTableItem[]>([]);
-  const [rulesToUnsnoozeFilter, setRulesToUnsnoozeFilter] = useState<string>('');
+  const [rulesToUnsnoozeFilter, setRulesToUnsnoozeFilter] = useState<
+    KueryNode | null | undefined
+  >();
 
   const [rulesToSchedule, setRulesToSchedule] = useState<RuleTableItem[]>([]);
-  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<string>('');
+  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<
+    KueryNode | null | undefined
+  >();
 
   const [rulesToUnschedule, setRulesToUnschedule] = useState<RuleTableItem[]>([]);
-  const [rulesToUnscheduleFilter, setRulesToUnscheduleFilter] = useState<string>('');
+  const [rulesToUnscheduleFilter, setRulesToUnscheduleFilter] = useState<
+    KueryNode | null | undefined
+  >();
 
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
-  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<string>('');
+  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<
+    KueryNode | null | undefined
+  >();
 
   const [isSnoozingRules, setIsSnoozingRules] = useState<boolean>(false);
   const [isSchedulingRules, setIsSchedulingRules] = useState<boolean>(false);
@@ -586,6 +598,12 @@ export const RulesList = ({
   } = useBulkEditSelect({
     totalItemCount: rulesState.totalItemCount,
     items: tableItems,
+    searchText,
+    typesFilter: rulesTypesFilter,
+    actionTypesFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+    tagsFilter,
   });
 
   const authorizedToModifySelectedRules = useMemo(() => {
@@ -602,27 +620,27 @@ export const RulesList = ({
 
   const clearRulesToSnooze = () => {
     setRulesToSnooze([]);
-    setRulesToSnoozeFilter('');
+    setRulesToSnoozeFilter(undefined);
   };
 
   const clearRulesToUnsnooze = () => {
     setRulesToUnsnooze([]);
-    setRulesToUnsnoozeFilter('');
+    setRulesToUnsnoozeFilter(undefined);
   };
 
   const clearRulesToSchedule = () => {
     setRulesToSchedule([]);
-    setRulesToScheduleFilter('');
+    setRulesToScheduleFilter(undefined);
   };
 
   const clearRulesToUnschedule = () => {
     setRulesToUnschedule([]);
-    setRulesToUnscheduleFilter('');
+    setRulesToUnscheduleFilter(undefined);
   };
 
   const clearRulesToUpdateAPIKey = () => {
     setRulesToUpdateAPIKey([]);
-    setRulesToUpdateAPIKeyFilter('');
+    setRulesToUpdateAPIKeyFilter(undefined);
   };
 
   const isRulesTableLoading = useMemo(() => {

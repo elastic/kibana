@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
+import { KueryNode } from '@kbn/es-query';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { BulkEditResponse } from '../../../types';
 
@@ -26,7 +27,7 @@ export async function unsnoozeRule({
 
 export interface BulkUnsnoozeRulesProps {
   ids?: string[];
-  filter?: string;
+  filter?: KueryNode | null | undefined;
   scheduleIds?: string[];
 }
 
@@ -40,7 +41,7 @@ export function bulkUnsnoozeRules({
   try {
     body = JSON.stringify({
       ids: ids?.length ? ids : undefined,
-      filter,
+      ...(filter ? { filter: JSON.stringify(filter) } : {}),
       operations: [
         {
           operation: 'delete',
