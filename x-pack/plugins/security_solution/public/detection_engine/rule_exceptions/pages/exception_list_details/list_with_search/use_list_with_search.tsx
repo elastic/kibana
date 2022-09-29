@@ -59,8 +59,11 @@ export const useListWithSearchComponent = (list: ExceptionListSchema) => {
       setPagination(paginationResult);
       setLastUpdated(Date.now());
 
-      if (viewStatus === ViewerStatus.EMPTY_SEARCH) setViewerStatus(!dataLength ? viewStatus : '');
-      else setViewerStatus(!dataLength ? ViewerStatus.EMPTY : '');
+      setTimeout(() => {
+        if (viewStatus === ViewerStatus.EMPTY_SEARCH)
+          setViewerStatus(!dataLength ? viewStatus : '');
+        else setViewerStatus(!dataLength ? ViewerStatus.EMPTY : '');
+      }, 200);
     },
     [setPagination]
   );
@@ -84,8 +87,7 @@ export const useListWithSearchComponent = (list: ExceptionListSchema) => {
 
   useEffect(() => {
     fetchItems(null, ViewerStatus.LOADING);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchItems]);
 
   const emptyViewerTitle = useMemo(() => {
     return viewerStatus === ViewerStatus.EMPTY ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE : '';
