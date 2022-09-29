@@ -6,6 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
+import type { Mitre } from '../../objects/rule';
 import { getIndexPatterns, getNewThresholdRule } from '../../objects/rule';
 
 import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
@@ -60,13 +61,15 @@ import {
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
+import type { CompleteTimeline } from '../../objects/timeline';
 
 describe('Detection rules, threshold', () => {
   let rule = getNewThresholdRule();
-  const expectedUrls = getNewThresholdRule().referenceUrls.join('');
-  const expectedFalsePositives = getNewThresholdRule().falsePositivesExamples.join('');
-  const expectedTags = getNewThresholdRule().tags.join('');
-  const expectedMitre = formatMitreAttackDescription(getNewThresholdRule().mitre);
+  const expectedUrls = getNewThresholdRule().referenceUrls?.join('');
+  const expectedFalsePositives = getNewThresholdRule().falsePositivesExamples?.join('');
+  const expectedTags = getNewThresholdRule().tags?.join('');
+  const mitreAttack = getNewThresholdRule().mitre as Mitre[];
+  const expectedMitre = formatMitreAttackDescription(mitreAttack);
 
   before(() => {
     cleanKibana();
@@ -75,9 +78,10 @@ describe('Detection rules, threshold', () => {
 
   beforeEach(() => {
     rule = getNewThresholdRule();
+    const timeline = rule.timeline as CompleteTimeline;
     deleteAlertsAndRules();
-    createTimeline(getNewThresholdRule().timeline).then((response) => {
-      rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+    createTimeline(timeline).then((response) => {
+      timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
     visitWithoutDateRange(RULE_CREATION);
   });
@@ -132,11 +136,11 @@ describe('Detection rules, threshold', () => {
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS).should(
         'have.text',
-        `${rule.runsEvery.interval}${rule.runsEvery.type}`
+        `${rule.runsEvery?.interval}${rule.runsEvery?.type}`
       );
       getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
         'have.text',
-        `${rule.lookBack.interval}${rule.lookBack.type}`
+        `${rule.lookBack?.interval}${rule.lookBack?.type}`
       );
     });
 
