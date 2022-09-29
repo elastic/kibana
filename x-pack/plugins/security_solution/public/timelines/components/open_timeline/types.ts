@@ -208,7 +208,7 @@ export interface UpdateTimeline {
   timeline: TimelineModel;
   to: string;
   ruleNote?: string;
-  ruleString?: string;
+  ruleAuthor?: string;
 }
 
 export type DispatchUpdateTimeline = ({
@@ -220,7 +220,7 @@ export type DispatchUpdateTimeline = ({
   timeline,
   to,
   ruleNote,
-  ruleString,
+  ruleAuthor,
 }: UpdateTimeline) => () => void;
 
 export enum TimelineTabsStyle {

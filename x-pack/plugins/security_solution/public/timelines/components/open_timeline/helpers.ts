@@ -465,7 +465,7 @@ export const dispatchUpdateTimeline =
     }
 
     if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-      const newNote = createNote({ newNote: ruleNote, user: ruleAuthor });
+      const newNote = createNote({ newNote: ruleNote, user: ruleAuthor || 'elastic' });
       dispatch(dispatchUpdateNote({ note: newNote }));
       dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
     }
