@@ -96,12 +96,27 @@ export const CreateAlertParamsSchema = schema.object({
   note: schema.maybe(schema.string({ maxLength: 25000 })),
 });
 
-export const Response = schema.object({
-  message: schema.string(),
-  took: schema.number(),
-  requestId: schema.string(),
-  errors: schema.maybe(schema.object({ message: schema.string() })),
-});
+const SuccessfulResponse = schema.object(
+  {
+    took: schema.number(),
+    requestId: schema.string(),
+    result: schema.string(),
+  },
+  { unknowns: 'allow' }
+);
+
+const FailureResponse = schema.object(
+  {
+    took: schema.number(),
+    requestId: schema.string(),
+    message: schema.maybe(schema.string()),
+    result: schema.maybe(schema.string()),
+    errors: schema.maybe(schema.object({ message: schema.string() })),
+  },
+  { unknowns: 'allow' }
+);
+
+export const Response = schema.oneOf([SuccessfulResponse, FailureResponse]);
 
 export const CloseAlertParamsSchema = schema.object({
   user: schema.maybe(schema.string({ maxLength: 100 })),

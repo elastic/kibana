@@ -46,3 +46,5 @@ export {
   ConnectorTypeId as WebhookConnectorTypeId,
 } from './webhook';
 export type { ActionParamsType as WebhookActionParams } from './webhook';
+
+export { getOpsgenieConnectorType } from './opsgenie';

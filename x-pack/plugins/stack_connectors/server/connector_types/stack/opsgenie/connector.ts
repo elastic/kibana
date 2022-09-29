@@ -10,8 +10,8 @@ import { AxiosError } from 'axios';
 import { CloseAlertParamsSchema, CreateAlertParamsSchema, Response } from './schema';
 import { CloseAlertParams, Config, CreateAlertParams, Secrets } from './types';
 
-// TODO: figure out the right schema for this
 interface ErrorSchema {
+  message?: string;
   errors?: {
     message?: string;
   };
@@ -35,17 +35,21 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
-    return `Message: ${error.response?.data.errors?.message ?? 'unknown error'}.`;
+    return `Message: ${
+      error.response?.data.errors?.message ?? error.response?.data.message ?? 'unknown error'
+    }.`;
   }
 
   public async createAlert(params: CreateAlertParams) {
-    return this.request({
+    const res = await this.request({
       method: 'post',
       url: this.config.apiUrl,
       data: params,
       headers: this.createHeaders(),
       responseSchema: Response,
     });
+
+    return res.data;
   }
 
   private createHeaders() {
@@ -53,13 +57,15 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async closeAlert(params: CloseAlertParams) {
-    return this.request({
+    const res = await this.request({
       method: 'post',
       url: this.concatPathToURL('close'),
       data: params,
       headers: this.createHeaders(),
       responseSchema: Response,
     });
+
+    return res.data;
   }
 
   private concatPathToURL(path: string) {

@@ -15,6 +15,7 @@ import {
   getSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
+  getOpsgenieConnectorType,
 } from './stack';
 import {
   getCasesWebhookConnectorType,
@@ -26,9 +27,6 @@ import {
   getSwimlaneConnectorType,
   getXmattersConnectorType,
 } from './cases';
-// TODO: move this to stack
-import { getOpsgenieConnectorType } from './cases/opsgenie';
-
 export type {
   EmailActionParams,
   IndexActionParams,

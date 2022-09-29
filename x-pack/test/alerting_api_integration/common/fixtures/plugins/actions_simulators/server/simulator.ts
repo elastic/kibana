@@ -7,15 +7,49 @@
 
 import getPort from 'get-port';
 import http from 'http';
+import httpProxy from 'http-proxy';
+import { getProxyPort } from '../../../../lib/get_proxy_server';
 import { getDataFromPostRequest } from './data_handler';
+
+export interface ProxyArgs {
+  config: string;
+  proxyHandler?: (proxyRes?: unknown, req?: unknown, res?: unknown) => void;
+}
 
 export abstract class Simulator {
   private _requestData: Record<string, unknown> | undefined;
+  private proxyServer: httpProxy | undefined;
+  private readonly proxyArgs: ProxyArgs | undefined;
   protected server: http.Server;
 
-  constructor() {
+  constructor(proxy?: ProxyArgs) {
     this.server = http.createServer(this.baseHandler);
+
+    if (proxy) {
+      this.proxyArgs = proxy;
+    }
   }
+
+  private createAndStartHttpProxyServer = (targetUrl: string) => {
+    if (!this.proxyArgs) {
+      return;
+    }
+
+    this.proxyServer = httpProxy.createProxyServer({
+      target: targetUrl,
+      secure: false,
+      selfHandleResponse: false,
+    });
+
+    this.proxyServer.on('proxyRes', (proxyRes: unknown, req: unknown, res: unknown) => {
+      if (this.proxyArgs?.proxyHandler) {
+        this.proxyArgs.proxyHandler(proxyRes, req, res);
+      }
+    });
+
+    const proxyPort = getProxyPort(this.proxyArgs.config);
+    this.proxyServer.listen(proxyPort);
+  };
 
   private baseHandler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
     const data = await getDataFromPostRequest(request);
@@ -37,10 +71,12 @@ export abstract class Simulator {
     }
     const url = `http://localhost:${port}`;
 
+    this.createAndStartHttpProxyServer(url);
     return url;
   }
 
   public close() {
+    this.proxyServer?.close();
     this.server.close();
   }
 
