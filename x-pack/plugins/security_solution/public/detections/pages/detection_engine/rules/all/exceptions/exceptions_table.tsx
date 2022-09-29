@@ -10,7 +10,10 @@ import type { EuiSearchBarProps } from '@elastic/eui';
 
 import {
   EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiPagination,
+  EuiPopover,
   EuiFlyoutFooter,
   EuiTextColor,
   EuiFlyout,
@@ -379,11 +382,64 @@ export const ExceptionListsTable = React.memo(() => {
     setFile(files?.item(0) ?? null);
   }, []);
   const [activePage, setActivePage] = useState(0);
+  const [rowSize, setRowSize] = useState(5);
+  const [isRowSizePopoverOpen, setIsRowSizePopoverOpen] = useState(false);
+  const onRowSizeButtonClick = () => setIsRowSizePopoverOpen((val) => !val);
+  const closeRowSizePopover = () => setIsRowSizePopoverOpen(false);
+
+  const rowSizeButton = (
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onRowSizeButtonClick}
+    >
+      {`Rows per page: ${rowSize}`}
+    </EuiButtonEmpty>
+  );
+
+  const getIconType = (size: number) => {
+    return size === rowSize ? 'check' : 'empty';
+  };
+
+  const rowSizeItems = [
+    <EuiContextMenuItem
+      key="5 rows"
+      icon={getIconType(5)}
+      onClick={() => {
+        closeRowSizePopover();
+        setRowSize(5);
+      }}
+    >
+      {'5 rows'}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="10 rows"
+      icon={getIconType(10)}
+      onClick={() => {
+        closeRowSizePopover();
+        setRowSize(10);
+      }}
+    >
+      {'10 rows'}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="25 rows"
+      icon={getIconType(25)}
+      onClick={() => {
+        closeRowSizePopover();
+        setRowSize(25);
+      }}
+    >
+      {'25 rows'}
+    </EuiContextMenuItem>,
+  ];
 
   useEffect(() => {
     setPagination({
       page: activePage,
-      perPage: 1,
+      perPage: rowSize,
       total: 0,
     });
     refreshExceptions();
@@ -518,9 +574,16 @@ export const ExceptionListsTable = React.memo(() => {
             ))}
           </>
         )}
+        <EuiPopover
+          button={rowSizeButton}
+          isOpen={isRowSizePopoverOpen}
+          closePopover={closeRowSizePopover}
+        >
+          <EuiContextMenuPanel items={rowSizeItems} />
+        </EuiPopover>
         <EuiPagination
           aria-label={'Custom pagination example'}
-          pageCount={3}
+          pageCount={pagination.total / rowSize}
           activePage={activePage}
           onPageClick={goToPage}
         />
