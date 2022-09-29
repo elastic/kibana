@@ -119,7 +119,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
             <RiskScoreHeaderTitle
               title={i18n.USER_RISK_SCORE}
               riskScoreEntity={RiskScoreEntity.user}
-              showTooltip={false}
             />
           ),
           description: (
@@ -135,7 +134,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
             <RiskScoreHeaderTitle
               title={i18n.USER_RISK_CLASSIFICATION}
               riskScoreEntity={RiskScoreEntity.host}
-              showTooltip={false}
             />
           ),
           description: (
