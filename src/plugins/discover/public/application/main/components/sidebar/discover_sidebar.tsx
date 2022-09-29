@@ -543,12 +543,13 @@ export function DiscoverSidebarComponent({
         {isPlainRecord && (
           <EuiFlexItem grow={false}>
             <EuiButton
+              iconType="lensApp"
               data-test-subj="textBased-visualize"
               onClick={visualizeAggregateQuery}
               size="s"
             >
               {i18n.translate('discover.textBasedLanguages.visualize.label', {
-                defaultMessage: 'Visualize',
+                defaultMessage: 'Visualize in Lens',
               })}
             </EuiButton>
           </EuiFlexItem>
