@@ -276,10 +276,6 @@ export const getXyVisualization = ({
       accessors: sortedAccessors,
     });
 
-    if (isReferenceLayer(layer)) {
-      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
-    }
-
     const dataLayer: XYDataLayerConfig = layer;
 
     const dataLayers = getDataLayers(state.layers);
@@ -332,7 +328,7 @@ export const getXyVisualization = ({
           accessors: mappedAccessors,
           filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: true,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsXY_yDimensionPanel',
           enableDimensionEditor: true,
         },
@@ -357,7 +353,8 @@ export const getXyVisualization = ({
           filterOperations: isBucketed,
           supportsMoreColumns: !dataLayer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor,
+          requiredMinDimensionCount:
+            dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
           enableDimensionEditor: true,
         },
       ],
