@@ -97,9 +97,9 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   const setActionParamsProperty = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (key: string, value: any, index: number) => {
-      // values in form controls and values used during form validation got out of sync leading to issue: https://github.com/elastic/kibana/issues/140593
+      // validation is not triggered correctly when actions params updated (more details in https://github.com/elastic/kibana/issues/142217)
       // wrapping field.setValue in setTimeout fixes the issue above
-      // and prevents form data used in validation getting out of sync with displayed values in UI
+      // and triggers validation after params have been updated
       setTimeout(
         () =>
           field.setValue((prevValue: RuleAction[]) => {
