@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { Assign } from '@kbn/utility-types';
 import {
   EuiPanel,
@@ -71,8 +71,11 @@ export function DragDropBuckets<T = unknown>({
   onDragEnd?: (items: T[]) => void;
   color?: EuiPanelProps['color'];
 }) {
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
     ({ source, destination }) => {
+      setIsDragging(false);
       if (source && destination) {
         onDragEnd?.(euiDragDropReorder(items, source.index, destination.index));
       }
@@ -80,16 +83,25 @@ export function DragDropBuckets<T = unknown>({
     [items, onDragEnd]
   );
 
+  const handleDragStart: DragDropContextProps['onDragStart'] = useCallback(() => {
+    setIsDragging(true);
+    onDragStart?.();
+  }, [onDragStart]);
+
   return (
-    <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
+    <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
       <EuiPanel
         paddingSize="none"
-        color={color}
+        color={isDragging ? 'accent' : color}
         style={{ overflow: 'hidden' }}
         hasShadow={false}
         hasBorder={false}
       >
-        <EuiDroppable droppableId={droppableId} spacing={color ? 'm' : 'none'}>
+        <EuiDroppable
+          droppableId={droppableId}
+          spacing={color ? 'm' : 'none'}
+          style={{ backgroundColor: 'transparent' }}
+        >
           {children}
         </EuiDroppable>
       </EuiPanel>
