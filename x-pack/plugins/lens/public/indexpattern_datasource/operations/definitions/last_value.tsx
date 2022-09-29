@@ -33,6 +33,7 @@ import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -258,6 +259,14 @@ export const lastValueOperation: OperationDefinition<
     ).toAst();
   },
 
+  getGroupByKey: (agg) => {
+    return getGroupByKey(
+      agg,
+      ['aggTopHit', 'aggTopMetrics'],
+      [{ name: 'field' }, { name: 'sortField' }]
+    );
+  },
+
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
     const newTimeField = newIndexPattern.getFieldByName(column.params.sortField);
@@ -419,4 +428,12 @@ Example: Get the current status of server A:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.lastValue.documentation.quick',
+    {
+      defaultMessage: `
+The value of a field from the last document, ordered by the default time field of the data view.
+      `,
+    }
+  ),
 };

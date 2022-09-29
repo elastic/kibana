@@ -27,7 +27,7 @@ describe('<IndicatorsPage />', () => {
       useAggregatedIndicators as jest.MockedFunction<typeof useAggregatedIndicators>
     ).mockReturnValue({
       dateRange: { min: moment(), max: moment() },
-      indicators: [],
+      series: [],
       selectedField: '',
       onFieldChange: () => {},
     });
@@ -35,7 +35,8 @@ describe('<IndicatorsPage />', () => {
     (useIndicators as jest.MockedFunction<typeof useIndicators>).mockReturnValue({
       indicators: [{ fields: {} }],
       indicatorCount: 1,
-      loading: false,
+      isLoading: false,
+      isFetching: false,
       pagination: { pageIndex: 0, pageSize: 10, pageSizeOptions: [10] },
       onChangeItemsPerPage: stub,
       onChangePage: stub,

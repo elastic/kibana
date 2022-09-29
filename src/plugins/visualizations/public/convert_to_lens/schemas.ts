@@ -11,7 +11,7 @@ import { METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
 import { AggBasedColumn, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
-import { getCutomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
+import { getCustomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
 import type { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
 import {
@@ -24,14 +24,26 @@ import {
   sortColumns,
 } from './utils';
 
+const areVisSchemasValid = (visSchemas: Schemas, unsupported: Array<keyof Schemas>) => {
+  const usedUnsupportedSchemas = unsupported.filter(
+    (schema) => visSchemas[schema] && visSchemas[schema]?.length
+  );
+  return !usedUnsupportedSchemas.length;
+};
+
 export const getColumnsFromVis = <T>(
   vis: Vis<T>,
   timefilter: TimefilterContract,
   dataView: DataView,
-  { splits, buckets }: { splits: Array<keyof Schemas>; buckets: Array<keyof Schemas> } = {
-    splits: [],
-    buckets: [],
-  },
+  {
+    splits = [],
+    buckets = [],
+    unsupported = [],
+  }: {
+    splits?: Array<keyof Schemas>;
+    buckets?: Array<keyof Schemas>;
+    unsupported?: Array<keyof Schemas>;
+  } = {},
   config?: {
     dropEmptyRowsInDateHistogram?: boolean;
   }
@@ -41,11 +53,11 @@ export const getColumnsFromVis = <T>(
     timeRange: timefilter.getAbsoluteTime(),
   });
 
-  if (!isValidVis(visSchemas)) {
+  if (!isValidVis(visSchemas) || !areVisSchemasValid(visSchemas, unsupported)) {
     return null;
   }
 
-  const customBuckets = getCutomBucketsFromSiblingAggs(visSchemas.metric);
+  const customBuckets = getCustomBucketsFromSiblingAggs(visSchemas.metric);
 
   // doesn't support sibbling pipeline aggs with different bucket aggs
   if (customBuckets.length > 1) {
@@ -111,8 +123,8 @@ export const getColumnsFromVis = <T>(
   const columnsWithoutReferenced = getColumnsWithoutReferenced(columns);
 
   return {
-    metrics: getColumnIds(metrics),
-    buckets: getColumnIds([...bucketColumns, ...splitBucketColumns, ...customBucketColumns]),
+    metrics: getColumnIds(columnsWithoutReferenced.filter((с) => !с.isBucketed)),
+    buckets: getColumnIds(columnsWithoutReferenced.filter((c) => c.isBucketed)),
     bucketCollapseFn: getBucketCollapseFn(visSchemas.metric, customBucketColumns),
     columnsWithoutReferenced,
     columns,

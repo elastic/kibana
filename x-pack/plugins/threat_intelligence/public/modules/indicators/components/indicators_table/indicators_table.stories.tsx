@@ -11,7 +11,7 @@ import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indi
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from './indicators_table';
-import { IndicatorsFiltersContext } from '../../context';
+import { IndicatorsFiltersContext } from '../../containers/indicators_filters/context';
 import { DEFAULT_COLUMNS } from './hooks/use_column_settings';
 
 export default {
@@ -44,7 +44,7 @@ export function WithIndicators() {
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsTable
           browserFields={{}}
-          loading={false}
+          isLoading={false}
           pagination={{
             pageSize: 10,
             pageIndex: 0,
@@ -76,7 +76,7 @@ export function WithNoIndicators() {
         onChangePage={stub}
         onChangeItemsPerPage={stub}
         indicatorCount={0}
-        loading={false}
+        isLoading={false}
         indexPattern={mockIndexPattern}
         columnSettings={columnSettings}
       />

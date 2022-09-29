@@ -82,15 +82,17 @@ export const QueryBar = memo<QueryBarComponentProps>(
   }) => {
     const onQuerySubmit = useCallback(
       ({ query, dateRange }: QueryPayload) => {
-        if (isQuery(query) && !deepEqual(query, filterQuery)) {
-          onSubmitQuery(query);
-        }
-
         if (dateRange != null) {
           onSubmitDateRange(dateRange);
         }
+
+        if (isQuery(query) && !deepEqual(query, filterQuery)) {
+          onSubmitQuery(query);
+        } else {
+          onRefresh();
+        }
       },
-      [filterQuery, onSubmitDateRange, onSubmitQuery]
+      [filterQuery, onRefresh, onSubmitDateRange, onSubmitQuery]
     );
 
     const onQueryChange = useCallback(
@@ -169,7 +171,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
         dataTestSubj={dataTestSubj}
         savedQuery={savedQuery}
         displayStyle={displayStyle}
-        onRefresh={onRefresh}
       />
     );
   }

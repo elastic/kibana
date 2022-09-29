@@ -9,27 +9,20 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { createBrowserHistory } from 'history';
-import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
-import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-
-import { DashboardConstants } from '../../dashboard_constants';
-import { SavedObjectLoader } from '../../services/saved_object_loader';
-import { DashboardAppServices, DashboardAppState } from '../../types';
-import { DashboardContainer } from '../embeddable/dashboard_container';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { dashboardStateStore, setDescription, setViewMode } from '../state';
-import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';
-import {
-  getSampleDashboardInput,
-  getSavedDashboardMock,
-  makeDefaultServices,
-} from '../test_helpers';
 
 import type { Filter } from '@kbn/es-query';
-import { pluginServices } from '../../services/plugin_services';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
-import { DashboardServices } from '../../services/types';
+import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
+import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
+
+import { DashboardAppState } from '../../types';
+import { getSampleDashboardInput } from '../test_helpers';
+import { DashboardConstants } from '../../dashboard_constants';
+import { pluginServices } from '../../services/plugin_services';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import { dashboardStateStore, setDescription, setViewMode } from '../state';
+import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';
 
 interface SetupEmbeddableFactoryReturn {
   finalizeEmbeddableCreation: () => void;
@@ -40,7 +33,6 @@ interface SetupEmbeddableFactoryReturn {
 interface RenderDashboardStateHookReturn {
   embeddableFactoryResult: SetupEmbeddableFactoryReturn;
   renderHookResult: RenderHookResult<Partial<UseDashboardStateProps>, DashboardAppState>;
-  services: DashboardAppServices;
   props: UseDashboardStateProps;
 }
 
@@ -55,28 +47,7 @@ const createDashboardAppStateProps = (): UseDashboardStateProps => ({
   setShowNoDataPage: () => {},
 });
 
-const createDashboardAppStateServices = () => {
-  const defaults = makeDefaultServices();
-
-  const defaultDataView = { id: 'foo', fields: [{ name: 'bar' }] } as DataView;
-
-  (pluginServices.getServices().data.dataViews.getDefaultDataView as jest.Mock).mockResolvedValue(
-    defaultDataView
-  );
-  (pluginServices.getServices().data.dataViews.getDefaultId as jest.Mock).mockResolvedValue(
-    defaultDataView.id
-  );
-  (pluginServices.getServices().data.query.filterManager.getFilters as jest.Mock).mockReturnValue(
-    []
-  );
-
-  return defaults;
-};
-
-const setupEmbeddableFactory = (
-  services: DashboardAppServices,
-  id: string
-): SetupEmbeddableFactoryReturn => {
+const setupEmbeddableFactory = (id: string): SetupEmbeddableFactoryReturn => {
   const dashboardContainer = new DashboardContainer({ ...getSampleDashboardInput(), id });
   const deferEmbeddableCreate = defer();
   pluginServices.getServices().embeddable.getEmbeddableFactory = jest.fn().mockImplementation(
@@ -100,15 +71,22 @@ const setupEmbeddableFactory = (
 
 const renderDashboardAppStateHook = ({
   partialProps,
-  partialServices,
 }: {
   partialProps?: Partial<UseDashboardStateProps>;
-  partialServices?: Partial<DashboardAppServices>;
 }): RenderDashboardStateHookReturn => {
+  const defaultDataView = { id: 'foo', fields: [{ name: 'bar' }] } as DataView;
+  (pluginServices.getServices().data.dataViews.getDefaultDataView as jest.Mock).mockResolvedValue(
+    defaultDataView
+  );
+  (pluginServices.getServices().data.dataViews.getDefaultId as jest.Mock).mockResolvedValue(
+    defaultDataView.id
+  );
+  (pluginServices.getServices().data.query.filterManager.getFilters as jest.Mock).mockReturnValue(
+    []
+  );
+
   const props = { ...createDashboardAppStateProps(), ...(partialProps ?? {}) };
-  const services = { ...createDashboardAppStateServices(), ...(partialServices ?? {}) };
-  const embeddableFactoryResult = setupEmbeddableFactory(services, originalDashboardEmbeddableId);
-  const DashboardServicesProvider = pluginServices.getContextProvider();
+  const embeddableFactoryResult = setupEmbeddableFactory(originalDashboardEmbeddableId);
 
   const renderHookResult = renderHook(
     (replaceProps: Partial<UseDashboardStateProps>) => {
@@ -116,18 +94,11 @@ const renderDashboardAppStateHook = ({
     },
     {
       wrapper: ({ children }) => {
-        return (
-          <Provider store={dashboardStateStore}>
-            {/* Can't get rid of KibanaContextProvider here yet because of saved dashboard tests below */}
-            <KibanaContextProvider services={services}>
-              <DashboardServicesProvider>{children}</DashboardServicesProvider>
-            </KibanaContextProvider>
-          </Provider>
-        );
+        return <Provider store={dashboardStateStore}>{children}</Provider>;
       },
     }
   );
-  return { embeddableFactoryResult, renderHookResult, services, props };
+  return { embeddableFactoryResult, renderHookResult, props };
 };
 
 describe('Dashboard container lifecycle', () => {
@@ -146,7 +117,7 @@ describe('Dashboard container lifecycle', () => {
   });
 
   test('Old dashboard container is destroyed when new dashboardId is given', async () => {
-    const { renderHookResult, embeddableFactoryResult, services } = renderDashboardAppStateHook({});
+    const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({});
     const getResult = () => renderHookResult.result.current;
 
     // on initial render dashboard container is undefined
@@ -158,7 +129,7 @@ describe('Dashboard container lifecycle', () => {
     expect(embeddableFactoryResult.dashboardDestroySpy).not.toBeCalled();
 
     const newDashboardId = 'wow_a_new_dashboard_id';
-    const embeddableFactoryNew = setupEmbeddableFactory(services, newDashboardId);
+    const embeddableFactoryNew = setupEmbeddableFactory(newDashboardId);
     renderHookResult.rerender({ savedDashboardId: newDashboardId });
 
     embeddableFactoryNew.finalizeEmbeddableCreation();
@@ -170,7 +141,7 @@ describe('Dashboard container lifecycle', () => {
   });
 
   test('Dashboard container is destroyed if dashboard id is changed before container is resolved', async () => {
-    const { renderHookResult, embeddableFactoryResult, services } = renderDashboardAppStateHook({});
+    const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({});
     const getResult = () => renderHookResult.result.current;
 
     // on initial render dashboard container is undefined
@@ -178,7 +149,7 @@ describe('Dashboard container lifecycle', () => {
     await act(() => Promise.resolve()); // wait for the original savedDashboard to be loaded...
 
     const newDashboardId = 'wow_a_new_dashboard_id';
-    const embeddableFactoryNew = setupEmbeddableFactory(services, newDashboardId);
+    const embeddableFactoryNew = setupEmbeddableFactory(newDashboardId);
 
     renderHookResult.rerender({ savedDashboardId: newDashboardId });
     await act(() => Promise.resolve()); // wait for the new savedDashboard to be loaded...
@@ -199,38 +170,33 @@ describe('Dashboard container lifecycle', () => {
 // FLAKY: https://github.com/elastic/kibana/issues/105018
 describe.skip('Dashboard initial state', () => {
   it('Extracts state from Dashboard Saved Object', async () => {
+    const savedTitle = 'testDash1';
+    (
+      pluginServices.getServices().dashboardSavedObject
+        .loadDashboardStateFromSavedObject as jest.Mock
+    ).mockResolvedValue({ title: savedTitle });
+
     const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({});
     const getResult = () => renderHookResult.result.current;
-
-    // saved dashboard isn't applied until after the dashboard embeddable has been created.
-    expect(getResult().savedDashboard).toBeUndefined();
 
     embeddableFactoryResult.finalizeEmbeddableCreation();
     await renderHookResult.waitForNextUpdate();
 
-    expect(getResult().savedDashboard).toBeDefined();
-    expect(getResult().savedDashboard?.title).toEqual(
-      getResult().getLatestDashboardState?.().title
-    );
+    expect(savedTitle).toEqual(getResult().getLatestDashboardState?.().title);
   });
 
   it('Sets initial time range and filters from saved dashboard', async () => {
-    const savedDashboards = {} as SavedObjectLoader;
-    savedDashboards.get = jest.fn().mockImplementation((id?: string) =>
-      Promise.resolve(
-        getSavedDashboardMock({
-          getFilters: () => [{ meta: { test: 'filterMeTimbers' } } as unknown as Filter],
-          timeRestore: true,
-          timeFrom: 'now-13d',
-          timeTo: 'now',
-          id,
-        })
-      )
-    );
-    const partialServices: Partial<DashboardAppServices> = { savedDashboards };
-    const { renderHookResult, embeddableFactoryResult, services } = renderDashboardAppStateHook({
-      partialServices,
+    (
+      pluginServices.getServices().dashboardSavedObject
+        .loadDashboardStateFromSavedObject as jest.Mock
+    ).mockResolvedValue({
+      filters: [{ meta: { test: 'filterMeTimbers' } } as unknown as Filter],
+      timeRestore: true,
+      timeFrom: 'now-13d',
+      timeTo: 'now',
     });
+
+    const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({});
     const getResult = () => renderHookResult.result.current;
 
     embeddableFactoryResult.finalizeEmbeddableCreation();
@@ -238,15 +204,13 @@ describe.skip('Dashboard initial state', () => {
 
     expect(getResult().getLatestDashboardState?.().timeRestore).toEqual(true);
     expect(
-      (services as DashboardAppServices & { data: DashboardServices['data'] }).data.query.timefilter
-        .timefilter.setTime
+      pluginServices.getServices().data.query.timefilter.timefilter.setTime
     ).toHaveBeenCalledWith({
       from: 'now-13d',
       to: 'now',
     });
     expect(
-      (services as DashboardAppServices & { data: DashboardServices['data'] }).data.query
-        .filterManager.setAppFilters
+      pluginServices.getServices().data.query.filterManager.setAppFilters
     ).toHaveBeenCalledWith([{ meta: { test: 'filterMeTimbers' } } as unknown as Filter]);
   });
 

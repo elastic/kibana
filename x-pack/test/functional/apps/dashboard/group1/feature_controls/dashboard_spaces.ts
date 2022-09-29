@@ -6,10 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  createDashboardEditUrl,
-  DashboardConstants,
-} from '@kbn/dashboard-plugin/public/dashboard_constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -53,15 +49,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.LANDING_PAGE_PATH,
-          {
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
-          }
-        );
+          },
+        });
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -69,30 +63,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows addNew button`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-          {
+        await PageObjects.dashboard.gotoDashboardURL({
+          args: {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
-          }
-        );
+          },
+        });
         await testSubjects.existOrFail('emptyDashboardWidget', {
           timeout: config.get('timeouts.waitFor'),
         });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('8fba09d8-df3f-5aa1-83cc-65f7fbcbc0d9'),
-          {
+        await PageObjects.dashboard.gotoDashboardURL({
+          id: '8fba09d8-df3f-5aa1-83cc-65f7fbcbc0d9',
+          args: {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
-          }
-        );
+          },
+        });
         await testSubjects.existOrFail('embeddablePanelHeading-APie', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -125,41 +116,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows 404`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-          {
+        await PageObjects.dashboard.gotoDashboardURL({
+          args: {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
-          }
-        );
+          },
+        });
         await PageObjects.error.expectNotFound();
       });
 
       it(`edit dashboard for object which doesn't exist shows 404`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-dont-exist'),
-          {
+        await PageObjects.dashboard.gotoDashboardURL({
+          id: 'i-dont-exist',
+          args: {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
-          }
-        );
+          },
+        });
         await PageObjects.error.expectNotFound();
       });
 
       it(`edit dashboard for object which exists shows 404`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-exist'),
-          {
+        await PageObjects.dashboard.gotoDashboardURL({
+          id: 'i-exist',
+          args: {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
-          }
-        );
+          },
+        });
         await PageObjects.error.expectNotFound();
       });
     });
