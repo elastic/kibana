@@ -98,6 +98,27 @@ describe('useIndicators()', () => {
         }),
         expect.any(AbortSignal)
       );
+
+      expect(hookResult.result.current).toMatchInlineSnapshot(`
+        Object {
+          "handleRefresh": [Function],
+          "indicatorCount": 0,
+          "indicators": Array [],
+          "isFetching": true,
+          "isLoading": true,
+          "onChangeItemsPerPage": [Function],
+          "onChangePage": [Function],
+          "pagination": Object {
+            "pageIndex": 0,
+            "pageSize": 50,
+            "pageSizeOptions": Array [
+              10,
+              25,
+              50,
+            ],
+          },
+        }
+      `);
     });
   });
 });
