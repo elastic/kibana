@@ -165,4 +165,4 @@ Select a field for categorization and optionally apply any filters that you
 want, then start the analysis. The analysis uses the same algorithms as a {ml} 
 categorization job. The results of the analysis are shown in a table that makes 
 it possible to open **Discover** and show or filter out the given category 
-there, which helps you to examine further your log messages.
+there, which helps you to further examine your log messages.
