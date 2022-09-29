@@ -27950,10 +27950,10 @@ vega-label@~1.2.0:
     vega-scenegraph "^4.9.2"
     vega-util "^1.15.2"
 
-vega-lite@^5.3.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-5.3.0.tgz#b9b9ecd80e869e823e6848c67d0a8ad94954bdee"
-  integrity sha512-6giodZ/bJnWyLq6Gj4OyiDt7EndoGyC9f5xDQjo82yPpUiO4MuG9iiPMqR1SPKmG9/qPBf+klWQR0v/7Mgju0Q==
+vega-lite@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-5.5.0.tgz#07345713d538cd63278748ec119c261722be66ff"
+  integrity sha512-MQBJt/iaUegvhRTS/hZVWfMOSF5ai4awlR2qtwTgHd84bErf9v7GtaZ9ArhJqXCb+FizvZ2jatmoYCzovgAhkg==
   dependencies:
     "@types/clone" "~2.1.1"
     array-flat-polyfill "^1.0.1"
