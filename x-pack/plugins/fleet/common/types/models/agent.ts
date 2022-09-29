@@ -231,6 +231,10 @@ export interface FleetServerAgent {
    */
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
   /**
+   * Last checkin message
+   */
+  last_checkin_message?: string;
+  /**
    * ID of the API key the Elastic Agent uses to authenticate with elasticsearch
    */
   default_api_key_id?: string;
