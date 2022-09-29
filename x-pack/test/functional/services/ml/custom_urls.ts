@@ -111,7 +111,7 @@ export function MachineLearningCustomUrlsProvider({
       );
       expect(actualLabel).to.eql(
         expectedLabel,
-        `Expected custom url item to be '${expectedLabel}' (got '${actualLabel}')`
+        `Expected custom url label to be '${expectedLabel}' (got '${actualLabel}')`
       );
     },
 
@@ -123,7 +123,7 @@ export function MachineLearningCustomUrlsProvider({
       );
       expect(actualUrl).to.eql(
         expectedUrl,
-        `Expected custom url item to be '${expectedUrl}' (got '${actualUrl}')`
+        `Expected custom url value to be '${expectedUrl}' (got '${actualUrl}')`
       );
     },
 
