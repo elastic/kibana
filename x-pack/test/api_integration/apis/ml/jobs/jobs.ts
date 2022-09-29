@@ -17,7 +17,13 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
+  const idSpace1 = 'space1';
+
   const testSetupJobConfigs = [SINGLE_METRIC_JOB_CONFIG, MULTI_METRIC_JOB_CONFIG];
+
+  const testSetupJobConfigsWithSpace = [
+    { ...SINGLE_METRIC_JOB_CONFIG, job_id: `${SINGLE_METRIC_JOB_CONFIG.job_id}-${idSpace1}` },
+  ];
 
   const testCalendarsConfigs = [
     {
@@ -40,10 +46,12 @@ export default ({ getService }: FtrProviderContext) => {
   async function runGetJobsRequest(
     user: USER,
     requestBody: object,
-    expectedResponsecode: number
+    expectedResponsecode: number,
+    space?: string
   ): Promise<CombinedJobWithStats[]> {
+    const path = space === undefined ? '/api/ml/jobs/jobs' : `/s/${space}/api/ml/jobs/jobs`;
     const { body, status } = await supertest
-      .post('/api/ml/jobs/jobs')
+      .post(path)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody);
@@ -71,6 +79,17 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
+  const expectedJobPropertiesWithSpace = [
+    {
+      jobId: `${SINGLE_METRIC_JOB_CONFIG.job_id}-${idSpace1}`,
+      datafeedId: `datafeed-${SINGLE_METRIC_JOB_CONFIG.job_id}-${idSpace1}`,
+      calendarIds: undefined,
+      groups: ['farequote', 'automated', 'single-metric'],
+      modelBytes: 0,
+      datafeedTotalSearchTimeMs: 0,
+    },
+  ];
+
   describe('get combined jobs with stats', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -85,6 +104,18 @@ export default ({ getService }: FtrProviderContext) => {
         });
       }
 
+      for (const job of testSetupJobConfigsWithSpace) {
+        await ml.api.createAnomalyDetectionJob(job, idSpace1);
+        await ml.api.createDatafeed(
+          {
+            ...DATAFEED_CONFIG,
+            datafeed_id: `datafeed-${job.job_id}`,
+            job_id: job.job_id,
+          },
+          idSpace1
+        );
+      }
+
       for (const cal of testCalendarsConfigs) {
         await ml.api.createCalendar(cal.calendar_id, cal);
       }
@@ -94,8 +125,13 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
-    it('returns expected list of combined jobs with stats', async () => {
+    it('returns expected list of combined jobs with stats in default space', async () => {
       const jobs = await runGetJobsRequest(USER.ML_VIEWER, {}, 200);
+
+      expect(jobs.length).to.eql(
+        testSetupJobConfigs.length,
+        `number of jobs in default space should be ${testSetupJobConfigs.length})`
+      );
 
       jobs.forEach((job, i) => {
         expect(job.job_id).to.eql(
@@ -122,6 +158,50 @@ export default ({ getService }: FtrProviderContext) => {
           expectedJobProperties[i].datafeedTotalSearchTimeMs,
           `datafeed total_search_time_ms should be equal to ${JSON.stringify(
             expectedJobProperties[i].datafeedTotalSearchTimeMs
+          )})`
+        );
+      });
+    });
+
+    it('returns expected list of combined jobs with stats in specified space', async () => {
+      const jobs = await runGetJobsRequest(USER.ML_VIEWER, {}, 200, idSpace1);
+
+      expect(jobs.length).to.eql(
+        testSetupJobConfigsWithSpace.length,
+        `number of jobs in default space should be ${testSetupJobConfigsWithSpace.length})`
+      );
+
+      jobs.forEach((job, i) => {
+        expect(job.job_id).to.eql(
+          expectedJobPropertiesWithSpace[i].jobId,
+          `job id should be equal to ${JSON.stringify(expectedJobPropertiesWithSpace[i].jobId)})`
+        );
+        expect(job.datafeed_config.datafeed_id).to.eql(
+          expectedJobPropertiesWithSpace[i].datafeedId,
+          `datafeed id should be equal to ${JSON.stringify(
+            expectedJobPropertiesWithSpace[i].datafeedId
+          )})`
+        );
+        expect(job.calendars).to.eql(
+          expectedJobPropertiesWithSpace[i].calendarIds,
+          `calendars should be equal to ${JSON.stringify(
+            expectedJobPropertiesWithSpace[i].calendarIds
+          )})`
+        );
+        expect(job.groups).to.eql(
+          expectedJobPropertiesWithSpace[i].groups,
+          `groups should be equal to ${JSON.stringify(expectedJobPropertiesWithSpace[i].groups)})`
+        );
+        expect(job.model_size_stats.model_bytes).to.eql(
+          expectedJobPropertiesWithSpace[i].modelBytes,
+          `model_bytes should be equal to ${JSON.stringify(
+            expectedJobPropertiesWithSpace[i].modelBytes
+          )})`
+        );
+        expect(job.datafeed_config.timing_stats.total_search_time_ms).to.eql(
+          expectedJobPropertiesWithSpace[i].datafeedTotalSearchTimeMs,
+          `datafeed total_search_time_ms should be equal to ${JSON.stringify(
+            expectedJobPropertiesWithSpace[i].datafeedTotalSearchTimeMs
           )})`
         );
       });
