@@ -7,7 +7,7 @@
 import uuid from 'uuid';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
@@ -15,22 +15,14 @@ import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 
-import { errorsToResults, bulkUpdateAgents } from './crud';
+import { bulkUpdateAgents } from './crud';
 import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class ReassignActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
-    return await reassignBatch(
-      this.soClient,
-      this.esClient,
-      this.actionParams! as any,
-      agents,
-      {},
-      undefined,
-      true
-    );
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
+    return await reassignBatch(this.soClient, this.esClient, this.actionParams! as any, agents, {});
   }
 
   protected getTaskType() {
@@ -51,10 +43,8 @@ export async function reassignBatch(
     total?: number;
   },
   givenAgents: Agent[],
-  outgoingErrors: Record<Agent['id'], Error>,
-  agentIds?: string[],
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+  outgoingErrors: Record<Agent['id'], Error>
+): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -74,14 +64,12 @@ export async function reassignBatch(
     return agents;
   }, []);
 
-  const result = { items: errorsToResults(givenAgents, errors, agentIds, skipSuccess) };
-
   if (agentsToUpdate.length === 0) {
     // early return if all agents failed validation
     appContextService
       .getLogger()
       .debug('No agents to update, skipping agent update and action creation');
-    return result;
+    throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
   }
 
   await bulkUpdateAgents(
@@ -129,5 +117,5 @@ export async function reassignBatch(
     );
   }
 
-  return result;
+  return { actionId };
 }

@@ -41,7 +41,7 @@ describe('convertToLens', () => {
 
   test('should return null if more than three split slice levels', async () => {
     mockGetColumnsFromVis.mockReturnValue({
-      buckets: ['1', '2', '3'],
+      buckets: ['1', '2', '3', '4'],
     });
     const result = await convertToLens(samplePieVis as any, {} as any);
     expect(mockGetColumnsFromVis).toBeCalledTimes(1);

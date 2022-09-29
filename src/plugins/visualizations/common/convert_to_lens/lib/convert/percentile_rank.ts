@@ -53,7 +53,7 @@ export const convertToPercentileRankColumn = (
     agg,
     dataView,
   }: CommonColumnConverterArgs<METRIC_TYPES.SINGLE_PERCENTILE_RANK | METRIC_TYPES.PERCENTILE_RANKS>,
-  { reducedTimeRange }: { reducedTimeRange?: string } = {}
+  { index, reducedTimeRange }: { index?: number; reducedTimeRange?: string } = {}
 ): PercentileRanksColumn | null => {
   const { aggParams } = agg;
   const percent = getPercent(agg);

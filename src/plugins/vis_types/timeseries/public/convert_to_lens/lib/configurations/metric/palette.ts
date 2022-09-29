@@ -155,9 +155,11 @@ const getCustomPalette = (
   };
 };
 
-export const getPalette = (model: Panel): PaletteOutput<CustomPaletteParams> | null | undefined => {
+export const getPalette = (
+  rules: Exclude<Panel['background_color_rules'], undefined>
+): PaletteOutput<CustomPaletteParams> | null | undefined => {
   const validRules =
-    model.background_color_rules?.filter(
+    rules.filter(
       ({ operator, color: textColor, value, background_color: bColor }) =>
         operator && (bColor ?? textColor) && value !== undefined
     ) ?? [];
@@ -175,7 +177,7 @@ export const getPalette = (model: Panel): PaletteOutput<CustomPaletteParams> | n
   // lnsMetric is supporting lte only, if one rule is defined
   if (validRules.length === 1) {
     if (validRules[0].operator !== Operators.LTE) {
-      return null;
+      return;
     }
     return getCustomPalette(getColorStopWithMinMaxForLte(validRules[0]));
   }
@@ -188,18 +190,18 @@ export const getPalette = (model: Panel): PaletteOutput<CustomPaletteParams> | n
     kindOfHeadRules.length > 1 ||
     (kindOfHeadRules[0].operator !== tailRule.operator && tailRule.operator !== Operators.LTE)
   ) {
-    return null;
+    return;
   }
 
   const [rule] = kindOfHeadRules;
 
   if (rule.operator === Operators.LTE) {
-    return null;
+    return;
   }
 
   if (rule.operator === Operators.LT) {
     if (tailRule.operator !== Operators.LTE) {
-      return null;
+      return;
     }
     return getCustomPalette(getColorStopsWithMinMaxForLtWithLte(validRules));
   }

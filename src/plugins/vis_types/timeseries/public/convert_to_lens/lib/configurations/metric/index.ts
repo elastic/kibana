@@ -50,7 +50,7 @@ export const getConfigurationForMetric = (
     return null;
   }
 
-  const palette = getPalette(model);
+  const palette = getPalette(model.background_color_rules ?? []);
   if (palette === null) {
     return null;
   }

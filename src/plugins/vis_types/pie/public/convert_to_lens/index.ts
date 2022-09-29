@@ -47,6 +47,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
   const result = getColumnsFromVis(vis, timefilter, dataView, {
     buckets: [],
     splits: ['segment'],
+    unsupported: ['split_row', 'split_column'],
   });
 
   if (result === null) {
@@ -55,7 +56,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
 
   // doesn't support more than three split slice levels
   // doesn't support pie without at least one split slice
-  if (result.buckets.length > 2 || !result.buckets.length) {
+  if (result.buckets.length > 3 || !result.buckets.length) {
     return null;
   }
 

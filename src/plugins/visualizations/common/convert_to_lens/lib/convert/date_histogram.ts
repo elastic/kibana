@@ -32,8 +32,8 @@ export const convertToDateHistogramColumn = (
   aggId: string,
   aggParams: AggParamsDateHistogram,
   dataView: DataView,
-  isSplit: boolean = false,
-  dropEmptyRowsInDateHistogram: boolean = false
+  isSplit: boolean,
+  dropEmptyRowsInDateHistogram: boolean
 ): DateHistogramColumn | null => {
   const dateFieldName = getFieldNameFromField(aggParams.field);
 

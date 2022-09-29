@@ -10,7 +10,12 @@ import { getConfiguration } from '.';
 import { samplePieVis } from '../../sample_vis.test.mocks';
 
 describe('getConfiguration', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('should return correct configuration', () => {
+    samplePieVis.uiState.get.mockReturnValueOnce(undefined);
     expect(
       getConfiguration('test1', samplePieVis as any, {
         metrics: ['metric-1'],
@@ -33,10 +38,65 @@ describe('getConfiguration', () => {
           percentDecimals: 2,
           primaryGroups: ['bucket-1'],
           secondaryGroups: [],
-          showValuesInLegend: undefined,
+          showValuesInLegend: true,
           truncateLegend: true,
         },
       ],
+      shape: 'donut',
+      palette: undefined,
+    });
+  });
+
+  test('should return legendDisplay = show if uiState contains truthy value', () => {
+    samplePieVis.uiState.get.mockReturnValueOnce(true);
+    expect(
+      getConfiguration(
+        'test1',
+        { ...samplePieVis, params: { ...samplePieVis.params, legendDisplay: 'hide' } } as any,
+        {
+          metrics: ['metric-1'],
+          buckets: ['bucket-1'],
+        }
+      )
+    ).toEqual({
+      layers: [expect.objectContaining({ legendDisplay: 'show' })],
+      shape: 'donut',
+      palette: undefined,
+    });
+  });
+
+  test('should return legendDisplay = hide if uiState contains falsy value', () => {
+    samplePieVis.uiState.get.mockReturnValueOnce(false);
+    expect(
+      getConfiguration(
+        'test1',
+        { ...samplePieVis, params: { ...samplePieVis.params, legendDisplay: 'show' } } as any,
+        {
+          metrics: ['metric-1'],
+          buckets: ['bucket-1'],
+        }
+      )
+    ).toEqual({
+      layers: [expect.objectContaining({ legendDisplay: 'hide' })],
+      shape: 'donut',
+      palette: undefined,
+    });
+  });
+
+  test('should return value of legendDisplay if uiState contains undefined value', () => {
+    samplePieVis.uiState.get.mockReturnValueOnce(undefined);
+    const legendDisplay = 'show';
+    expect(
+      getConfiguration(
+        'test1',
+        { ...samplePieVis, params: { ...samplePieVis.params, legendDisplay } } as any,
+        {
+          metrics: ['metric-1'],
+          buckets: ['bucket-1'],
+        }
+      )
+    ).toEqual({
+      layers: [expect.objectContaining({ legendDisplay })],
       shape: 'donut',
       palette: undefined,
     });

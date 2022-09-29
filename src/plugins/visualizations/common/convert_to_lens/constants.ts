@@ -44,19 +44,19 @@ export const PartitionChartTypes = {
   WAFFLE: 'waffle',
 } as const;
 
-export const CategoryDisplay = {
+export const CategoryDisplayTypes = {
   DEFAULT: 'default',
   INSIDE: 'inside',
   HIDE: 'hide',
 } as const;
 
-export const NumberDisplay = {
+export const NumberDisplayTypes = {
   HIDDEN: 'hidden',
   PERCENT: 'percent',
   VALUE: 'value',
 } as const;
 
-export const LegendDisplay = {
+export const LegendDisplayTypes = {
   DEFAULT: 'default',
   SHOW: 'show',
   HIDE: 'hide',

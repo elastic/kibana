@@ -69,7 +69,8 @@ export const getPartitionVisRenderer: (
         const events = [
           `render_${visualizationType}_${visType}`,
           canNavigateToLens ? `render_${visualizationType}_${visType}_convertable` : undefined,
-        ].filter(Boolean) as string[];
+        ].filter<string>((event): event is string => Boolean(event));
+
         plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
       }
       handlers.done();

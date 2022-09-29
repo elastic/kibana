@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
-import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common';
+import { LegendDisplay, PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
+import {
+  CategoryDisplayTypes,
+  NumberDisplayTypes,
+  PartitionVisConfiguration,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Vis } from '@kbn/visualizations-plugin/public';
 
 const getLayers = (
@@ -15,7 +19,16 @@ const getLayers = (
   vis: Vis<PartitionVisParams>,
   metrics: string[],
   buckets: string[]
-) => {
+): PartitionVisConfiguration['layers'] => {
+  const legendOpen = vis.uiState.get('vis.legendOpen');
+  const legendDisplayFromUiState =
+    legendOpen !== undefined ? (legendOpen ? LegendDisplay.SHOW : LegendDisplay.HIDE) : undefined;
+
+  const showValuesInLegend =
+    vis.params.labels.values ??
+    vis.params.showValuesInLegend ??
+    vis.type.visConfig.defaults.showValuesInLegend;
+
   return [
     {
       layerId,
@@ -24,12 +37,18 @@ const getLayers = (
       secondaryGroups: [],
       metric: metrics[0],
       numberDisplay:
-        vis.params.labels.valuesFormat ?? vis.type.visConfig.defaults.labels.valuesFormat,
-      categoryDisplay: vis.params.labels.position ?? vis.type.visConfig.defaults.labels.position,
-      legendDisplay: vis.params.legendDisplay ?? vis.type.visConfig.defaults.legendDisplay,
+        showValuesInLegend === false
+          ? NumberDisplayTypes.HIDDEN
+          : vis.params.labels.valuesFormat ?? vis.type.visConfig.defaults.labels.valuesFormat,
+      categoryDisplay: vis.params.labels.show
+        ? vis.params.labels.position ?? vis.type.visConfig.defaults.labels.position
+        : CategoryDisplayTypes.HIDE,
+      legendDisplay:
+        legendDisplayFromUiState ??
+        vis.params.legendDisplay ??
+        vis.type.visConfig.defaults.legendDisplay,
       legendPosition: vis.params.legendPosition ?? vis.type.visConfig.defaults.legendPosition,
-      showValuesInLegend:
-        vis.params.showValuesInLegend ?? vis.type.visConfig.defaults.showValuesInLegend,
+      showValuesInLegend,
       nestedLegend: vis.params.nestedLegend ?? vis.type.visConfig.defaults.nestedLegend,
       percentDecimals:
         vis.params.labels.percentDecimals ?? vis.type.visConfig.defaults.labels.percentDecimals,
