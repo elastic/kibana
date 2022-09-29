@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { Rule } from '../../../../../types';
-
-export interface RuleAlertsSummaryProps {
-  rule: Rule;
-  filteredRuleTypes: string[];
-}
+export { AlertsSummaryWidgetUI } from './alert_summary_widget_ui';
+export { AlertSummaryWidgetError } from './alert_summary_widget_error';

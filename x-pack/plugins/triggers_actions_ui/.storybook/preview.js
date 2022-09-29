@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { Rule } from '../../../../../types';
+import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
 
-export interface RuleAlertsSummaryProps {
-  rule: Rule;
-  filteredRuleTypes: string[];
-}
+export const decorators = [EuiThemeProviderDecorator];

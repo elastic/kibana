@@ -32540,7 +32540,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage": "持续时间超出了规则的预期运行时间。",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel": "活动",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel": "所有告警",
-    "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.recentAlertHistoryTitle": "最近告警历史记录",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title": "告警",
     "xpack.triggersActionsUI.sections.ruleDetails.deleteRuleButtonLabel": "删除规则",
     "xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel": "禁用",

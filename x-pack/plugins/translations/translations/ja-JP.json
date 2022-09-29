@@ -32503,7 +32503,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage": "期間がルールの想定実行時間を超えています。",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel": "アクティブ",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel": "すべてのアラート",
-    "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.recentAlertHistoryTitle": "最近のアラート履歴",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title": "アラート",
     "xpack.triggersActionsUI.sections.ruleDetails.deleteRuleButtonLabel": "ルールの削除",
     "xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel": "無効にする",
