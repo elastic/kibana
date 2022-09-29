@@ -15,7 +15,7 @@ import {
   prepareFetchExceptionItemsParams,
   fetchListExceptionItems,
   getExceptionItemsReferences,
-} from '../list-api';
+} from '../list_api';
 import * as i18n from '../translations';
 import { useExceptionListDetailsContext } from '../context/exception_list_details.context';
 
