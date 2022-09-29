@@ -382,7 +382,7 @@ export const panelStorageErrorStrings = {
     }),
 };
 
-export const dashboardLoadingErrorStrings = {
+export const dashboardSavedObjectErrorStrings = {
   getDashboardLoadError: (message: string) =>
     i18n.translate('dashboard.loadingError.errorMessage', {
       defaultMessage: 'Error encountered while loading saved dashboard: {message}',
@@ -392,6 +392,14 @@ export const dashboardLoadingErrorStrings = {
     i18n.translate('dashboard.loadingError.dashboardGridErrorMessage', {
       defaultMessage: 'Unable to load dashboard: {message}',
       values: { message },
+    }),
+  getErrorDeletingDashboardToast: () =>
+    i18n.translate('dashboard.deleteError.toastDescription', {
+      defaultMessage: 'Error encountered while deleting dashboard',
+    }),
+  getPanelTooOldError: () =>
+    i18n.translate('dashboard.loadURLError.PanelTooOld', {
+      defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
     }),
 };
 
@@ -432,7 +440,7 @@ export const emptyScreenStrings = {
 /*
   Dashboard Listing Page
 */
-export const dashboardListingTable = {
+export const dashboardListingTableStrings = {
   getEntityName: () =>
     i18n.translate('dashboard.listing.table.entityName', {
       defaultMessage: 'dashboard',
@@ -450,8 +458,8 @@ export const dashboardUnsavedListingStrings = {
       defaultMessage: 'You have unsaved changes in the following {dash}:',
       values: {
         dash: plural
-          ? dashboardListingTable.getEntityNamePlural()
-          : dashboardListingTable.getEntityName(),
+          ? dashboardListingTableStrings.getEntityNamePlural()
+          : dashboardListingTableStrings.getEntityName(),
       },
     }),
   getLoadingTitle: () =>
