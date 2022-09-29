@@ -39,6 +39,7 @@ describe('createIndexPipelineDefinitions util function', () => {
 });
 
 describe('formatMlPipelineBody util function', () => {
+  const pipelineName = 'ml-inference-my-ml-proc';
   const modelId = 'my-model-id';
   let modelInputField = 'my-model-input-field';
   const modelType = 'pytorch';
@@ -82,8 +83,8 @@ describe('formatMlPipelineBody util function', () => {
             field: '_source._ingest.processors',
             value: [
               {
-                model_id: modelId,
                 model_version: modelVersion,
+                pipeline: pipelineName,
                 processed_timestamp: '{{{ _ingest.timestamp }}}',
                 types: modelTypes,
               },
@@ -110,6 +111,7 @@ describe('formatMlPipelineBody util function', () => {
     };
     mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
     const actualResult = await formatMlPipelineBody(
+      pipelineName,
       modelId,
       sourceField,
       destField,
@@ -123,6 +125,7 @@ describe('formatMlPipelineBody util function', () => {
     const mockError = new Error('No known trained model with model_id [my-model-id]');
     mockClient.ml.getTrainedModels.mockImplementation(() => Promise.reject(mockError));
     const asyncCall = formatMlPipelineBody(
+      pipelineName,
       modelId,
       sourceField,
       destField,
@@ -157,8 +160,8 @@ describe('formatMlPipelineBody util function', () => {
             field: '_source._ingest.processors',
             value: [
               {
-                model_id: modelId,
                 model_version: modelVersion,
+                pipeline: pipelineName,
                 processed_timestamp: '{{{ _ingest.timestamp }}}',
                 types: modelTypes,
               },
@@ -184,6 +187,7 @@ describe('formatMlPipelineBody util function', () => {
     };
     mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
     const actualResult = await formatMlPipelineBody(
+      pipelineName,
       modelId,
       sourceField,
       destField,
