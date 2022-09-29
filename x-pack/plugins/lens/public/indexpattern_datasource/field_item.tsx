@@ -447,6 +447,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
             fullWidth
             size="s"
             href={exploreInDiscover}
+            target="_blank"
             data-test-subj={`lnsFieldListPanel-exploreInDiscover-${field.name}`}
           >
             {i18n.translate('xpack.lens.indexPattern.fieldExploreInDiscover', {
