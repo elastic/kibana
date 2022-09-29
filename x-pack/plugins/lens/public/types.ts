@@ -966,7 +966,8 @@ export interface Visualization<T = unknown, P = unknown> {
       staticValue?: unknown;
       autoTimeField?: boolean;
     }>;
-    hideFromMenu?: boolean;
+    canAddViaMenu?: boolean;
+    hidden?: boolean;
   }>;
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
 

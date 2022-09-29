@@ -46,7 +46,7 @@ export function AddLayerButton({
     }
     return visualization
       .getSupportedLayers?.(visualizationState, layersMeta)
-      ?.filter(({ hideFromMenu }) => !hideFromMenu);
+      ?.filter(({ canAddViaMenu: hideFromMenu }) => !hideFromMenu);
   }, [visualization, visualizationState, layersMeta]);
 
   if (supportedLayers == null || !supportedLayers.length) {

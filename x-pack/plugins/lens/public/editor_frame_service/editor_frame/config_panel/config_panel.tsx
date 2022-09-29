@@ -197,89 +197,98 @@ export function LayerPanels(
 
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map((layerId, layerIndex) => (
-        <LayerPanel
-          {...props}
-          activeVisualization={activeVisualization}
-          registerNewLayerRef={registerNewLayerRef}
-          key={layerId}
-          layerId={layerId}
-          layerIndex={layerIndex}
-          visualizationState={visualization.state}
-          updateVisualization={setVisualizationState}
-          updateDatasource={updateDatasource}
-          updateDatasourceAsync={updateDatasourceAsync}
-          onChangeIndexPattern={onChangeIndexPattern}
-          updateAll={updateAll}
-          addLayer={addLayer}
-          isOnlyLayer={
-            getRemoveOperation(
-              activeVisualization,
-              visualization.state,
-              layerId,
-              layerIds.length
-            ) === 'clear'
-          }
-          onEmptyDimensionAdd={(columnId, { groupId }) => {
-            // avoid state update if the datasource does not support initializeDimension
-            if (
-              activeDatasourceId != null &&
-              datasourceMap[activeDatasourceId]?.initializeDimension
-            ) {
-              dispatchLens(
-                setLayerDefaultDimension({
+      {layerIds.map((layerId, layerIndex) => {
+        const layerType = activeVisualization.getLayerType(layerId, visualization.state);
+        const hidden = activeVisualization
+          .getSupportedLayers(visualization.state)
+          .find((layerInfo) => layerInfo.type === layerType)?.hidden;
+
+        return (
+          !hidden && (
+            <LayerPanel
+              {...props}
+              activeVisualization={activeVisualization}
+              registerNewLayerRef={registerNewLayerRef}
+              key={layerId}
+              layerId={layerId}
+              layerIndex={layerIndex}
+              visualizationState={visualization.state}
+              updateVisualization={setVisualizationState}
+              updateDatasource={updateDatasource}
+              updateDatasourceAsync={updateDatasourceAsync}
+              onChangeIndexPattern={onChangeIndexPattern}
+              updateAll={updateAll}
+              addLayer={addLayer}
+              isOnlyLayer={
+                getRemoveOperation(
+                  activeVisualization,
+                  visualization.state,
                   layerId,
-                  columnId,
-                  groupId,
-                })
-              );
-            }
-          }}
-          onCloneLayer={() => {
-            dispatchLens(
-              cloneLayer({
-                layerId,
-              })
-            );
-          }}
-          onRemoveLayer={() => {
-            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
-            const datasourceId = datasourcePublicAPI?.datasourceId;
+                  layerIds.length
+                ) === 'clear'
+              }
+              onEmptyDimensionAdd={(columnId, { groupId }) => {
+                // avoid state update if the datasource does not support initializeDimension
+                if (
+                  activeDatasourceId != null &&
+                  datasourceMap[activeDatasourceId]?.initializeDimension
+                ) {
+                  dispatchLens(
+                    setLayerDefaultDimension({
+                      layerId,
+                      columnId,
+                      groupId,
+                    })
+                  );
+                }
+              }}
+              onCloneLayer={() => {
+                dispatchLens(
+                  cloneLayer({
+                    layerId,
+                  })
+                );
+              }}
+              onRemoveLayer={() => {
+                const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
+                const datasourceId = datasourcePublicAPI?.datasourceId;
 
-            if (datasourceId) {
-              const layerDatasource = datasourceMap[datasourceId];
-              const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
-              const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-              const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+                if (datasourceId) {
+                  const layerDatasource = datasourceMap[datasourceId];
+                  const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+                  const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+                  const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
-              action?.execute({
-                trigger,
-                fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
-                usedDataViews: layerDatasource
-                  .getLayers(layerDatasourceState)
-                  .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
-                defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
-              } as ActionExecutionContext);
-            }
+                  action?.execute({
+                    trigger,
+                    fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
+                    usedDataViews: layerDatasource
+                      .getLayers(layerDatasourceState)
+                      .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
+                    defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
+                  } as ActionExecutionContext);
+                }
 
-            dispatchLens(
-              removeOrClearLayer({
-                visualizationId: activeVisualization.id,
-                layerId,
-                layerIds,
-              })
-            );
-            removeLayerRef(layerId);
-          }}
-          onRemoveDimension={(dimensionProps) => {
-            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
-            const datasourceId = datasourcePublicAPI?.datasourceId;
-            dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
-          }}
-          toggleFullscreen={toggleFullscreen}
-          indexPatternService={indexPatternService}
-        />
-      ))}
+                dispatchLens(
+                  removeOrClearLayer({
+                    visualizationId: activeVisualization.id,
+                    layerId,
+                    layerIds,
+                  })
+                );
+                removeLayerRef(layerId);
+              }}
+              onRemoveDimension={(dimensionProps) => {
+                const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
+                const datasourceId = datasourcePublicAPI?.datasourceId;
+                dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
+              }}
+              toggleFullscreen={toggleFullscreen}
+              indexPatternService={indexPatternService}
+            />
+          )
+        );
+      })}
       {!hideAddLayerButton && (
         <AddLayerButton
           visualization={activeVisualization}
