@@ -24,7 +24,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { Case, UpdateByKey } from '../../../common/ui/types';
+import { Case } from '../../../common/ui/types';
 import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
@@ -34,12 +34,10 @@ import * as i18n from './translations';
 import { ALERTS } from '../../common/translations';
 import { useActions } from './use_actions';
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
-import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { severities } from '../severity/config';
-import { useUpdateCase } from '../../containers/use_update_case';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
@@ -47,7 +45,6 @@ import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 import { CurrentUserProfile } from '../types';
 import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { useRefreshCases } from './use_on_refresh_cases';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -122,24 +119,8 @@ export const useCasesColumns = ({
   onRowClick,
   showSolutionColumn,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
-  const refreshCases = useRefreshCases();
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
-  const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
-
-  const handleDispatchUpdate = useCallback(
-    ({ updateKey, updateValue, caseData }: UpdateByKey) => {
-      updateCaseProperty({
-        updateKey,
-        updateValue,
-        caseData,
-        onSuccess: () => {
-          refreshCases();
-        },
-      });
-    },
-    [refreshCases, updateCaseProperty]
-  );
 
   const { actions, modals } = useActions({ permissions });
 
@@ -310,32 +291,6 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    ...(!isSelectorView
-      ? [
-          {
-            name: i18n.STATUS,
-            render: (theCase: Case) => {
-              if (theCase.status === null || theCase.status === undefined) {
-                return getEmptyTagValue();
-              }
-
-              return (
-                <StatusContextMenu
-                  currentStatus={theCase.status}
-                  disabled={!permissions.update || isLoadingUpdateCase}
-                  onStatusChanged={(status) =>
-                    handleDispatchUpdate({
-                      updateKey: 'status',
-                      updateValue: status,
-                      caseData: theCase,
-                    })
-                  }
-                />
-              );
-            },
-          },
-        ]
-      : []),
     {
       name: i18n.SEVERITY,
       render: (theCase: Case) => {

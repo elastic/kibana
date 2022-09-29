@@ -10,11 +10,13 @@ import React from 'react';
 
 import { Case } from '../../containers/types';
 import { useBulkDeleteAction } from '../actions/delete/use_delete_action';
+import { useBulkStatusAction } from '../actions/status/use_status_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 
 interface UseBulkActionsProps {
   selectedCases: Case[];
   onAction: () => void;
+  onActionSuccess: () => void;
 }
 
 interface UseBulkActionsReturnValue {
@@ -25,8 +27,23 @@ interface UseBulkActionsReturnValue {
 export const useBulkActions = ({
   selectedCases,
   onAction,
+  onActionSuccess,
 }: UseBulkActionsProps): UseBulkActionsReturnValue => {
-  const deleteAction = useBulkDeleteAction({ selectedCases, onAction });
+  const isDisabled = selectedCases.length === 0;
+
+  const deleteAction = useBulkDeleteAction({
+    selectedCases,
+    isDisabled,
+    onAction,
+    onActionSuccess,
+  });
+
+  const statusAction = useBulkStatusAction({
+    selectedCases,
+    isDisabled,
+    onAction,
+    onActionSuccess,
+  });
 
   return {
     modals: (
@@ -40,6 +57,6 @@ export const useBulkActions = ({
         ) : null}
       </>
     ),
-    actions: [deleteAction.action],
+    actions: [...statusAction.actions, deleteAction.action],
   };
 };

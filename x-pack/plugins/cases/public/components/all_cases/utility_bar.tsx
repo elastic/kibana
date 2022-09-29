@@ -7,7 +7,6 @@
 
 import React, { FunctionComponent, useCallback, useState } from 'react';
 import { EuiContextMenu } from '@elastic/eui';
-import { CaseStatuses } from '../../../common';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -17,7 +16,6 @@ import {
 } from '../utility_bar';
 import * as i18n from './translations';
 import { Cases, Case, FilterOptions } from '../../../common/ui/types';
-import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useRefreshCases } from './use_on_refresh_cases';
 import { UtilityBarBulkActions } from '../utility_bar/utility_bar_bulk_actions';
 import { useBulkActions } from './use_bulk_actions';
@@ -29,21 +27,6 @@ interface Props {
   selectedCases: Case[];
   deselectCases: () => void;
 }
-
-export const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string => {
-  const totalCases = cases.length;
-  const caseTitle = totalCases === 1 ? cases[0].title : '';
-
-  if (status === CaseStatuses.open) {
-    return i18n.REOPENED_CASES({ totalCases, caseTitle });
-  } else if (status === CaseStatuses['in-progress']) {
-    return i18n.MARK_IN_PROGRESS_CASES({ totalCases, caseTitle });
-  } else if (status === CaseStatuses.closed) {
-    return i18n.CLOSED_CASES({ totalCases, caseTitle });
-  }
-
-  return '';
-};
 
 export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   data,
@@ -57,24 +40,6 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
 
-  const { mutate: updateCases } = useUpdateCases();
-
-  const handleUpdateCaseStatus = useCallback(
-    (status: CaseStatuses) => {
-      const casesToUpdate = selectedCases.map((theCase) => ({
-        status,
-        id: theCase.id,
-        version: theCase.version,
-      }));
-
-      updateCases({
-        cases: casesToUpdate,
-        successToasterTitle: getStatusToasterMessage(status, selectedCases),
-      });
-    },
-    [selectedCases, updateCases]
-  );
-
   const onRefresh = useCallback(() => {
     deselectCases();
     refreshCases();
@@ -83,6 +48,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   const { actions, modals } = useBulkActions({
     selectedCases,
     onAction: closePopover,
+    onActionSuccess: onRefresh,
   });
 
   const panels = [{ id: 0, items: actions }];

@@ -10,6 +10,8 @@ import { EuiTableActionsColumnType } from '@elastic/eui';
 import { Case, CasesPermissions } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useStatusAction } from '../actions/status/use_status_action';
+import { useRefreshCases } from './use_on_refresh_cases';
 
 interface UseBulkActionsProps {
   permissions: CasesPermissions;
@@ -21,7 +23,9 @@ interface UseBulkActionsReturnValue {
 }
 
 export const useActions = ({ permissions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
-  const deleteAction = useDeleteAction();
+  const refreshCases = useRefreshCases();
+  const deleteAction = useDeleteAction({ onActionSuccess: refreshCases });
+  const statusAction = useStatusAction({ onActionSuccess: refreshCases });
 
   return {
     modals: (
@@ -35,6 +39,6 @@ export const useActions = ({ permissions }: UseBulkActionsProps): UseBulkActions
         ) : null}
       </>
     ),
-    actions: [...(permissions.delete ? [deleteAction.action] : [])],
+    actions: [...statusAction.actions, ...(permissions.delete ? [deleteAction.action] : [])],
   };
 };

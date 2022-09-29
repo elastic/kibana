@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 export { DELETED_CASES } from '../../../common/translations';
 
-export const BULK_ACTION_DELETE_SELECTED = i18n.translate(
-  'xpack.cases.caseTable.bulkActions.deleteSelectedTitle',
+export const BULK_ACTION_DELETE_LABEL = i18n.translate(
+  'xpack.cases.caseTable.bulkActions.deleteCases',
   {
-    defaultMessage: 'Delete selected',
+    defaultMessage: 'Delete cases',
   }
 );
 

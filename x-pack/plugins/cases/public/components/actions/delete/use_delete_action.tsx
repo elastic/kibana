@@ -5,48 +5,57 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelItemDescriptor, EuiTableActionsColumnType } from '@elastic/eui';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiContextMenuPanelItemDescriptor,
+  EuiIcon,
+  EuiTableActionsColumnType,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { Case } from '../../../../common';
 import { useDeleteCases } from '../../../containers/use_delete_cases';
 
 import * as i18n from './translations';
+import { UseActionProps, UseBulkActionProps } from '../types';
 
-export interface UseBulkDeleteActionProps {
-  selectedCases: Case[];
-  onAction: () => void;
-}
-
-export const useBulkDeleteAction = ({ selectedCases, onAction }: UseBulkDeleteActionProps) => {
+export const useBulkDeleteAction = ({
+  selectedCases,
+  onAction,
+  isDisabled,
+}: UseBulkActionProps) => {
+  const euiTheme = useEuiTheme();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const onCloseModal = useCallback(() => setIsModalVisible(false), []);
   const openModal = useCallback(() => {
-    onAction();
     setIsModalVisible(true);
-  }, [onAction]);
+  }, []);
 
   const { mutate: deleteCases } = useDeleteCases();
 
   const onConfirmDeletion = useCallback(() => {
     onCloseModal();
-    deleteCases({
-      caseIds: selectedCases.map(({ id }) => id),
-      successToasterTitle: i18n.DELETED_CASES(selectedCases.length),
-    });
-  }, [deleteCases, onCloseModal, selectedCases]);
+    deleteCases(
+      {
+        caseIds: selectedCases.map(({ id }) => id),
+        successToasterTitle: i18n.DELETED_CASES(selectedCases.length),
+      },
+      { onSuccess: onAction }
+    );
+  }, [deleteCases, onAction, onCloseModal, selectedCases]);
 
-  const isDisabled = selectedCases.length === 0;
+  const color = isDisabled ? euiTheme.euiTheme.colors.disabled : 'danger';
 
   const action: EuiContextMenuPanelItemDescriptor = useMemo(
     () => ({
-      name: i18n.BULK_ACTION_DELETE_SELECTED,
+      name: <EuiTextColor color={color}>{i18n.BULK_ACTION_DELETE_LABEL}</EuiTextColor>,
       onClick: openModal,
       disabled: isDisabled,
-      'data-test-subj': 'cases-bulk-delete-button',
-      icon: 'trash',
-      key: i18n.BULK_ACTION_DELETE_SELECTED,
+      'data-test-subj': 'cases-bulk-action-delete',
+      icon: <EuiIcon type="trash" size="m" color={color} />,
+      key: 'cases-bulk-action-delete',
     }),
-    [isDisabled, openModal]
+    [color, isDisabled, openModal]
   );
 
   return { action, isModalVisible, onConfirmDeletion, onCloseModal };
@@ -54,7 +63,7 @@ export const useBulkDeleteAction = ({ selectedCases, onAction }: UseBulkDeleteAc
 
 export type UseBulkDeleteAction = ReturnType<typeof useBulkDeleteAction>;
 
-export const useDeleteAction = () => {
+export const useDeleteAction = ({ onActionSuccess }: UseActionProps) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [caseToBeDeleted, setCaseToBeDeleted] = useState<string>();
   const onCloseModal = useCallback(() => setIsModalVisible(false), []);
@@ -68,12 +77,15 @@ export const useDeleteAction = () => {
   const onConfirmDeletion = useCallback(() => {
     onCloseModal();
     if (caseToBeDeleted) {
-      deleteCases({
-        caseIds: [caseToBeDeleted],
-        successToasterTitle: i18n.DELETED_CASES(1),
-      });
+      deleteCases(
+        {
+          caseIds: [caseToBeDeleted],
+          successToasterTitle: i18n.DELETED_CASES(1),
+        },
+        { onSuccess: onActionSuccess }
+      );
     }
-  }, [caseToBeDeleted, deleteCases, onCloseModal]);
+  }, [caseToBeDeleted, deleteCases, onActionSuccess, onCloseModal]);
 
   const action: EuiTableActionsColumnType<Case>['actions'][number] = useMemo(
     () => ({
@@ -84,8 +96,8 @@ export const useDeleteAction = () => {
       type: 'icon',
       isPrimary: true,
       onClick: openModal,
-      'data-test-subj': 'cases-action-delete-button',
-      key: i18n.DELETE_ACTION_LABEL,
+      'data-test-subj': 'case-action-delete',
+      key: 'case-action-delete',
     }),
     [openModal]
   );
