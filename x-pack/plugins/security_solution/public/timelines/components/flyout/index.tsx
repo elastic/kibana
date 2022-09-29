@@ -14,7 +14,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
-import { useTimelineSavePrompt } from '../use_timeline_save_prompt';
+import { useTimelineSavePrompt } from '../../../common/hooks/timeline/use_timeline_save_prompt';
 
 interface OwnProps {
   timelineId: TimelineId;
