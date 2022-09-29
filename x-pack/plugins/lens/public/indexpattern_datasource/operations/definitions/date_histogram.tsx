@@ -515,6 +515,14 @@ export const dateHistogramOperation: OperationDefinition<
       </>
     );
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.dateHistogram.documentation.quick',
+    {
+      defaultMessage: `
+The date or date range values distributed into intervals.
+      `,
+    }
+  ),
 };
 
 function parseInterval(currentInterval: string) {

@@ -158,6 +158,14 @@ export const filtersOperation: OperationDefinition<
   },
 
   getMaxPossibleNumValues: (column) => column.params.filters.length,
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.filters.documentation.quick',
+    {
+      defaultMessage: `
+    Divides values into predefined subsets.
+      `,
+    }
+  ),
 };
 
 export const FilterList = ({

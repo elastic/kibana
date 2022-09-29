@@ -417,4 +417,12 @@ Example: Get the number of bytes larger than 95 % of values:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.percentile.documentation.quick',
+    {
+      defaultMessage: `
+      The largest value that is smaller than n percent of the values that occur in all documents.
+      `,
+    }
+  ),
 };
