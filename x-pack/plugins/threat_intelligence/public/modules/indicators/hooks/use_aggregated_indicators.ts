@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { TimeRange } from '@kbn/es-query';
+import { useQuery } from '@tanstack/react-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { useQuery } from '@tanstack/react-query';
 import { useInspector } from '../../../hooks/use_inspector';
-import { useFilters } from '../../query_bar/hooks/use_filters';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
@@ -27,13 +26,15 @@ export interface UseAggregatedIndicatorsParam {
    * to query indicators for the Indicators barchart.
    */
   timeRange?: TimeRange;
+  filters: Filter[];
+  filterQuery: Query;
 }
 
 export interface UseAggregatedIndicatorsValue {
   /**
    * Array of {@link ChartSeries}, ready to be used in the Indicators barchart.
    */
-  indicators: ChartSeries[];
+  series: ChartSeries[];
   /**
    * Callback used by the IndicatorsFieldSelector component to query a new set of
    * aggregated indicators.
@@ -54,6 +55,8 @@ const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
 
 export const useAggregatedIndicators = ({
   timeRange = DEFAULT_TIME_RANGE,
+  filters,
+  filterQuery,
 }: UseAggregatedIndicatorsParam): UseAggregatedIndicatorsValue => {
   const {
     services: {
@@ -66,7 +69,6 @@ export const useAggregatedIndicators = ({
   const { inspectorAdapters } = useInspector();
 
   const [field, setField] = useState<string>(DEFAULT_FIELD);
-  const { filters, filterQuery } = useFilters();
 
   const aggregatedIndicatorsQuery = useMemo(
     () =>
@@ -105,7 +107,7 @@ export const useAggregatedIndicators = ({
 
   return {
     dateRange,
-    indicators: data || [],
+    series: data || [],
     onFieldChange: setField,
     selectedField: field,
   };
