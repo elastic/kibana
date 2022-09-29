@@ -132,7 +132,7 @@ export function ActionsPopover({
       icon: 'invert',
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
-          updateMonitorEnabledState(monitor, !monitor.isEnabled);
+          updateMonitorEnabledState(!monitor.isEnabled);
         }
       },
     },

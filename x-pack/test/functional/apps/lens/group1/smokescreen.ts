@@ -504,6 +504,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionFormat('Number');
       await PageObjects.lens.closeDimensionEditor();
 
+      await PageObjects.lens.waitForVisualization();
+
       const values = await Promise.all(
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
       );

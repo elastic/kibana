@@ -19,7 +19,7 @@ import type { ActionTimelineToShow } from '../../../../timelines/components/open
 import { QueryBar } from '../../../../common/components/query_bar';
 import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
-import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
+import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
@@ -70,6 +70,7 @@ const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => (
   filters: savedQuery.attributes.filters ?? [],
   query: savedQuery.attributes.query,
   saved_id: savedQuery.id,
+  title: savedQuery.attributes.title,
 });
 
 export const QueryBarDefineRule = ({

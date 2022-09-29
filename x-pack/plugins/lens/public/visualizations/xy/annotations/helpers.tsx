@@ -41,6 +41,19 @@ export const defaultRangeAnnotationLabel = i18n.translate(
   }
 );
 
+const isDateHistogram = (
+  dataLayers: XYDataLayerConfig[],
+  frame?: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'> | undefined
+) =>
+  Boolean(
+    dataLayers.length &&
+      dataLayers.every(
+        (dataLayer) =>
+          dataLayer.xAccessor &&
+          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+      )
+  );
+
 export function getStaticDate(dataLayers: XYDataLayerConfig[], frame: FramePublicAPI) {
   const dataLayersId = dataLayers.map(({ layerId }) => layerId);
   const { activeData, dateRange } = frame;
@@ -83,14 +96,8 @@ export const getAnnotationsSupportedLayer = (
 ) => {
   const dataLayers = getDataLayers(state?.layers || []);
 
-  const hasDateHistogram = Boolean(
-    dataLayers.length &&
-      dataLayers.every(
-        (dataLayer) =>
-          dataLayer.xAccessor &&
-          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
-      )
-  );
+  const hasDateHistogram = isDateHistogram(dataLayers, frame);
+
   const initialDimensions =
     state && hasDateHistogram
       ? [
@@ -375,16 +382,7 @@ export const getAnnotationsConfiguration = ({
   frame: Pick<FramePublicAPI, 'datasourceLayers'>;
   layer: XYAnnotationLayerConfig;
 }) => {
-  const dataLayers = getDataLayers(state.layers);
-
-  const hasDateHistogram = Boolean(
-    dataLayers.length &&
-      dataLayers.every(
-        (dataLayer) =>
-          dataLayer.xAccessor &&
-          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
-      )
-  );
+  const hasDateHistogram = isDateHistogram(getDataLayers(state.layers), frame);
 
   const groupLabel = getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) });
 
@@ -416,7 +414,7 @@ export const getAnnotationsConfiguration = ({
         invalidMessage: i18n.translate('xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp', {
           defaultMessage: 'Annotations require a time based chart to work. Add a date histogram.',
         }),
-        required: false,
+        requiredMinDimensionCount: 0,
         supportsMoreColumns: true,
         supportFieldFormat: false,
         enableDimensionEditor: true,

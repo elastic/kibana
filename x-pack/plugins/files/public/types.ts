@@ -96,7 +96,18 @@ export interface FilesClient extends GlobalEndpoints {
    *
    * @param args - upload file args
    */
-  upload: ClientMethodFrom<UploadFileKindHttpEndpoint, { abortSignal?: AbortSignal }>;
+  upload: (
+    args: UploadFileKindHttpEndpoint['inputs']['params'] &
+      UploadFileKindHttpEndpoint['inputs']['query'] & {
+        /**
+         * Should be blob or ReadableStream of some kind.
+         */
+        body: unknown;
+        kind: string;
+        abortSignal?: AbortSignal;
+        contentType?: string;
+      }
+  ) => Promise<UploadFileKindHttpEndpoint['output']>;
   /**
    * Stream a download of the file object's content.
    *
@@ -106,8 +117,10 @@ export interface FilesClient extends GlobalEndpoints {
   /**
    * Get a string for downloading a file that can be passed to a button element's
    * href for download.
+   *
+   * @param args - get download URL args
    */
-  getDownloadHref: (file: FileJSON) => string;
+  getDownloadHref: (args: Pick<FileJSON, 'id' | 'fileKind'>) => string;
   /**
    * Share a file by creating a new file share instance.
    *
