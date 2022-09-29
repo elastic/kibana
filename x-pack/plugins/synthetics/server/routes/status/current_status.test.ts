@@ -45,6 +45,7 @@ jest.mock('../../legacy_uptime/lib/requests/get_snapshot_counts', () => ({
 describe('current status route', () => {
   describe('periodToMs', () => {
     it('returns 0 for unsupported unit type', () => {
+      // @ts-expect-error Providing invalid value to test handler in function
       expect(periodToMs({ number: '10', unit: 'rad' })).toEqual(0);
     });
     it('converts seconds', () => {
@@ -244,9 +245,11 @@ describe('current status route', () => {
       });
       expect(esClient.search).toHaveBeenCalledTimes(2);
       // These assertions are to ensure that we are paginating through the IDs we use for filtering
+      // @ts-expect-error mock search is not lining up with expected type
       expect(esClient.search.mock.calls[0][0].query.bool.filter[1].terms['monitor.id']).toEqual([
         'id1',
       ]);
+      // @ts-expect-error mock search is not lining up with expected type
       expect(esClient.search.mock.calls[1][0].query.bool.filter[1].terms['monitor.id']).toEqual([
         'id2',
       ]);
