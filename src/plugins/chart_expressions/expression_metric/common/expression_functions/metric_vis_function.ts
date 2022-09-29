@@ -160,7 +160,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }
 
       const logTable = prepareLogTable(input, argsTable, true);
-      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+      handlers.inspectorAdapters.tables.logDatatable(args.inspectorTableId, logTable);
+
+      if (args.trendline?.inspectorTable && args.trendline.inspectorTableId) {
+        handlers.inspectorAdapters.tables.logDatatable(
+          args.trendline?.inspectorTableId,
+          args.trendline?.inspectorTable
+        );
+      }
     }
 
     return {

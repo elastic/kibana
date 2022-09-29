@@ -225,7 +225,6 @@ const getMetricLayerConfiguration = (
   };
 };
 
-// TODO - is this config necessary if the layer is hidden?
 const getTrendlineLayerConfiguration = (
   props: VisualizationConfigProps<MetricVisualizationState>
 ): {
@@ -238,11 +237,6 @@ const getTrendlineLayerConfiguration = (
         groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
           defaultMessage: 'Primary metric',
         }),
-        paramEditorCustomProps: {
-          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
-            defaultMessage: 'Value',
-          }),
-        },
         accessors: props.state.trendlineMetricAccessor
           ? [
               {
@@ -251,20 +245,11 @@ const getTrendlineLayerConfiguration = (
             ]
           : [],
         supportsMoreColumns: !props.state.trendlineMetricAccessor,
-        filterOperations: () => true,
-        enableDimensionEditor: true,
-        required: true,
-        hideGrouping: true,
-        nestingOrder: 2,
+        filterOperations: () => false,
       },
       {
         groupId: GROUP_ID.TREND_TIME,
         groupLabel: i18n.translate('xpack.lens.metric.timeField', { defaultMessage: 'Time field' }),
-        paramEditorCustomProps: {
-          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
-            defaultMessage: 'Value',
-          }),
-        },
         accessors: props.state.trendlineTimeAccessor
           ? [
               {
@@ -273,25 +258,13 @@ const getTrendlineLayerConfiguration = (
             ]
           : [],
         supportsMoreColumns: !props.state.trendlineTimeAccessor,
-        filterOperations: (op) => op.isBucketed && op.dataType === 'date',
-        enableDimensionEditor: true,
-        required: true,
-        groupTooltip: i18n.translate('xpack.lens.metric.timeFieldTooltip', {
-          defaultMessage: 'This is the time axis for the trend line',
-        }),
-        hideGrouping: true,
-        nestingOrder: 1,
+        filterOperations: () => false,
       },
       {
         groupId: GROUP_ID.TREND_BREAKDOWN_BY,
         groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
         }),
-        paramEditorCustomProps: {
-          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
-            defaultMessage: 'Value',
-          }),
-        },
         accessors: props.state.trendlineBreakdownByAccessor
           ? [
               {
@@ -301,10 +274,6 @@ const getTrendlineLayerConfiguration = (
           : [],
         supportsMoreColumns: !props.state.trendlineBreakdownByAccessor,
         filterOperations: () => false,
-        enableDimensionEditor: true,
-        required: false,
-        hideGrouping: true,
-        nestingOrder: 0,
       },
     ],
   };
