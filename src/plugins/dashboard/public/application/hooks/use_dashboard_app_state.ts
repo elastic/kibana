@@ -6,50 +6,45 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { History } from 'history';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardConstants } from '../..';
-import { getNewDashboardTitle } from '../../dashboard_strings';
-import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
-import type {
-  DashboardBuildContext,
-  DashboardAppServices,
-  DashboardAppState,
-  DashboardState,
-} from '../../types';
-import { DashboardAppLocatorParams } from '../../locator';
 import {
-  loadDashboardHistoryLocationState,
-  tryDestroyDashboardContainer,
-  syncDashboardContainerInput,
-  savedObjectToDashboardState,
-  syncDashboardDataViews,
-  syncDashboardFilterState,
-  loadSavedDashboardState,
-  buildDashboardContainer,
-  syncDashboardUrlState,
   diffDashboardState,
-  areTimeRangesEqual,
-  areRefreshIntervalsEqual,
+  syncDashboardUrlState,
+  syncDashboardDataViews,
+  buildDashboardContainer,
+  syncDashboardFilterState,
+  syncDashboardContainerInput,
+  tryDestroyDashboardContainer,
+  loadDashboardHistoryLocationState,
 } from '../lib';
-import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import {
+  dashboardStateLoadWasSuccessful,
+  LoadDashboardFromSavedObjectReturn,
+} from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
+import { DashboardConstants } from '../..';
+import { DashboardAppLocatorParams } from '../../locator';
+import { dashboardSavedObjectErrorStrings, getNewDashboardTitle } from '../../dashboard_strings';
 import { pluginServices } from '../../services/plugin_services';
 import { useDashboardMountContext } from './dashboard_mount_context';
+import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
+import type { DashboardBuildContext, DashboardAppState, DashboardState } from '../../types';
 
 export interface UseDashboardStateProps {
   history: History;
   showNoDataPage: boolean;
   savedDashboardId?: string;
   isEmbeddedExternally: boolean;
-  setShowNoDataPage: (showNoData: boolean) => void;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  setShowNoDataPage: (showNoData: boolean) => void;
 }
 
 export const useDashboardAppState = ({
@@ -79,25 +74,23 @@ export const useDashboardAppState = ({
   const [lastSavedState, setLastSavedState] = useState<DashboardState>();
   const $onLastSavedStateChange = useMemo(() => new Subject<DashboardState>(), []);
 
-  const {
-    services: { savedDashboards },
-  } = useKibana<DashboardAppServices>();
-
   /**
    * Unpack services and context
    */
   const { scopedHistory } = useDashboardMountContext();
   const {
+    embeddable,
+    notifications: { toasts },
     chrome: { docTitle },
     dashboardCapabilities,
     dashboardSessionStorage,
+    spaces: { redirectLegacyUrl },
     data: { query, search, dataViews },
-    embeddable,
     initializerContext: { kibanaVersion },
     screenshotMode: { isScreenshotMode, getScreenshotContext },
-    spaces: { redirectLegacyUrl },
-    notifications,
+    dashboardSavedObject: { loadDashboardStateFromSavedObject },
   } = pluginServices.getServices();
+
   const { getStateTransfer } = embeddable;
 
   /**
@@ -120,7 +113,6 @@ export const useDashboardAppState = ({
      */
     const dashboardBuildContext: DashboardBuildContext = {
       history,
-      savedDashboards,
       kbnUrlStateStorage,
       isEmbeddedExternally,
       dispatchDashboardStateChange,
@@ -149,32 +141,24 @@ export const useDashboardAppState = ({
       /**
        * Load and unpack state from dashboard saved object.
        */
-      const loadSavedDashboardResult = await loadSavedDashboardState({
-        ...dashboardBuildContext,
-        savedDashboardId,
-      });
-      if (canceled || !loadSavedDashboardResult) return;
-      const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
-
-      // If the saved dashboard is an alias match, then we will redirect
-      if (savedDashboard.outcome === 'aliasMatch' && savedDashboard.id && savedDashboard.aliasId) {
-        // We want to keep the "query" params on our redirect.
-        // But, these aren't true query params, they are technically part of the hash
-        // So, to get the new path, we will just replace the current id in the hash
-        // with the alias id
-        const path = scopedHistory().location.hash.replace(
-          savedDashboard.id,
-          savedDashboard.aliasId
-        );
-        const aliasPurpose = savedDashboard.aliasPurpose;
-        if (isScreenshotMode()) {
-          scopedHistory().replace(path);
-        } else {
-          await redirectLegacyUrl?.({ path, aliasPurpose });
-        }
-        // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
+      let loadSavedDashboardResult: LoadDashboardFromSavedObjectReturn;
+      try {
+        loadSavedDashboardResult = await loadDashboardStateFromSavedObject({
+          getScopedHistory: scopedHistory,
+          id: savedDashboardId,
+        });
+      } catch (error) {
+        // redirect back to landing page if dashboard could not be loaded.
+        toasts.addDanger(dashboardSavedObjectErrorStrings.getDashboardLoadError(error.message));
+        history.push(DashboardConstants.LANDING_PAGE_PATH);
         return;
       }
+      if (canceled || !dashboardStateLoadWasSuccessful(loadSavedDashboardResult)) {
+        return;
+      }
+
+      const { dashboardState: savedDashboardState, createConflictWarning } =
+        loadSavedDashboardResult;
 
       /**
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
@@ -187,12 +171,11 @@ export const useDashboardAppState = ({
 
       const { initialDashboardStateFromUrl, stopWatchingAppStateInUrl } = syncDashboardUrlState({
         ...dashboardBuildContext,
-        savedDashboard,
       });
 
       const printLayoutDetected = isScreenshotMode() && getScreenshotContext('layout') === 'print';
 
-      const initialDashboardState = {
+      const initialDashboardState: DashboardState = {
         ...savedDashboardState,
         ...dashboardSessionStorageState,
         ...initialDashboardStateFromUrl,
@@ -208,10 +191,9 @@ export const useDashboardAppState = ({
       /**
        * Start syncing dashboard state with the Query, Filters and Timepicker from the Query Service.
        */
-      const { applyFilters, stopSyncingDashboardFilterState } = syncDashboardFilterState({
+      const { stopSyncingDashboardFilterState } = syncDashboardFilterState({
         ...dashboardBuildContext,
         initialDashboardState,
-        savedDashboard,
       });
 
       /**
@@ -222,10 +204,9 @@ export const useDashboardAppState = ({
         ...dashboardBuildContext,
         initialDashboardState,
         incomingEmbeddable,
-        savedDashboard,
         executionContext: {
           type: 'dashboard',
-          description: savedDashboard.title,
+          description: initialDashboardState.title,
         },
       });
 
@@ -256,15 +237,13 @@ export const useDashboardAppState = ({
       const stopSyncingContainerInput = syncDashboardContainerInput({
         ...dashboardBuildContext,
         dashboardContainer,
-        savedDashboard,
-        applyFilters,
       });
 
       /**
        * Any time the redux state, or the last saved state changes, compare them, set the unsaved
        * changes state, and and push the unsaved changes to session storage.
        */
-      const { timefilter } = query.timefilter;
+
       const lastSavedSubscription = combineLatest([
         $onLastSavedStateChange,
         dashboardAppState.$onDashboardStateChange,
@@ -281,31 +260,24 @@ export const useDashboardAppState = ({
                 newState: current,
               }).then((unsavedChanges) => {
                 if (observer.closed) return;
-                const savedTimeChanged =
-                  lastSaved.timeRestore &&
-                  (!areTimeRangesEqual(
-                    {
-                      from: savedDashboard?.timeFrom,
-                      to: savedDashboard?.timeTo,
-                    },
-                    timefilter.getTime()
-                  ) ||
-                    !areRefreshIntervalsEqual(
-                      savedDashboard?.refreshInterval,
-                      timefilter.getRefreshInterval()
-                    ));
-
                 /**
                  * changes to the dashboard should only be considered 'unsaved changes' when
                  * editing the dashboard
                  */
                 const hasUnsavedChanges =
-                  current.viewMode === ViewMode.EDIT &&
-                  (Object.keys(unsavedChanges).length > 0 || savedTimeChanged);
+                  current.viewMode === ViewMode.EDIT && Object.keys(unsavedChanges).length > 0;
                 setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
                 unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
-                dashboardSessionStorage.setState(savedDashboardId, unsavedChanges);
+
+                /**
+                 * Current behaviour expects time range not to be backed up.
+                 * TODO: Revisit this. It seems like we should treat all state the same.
+                 */
+                dashboardSessionStorage.setState(
+                  savedDashboardId,
+                  omit(unsavedChanges, ['timeRange', 'refreshInterval'])
+                );
               });
             });
           })
@@ -319,11 +291,7 @@ export const useDashboardAppState = ({
       setLastSavedState(savedDashboardState);
       dashboardBuildContext.$checkForUnsavedChanges.next(undefined);
       const updateLastSavedState = () => {
-        setLastSavedState(
-          savedObjectToDashboardState({
-            savedDashboard,
-          })
-        );
+        setLastSavedState(dashboardBuildContext.getLatestDashboardState());
       };
 
       /**
@@ -332,10 +300,9 @@ export const useDashboardAppState = ({
       docTitle.change(savedDashboardState.title || getNewDashboardTitle());
       setDashboardAppState((s) => ({
         ...s,
-        applyFilters,
-        savedDashboard,
         dashboardContainer,
         updateLastSavedState,
+        createConflictWarning,
         getLatestDashboardState: dashboardBuildContext.getLatestDashboardState,
       }));
 
@@ -359,47 +326,43 @@ export const useDashboardAppState = ({
   }, [
     dashboardAppState.$triggerDashboardRefresh,
     dashboardAppState.$onDashboardStateChange,
+    loadDashboardStateFromSavedObject,
     dispatchDashboardStateChange,
     $onLastSavedStateChange,
     dashboardSessionStorage,
     dashboardCapabilities,
     isEmbeddedExternally,
+    getScreenshotContext,
     kbnUrlStateStorage,
+    setShowNoDataPage,
+    redirectLegacyUrl,
     savedDashboardId,
+    isScreenshotMode,
     getStateTransfer,
-    savedDashboards,
+    showNoDataPage,
     scopedHistory,
-    notifications,
-    dataViews,
     kibanaVersion,
+    dataViews,
     embeddable,
     docTitle,
     history,
+    toasts,
     search,
     query,
-    showNoDataPage,
-    setShowNoDataPage,
-    redirectLegacyUrl,
-    getScreenshotContext,
-    isScreenshotMode,
   ]);
 
   /**
    *  rebuild reset to last saved state callback whenever last saved state changes
    */
   const resetToLastSavedState = useCallback(() => {
-    if (
-      !lastSavedState ||
-      !dashboardAppState.savedDashboard ||
-      !dashboardAppState.getLatestDashboardState
-    ) {
+    if (!lastSavedState || !dashboardAppState.getLatestDashboardState) {
       return;
     }
 
     if (dashboardAppState.getLatestDashboardState().timeRestore) {
       const { timefilter } = query.timefilter;
-      const { timeFrom: from, timeTo: to, refreshInterval } = dashboardAppState.savedDashboard;
-      if (from && to) timefilter.setTime({ from, to });
+      const { timeRange, refreshInterval } = lastSavedState;
+      if (timeRange) timefilter.setTime(timeRange);
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
     }
     dispatchDashboardStateChange(

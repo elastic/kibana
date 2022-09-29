@@ -15,6 +15,10 @@ import { Task, read, downloadToDisk, unzipBuffer, createZipFile } from '../lib';
 
 const BUNDLED_PACKAGES_DIR = 'x-pack/plugins/fleet/target/bundled_packages';
 
+// APM needs to directly request its versions from Package Storage v2 - this should
+// be removed when Package Storage v2 is in production
+const PACKAGE_STORAGE_V2_URL = 'https://epr-v2.ea-web.elastic.dev';
+
 interface FleetPackage {
   name: string;
   version: string;
@@ -64,7 +68,12 @@ export const BundleFleetPackages: Task = {
         }
 
         const archivePath = `${fleetPackage.name}-${versionToWrite}.zip`;
-        const archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
+        let archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
+
+        // Point APM to package storage v2
+        if (fleetPackage.name === 'apm') {
+          archiveUrl = `${PACKAGE_STORAGE_V2_URL}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
+        }
 
         const destination = build.resolvePath(BUNDLED_PACKAGES_DIR, archivePath);
 
