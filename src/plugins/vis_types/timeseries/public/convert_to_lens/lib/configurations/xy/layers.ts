@@ -20,6 +20,7 @@ import Color from 'color';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
+import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
 import { fetchIndexPattern } from '../../../../../common/index_patterns_utils';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';
@@ -170,38 +171,38 @@ const convertAnnotation = (
   annotation: Annotation,
   dataView: DataView
 ): EventAnnotationConfig | undefined => {
-  if (annotation.query_string) {
-    const extraFields = annotation.fields
-      ? annotation.fields
-          ?.replace(/\s/g, '')
-          ?.split(',')
-          .map((field) => {
-            const dataViewField = dataView.getFieldByName(field);
-            return dataViewField && dataViewField.aggregatable ? field : undefined;
-          })
-          .filter(nonNullable)
-      : undefined;
-    return {
-      type: 'query',
-      id: annotation.id,
-      label: 'Event',
-      key: {
-        type: 'point_in_time',
-      },
-      color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
-      timeField: annotation.time_field,
-      icon:
-        annotation.icon &&
-        ICON_TYPES_MAP[annotation.icon] &&
-        typeof ICON_TYPES_MAP[annotation.icon] === 'string'
-          ? ICON_TYPES_MAP[annotation.icon]
-          : 'triangle',
-      filter: {
-        type: 'kibana_query',
-        ...annotation.query_string,
-      },
-      extraFields,
-      isHidden: annotation.hidden,
-    };
-  }
+  const extraFields = annotation.fields
+    ?.replace(/\s/g, '')
+    ?.split(',')
+    .map((field) => {
+      const dataViewField = dataView.getFieldByName(field);
+      return dataViewField && dataViewField.aggregatable ? field : undefined;
+    })
+    .filter(nonNullable);
+
+  return {
+    type: 'query',
+    id: annotation.id,
+    label: 'Event',
+    key: {
+      type: 'point_in_time',
+    },
+    color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
+    timeField: annotation.time_field || dataView.timeFieldName,
+    icon:
+      annotation.icon &&
+      ICON_TYPES_MAP[annotation.icon] &&
+      typeof ICON_TYPES_MAP[annotation.icon] === 'string'
+        ? ICON_TYPES_MAP[annotation.icon]
+        : 'triangle',
+    filter: {
+      type: 'kibana_query',
+      /** Fixed difference in default behavior between visualizations.
+       * Defaults for Lens: "none", for TSVB: "*" **/
+      query: annotation.query_string?.query || '*',
+      language: annotation.query_string?.language || getDefaultQueryLanguage(),
+    },
+    extraFields,
+    isHidden: annotation.hidden,
+  };
 };
