@@ -9,13 +9,27 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 import { EndpointPolicyCreateExtension } from './endpoint_policy_create_extension';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 
+const mockNewPackagePolicyInputStream : NewPackagePolicyInputStream = {
+  enabled: true,
+  data_stream: {
+    dataset: 'someDataset',
+    type: 'someType',
+  },
+}
+
+const mockNewPackagePolicyInput : NewPackagePolicyInput = {
+  type: 'someType',
+  enabled: true,
+  streams: [mockNewPackagePolicyInputStream],
+}
+
 const mockNewPackage : NewPackagePolicy = {
   id: 'someid',
-  inputs: ["someInput"],
+  inputs: [mockNewPackagePolicyInput],
   name: 'someName',
   namespace: 'someNamespace',
   enabled: true,
