@@ -6,21 +6,29 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isEqual } from 'lodash';
+
+const defaultEmptyQuery = { bool: { must: [{ match_all: {} }] } };
 
 export const getFiltersForDSLQuery = (
   datafeedQuery: QueryDslQueryContainer,
   dataViewId: string | null,
-  alias: string
+  alias?: string
 ) => {
-  if (datafeedQuery && !isPopulatedObject(datafeedQuery, ['match_all']) && dataViewId !== null) {
+  if (
+    datafeedQuery &&
+    !isPopulatedObject(datafeedQuery, ['match_all']) &&
+    !isEqual(datafeedQuery, defaultEmptyQuery) &&
+    dataViewId !== null
+  ) {
     return [
       {
         meta: {
           index: dataViewId,
-          alias,
+          ...(!!alias ? { alias } : {}),
           negate: false,
           disabled: false,
           type: 'custom',

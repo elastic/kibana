@@ -84,6 +84,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   }, [props.anomaly.jobId]);
 
   const getAnomaliesMapsLink = async (anomaly: AnomaliesTableRecord) => {
+    const index = job.datafeed_config.indices[0];
+    const dataViewId = await getDataViewIdFromName(index);
+
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
     const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
@@ -109,7 +112,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             },
           }
         : {}),
-      filters: getFiltersForDSLQuery(job.datafeed_config.query, null, job.job_id),
+      filters: getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
     });
     return location;
   };
@@ -118,6 +121,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     anomaly: AnomaliesTableRecord,
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
+    const index = job.datafeed_config.indices[0];
+    const dataViewId = await getDataViewIdFromName(index);
+
     // Create a layer for each of the geoFields
     const initialLayers = getInitialSourceIndexFieldLayers(
       sourceIndicesWithGeoFields[anomaly.jobId]
@@ -146,7 +152,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const filtersFromDatafeedQuery = getFiltersForDSLQuery(
       job.datafeed_config.query,
-      null,
+      dataViewId,
       job.job_id
     );
     const location = await locator?.getLocation({
