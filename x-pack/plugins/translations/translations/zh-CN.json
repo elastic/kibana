@@ -7170,7 +7170,6 @@
     "xpack.apm.serviceGroups.selectServicesForm.preview": "预览",
     "xpack.apm.serviceGroups.selectServicesForm.refresh": "刷新",
     "xpack.apm.serviceGroups.selectServicesForm.saveGroup": "保存组",
-    "xpack.apm.serviceGroups.selectServicesForm.subtitle": "使用查询为该组选择服务。过去 24 小时内与此查询匹配的服务将分配给该组。",
     "xpack.apm.serviceGroups.selectServicesForm.title": "选择服务",
     "xpack.apm.serviceGroups.selectServicesList.environmentColumnLabel": "环境",
     "xpack.apm.serviceGroups.selectServicesList.nameColumnLabel": "名称",
