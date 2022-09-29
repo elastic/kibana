@@ -155,7 +155,7 @@ export function TooltipSection({
         }}
         droppableId="ANNOTATION_TOOLTIP_DROPPABLE_AREA"
         items={localValues}
-        color="subdued"
+        bgColor="subdued"
       >
         {localValues.map(({ id, value, isNew }, index, arrayRef) => {
           const fieldIsValid = value ? Boolean(indexPattern.getFieldByName(value)) : true;
