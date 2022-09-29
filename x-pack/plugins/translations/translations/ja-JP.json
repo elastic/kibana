@@ -28279,7 +28279,6 @@
     "xpack.securitySolution.exceptions.referenceModalCancelButton": "キャンセル",
     "xpack.securitySolution.exceptions.referenceModalDeleteButton": "例外リストを削除",
     "xpack.securitySolution.exceptions.referenceModalTitle": "例外リストを削除",
-    "xpack.securitySolution.exceptions.searchPlaceholder": "例：例外リスト名",
     "xpack.securitySolution.exceptions.viewer.addCommentPlaceholder": "新しいコメントを追加...",
     "xpack.securitySolution.exceptions.viewer.addToClipboard": "コメント",
     "xpack.securitySolution.exceptions.viewer.addToDetectionsListLabel": "ルール例外の追加",

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
-import { EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type {
   ExceptionListItemSchema,
@@ -21,7 +21,6 @@ import {
   fetchExceptionListsItemsByListIds,
 } from '@kbn/securitysolution-list-api';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -160,16 +159,18 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [isLoadingReferences, allReferences] =
+  const [isLoadingReferences, isFetchReferencesError, allReferences] =
     useFindExceptionListReferences(exceptionListsToQuery);
 
   useEffect(() => {
-    if (isLoadingReferences) {
+    if (isFetchReferencesError) {
+      setViewerState('error');
+    } else if (isLoadingReferences) {
       setViewerState('loading');
     } else {
       setViewerState(null);
     }
-  }, [isLoadingReferences, setViewerState]);
+  }, [isLoadingReferences, isFetchReferencesError, setViewerState]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -334,16 +335,6 @@ const ExceptionsViewerComponent = ({
     [handleGetExceptionListItems, services.http, setViewerState, toasts]
   );
 
-  const ruleSettingsUrl = useMemo(
-    () =>
-      rule != null
-        ? services.application.getUrlForApp(
-            `security/detections/rules/id/${encodeURI(rule.id)}/edit`
-          )
-        : '',
-    [rule, services.application]
-  );
-
   // User privileges checks
   useEffect((): void => {
     setReadOnly(!canUserCRUD || !hasIndexWrite);
@@ -391,51 +382,9 @@ const ExceptionsViewerComponent = ({
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
           <StyledText size="s">
-            {listType === ExceptionListTypeEnum.ENDPOINT ? (
-              <FormattedMessage
-                id="xpack.securitySolution.exceptions.allExceptionItems.exceptionEndpointDetailsDescription"
-                defaultMessage="Endpoint exceptions are applied to the endpoint and the detection rule. View the {ruleSettings} 'About' advanced settings section for more details."
-                data-test-subj="exceptionsEndpointMessage"
-                values={{
-                  ruleSettings:
-                    rule == null ? (
-                      <FormattedMessage
-                        id="xpack.securitySolution.exceptions.allExceptionItems.exceptionEndpointDetailsDescription.ruleSettingsLink"
-                        defaultMessage="rule settings"
-                      />
-                    ) : (
-                      <EuiLink href={ruleSettingsUrl} target="_blank">
-                        <FormattedMessage
-                          id="xpack.securitySolution.exceptions.viewer.exceptionEndpointDetailsDescription.ruleSettingsLink"
-                          defaultMessage="rule settings"
-                        />
-                      </EuiLink>
-                    ),
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.exceptions.allExceptionItems.exceptionDetectionDetailsDescription"
-                defaultMessage="Rule exceptions are applied to the detection rule only. For endpoint exceptions view the {ruleSettings} 'About' advanced settings section for more details."
-                data-test-subj="exceptionsDetectionsMessage"
-                values={{
-                  ruleSettings:
-                    rule == null ? (
-                      <FormattedMessage
-                        id="xpack.securitySolution.exceptions.allExceptionItems.exceptionEndpointDetailsDescription.ruleSettingsLink"
-                        defaultMessage="rule settings"
-                      />
-                    ) : (
-                      <EuiLink href={ruleSettingsUrl} target="_blank">
-                        <FormattedMessage
-                          id="xpack.securitySolution.exceptions.allExceptionItems.exceptionEndpointDetailsDescription.ruleSettingsLink"
-                          defaultMessage="rule settings"
-                        />
-                      </EuiLink>
-                    ),
-                }}
-              />
-            )}
+            {listType === ExceptionListTypeEnum.ENDPOINT
+              ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT
+              : i18n.EXCEPTIONS_TAB_ABOUT}
           </StyledText>
           <EuiSpacer size="l" />
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
