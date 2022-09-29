@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { type FleetAuthz, ENDPOINT_PRIVILEGES } from '@kbn/fleet-plugin/common';
+import type { ENDPOINT_PRIVILEGES } from '@kbn/fleet-plugin/common';
+import { type FleetAuthz } from '@kbn/fleet-plugin/common';
 import type { LicenseService } from '../../../license';
 import type { EndpointAuthz } from '../../types/authz';
 import type { MaybeImmutable } from '../../types';
