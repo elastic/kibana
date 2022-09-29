@@ -13,8 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/142083
-  describe.skip('outlier detection creation', function () {
+  describe('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
@@ -109,8 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      // FLAKY: https://github.com/elastic/kibana/issues/142083
-      describe.skip(`${testData.suiteTitle}`, function () {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
           await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
@@ -172,20 +170,20 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
-          await ml.testExecution.logTestStep(
-            'sets the sample size to 10000 for the scatterplot matrix'
-          );
-          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
+          // await ml.testExecution.logTestStep(
+          //   'sets the sample size to 10000 for the scatterplot matrix'
+          // );
+          // await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
 
-          await ml.testExecution.logTestStep(
-            'sets the randomize query switch to true for the scatterplot matrix'
-          );
-          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
+          // await ml.testExecution.logTestStep(
+          //   'sets the randomize query switch to true for the scatterplot matrix'
+          // );
+          // await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
 
-          await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
-            testData.expected.scatterplotMatrixColorsWizard
-          );
+          // await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          // await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
+          //   testData.expected.scatterplotMatrixColorsWizard
+          // );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
@@ -319,20 +317,20 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
 
-          await ml.testExecution.logTestStep(
-            'sets the sample size to 10000 for the scatterplot matrix'
-          );
-          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+          // await ml.testExecution.logTestStep(
+          //   'sets the sample size to 10000 for the scatterplot matrix'
+          // );
+          // await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
 
-          await ml.testExecution.logTestStep(
-            'sets the randomize query switch to true for the scatterplot matrix'
-          );
-          await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
+          // await ml.testExecution.logTestStep(
+          //   'sets the randomize query switch to true for the scatterplot matrix'
+          // );
+          // await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
 
-          await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
-            testData.expected.scatterplotMatrixColorStatsResults
-          );
+          // await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          // await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
+          //   testData.expected.scatterplotMatrixColorStatsResults
+          // );
 
           await ml.commonUI.resetAntiAliasing();
         });
