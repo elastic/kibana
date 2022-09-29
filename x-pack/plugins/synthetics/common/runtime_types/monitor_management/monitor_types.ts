@@ -83,6 +83,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
     [ConfigKey.CONFIG_ID]: t.string,
     [ConfigKey.JOURNEY_ID]: t.string,
+    [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
   }),
 ]);
 
@@ -218,7 +219,6 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
       [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
       [ConfigKey.PROJECT_ID]: t.string,
       [ConfigKey.ORIGINAL_SPACE]: t.string,
-      [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
       [ConfigKey.TEXT_ASSERTION]: t.string,
     }),
   ]),
