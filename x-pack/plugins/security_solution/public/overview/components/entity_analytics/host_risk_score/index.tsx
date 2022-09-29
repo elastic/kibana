@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
 import { RiskScoresDeprecated } from '../../../../common/components/risk_score/risk_score_deprecated';
@@ -30,11 +30,13 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { hostsActions } from '../../../../hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import { RISKY_HOSTS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
+import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
+import { Loader } from '../../../../common/components/loader';
+import { Panel } from '../../../../common/components/panel';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
@@ -149,7 +151,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder data-test-subj="entity_analytics_hosts">
+      <Panel hasBorder data-test-subj="entity_analytics_hosts">
         <HeaderSection
           title={<RiskScoreHeaderTitle riskScoreEntity={RiskScoreEntity.host} />}
           titleSize="s"
@@ -165,7 +167,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
               <EuiFlexItem>
                 <EuiButtonEmpty
                   rel="noopener nofollow noreferrer"
-                  href={RISKY_HOSTS_EXTERNAL_DOC_LINK}
+                  href={RISKY_HOSTS_DOC_LINK}
                   target="_blank"
                 >
                   {i18n.LEARN_MORE}
@@ -207,7 +209,10 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-      </EuiPanel>
+        {(isTableLoading || isKpiLoading) && (
+          <Loader data-test-subj="loadingPanelRiskScore" overlay size="xl" />
+        )}
+      </Panel>
     </InspectButtonContainer>
   );
 };

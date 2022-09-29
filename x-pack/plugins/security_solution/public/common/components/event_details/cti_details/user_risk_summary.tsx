@@ -41,7 +41,6 @@ const UserRiskSummaryComponent: React.FC<{
               values={{
                 userRiskScoreDocumentationLink: (
                   <RiskScoreDocLink
-                    external={false}
                     riskScoreEntity={RiskScoreEntity.user}
                     title={
                       <FormattedMessage
