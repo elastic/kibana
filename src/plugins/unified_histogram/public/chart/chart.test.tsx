@@ -8,20 +8,16 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { setHeaderActionMenuMounter, setUiActions } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
-import { FetchStatus } from '../../../types';
-import { ChartData } from './point_series';
+import type { ChartData } from '../types';
 import { Chart } from './chart';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ReactWrapper } from 'enzyme';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 
 setHeaderActionMenuMounter(jest.fn());
@@ -103,7 +99,6 @@ async function mountComponent(isTimeBased: boolean = false) {
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     state: { columns: [] },
-    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     isTimeBased,
     onResetChartHeight: jest.fn(),
   };

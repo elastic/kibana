@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+
+import type { ReactElement } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import {
   EuiButtonIcon,
@@ -19,12 +21,31 @@ import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
-import {
+import type {
   TimechartBucketInterval,
   UnifiedHistogramServices,
   UnifiedHistogramStatus,
 } from '../types';
-import { ChartData } from './point_series';
+import type { ChartData } from '../types';
+
+export interface ChartProps {
+  services: UnifiedHistogramServices;
+  className?: string;
+  isTimeBased: boolean;
+  hideChart?: boolean;
+  interval?: string;
+  status: UnifiedHistogramStatus;
+  hits: number;
+  chartData: ChartData;
+  bucketInterval: TimechartBucketInterval;
+  error?: Error;
+  appendHitsCounter?: ReactElement;
+  appendHistogram?: ReactElement;
+  onEditVisualization?: () => void;
+  onResetChartHeight?: () => void;
+  onHideChartChange?: (hideChart: boolean) => void;
+  onIntervalChange?: (interval: string) => void;
+}
 
 const HistogramMemoized = memo(Histogram);
 
@@ -45,24 +66,7 @@ export function Chart({
   onResetChartHeight,
   onHideChartChange,
   onIntervalChange,
-}: {
-  services: UnifiedHistogramServices;
-  className?: string;
-  isTimeBased: boolean;
-  hideChart?: boolean;
-  interval?: string;
-  status: UnifiedHistogramStatus;
-  hits: number;
-  chartData: ChartData;
-  bucketInterval: TimechartBucketInterval;
-  error?: Error;
-  appendHitsCounter?: ReactElement;
-  appendHistogram?: ReactElement;
-  onEditVisualization?: () => void;
-  onResetChartHeight?: () => void;
-  onHideChartChange?: (hideChart: boolean) => void;
-  onIntervalChange?: (interval: string) => void;
-}) {
+}: ChartProps) {
   const { data } = services;
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
 

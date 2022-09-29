@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { UnifiedHistogramStatus } from '../types';
+import type { UnifiedHistogramStatus } from '../types';
 
 export interface HitsCounterProps {
   hits: number;
   status: UnifiedHistogramStatus;
-  append?: ReactNode;
+  append?: ReactElement;
 }
 
 export function HitsCounter({ hits, status, append }: HitsCounterProps) {

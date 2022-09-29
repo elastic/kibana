@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { BehaviorSubject } from 'rxjs';
-import { FetchStatus } from '../../../types';
-import { DataCharts$ } from '../../hooks/use_saved_search';
-import { ChartData } from './point_series';
+import { ChartData } from '../types';
 import { Histogram } from './histogram';
 import React from 'react';
-import * as hooks from '../../hooks/use_data_state';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 
 const chartData = {

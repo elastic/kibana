@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
-import React, { ReactElement, RefObject } from 'react';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
+import type { ReactElement, RefObject } from 'react';
+import React from 'react';
 import { PanelsResizable } from './panels_resizable';
 import { act } from 'react-dom/test-utils';
 

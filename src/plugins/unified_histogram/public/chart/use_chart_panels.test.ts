@@ -7,7 +7,6 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-
 import { useChartPanels } from './use_chart_panels';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 

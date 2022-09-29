@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement, RefObject, useMemo } from 'react';
+import type { ReactElement, RefObject } from 'react';
+import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { Panels, PANELS_MODE } from '../panels';
-import { UnifiedHistogramLayoutStyle, UnifiedHistogramServices } from '../types';
+import type { UnifiedHistogramLayoutStyle, UnifiedHistogramServices } from '../types';
 
 export interface UnifiedHistogramLayoutProps {
   services: UnifiedHistogramServices;

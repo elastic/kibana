@@ -8,8 +8,9 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
-import { HitsCounter, HitsCounterProps } from './hits_counter';
+import type { ReactWrapper } from 'enzyme';
+import type { HitsCounterProps } from './hits_counter';
+import { HitsCounter } from './hits_counter';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('hits counter', function () {

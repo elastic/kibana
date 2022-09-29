@@ -7,7 +7,8 @@
  */
 
 import { mount } from 'enzyme';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { PanelsFixed } from './panels_fixed';
 
 describe('Panels fixed', () => {

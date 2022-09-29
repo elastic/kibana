@@ -9,7 +9,7 @@
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { UnifiedHistogramServices } from '../types';
+import type { UnifiedHistogramServices } from '../types';
 
 const dataPlugin = dataPluginMock.createStartContract();
 dataPlugin.query.filterManager.getFilters = jest.fn(() => []);

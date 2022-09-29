@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import moment, { unitOfTime } from 'moment-timezone';
+import { unitOfTime } from 'moment';
+import moment from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -20,20 +21,22 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@kbn/datemath';
+import type {
+  BrushEndListener,
+  ElementClickListener,
+  XYBrushEvent,
+  XYChartElementEvent,
+} from '@elastic/charts';
 import {
   Axis,
-  BrushEndListener,
   Chart,
-  ElementClickListener,
   HistogramBarSeries,
   Position,
   ScaleType,
   Settings,
   TooltipType,
-  XYBrushEvent,
-  XYChartElementEvent,
 } from '@elastic/charts';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   CurrentTime,
@@ -43,12 +46,12 @@ import {
 } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import { css } from '@emotion/react';
-import {
+import type {
   TimechartBucketInterval,
   UnifiedHistogramServices,
   UnifiedHistogramStatus,
 } from '../types';
-import { ChartData } from './point_series';
+import type { ChartData } from '../types';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;

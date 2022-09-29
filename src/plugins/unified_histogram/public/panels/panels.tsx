@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement, RefObject } from 'react';
+import type { ReactElement, RefObject } from 'react';
+import React from 'react';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsFixed } from './panels_fixed';
 

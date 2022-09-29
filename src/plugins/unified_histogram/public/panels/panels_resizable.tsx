@@ -8,7 +8,8 @@
 
 import { EuiResizableContainer, useGeneratedHtmlId, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { ReactElement, RefObject, useCallback, useEffect, useState } from 'react';
+import type { ReactElement, RefObject } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 const percentToPixels = (containerHeight: number, percentage: number) =>
   Math.round(containerHeight * (percentage / 100));

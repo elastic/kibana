@@ -7,7 +7,8 @@
  */
 
 import { mount } from 'enzyme';
-import React, { ReactElement, RefObject } from 'react';
+import type { ReactElement, RefObject } from 'react';
+import React from 'react';
 import { Panels, PANELS_MODE } from './panels';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsFixed } from './panels_fixed';
