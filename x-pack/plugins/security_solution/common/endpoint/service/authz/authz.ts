@@ -22,7 +22,6 @@ export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
   userRoles: MaybeImmutable<string[]>,
-  // to be used in follow-up PRs
   isEndpointRbacEnabled: boolean = false
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
@@ -32,21 +31,25 @@ export const calculateEndpointAuthz = (
     ? fleetAuthz.packagePrivileges?.endpoint?.actions?.writeHostIsolation?.executePackageAction ||
       false
     : hasEndpointManagementAccess;
-  // will be updated once BE RBAC pr goes in
-  const canOperateProcesses = hasEndpointManagementAccess && isEnterpriseLicense;
+  const canWriteProcessOperations = isEndpointRbacEnabled
+    ? fleetAuthz.packagePrivileges?.endpoint?.actions?.writeProcessOperations
+        ?.executePackageAction || false
+    : hasEndpointManagementAccess;
 
   return {
     canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
     canAccessEndpointManagement: hasEndpointManagementAccess,
     canCreateArtifactsByPolicy: hasEndpointManagementAccess && isPlatinumPlusLicense,
     // Response Actions
-    canIsolateHost: isPlatinumPlusLicense && canIsolateHost,
+    canIsolateHost: canIsolateHost && isPlatinumPlusLicense,
     canUnIsolateHost: canIsolateHost,
-    canKillProcess: hasEndpointManagementAccess && isEnterpriseLicense,
-    canSuspendProcess: hasEndpointManagementAccess && isEnterpriseLicense,
-    canGetRunningProcesses: hasEndpointManagementAccess && isEnterpriseLicense,
+    canKillProcess: canWriteProcessOperations && isEnterpriseLicense,
+    canSuspendProcess: canWriteProcessOperations && isEnterpriseLicense,
+    canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
     canAccessResponseConsole:
-      hasEndpointManagementAccess && isEnterpriseLicense && (canIsolateHost || canOperateProcesses),
+      hasEndpointManagementAccess &&
+      isEnterpriseLicense &&
+      (canIsolateHost || canWriteProcessOperations),
   };
 };
 

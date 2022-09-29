@@ -8,7 +8,7 @@
 import { Locations, LocationStatus, PrivateLocation } from '../../../../common/runtime_types';
 import { normalizeProjectMonitors } from '.';
 
-describe('http normalizers', () => {
+describe('icmp normalizers', () => {
   describe('normalize push monitors', () => {
     const projectId = 'test-project-id';
     const locations: Locations = [
@@ -81,7 +81,7 @@ describe('http normalizers', () => {
       },
     ];
 
-    it('properly normalizes http monitors', () => {
+    it('properly normalizes icmp monitors', () => {
       const actual = normalizeProjectMonitors({
         locations,
         privateLocations,
