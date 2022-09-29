@@ -10,56 +10,50 @@ import { useMemo } from 'react';
 import { css } from '@emotion/react';
 
 export const useAnimatedProgressBarBackground = (color: string) => {
-  return useMemo(
-    () => css`
-      progress[value] {
-        display: block;
-        width: 100%;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        border: none;
-        animation: aiopsAnimatedProgress 4s infinite linear;
+  return useMemo(() => {
+    const progressBackground = {
+      background: `repeating-linear-gradient(
+            -45deg,
+            transparent 0 6px,
+            rgba(0, 0, 0, 0.1) 6px 12px
+          ),
+          ${color}`,
+      // 0.707 = cos(45deg)
+      backgroundSize: 'calc(12px / 0.707) 100%,  100% 800%',
+      backgroundPosition: 'inherit',
+    };
 
-        ::-webkit-progress-inner-element {
-          overflow: hidden;
-          background-position: inherit;
-        }
-        ::-webkit-progress-bar {
-          background-color: transparent;
-          background-position: inherit;
-        }
-        ::-webkit-progress-value {
-          background: repeating-linear-gradient(
-              -45deg,
-              transparent 0 6px,
-              rgba(0, 0, 0, 0.1) 6px 12px
-            ),
-            ${color};
-          background-size: calc(12px / 0.707) 100%, /* 0.707 = cos(45deg)*/ 100% 800%;
-          background-position: inherit;
-        }
-        ::-moz-progress-bar {
-          background: repeating-linear-gradient(
-              -45deg,
-              transparent 0 6px,
-              rgba(0, 0, 0, 0.1) 6px 12px
-            ),
-            ${color};
-          background-size: calc(12px / 0.707) 100%, /* 0.707 = cos(45deg)*/ 100% 800%;
-          background-position: inherit;
-        }
-      }
+    return css({
+      'progress[value]': {
+        display: 'block',
+        width: '100%',
+        WebkitAppearance: 'none',
+        MozAppearance: 'none',
+        appearance: 'none',
+        border: 'none',
+        animation: 'aiopsAnimatedProgress 4s infinite linear',
 
-      @keyframes aiopsAnimatedProgress {
-        0% {
-          background-position: 0 0;
-        }
-        100% {
-          background-position: calc(10 * (12px / 0.707)) 100%;
-        }
-      }
-    `,
-    [color]
-  );
+        '::-webkit-progress-inner-element': {
+          overflow: 'hidden',
+          backgroundPosition: 'inherit',
+        },
+        '::-webkit-progress-bar': {
+          backgroundColor: 'transparent',
+          backgroundPosition: 'inherit',
+        },
+
+        '::-webkit-progress-value': progressBackground,
+        '::-moz-progress-bar': progressBackground,
+
+        '@keyframes aiopsAnimatedProgress': {
+          '0%': {
+            backgroundPosition: '0 0',
+          },
+          '100%': {
+            backgroundPosition: 'calc(10 * (12px / 0.707)) 100%',
+          },
+        },
+      },
+    });
+  }, [color]);
 };
