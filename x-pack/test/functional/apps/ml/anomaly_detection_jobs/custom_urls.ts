@@ -66,11 +66,10 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
 
     let testDashboardId: string | null = null;
-    let dataViewId: string | null = null;
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      dataViewId = await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -101,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('adds a custom URL to Dashboard in the edit job flyout', async () => {
       await ml.jobTable.addDashboardCustomUrl(JOB_CONFIG.job_id, testDashboardCustomUrl, {
         index: 1,
-        url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(('$state':(store:appState),meta:(alias:fq_multi_1_custom_urls,disabled:!f,index:'${dataViewId}',negate:!f,type:custom,value:'{"bool":{"must":[{"match_all":{}}]}}'),query:(bool:(must:!((match_all:())))))),query:(language:kuery,query:'airline:"$airline$"'))`,
+        url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'airline:\"$airline$\"'))`,
       });
     });
 
