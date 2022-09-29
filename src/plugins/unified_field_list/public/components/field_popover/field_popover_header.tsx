@@ -50,6 +50,10 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   onEditField,
   onDeleteField,
 }) => {
+  if (!field) {
+    return null;
+  }
+
   const addFieldToWorkspaceTooltip = i18n.translate(
     'unifiedFieldList.fieldPopover.addFieldToWorkspaceLabel',
     {
