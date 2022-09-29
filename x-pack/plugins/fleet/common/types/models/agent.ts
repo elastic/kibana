@@ -84,6 +84,7 @@ interface AgentBase {
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_message?: string;
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
   tags?: string[];
