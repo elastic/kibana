@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
@@ -17,19 +16,9 @@ export interface UseNavigationProps {
   rowIndex: string;
   rowId: string;
   columns: string[];
+  // provided for embeddable only
   filters?: Filter[];
 }
-
-const getCurrentBreadcrumb = (search: string | undefined) =>
-  new URLSearchParams(search).get('breadcrumb') || undefined;
-
-export const useMainRouteBreadcrumb = () => {
-  const history = useHistory();
-  return useMemo(() => {
-    const breadbrumb = getCurrentBreadcrumb(history.location.search);
-    return breadbrumb;
-  }, [history.location.search]);
-};
 
 export const useNavigationProps = ({
   dataView,

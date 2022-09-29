@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -18,14 +18,15 @@ export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
 export interface DiscoverContextAppLocatorParams extends SerializableRecord {
   dataViewSpec: DataViewSpec;
   rowId: string;
-  /**
-   * Columns displayed in the table
-   */
+
   columns?: string[];
-  /**
-   * Optionally apply filters.
-   */
   filters?: Filter[];
+
+  /**
+   * Next params used to create discover main view breadcrumb link if any provided
+   */
+  timeRange?: TimeRange;
+  query?: Query | AggregateQuery;
 }
 
 export type DiscoverContextAppLocator = LocatorPublic<DiscoverContextAppLocatorParams>;
@@ -36,6 +37,8 @@ export interface DiscoverContextAppLocatorDependencies {
 
 export interface ContextHistoryLocationState {
   dataViewSpec?: DataViewSpec;
+  timeRange?: TimeRange;
+  query?: Query | AggregateQuery;
 }
 
 export class DiscoverContextAppLocatorDefinition
@@ -47,7 +50,7 @@ export class DiscoverContextAppLocatorDefinition
 
   public readonly getLocation = async (params: DiscoverContextAppLocatorParams) => {
     const useHash = this.deps.useHash;
-    const { dataViewSpec, rowId, columns, filters } = params;
+    const { dataViewSpec, rowId, columns, filters, timeRange, query } = params;
 
     const appState: { filters?: Filter[]; columns?: string[] } = {};
     const queryState: GlobalQueryStateFromUrl = {};
@@ -58,8 +61,11 @@ export class DiscoverContextAppLocatorDefinition
 
     if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
 
-    const state: ContextHistoryLocationState = {};
-    state.dataViewSpec = dataViewSpec;
+    const state: ContextHistoryLocationState = {
+      dataViewSpec,
+      timeRange,
+      query,
+    };
 
     let path = `#/context/${dataViewSpec.id}/${rowId}`;
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);

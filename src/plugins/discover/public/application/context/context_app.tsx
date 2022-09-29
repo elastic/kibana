@@ -21,6 +21,12 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { useHistory } from 'react-router-dom';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
@@ -33,26 +39,32 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
+import { ContextHistoryLocationState } from './services/locator';
+import { getUiActions } from '../../kibana_services';
+import { useRootBreadcrumb } from '../../hooks/use_root_breadcrumb';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
 export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
+  locationState?: ContextHistoryLocationState;
 }
 
-export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
+export const ContextApp = ({
+  dataView,
+  anchorId,
+  locationState: preservedReferrerState = {},
+}: ContextAppProps) => {
   const services = useDiscoverServices();
-  const { uiSettings, capabilities, dataViews, navigation, filterManager, core } = services;
+  const history = useHistory();
+  const { locator, uiSettings, capabilities, dataViews, navigation, filterManager, core } =
+    services;
 
+  const initialDataViewId = useRef(dataView.id).current;
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-
-  useExecutionContext(core.executionContext, {
-    type: 'application',
-    page: 'context',
-    id: dataView.id || '',
-  });
 
   /**
    * Context app state
@@ -60,6 +72,41 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
   const { appState, globalState, setAppState } = useContextAppState({ services, dataView });
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
+
+  const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
+    capabilities,
+    config: uiSettings,
+    dataView,
+    dataViews,
+    state: appState,
+    useNewFieldsApi,
+    setAppState,
+  });
+
+  const breadcrumb = useRootBreadcrumb({
+    dataViewId: dataView.id!,
+    filters: appState.filters,
+    columns,
+    timeRange: preservedReferrerState.timeRange,
+    query: preservedReferrerState.query,
+  });
+
+  useEffect(() => {
+    services.chrome.setBreadcrumbs([
+      ...getRootBreadcrumbs({ href: breadcrumb }),
+      {
+        text: i18n.translate('discover.context.breadcrumb', {
+          defaultMessage: 'Surrounding documents',
+        }),
+      },
+    ]);
+  }, [breadcrumb, history, locator, services.chrome]);
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'context',
+    id: dataView.id || '',
+  });
 
   /**
    * Context fetched state
@@ -71,6 +118,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
       appState,
       useNewFieldsApi,
     });
+
   /**
    * Reset state when anchor changes
    */
@@ -110,15 +158,6 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     fetchedState.anchor.id,
   ]);
 
-  const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
-    capabilities,
-    config: uiSettings,
-    dataView,
-    dataViews,
-    state: appState,
-    useNewFieldsApi,
-    setAppState,
-  });
   const rows = useMemo(
     () => [
       ...(fetchedState.predecessors || []),
@@ -139,6 +178,64 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     },
     [filterManager, dataViews, dataView, capabilities]
   );
+
+  const updateAdHocDataViewId = useCallback(
+    async (dataViewToUpdate: DataView) => {
+      const updatedDataView = await dataViews.create({
+        ...dataViewToUpdate.toSpec(),
+        id: undefined,
+      });
+
+      // do not clear data view from cache to preserve it for go back action
+      if (initialDataViewId !== dataViewToUpdate.id) {
+        dataViews.clearInstanceCache(dataViewToUpdate.id);
+      }
+
+      const uiActions = await getUiActions();
+      const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+      await action?.execute({
+        trigger,
+        fromDataView: dataViewToUpdate.id,
+        toDataView: updatedDataView.id,
+        usedDataViews: [],
+      } as ActionExecutionContext);
+
+      const updatedFilters = [
+        ...filterManager.getGlobalFilters(),
+        ...filterManager.getAppFilters(),
+      ];
+      return { updatedDataView, updatedFilters };
+    },
+    [dataViews, filterManager, initialDataViewId]
+  );
+
+  const onFieldEdited = useCallback(async () => {
+    if (!dataView.isPersisted()) {
+      const { updatedDataView } = await updateAdHocDataViewId(dataView);
+
+      services.contextLocator.navigate({
+        rowId: anchorId,
+        dataViewSpec: updatedDataView.toSpec(false),
+        columns,
+        filters: appState.filters,
+        timeRange: preservedReferrerState.timeRange,
+        query: preservedReferrerState.query,
+      });
+    } else {
+      fetchAllRows();
+    }
+  }, [
+    dataView,
+    updateAdHocDataViewId,
+    services.contextLocator,
+    anchorId,
+    columns,
+    appState.filters,
+    preservedReferrerState.timeRange,
+    preservedReferrerState.query,
+    fetchAllRows,
+  ]);
 
   const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
   const getNavBarProps = () => {
@@ -210,7 +307,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
-                onFieldEdited={fetchAllRows}
+                onFieldEdited={onFieldEdited}
               />
             </EuiPageContent>
           </EuiPage>

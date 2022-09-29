@@ -37,7 +37,7 @@ export class DiscoverSingleDocLocatorDefinition
     const state: SingleDocHistoryLocationState = {};
     state.dataViewSpec = dataViewSpec;
 
-    const path = `#/doc/${dataViewSpec.id}/${rowIndex}/id=${rowId}`;
+    const path = `#/doc/${dataViewSpec.id}/${rowIndex}?id=${rowId}`;
 
     return {
       app: 'discover',
