@@ -226,7 +226,7 @@ export const checkAuthError = SavedObjectsErrorHelpers.createBadRequestError(
 
 export const enforceError = SavedObjectsErrorHelpers.decorateForbiddenError(
   new Error('Unauthorized'),
-  'User lacks priviliges'
+  'User lacks privileges'
 );
 
 export const setupCheckAuthorized = (
