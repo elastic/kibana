@@ -13,14 +13,14 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 
-const mockNewPackage : NewPackagePolicy = {
+const mockNewPackage: NewPackagePolicy = {
   id: 'someid',
-  inputs: ["someInput"],
+  inputs: ['someInput'],
   name: 'someName',
   namespace: 'someNamespace',
   enabled: true,
-  policy_id: 'somePolicyid'
-}
+  policy_id: 'somePolicyid',
+};
 
 describe('Onboarding Component new section', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -34,10 +34,7 @@ describe('Onboarding Component new section', () => {
   describe('When EndpointPolicyCreateExtension is mounted', () => {
     it('renders EndpointPolicyCreateExtension options correctly (Default to Endpoint)', async () => {
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension
-          newPolicy={mockNewPackage}
-          onChange={jest.fn()}
-        />
+        <EndpointPolicyCreateExtension newPolicy={mockNewPackage} onChange={jest.fn()} />
       );
       expect(renderResult.getByTestId('selectIntegrationTypeId')).toBeVisible();
       expect(renderResult.queryByText('NGAV')).toBeVisible();
@@ -47,10 +44,7 @@ describe('Onboarding Component new section', () => {
 
     it('renders EndpointPolicyCreateExtension options correctly (set to Cloud)', async () => {
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension
-          newPolicy={mockNewPackage}
-          onChange={jest.fn()}
-        />
+        <EndpointPolicyCreateExtension newPolicy={mockNewPackage} onChange={jest.fn()} />
       );
       userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(renderResult.getByText('Interactive only')).toBeVisible();
@@ -60,10 +54,7 @@ describe('Onboarding Component new section', () => {
     it('make sure onChange is called when user change environment', async () => {
       const mockedOnChange = jest.fn();
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension
-          newPolicy={mockNewPackage}
-          onChange={mockedOnChange}
-        />
+        <EndpointPolicyCreateExtension newPolicy={mockNewPackage} onChange={mockedOnChange} />
       );
       expect(mockedOnChange).toHaveBeenCalledTimes(1);
       userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
