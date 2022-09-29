@@ -31,10 +31,10 @@ describe('Onboarding Component new section', () => {
           onChange={jest.fn()}
         />
       );
+      expect(renderResult.getByTestId('selectIntegrationTypeId')).toBeVisible();
       expect(renderResult.queryByText('NGAV')).toBeVisible();
       expect(renderResult.queryByText('EDR Essential')).toBeVisible();
       expect(renderResult.queryByText('EDR Complete')).toBeVisible();
-      expect(renderResult.getByTestId('selectIntegrationTypeId')).toBeVisible();
     });
 
     it('renders EndpointPolicyCreateExtension options correctly (set to Cloud)', async () => {
@@ -47,6 +47,19 @@ describe('Onboarding Component new section', () => {
       userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(renderResult.getByText('Interactive only')).toBeVisible();
       expect(renderResult.getByText('All events')).toBeVisible();
+    });
+
+    it('make sure onChange is called when user change environment', async () => {
+      const mockedOnChange = jest.fn();
+      renderResult = mockedContext.render(
+        <EndpointPolicyCreateExtension
+          newPolicy={{ id: 'someid', inputs:["someInput"] } as NewPackagePolicy}
+          onChange={mockedOnChange}
+        />
+      );
+      expect(mockedOnChange).toHaveBeenCalledTimes(1)
+      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      expect(mockedOnChange).toHaveBeenCalledTimes(2)
     });
   });
 });
