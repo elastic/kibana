@@ -13,7 +13,7 @@ import {
   getIndexPatternIds,
   StaticValueColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { PANEL_TYPES } from '../../../common/enums';
+import { PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../common/enums';
 import { Metric } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
@@ -55,6 +55,10 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
   }
 
   if (!isValidMetrics(series.metrics, PANEL_TYPES.GAUGE, series.time_range_mode)) {
+    return null;
+  }
+
+  if (series.metrics[series.metrics.length - 1].type === TSVB_METRIC_TYPES.STATIC) {
     return null;
   }
 

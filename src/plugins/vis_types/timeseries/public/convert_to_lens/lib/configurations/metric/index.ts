@@ -10,7 +10,7 @@ import color from 'color';
 import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Panel } from '../../../../../common/types';
 import { Column, Layer } from '../../convert';
-import { getGaugePalette, getPalette } from './palette';
+import { getPalette } from './palette';
 import { findMetricColumn, getMetricWithCollapseFn } from '../../../utils';
 
 export const getConfigurationForMetric = (
@@ -64,7 +64,7 @@ export const getConfigurationForGauge = (
 
   const primaryColumn = findMetricColumn(primaryMetricWithCollapseFn.metric, layer.columns);
 
-  const gaugePalette = getGaugePalette(model, bucket);
+  const gaugePalette = getPalette(model.gauge_color_rules ?? []);
   if (gaugePalette === null) {
     return null;
   }

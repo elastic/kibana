@@ -9,7 +9,6 @@ import color from 'color';
 import { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { uniqBy } from 'lodash';
 import { Panel } from '../../../../../common/types';
-import { Column } from '../../convert';
 
 const Operators = {
   GTE: 'gte',
@@ -255,21 +254,4 @@ export const getPalette = (
       getColorStopsWithMinMaxForAllGteOrWithLte(validRules, tailRule.operator!)
     );
   }
-};
-
-export const getGaugePalette = (
-  model: Panel,
-  bucket?: Column
-): PaletteOutput<CustomPaletteParams> | null | undefined => {
-  const palette = getPalette(model.gauge_color_rules ?? []);
-  if (palette === null) {
-    return null;
-  }
-
-  // const gaugePalette = (
-  //   bucket ? { type: 'palette', name: 'status' } : undefined
-  // ) as PaletteOutput<CustomPaletteParams> | undefined;
-
-  // return palette ?? gaugePalette;
-  return palette;
 };
