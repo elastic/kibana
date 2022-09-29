@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../test_helpers/exception_list_item_schema.mock';
 
 import { ExceptionItemCardMetaInfo } from './meta';
 import { RuleReference } from '../../types';

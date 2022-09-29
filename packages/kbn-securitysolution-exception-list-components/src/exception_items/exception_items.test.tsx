@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '../test_helpers/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ExceptionItems } from './exception_items';
