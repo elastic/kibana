@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '@kbn/apm-plugin/common/environment_filter_values';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import expect from '@kbn/expect';
-import { merge, cloneDeep, isPlainObject } from 'lodash';
 import { JsonObject } from '@kbn/utility-types';
+import { cloneDeep, isPlainObject, merge } from 'lodash';
+import { ApmApiError } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertestRead = getService('legacySupertestAsApmReadUser');
-  const supertestWrite = getService('legacySupertestAsApmAnnotationsWriteUser');
+  const apmApiClient = getService("apmApiClient");
   const es = getService('es');
 
-  function expectContainsObj(source: JsonObject, expected: JsonObject) {
+  function expectContainsObj(
+    source: APIReturnType<"POST /api/apm/services/{serviceName}/annotation">,
+    expected: JsonObject
+  ) {
     expect(source).to.eql(
       merge(cloneDeep(source), expected, (a: any, b: any) => {
         if (isPlainObject(a) && isPlainObject(b)) {
@@ -29,26 +34,39 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
     );
   }
 
-  function request({ method, url, data }: { method: string; url: string; data?: JsonObject }) {
-    switch (method.toLowerCase()) {
-      case 'get':
-        return supertestRead.get(url).set('kbn-xsrf', 'foo');
+  function createAnnotation(body?: {
+    '@timestamp'?: string; message?: string; tags?: string[]; service?: { environment?: string; version: string }
+  }){
+    return apmApiClient.annotationWriterUser({
+      endpoint: 'POST /api/apm/services/{serviceName}/annotation',
+      params: {
+        path: {
+          serviceName: 'opbeans-java',
+        },
+        body: body as {'@timestamp': string; message?: string; tags?: string[]; service: { environment?: string; version: string }},
+      }
+    });
+  }
 
-      case 'post':
-        return supertestWrite.post(url).send(data).set('kbn-xsrf', 'foo');
-
-      default:
-        throw new Error(`Unsupported method ${method}`);
-    }
+  function getAnnotation(query: {
+    start: string; end: string; environment: string;
+  }) {
+    return apmApiClient.readUser({
+      endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
+      params: {
+        path: {
+          serviceName: 'opbeans-java',
+        },
+        query,
+      }
+    });
   }
 
   registry.when('Annotations with a basic license', { config: 'basic', archives: [] }, () => {
     describe('when creating an annotation', () => {
       it('fails with a 403 forbidden', async () => {
-        const response = await request({
-          url: '/api/apm/services/opbeans-java/annotation',
-          method: 'POST',
-          data: {
+        try {
+          await createAnnotation({
             '@timestamp': new Date().toISOString(),
             message: 'New deployment',
             tags: ['foo'],
@@ -56,13 +74,14 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
               version: '1.1',
               environment: 'production',
             },
-          },
-        });
+          });
+        } catch (error: unknown) {
+          const apiError = error as ApmApiError;
+          console.log(apiError);
 
-        expect(response.status).to.be(403);
-        expect(response.body.message).to.be(
-          'Annotations require at least a gold license or a trial license.'
-        );
+          expect(apiError.res.status).eql(403);
+          expect(apiError.res.body.message).eql('Annotations require at least a gold license or a trial license.');
+        }
       });
     });
   });
@@ -79,52 +98,49 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
       });
 
       it('fails with a 400 bad request if data is missing', async () => {
-        const response = await request({
-          url: '/api/apm/services/opbeans-java/annotation',
-          method: 'POST',
-        });
+        try {
+          await createAnnotation();
+        } catch (error: unknown) {
+          const apiError = error as ApmApiError;
 
-        expect(response.status).to.be(400);
+          expect(apiError.res.status).eql(400);
+        }
       });
 
       it('fails with a 400 bad request if data is invalid', async () => {
-        const invalidTimestampResponse = await request({
-          url: '/api/apm/services/opbeans-java/annotation',
-          method: 'POST',
-          data: {
+        try {
+          await createAnnotation({
             '@timestamp': 'foo',
             message: 'foo',
-          },
-        });
+          });
+        } catch (error: unknown) {
+          const apiError = error as ApmApiError;
 
-        expect(invalidTimestampResponse.status).to.be(400);
+          expect(apiError.res.status).eql(400);
+        }
 
-        const missingServiceVersionResponse = await request({
-          url: '/api/apm/services/opbeans-java/annotation',
-          method: 'POST',
-          data: {
+        try {
+          await createAnnotation({
             '@timestamp': new Date().toISOString(),
             message: 'New deployment',
-          },
-        });
+          });
+        } catch (error: unknown) {
+          const apiError = error as ApmApiError;
 
-        expect(missingServiceVersionResponse.status).to.be(400);
+          expect(apiError.res.status).eql(400);
+        }
       });
 
       it('completes with a 200 and the created annotation if data is complete and valid', async () => {
         const timestamp = new Date().toISOString();
 
-        const response = await request({
-          url: '/api/apm/services/opbeans-java/annotation',
-          method: 'POST',
-          data: {
-            '@timestamp': timestamp,
-            message: 'New deployment',
-            tags: ['foo'],
-            service: {
-              version: '1.1',
-              environment: 'production',
-            },
+        const response = await createAnnotation({
+          '@timestamp': timestamp,
+          message: 'New deployment',
+          tags: ['foo'],
+          service: {
+            version: '1.1',
+            environment: 'production',
           },
         });
 
@@ -150,14 +166,10 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
       it('prefills `message` and `tags`', async () => {
         const timestamp = new Date().toISOString();
 
-        const response = await request({
-          url: '/api/apm/services/opbeans-java/annotation',
-          method: 'POST',
-          data: {
-            '@timestamp': timestamp,
-            service: {
-              version: '1.1',
-            },
+        const response = await createAnnotation({
+          '@timestamp': timestamp,
+          service: {
+            version: '1.1',
           },
         });
 
@@ -263,9 +275,10 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           end: new Date(2020, 4, 2, 20).toISOString(),
         };
 
-        const response = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_ALL`,
-          method: 'GET',
+        const response = await getAnnotation({
+          start: range.start,
+          end: range.end,
+          environment: ENVIRONMENT_ALL.value,
         });
 
         expect(response.status).to.be(200);
@@ -283,22 +296,19 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
         expect(
           (
-            await request({
-              url: `/api/apm/services/${serviceName}/annotation`,
-              method: 'POST',
-              data: {
-                service: {
-                  version: '1.3',
-                },
-                '@timestamp': new Date(2020, 4, 2, 21, 30).toISOString(),
+            await createAnnotation({
+              service: {
+                version: '1.3',
               },
+              '@timestamp': new Date(2020, 4, 2, 21, 30).toISOString(),
             })
           ).status
         ).to.be(200);
 
-        const response = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_ALL`,
-          method: 'GET',
+        const response = await getAnnotation({
+          start: range.start,
+          end: range.end,
+          environment: ENVIRONMENT_ALL.value,
         });
 
         expect(response.body.annotations.length).to.be(1);
@@ -311,22 +321,19 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
         expect(
           (
-            await request({
-              url: `/api/apm/services/${serviceName}/annotation`,
-              method: 'POST',
-              data: {
-                service: {
-                  version: '1.3',
-                },
-                '@timestamp': new Date(2020, 4, 2, 21, 30).toISOString(),
+            await createAnnotation({
+              service: {
+                version: '1.3',
               },
+              '@timestamp': new Date(2020, 4, 2, 21, 30).toISOString(),
             })
           ).status
         ).to.be(200);
 
-        const responseFromEarlierRange = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${earlierRange.start}&end=${earlierRange.end}&environment=ENVIRONMENT_ALL`,
-          method: 'GET',
+        const responseFromEarlierRange = await getAnnotation({
+          start: earlierRange.start,
+          end: earlierRange.end,
+          environment: ENVIRONMENT_ALL.value,
         });
 
         expect(responseFromEarlierRange.body.annotations.length).to.be(2);
@@ -337,31 +344,23 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
       it('returns stored annotations for the given environment', async () => {
         expect(
           (
-            await request({
-              url: `/api/apm/services/${serviceName}/annotation`,
-              method: 'POST',
-              data: {
-                service: {
-                  version: '1.3',
-                },
-                '@timestamp': new Date(2020, 4, 2, 21, 30).toISOString(),
+            await createAnnotation({
+              service: {
+                version: '1.3',
               },
+              '@timestamp': new Date(2020, 4, 2, 21, 30).toISOString(),
             })
           ).status
         ).to.be(200);
 
         expect(
           (
-            await request({
-              url: `/api/apm/services/${serviceName}/annotation`,
-              method: 'POST',
-              data: {
-                service: {
-                  version: '1.4',
-                  environment: 'production',
-                },
-                '@timestamp': new Date(2020, 4, 2, 21, 31).toISOString(),
+            await createAnnotation({
+              service: {
+                version: '1.4',
+                environment: 'production',
               },
+              '@timestamp': new Date(2020, 4, 2, 21, 31).toISOString(),
             })
           ).status
         ).to.be(200);
@@ -371,24 +370,27 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           end: new Date(2020, 4, 2, 23).toISOString(),
         };
 
-        const allEnvironmentsResponse = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_ALL`,
-          method: 'GET',
+        const allEnvironmentsResponse = await getAnnotation({
+          start: range.start,
+          end: range.end,
+          environment: ENVIRONMENT_ALL.value,
         });
 
         expect(allEnvironmentsResponse.body.annotations.length).to.be(2);
 
-        const productionEnvironmentResponse = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=production`,
-          method: 'GET',
+        const productionEnvironmentResponse = await getAnnotation({
+          start: range.start,
+          end: range.end,
+          environment: 'production',
         });
 
         expect(productionEnvironmentResponse.body.annotations.length).to.be(1);
         expect(productionEnvironmentResponse.body.annotations[0].text).to.be('1.4');
 
-        const missingEnvironmentsResponse = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_NOT_DEFINED`,
-          method: 'GET',
+        const missingEnvironmentsResponse = await getAnnotation({
+          start: range.start,
+          end: range.end,
+          environment: ENVIRONMENT_NOT_DEFINED.value,
         });
 
         expect(missingEnvironmentsResponse.body.annotations.length).to.be(1);
