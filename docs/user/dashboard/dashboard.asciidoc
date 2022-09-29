@@ -25,7 +25,7 @@ Identify the primary dashboard users and their goals for using the dashboard.
 
 [discrete]
 [[dashboard-define-the-organization-and-hierarchy]]
-=== Define the organization and hierarchy
+=== Create visual organization and hierarchy
 
 Display the most relevant and critical visualizations at the top of the dashboard. The first visualizations that appear on the dashboard should help users complete their most important tasks quickly and efficiently. If you require additional visualizations that appear only when users scroll down the dashboard, make sure the visualizations decrease in importance. 
 

@@ -6,73 +6,86 @@
 Short description.
 
 [discrete]
-[[supported-visualizations-table]]
-=== Table
+[[supported-visualizations-tabular]]
+=== Tabular
+
+Tabular visualizations organize your data in tables, which are highly customizable and allow you to align the text, format the values, apply different colors to cell and text values, and more. 
+
+[image]
+
+[cols=2*]
+|===
+
+| *1*
+| *Header* [Description]
+
+| *2*
+| *Rows* [Description]
+
+| *3*
+| *Columns* [Description]
+
+| *4*
+| *Sorting* [Description]
+
+| *5*
+| *Minimum value* [Description]
+
+| *5*
+| *Maximum value* [Description]
+
+| *5*
+| *Bar and color values* [Description]
+|===
+
+Use tables to display the following quantitive and qualitative data:
+
+* Text, such as names, geographic locations, and URLs
+* Plain numbers, such as value amounts, percentages, and dates
+
+Add tables to your dashboard to answer the following questions:
+
+* How many visits did a webpage on my site receive compared to other webpages?
+* What log errors did I receive over the last week?
+* What was my revenue this week compared to last week?
+
+Best practices:
+
+* Priortize the data by ordering columns by level of relevance.
+* Leave adequate spacing between columns and rows to make the table easy to read and the information easy to consume. 
+
+Alternative visualizations:
+
+* *Line* To display a large amount of overview or summary data, a line chart is an effective way to digest the changes and trends.
+
+* *Bar* To compare many metrics over time, display them on a bar chart to easily compare the metrics. 
 
 [discrete]
-[[supported-visualizations-bar-horizontal]]
-=== Bar horizontal
+[[supported-visualizations-bar]]
+=== Bar (Giovanni)
+
+Supported visualizations:
+
+* Bar horizontal
+* Bar horizontal percentage
+* Bar horizontal stacked
+* Bar vertical
+* Bar vertical percentage
+* Bar vertical stacked
 
 [discrete]
-[[supported-visualizations-bar-horizontal-percentage]]
-=== Bar horizontal percentage
-
-[discrete]
-[[supported-visualizations-bar-stacked]]
-=== Bar horizontal stacked
-
-[discrete]
-[[supported-visualizations-bar-vertical]]
-=== Bar vertical
-
-[discrete]
-[[supported-visualizations-bar-vertical-percentage]]
-=== Bar vertical percentage
-
-[discrete]
-[[supported-visualizations-bar-stacked]]
-=== Bar vertical stacked
-
-[discrete]
-[[supported-visualizations-bar-stacked]]
-=== Bar vertical stacked
-
-[discrete]
-[[supported-visualizations-gauge-horizontal]]
-=== Gauge hortizontal
-
-[WARNING]
-==================================================
-This functionality is in technical preview and may be changed or removed 
-completely in a future release.
-==================================================
-
-[discrete]
-[[supported-visualizations-gauge-vertical]]
-=== Gauge vertical
-
-[WARNING]
-==================================================
-This functionality is in technical preview and may be changed or removed 
-completely in a future release.
-==================================================
-
-[discrete]
-[[supported-visualizations-legacy-metric]]
-=== Legacy metric
-
-[discrete]
-[[supported-visualizations-metric]]
-=== Metric
-
-[WARNING]
-==================================================
-This functionality is in technical preview and may be changed or removed 
-completely in a future release.
-==================================================
+[[supported-visualizations-goal-and-single-value]]
+=== Goal and single value
 
 Metrics convey a clear understanding of how a specific indicator behaves. The primary goal is to display a number of the 
 the most accurate, precise, and immediate value. 
+
+Supported visualizations:
+
+* (Technical preview) Gauge horizontal 
+* (Technical preview) Gauge vertical
+* Legacy metric
+* (Technical preview) Metric
 
 Use metrics for the following quantitative data:
 
@@ -150,28 +163,27 @@ If your goal is to precisely see evolution of values over time please use a line
 abounding with text, switch to a simpler component such a plain text.
 
 [discrete]
-[[supported-visualizations-area]]
-=== Area
+[[supported-visualizations-line-and-area]]
+=== Line and area (Giovanni)
+
+Supported visualizations:
+
+* Area
+* Area percentage
+* Area stacked
+* Line
 
 [discrete]
-[[supported-visualizations-area-percentage]]
-=== Area percentage
+[[supported-visualizations-magnitude]]
+=== Magnitude
+
+Supported visualizations:
+
+* Heat map
 
 [discrete]
-[[supported-visualizations-area-stacked]]
-=== Area stacked
-
-[discrete]
-[[supported-visualizations-line]]
-=== Line
-
-[discrete]
-[[supported-visualizations-heat-map]]
-=== Heat map
-
-[discrete]
-[[supported-visualizations-region-map]]
-=== Region map
+[[supported-visualizations-map]]
+=== Map
 
 [WARNING]
 ==================================================
@@ -179,34 +191,18 @@ This functionality is in technical preview and may be changed or removed
 completely in a future release.
 ==================================================
 
-[discrete]
-[[supported-visualizations-donut]]
-=== Donut
+Supported visualizations:
+
+* (Technical preview) Region map
 
 [discrete]
-[[supported-visualizations-mosaic]]
-=== Mosaic
+[[supported-visualizations-proportion]]
+=== Proportion
 
-[WARNING]
-==================================================
-This functionality is in technical preview and may be changed or removed 
-completely in a future release.
-==================================================
+Supported visualizations:
 
-[discrete]
-[[supported-visualizations-pie]]
-=== Pie
-
-[discrete]
-[[supported-visualizations-treemap]]
-=== Treemap
-
-[discrete]
-[[supported-visualizations-waffle]]
-=== Waffle
-
-[WARNING]
-==================================================
-This functionality is in technical preview and may be changed or removed 
-completely in a future release.
-==================================================
+* Donut
+* (Technical preview) Mosaic
+* Pie
+* Treemap
+* (Technical preview) Waffle
