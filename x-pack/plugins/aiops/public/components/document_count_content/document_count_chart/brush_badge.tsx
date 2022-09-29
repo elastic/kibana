@@ -39,7 +39,7 @@ export const BrushBadge: FC<BrushBadgeProps> = ({
     <div
       css={{
         position: 'absolute',
-        'margin-left': `${marginLeft}px`,
+        marginLeft: `${marginLeft}px`,
       }}
     >
       <EuiToolTip

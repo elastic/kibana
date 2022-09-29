@@ -21,7 +21,7 @@ export const TrainedModelLink: FC<TrainedModelLinkProps> = ({ id }) => {
   });
 
   return (
-    <EuiLink href={href} css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }} title={id}>
+    <EuiLink href={href} css={{ overflow: 'hidden', textOverflow: 'ellipsis' }} title={id}>
       {id}
     </EuiLink>
   );

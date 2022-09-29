@@ -320,7 +320,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             {menuPanels[0].items!.length > 0 ? (
               <EuiFlexItem
                 grow={false}
-                css={{ 'margin-left': 'auto !important', 'align-self': 'baseline' }}
+                css={{ marginLeft: 'auto !important', alignSelf: 'baseline' }}
               >
                 <EuiPopover
                   button={
@@ -368,7 +368,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </>
             )}
 
-            <EuiFlexItem grow={true} css={{ 'max-width': '500px' }}>
+            <EuiFlexItem grow={true} css={{ maxWidth: '500px' }}>
               <SeverityControl
                 value={severityUpdate ?? 0}
                 onChange={useCallback((update) => {

@@ -421,8 +421,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           <EuiFlexItem
             css={{
               width: '100%',
-              'overflow-y': 'auto',
-              'overflow-x': 'hidden',
+              overflowY: 'auto',
+              overflowX: 'hidden',
             }}
             grow={false}
           >
