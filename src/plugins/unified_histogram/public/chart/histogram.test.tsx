@@ -103,10 +103,12 @@ describe('Histogram', () => {
     }));
     const component = mountComponent(FetchStatus.ERROR);
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(false);
-    expect(component.find('.unifiedHistogram__errorChartContainer').exists()).toBe(true);
-    expect(component.find('.unifiedHistogram__errorChart__text').get(1).props.children).toBe(
-      'Loading error'
+    expect(component.find('[data-test-subj="unifiedHistogramErrorChartContainer"]').exists()).toBe(
+      true
     );
+    expect(
+      component.find('[data-test-subj="unifiedHistogramErrorChartText"]').get(1).props.children
+    ).toBe('Loading error');
   });
 
   it('renders loading state correctly', () => {
@@ -116,6 +118,6 @@ describe('Histogram', () => {
     }));
     const component = mountComponent(FetchStatus.LOADING);
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
-    expect(component.find('.unifiedHistogramChart__loading').exists()).toBe(true);
+    expect(component.find('[data-test-subj="unifiedHistogramChartLoading"]').exists()).toBe(true);
   });
 });

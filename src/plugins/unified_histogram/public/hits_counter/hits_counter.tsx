@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import './hits_counter.scss';
 import React, { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { UnifiedHistogramStatus } from '../types';
 
 export interface HitsCounterProps {
@@ -34,13 +34,17 @@ export function HitsCounter({ hits, status, append }: HitsCounterProps) {
     </strong>
   );
 
+  const hitsCounterCss = css`
+    flex-grow: 0;
+  `;
+
   return (
     <EuiFlexGroup
-      className="unifiedHistogramHitsCounter"
       gutterSize="s"
       responsive={false}
       justifyContent="center"
       alignItems="center"
+      css={hitsCounterCss}
     >
       <EuiFlexItem grow={false} aria-live="polite">
         <EuiText>

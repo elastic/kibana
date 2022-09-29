@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './histogram.scss';
+
 import moment, { unitOfTime } from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
 import {
@@ -16,6 +16,7 @@ import {
   EuiLoadingChart,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@kbn/datemath';
@@ -41,6 +42,7 @@ import {
   renderEndzoneTooltip,
 } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import { css } from '@emotion/react';
 import {
   TimechartBucketInterval,
   UnifiedHistogramServices,
@@ -145,10 +147,22 @@ export function Histogram({
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
   }, [from, to, interval, bucketInterval?.description, toMoment]);
 
+  const { euiTheme } = useEuiTheme();
+
   if (!chartData && status === 'loading') {
+    const chartLoadingCss = css`
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1 0 100%;
+      text-align: center;
+      height: 100%;
+      width: 100%;
+    `;
+
     return (
       <div className="unifiedHistogramChart" data-test-subj="unifiedHistogramChart">
-        <div className="unifiedHistogramChart__loading">
+        <div css={chartLoadingCss} data-test-subj="unifiedHistogramChartLoading">
           <EuiText size="xs" color="subdued">
             <EuiLoadingChart mono size="l" />
             <EuiSpacer size="s" />
@@ -163,13 +177,26 @@ export function Histogram({
   }
 
   if (status === 'error' && error) {
+    const chartErrorContainerCss = css`
+      padding: 0 ${euiTheme.size.s} 0 ${euiTheme.size.s};
+    `;
+    const chartErrorIconCss = css`
+      padding-top: 0.5 * ${euiTheme.size.xs};
+    `;
+    const chartErrorCss = css`
+      margin-left: ${euiTheme.size.xs} !important;
+    `;
+    const chartErrorTextCss = css`
+      margin-top: ${euiTheme.size.s};
+    `;
+
     return (
-      <div className="unifiedHistogram__errorChartContainer">
+      <div css={chartErrorContainerCss} data-test-subj="unifiedHistogramErrorChartContainer">
         <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false} className="unifiedHistogram__errorChart__icon">
+          <EuiFlexItem grow={false} css={chartErrorIconCss}>
             <EuiIcon type="visBarVertical" color="danger" size="m" />
           </EuiFlexItem>
-          <EuiFlexItem className="unifiedHistogram__errorChart">
+          <EuiFlexItem css={chartErrorCss}>
             <EuiText size="s" color="danger">
               <FormattedMessage
                 id="unifiedHistogram.errorLoadingChart"
@@ -178,7 +205,7 @@ export function Histogram({
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiText className="unifiedHistogram__errorChart__text" size="s">
+        <EuiText size="s" css={chartErrorTextCss} data-test-subj="unifiedHistogramErrorChartText">
           {error.message}
         </EuiText>
       </div>
