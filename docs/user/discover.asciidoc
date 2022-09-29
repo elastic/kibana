@@ -57,7 +57,8 @@ your {es} data.
 To view the ecommerce sample data, open the {data-source} menu, and then select **Kibana Sample Data Ecommerce**.
 +
 [role="screenshot"]
-image::images/discover-data-view.png[How to set the {data-source} in Discover, width="50%"]
+image::images/discover-data-view.png[How to set the {data-source} in Discover, width="40%"]
+
 +
 To create a data view for your own data,
 click *Create a data view*.
@@ -87,12 +88,15 @@ You can also search for the field by name.
 [role="screenshot"]
 image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
 
-. Click the `manufacturer` field to view its most popular values.
+. Click `manufacturer` to view its most popular values.
 +
-[role="screenshot"]
-image:images/find-manufacturer-field.png[Fields list that displays the top five search results, width=75%]
+**Discover** shows the top 10 values and the number of records used to calculate those values.
 
 . Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
++
+[role="screenshot"]
+image::images/discover-add-icon.png[How to add a field as a column in the table, width="50%"]
+
 
 . Find the `customer_first_name` and `customer_last_name` fields and add
 them to the document table. Your table should look similar to this:
@@ -103,7 +107,8 @@ image:images/document-table.png[Document table with fields for manufacturer, cus
 . To rearrange the table columns, click a
 column header, and then select *Move left* or *Move right*.
 
-. To view more of the document table, click
+. To view more of the document table,
+click
 image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
 to open the *Chart options* menu,
 and then select *Hide chart*.
@@ -237,7 +242,7 @@ the document table, the sort order, and the {data-source}.
 
 . In the toolbar, click **Save**.
 
-. Optionally store <<managing-tags,tags>> and the time range with the saved search.
+. Optionally store <<managing-tags,tags>> and the time range with the search.
 
 . Give your search a title, and then click **Save**.
 

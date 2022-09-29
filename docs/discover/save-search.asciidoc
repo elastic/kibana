@@ -23,7 +23,7 @@ current view of *Discover*, including the columns and sort order in the document
 
 . Once you've created a search worth saving, click *Save* in the toolbar.
 . Enter a name for the search.
-. Optionally store <<managing-tags,tags>> and the time range with the saved search.
+. Optionally store <<managing-tags,tags>> and the time range with the search.
 . Click *Save*.
 . To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
 +

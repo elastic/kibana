@@ -30,7 +30,7 @@ The chart size is saved in the browser.
 [[document-explorer-customize]]
 === Define the table structure
 
-Refine your view of the data by resizing the table columns and rows, setting the column sort order, and filtering the data.
+Refine your view by resizing the table columns and rows, setting the column sort order, and filtering the data.
 
 [float]
 [[document-explorer-columns]]
