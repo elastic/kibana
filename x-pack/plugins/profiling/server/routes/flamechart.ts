@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createCalleeTree } from '../../common/callee';
-import { createFlameGraph } from '../../common/flamegraph';
+import { createBaseFlameGraph } from '../../common/flamegraph';
 import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
@@ -62,7 +62,7 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
           logger.info(`creating callee tree took ${Date.now() - t0} ms`);
 
           const t1 = Date.now();
-          const fg = createFlameGraph(tree, totalSeconds);
+          const fg = createBaseFlameGraph(tree, totalSeconds);
           logger.info(`creating flamegraph took ${Date.now() - t1} ms`);
 
           return fg;

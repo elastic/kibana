@@ -7,7 +7,7 @@
 
 import { CoreStart, HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
-import { ElasticFlameGraph } from '../common/flamegraph';
+import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
 import { StackFrameMetadata } from '../common/profiling';
 import { TopNResponse } from '../common/topn';
@@ -96,7 +96,8 @@ export function getServices(core: CoreStart): Services {
           timeTo,
           kuery,
         };
-        return await core.http.get(paths.Flamechart, { query });
+        const baseFlamegraph: BaseFlameGraph = await core.http.get(paths.Flamechart, { query });
+        return createFlameGraph(baseFlamegraph);
       } catch (e) {
         return e;
       }

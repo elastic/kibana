@@ -8,7 +8,7 @@
 import { sum } from 'lodash';
 import { createCalleeTree } from './callee';
 import { createColumnarViewModel } from './columnar_view_model';
-import { createFlameGraph } from './flamegraph';
+import { createBaseFlameGraph, createFlameGraph } from './flamegraph';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
 
@@ -17,7 +17,7 @@ describe('Columnar view model operations', () => {
     const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
 
     const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
-    const graph = createFlameGraph(tree, 60);
+    const graph = createFlameGraph(createBaseFlameGraph(tree, 60));
 
     expect(graph.Size).toEqual(totalFrames - 2);
 
