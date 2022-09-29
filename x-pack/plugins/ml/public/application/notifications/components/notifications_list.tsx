@@ -297,7 +297,7 @@ export const NotificationsList: FC = () => {
                 values={{ sinceDate: dateFormatter(latestRequestedAt), newNotificationsCount }}
               />
             }
-            iconType="pin"
+            iconType="bell"
           />
           <EuiSpacer size={'m'} />
         </>
