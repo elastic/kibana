@@ -55,14 +55,10 @@ export class MetricsService
       this.coreContext.configService.atPath<OpsConfigType>(OPS_CONFIG_PATH)
     );
 
-    this.metricsCollector = new OpsMetricsCollector(
-      http.server,
-      elasticsearchService.agentManager,
-      {
-        logger: this.logger,
-        ...config.cGroupOverrides,
-      }
-    );
+    this.metricsCollector = new OpsMetricsCollector(http.server, elasticsearchService.agentStore, {
+      logger: this.logger,
+      ...config.cGroupOverrides,
+    });
 
     await this.refreshMetrics();
 

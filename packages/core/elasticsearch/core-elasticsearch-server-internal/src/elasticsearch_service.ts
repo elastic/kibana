@@ -120,7 +120,7 @@ export class ElasticsearchService
         }
         this.unauthorizedErrorHandler = handler;
       },
-      agentManager: this.agentManager,
+      agentStore: this.agentManager,
     };
   }
 

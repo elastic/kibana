@@ -26,6 +26,10 @@ export interface AgentFactoryProvider {
   getAgentFactory(agentOptions?: HttpAgentOptions): AgentFactory;
 }
 
+export interface AgentStore {
+  getAgents(): Set<NetworkAgent>;
+}
+
 /**
  * Allows obtaining Agent factories, which can then be fed into elasticsearch-js's Client class.
  * Ideally, we should obtain one Agent factory for each ES Client class.
@@ -37,7 +41,7 @@ export interface AgentFactoryProvider {
  * exposes methods that can modify the underlying pools, effectively impacting the connections of other Clients.
  * @internal
  **/
-export class AgentManager implements AgentFactoryProvider {
+export class AgentManager implements AgentFactoryProvider, AgentStore {
   private agents: Set<HttpAgent>;
 
   constructor(private agentOptions: HttpAgentOptions = DEFAULT_CONFIG) {

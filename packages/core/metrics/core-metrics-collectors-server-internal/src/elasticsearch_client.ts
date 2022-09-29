@@ -7,16 +7,16 @@
  */
 
 import type { ElasticsearchClientsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
-import type { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import type { AgentStore } from '@kbn/core-elasticsearch-client-server-internal';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
 export class ElasticsearchClientsMetricsCollector
   implements MetricsCollector<ElasticsearchClientsMetrics>
 {
-  constructor(private readonly agentManager: AgentManager) {}
+  constructor(private readonly agentStore: AgentStore) {}
 
   public async collect(): Promise<ElasticsearchClientsMetrics> {
-    return getAgentsSocketsStats(this.agentManager.getAgents());
+    return getAgentsSocketsStats(this.agentStore.getAgents());
   }
 
   public reset() {

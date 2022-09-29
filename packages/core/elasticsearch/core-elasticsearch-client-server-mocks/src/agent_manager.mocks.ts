@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { elasticsearchClientMock } from './src/mocks';
-export type {
-  ClientApiMockInstance,
-  ClusterClientMock,
-  ScopedClusterClientMock,
-  CustomClusterClientMock,
-  DeeplyMockedApi,
-  ElasticsearchClientMock,
-} from './src/mocks';
-export { createAgentStoreMock } from './src/agent_manager.mocks';
+import { AgentStore, NetworkAgent } from '@kbn/core-elasticsearch-client-server-internal';
+
+export const createAgentStoreMock = (agents: Set<NetworkAgent> = new Set()): AgentStore => ({
+  getAgents: jest.fn(() => agents),
+});

@@ -8,7 +8,7 @@
 
 import { Server as HapiServer } from '@hapi/hapi';
 import type { OpsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
-import type { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import type { AgentStore } from '@kbn/core-elasticsearch-client-server-internal';
 import {
   ProcessMetricsCollector,
   OsMetricsCollector,
@@ -23,15 +23,11 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   private readonly serverCollector: ServerMetricsCollector;
   private readonly esClientCollector: ElasticsearchClientsMetricsCollector;
 
-  constructor(
-    server: HapiServer,
-    agentManager: AgentManager,
-    opsOptions: OpsMetricsCollectorOptions
-  ) {
+  constructor(server: HapiServer, agentStore: AgentStore, opsOptions: OpsMetricsCollectorOptions) {
     this.processCollector = new ProcessMetricsCollector();
     this.osCollector = new OsMetricsCollector(opsOptions);
     this.serverCollector = new ServerMetricsCollector(server);
-    this.esClientCollector = new ElasticsearchClientsMetricsCollector(agentManager);
+    this.esClientCollector = new ElasticsearchClientsMetricsCollector(agentStore);
   }
 
   public async collect(): Promise<OpsMetrics> {
