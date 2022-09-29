@@ -60,7 +60,8 @@ export const NotificationsList: FC = () => {
   } = useMlKibana();
   const { displayErrorToast } = useToastNotificationService();
 
-  const { lastCheckedAt, setLastCheckedAt } = useMlNotifications();
+  const { lastCheckedAt, setLastCheckedAt, notificationsCounts, latestRequestedAt } =
+    useMlNotifications();
   const timeFilter = useTimefilter();
   const timeRange = useTimeRangeUpdates();
 
@@ -279,9 +280,28 @@ export const NotificationsList: FC = () => {
     ];
   }, []);
 
+  const newNotificationsCount = Object.values(notificationsCounts).reduce((a, b) => a + b);
+
   return (
     <>
       <SavedObjectsWarning onCloseFlyout={fetchNotifications} forceRefresh={isLoading} />
+
+      {newNotificationsCount ? (
+        <>
+          <EuiCallOut
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.ml.notifications.newNotificationsMessage"
+                defaultMessage="There {newNotificationsCount, plural, one {is # notification} other {are # notifications}} since {sinceDate}. Refresh the page to view updates."
+                values={{ sinceDate: dateFormatter(latestRequestedAt), newNotificationsCount }}
+              />
+            }
+            iconType="pin"
+          />
+          <EuiSpacer size={'m'} />
+        </>
+      ) : null}
 
       <EuiSearchBar
         query={queryInstance}
