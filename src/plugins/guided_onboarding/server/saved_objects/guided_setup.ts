@@ -8,7 +8,7 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 
-export const guidedSetupSavedObjectsType = 'guided-setup-state';
+export const guidedSetupSavedObjectsType = 'guided-onboarding-guide-state';
 
 export const guidedSetupSavedObjects: SavedObjectsType = {
   name: guidedSetupSavedObjectsType,
