@@ -883,6 +883,7 @@ packages/kbn-mapbox-gl @elastic/kibana-gis
 packages/kbn-monaco @elastic/kibana-app-services
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
+packages/kbn-osquery-io-ts-types @elastic/security-asset-management
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-plugin-discovery @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
@@ -938,7 +939,6 @@ packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/shared-ux/avatar/solution @elastic/shared-ux
-packages/shared-ux/avatar/user_profile/impl @elastic/shared-ux
 packages/shared-ux/button_toolbar @elastic/shared-ux
 packages/shared-ux/button/exit_full_screen/impl @elastic/shared-ux
 packages/shared-ux/button/exit_full_screen/mocks @elastic/shared-ux
@@ -968,9 +968,6 @@ packages/shared-ux/page/solution_nav @elastic/shared-ux
 packages/shared-ux/prompt/no_data_views/impl @elastic/shared-ux
 packages/shared-ux/prompt/no_data_views/mocks @elastic/shared-ux
 packages/shared-ux/prompt/no_data_views/types @elastic/shared-ux
-packages/shared-ux/router/impl @elastic/shared-ux
-packages/shared-ux/router/mocks @elastic/shared-ux
-packages/shared-ux/router/types @elastic/shared-ux
 packages/shared-ux/storybook/config @elastic/shared-ux
 packages/shared-ux/storybook/mock @elastic/shared-ux
 x-pack/packages/ml/agg_utils @elastic/ml-ui
