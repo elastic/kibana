@@ -134,7 +134,12 @@ export const TTYPlayer = ({
             <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
-            <TTYSearchBar lines={lines} seekToLine={seekToLine} xTermSearchFn={search} />
+            <TTYSearchBar
+              lines={lines}
+              seekToLine={seekToLine}
+              xTermSearchFn={search}
+              setIsPlaying={setIsPlaying}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
