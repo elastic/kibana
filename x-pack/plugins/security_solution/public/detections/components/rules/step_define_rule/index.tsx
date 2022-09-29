@@ -739,8 +739,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <>
               <EuiSpacer size="s" />
               <RuleTypeEuiFormRow
-                label={i18n.SAVED_QUERY_CHECKBOX_LABEL}
-                $isVisible={Boolean(formQuery?.saved_id)}
+                label={i18n.SAVED_QUERY_FORM_ROW_LABEL}
+                $isVisible={Boolean(formQuery?.saved_id && formQuery?.title)}
                 fullWidth
               >
                 <CommonUseField
@@ -750,6 +750,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     'data-test-subj': 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
                     euiFieldProps: {
                       disabled: isLoading,
+                      label: formQuery?.title
+                        ? i18n.getSavedQueryCheckboxLabel(formQuery.title)
+                        : undefined,
                     },
                   }}
                 />

@@ -250,7 +250,6 @@ describe('disable()', () => {
             meta: {
               lastScheduledActions: {
                 group: 'default',
-                subgroup: 'newSubgroup',
                 date: new Date().toISOString(),
               },
             },
@@ -319,7 +318,6 @@ describe('disable()', () => {
         },
         alerting: {
           action_group_id: 'default',
-          action_subgroup: 'newSubgroup',
           instance_id: '1',
         },
         saved_objects: [

@@ -16,112 +16,205 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
-import { Aggregation, AGGREGATION_NAME } from '../../hooks/use_aggregated_indicators';
 import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
 import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
+import {
+  Aggregation,
+  AGGREGATION_NAME,
+  ChartSeries,
+} from '../../services/fetch_aggregated_indicators';
 
 export default {
   component: IndicatorsBarChartWrapper,
   title: 'IndicatorsBarChartWrapper',
 };
 
-export const Default: Story<void> = () => {
-  const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
+const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
 
-  const mockIndexPattern: DataView = {
-    fields: [
+const mockIndexPattern: DataView = {
+  fields: [
+    {
+      name: '@timestamp',
+      type: 'date',
+    } as DataViewField,
+    {
+      name: 'threat.feed.name',
+      type: 'string',
+    } as DataViewField,
+  ],
+} as DataView;
+
+const validDate: string = '1 Jan 2022 00:00:00 GMT';
+const numberOfDays: number = 1;
+const aggregation1: Aggregation = {
+  events: {
+    buckets: [
       {
-        name: '@timestamp',
-        type: 'date',
-      } as DataViewField,
+        doc_count: 0,
+        key: 1641016800000,
+        key_as_string: '1 Jan 2022 06:00:00 GMT',
+      },
       {
-        name: 'threat.feed.name',
-        type: 'string',
-      } as DataViewField,
+        doc_count: 10,
+        key: 1641038400000,
+        key_as_string: '1 Jan 2022 12:00:00 GMT',
+      },
     ],
-  } as DataView;
+  },
+  doc_count: 0,
+  key: '[Filebeat] AbuseCH Malware',
+};
+const aggregation2: Aggregation = {
+  events: {
+    buckets: [
+      {
+        doc_count: 20,
+        key: 1641016800000,
+        key_as_string: '1 Jan 2022 06:00:00 GMT',
+      },
+      {
+        doc_count: 8,
+        key: 1641038400000,
+        key_as_string: '1 Jan 2022 12:00:00 GMT',
+      },
+    ],
+  },
+  doc_count: 0,
+  key: '[Filebeat] AbuseCH MalwareBazaar',
+};
 
-  const validDate: string = '1 Jan 2022 00:00:00 GMT';
-  const numberOfDays: number = 1;
-  const aggregation1: Aggregation = {
-    events: {
-      buckets: [
-        {
-          doc_count: 0,
-          key: 1641016800000,
-          key_as_string: '1 Jan 2022 06:00:00 GMT',
-        },
-        {
-          doc_count: 10,
-          key: 1641038400000,
-          key_as_string: '1 Jan 2022 12:00:00 GMT',
-        },
-      ],
-    },
-    doc_count: 0,
-    key: '[Filebeat] AbuseCH Malware',
-  };
-  const aggregation2: Aggregation = {
-    events: {
-      buckets: [
-        {
-          doc_count: 20,
-          key: 1641016800000,
-          key_as_string: '1 Jan 2022 06:00:00 GMT',
-        },
-        {
-          doc_count: 8,
-          key: 1641038400000,
-          key_as_string: '1 Jan 2022 12:00:00 GMT',
-        },
-      ],
-    },
-    doc_count: 0,
-    key: '[Filebeat] AbuseCH MalwareBazaar',
-  };
-
-  const dataServiceMock = {
-    search: {
-      search: () =>
-        of({
-          rawResponse: {
-            aggregations: {
-              [AGGREGATION_NAME]: {
-                buckets: [aggregation1, aggregation2],
-              },
+const dataServiceMock = {
+  search: {
+    search: () =>
+      of({
+        rawResponse: {
+          aggregations: {
+            [AGGREGATION_NAME]: {
+              buckets: [aggregation1, aggregation2],
             },
           },
-        }),
-    },
-    query: {
-      timefilter: {
-        timefilter: {
-          calculateBounds: () => ({
-            min: moment(validDate),
-            max: moment(validDate).add(numberOfDays, 'days'),
-          }),
         },
-      },
-      filterManager: {
-        getFilters: () => {},
-        setFilters: () => {},
-        getUpdates$: () => of(),
+      }),
+  },
+  query: {
+    timefilter: {
+      timefilter: {
+        calculateBounds: () => ({
+          min: moment(validDate),
+          max: moment(validDate).add(numberOfDays, 'days'),
+        }),
       },
     },
-  } as unknown as DataPublicPluginStart;
+    filterManager: {
+      getFilters: () => {},
+      setFilters: () => {},
+      getUpdates$: () => of(),
+    },
+  },
+} as unknown as DataPublicPluginStart;
 
-  const uiSettingsMock = {
-    get: () => {},
-  } as unknown as IUiSettingsClient;
+const uiSettingsMock = {
+  get: () => {},
+} as unknown as IUiSettingsClient;
 
-  const timelinesMock = mockKibanaTimelinesService;
+const timelinesMock = mockKibanaTimelinesService;
+
+export const Default: Story<void> = () => {
+  return (
+    <StoryProvidersComponent
+      kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
+    >
+      <IndicatorsBarChartWrapper
+        dateRange={{ min: moment(), max: moment() }}
+        timeRange={mockTimeRange}
+        indexPattern={mockIndexPattern}
+        series={[]}
+        field={''}
+        onFieldChange={function (value: string): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    </StoryProvidersComponent>
+  );
+};
+
+Default.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
+
+export const InitialLoad: Story<void> = () => {
+  return (
+    <StoryProvidersComponent
+      kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
+    >
+      <IndicatorsBarChartWrapper
+        dateRange={{ min: moment(), max: moment() }}
+        timeRange={mockTimeRange}
+        indexPattern={mockIndexPattern}
+        series={[]}
+        isLoading={true}
+        isFetching={false}
+        field={''}
+        onFieldChange={function (value: string): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    </StoryProvidersComponent>
+  );
+};
+
+InitialLoad.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
+
+export const UpdatingData: Story<void> = () => {
+  const mockIndicators: ChartSeries[] = [
+    {
+      x: '1 Jan 2022 00:00:00 GMT',
+      y: 2,
+      g: '[Filebeat] AbuseCH Malware',
+    },
+    {
+      x: '1 Jan 2022 00:00:00 GMT',
+      y: 10,
+      g: '[Filebeat] AbuseCH MalwareBazaar',
+    },
+    {
+      x: '1 Jan 2022 06:00:00 GMT',
+      y: 0,
+      g: '[Filebeat] AbuseCH Malware',
+    },
+    {
+      x: '1 Jan 2022 06:00:00 GMT',
+      y: 0,
+      g: '[Filebeat] AbuseCH MalwareBazaar',
+    },
+    {
+      x: '1 Jan 2022 12:00:00 GMT',
+      y: 25,
+      g: '[Filebeat] AbuseCH Malware',
+    },
+    {
+      x: '1 Jan 2022 18:00:00 GMT',
+      y: 15,
+      g: '[Filebeat] AbuseCH MalwareBazaar',
+    },
+  ];
 
   return (
     <StoryProvidersComponent
       kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
     >
-      <IndicatorsBarChartWrapper timeRange={mockTimeRange} indexPattern={mockIndexPattern} />
+      <IndicatorsBarChartWrapper
+        dateRange={{ min: moment(), max: moment() }}
+        timeRange={mockTimeRange}
+        indexPattern={mockIndexPattern}
+        series={mockIndicators}
+        isLoading={false}
+        isFetching={true}
+        field={''}
+        onFieldChange={function (value: string): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
     </StoryProvidersComponent>
   );
 };
-Default.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
+
+UpdatingData.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
