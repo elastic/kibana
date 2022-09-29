@@ -7,7 +7,6 @@ post:
     feature privileges, depending on the owner of the case you're creating.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -79,7 +78,6 @@ delete:
     depending on the owner of the cases you're deleting.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -105,7 +103,6 @@ patch:
     feature privileges, depending on the owner of the case you're updating.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
