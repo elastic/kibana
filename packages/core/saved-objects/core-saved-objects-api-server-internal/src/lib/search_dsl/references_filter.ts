@@ -6,35 +6,45 @@
  * Side Public License, v 1.
  */
 
-import type { HasReferenceQueryParams, SearchOperator } from './query_params';
+import type { ReferenceQueryParams, SearchOperator } from './query_params';
 
 export function getReferencesFilter({
   references,
   operator = 'OR',
   maxTermsPerClause = 1000,
+  must = true,
 }: {
-  references: HasReferenceQueryParams[];
+  references: ReferenceQueryParams[];
   operator?: SearchOperator;
   maxTermsPerClause?: number;
+  must?: boolean;
 }) {
   if (operator === 'AND') {
     return {
       bool: {
-        must: references.map(getNestedTermClauseForReference),
+        [must ? 'must' : 'must_not']: references.map(getNestedTermClauseForReference),
       },
     };
   } else {
+    if (must) {
+      return {
+        bool: {
+          should: getAggregatedTermsClauses(references, maxTermsPerClause),
+          minimum_should_match: 1,
+        },
+      };
+    }
+
     return {
       bool: {
-        should: getAggregatedTermsClauses(references, maxTermsPerClause),
-        minimum_should_match: 1,
+        must_not: getAggregatedTermsClauses(references, maxTermsPerClause),
       },
     };
   }
 }
 
 const getAggregatedTermsClauses = (
-  references: HasReferenceQueryParams[],
+  references: ReferenceQueryParams[],
   maxTermsPerClause: number
 ) => {
   const refTypeToIds = references.reduce((map, { type, id }) => {
@@ -58,7 +68,7 @@ const createChunks = <T>(array: T[], chunkSize: number): T[][] => {
   return chunks;
 };
 
-export const getNestedTermClauseForReference = (reference: HasReferenceQueryParams) => {
+export const getNestedTermClauseForReference = (reference: ReferenceQueryParams) => {
   return {
     nested: {
       path: 'references',

@@ -12,7 +12,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
+import { getQueryParams, ReferenceQueryParams, SearchOperator } from './query_params';
 import { getPitParams } from './pit_params';
 import { getSortingParams } from './sorting_params';
 
@@ -30,8 +30,10 @@ interface GetSearchDslOptions {
   namespaces?: string[];
   pit?: SavedObjectsPitParams;
   typeToNamespacesMap?: Map<string, string[] | undefined>;
-  hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
+  hasReference?: ReferenceQueryParams | ReferenceQueryParams[];
   hasReferenceOperator?: SearchOperator;
+  hasNoReference?: ReferenceQueryParams | ReferenceQueryParams[];
+  hasNoReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
 }
 
@@ -54,6 +56,8 @@ export function getSearchDsl(
     typeToNamespacesMap,
     hasReference,
     hasReferenceOperator,
+    hasNoReference,
+    hasNoReferenceOperator,
     kueryNode,
   } = options;
 
@@ -77,6 +81,8 @@ export function getSearchDsl(
       defaultSearchOperator,
       hasReference,
       hasReferenceOperator,
+      hasNoReference,
+      hasNoReferenceOperator,
       kueryNode,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
