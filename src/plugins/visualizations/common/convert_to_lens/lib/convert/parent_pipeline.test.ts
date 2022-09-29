@@ -19,10 +19,19 @@ import {
 const mockGetMetricFromParentPipelineAgg = jest.fn();
 const mockGetFormulaForPipelineAgg = jest.fn();
 const mockConvertMetricToColumns = jest.fn();
+const mockGetFieldByName = jest.fn();
+const mockConvertMetricAggregationColumnWithoutSpecialParams = jest.fn();
 
 jest.mock('../utils', () => ({
   getMetricFromParentPipelineAgg: jest.fn(() => mockGetMetricFromParentPipelineAgg()),
   getLabel: jest.fn(() => 'label'),
+  getFieldNameFromField: jest.fn(() => 'document'),
+}));
+
+jest.mock('./metric', () => ({
+  convertMetricAggregationColumnWithoutSpecialParams: jest.fn(() =>
+    mockConvertMetricAggregationColumnWithoutSpecialParams()
+  ),
 }));
 
 jest.mock('../metrics', () => ({
@@ -242,6 +251,16 @@ describe('convertToCumulativeSumAggColumn', () => {
     },
   ];
 
+  beforeEach(() => {
+    mockGetFieldByName.mockReturnValue({
+      aggregatable: true,
+      type: 'number',
+      sourceField: 'bytes',
+    });
+
+    stubLogstashDataView.getFieldByName = mockGetFieldByName;
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -371,7 +390,7 @@ describe('convertToCumulativeSumAggColumn', () => {
           aggId: '2-metric',
           aggType: METRIC_TYPES.SUM,
         });
-        mockConvertMetricToColumns.mockReturnValue(null);
+        mockConvertMetricAggregationColumnWithoutSpecialParams.mockReturnValue(null);
       },
       null,
     ],
@@ -389,13 +408,11 @@ describe('convertToCumulativeSumAggColumn', () => {
           aggId: '2-metric',
           aggType: METRIC_TYPES.SUM,
         });
-        mockConvertMetricToColumns.mockReturnValue([
-          {
-            columnId: 'test-id-1',
-            operationType: 'sum',
-            sourceField: field,
-          },
-        ]);
+        mockConvertMetricAggregationColumnWithoutSpecialParams.mockReturnValue({
+          columnId: 'test-id-1',
+          operationType: 'sum',
+          sourceField: field,
+        });
       },
       [
         { operationType: 'cumulative_sum', references: ['test-id-1'] },

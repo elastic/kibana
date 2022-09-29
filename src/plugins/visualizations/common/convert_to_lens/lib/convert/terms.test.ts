@@ -81,6 +81,7 @@ describe('convertToDateHistogramColumn', () => {
           metricColumns,
         },
         '',
+        false,
       ],
       null,
       () => {},
@@ -96,6 +97,7 @@ describe('convertToDateHistogramColumn', () => {
           metricColumns,
         },
         '',
+        false,
       ],
       {
         operationType: 'terms',
@@ -123,6 +125,7 @@ describe('convertToDateHistogramColumn', () => {
           metricColumns,
         },
         '',
+        false,
       ],
       {
         operationType: 'terms',
@@ -151,6 +154,7 @@ describe('convertToDateHistogramColumn', () => {
           metricColumns,
         },
         '',
+        false,
       ],
       null,
       () => {},
@@ -168,6 +172,7 @@ describe('convertToDateHistogramColumn', () => {
           metricColumns,
         },
         '',
+        false,
       ],
       null,
       () => {},
@@ -185,6 +190,7 @@ describe('convertToDateHistogramColumn', () => {
           metricColumns,
         },
         '',
+        false,
       ],
       null,
       () => {
@@ -204,6 +210,7 @@ describe('convertToDateHistogramColumn', () => {
           metricColumns,
         },
         '',
+        false,
       ],
       {
         operationType: 'terms',

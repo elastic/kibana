@@ -11,7 +11,7 @@ import { METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
 import { AggBasedColumn, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
-import { getCutomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
+import { getCustomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
 import type { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
 import {
@@ -57,7 +57,7 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
-  const customBuckets = getCutomBucketsFromSiblingAggs(visSchemas.metric);
+  const customBuckets = getCustomBucketsFromSiblingAggs(visSchemas.metric);
 
   // doesn't support sibbling pipeline aggs with different bucket aggs
   if (customBuckets.length > 1) {

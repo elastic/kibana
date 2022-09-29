@@ -26,7 +26,7 @@ describe('convertToDateHistogramColumn', () => {
   >([
     [
       'date histogram column if field is provided',
-      [aggId, aggParams, stubLogstashDataView],
+      [aggId, aggParams, stubLogstashDataView, false, false],
       {
         dataType: stubLogstashDataView.fields[0].type as DataType,
         isBucketed: true,
@@ -43,12 +43,12 @@ describe('convertToDateHistogramColumn', () => {
     ],
     [
       'null if field is not provided',
-      [aggId, { interval: '1d', field: undefined }, stubLogstashDataView],
+      [aggId, { interval: '1d', field: undefined }, stubLogstashDataView, false, false],
       null,
     ],
     [
       'date histogram column with isSplit and timeShift if specified',
-      [aggId, { ...aggParams, timeShift }, stubLogstashDataView, true],
+      [aggId, { ...aggParams, timeShift }, stubLogstashDataView, true, false],
       {
         dataType: stubLogstashDataView.fields[0].type as DataType,
         isBucketed: true,
