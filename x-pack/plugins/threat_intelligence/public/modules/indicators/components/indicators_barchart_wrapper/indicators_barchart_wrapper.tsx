@@ -9,11 +9,12 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeRange } from '@kbn/es-query';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { SecuritySolutionDataViewBase } from '../../../../types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { useAggregatedIndicators } from '../../hooks/use_aggregated_indicators';
 import { IndicatorsFieldSelector } from '../indicators_field_selector/indicators_field_selector';
 import { IndicatorsBarChart } from '../indicators_barchart/indicators_barchart';
+import { ChartSeries } from '../../services/fetch_aggregated_indicators';
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
 
@@ -26,6 +27,14 @@ export interface IndicatorsBarChartWrapperProps {
    * List of fields coming from the Security Solution sourcerer data view, passed down to the {@link IndicatorFieldSelector} to populate the dropdown.
    */
   indexPattern: SecuritySolutionDataViewBase;
+
+  series: ChartSeries[];
+
+  dateRange: TimeRangeBounds;
+
+  field: string;
+
+  onFieldChange: (value: string) => void;
 }
 
 /**
@@ -33,11 +42,7 @@ export interface IndicatorsBarChartWrapperProps {
  * and handles retrieving aggregated indicator data.
  */
 export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
-  ({ timeRange, indexPattern }) => {
-    const { dateRange, indicators, selectedField, onFieldChange } = useAggregatedIndicators({
-      timeRange,
-    });
-
+  ({ timeRange, indexPattern, series, dateRange, field, onFieldChange }) => {
     return (
       <>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
@@ -60,7 +65,7 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
           </EuiFlexItem>
         </EuiFlexGroup>
         {timeRange ? (
-          <IndicatorsBarChart indicators={indicators} dateRange={dateRange} field={selectedField} />
+          <IndicatorsBarChart indicators={series} dateRange={dateRange} field={field} />
         ) : (
           <></>
         )}

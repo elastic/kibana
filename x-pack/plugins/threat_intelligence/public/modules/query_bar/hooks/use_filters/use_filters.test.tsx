@@ -9,28 +9,37 @@ import { mockUseKibanaForFilters } from '../../../../common/mocks/mock_use_kiban
 import { renderHook, act, RenderHookResult, Renderer } from '@testing-library/react-hooks';
 import { useFilters, UseFiltersValue } from './use_filters';
 
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import React, { FC } from 'react';
+import { IndicatorsFilters } from '../../../indicators/containers/indicators_filters';
 
 jest.mock('react-router-dom', () => ({
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
+  MemoryRouter: ({ children }: any) => <>{children}</>,
+  useLocation: jest.fn().mockReturnValue({ pathname: '', search: '' }),
   useHistory: jest.fn().mockReturnValue({ replace: jest.fn() }),
 }));
+
+const FiltersWrapper: FC = ({ children }) => (
+  <TestProvidersComponent>
+    <IndicatorsFilters>{children}</IndicatorsFilters>{' '}
+  </TestProvidersComponent>
+);
+
+const renderUseFilters = () => renderHook(() => useFilters(), { wrapper: FiltersWrapper });
 
 describe('useFilters()', () => {
   let hookResult: RenderHookResult<{}, UseFiltersValue, Renderer<unknown>>;
   let mockRef: ReturnType<typeof mockUseKibanaForFilters>;
 
+  afterAll(() => jest.unmock('react-router-dom'));
+
   describe('when mounted', () => {
     beforeEach(async () => {
       mockRef = mockUseKibanaForFilters();
 
-      hookResult = renderHook(() => useFilters(), {
-        wrapper: TestProvidersComponent,
-      });
+      hookResult = renderUseFilters();
     });
 
     it('should have valid initial filterQuery value', () => {
@@ -44,9 +53,7 @@ describe('useFilters()', () => {
             '?indicators=(filterQuery:(language:kuery,query:%27threat.indicator.type%20:%20"file"%20%27),filters:!(),timeRange:(from:now/d,to:now/d))',
         });
 
-        hookResult = renderHook(() => useFilters(), {
-          wrapper: TestProvidersComponent,
-        });
+        hookResult = renderUseFilters();
 
         expect(hookResult.result.current.filterQuery).toMatchObject({
           language: 'kuery',
@@ -61,9 +68,7 @@ describe('useFilters()', () => {
     beforeEach(async () => {
       mockRef = mockUseKibanaForFilters();
 
-      hookResult = renderHook(() => useFilters(), {
-        wrapper: TestProvidersComponent,
-      });
+      hookResult = renderUseFilters();
 
       (useHistory as jest.Mock).mockReturnValue({ replace: historyReplace });
 

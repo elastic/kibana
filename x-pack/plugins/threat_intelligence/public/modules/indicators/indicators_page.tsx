@@ -7,7 +7,6 @@
 
 import React, { FC, VFC } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { IndicatorsFilters } from './containers/indicators_filters/indicators_filters';
 import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
@@ -19,14 +18,18 @@ import { useSourcererDataView } from './hooks/use_sourcerer_data_view';
 import { FieldTypesProvider } from '../../containers/field_types_provider';
 import { InspectorProvider } from '../../containers/inspector';
 import { useColumnSettings } from './components/indicators_table/hooks/use_column_settings';
+import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
+import { IndicatorsFilters } from './containers/indicators_filters';
 
 const queryClient = new QueryClient();
 
 const IndicatorsPageProviders: FC = ({ children }) => (
   <QueryClientProvider client={queryClient}>
-    <FieldTypesProvider>
-      <InspectorProvider>{children}</InspectorProvider>
-    </FieldTypesProvider>
+    <IndicatorsFilters>
+      <FieldTypesProvider>
+        <InspectorProvider>{children}</InspectorProvider>
+      </FieldTypesProvider>
+    </IndicatorsFilters>
   </QueryClientProvider>
 );
 
@@ -46,43 +49,68 @@ const IndicatorsPageContent: VFC = () => {
     savedQuery,
   } = useFilters();
 
-  const { handleRefresh, ...indicators } = useIndicators({
+  const {
+    handleRefresh,
+    indicatorCount,
+    indicators,
+    isLoading,
+    onChangeItemsPerPage,
+    onChangePage,
+    pagination,
+  } = useIndicators({
     filters,
     filterQuery,
     timeRange,
     sorting: columnSettings.sorting.columns,
   });
 
+  const { dateRange, series, selectedField, onFieldChange } = useAggregatedIndicators({
+    timeRange,
+    filters,
+    filterQuery,
+  });
+
   return (
-    <DefaultPageLayout pageTitle="Indicators">
-      <FiltersGlobal>
-        <QueryBar
-          dateRangeFrom={timeRange?.from}
-          dateRangeTo={timeRange?.to}
-          isLoading={indicators.isFetching}
+    <FieldTypesProvider>
+      <DefaultPageLayout pageTitle="Indicators">
+        <FiltersGlobal>
+          <QueryBar
+            dateRangeFrom={timeRange?.from}
+            dateRangeTo={timeRange?.to}
+            indexPattern={indexPattern}
+            filterQuery={filterQuery}
+            filterManager={filterManager}
+            filters={filters}
+            dataTestSubj="iocListPageQueryInput"
+            displayStyle="detached"
+            savedQuery={savedQuery}
+            onRefresh={handleRefresh}
+            onSubmitQuery={handleSubmitQuery}
+            onSavedQuery={handleSavedQuery}
+            onSubmitDateRange={handleSubmitTimeRange}
+          />
+        </FiltersGlobal>
+        <IndicatorsBarChartWrapper
+          dateRange={dateRange}
+          series={series}
+          timeRange={timeRange}
           indexPattern={indexPattern}
-          filterQuery={filterQuery}
-          filterManager={filterManager}
-          filters={filters}
-          dataTestSubj="iocListPageQueryInput"
-          displayStyle="detached"
-          savedQuery={savedQuery}
-          onSubmitQuery={handleSubmitQuery}
-          onSavedQuery={handleSavedQuery}
-          onSubmitDateRange={handleSubmitTimeRange}
-          onRefresh={handleRefresh}
+          field={selectedField}
+          onFieldChange={onFieldChange}
         />
-      </FiltersGlobal>
-      <IndicatorsFilters filterManager={filterManager}>
-        <IndicatorsBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
         <IndicatorsTable
           browserFields={browserFields}
           indexPattern={indexPattern}
           columnSettings={columnSettings}
-          {...indicators}
+          pagination={pagination}
+          indicatorCount={indicatorCount}
+          indicators={indicators}
+          isLoading={isLoading}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
         />
-      </IndicatorsFilters>
-    </DefaultPageLayout>
+      </DefaultPageLayout>
+    </FieldTypesProvider>
   );
 };
 

@@ -12,32 +12,21 @@ import {
   mockedTimefilterService,
   TestProvidersComponent,
 } from '../../../common/mocks/test_providers';
-import { useFilters } from '../../query_bar/hooks/use_filters';
 import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';
 
 jest.mock('../services/fetch_aggregated_indicators');
-jest.mock('../../query_bar/hooks/use_filters');
 
 const useAggregatedIndicatorsParams: UseAggregatedIndicatorsParam = {
   timeRange: DEFAULT_TIME_RANGE,
+  filters: [],
+  filterQuery: { language: 'kuery', query: '' },
 };
 
-const stub = () => {};
-
 const renderUseAggregatedIndicators = () =>
-  renderHook((props) => useAggregatedIndicators(props), {
+  renderHook((props: UseAggregatedIndicatorsParam) => useAggregatedIndicators(props), {
     initialProps: useAggregatedIndicatorsParams,
     wrapper: TestProvidersComponent,
   });
-
-const initialFiltersValue = {
-  filters: [],
-  filterQuery: { language: 'kuery', query: '' },
-  filterManager: {} as any,
-  handleSavedQuery: stub,
-  handleSubmitQuery: stub,
-  handleSubmitTimeRange: stub,
-};
 
 describe('useAggregatedIndicators()', () => {
   beforeEach(jest.clearAllMocks);
@@ -56,14 +45,12 @@ describe('useAggregatedIndicators()', () => {
     (createFetchAggregatedIndicators as MockedCreateFetchAggregatedIndicators).mockReturnValue(
       aggregatedIndicatorsQuery
     );
-
-    (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue(initialFiltersValue);
   });
 
   it('should create and call the aggregatedIndicatorsQuery correctly', async () => {
     aggregatedIndicatorsQuery.mockResolvedValue([]);
 
-    const { rerender } = renderUseAggregatedIndicators();
+    const { result, rerender } = renderUseAggregatedIndicators();
 
     // indicators service and the query should be called just once
     expect(
@@ -81,14 +68,12 @@ describe('useAggregatedIndicators()', () => {
       expect.any(AbortSignal)
     );
 
-    // After filter values change, the hook will be re-rendered and should call the query function again, with
-    // updated values
-    (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
-      ...initialFiltersValue,
-      filterQuery: { language: 'kuery', query: "threat.indicator.type: 'file'" },
-    });
-
-    await act(async () => rerender());
+    await act(async () =>
+      rerender({
+        filterQuery: { language: 'kuery', query: "threat.indicator.type: 'file'" },
+        filters: [],
+      })
+    );
 
     expect(aggregatedIndicatorsQuery).toHaveBeenCalledTimes(2);
     expect(aggregatedIndicatorsQuery).toHaveBeenLastCalledWith(
@@ -97,5 +82,16 @@ describe('useAggregatedIndicators()', () => {
       }),
       expect.any(AbortSignal)
     );
+    expect(result.current).toMatchInlineSnapshot(`
+      Object {
+        "dateRange": Object {
+          "max": "2022-01-02T00:00:00.000Z",
+          "min": "2022-01-01T00:00:00.000Z",
+        },
+        "onFieldChange": [Function],
+        "selectedField": "threat.feed.name",
+        "series": Array [],
+      }
+    `);
   });
 });
