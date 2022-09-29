@@ -6,17 +6,13 @@
  */
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlyoutFooter,
-  EuiPopover,
-  EuiSearchBarProps,
-  EuiTextColor,
-} from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
 
 import {
+  EuiButtonEmpty,
+  EuiPagination,
+  EuiFlyoutFooter,
+  EuiTextColor,
   EuiFlyout,
   EuiFilePicker,
   EuiFlyoutBody,
@@ -45,7 +41,6 @@ import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { useFormatUrl } from '../../../../../../common/components/link_to';
 import { Loader } from '../../../../../../common/components/loader';
 
 import * as i18n from './translations';
@@ -55,14 +50,12 @@ import { ReferenceErrorModal } from '../../../../../components/value_lists_manag
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
-import { SecurityPageName } from '../../../../../../../common/constants';
 import { useUserData } from '../../../../../components/user_info';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
 import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../../../common/endpoint/service/artifacts/constants';
 import { ExceptionsListCard } from './exceptions_list_card';
 import { useImportExceptionList } from './use_import_exception_list';
-import { AddExceptionFlyout } from '@kbn/security-solution-plugin/public/detection_engine/rule_exceptions/components/add_exception_flyout';
 
 export type Func = () => Promise<void>;
 
@@ -83,14 +76,13 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 };
 
 export const ExceptionListsTable = React.memo(() => {
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
+  const [{ loading: userInfoLoading }] = useUserData();
 
   const { loading: listsConfigLoading } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
 
   const {
-    services: { http, notifications, timelines, application },
+    services: { http, notifications, timelines },
   } = useKibana();
   const { exportExceptionList, deleteExceptionList } = useApi(http);
 
@@ -114,13 +106,10 @@ export const ExceptionListsTable = React.memo(() => {
 
   const [initLoading, setInitLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
-  const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
-  const [exportingListIds, setExportingListIds] = useState<string[]>([]);
   const filePickerRef = useRef<EuiFilePicker | null>(null);
 
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
-  const { navigateToUrl } = application;
   const { addError, addSuccess } = useAppToasts();
 
   const handleDeleteSuccess = useCallback(
@@ -145,7 +134,6 @@ export const ExceptionListsTable = React.memo(() => {
     ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
       async () => {
         try {
-          setDeletingListIds((ids) => [...ids, id]);
           if (refreshExceptions != null) {
             refreshExceptions();
           }
@@ -174,8 +162,6 @@ export const ExceptionListsTable = React.memo(() => {
           // route to patch rules with associated exception list
         } catch (error) {
           handleDeleteError(error);
-        } finally {
-          setDeletingListIds((ids) => ids.filter((_id) => _id !== id));
         }
       },
     [
@@ -206,23 +192,7 @@ export const ExceptionListsTable = React.memo(() => {
   const handleExport = useCallback(
     ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
       async () => {
-        setExportingListIds((ids) => [...ids, id]);
         await exportExceptionList({
-          id,
-          listId,
-          namespaceType,
-          onError: handleExportError,
-          onSuccess: handleExportSuccess(listId),
-        });
-      },
-    [exportExceptionList, handleExportError, handleExportSuccess]
-  );
-
-  const handleDuplicate = useCallback(
-    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
-      async () => {
-        setExportingListIds((ids) => [...ids, id]);
-        await duplicateExceptionList({
           id,
           listId,
           namespaceType,
@@ -270,7 +240,6 @@ export const ExceptionListsTable = React.memo(() => {
   );
 
   const handleCloseReferenceErrorModal = useCallback((): void => {
-    setDeletingListIds([]);
     setShowReferenceErrorModal(false);
     setReferenceModalState({
       contentText: '',
@@ -314,7 +283,6 @@ export const ExceptionListsTable = React.memo(() => {
       handleDeleteError(err);
     } finally {
       setReferenceModalState(exceptionReferenceModalInitialState);
-      setDeletingListIds([]);
       setShowReferenceErrorModal(false);
       if (refreshExceptions != null) {
         refreshExceptions();
@@ -410,9 +378,19 @@ export const ExceptionListsTable = React.memo(() => {
   const handleFileChange = useCallback((files: FileList | null) => {
     setFile(files?.item(0) ?? null);
   }, []);
+  const [activePage, setActivePage] = useState(0);
 
-  const [openAddExceptionFlyout, setOpenAddExceptionFlyout] = useState(false);
-  const [isCreateExceptionsFlyoutOpen, setIsCreateExceptionsFlyoutOpen] = useState(false);
+  useEffect(() => {
+    setPagination({
+      page: activePage,
+      perPage: 1,
+      total: 0,
+    });
+    refreshExceptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePage, setPagination]);
+
+  const goToPage = (pageNumber: number) => setActivePage(pageNumber);
 
   return (
     <>
@@ -536,11 +514,16 @@ export const ExceptionListsTable = React.memo(() => {
                 exceptionsList={excList}
                 handleDelete={handleDelete}
                 handleExport={handleExport}
-                handleDuplicate={handleDuplicate}
               />
             ))}
           </>
         )}
+        <EuiPagination
+          aria-label={'Custom pagination example'}
+          pageCount={3}
+          activePage={activePage}
+          onPageClick={goToPage}
+        />
 
         <AutoDownload
           blob={exportDownload.blob}

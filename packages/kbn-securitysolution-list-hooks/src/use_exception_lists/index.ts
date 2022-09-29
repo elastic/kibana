@@ -27,7 +27,7 @@ export type ReturnExceptionLists = [
 
 const DEFAULT_PAGINATION = {
   page: 1,
-  perPage: 20,
+  perPage: 1,
   total: 0,
 };
 

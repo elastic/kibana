@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -23,9 +23,6 @@ import {
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-
-import { ExceptionsViewerItems } from '../../../../../../detection_engine/rule_exceptions/components/all_exception_items_table/all_items';
 import type { ExceptionListInfo } from './use_all_exception_lists';
 
 const StyledFlexItem = styled(EuiFlexItem)`
@@ -54,23 +51,10 @@ interface ExceptionsListCardProps {
     listId: string;
     namespaceType: NamespaceType;
   }) => () => Promise<void>;
-  handleDuplicate: ({
-    id,
-    listId,
-    namespaceType,
-  }: {
-    id: string;
-    listId: string;
-    namespaceType: NamespaceType;
-  }) => () => Promise<void>;
 }
 
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
-  ({ exceptionsList, http, handleDelete, handleDuplicate, handleExport }) => {
-    const [toggleStatus, setToggleStatus] = useState(false);
-    const toggle = useCallback(() => {
-      setToggleStatus(!toggleStatus);
-    }, [toggleStatus]);
+  ({ exceptionsList, http, handleDelete, handleExport }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const onItemActionsClick = () => setIsPopoverOpen((isOpen) => !isOpen);
@@ -171,27 +155,6 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                 </EuiFlexGroup>
               </>
             }
-            {toggleStatus && (
-              <EuiFlexItem grow={true}>
-                {
-                  <ExceptionsViewerItems
-                    disableActions={!true} // !canUserCRUD
-                    // showEmpty={loadingList}
-                    // exceptions={exceptionItems}
-                    onDeleteException={() => ''}
-                    onEditExceptionItem={() => ''}
-                    isReadOnly={false}
-                    exceptions={[]}
-                    listType={ExceptionListTypeEnum.DETECTION}
-                    ruleReferences={null}
-                    viewerState={null}
-                    onCreateExceptionListItem={function (): void {
-                      throw new Error('Function not implemented.');
-                    }}
-                  />
-                }
-              </EuiFlexItem>
-            )}
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
