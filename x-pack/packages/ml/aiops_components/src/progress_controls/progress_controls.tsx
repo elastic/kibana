@@ -22,8 +22,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_background';
 
-// import './progress_controls.scss';
-
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 
