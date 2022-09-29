@@ -197,8 +197,6 @@ const convertAnnotation = (
         : 'triangle',
     filter: {
       type: 'kibana_query',
-      /** Fixed difference in default behavior between visualizations.
-       * Defaults for Lens: "none", for TSVB: "*" **/
       query: annotation.query_string?.query || '*',
       language: annotation.query_string?.language || getDefaultQueryLanguage(),
     },
