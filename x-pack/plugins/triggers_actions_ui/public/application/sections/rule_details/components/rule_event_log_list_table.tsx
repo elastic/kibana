@@ -30,9 +30,9 @@ import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filte
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
-
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
+import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -114,6 +114,9 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   const [search, setSearch] = useState<string>('');
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | undefined>();
+  const [internalRefreshToken, setInternalRefreshToken] = useState<number | undefined>(
+    refreshToken
+  );
 
   // Data grid states
   const [logs, setLogs] = useState<IExecutionLog[]>();
@@ -243,6 +246,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   );
 
   const onRefresh = () => {
+    setInternalRefreshToken(Date.now());
     loadEventLogs();
   };
 
@@ -339,6 +343,10 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     localStorage.setItem(localStorageKey, JSON.stringify(visibleColumns));
   }, [localStorageKey, visibleColumns]);
 
+  useEffect(() => {
+    setInternalRefreshToken(refreshToken);
+  }, [refreshToken]);
+
   return (
     <>
       <EuiFlexGroup>
@@ -370,6 +378,15 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer />
+      <RuleEventLogListKPI
+        ruleId={ruleId}
+        dateStart={dateStart}
+        dateEnd={dateEnd}
+        outcomeFilter={filter}
+        message={searchText}
+        refreshToken={internalRefreshToken}
+      />
       <EuiSpacer />
       {renderList()}
       {isOnLastPage && (
