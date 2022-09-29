@@ -215,6 +215,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(currentPeriodNonNullDataPoints).to.be.empty();
         });
       });
+
+      describe('with production environment', () => {
+        let response: Awaited<ReturnType<typeof fetchLatencyCharts>>;
+
+        before(async () => {
+          response = await fetchLatencyCharts({
+            query: {
+              environment: 'production',
+            },
+          });
+        });
+
+        it('returns average duration and timeseries', async () => {
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            GO_PROD_DURATION * 1000
+          );
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
+        });
+      });
     }
   );
 }
