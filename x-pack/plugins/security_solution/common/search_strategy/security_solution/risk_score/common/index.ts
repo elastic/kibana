@@ -27,6 +27,12 @@ export const buildUserNamesFilter = (userNames: string[]) => {
   return { terms: { 'user.name': userNames } };
 };
 
+export const buildEntityNameFilter = (entityNames: string[], riskEntity: RiskScoreEntity) => {
+  return riskEntity === RiskScoreEntity.host
+    ? { terms: { 'host.name': entityNames } }
+    : { terms: { 'user.name': entityNames } };
+};
+
 export enum RiskQueries {
   hostsRiskScore = 'hostsRiskScore',
   usersRiskScore = 'usersRiskScore',
