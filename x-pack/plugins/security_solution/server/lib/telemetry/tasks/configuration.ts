@@ -29,7 +29,7 @@ export function createTelemetryConfigurationTaskConfig() {
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       try {
-        const artifactName = 'telemetry-configuration-v1';
+        const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
         const configArtifact = (await artifactService.getArtifact(
           artifactName
         )) as unknown as TelemetryConfiguration;
