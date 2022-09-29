@@ -7,7 +7,7 @@
  */
 
 import { useCallback } from 'react';
-import type { Filter } from '@kbn/es-query';
+import { disableFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
@@ -45,7 +45,7 @@ export const useNavigationProps = ({
   const onOpenSurrDocs = useCallback(() => {
     event?.preventDefault?.();
 
-    let appliedFilters = filters;
+    let appliedFilters = filters || [];
     if (!filters) {
       appliedFilters = [
         ...services.filterManager.getGlobalFilters(),
@@ -57,7 +57,7 @@ export const useNavigationProps = ({
       dataViewSpec: dataView.toSpec(false),
       rowId,
       columns,
-      filters: appliedFilters,
+      filters: appliedFilters.map(disableFilter),
     });
   }, [columns, dataView, filters, rowId, services.contextLocator, services.filterManager]);
 

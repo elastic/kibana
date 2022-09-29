@@ -37,6 +37,10 @@ export interface DocProps {
    * DataView entity
    */
   dataView: DataView;
+  /**
+   * If set, will always request source, regardless of the global `fieldsFromSource` setting
+   */
+  requestSource?: boolean;
 }
 
 export function Doc(props: DocProps) {
