@@ -11,7 +11,12 @@ import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/
 
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
+import {
+  formatPipelineName,
+  generateMlInferencePipelineBody,
+} from '../../../../../../../common/ml_inference_pipeline';
 import { HttpError, Status } from '../../../../../../../common/types/api';
+import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
@@ -78,6 +83,7 @@ interface MLInferenceProcessorsValues {
   isPipelineDataValid: boolean;
   mappingData: typeof MappingsApiLogic.values.data;
   mappingStatus: Status;
+  mlInferencePipeline?: MlInferencePipeline;
   mlModelsData: typeof MLModelsApiLogic.values.data;
   mlModelsStatus: typeof MLModelsApiLogic.values.apiStatus;
   sourceFields: string[] | undefined;
@@ -191,6 +197,30 @@ export const MLInferenceLogic = kea<
     isPipelineDataValid: [
       () => [selectors.formErrors],
       (errors: AddInferencePipelineFormErrors) => Object.keys(errors).length === 0,
+    ],
+    mlInferencePipeline: [
+      () => [
+        selectors.isPipelineDataValid,
+        selectors.addInferencePipelineModal,
+        selectors.mlModelsData,
+      ],
+      (
+        isPipelineDataValid: boolean,
+        { configuration }: AddInferencePipelineModal,
+        models: MLInferenceProcessorsValues['mlModelsData']
+      ) => {
+        if (!isPipelineDataValid) return undefined;
+        const model = models?.find((mlModel) => mlModel.model_id === configuration.modelID);
+        if (!model) return undefined;
+
+        return generateMlInferencePipelineBody({
+          destinationField:
+            configuration.destinationField || formatPipelineName(configuration.pipelineName),
+          model,
+          pipelineName: configuration.pipelineName,
+          sourceField: configuration.sourceField,
+        });
+      },
     ],
     sourceFields: [
       () => [selectors.mappingStatus, selectors.mappingData],

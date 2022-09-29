@@ -6,9 +6,12 @@
  */
 
 import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 
 import { MlInferencePipeline } from '../types/pipelines';
+
+// Getting an error importing this from @kbn/ml-plugin/common/constants/data_frame_analytics'
+// So defining it locally for now with a test to make sure it matches.
+export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
 export interface MlInferencePipelineParams {
   description?: string;
