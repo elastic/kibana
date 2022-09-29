@@ -6,7 +6,9 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
+import type { Mitre } from '../../objects/rule';
 import { getDataViewRule } from '../../objects/rule';
+import type { CompleteTimeline } from '../../objects/timeline';
 import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
 import {
@@ -50,7 +52,7 @@ import { postDataView } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
-  fillDefineCustomRuleWithImportedQueryAndContinue,
+  fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
@@ -69,10 +71,11 @@ describe('Custom query rules', () => {
 
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
-    const expectedUrls = rule.referenceUrls.join('');
-    const expectedFalsePositives = rule.falsePositivesExamples.join('');
-    const expectedTags = rule.tags.join('');
-    const expectedMitre = formatMitreAttackDescription(rule.mitre);
+    const expectedUrls = rule.referenceUrls?.join('');
+    const expectedFalsePositives = rule.falsePositivesExamples?.join('');
+    const expectedTags = rule.tags?.join('');
+    const mitreAttack = rule.mitre as Mitre[];
+    const expectedMitre = formatMitreAttackDescription(mitreAttack);
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
@@ -80,12 +83,13 @@ describe('Custom query rules', () => {
       are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
       We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive 
       cleaning in all the other tests. */
+      const timeline = rule.timeline as CompleteTimeline;
       esArchiverResetKibana();
-      createTimeline(rule.timeline).then((response) => {
+      createTimeline(timeline).then((response) => {
         cy.wrap({
           ...rule,
           timeline: {
-            ...rule.timeline,
+            ...timeline,
             id: response.body.data.persistTimeline.timeline.savedObjectId,
           },
         }).as('rule');
@@ -97,7 +101,7 @@ describe('Custom query rules', () => {
 
     it('Creates and enables a new rule', function () {
       visit(RULE_CREATION);
-      fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
+      fillDefineCustomRuleAndContinue(this.rule);
       fillAboutRuleAndContinue(this.rule);
       fillScheduleRuleAndContinue(this.rule);
       createAndEnableRule();
@@ -138,11 +142,11 @@ describe('Custom query rules', () => {
       cy.get(SCHEDULE_DETAILS).within(() => {
         getDetails(RUNS_EVERY_DETAILS).should(
           'have.text',
-          `${getDataViewRule().runsEvery.interval}${getDataViewRule().runsEvery.type}`
+          `${getDataViewRule().runsEvery?.interval}${getDataViewRule().runsEvery?.type}`
         );
         getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
           'have.text',
-          `${getDataViewRule().lookBack.interval}${getDataViewRule().lookBack.type}`
+          `${getDataViewRule().lookBack?.interval}${getDataViewRule().lookBack?.type}`
         );
       });
 
