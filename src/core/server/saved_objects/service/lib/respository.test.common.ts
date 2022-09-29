@@ -40,8 +40,6 @@ import {
 } from '../saved_objects_client';
 import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
 
-// import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
-// import { ElasticsearchClient } from '../../../elasticsearch';
 import { SavedObjectsErrorHelpers } from './errors';
 import {
   AuthorizationTypeEntry,
