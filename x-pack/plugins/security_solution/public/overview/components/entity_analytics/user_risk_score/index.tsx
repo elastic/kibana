@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { RiskScoresDeprecated } from '../../../../common/components/risk_score/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
@@ -35,6 +35,9 @@ import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/componen
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
+import { Loader } from '../../../../common/components/loader';
+import { Panel } from '../../../../common/components/panel';
+import * as commonI18n from '../common/translations';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 const USER_RISK_KPI_QUERY_ID = 'headerUserRiskScoreKpiQuery';
@@ -149,7 +152,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder data-test-subj="entity_analytics_users">
+      <Panel hasBorder data-test-subj="entity_analytics_users">
         <HeaderSection
           title={<RiskScoreHeaderTitle riskScoreEntity={RiskScoreEntity.user} />}
           titleSize="s"
@@ -159,6 +162,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
           id={TABLE_QUERY_ID}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
+          tooltip={commonI18n.USER_RISK_TABLE_TOOLTIP}
         >
           {toggleStatus && (
             <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -207,7 +211,10 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-      </EuiPanel>
+        {(isTableLoading || isKpiLoading) && (
+          <Loader data-test-subj="loadingPanelRiskScore" overlay size="xl" />
+        )}
+      </Panel>
     </InspectButtonContainer>
   );
 };
