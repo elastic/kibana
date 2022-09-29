@@ -75,12 +75,9 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
   const { indexPatternId, indexPattern } = datasourceInfo;
 
   // handle multiple metrics
-  const metricsColumns = getMetricsColumns(
-    series,
-    indexPattern!,
-    model.series.length,
-    reducedTimeRange
-  );
+  const metricsColumns = getMetricsColumns(series, indexPattern!, model.series.length, {
+    reducedTimeRange,
+  });
   if (metricsColumns === null) {
     return null;
   }

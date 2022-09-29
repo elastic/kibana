@@ -83,7 +83,6 @@ describe('getLayers', () => {
           params: {
             value: '100',
           },
-          meta: { metricId: 'metric-1' },
         },
       ],
       columnOrder: [],
