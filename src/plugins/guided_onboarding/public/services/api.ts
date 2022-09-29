@@ -244,7 +244,6 @@ export class ApiService {
   /**
    * Completes the guide step identified by the passed params.
    * A noop if the passed step is not active.
-   * Completes the current guide, if the step is the last one in the guide.
    * @param {GuideId} guideId the id of the guide (one of search, observability, security)
    * @param {GuideStepIds} stepId the id of the step in the guide
    * @return {Promise} a promise with the updated state or undefined if the operation fails

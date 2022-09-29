@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { StepStatus, StepConfig, GuideStepIds } from '../../common/types';
+import type { StepStatus, GuideStepIds } from '../../common/types';
+import type { StepConfig } from '../types';
 import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
 interface GuideStepProps {

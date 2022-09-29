@@ -16,4 +16,4 @@ export type { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from '.
 
 export type { GuideId, GuideStepIds, GuideState, GuideStep } from '../common/types';
 
-export { guidesConfig } from '../common/guides_config';
+export { guidesConfig } from './constants/guides_config';

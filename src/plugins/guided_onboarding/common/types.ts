@@ -31,30 +31,6 @@ export type GuideStatus = 'in_progress' | 'ready_to_complete' | 'complete';
  */
 export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'complete';
 
-export interface StepConfig {
-  id: GuideStepIds;
-  title: string;
-  descriptionList: string[];
-  location?: {
-    appID: string;
-    path: string;
-  };
-  status?: StepStatus;
-}
-export interface GuideConfig {
-  title: string;
-  description: string;
-  docs?: {
-    text: string;
-    url: string;
-  };
-  steps: StepConfig[];
-}
-
-export type GuidesConfig = {
-  [key in GuideId]: GuideConfig;
-};
-
 export interface GuideStep {
   id: GuideStepIds;
   status: StepStatus;

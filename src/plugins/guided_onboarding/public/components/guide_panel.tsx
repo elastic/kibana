@@ -29,8 +29,10 @@ import {
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { guidesConfig } from '../../common/guides_config';
-import type { GuideConfig, StepConfig, GuideState, GuideStepIds } from '../../common/types';
+import { guidesConfig } from '../constants/guides_config';
+import type { GuideState, GuideStepIds } from '../../common/types';
+import type { GuideConfig, StepConfig } from '../types';
+
 import type { ApiService } from '../services/api';
 
 import { GuideStep } from './guide_panel_step';

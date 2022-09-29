@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { guidesConfig } from '../../common/guides_config';
+import { guidesConfig } from '../constants/guides_config';
 import { isLastStep } from './helpers';
 
 const searchGuide = 'search';

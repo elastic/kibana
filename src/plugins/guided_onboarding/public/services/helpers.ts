@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { guidesConfig } from '../../common/guides_config';
-import { GuideConfig, StepConfig, GuideId } from '../../common/types';
+import type { GuideId } from '../../common/types';
+import { guidesConfig } from '../constants/guides_config';
+import type { GuideConfig, StepConfig } from '../types';
 
 export const getGuideConfig = (guideID?: string): GuideConfig | undefined => {
   if (guideID && Object.keys(guidesConfig).includes(guideID)) {
