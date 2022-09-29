@@ -179,15 +179,14 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
 
 export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
   cy.get(TIMELINE_SWITCHQUERYLANGUAGE_BUTTON).click();
-  const status = cy.get(TIMELINE_KQLORLUCENELANGUAGE_TOGGLE)
-    .then(toggle => {
-      const status = toggle.attr('aria-checked');
-      if (status === 'true' && language === 'lucene') {
-        cy.get(TIMELINE_KQLORLUCENELANGUAGE_TOGGLE).click();
-      } else if (status === 'false' && language === 'kuery') {
-        cy.get(TIMELINE_KQLORLUCENELANGUAGE_TOGGLE).click();
-      }
-    });
+  cy.get(TIMELINE_KQLORLUCENELANGUAGE_TOGGLE).then((toggle) => {
+    const status = toggle.attr('aria-checked');
+    if (status === 'true' && language === 'lucene') {
+      cy.get(TIMELINE_KQLORLUCENELANGUAGE_TOGGLE).click();
+    } else if (status === 'false' && language === 'kuery') {
+      cy.get(TIMELINE_KQLORLUCENELANGUAGE_TOGGLE).click();
+    }
+  });
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
