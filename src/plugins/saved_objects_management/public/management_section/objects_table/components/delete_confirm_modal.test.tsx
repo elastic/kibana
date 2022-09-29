@@ -95,7 +95,7 @@ describe('DeleteConfirmModal', () => {
         allowedTypes={allowedTypes}
       />
     );
-    wrapper.find('EuiButton').simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(onCancel).not.toHaveBeenCalled();
@@ -176,7 +176,9 @@ describe('DeleteConfirmModal', () => {
         />
       );
 
-      expect(wrapper.find('EuiButton').getDOMNode()).toBeDisabled();
+      expect(
+        wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').getDOMNode()
+      ).toBeDisabled();
     });
   });
 

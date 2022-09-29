@@ -126,7 +126,7 @@ describe('Saved query management list component', () => {
       component.find('[data-test-subj="saved-query-management-apply-changes-button"]').length
     ).toBeTruthy();
     component
-      .find('[data-test-subj="saved-query-management-apply-changes-button"]')
+      .find('button[data-test-subj="saved-query-management-apply-changes-button"]')
       .first()
       .simulate('click');
     expect(onLoadSpy).toBeCalled();

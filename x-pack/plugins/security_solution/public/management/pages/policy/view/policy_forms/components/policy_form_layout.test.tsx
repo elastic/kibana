@@ -144,9 +144,7 @@ describe('Policy Form Layout', () => {
       beforeEach(async () => {
         await asyncActions;
         policyFormLayoutView.update();
-        saveButton = policyFormLayoutView.find(
-          'EuiButton[data-test-subj="policyDetailsSaveButton"]'
-        );
+        saveButton = policyFormLayoutView.find('button[data-test-subj="policyDetailsSaveButton"]');
         saveButton.simulate('click');
         policyFormLayoutView.update();
         confirmModal = policyFormLayoutView.find(

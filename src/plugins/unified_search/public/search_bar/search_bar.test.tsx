@@ -273,8 +273,10 @@ describe('SearchBar', () => {
     expect(component.find(EuiSuperUpdateButton).prop('isDisabled')).toBe(true);
     expect(component.find(FilterItems).prop('readOnly')).toBe(true);
 
-    expect(component.find('[data-test-subj="showQueryBarMenu"]').at(0).getDOMNode()).toBeDisabled();
-    expect(component.find('[data-test-subj="addFilter"]').at(0).getDOMNode()).toBeDisabled();
+    expect(
+      component.find('button[data-test-subj="showQueryBarMenu"]').at(0).getDOMNode()
+    ).toBeDisabled();
+    expect(component.find('button[data-test-subj="addFilter"]').at(0).getDOMNode()).toBeDisabled();
 
     expect(component.find(DataViewPicker).prop('isDisabled')).toBe(true);
 

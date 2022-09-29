@@ -43,7 +43,7 @@ describe('FieldTypeIcon', () => {
     jest.runAllTimers();
 
     typeIconComponent.update();
-    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
+    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2);
 
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();
