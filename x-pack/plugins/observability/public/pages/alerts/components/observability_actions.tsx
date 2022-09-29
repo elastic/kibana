@@ -109,7 +109,6 @@ export function ObservabilityActions({
     selectCaseModal.open({ attachments: caseAttachments });
     closeActionsPopover();
   }, [caseAttachments, closeActionsPopover, selectCaseModal]);
-
   const actionsMenuItems = useMemo(() => {
     return [
       ...(userCasesPermissions.create && userCasesPermissions.read
@@ -144,7 +143,7 @@ export function ObservabilityActions({
         : []),
 
       ...[
-        config.unsafe.alertDetails.enabled && linkToAlert ? (
+        config?.unsafe?.alertDetails.enabled && linkToAlert ? (
           <EuiContextMenuItem
             key="viewAlertDetailsPage"
             data-test-subj="viewAlertDetailsPage"
