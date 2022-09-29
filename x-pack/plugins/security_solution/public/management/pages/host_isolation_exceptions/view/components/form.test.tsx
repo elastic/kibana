@@ -29,8 +29,7 @@ import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 
 jest.mock('../../../../../common/components/user_privileges');
 
-// FLAKY: https://github.com/elastic/kibana/issues/140907
-describe.skip('When on the host isolation exceptions entry form', () => {
+describe('When on the host isolation exceptions entry form', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -86,8 +85,7 @@ describe.skip('When on the host isolation exceptions entry form', () => {
       await render();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/140140
-    it.skip('should render the form with empty inputs', () => {
+    it('should render the form with empty inputs', () => {
       expect(renderResult.getByTestId('hostIsolationExceptions-form-name-input')).toHaveValue('');
       expect(renderResult.getByTestId('hostIsolationExceptions-form-ip-input')).toHaveValue('');
       expect(
@@ -146,16 +144,14 @@ describe.skip('When on the host isolation exceptions entry form', () => {
       ).toBe(true);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139776
-    it.skip('should show policy as selected when user clicks on it', async () => {
+    it('should show policy as selected when user clicks on it', async () => {
       userEvent.click(renderResult.getByTestId('perPolicy'));
       await clickOnEffectedPolicy(renderResult);
 
       await expect(isEffectedPolicySelected(renderResult)).resolves.toBe(true);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139899
-    it.skip('should retain the previous policy selection when switching from per-policy to global', async () => {
+    it('should retain the previous policy selection when switching from per-policy to global', async () => {
       // move to per-policy and select the first
       userEvent.click(renderResult.getByTestId('perPolicy'));
       await clickOnEffectedPolicy(renderResult);
