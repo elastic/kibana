@@ -30,28 +30,11 @@ const sloSchema = t.type({
   updated_at: dateType,
 });
 
-const apmTransactionErrorRateSLOSchema = t.intersection([
-  sloSchema,
-  t.type({ indicator: apmTransactionErrorRateIndicatorSchema }),
-]);
-
-const apmTransactionDurationSLOSchema = t.intersection([
-  sloSchema,
-  t.type({ indicator: apmTransactionDurationIndicatorSchema }),
-]);
-
 const storedSLOSchema = sloSchema;
 
-export {
-  sloSchema,
-  storedSLOSchema,
-  apmTransactionDurationSLOSchema,
-  apmTransactionErrorRateSLOSchema,
-};
+export { sloSchema, storedSLOSchema };
 
 type SLO = t.TypeOf<typeof sloSchema>;
-type APMTransactionErrorRateSLO = t.TypeOf<typeof apmTransactionErrorRateSLOSchema>;
-type APMTransactionDurationSLO = t.TypeOf<typeof apmTransactionDurationSLOSchema>;
 
 type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
@@ -62,8 +45,6 @@ type StoredSLO = t.TypeOf<typeof storedSLOSchema>;
 
 export type {
   SLO,
-  APMTransactionErrorRateSLO,
-  APMTransactionDurationSLO,
   Indicator,
   IndicatorTypes,
   APMTransactionErrorRateIndicator,
