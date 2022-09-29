@@ -368,7 +368,7 @@ import rule355 from './persistence_google_workspace_api_access_granted_via_domai
 import rule356 from './defense_evasion_suspicious_short_program_name.json';
 import rule357 from './lateral_movement_incoming_wmi.json';
 import rule358 from './persistence_via_hidden_run_key_valuename.json';
-import rule359 from './credential_access_potential_ssh_bruteforce.json';
+import rule359 from './credential_access_potential_macos_ssh_bruteforce.json';
 import rule360 from './credential_access_promt_for_pwd_via_osascript.json';
 import rule361 from './lateral_movement_remote_services.json';
 import rule362 from './defense_evasion_domain_added_to_google_workspace_trusted_domains.json';
