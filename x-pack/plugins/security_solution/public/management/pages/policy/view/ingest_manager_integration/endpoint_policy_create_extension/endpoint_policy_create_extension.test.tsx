@@ -7,7 +7,6 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { screen } from '@testing-library/react';
 import { EndpointPolicyCreateExtension } from './endpoint_policy_create_extension';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
@@ -66,9 +65,9 @@ describe('Onboarding Component new section', () => {
           onChange={mockedOnChange}
         />
       );
-      expect(mockedOnChange).toHaveBeenCalledTimes(1)
+      expect(mockedOnChange).toHaveBeenCalledTimes(1);
       userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
-      expect(mockedOnChange).toHaveBeenCalledTimes(2)
+      expect(mockedOnChange).toHaveBeenCalledTimes(2);
     });
   });
 });
