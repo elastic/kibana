@@ -63,6 +63,7 @@ describe('When using the ArtifactListPage component', () => {
         await act(async () => {
           await waitFor(() => {
             expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+            expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalled();
           });
         });
 
@@ -120,11 +121,12 @@ describe('When using the ArtifactListPage component', () => {
       });
       await act(async () => {
         await waitFor(() => {
-          expect(getByTestId('tablePagination-20-rows'));
+          expect(getByTestId('tablePagination-20-rows')).toBeEnabled();
         });
       });
-      act(() => {
-        userEvent.click(getByTestId('tablePagination-20-rows'));
+
+      userEvent.click(getByTestId('tablePagination-20-rows'), undefined, {
+        skipPointerEventsCheck: true,
       });
 
       await waitFor(() => {
@@ -138,11 +140,17 @@ describe('When using the ArtifactListPage component', () => {
         act(() => {
           switch (action) {
             case 'delete':
-              userEvent.click(renderResult.getByTestId('testPage-card-cardDeleteAction'));
+              userEvent.click(
+                renderResult.getByTestId('testPage-card-cardDeleteAction'),
+                undefined,
+                { skipPointerEventsCheck: true }
+              );
               break;
 
             case 'edit':
-              userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'));
+              userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'), undefined, {
+                skipPointerEventsCheck: true,
+              });
               break;
           }
         });
@@ -244,8 +252,9 @@ describe('When using the ArtifactListPage component', () => {
           await waitFor(() => {
             expect(renderResult.getByTestId(firstPolicyTestId)).toBeTruthy();
           });
-          userEvent.click(renderResult.getByTestId(firstPolicyTestId));
         });
+
+        userEvent.click(renderResult.getByTestId(firstPolicyTestId));
 
         await waitFor(() => {
           expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));
