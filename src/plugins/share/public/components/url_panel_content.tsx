@@ -20,7 +20,6 @@ import {
   EuiRadioGroup,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -46,7 +45,7 @@ export interface UrlPanelContentProps {
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   urlService: BrowserUrlService;
-  snapshotShareWarning?: boolean;
+  snapshotShareWarning?: string;
 }
 
 export enum ExportUrlAsType {
@@ -164,19 +163,6 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
           {urlRow}
 
           <EuiSpacer size="m" />
-
-          {this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT &&
-            this.props.snapshotShareWarning && (
-              <>
-                <EuiCallOut color="warning" iconType="help" size="s">
-                  <FormattedMessage
-                    id="share.urlPanel.longUrlWarning"
-                    defaultMessage="This dashboard has a lot of unsaved changes, so it is recommended that you save before continuing."
-                  />
-                </EuiCallOut>
-                <EuiSpacer size={'m'} />
-              </>
-            )}
 
           <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
             {(copy: () => void) => (
@@ -416,17 +402,26 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   };
 
   private renderExportUrlAsOptions = () => {
+    const snapshotLabel = (
+      <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />
+    );
     return [
       {
         id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
-        label: this.renderWithIconTip(
-          <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />,
-          <FormattedMessage
-            id="share.urlPanel.snapshotDescription"
-            defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+        label: (
+          <>
+            {this.props.snapshotShareWarning
+              ? this.renderWithWarning(snapshotLabel, this.props.snapshotShareWarning)
+              : this.renderWithIconTip(
+                  snapshotLabel,
+                  <FormattedMessage
+                    id="share.urlPanel.snapshotDescription"
+                    defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
             Edits to the saved {objectType} won't be visible via this URL."
-            values={{ objectType: this.props.objectType }}
-          />
+                    values={{ objectType: this.props.objectType }}
+                  />
+                )}
+          </>
         ),
         ['data-test-subj']: 'exportAsSnapshot',
       },
@@ -452,6 +447,17 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
         <EuiFlexItem grow={false}>{child}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip content={tipContent} position="bottom" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  private renderWithWarning = (child: React.ReactNode, warningContent: React.ReactNode) => {
+    return (
+      <EuiFlexGroup gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip type="alert" color="warning" content={warningContent} position="bottom" />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
