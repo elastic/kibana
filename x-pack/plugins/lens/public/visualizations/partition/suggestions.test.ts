@@ -93,7 +93,7 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('should reject date operations', () => {
+    it('should hide date operations', () => {
       expect(
         suggestions({
           table: {
@@ -118,11 +118,17 @@ describe('suggestions', () => {
           },
           state: undefined,
           keptLayerIds: ['first'],
-        })
-      ).toHaveLength(0);
+        }).map((s) => [s.hide, s.score])
+      ).toEqual([
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+      ]);
     });
 
-    it('should reject histogram operations', () => {
+    it('should hide histogram operations', () => {
       expect(
         suggestions({
           table: {
@@ -147,8 +153,14 @@ describe('suggestions', () => {
           },
           state: undefined,
           keptLayerIds: ['first'],
-        })
-      ).toHaveLength(0);
+        }).map((s) => [s.hide, s.score])
+      ).toEqual([
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+      ]);
     });
 
     it('should not reject histogram operations in case of switching between partition charts', () => {

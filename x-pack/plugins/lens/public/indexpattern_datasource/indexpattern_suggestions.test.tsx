@@ -1774,7 +1774,7 @@ describe('IndexPattern Data Source suggestions', () => {
           state: expect.objectContaining({
             layers: {
               test: expect.objectContaining({
-                columnOrder: ['column-id-3', 'column-id-2', 'column-id-1'],
+                columnOrder: ['column-id-2', 'column-id-3', 'column-id-1'],
                 columns: {
                   'column-id-1': expect.objectContaining({
                     operationType: 'count',
@@ -1804,10 +1804,10 @@ describe('IndexPattern Data Source suggestions', () => {
             isMultiRow: true,
             columns: [
               expect.objectContaining({
-                columnId: 'column-id-3',
+                columnId: 'column-id-2',
               }),
               expect.objectContaining({
-                columnId: 'column-id-2',
+                columnId: 'column-id-3',
               }),
               expect.objectContaining({
                 columnId: 'column-id-1',
