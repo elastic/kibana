@@ -71,10 +71,6 @@ export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
   defaultMessage: 'Closed',
 });
 
-export const DELETE = i18n.translate('xpack.cases.caseTable.delete', {
-  defaultMessage: 'Delete',
-});
-
 export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
   defaultMessage: 'Select',
 });
@@ -133,4 +129,41 @@ export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
   i18n.translate('xpack.cases.allCasesView.totalFilteredUsers', {
     defaultMessage: '{total, plural, one {# assignee} other {# assignees}} filtered',
     values: { total },
+  });
+
+export const CLOSED_CASES = ({
+  totalCases,
+  caseTitle,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+}) =>
+  i18n.translate('xpack.cases.containers.closedCases', {
+    values: { caseTitle, totalCases },
+    defaultMessage: 'Closed {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
+  });
+
+export const REOPENED_CASES = ({
+  totalCases,
+  caseTitle,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+}) =>
+  i18n.translate('xpack.cases.containers.reopenedCases', {
+    values: { caseTitle, totalCases },
+    defaultMessage: 'Opened {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
+  });
+
+export const MARK_IN_PROGRESS_CASES = ({
+  totalCases,
+  caseTitle,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+}) =>
+  i18n.translate('xpack.cases.containers.markInProgressCases', {
+    values: { caseTitle, totalCases },
+    defaultMessage:
+      'Marked {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} as in progress',
   });
