@@ -7,11 +7,14 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { RefreshInterval } from '@kbn/data-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import { Filter, Query, TimeRange } from '../../services/data';
-import { ViewMode } from '../../services/embeddable';
-import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import { DashboardPanelMap } from '../../../common';
+import type { DashboardOptions, DashboardState } from '../../types';
 
 export const dashboardStateSlice = createSlice({
   name: 'dashboardState',
@@ -33,11 +36,15 @@ export const dashboardStateSlice = createSlice({
         description: string;
         tags?: string[];
         timeRestore: boolean;
+        timeRange?: TimeRange;
+        refreshInterval?: RefreshInterval;
       }>
     ) => {
       state.title = action.payload.title;
       state.description = action.payload.description;
       state.timeRestore = action.payload.timeRestore;
+      state.timeRange = action.payload.timeRange;
+      state.refreshInterval = action.payload.refreshInterval;
       if (action.payload.tags) {
         state.tags = action.payload.tags;
       }
@@ -100,6 +107,9 @@ export const dashboardStateSlice = createSlice({
     setQuery: (state, action: PayloadAction<Query>) => {
       state.query = action.payload;
     },
+    setTimeslice: (state, action: PayloadAction<[number, number] | undefined>) => {
+      state.timeslice = action.payload;
+    },
   },
 });
 
@@ -124,5 +134,6 @@ export const {
   setPanels,
   setTitle,
   setQuery,
+  setTimeslice,
   setTags,
 } = dashboardStateSlice.actions;

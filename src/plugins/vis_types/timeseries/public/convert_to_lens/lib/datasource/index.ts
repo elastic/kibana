@@ -7,4 +7,3 @@
  */
 
 export * from './get_datasource_info';
-export * from './get_field_type';

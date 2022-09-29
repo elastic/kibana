@@ -5,23 +5,38 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { FC, VFC } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
-import { EmptyPage } from '../empty_page';
-import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
 import { DefaultPageLayout } from '../../components/layout';
-import { useFilters } from './hooks/use_filters';
+import { useFilters } from '../query_bar/hooks/use_filters';
 import { FiltersGlobal } from '../../containers/filters_global';
-import QueryBar from './components/query_bar';
+import QueryBar from '../query_bar/components/query_bar';
 import { useSourcererDataView } from './hooks/use_sourcerer_data_view';
+import { FieldTypesProvider } from '../../containers/field_types_provider';
+import { InspectorProvider } from '../../containers/inspector';
+import { useColumnSettings } from './components/indicators_table/hooks/use_column_settings';
+import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
+import { IndicatorsFilters } from './containers/indicators_filters';
 
-export const IndicatorsPage: VFC = () => {
-  const { count: indicatorsTotalCount, isLoading: isIndicatorsTotalCountLoading } =
-    useIndicatorsTotalCount();
+const queryClient = new QueryClient();
 
+const IndicatorsPageProviders: FC = ({ children }) => (
+  <QueryClientProvider client={queryClient}>
+    <IndicatorsFilters>
+      <FieldTypesProvider>
+        <InspectorProvider>{children}</InspectorProvider>
+      </FieldTypesProvider>
+    </IndicatorsFilters>
+  </QueryClientProvider>
+);
+
+const IndicatorsPageContent: VFC = () => {
   const { browserFields, indexPattern } = useSourcererDataView();
+
+  const columnSettings = useColumnSettings();
 
   const {
     timeRange,
@@ -34,47 +49,76 @@ export const IndicatorsPage: VFC = () => {
     savedQuery,
   } = useFilters();
 
-  const { handleRefresh, ...indicators } = useIndicators({
+  const {
+    handleRefresh,
+    indicatorCount,
+    indicators,
+    isLoading,
+    onChangeItemsPerPage,
+    onChangePage,
+    pagination,
+  } = useIndicators({
     filters,
     filterQuery,
     timeRange,
+    sorting: columnSettings.sorting.columns,
   });
 
-  // This prevents indicators table flash when total count is loading.
-  // TODO: Improve this with custom loader component. It would require changes to security solutions' template wrapper - to allow
-  // 'template' overrides.
-  if (isIndicatorsTotalCountLoading) {
-    return null;
-  }
+  const { dateRange, series, selectedField, onFieldChange } = useAggregatedIndicators({
+    timeRange,
+    filters,
+    filterQuery,
+  });
 
-  const showEmptyPage = indicatorsTotalCount === 0;
-
-  return showEmptyPage ? (
-    <EmptyPage />
-  ) : (
-    <DefaultPageLayout pageTitle="Indicators">
-      <FiltersGlobal>
-        <QueryBar
-          dateRangeFrom={timeRange?.from}
-          dateRangeTo={timeRange?.to}
+  return (
+    <FieldTypesProvider>
+      <DefaultPageLayout pageTitle="Indicators">
+        <FiltersGlobal>
+          <QueryBar
+            dateRangeFrom={timeRange?.from}
+            dateRangeTo={timeRange?.to}
+            indexPattern={indexPattern}
+            filterQuery={filterQuery}
+            filterManager={filterManager}
+            filters={filters}
+            dataTestSubj="iocListPageQueryInput"
+            displayStyle="detached"
+            savedQuery={savedQuery}
+            onRefresh={handleRefresh}
+            onSubmitQuery={handleSubmitQuery}
+            onSavedQuery={handleSavedQuery}
+            onSubmitDateRange={handleSubmitTimeRange}
+          />
+        </FiltersGlobal>
+        <IndicatorsBarChartWrapper
+          dateRange={dateRange}
+          series={series}
+          timeRange={timeRange}
           indexPattern={indexPattern}
-          filterQuery={filterQuery}
-          filterManager={filterManager}
-          filters={filters}
-          dataTestSubj="iocListPageQueryInput"
-          displayStyle="detached"
-          savedQuery={savedQuery}
-          onRefresh={handleRefresh}
-          onSubmitQuery={handleSubmitQuery}
-          onSavedQuery={handleSavedQuery}
-          onSubmitDateRange={handleSubmitTimeRange}
+          field={selectedField}
+          onFieldChange={onFieldChange}
         />
-      </FiltersGlobal>
-      <IndicatorsBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
-      <IndicatorsTable {...indicators} browserFields={browserFields} indexPattern={indexPattern} />
-    </DefaultPageLayout>
+        <IndicatorsTable
+          browserFields={browserFields}
+          indexPattern={indexPattern}
+          columnSettings={columnSettings}
+          pagination={pagination}
+          indicatorCount={indicatorCount}
+          indicators={indicators}
+          isLoading={isLoading}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+        />
+      </DefaultPageLayout>
+    </FieldTypesProvider>
   );
 };
+
+export const IndicatorsPage: VFC = () => (
+  <IndicatorsPageProviders>
+    <IndicatorsPageContent />
+  </IndicatorsPageProviders>
+);
 
 // Note: This is for lazy loading
 // eslint-disable-next-line import/no-default-export

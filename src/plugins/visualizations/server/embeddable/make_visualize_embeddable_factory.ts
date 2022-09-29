@@ -27,6 +27,7 @@ import {
   commonRemoveMarkdownLessFromTSVB,
   commonUpdatePieVisApi,
   commonPreserveOldLegendSizeDefault,
+  commonRemoveExclamationCircleIcon,
 } from '../migrations/visualization_common_migrations';
 import { SerializedVis } from '../../common';
 
@@ -103,6 +104,11 @@ const byValuePreserveOldLegendSizeDefault = (state: SerializableRecord) => ({
   savedVis: commonPreserveOldLegendSizeDefault(state.savedVis),
 });
 
+const byValueRemoveExclamationCircleIcon = (state: SerializableRecord) => ({
+  ...state,
+  savedVis: commonRemoveExclamationCircleIcon(state.savedVis),
+});
+
 const getEmbeddedVisualizationSearchSourceMigrations = (
   searchSourceMigrations: MigrateFunctionsObject
 ) =>
@@ -151,6 +157,7 @@ export const makeVisualizeEmbeddableFactory =
             '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
             '8.1.0': (state) => flow(byValueUpdatePieVisApi)(state),
             '8.3.0': (state) => flow(byValuePreserveOldLegendSizeDefault)(state),
+            '8.5.0': (state) => flow(byValueRemoveExclamationCircleIcon)(state),
           }
         ),
     };

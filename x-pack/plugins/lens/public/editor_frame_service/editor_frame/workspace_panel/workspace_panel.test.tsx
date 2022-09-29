@@ -562,7 +562,10 @@ describe('workspace_panel', () => {
 
     expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/onActiveDataChange',
-      payload: tablesData,
+      payload: {
+        activeData: tablesData,
+        requestWarnings: [],
+      },
     });
   });
 

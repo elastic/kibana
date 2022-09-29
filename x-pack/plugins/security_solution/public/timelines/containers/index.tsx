@@ -43,6 +43,8 @@ import type {
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
+import { APP_UI_ID } from '../../../common/constants';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -156,6 +158,7 @@ export const useTimelineEvents = ({
     null
   );
   const prevTimelineRequest = useRef<TimelineRequest<typeof language> | null>(null);
+  const { startTracking } = useTrackHttpRequest();
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -219,6 +222,8 @@ export const useTimelineEvents = ({
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
         setLoading(true);
+        const { endTracking } = startTracking({ name: `${APP_UI_ID} timeline events search` });
+
         searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
             strategy:
@@ -230,6 +235,7 @@ export const useTimelineEvents = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
+                endTracking('success');
                 setLoading(false);
                 setTimelineResponse((prevResponse) => {
                   const newTimelineResponse = {
@@ -257,12 +263,14 @@ export const useTimelineEvents = ({
                 });
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
+                endTracking('invalid');
                 setLoading(false);
                 addWarning(i18n.ERROR_TIMELINE_EVENTS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
+              endTracking(abortCtrl.current.signal.aborted ? 'aborted' : 'error');
               setLoading(false);
               data.search.showError(msg);
               searchSubscription$.current.unsubscribe();
@@ -317,6 +325,7 @@ export const useTimelineEvents = ({
       pageName,
       skip,
       id,
+      startTracking,
       data.search,
       dataViewId,
       setUpdated,

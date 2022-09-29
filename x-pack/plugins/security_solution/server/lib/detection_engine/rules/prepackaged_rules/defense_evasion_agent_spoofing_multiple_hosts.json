@@ -62,5 +62,5 @@
   },
   "timestamp_override": "event.ingested",
   "type": "threshold",
-  "version": 3
+  "version": 100
 }

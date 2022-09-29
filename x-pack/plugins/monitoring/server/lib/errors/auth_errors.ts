@@ -9,6 +9,7 @@ import { forbidden } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { getStatusCode } from './handle_error';
 import { ErrorTypes } from '../../types';
+import { NO_REMOTE_CLIENT_ROLE_ERROR } from '../../routes/api/v1/check_access/check_access';
 
 export function isAuthError(err: ErrorTypes) {
   const statusCode = getStatusCode(err);
@@ -30,9 +31,15 @@ export function handleAuthError(err: ErrorTypes) {
       defaultMessage: 'Invalid authentication for monitoring cluster',
     });
   } else {
-    message = i18n.translate('xpack.monitoring.errors.insufficientUserErrorMessage', {
-      defaultMessage: 'Insufficient user permissions for monitoring data',
-    });
+    if (err.message === NO_REMOTE_CLIENT_ROLE_ERROR) {
+      message = i18n.translate('xpack.monitoring.errors.noRemoteClientRoleErrorMessage', {
+        defaultMessage: 'Cluster has no remote_cluster_client role',
+      });
+    } else {
+      message = i18n.translate('xpack.monitoring.errors.insufficientUserErrorMessage', {
+        defaultMessage: 'Insufficient user permissions for monitoring data',
+      });
+    }
   }
 
   return forbidden(message);

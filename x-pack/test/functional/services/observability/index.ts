@@ -8,13 +8,16 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObservabilityUsersProvider } from './users';
 import { ObservabilityAlertsProvider } from './alerts';
+import { ObservabilityOverviewProvider } from './overview';
 
 export function ObservabilityProvider(context: FtrProviderContext) {
   const alerts = ObservabilityAlertsProvider(context);
   const users = ObservabilityUsersProvider(context);
+  const overview = ObservabilityOverviewProvider(context);
 
   return {
     alerts,
     users,
+    overview,
   };
 }

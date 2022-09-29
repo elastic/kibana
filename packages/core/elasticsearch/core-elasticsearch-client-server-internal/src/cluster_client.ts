@@ -23,9 +23,10 @@ import type {
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
-import { DEFAULT_HEADERS } from './headers';
+import { getDefaultHeaders } from './headers';
 import { createInternalErrorHandler, InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import { createTransport } from './create_transport';
+import { AgentManager } from './agent_manager';
 
 const noop = () => undefined;
 
@@ -34,6 +35,7 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
   private readonly authHeaders?: IAuthHeadersStorage;
   private readonly rootScopedClient: Client;
+  private readonly kibanaVersion: string;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
   private isClosed = false;
@@ -47,6 +49,8 @@ export class ClusterClient implements ICustomClusterClient {
     authHeaders,
     getExecutionContext = noop,
     getUnauthorizedErrorHandler = noop,
+    agentManager,
+    kibanaVersion,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
@@ -54,18 +58,29 @@ export class ClusterClient implements ICustomClusterClient {
     authHeaders?: IAuthHeadersStorage;
     getExecutionContext?: () => string | undefined;
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
+    agentManager: AgentManager;
+    kibanaVersion: string;
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
+    this.kibanaVersion = kibanaVersion;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
 
-    this.asInternalUser = configureClient(config, { logger, type, getExecutionContext });
+    this.asInternalUser = configureClient(config, {
+      logger,
+      type,
+      getExecutionContext,
+      agentManager,
+      kibanaVersion,
+    });
     this.rootScopedClient = configureClient(config, {
       logger,
       type,
       getExecutionContext,
       scoped: true,
+      agentManager,
+      kibanaVersion,
     });
   }
 
@@ -123,7 +138,7 @@ export class ClusterClient implements ICustomClusterClient {
     }
 
     return {
-      ...DEFAULT_HEADERS,
+      ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       ...scopedHeaders,
     };

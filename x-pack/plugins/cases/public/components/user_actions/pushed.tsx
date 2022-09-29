@@ -109,6 +109,7 @@ const getFooters = ({
 
 export const createPushedUserActionBuilder: UserActionBuilder = ({
   userAction,
+  userProfiles,
   caseServices,
   index,
   handleOutlineComment,
@@ -135,6 +136,7 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
 
     const label = getLabelTitle(pushedUserAction, firstPush);
     const commonBuilder = createCommonUpdateUserActionBuilder({
+      userProfiles,
       userAction,
       handleOutlineComment,
       label,

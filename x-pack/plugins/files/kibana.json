@@ -10,5 +10,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [],
-  "optionalPlugins": ["security"]
+  "requiredBundles": ["kibanaUtils"],
+  "optionalPlugins": ["security", "usageCollection"]
 }

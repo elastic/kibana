@@ -15,6 +15,8 @@ export class FilterBarService extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly retry = this.ctx.getService('retry');
+  private readonly config = this.ctx.getService('config');
+  private readonly defaultTryTimeout = this.config.get('timeouts.try');
 
   /**
    * Checks if specified filter exists
@@ -111,28 +113,19 @@ export class FilterBarService extends FtrService {
     return Promise.all(filters.map((filter) => filter.getVisibleText()));
   }
 
-  /**
-   * Adds a filter to the filter bar.
-   *
-   * @param {string} field The name of the field the filter should be applied for.
-   * @param {string} operator A valid operator for that fields, e.g. "is one of", "is", "exists", etc.
-   * @param {string[]|string} values The remaining parameters are the values passed into the individual
-   *   value input fields, i.e. the third parameter into the first input field, the fourth into the second, etc.
-   *   Each value itself can be an array, in case you want to enter multiple values into one field (e.g. for "is one of"):
-   * @example
-   * // Add a plain single value
-   * filterBar.addFilter('country', 'is', 'NL');
-   * // Add an exists filter
-   * filterBar.addFilter('country', 'exists');
-   * // Add a range filter for a numeric field
-   * filterBar.addFilter('bytes', 'is between', '500', '1000');
-   * // Add a filter containing multiple values
-   * filterBar.addFilter('extension', 'is one of', ['jpg', 'png']);
-   */
-  public async addFilter(field: string, operator: string, ...values: any): Promise<void> {
-    await this.retry.try(async () => {
+  public async addFilterAndSelectDataView(
+    dataViewTitle: string | null,
+    field: string,
+    operator: string,
+    ...values: any
+  ): Promise<void> {
+    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
       await this.testSubjects.click('addFilter');
       await this.testSubjects.existOrFail('addFilterPopover');
+
+      if (dataViewTitle) {
+        await this.comboBox.set('filterIndexPatternsSelect', dataViewTitle);
+      }
 
       await this.comboBox.set('filterFieldSuggestionList', field);
       await this.comboBox.set('filterOperatorList', operator);
@@ -159,9 +152,31 @@ export class FilterBarService extends FtrService {
         }
       }
 
-      await this.testSubjects.clickWhenNotDisabled('saveFilter');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('saveFilter');
     });
     await this.header.awaitGlobalLoadingIndicatorHidden();
+  }
+
+  /**
+   * Adds a filter to the filter bar.
+   *
+   * @param {string} field The name of the field the filter should be applied for.
+   * @param {string} operator A valid operator for that fields, e.g. "is one of", "is", "exists", etc.
+   * @param {string[]|string} values The remaining parameters are the values passed into the individual
+   *   value input fields, i.e. the third parameter into the first input field, the fourth into the second, etc.
+   *   Each value itself can be an array, in case you want to enter multiple values into one field (e.g. for "is one of"):
+   * @example
+   * // Add a plain single value
+   * filterBar.addFilter('country', 'is', 'NL');
+   * // Add an exists filter
+   * filterBar.addFilter('country', 'exists');
+   * // Add a range filter for a numeric field
+   * filterBar.addFilter('bytes', 'is between', '500', '1000');
+   * // Add a filter containing multiple values
+   * filterBar.addFilter('extension', 'is one of', ['jpg', 'png']);
+   */
+  public async addFilter(field: string, operator: string, ...values: any): Promise<void> {
+    await this.addFilterAndSelectDataView(null, field, operator, ...values);
   }
 
   /**
@@ -209,15 +224,5 @@ export class FilterBarService extends FtrService {
     const indexPatterns = await this.comboBox.getOptionsList('filterIndexPatternsSelect');
     await this.ensureFieldEditorModalIsClosed();
     return indexPatterns.trim().split('\n').join(',');
-  }
-
-  /**
-   * Adds new index pattern filter
-   * @param indexPatternTitle
-   */
-  public async selectIndexPattern(indexPatternTitle: string): Promise<void> {
-    await this.testSubjects.click('addFilter');
-    await this.comboBox.set('filterIndexPatternsSelect', indexPatternTitle);
-    await this.testSubjects.click('addFilter');
   }
 }

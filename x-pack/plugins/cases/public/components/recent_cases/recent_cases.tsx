@@ -18,6 +18,8 @@ import { MarkdownRenderer } from '../markdown_editor';
 import { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
 import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MarkdownContainer = styled.div`
   max-height: 150px;
@@ -31,9 +33,13 @@ export interface RecentCasesProps {
 }
 
 export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesProps) => {
+  const { owner } = useCasesContext();
+  const availableSolutions = useAvailableCasesOwners(['read']);
+  const hasOwner = !!owner.length;
+
   const { data = initialGetCasesData, isLoading: isLoadingCases } = useGetCases({
     queryParams: { perPage: maxCasesToShow },
-    filterOptions,
+    filterOptions: { ...filterOptions, owner: hasOwner ? owner : availableSolutions },
   });
 
   return isLoadingCases ? (

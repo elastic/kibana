@@ -36,9 +36,16 @@ export const UNKNOWN = i18n.translate(
 );
 
 export const EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab',
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExceptionsTab',
   {
-    defaultMessage: 'Exceptions',
+    defaultMessage: 'Rule exceptions',
+  }
+);
+
+export const ENDPOINT_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.endpointExceptionsTab',
+  {
+    defaultMessage: 'Endpoint exceptions',
   }
 );
 
@@ -60,5 +67,12 @@ export const DELETED_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.deletedRule',
   {
     defaultMessage: 'Deleted rule',
+  }
+);
+
+export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
+  {
+    defaultMessage: 'Failed to load the saved query',
   }
 );

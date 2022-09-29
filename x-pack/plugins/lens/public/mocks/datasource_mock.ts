@@ -20,6 +20,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getSourceId: jest.fn(),
     getFilters: jest.fn(),
     getMaxPossibleNumValues: jest.fn(),
+    isTextBasedLanguage: jest.fn(() => false),
   };
 
   return {
@@ -44,6 +45,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     toExpression: jest.fn((_frame, _state, _indexPatterns) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((_state, _layerId) => {}),
+    cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
     uniqueLabels: jest.fn((_state) => ({})),
@@ -51,6 +53,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     renderDimensionEditor: jest.fn(),
     getDropProps: jest.fn(),
     onDrop: jest.fn(),
+    createEmptyLayer: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
@@ -61,6 +64,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     isValidColumn: jest.fn(),
     isEqual: jest.fn(),
     getUsedDataView: jest.fn(),
+    getUsedDataViews: jest.fn(),
     onRefreshIndexPattern: jest.fn(),
   };
 }

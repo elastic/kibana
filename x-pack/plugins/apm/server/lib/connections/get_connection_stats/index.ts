@@ -12,7 +12,7 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup } from '../../helpers/setup_request';
 import { getStats } from './get_stats';
 import { getDestinationMap } from './get_destination_map';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function getConnectionStats({
@@ -124,7 +124,7 @@ export function getConnectionStats({
         throughput: {
           value:
             mergedStats.value.count > 0
-              ? calculateThroughput({
+              ? calculateThroughputWithRange({
                   start,
                   end,
                   value: mergedStats.value.count,
@@ -134,7 +134,11 @@ export function getConnectionStats({
             x: point.x,
             y:
               point.count > 0
-                ? calculateThroughput({ start, end, value: point.count })
+                ? calculateThroughputWithRange({
+                    start,
+                    end,
+                    value: point.count,
+                  })
                 : null,
           })),
         },

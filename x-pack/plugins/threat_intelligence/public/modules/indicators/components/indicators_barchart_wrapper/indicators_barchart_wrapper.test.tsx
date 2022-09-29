@@ -11,10 +11,11 @@ import { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
-import { DEFAULT_TIME_RANGE } from '../../hooks/use_filters/utils';
-import { useFilters } from '../../hooks/use_filters';
+import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
+import { useFilters } from '../../../query_bar/hooks/use_filters';
+import moment from 'moment';
 
-jest.mock('../../hooks/use_filters');
+jest.mock('../../../query_bar/hooks/use_filters');
 
 const mockIndexPattern: DataView = {
   fields: [
@@ -47,7 +48,14 @@ describe('<IndicatorsBarChartWrapper />', () => {
   it('should render barchart and field selector dropdown', () => {
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsBarChartWrapper indexPattern={mockIndexPattern} timeRange={mockTimeRange} />
+        <IndicatorsBarChartWrapper
+          dateRange={{ max: moment(), min: moment() }}
+          series={[]}
+          field=""
+          onFieldChange={jest.fn()}
+          indexPattern={mockIndexPattern}
+          timeRange={mockTimeRange}
+        />
       </TestProvidersComponent>
     );
 

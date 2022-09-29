@@ -452,6 +452,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           alignments,
           minMaxByColumnId,
           getColorForValue: props.paletteService.get(CUSTOM_PALETTE).getColorForValue!,
+          handleFilterClick,
         }}
       >
         <EuiDataGrid
@@ -460,7 +461,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHeightsOptions={{
             defaultHeight: props.args.fitRowToContent
               ? 'auto'
-              : props.args.rowHeightLines
+              : props.args.rowHeightLines && props.args.rowHeightLines !== 1
               ? {
                   lineCount: props.args.rowHeightLines,
                 }

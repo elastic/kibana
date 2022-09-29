@@ -7,28 +7,16 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProvidersComponent } from '../../common/mocks/test_providers';
 import { IndicatorsPage } from './indicators_page';
 import { useIndicators } from './hooks/use_indicators';
-import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
 import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
-
-import {
-  TABLE_TEST_ID as INDICATORS_TABLE_TEST_ID,
-  TABLE_TEST_ID,
-} from './components/indicators_table/indicators_table';
-import { EMPTY_PROMPT_TEST_ID } from '../empty_page';
-import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
-import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
-import { useFilters } from './hooks/use_filters';
+import { useFilters } from '../query_bar/hooks/use_filters';
 import moment from 'moment';
+import { TestProvidersComponent } from '../../common/mocks/test_providers';
+import { TABLE_TEST_ID } from './components/indicators_table';
 
+jest.mock('../query_bar/hooks/use_filters');
 jest.mock('./hooks/use_indicators');
-jest.mock('./hooks/use_indicators_total_count');
-jest.mock('./hooks/use_filters');
-
-jest.mock('../../hooks/use_integrations_page_link');
-jest.mock('../../hooks/use_documentation_link');
 jest.mock('./hooks/use_aggregated_indicators');
 
 const stub = () => {};
@@ -39,7 +27,7 @@ describe('<IndicatorsPage />', () => {
       useAggregatedIndicators as jest.MockedFunction<typeof useAggregatedIndicators>
     ).mockReturnValue({
       dateRange: { min: moment(), max: moment() },
-      indicators: [],
+      series: [],
       selectedField: '',
       onFieldChange: () => {},
     });
@@ -47,7 +35,8 @@ describe('<IndicatorsPage />', () => {
     (useIndicators as jest.MockedFunction<typeof useIndicators>).mockReturnValue({
       indicators: [{ fields: {} }],
       indicatorCount: 1,
-      loading: false,
+      isLoading: false,
+      isFetching: false,
       pagination: { pageIndex: 0, pageSize: 10, pageSizeOptions: [10] },
       onChangeItemsPerPage: stub,
       onChangePage: stub,
@@ -64,65 +53,19 @@ describe('<IndicatorsPage />', () => {
     });
   });
 
-  describe('checking if the page should be visible (based on indicator count)', () => {
-    describe('when indicator count is being loaded', () => {
-      it('should render nothing at all', () => {
-        (
-          useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
-        ).mockReturnValue({
-          count: 0,
-          isLoading: true,
-        });
-        (
-          useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
-        ).mockReturnValue('');
-        (
-          useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>
-        ).mockReturnValue('');
+  it('should render the table', () => {
+    const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
 
-        const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
-
-        expect(queryByTestId(EMPTY_PROMPT_TEST_ID)).not.toBeInTheDocument();
-        expect(queryByTestId(TABLE_TEST_ID)).not.toBeInTheDocument();
-      });
-    });
-
-    describe('when indicator count is loaded and there are no indicators', () => {
-      it('should render empty page when no indicators are found', async () => {
-        (
-          useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
-        ).mockReturnValue({
-          count: 0,
-          isLoading: false,
-        });
-        (
-          useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
-        ).mockReturnValue('');
-        (
-          useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>
-        ).mockReturnValue('');
-
-        const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
-
-        expect(queryByTestId(TABLE_TEST_ID)).not.toBeInTheDocument();
-        expect(queryByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();
-      });
-    });
+    expect(queryByTestId(TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  describe('when loading is done and we have some indicators', () => {
-    it('should render indicators table', async () => {
-      (
-        useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
-      ).mockReturnValue({
-        count: 7,
-        isLoading: false,
-      });
+  it('should render the query input', () => {
+    const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
+    expect(queryByTestId('iocListPageQueryInput')).toBeInTheDocument();
+  });
 
-      const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
-
-      expect(queryByTestId(INDICATORS_TABLE_TEST_ID)).toBeInTheDocument();
-      expect(queryByTestId(EMPTY_PROMPT_TEST_ID)).not.toBeInTheDocument();
-    });
+  it('should render stack by selector', () => {
+    const { queryByText } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
+    expect(queryByText('Stack by')).toBeInTheDocument();
   });
 });

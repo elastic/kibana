@@ -8,27 +8,20 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import { CoreStart } from '@kbn/core/public';
-import { Embeddable, EmbeddableInput, IContainer } from '../../../services/embeddable';
-import { KibanaThemeProvider } from '../../../services/kibana_react';
 
-export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
+import { EuiLoadingChart } from '@elastic/eui';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Embeddable, type EmbeddableInput, type IContainer } from '@kbn/embeddable-plugin/public';
 
-export interface PlaceholderEmbeddableServices {
-  theme: CoreStart['theme'];
-}
+import { PLACEHOLDER_EMBEDDABLE } from '.';
+import { pluginServices } from '../../../services/plugin_services';
 
 export class PlaceholderEmbeddable extends Embeddable {
   public readonly type = PLACEHOLDER_EMBEDDABLE;
   private node?: HTMLElement;
 
-  constructor(
-    initialInput: EmbeddableInput,
-    private readonly services: PlaceholderEmbeddableServices,
-    parent?: IContainer
-  ) {
+  constructor(initialInput: EmbeddableInput, parent?: IContainer) {
     super(initialInput, {}, parent);
     this.input = initialInput;
   }
@@ -38,9 +31,15 @@ export class PlaceholderEmbeddable extends Embeddable {
     }
     this.node = node;
 
+    const {
+      settings: {
+        theme: { theme$ },
+      },
+    } = pluginServices.getServices();
+
     const classes = classNames('embPanel', 'embPanel-isLoading');
     ReactDOM.render(
-      <KibanaThemeProvider theme$={this.services.theme.theme$}>
+      <KibanaThemeProvider theme$={theme$}>
         <div className={classes}>
           <EuiLoadingChart size="l" mono />
         </div>

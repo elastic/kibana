@@ -16,9 +16,9 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
-import { Aggregation, AGGREGATION_NAME } from '../../hooks/use_aggregated_indicators';
-import { DEFAULT_TIME_RANGE } from '../../hooks/use_filters/utils';
+import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
 import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
+import { Aggregation, AGGREGATION_NAME } from '../../services/fetch_aggregated_indicators';
 
 export default {
   component: IndicatorsBarChartWrapper,
@@ -120,7 +120,16 @@ export const Default: Story<void> = () => {
     <StoryProvidersComponent
       kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
     >
-      <IndicatorsBarChartWrapper timeRange={mockTimeRange} indexPattern={mockIndexPattern} />
+      <IndicatorsBarChartWrapper
+        dateRange={{ min: moment(), max: moment() }}
+        timeRange={mockTimeRange}
+        indexPattern={mockIndexPattern}
+        series={[]}
+        field={''}
+        onFieldChange={function (value: string): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
     </StoryProvidersComponent>
   );
 };
