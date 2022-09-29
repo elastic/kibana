@@ -95,6 +95,10 @@ describe('alertType', () => {
             "name": "termField",
           },
           Object {
+            "description": "filterKuery",
+            "name": "filterKuery",
+          },
+          Object {
             "description": "termSize",
             "name": "termSize",
           },

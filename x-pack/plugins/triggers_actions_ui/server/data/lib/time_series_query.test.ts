@@ -37,6 +37,10 @@ describe('timeSeriesQuery', () => {
     query: DefaultQueryParams,
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('fails as expected when the callCluster call fails', async () => {
     esClient.search.mockRejectedValue(new Error('woopsie'));
     await timeSeriesQuery(params);
@@ -48,15 +52,19 @@ describe('timeSeriesQuery', () => {
   });
 
   it('fails as expected when the query params are invalid', async () => {
-    params.query = { ...params.query, dateStart: 'x' };
-    expect(timeSeriesQuery(params)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"invalid date format for dateStart: \\"x\\""`
-    );
+    expect(
+      timeSeriesQuery({
+        ...params,
+        query: { ...params.query, dateStart: 'x' },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid date format for dateStart: \\"x\\""`);
   });
 
   it('filters the results when filter param is passed', async () => {
-    params.query = { ...params.query, filterKuery: 'event.provider: alerting' };
-    timeSeriesQuery(params);
+    await timeSeriesQuery({
+      ...params,
+      query: { ...params.query, filterKuery: 'event.provider: alerting' },
+    });
     // @ts-ignore
     expect(esClient.search.mock.calls[0]![0].body.query.bool.filter[1]).toEqual({
       bool: {
