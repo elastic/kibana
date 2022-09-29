@@ -226,10 +226,13 @@ export function OverviewPage() {
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id="statusVisualizationFlyoutTitle">
+              <h2
+                id="statusVisualizationFlyoutTitle"
+                data-test-subj="statusVisualizationFlyoutTitle"
+              >
                 <FormattedMessage
                   id="xpack.observability.overview.statusVisualizationFlyoutTitle"
-                  defaultMessage="Guided setup"
+                  defaultMessage="Data assistant"
                 />
               </h2>
             </EuiTitle>
@@ -289,7 +292,7 @@ function PageHeader({
           color="text"
           iconType="wrench"
           onClick={() => {
-            // End the Observability tour if it's visible and the user clicks the guided setup button
+            // End the Observability tour if it's visible and the user clicks the data assistant button
             if (isObservabilityTourVisible) {
               endObservabilityTour();
             }
@@ -298,7 +301,7 @@ function PageHeader({
         >
           <FormattedMessage
             id="xpack.observability.overview.guidedSetupButton"
-            defaultMessage="Guided setup"
+            defaultMessage="Data assistant"
           />
         </EuiButton>
         {showTour ? (
@@ -307,13 +310,13 @@ function PageHeader({
             anchor={() => buttonRef.current}
             isStepOpen
             title={i18n.translate('xpack.observability.overview.guidedSetupTourTitle', {
-              defaultMessage: 'Guided setup is always available',
+              defaultMessage: 'Data assistant is always available',
             })}
             content={
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.observability.overview.guidedSetupTourContent"
-                  defaultMessage="If you're ever in doubt you can always access the integration status and view next steps by clicking on this action."
+                  defaultMessage="If you're ever in doubt you can always access the data assistant and view your next steps by clicking here."
                 />
               </EuiText>
             }

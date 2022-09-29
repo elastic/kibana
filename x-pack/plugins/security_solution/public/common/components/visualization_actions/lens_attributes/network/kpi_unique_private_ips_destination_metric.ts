@@ -48,7 +48,7 @@ export const kpiUniquePrivateIpsDestinationMetricLensAttributes: LensAttributes 
     },
   },
   title: '[Network] Unique private IPs - destination metric',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   references: [
     {
       id: '{dataViewId}',

@@ -23,12 +23,12 @@ import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indi
 import { cellRendererFactory } from './cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
-import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
-import { Pagination } from '../../hooks/use_indicators';
+import { IndicatorsFlyout } from '../flyout';
 import { useToolbarOptions } from './hooks/use_toolbar_options';
 import { ColumnSettingsValue } from './hooks/use_column_settings';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
-import { getFieldSchema } from '../../lib/get_field_schema';
+import { getFieldSchema } from '../../utils/get_field_schema';
+import { Pagination } from '../../services/fetch_indicators';
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];
@@ -36,7 +36,10 @@ export interface IndicatorsTableProps {
   pagination: Pagination;
   onChangeItemsPerPage: (value: number) => void;
   onChangePage: (value: number) => void;
-  loading: boolean;
+  /**
+   * If true, no data is available yet
+   */
+  isLoading: boolean;
   indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
   columnSettings: ColumnSettingsValue;
@@ -57,7 +60,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangePage,
   onChangeItemsPerPage,
   pagination,
-  loading,
+  isLoading,
   browserFields,
   columnSettings: { columns, columnVisibility, handleResetColumns, handleToggleColumn, sorting },
 }) => {
@@ -137,7 +140,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   );
 
   const gridFragment = useMemo(() => {
-    if (loading) {
+    if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
@@ -177,7 +180,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     mappedColumns,
     indicatorCount,
     leadingControlColumns,
-    loading,
+    isLoading,
     onChangeItemsPerPage,
     onChangePage,
     pagination,

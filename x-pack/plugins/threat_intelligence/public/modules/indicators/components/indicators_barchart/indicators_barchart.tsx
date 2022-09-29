@@ -11,7 +11,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { IndicatorBarchartLegendAction } from '../indicator_barchart_legend_action/indicator_barchart_legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../common/utils/dates';
-import { ChartSeries } from '../../hooks/use_aggregated_indicators';
+import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
 
 const ID = 'tiIndicator';
 const DEFAULT_CHART_HEIGHT = '200px';

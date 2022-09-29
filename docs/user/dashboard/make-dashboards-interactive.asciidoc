@@ -28,7 +28,7 @@ data-type="inline"
 
 *Controls* are interactive panels you add to your dashboards to filter and display only the data you want to explore.
 
-There are two types of controls:
+There are three types of controls:
 
 * *Options list* &mdash; Adds a dropdown that allows you to filter the data with one or more options that you select.
 +
@@ -44,11 +44,17 @@ For example, if you are using the *[Logs] Web Traffic* dashboard from the sample
 [role="screenshot"]
 image::images/dashboard_controlsRangeSlider_8.3.0.png[Range slider control for the `hour_of_day` field with a range of `9` to `17` selected]
 
-[float]
-[[create-and-add-controls]]
-==== Create and add controls
+* *Time slider* &mdash; Adds a time range slider that allows you to filter the data within a specified range of time, advance the time range backward and forward, and animate your change in data over the specified time range.
++
+For example, you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, and the global time filter is *Last 7 days*. When you add the time slider, you can click the previous and next buttons to advance the time range backward or forward, and click the play button to watch how the data changes over the last 7 days. 
+[role="screenshot"]
+image::images/dashboard_timeSliderControl_8.5.0.gif[Time slider control for the the Last 7 days]
 
-To add interactive filters, create controls, then add them to your dashboard.
+[float]
+[[create-and-add-options-list-and-range-slider-controls]]
+==== Create and add Options list and Range slider controls
+
+To add interactive Options list and Range slider controls, create the controls, then add them to your dashboard.
 
 . Open or create a new dashboard. 
 
@@ -79,8 +85,22 @@ The *Control type* is automatically applied for the field you selected.
 . Click *Save and close*.
 
 [float]
-[[filter-the-data-with-options-lists]]
-==== Filter the data with Options lists
+[[add-time-slider-controls]]
+==== Add time slider controls
+
+To add interactive time slider controls, create the control, then add it to your dashboard.
+
+. Open or create a new dashboard. 
+
+. In the dashboard toolbar, click *Controls*, then select *Add time slider control*.
+
+. The time slider control uses the time range from the global time filter. To change the time range in the time slider control, <<set-time-filter,change the global time filter>>. 
+
+. Save the dashboard.
+
+[float]
+[[filter-the-data-with-options-list-controls]]
+==== Filter the data with Options list controls
 Filter the data with one or more options that you select.
 
 . Open the Options list dropdown.
@@ -94,8 +114,8 @@ The dashboard displays only the data for the options you selected.
 . To display only the options you selected in the dropdown, click image:images/dashboard_showOnlySelectedOptions_8.3.0.png[The icon to display only the options you have selected in the Options list].
 
 [float]
-[[filter-the-data-with-range-sliders]]
-==== Filter the data with Range sliders
+[[filter-the-data-with-range-slider-controls]]
+==== Filter the data with Range slider controls
 Filter the data within a specified range of values.
 
 . On the Range slider, click a value.
@@ -103,6 +123,21 @@ Filter the data within a specified range of values.
 . Move the sliders to specify the values you want to display.
 +
 The dashboard displays only the data for the range of values you specified.
+
+. To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[float]
+[[filter-the-data-with-time-slider-controls]]
+==== Filter the data with time slider controls
+Filter the data within a specified range of time.
+
+. To view a different time range, click the time slider, then move the sliders to specify the time range you want to display.
+
+. To advance the time range forward, click image:images/dashboard_timeSliderControl_advanceForward_8.5.0.png[The icon to advance the time range forward].
+
+. To advance the time range backward, click image:images/dashboard_timeSliderControl_advanceBackward_8.5.0.png[The icon to advance the time range backward].
+
+. To animate the data changes over time, click image:images/dashboard_timeSliderControl_animate_8.5.0.png[The icon to clear all specified values in the Range slider].
 
 . To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
 
@@ -126,9 +161,9 @@ The dashboard displays only the data for the range of values you specified.
 
 [float]
 [[edit-controls]]
-==== Edit controls
+==== Edit Options list and Range slider control settings
 
-Change the settings for a control.
+Change the settings for the Options list and Range slider controls.
 
 . Hover over the control you want to edit, then click image:images/dashboard_controlsEditControl_8.3.0.png[The Edit control icon that opens the Edit control flyout].
 
