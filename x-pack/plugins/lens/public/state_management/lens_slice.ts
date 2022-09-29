@@ -299,7 +299,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
     ) => {
-      const newState = updater(current(state) as LensAppState);
+      let newState: LensAppState = updater(current(state) as LensAppState);
 
       if (newState.activeDatasourceId) {
         const { datasourceState, visualizationState } = syncLinkedDimensions(
@@ -307,8 +307,21 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           visualizationMap,
           datasourceMap
         );
-        newState.datasourceStates[newState.activeDatasourceId].state = datasourceState;
-        newState.visualization.state = visualizationState;
+
+        newState = {
+          ...newState,
+          visualization: {
+            ...newState.visualization,
+            state: visualizationState,
+          },
+          datasourceStates: {
+            ...newState.datasourceStates,
+            [newState.activeDatasourceId]: {
+              ...newState.datasourceStates[newState.activeDatasourceId],
+              state: datasourceState,
+            },
+          },
+        };
       }
 
       return {
