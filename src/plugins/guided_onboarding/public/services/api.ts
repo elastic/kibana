@@ -72,7 +72,7 @@ export class ApiService {
 
   /**
    * Updates the SO with the updated guide state and refreshes the observables
-   * TODO Consider changing this to private once we no longer need this functionality within the example plugin.
+   * This is largely used internally and for tests
    * @param {GuideState} guideState the updated guide state
    * @param {boolean} panelState boolean to determine whether the dropdown panel should open or not
    * @return {Promise} a promise with the updated guide state

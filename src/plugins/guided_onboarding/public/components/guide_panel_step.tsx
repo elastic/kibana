@@ -81,7 +81,11 @@ export const GuideStep = ({
           {(stepStatus === 'in_progress' || stepStatus === 'active') && (
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => navigateToStep(stepConfig.id, stepConfig.location)} fill>
+                <EuiButton
+                  onClick={() => navigateToStep(stepConfig.id, stepConfig.location)}
+                  fill
+                  data-test-subj="activeStepButtonLabel"
+                >
                   {stepStatus === 'active'
                     ? i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
                         defaultMessage: 'Start',

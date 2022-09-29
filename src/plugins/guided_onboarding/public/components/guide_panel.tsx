@@ -98,7 +98,6 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   };
 
   const navigateToLandingPage = () => {
-    // TODO: Any state updates needed here?
     setIsGuideOpen(false);
     application.navigateToApp('home', { path: '#getting_started' });
   };
@@ -214,6 +213,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                 <>
                   <EuiSpacer size="xl" />
                   <EuiProgress
+                    data-test-subj="guideProgress"
                     label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
                       defaultMessage: 'Progress',
                     })}
@@ -255,7 +255,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
               {guideState?.status === 'ready_to_complete' && (
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={completeGuide} fill>
+                    <EuiButton onClick={completeGuide} fill data-test-subj="useElasticButton">
                       {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
                         defaultMessage: 'Continue using Elastic',
                       })}
@@ -269,7 +269,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
             <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
               <EuiFlexItem>
-                {/* TODO: Implement quit guide modal - https://github.com/elastic/kibana/issues/139804 */}
+                {/* TODO: Implement exit guide modal - https://github.com/elastic/kibana/issues/139804 */}
                 <EuiButtonEmpty onClick={() => {}}>
                   {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
                     defaultMessage: 'Exit setup guide',
