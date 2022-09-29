@@ -68,7 +68,7 @@ describe('AddComment ', () => {
     expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
 
-    wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="submit-comment"]`).first().simulate('click');
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
       expect(createAttachments).toBeCalledWith({

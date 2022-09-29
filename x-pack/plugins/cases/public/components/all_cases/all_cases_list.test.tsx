@@ -592,7 +592,7 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalledWith({
         assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],

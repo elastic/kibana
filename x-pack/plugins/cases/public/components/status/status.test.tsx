@@ -55,7 +55,10 @@ describe('Stats', () => {
   it('it calls onClick when pressing the badge', async () => {
     const wrapper = mount(<Status type={CaseStatuses.open} withArrow={true} onClick={onClick} />);
 
-    wrapper.find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`).simulate('click');
+    wrapper
+      .find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`)
+      .last()
+      .simulate('click');
     expect(onClick).toHaveBeenCalled();
   });
 

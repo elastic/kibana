@@ -124,7 +124,7 @@ describe('CreateCase case', () => {
 
     await act(async () => {
       fillForm(wrapper);
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+      wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
     });
     expect(defaultProps.onSuccess).toHaveBeenCalled();
   });
