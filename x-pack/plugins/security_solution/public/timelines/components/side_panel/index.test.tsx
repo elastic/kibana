@@ -211,7 +211,7 @@ describe('Details Panel Component', () => {
     test('it should have the attributes isDraggable to be true when timelineId === "active" and activeTab === "query"', () => {
       const currentProps = {
         ...mockProps,
-        timelineId: TimelineId.active,
+        scopeId: TimelineId.active,
         tabType: TimelineTabs.query,
       };
       const wrapper = mount(

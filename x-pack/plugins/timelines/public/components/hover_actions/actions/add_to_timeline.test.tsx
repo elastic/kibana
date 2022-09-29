@@ -11,7 +11,6 @@ import React from 'react';
 
 import AddToTimelineButton, { ADD_TO_TIMELINE_KEYBOARD_SHORTCUT } from './add_to_timeline';
 import { DataProvider, IS_OPERATOR } from '../../../../common/types';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { TestProviders } from '../../../mock';
 import * as i18n from './translations';
 
@@ -82,7 +81,6 @@ const providerB: DataProvider = {
 describe('add to timeline', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({ timelineType: 'default' });
   });
 
   const field = 'user.name';
@@ -194,7 +192,7 @@ describe('add to timeline', () => {
           },
           id: 'timeline-1',
         },
-        type: 'x-pack/timelines/t-grid/ADD_PROVIDER_TO_TIMELINE',
+        type: 'x-pack/timelines/timeline/ADD_PROVIDER_TO_TIMELINE',
       });
     });
 
@@ -229,7 +227,7 @@ describe('add to timeline', () => {
             },
             id: 'timeline-1',
           },
-          type: 'x-pack/timelines/t-grid/ADD_PROVIDER_TO_TIMELINE',
+          type: 'x-pack/timelines/timeline/ADD_PROVIDER_TO_TIMELINE',
         })
       );
     });
@@ -395,11 +393,14 @@ describe('add to timeline', () => {
     });
 
     test('Add success is called with "template" if timeline type is template', () => {
-      (useDeepEqualSelector as jest.Mock).mockReturnValue({ timelineType: 'template' });
-
       render(
         <TestProviders>
-          <AddToTimelineButton dataProvider={providerA} field={field} ownFocus={false} />
+          <AddToTimelineButton
+            dataProvider={providerA}
+            field={field}
+            ownFocus={false}
+            timelineType={'template'}
+          />
         </TestProviders>
       );
 

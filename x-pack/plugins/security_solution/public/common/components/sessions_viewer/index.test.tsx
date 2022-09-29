@@ -193,7 +193,7 @@ describe('SessionsView', () => {
   it('Action tab should have 5 columns when accessed via K8S dahsboard', async () => {
     render(
       <TestProviders>
-        <SessionsView {...testProps} timelineId={TimelineId.kubernetesPageSessions} />
+        <SessionsView {...testProps} tableId={TableId.kubernetesPageSessions} />
       </TestProviders>
     );
 
