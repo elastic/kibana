@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
+import { EuiDataGridSorting } from '@elastic/eui';
 import { useInspector } from '../../../hooks/use_inspector';
 import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -22,11 +23,15 @@ export interface UseIndicatorsParams {
   filterQuery: Query;
   filters: Filter[];
   timeRange?: TimeRange;
-  sorting: any[];
+  sorting: EuiDataGridSorting['columns'];
 }
 
 export interface UseIndicatorsValue {
   handleRefresh: () => void;
+
+  /**
+   * Array of {@link Indicator} ready to render inside the IndicatorTable component
+   */
   indicators: Indicator[];
   indicatorCount: number;
   pagination: Pagination;
