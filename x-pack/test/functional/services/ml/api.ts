@@ -1065,9 +1065,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createAndRunDFAJobWoSync(dfaConfig: DataFrameAnalyticsConfig, timeout?: number) {
       await this.createDataFrameAnalyticsJob(dfaConfig);
-      await this.runDFAJob(dfaConfig.id);
-      await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
-      await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED, timeout);
+      // await this.runDFAJob(dfaConfig.id);
+      // await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
+      // await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED, timeout);
     },
 
     async updateJobSpaces(
