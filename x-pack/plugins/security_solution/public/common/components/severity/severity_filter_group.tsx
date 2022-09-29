@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 
 import type { RiskSeverity } from '../../../../common/search_strategy';
+import { SEVERITY_UI_SORT_ORDER } from '../../../../common/search_strategy';
 import type { SeverityCount } from './types';
 import { RiskScore } from './common';
 
@@ -46,10 +47,10 @@ export const SeverityFilterGroup: React.FC<{
 
   const items: SeverityItems[] = useMemo(() => {
     const checked: FilterChecked = 'on';
-    return (Object.keys(severityCount) as RiskSeverity[]).map((k) => ({
-      risk: k,
-      count: severityCount[k],
-      checked: selectedSeverities.includes(k) ? checked : undefined,
+    return SEVERITY_UI_SORT_ORDER.map((severity) => ({
+      risk: severity,
+      count: severityCount[severity],
+      checked: selectedSeverities.includes(severity) ? checked : undefined,
     }));
   }, [severityCount, selectedSeverities]);
 
