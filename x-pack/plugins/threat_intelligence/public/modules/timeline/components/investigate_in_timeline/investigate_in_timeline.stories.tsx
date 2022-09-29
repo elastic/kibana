@@ -9,16 +9,23 @@ import React from 'react';
 import { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { generateMockUrlIndicator } from '../../../../../common/types/indicator';
-import { InvestigateInTimelineButtonIcon } from './investigate_in_timeline_button_icon';
+import { InvestigateInTimelineButton, InvestigateInTimelineButtonIcon } from '.';
 
 export default {
-  component: InvestigateInTimelineButtonIcon,
-  title: 'InvestigateInTimelineButtonIcon',
+  title: 'InvestigateInTimeline',
 };
 
 const mockIndicator = generateMockUrlIndicator();
 
-export const Default: Story<void> = () => {
+export const Button: Story<void> = () => {
+  return (
+    <StoryProvidersComponent>
+      <InvestigateInTimelineButton data={mockIndicator} />
+    </StoryProvidersComponent>
+  );
+};
+
+export const ButtonIcon: Story<void> = () => {
   return (
     <StoryProvidersComponent>
       <InvestigateInTimelineButtonIcon data={mockIndicator} />
