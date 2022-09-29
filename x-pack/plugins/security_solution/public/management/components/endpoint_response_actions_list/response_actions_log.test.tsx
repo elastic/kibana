@@ -408,6 +408,7 @@ describe('Response actions history', () => {
           'Execution completed',
           'Input',
           'Parameters',
+          'Comment',
           'Output:',
         ]
       );
