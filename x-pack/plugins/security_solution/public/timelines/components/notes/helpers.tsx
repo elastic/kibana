@@ -77,7 +77,7 @@ export const createNote = ({ newNote, user }: { newNote: string; user: string })
   lastEdit: null,
   note: newNote,
   saveObjectId: null,
-  user, // TODO: get the logged-in Kibana user
+  user,
   version: null,
 });
 
