@@ -40,8 +40,6 @@ import {
 } from '../saved_objects_client';
 import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
 
-// import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
-// import { ElasticsearchClient } from '../../../elasticsearch';
 import { SavedObjectsErrorHelpers } from './errors';
 import {
   AuthorizationTypeEntry,
@@ -228,7 +226,7 @@ export const checkAuthError = SavedObjectsErrorHelpers.createBadRequestError(
 
 export const enforceError = SavedObjectsErrorHelpers.decorateForbiddenError(
   new Error('Unauthorized'),
-  'User lacks priviliges'
+  'User lacks privileges'
 );
 
 export const setupCheckAuthorized = (

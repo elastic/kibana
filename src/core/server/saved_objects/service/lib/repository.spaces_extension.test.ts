@@ -153,7 +153,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
       describe('#get', () => {
         test(`throws error if options.namespace is specified`, async () => {
-          // Just makes sure the error propogstes from the extension through the repo call
+          // Just makes sure the error propagates from the extension through the repo call
           await expect(repository.get('foo', '', { namespace: 'bar' })).rejects.toThrowError(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
