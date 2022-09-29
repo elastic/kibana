@@ -96,6 +96,7 @@ const TopNav = ({
     [doReload]
   );
 
+  const uiStateJSON = useMemo(() => vis.uiState.toJSON(), [vis.uiState]);
   useEffect(() => {
     const asyncGetTriggerContext = async () => {
       if (vis.type.navigateToLens) {
@@ -107,7 +108,14 @@ const TopNav = ({
       }
     };
     asyncGetTriggerContext();
-  }, [services.data.query.timefilter.timefilter, vis, vis.type, vis.params, vis.data.indexPattern]);
+  }, [
+    services.data.query.timefilter.timefilter,
+    vis,
+    vis.type,
+    vis.params,
+    uiStateJSON?.vis,
+    vis.data.indexPattern,
+  ]);
 
   const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
   const config = useMemo(() => {

@@ -16,7 +16,7 @@ import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[PUT] /internal/uptime/service/monitors', function () {
+  describe('EditMonitor', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -107,6 +107,66 @@ export default function ({ getService }: FtrProviderContext) {
       expect(editResponse.body.attributes).eql(
         omit({ ...modifiedMonitor, revision: 2 }, secretKeys)
       );
+    });
+
+    it('strips unknown keys from monitor edits', async () => {
+      const newMonitor = httpMonitorJson;
+
+      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
+        newMonitor as MonitorFields
+      );
+
+      expect(savedMonitor).eql(omit(newMonitor, secretKeys));
+
+      const updates: Partial<HTTPFields> = {
+        [ConfigKey.URLS]: 'https://modified-host.com',
+        [ConfigKey.NAME]: 'Modified name',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'eu-west-01',
+            label: 'Europe West',
+            geo: {
+              lat: 33.2343132435,
+              lon: 73.2342343434,
+            },
+            url: 'https://example-url.com',
+            isServiceManaged: true,
+          },
+        ],
+        [ConfigKey.REQUEST_HEADERS_CHECK]: {
+          sampleHeader2: 'sampleValue2',
+        },
+        [ConfigKey.METADATA]: {
+          script_source: {
+            is_generated_script: false,
+            file_name: 'test-file.name',
+          },
+        },
+        unknownkey: 'unknownvalue',
+      } as Partial<HTTPFields>;
+
+      const modifiedMonitor = omit(
+        {
+          ...newMonitor,
+          ...updates,
+          [ConfigKey.METADATA]: {
+            ...newMonitor[ConfigKey.METADATA],
+            ...updates[ConfigKey.METADATA],
+          },
+        },
+        ['unknownkey']
+      );
+
+      const editResponse = await supertest
+        .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+        .set('kbn-xsrf', 'true')
+        .send(modifiedMonitor)
+        .expect(200);
+
+      expect(editResponse.body.attributes).eql(
+        omit({ ...modifiedMonitor, revision: 2 }, secretKeys)
+      );
+      expect(editResponse.body.attributes).not.to.have.keys('unknownkey');
     });
 
     it('returns 404 if monitor id is not present', async () => {

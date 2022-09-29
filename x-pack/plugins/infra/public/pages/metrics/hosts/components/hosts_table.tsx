@@ -64,7 +64,7 @@ const getLensHostsTable = (
                   dataType: 'string',
                   operationType: 'terms',
                   scale: 'ordinal',
-                  sourceField: 'host.os.name',
+                  sourceField: 'host.os.type',
                   isBucketed: true,
                   params: {
                     size: 10000,
