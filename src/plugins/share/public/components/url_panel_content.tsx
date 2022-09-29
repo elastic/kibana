@@ -20,6 +20,7 @@ import {
   EuiRadioGroup,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -45,6 +46,7 @@ export interface UrlPanelContentProps {
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   urlService: BrowserUrlService;
+  snapshotShareWarning?: boolean;
 }
 
 export enum ExportUrlAsType {
@@ -78,7 +80,6 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     super(props);
 
     this.shortUrlCache = undefined;
-
     this.state = {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
       useShortUrl: false,
@@ -164,6 +165,19 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
 
           <EuiSpacer size="m" />
 
+          {this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT &&
+            this.props.snapshotShareWarning && (
+              <>
+                <EuiCallOut color="warning" iconType="help" size="s">
+                  <FormattedMessage
+                    id="share.urlPanel.longUrlWarning"
+                    defaultMessage="This dashboard has a lot of unsaved changes, so it is recommended that you save before continuing."
+                  />
+                </EuiCallOut>
+                <EuiSpacer size={'m'} />
+              </>
+            )}
+
           <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
             {(copy: () => void) => (
               <EuiButton
@@ -246,13 +260,11 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
         },
       }),
     });
-
     return this.updateUrlParams(formattedUrl);
   };
 
   private getSnapshotUrl = () => {
     const url = this.props.shareableUrl || window.location.href;
-
     return this.updateUrlParams(url);
   };
 

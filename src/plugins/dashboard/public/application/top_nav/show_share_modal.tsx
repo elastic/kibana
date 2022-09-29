@@ -194,5 +194,6 @@ export function ShowShareModal({
       },
     ],
     showPublicUrlSwitch,
+    snapshotShareWarning: Boolean(unsavedDashboardState?.panels),
   });
 }
