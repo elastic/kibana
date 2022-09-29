@@ -112,6 +112,10 @@ export const defineExplainLogRateSpikesRoute = (
         end();
       }
 
+      function pushError(m: string) {
+        push(addErrorAction(m));
+      }
+
       // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
       (async () => {
         push(resetAction());
@@ -132,7 +136,8 @@ export const defineExplainLogRateSpikesRoute = (
         try {
           fieldCandidates = await fetchFieldCandidates(client, request.body);
         } catch (e) {
-          push(addErrorAction(e.toString()));
+          logger.error(`Failed to fetch field candidates, got: \n${e.toString()}`);
+          pushError(`Failed to fetch field candidates.`);
           end();
           return;
         }
@@ -177,12 +182,17 @@ export const defineExplainLogRateSpikesRoute = (
               request.body,
               fieldCandidatesChunk,
               logger,
-              (m: string) => push(addErrorAction(m))
+              pushError
             );
           } catch (e) {
-            push(addErrorAction(e.toString()));
-            end();
-            return;
+            logger.error(
+              `Failed to fetch p-values for ${JSON.stringify(
+                fieldCandidatesChunk
+              )}, got: \n${e.toString()}`
+            );
+            pushError(`Failed to fetch p-values for ${JSON.stringify(fieldCandidatesChunk)}.`);
+            // Still continue the analysis even if chunks of p-value queries fail.
+            continue;
           }
 
           if (pValues.length > 0) {
@@ -228,16 +238,25 @@ export const defineExplainLogRateSpikesRoute = (
           { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
         ];
 
-        const [overallTimeSeries] = (await fetchHistogramsForFields(
-          client,
-          request.body.index,
-          { match_all: {} },
-          // fields
-          histogramFields,
-          // samplerShardSize
-          -1,
-          undefined
-        )) as [NumericChartData];
+        let overallTimeSeries: NumericChartData | undefined;
+        try {
+          overallTimeSeries = (
+            (await fetchHistogramsForFields(
+              client,
+              request.body.index,
+              { match_all: {} },
+              // fields
+              histogramFields,
+              // samplerShardSize
+              -1,
+              undefined
+            )) as [NumericChartData]
+          )[0];
+        } catch (e) {
+          logger.error(`Failed to fetch the overall histogram data, got: \n${e.toString()}`);
+          pushError(`Failed to fetch overall histogram data.`);
+          // Still continue the analysis even if loading the overall histogram failes.
+        }
 
         if (groupingEnabled) {
           // To optimize the `frequent_items` query, we identify duplicate change points by count attributes.
@@ -259,202 +278,232 @@ export const defineExplainLogRateSpikesRoute = (
             (g) => g.group.length > 1
           );
 
-          const { fields, df } = await fetchFrequentItems(
-            client,
-            request.body.index,
-            JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
-            deduplicatedChangePoints,
-            request.body.timeFieldName,
-            request.body.deviationMin,
-            request.body.deviationMax
-          );
+          try {
+            const { fields, df } = await fetchFrequentItems(
+              client,
+              request.body.index,
+              JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
+              deduplicatedChangePoints,
+              request.body.timeFieldName,
+              request.body.deviationMin,
+              request.body.deviationMax,
+              logger,
+              pushError
+            );
 
-          // The way the `frequent_items` aggregations works could return item sets that include
-          // field/value pairs that are not part of the original list of significant change points.
-          // This cleans up groups and removes those unrelated field/value pairs.
-          const filteredDf = df
-            .map((fi) => {
-              fi.set = Object.entries(fi.set).reduce<ItemsetResult['set']>(
-                (set, [field, value]) => {
-                  if (
-                    changePoints.some((cp) => cp.fieldName === field && cp.fieldValue === value)
-                  ) {
-                    set[field] = value;
+            if (fields.length > 0 && df.length > 0) {
+              // The way the `frequent_items` aggregations works could return item sets that include
+              // field/value pairs that are not part of the original list of significant change points.
+              // This cleans up groups and removes those unrelated field/value pairs.
+              const filteredDf = df
+                .map((fi) => {
+                  fi.set = Object.entries(fi.set).reduce<ItemsetResult['set']>(
+                    (set, [field, value]) => {
+                      if (
+                        changePoints.some((cp) => cp.fieldName === field && cp.fieldValue === value)
+                      ) {
+                        set[field] = value;
+                      }
+                      return set;
+                    },
+                    {}
+                  );
+                  fi.size = Object.keys(fi.set).length;
+                  return fi;
+                })
+                .filter((fi) => fi.size > 1);
+
+              // `frequent_items` returns lot of different small groups of field/value pairs that co-occur.
+              // The following steps analyse these small groups, identify overlap between these groups,
+              // and then summarize them in larger groups where possible.
+
+              // Get a tree structure based on `frequent_items`.
+              const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
+
+              // Each leave of the tree will be a summarized group of co-occuring field/value pairs.
+              const treeLeaves = getSimpleHierarchicalTreeLeaves(root, []);
+
+              // To be able to display a more cleaned up results table in the UI, we identify field/value pairs
+              // that occur in multiple groups. This will allow us to highlight field/value pairs that are
+              // unique to a group in a better way. This step will also re-add duplicates we identified in the
+              // beginning and didn't pass on to the `frequent_items` agg.
+              const fieldValuePairCounts = getFieldValuePairCounts(treeLeaves);
+              const changePointGroups = markDuplicates(treeLeaves, fieldValuePairCounts).map(
+                (g) => {
+                  const group = [...g.group];
+
+                  for (const groupItem of g.group) {
+                    const { duplicate } = groupItem;
+                    const duplicates = groupedChangePoints.find((d) =>
+                      d.group.some(
+                        (dg) =>
+                          dg.fieldName === groupItem.fieldName &&
+                          dg.fieldValue === groupItem.fieldValue
+                      )
+                    );
+
+                    if (duplicates !== undefined) {
+                      group.push(
+                        ...duplicates.group.map((d) => {
+                          return {
+                            fieldName: d.fieldName,
+                            fieldValue: d.fieldValue,
+                            duplicate,
+                          };
+                        })
+                      );
+                    }
                   }
-                  return set;
-                },
-                {}
+
+                  return {
+                    ...g,
+                    group,
+                  };
+                }
               );
-              fi.size = Object.keys(fi.set).length;
-              return fi;
-            })
-            .filter((fi) => fi.size > 1);
 
-          // `frequent_items` returns lot of different small groups of field/value pairs that co-occur.
-          // The following steps analyse these small groups, identify overlap between these groups,
-          // and then summarize them in larger groups where possible.
+              // Some field/value pairs might not be part of the `frequent_items` result set, for example
+              // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
+              // In this next part we identify those missing pairs and add them as individual groups.
+              const missingChangePoints = deduplicatedChangePoints.filter((cp) => {
+                return !changePointGroups.some((cpg) => {
+                  return cpg.group.some(
+                    (d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue
+                  );
+                });
+              });
 
-          // Get a tree structure based on `frequent_items`.
-          const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
-
-          // Each leave of the tree will be a summarized group of co-occuring field/value pairs.
-          const treeLeaves = getSimpleHierarchicalTreeLeaves(root, []);
-
-          // To be able to display a more cleaned up results table in the UI, we identify field/value pairs
-          // that occur in multiple groups. This will allow us to highlight field/value pairs that are
-          // unique to a group in a better way. This step will also re-add duplicates we identified in the
-          // beginning and didn't pass on to the `frequent_items` agg.
-          const fieldValuePairCounts = getFieldValuePairCounts(treeLeaves);
-          const changePointGroups = markDuplicates(treeLeaves, fieldValuePairCounts).map((g) => {
-            const group = [...g.group];
-
-            for (const groupItem of g.group) {
-              const { duplicate } = groupItem;
-              const duplicates = groupedChangePoints.find((d) =>
-                d.group.some(
-                  (dg) =>
-                    dg.fieldName === groupItem.fieldName && dg.fieldValue === groupItem.fieldValue
+              changePointGroups.push(
+                ...missingChangePoints.map(
+                  ({ fieldName, fieldValue, doc_count: docCount, pValue }) => {
+                    const duplicates = groupedChangePoints.find((d) =>
+                      d.group.some(
+                        (dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue
+                      )
+                    );
+                    if (duplicates !== undefined) {
+                      return {
+                        id: `${stringHash(
+                          JSON.stringify(
+                            duplicates.group.map((d) => ({
+                              fieldName: d.fieldName,
+                              fieldValue: d.fieldValue,
+                            }))
+                          )
+                        )}`,
+                        group: duplicates.group.map((d) => ({
+                          fieldName: d.fieldName,
+                          fieldValue: d.fieldValue,
+                          duplicate: false,
+                        })),
+                        docCount,
+                        pValue,
+                      };
+                    } else {
+                      return {
+                        id: `${stringHash(JSON.stringify({ fieldName, fieldValue }))}`,
+                        group: [
+                          {
+                            fieldName,
+                            fieldValue,
+                            duplicate: false,
+                          },
+                        ],
+                        docCount,
+                        pValue,
+                      };
+                    }
+                  }
                 )
               );
 
-              if (duplicates !== undefined) {
-                group.push(
-                  ...duplicates.group.map((d) => {
-                    return {
-                      fieldName: d.fieldName,
-                      fieldValue: d.fieldValue,
-                      duplicate,
-                    };
-                  })
-                );
+              // Finally, we'll find out if there's at least one group with at least two items,
+              // only then will we return the groups to the clients and make the grouping option available.
+              const maxItems = Math.max(...changePointGroups.map((g) => g.group.length));
+
+              if (maxItems > 1) {
+                push(addChangePointsGroupAction(changePointGroups));
               }
-            }
 
-            return {
-              ...g,
-              group,
-            };
-          });
-
-          // Some field/value pairs might not be part of the `frequent_items` result set, for example
-          // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
-          // In this next part we identify those missing pairs and add them as individual groups.
-          const missingChangePoints = deduplicatedChangePoints.filter((cp) => {
-            return !changePointGroups.some((cpg) => {
-              return cpg.group.some(
-                (d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue
-              );
-            });
-          });
-
-          changePointGroups.push(
-            ...missingChangePoints.map(({ fieldName, fieldValue, doc_count: docCount, pValue }) => {
-              const duplicates = groupedChangePoints.find((d) =>
-                d.group.some((dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue)
-              );
-              if (duplicates !== undefined) {
-                return {
-                  id: `${stringHash(
-                    JSON.stringify(
-                      duplicates.group.map((d) => ({
-                        fieldName: d.fieldName,
-                        fieldValue: d.fieldValue,
-                      }))
-                    )
-                  )}`,
-                  group: duplicates.group.map((d) => ({
-                    fieldName: d.fieldName,
-                    fieldValue: d.fieldValue,
-                    duplicate: false,
-                  })),
-                  docCount,
-                  pValue,
-                };
-              } else {
-                return {
-                  id: `${stringHash(JSON.stringify({ fieldName, fieldValue }))}`,
-                  group: [
-                    {
-                      fieldName,
-                      fieldValue,
-                      duplicate: false,
+              await asyncForEach(changePointGroups, async (cpg) => {
+                if (overallTimeSeries !== undefined) {
+                  const histogramQuery = {
+                    bool: {
+                      filter: cpg.group.map((d) => ({
+                        term: { [d.fieldName]: d.fieldValue },
+                      })),
                     },
-                  ],
-                  docCount,
-                  pValue,
-                };
-              }
-            })
-          );
-
-          // Finally, we'll find out if there's at least one group with at least two items,
-          // only then will we return the groups to the clients and make the grouping option available.
-          const maxItems = Math.max(...changePointGroups.map((g) => g.group.length));
-
-          if (maxItems > 1) {
-            push(addChangePointsGroupAction(changePointGroups));
-          }
-
-          if (changePointGroups) {
-            await asyncForEach(changePointGroups, async (cpg, index) => {
-              const histogramQuery = {
-                bool: {
-                  filter: cpg.group.map((d) => ({
-                    term: { [d.fieldName]: d.fieldValue },
-                  })),
-                },
-              };
-
-              const [cpgTimeSeries] = (await fetchHistogramsForFields(
-                client,
-                request.body.index,
-                histogramQuery,
-                // fields
-                [
-                  {
-                    fieldName: request.body.timeFieldName,
-                    type: KBN_FIELD_TYPES.DATE,
-                    interval: overallTimeSeries.interval,
-                    min: overallTimeSeries.stats[0],
-                    max: overallTimeSeries.stats[1],
-                  },
-                ],
-                // samplerShardSize
-                -1,
-                undefined
-              )) as [NumericChartData];
-
-              const histogram =
-                overallTimeSeries.data.map((o, i) => {
-                  const current = cpgTimeSeries.data.find(
-                    (d1) => d1.key_as_string === o.key_as_string
-                  ) ?? {
-                    doc_count: 0,
                   };
-                  return {
-                    key: o.key,
-                    key_as_string: o.key_as_string ?? '',
-                    doc_count_change_point: current.doc_count,
-                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                  };
-                }) ?? [];
 
-              push(
-                addChangePointsGroupHistogramAction([
-                  {
-                    id: cpg.id,
-                    histogram,
-                  },
-                ])
-              );
-            });
+                  let cpgTimeSeries: NumericChartData;
+                  try {
+                    cpgTimeSeries = (
+                      (await fetchHistogramsForFields(
+                        client,
+                        request.body.index,
+                        histogramQuery,
+                        // fields
+                        [
+                          {
+                            fieldName: request.body.timeFieldName,
+                            type: KBN_FIELD_TYPES.DATE,
+                            interval: overallTimeSeries.interval,
+                            min: overallTimeSeries.stats[0],
+                            max: overallTimeSeries.stats[1],
+                          },
+                        ],
+                        // samplerShardSize
+                        -1,
+                        undefined
+                      )) as [NumericChartData]
+                    )[0];
+                  } catch (e) {
+                    logger.error(
+                      `Failed to fetch the histogram data for group #${
+                        cpg.id
+                      }, got: \n${e.toString()}`
+                    );
+                    pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
+                    return;
+                  }
+                  const histogram =
+                    overallTimeSeries.data.map((o, i) => {
+                      const current = cpgTimeSeries.data.find(
+                        (d1) => d1.key_as_string === o.key_as_string
+                      ) ?? {
+                        doc_count: 0,
+                      };
+                      return {
+                        key: o.key,
+                        key_as_string: o.key_as_string ?? '',
+                        doc_count_change_point: current.doc_count,
+                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                      };
+                    }) ?? [];
+
+                  push(
+                    addChangePointsGroupHistogramAction([
+                      {
+                        id: cpg.id,
+                        histogram,
+                      },
+                    ])
+                  );
+                }
+              });
+            }
+          } catch (e) {
+            logger.error(
+              `Failed to transform field/value pairs into groups, got: \n${e.toString()}`
+            );
+            pushError(`Failed to transform field/value pairs  into groups.`);
           }
         }
 
         // time series filtered by fields
-        if (changePoints) {
-          await asyncForEach(changePoints, async (cp, index) => {
-            if (changePoints) {
+        if (changePoints && overallTimeSeries !== undefined) {
+          await asyncForEach(changePoints, async (cp) => {
+            if (overallTimeSeries !== undefined) {
               const histogramQuery = {
                 bool: {
                   filter: [
@@ -465,24 +514,40 @@ export const defineExplainLogRateSpikesRoute = (
                 },
               };
 
-              const [cpTimeSeries] = (await fetchHistogramsForFields(
-                client,
-                request.body.index,
-                histogramQuery,
-                // fields
-                [
-                  {
-                    fieldName: request.body.timeFieldName,
-                    type: KBN_FIELD_TYPES.DATE,
-                    interval: overallTimeSeries.interval,
-                    min: overallTimeSeries.stats[0],
-                    max: overallTimeSeries.stats[1],
-                  },
-                ],
-                // samplerShardSize
-                -1,
-                undefined
-              )) as [NumericChartData];
+              let cpTimeSeries: NumericChartData;
+
+              try {
+                cpTimeSeries = (
+                  (await fetchHistogramsForFields(
+                    client,
+                    request.body.index,
+                    histogramQuery,
+                    // fields
+                    [
+                      {
+                        fieldName: request.body.timeFieldName,
+                        type: KBN_FIELD_TYPES.DATE,
+                        interval: overallTimeSeries.interval,
+                        min: overallTimeSeries.stats[0],
+                        max: overallTimeSeries.stats[1],
+                      },
+                    ],
+                    // samplerShardSize
+                    -1,
+                    undefined
+                  )) as [NumericChartData]
+                )[0];
+              } catch (e) {
+                logger.error(
+                  `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
+                    cp.fieldValue
+                  }", got: \n${e.toString()}`
+                );
+                pushError(
+                  `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
+                );
+                return;
+              }
 
               const histogram =
                 overallTimeSeries.data.map((o, i) => {

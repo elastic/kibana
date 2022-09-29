@@ -112,6 +112,7 @@ export const fetchChangePointPValues = async (
         )}`
       );
       emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+      // Still continue the analysis even if individual p-value queries fail.
       continue;
     }
 
