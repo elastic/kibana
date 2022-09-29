@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('regression creation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/142095
+  describe.skip('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
@@ -86,7 +87,8 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/142095
+      describe.skip(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
           await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);

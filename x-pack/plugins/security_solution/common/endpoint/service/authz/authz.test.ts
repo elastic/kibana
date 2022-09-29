@@ -107,6 +107,31 @@ describe('Endpoint Authz service', () => {
         );
       });
     });
+
+    describe('and endpoint rbac is enabled', () => {
+      it.each<[EndpointAuthzKeyList[number], string]>([
+        ['canIsolateHost', 'writeHostIsolation'],
+        ['canUnIsolateHost', 'writeHostIsolation'],
+        ['canKillProcess', 'writeProcessOperations'],
+        ['canSuspendProcess', 'writeProcessOperations'],
+        ['canGetRunningProcesses', 'writeProcessOperations'],
+      ])('%s should be true if `packagePrivilege.%s` is `true`', (auth) => {
+        const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+        expect(authz[auth]).toBe(true);
+      });
+
+      it.each<[EndpointAuthzKeyList[number], string]>([
+        ['canIsolateHost', 'writeHostIsolation'],
+        ['canUnIsolateHost', 'writeHostIsolation'],
+        ['canKillProcess', 'writeProcessOperations'],
+        ['canSuspendProcess', 'writeProcessOperations'],
+        ['canGetRunningProcesses', 'writeProcessOperations'],
+      ])('%s should be false if `packagePrivilege.%s` is `false`', (auth, privilege) => {
+        fleetAuthz.packagePrivileges!.endpoint.actions[privilege].executePackageAction = false;
+        const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+        expect(authz[auth]).toBe(false);
+      });
+    });
   });
 
   describe('getEndpointAuthzInitialState()', () => {
