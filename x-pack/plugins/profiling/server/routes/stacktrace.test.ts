@@ -11,7 +11,7 @@ import {
   EncodedStackTrace,
   runLengthDecode,
   runLengthEncode,
-} from './stacktrace';
+} from '../../common/parse_stacktraces';
 
 enum fileID {
   A = 'aQpJmTLWydNvOapSFZOwKg',
@@ -85,8 +85,10 @@ describe('Stack trace operations', () => {
       },
     ];
 
+    const frameCache = new Map<string, [string, number]>();
+
     for (const t of tests) {
-      expect(decodeStackTrace(t.original)).toEqual(t.expected);
+      expect(decodeStackTrace(t.original, frameCache)).toEqual(t.expected);
     }
   });
 

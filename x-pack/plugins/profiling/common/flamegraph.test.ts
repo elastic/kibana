@@ -16,7 +16,7 @@ describe('Flamegraph operations', () => {
     const totalSamples = sum([...events.values()]);
     const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
 
-    const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
+    const tree = createCalleeTree({ events, stackTraces, stackFrames, executables, totalFrames });
     const graph = createFlameGraph(tree, 60, totalSamples, totalSamples);
 
     expect(graph.Size).toEqual(totalFrames - 2);

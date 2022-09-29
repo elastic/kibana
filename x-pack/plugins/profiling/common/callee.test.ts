@@ -15,7 +15,7 @@ describe('Callee operations', () => {
     const totalSamples = sum([...events.values()]);
     const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
 
-    const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
+    const tree = createCalleeTree({ events, stackTraces, stackFrames, executables, totalFrames });
 
     expect(tree.Samples[0]).toEqual(totalSamples);
     expect(tree.CountInclusive[0]).toEqual(totalSamples);

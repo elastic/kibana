@@ -7,20 +7,20 @@
 
 import fnv from 'fnv-plus';
 
-import { createFrameGroupID, FrameGroupID } from './frame_group';
+import { createFrameGroupID, type FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
   emptyExecutable,
   emptyStackFrame,
   emptyStackTrace,
-  Executable,
-  FileID,
+  type Executable,
+  type FileID,
   getCalleeLabel,
-  StackFrame,
-  StackFrameID,
-  StackFrameMetadata,
-  StackTrace,
-  StackTraceID,
+  type StackFrame,
+  type StackFrameID,
+  type StackFrameMetadata,
+  type StackTrace,
+  type StackTraceID,
 } from './profiling';
 
 type NodeID = number;
@@ -107,13 +107,21 @@ function insertNode(
 //
 // The resulting data structure contains all of the data, but is not yet in the
 // form most easily digestible by others.
-export function createCalleeTree(
-  events: Map<StackTraceID, number>,
-  stackTraces: Map<StackTraceID, StackTrace>,
-  stackFrames: Map<StackFrameID, StackFrame>,
-  executables: Map<FileID, Executable>,
-  totalFrames: number
-): CalleeTree {
+export interface CreateCalleeTreeOptions {
+  events: Map<StackTraceID, number>;
+  stackTraces: Map<StackTraceID, StackTrace>;
+  stackFrames: Map<StackFrameID, StackFrame>;
+  executables: Map<FileID, Executable>;
+  totalFrames: number;
+}
+
+export function createCalleeTree({
+  events,
+  executables,
+  stackFrames,
+  stackTraces,
+  totalFrames,
+}: CreateCalleeTreeOptions): CalleeTree {
   const tree = initCalleeTree(totalFrames);
 
   const sortedStackTraceIDs = new Array<StackTraceID>();

@@ -6,15 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import * as _PProf from 'pprof';
+import execa from 'execa';
 import fs from 'fs';
 import path from 'path';
-import execa from 'execa';
-import { RouteRegisterParameters } from '.';
+import * as _PProf from 'pprof';
+import type { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
-import { createCalleeTree } from '../../common/callee';
 import { createFlameGraph } from '../../common/flamegraph';
 import { withProfilingSpan } from '../utils/with_profiling_span';
+import { workers } from '../workers';
 import { getClient } from './compat';
 import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
 import { createCommonFilter } from './query';
@@ -22,7 +22,7 @@ import { createCommonFilter } from './query';
 const pprof: typeof _PProf = require('pprof');
 
 function withPprof<T>(fn: () => Promise<T>): Promise<T> {
-  const stop = pprof.time.start();
+  const stop = pprof.time.start(250);
   return fn().then((response) => {
     const profile = stop();
     pprof.encode(profile).then((buffer) => {
@@ -100,13 +100,13 @@ export function registerFlameChartSearchRoute({
 
           const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
             const t0 = Date.now();
-            const tree = createCalleeTree(
-              stackTraceEvents,
+            const tree = await workers.createCalleeTree({
+              events: stackTraceEvents,
               stackTraces,
               stackFrames,
               executables,
-              totalFrames
-            );
+              totalFrames,
+            });
             logger.info(`creating callee tree took ${Date.now() - t0} ms`);
 
             // sampleRate is 1/5^N, with N being the downsampled index the events were fetched from.
