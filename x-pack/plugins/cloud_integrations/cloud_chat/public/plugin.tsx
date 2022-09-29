@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -52,18 +52,12 @@ export class CloudChatPlugin implements Plugin {
     cloud.registerCloudService(CloudChatContextProvider);
   }
 
-  public start(core: CoreStart) {}
+  public start() {}
 
   public stop() {}
 
   private async setupChat({ cloud, http, security }: SetupChatDeps) {
-    if (!cloud.isCloudEnabled) {
-      return;
-    }
-
-    const { chatURL } = this.config;
-
-    if (!security || !chatURL) {
+    if (!cloud.isCloudEnabled || !security || !this.config.chatURL) {
       return;
     }
 
@@ -79,7 +73,7 @@ export class CloudChatPlugin implements Plugin {
       }
 
       this.chatConfig$.next({
-        chatURL,
+        chatURL: this.config.chatURL,
         user: {
           email,
           id,
