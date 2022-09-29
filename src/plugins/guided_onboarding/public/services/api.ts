@@ -72,7 +72,7 @@ export class ApiService {
 
   /**
    * Updates the SO with the updated guide state and refreshes the observables
-   * TODO change this to private once we no longer need this functionality within the example plugin.
+   * TODO Consider changing this to private once we no longer need this functionality within the example plugin.
    * @param {GuideState} guideState the updated guide state
    * @param {boolean} panelState boolean to determine whether the dropdown panel should open or not
    * @return {Promise} a promise with the updated guide state
@@ -161,13 +161,20 @@ export class ApiService {
       return undefined;
     }
 
-    const updatedGuide: GuideState = {
-      ...guideState,
-      isActive: false,
-      status: 'complete',
-    };
+    // All steps should be complete at this point
+    // However, we do a final check here as a safeguard
+    const allStepsComplete =
+      Boolean(guideState.steps.find((step) => step.status !== 'complete')) === false;
 
-    return await this.updateGuideState(updatedGuide, false);
+    if (allStepsComplete) {
+      const updatedGuide: GuideState = {
+        ...guideState,
+        isActive: false,
+        status: 'complete',
+      };
+
+      return await this.updateGuideState(updatedGuide, false);
+    }
   }
 
   /**
