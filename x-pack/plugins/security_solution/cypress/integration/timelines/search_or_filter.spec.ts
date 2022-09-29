@@ -16,11 +16,7 @@ import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
-import {   
-  changeTimelineQueryLanguage,
-  executeTimelineKQL,
-  executeTimelineSearch
-} from '../../tasks/timeline';
+import { changeTimelineQueryLanguage, executeTimelineKQL, executeTimelineSearch } from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
