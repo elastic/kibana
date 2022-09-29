@@ -435,4 +435,29 @@ describe('IndexPattern Field Item', () => {
     );
     expect(exploreInDiscoverBtn.length).toBe(1);
   });
+
+  it('should not display Explore in discover button for a geo_point field', async () => {
+    const wrapper = await mountWithIntl(
+      <InnerFieldItemWrapper
+        {...defaultProps}
+        field={{
+          name: 'geo_point',
+          displayName: 'geo_point',
+          type: 'geo_point',
+          aggregatable: true,
+          searchable: true,
+        }}
+      />
+    );
+
+    await clickField(wrapper, 'geo_point');
+
+    await wrapper.update();
+
+    const exploreInDiscoverBtn = findTestSubject(
+      wrapper,
+      'lnsFieldListPanel-exploreInDiscover-geo_point'
+    );
+    expect(exploreInDiscoverBtn.length).toBe(0);
+  });
 });

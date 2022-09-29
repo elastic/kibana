@@ -20,7 +20,6 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiButton,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -442,9 +441,8 @@ function FieldItemPopoverContents(props: FieldItemProps) {
           return params.element;
         }}
       />
-      {exploreInDiscover && (
-        <>
-          <EuiSpacer size="s" />
+      {exploreInDiscover && field.type !== 'geo_point' && field.type !== 'geo_shape' && (
+        <EuiPopoverFooter>
           <EuiButton
             fullWidth
             size="s"
@@ -455,7 +453,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
               defaultMessage: 'Explore values in Discover',
             })}
           </EuiButton>
-        </>
+        </EuiPopoverFooter>
       )}
     </>
   );
