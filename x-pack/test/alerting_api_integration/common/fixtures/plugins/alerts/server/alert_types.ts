@@ -109,31 +109,21 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
     rule,
   } = alertExecutorOptions;
   let group: string | null = 'default';
-  let subgroup: string | null = null;
   const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy, ...rule };
 
   if (params.groupsToScheduleActionsInSeries) {
     const index = state.groupInSeriesIndex || 0;
-    const [scheduledGroup, scheduledSubgroup] = (
-      params.groupsToScheduleActionsInSeries[index] ?? ''
-    ).split(':');
+    const [scheduledGroup] = (params.groupsToScheduleActionsInSeries[index] ?? '').split(':');
 
     group = scheduledGroup;
-    subgroup = scheduledSubgroup;
   }
 
   if (group) {
     const instance = services.alertFactory.create('1').replaceState({ instanceStateValue: true });
 
-    if (subgroup) {
-      instance.scheduleActionsWithSubGroup(group, subgroup, {
-        instanceContextValue: true,
-      });
-    } else {
-      instance.scheduleActions(group, {
-        instanceContextValue: true,
-      });
-    }
+    instance.scheduleActions(group, {
+      instanceContextValue: true,
+    });
   }
 
   await services.scopedClusterClient.asCurrentUser.index({
@@ -506,9 +496,7 @@ function getPatternFiringAlertType() {
             deep: DeepContextVariables,
           });
         } else if (typeof scheduleByPattern === 'string') {
-          services.alertFactory
-            .create(instanceId)
-            .scheduleActionsWithSubGroup('default', scheduleByPattern);
+          services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
         }
       }
 
