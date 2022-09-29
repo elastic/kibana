@@ -45,6 +45,7 @@ import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 import { CurrentUserProfile } from '../types';
 import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { Status } from '../status';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -290,6 +291,20 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
+    ...(!isSelectorView
+      ? [
+          {
+            name: i18n.STATUS,
+            render: (theCase: Case) => {
+              if (theCase.status === null || theCase.status === undefined) {
+                return getEmptyTagValue();
+              }
+
+              return <Status type={theCase.status} />;
+            },
+          },
+        ]
+      : []),
     {
       name: i18n.SEVERITY,
       render: (theCase: Case) => {
