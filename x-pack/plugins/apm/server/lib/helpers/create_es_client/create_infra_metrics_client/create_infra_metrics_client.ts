@@ -6,26 +6,14 @@
  */
 
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
-import { ApmPluginRequestHandlerContext } from '../../../../routes/typings';
+import { APMRouteHandlerResources } from '../../../../routes/typings';
 import { getInfraMetricIndices } from '../../get_infra_metric_indices';
-
-interface InfraPlugin {
-  setup: InfraPluginSetup;
-  start: () => Promise<InfraPluginStart>;
-}
 
 type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'>;
 
 export type InfraMetricsClient = ReturnType<typeof createInfraMetricsClient>;
 
-export function createInfraMetricsClient({
-  infraPlugin,
-  context,
-}: {
-  infraPlugin: InfraPlugin;
-  context: ApmPluginRequestHandlerContext;
-}) {
+export function createInfraMetricsClient(resources: APMRouteHandlerResources) {
   return {
     async search<TDocument, TParams extends InfraMetricsSearchParams>(
       opts: TParams
@@ -33,10 +21,10 @@ export function createInfraMetricsClient({
       const {
         savedObjects: { client: savedObjectsClient },
         elasticsearch: { client: esClient },
-      } = await context.core;
+      } = await resources.context.core;
 
       const indexName = await getInfraMetricIndices({
-        infraPlugin,
+        infraPlugin: resources.plugins.infra,
         savedObjectsClient,
       });
 

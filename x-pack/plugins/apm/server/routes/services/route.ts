@@ -275,11 +275,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     import('./get_service_metadata_details').ServiceMetadataDetails
   > => {
     const setup = await setupRequest(resources);
-    const { plugins, context } = resources;
-    const infraMetricsClient = await createInfraMetricsClient({
-      infraPlugin: plugins.infra,
-      context,
-    });
+    const infraMetricsClient = createInfraMetricsClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
@@ -906,11 +902,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       | undefined;
   }> => {
     const setup = await setupRequest(resources);
-    const { plugins, context } = resources;
-    const infraMetricsClient = await createInfraMetricsClient({
-      infraPlugin: plugins.infra,
-      context,
-    });
+    const infraMetricsClient = createInfraMetricsClient(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
     const { start, end } = params.query;
