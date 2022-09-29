@@ -24,7 +24,7 @@ export interface ExceptionItemProps {
   exceptionItem: ExceptionListItemSchema;
   listType: ExceptionListTypeEnum;
   disableActions: boolean;
-  ruleReferences: ExceptionListRuleReferencesSchema[];
+  ruleReferences: ExceptionListRuleReferencesSchema | null;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
   dataTestSubj: string;

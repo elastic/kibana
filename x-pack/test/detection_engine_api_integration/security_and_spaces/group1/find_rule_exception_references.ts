@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const refs = references.references.flatMap((ref: RuleReferencesSchema) => Object.keys(ref));
 
-      expect(refs).to.eql(['i_exist', 'i_exist_2']);
+      expect(refs.sort()).to.eql(['i_exist', 'i_exist_2'].sort());
     });
 
     it('returns found references for all existing exception lists if no list id/list_id passed in', async () => {
@@ -215,7 +215,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       const refs = references.references.flatMap((ref: RuleReferencesSchema) => Object.keys(ref));
-      expect(refs).to.eql(['i_exist', 'i_exist_2', 'endpoint_list']);
+      expect(refs.sort()).to.eql(['i_exist', 'i_exist_2', 'endpoint_list'].sort());
     });
   });
 };

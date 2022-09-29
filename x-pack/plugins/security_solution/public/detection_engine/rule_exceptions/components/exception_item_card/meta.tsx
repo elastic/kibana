@@ -36,7 +36,7 @@ const StyledFlexItem = styled(EuiFlexItem)`
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
-  references: ExceptionListRuleReferencesSchema[];
+  references: ExceptionListRuleReferencesSchema | null;
   dataTestSubj: string;
 }
 
@@ -51,7 +51,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
       if (references == null) {
         return [];
       }
-      return references.map((reference) => (
+      return references.referenced_rules.map((reference) => (
         <EuiContextMenuItem
           data-test-subj={`${dataTestSubj}-actionItem-${reference.id}`}
           key={reference.id}
@@ -94,25 +94,27 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             dataTestSubj={`${dataTestSubj}-updatedBy`}
           />
         </StyledFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiButtonEmpty
-                onClick={onAffectedRulesClick}
-                iconType="list"
-                data-test-subj={`${dataTestSubj}-affectedRulesButton`}
-              >
-                {i18n.AFFECTED_RULES(references?.length ?? 0)}
-              </EuiButtonEmpty>
-            }
-            panelPaddingSize="none"
-            isOpen={isPopoverOpen}
-            closePopover={onClosePopover}
-            data-test-subj={`${dataTestSubj}-items`}
-          >
-            <EuiContextMenuPanel size="s" items={itemActions} />
-          </EuiPopover>
-        </EuiFlexItem>
+        {references != null && (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonEmpty
+                  onClick={onAffectedRulesClick}
+                  iconType="list"
+                  data-test-subj={`${dataTestSubj}-affectedRulesButton`}
+                >
+                  {i18n.AFFECTED_RULES(references?.referenced_rules.length ?? 0)}
+                </EuiButtonEmpty>
+              }
+              panelPaddingSize="none"
+              isOpen={isPopoverOpen}
+              closePopover={onClosePopover}
+              data-test-subj={`${dataTestSubj}-items`}
+            >
+              <EuiContextMenuPanel size="s" items={itemActions} />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }
