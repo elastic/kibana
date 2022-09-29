@@ -11,9 +11,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { HitsCounter, HitsCounterProps } from './hits_counter';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { BehaviorSubject } from 'rxjs';
-import { FetchStatus } from '../../../types';
-import { DataTotalHits$ } from '../../hooks/use_saved_search';
 
 describe('hits counter', function () {
   let props: HitsCounterProps;
@@ -23,10 +20,8 @@ describe('hits counter', function () {
     props = {
       onResetQuery: jest.fn(),
       showResetButton: true,
-      savedSearchData$: new BehaviorSubject({
-        fetchStatus: FetchStatus.COMPLETE,
-        result: 2,
-      }) as DataTotalHits$,
+      hits: 2,
+      status: 'complete',
     };
   });
 
@@ -47,17 +42,8 @@ describe('hits counter', function () {
   });
 
   it('expect to render 1,899 hits if 1899 hits given', function () {
-    const data$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: 1899,
-    }) as DataTotalHits$;
     component = mountWithIntl(
-      <HitsCounter
-        {...props}
-        savedSearchData$={data$}
-        showResetButton={false}
-        onResetQuery={jest.fn()}
-      />
+      <HitsCounter {...props} hits={1899} showResetButton={false} onResetQuery={jest.fn()} />
     );
     const hits = findTestSubject(component, 'unifiedHistogramQueryHits');
     expect(hits.text()).toBe('1,899');

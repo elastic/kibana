@@ -16,47 +16,49 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
-import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
 import {
-  getVisualizeInformation,
-  triggerVisualizeActions,
-} from '../sidebar/lib/visualize_trigger_utils';
-import { UnifiedHistogramServices } from '../types';
+  TimechartBucketInterval,
+  UnifiedHistogramServices,
+  UnifiedHistogramStatus,
+} from '../types';
+import { ChartData } from './point_series';
 
 const HistogramMemoized = memo(Histogram);
 
 export function Chart({
   services,
   className,
-  resetSavedSearch,
-  savedSearch,
-  savedSearchDataChart$,
-  savedSearchDataTotalHits$,
-  dataView,
   hideChart,
   interval,
   isTimeBased,
+  status,
+  hits,
+  chartData,
+  bucketInterval,
+  error,
+  appendHitsCounter,
   appendHistogram,
+  onEditVisualization,
   onResetChartHeight,
   onHideChartChange,
   onIntervalChange,
 }: {
   services: UnifiedHistogramServices;
   className?: string;
-  resetSavedSearch: () => void;
-  savedSearch: SavedSearch;
-  savedSearchDataChart$: DataCharts$;
-  savedSearchDataTotalHits$: DataTotalHits$;
-  dataView: DataView;
   isTimeBased: boolean;
   hideChart?: boolean;
   interval?: string;
+  status: UnifiedHistogramStatus;
+  hits: number;
+  chartData: ChartData;
+  bucketInterval: TimechartBucketInterval;
+  error?: Error;
+  appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
+  onEditVisualization?: () => void;
   onResetChartHeight?: () => void;
   onHideChartChange?: (hideChart: boolean) => void;
   onIntervalChange?: (interval: string) => void;
@@ -68,23 +70,6 @@ export function Chart({
     element: null,
     moveFocus: false,
   });
-
-  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
-  const [canVisualize, setCanVisualize] = useState(false);
-
-  useEffect(() => {
-    if (!timeField) return;
-    getVisualizeInformation(timeField, dataView, savedSearch.columns || []).then((info) => {
-      setCanVisualize(Boolean(info));
-    });
-  }, [dataView, savedSearch.columns, timeField]);
-
-  const onEditVisualization = useCallback(() => {
-    if (!timeField) {
-      return;
-    }
-    triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
-  }, [dataView, savedSearch.columns, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);
@@ -139,16 +124,12 @@ export function Chart({
             grow={false}
             className="unifiedHistogramResultCount__title eui-textTruncate eui-textNoWrap"
           >
-            <HitsCounter
-              savedSearchData$={savedSearchDataTotalHits$}
-              showResetButton={!!(savedSearch && savedSearch.id)}
-              onResetQuery={resetSavedSearch}
-            />
+            <HitsCounter hits={hits} status={status} append={appendHitsCounter} />
           </EuiFlexItem>
           {isTimeBased && (
             <EuiFlexItem className="unifiedHistogramResultCount__toggle" grow={false}>
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-                {canVisualize && (
+                {onEditVisualization && (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       content={i18n.translate('unifiedHistogram.editVisualizationButton', {
@@ -212,9 +193,12 @@ export function Chart({
           >
             <HistogramMemoized
               services={services}
-              savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
               interval={interval}
+              status={status}
+              chartData={chartData}
+              bucketInterval={bucketInterval}
+              error={error}
             />
           </section>
           {appendHistogram}

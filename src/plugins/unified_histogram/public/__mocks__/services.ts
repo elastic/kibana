@@ -8,7 +8,6 @@
 
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { LocalStorageMock } from './local_storage_mock';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { UnifiedHistogramServices } from '../types';
 
@@ -26,5 +25,4 @@ export const unifiedHistogramServicesMock = {
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
   },
-  storage: new LocalStorageMock({}) as unknown as Storage,
 } as unknown as UnifiedHistogramServices;

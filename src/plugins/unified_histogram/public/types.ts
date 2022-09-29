@@ -17,3 +17,13 @@ export interface UnifiedHistogramServices {
   uiSettings: IUiSettingsClient;
   fieldFormats: FieldFormatsStart;
 }
+
+export type UnifiedHistogramStatus = 'loading' | 'complete' | 'partial' | 'error';
+
+export type UnifiedHistogramLayout = 'single' | 'fixed' | 'resizable';
+
+export interface TimechartBucketInterval {
+  scaled?: boolean;
+  description?: string;
+  scale?: number;
+}

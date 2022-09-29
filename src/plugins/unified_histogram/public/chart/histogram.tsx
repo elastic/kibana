@@ -41,16 +41,21 @@ import {
   renderEndzoneTooltip,
 } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import { DataCharts$, DataChartsMessage } from '../../hooks/use_saved_search';
-import { FetchStatus } from '../../../types';
-import { useDataState } from '../../hooks/use_data_state';
-import { UnifiedHistogramServices } from '../types';
+import {
+  TimechartBucketInterval,
+  UnifiedHistogramServices,
+  UnifiedHistogramStatus,
+} from '../types';
+import { ChartData } from './point_series';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
-  savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   interval?: string;
+  status: UnifiedHistogramStatus;
+  chartData: ChartData;
+  bucketInterval: TimechartBucketInterval;
+  error?: Error;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -65,17 +70,16 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 
 export function Histogram({
   services: { data, theme, uiSettings, fieldFormats },
-  savedSearchData$,
   timefilterUpdateHandler,
   interval,
+  status,
+  chartData,
+  bucketInterval,
+  error,
 }: HistogramProps) {
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
-
-  const dataState: DataChartsMessage = useDataState(savedSearchData$);
-
   const timeZone = getTimezone(uiSettings);
-  const { chartData, bucketInterval, fetchStatus, error } = dataState;
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
@@ -141,7 +145,7 @@ export function Histogram({
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
   }, [from, to, interval, bucketInterval?.description, toMoment]);
 
-  if (!chartData && fetchStatus === FetchStatus.LOADING) {
+  if (!chartData && status === 'loading') {
     return (
       <div className="unifiedHistogramChart" data-test-subj="unifiedHistogramChart">
         <div className="unifiedHistogramChart__loading">
@@ -158,7 +162,7 @@ export function Histogram({
     );
   }
 
-  if (fetchStatus === FetchStatus.ERROR && error) {
+  if (status === 'error' && error) {
     return (
       <div className="unifiedHistogram__errorChartContainer">
         <EuiFlexGroup gutterSize="s">

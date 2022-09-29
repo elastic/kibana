@@ -7,49 +7,27 @@
  */
 
 import './hits_counter.scss';
-import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import React, { ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DataTotalHits$, DataTotalHitsMsg } from '../../hooks/use_saved_search';
-import { FetchStatus } from '../../../types';
-import { useDataState } from '../../hooks/use_data_state';
+import { UnifiedHistogramStatus } from '../types';
 
 export interface HitsCounterProps {
-  /**
-   * displays the reset button
-   */
-  showResetButton: boolean;
-  /**
-   * resets the query
-   */
-  onResetQuery: () => void;
-  /**
-   * saved search data observable
-   */
-  savedSearchData$: DataTotalHits$;
+  hits: number;
+  status: UnifiedHistogramStatus;
+  append?: ReactNode;
 }
 
-export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }: HitsCounterProps) {
-  const data: DataTotalHitsMsg = useDataState(savedSearchData$);
-
-  const hits = data.result || 0;
-  if (!hits && data.fetchStatus === FetchStatus.LOADING) {
+export function HitsCounter({ hits, status, append }: HitsCounterProps) {
+  if (!hits && status === 'loading') {
     return null;
   }
 
   const formattedHits = (
     <strong
       data-test-subj={
-        data.fetchStatus === FetchStatus.PARTIAL
-          ? 'unifiedHistogramQueryHitsPartial'
-          : 'unifiedHistogramQueryHits'
+        status === 'partial' ? 'unifiedHistogramQueryHitsPartial' : 'unifiedHistogramQueryHits'
       }
     >
       <FormattedNumber value={hits} />
@@ -66,14 +44,14 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
     >
       <EuiFlexItem grow={false} aria-live="polite">
         <EuiText>
-          {data.fetchStatus === FetchStatus.PARTIAL && (
+          {status === 'partial' && (
             <FormattedMessage
               id="unifiedHistogram.partialHits"
               defaultMessage="≥{formattedHits} {hits, plural, one {hit} other {hits}}"
               values={{ hits, formattedHits }}
             />
           )}
-          {data.fetchStatus !== FetchStatus.PARTIAL && (
+          {status !== 'partial' && (
             <FormattedMessage
               id="unifiedHistogram.hitsPluralTitle"
               defaultMessage="{formattedHits} {hits, plural, one {hit} other {hits}}"
@@ -82,7 +60,7 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
           )}
         </EuiText>
       </EuiFlexItem>
-      {data.fetchStatus === FetchStatus.PARTIAL && (
+      {status === 'partial' && (
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner
             size="m"
@@ -92,24 +70,7 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
           />
         </EuiFlexItem>
       )}
-      {showResetButton && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="refresh"
-            data-test-subj="resetSavedSearch"
-            onClick={onResetQuery}
-            size="s"
-            aria-label={i18n.translate('unifiedHistogram.reloadSavedSearchButton', {
-              defaultMessage: 'Reset search',
-            })}
-          >
-            <FormattedMessage
-              id="unifiedHistogram.reloadSavedSearchButton"
-              defaultMessage="Reset search"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
+      {append}
     </EuiFlexGroup>
   );
 }
