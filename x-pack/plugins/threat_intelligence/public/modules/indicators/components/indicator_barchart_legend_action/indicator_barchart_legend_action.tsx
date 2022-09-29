@@ -8,10 +8,9 @@
 import React, { useState, VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ComponentType } from '../../../../../common/types/component_type';
-import { FilterIn } from '../../../query_bar/components/filter_in';
-import { FilterOut } from '../../../query_bar/components/filter_out';
-import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
+import { FilterInContextMenu } from '../../../query_bar/components/filter_in';
+import { FilterOutContextMenu } from '../../../query_bar/components/filter_out';
+import { AddToTimelineContextMenu } from '../../../timeline/components/add_to_timeline';
 
 export const POPOVER_BUTTON_TEST_ID = 'tiBarchartPopoverButton';
 export const TIMELINE_BUTTON_TEST_ID = 'tiBarchartTimelineButton';
@@ -28,7 +27,7 @@ export interface IndicatorBarchartLegendActionProps {
    */
   data: string;
   /**
-   * Indicator field selected in the IndicatorFieldSelector component, passed to the {@link AddToTimeline} to populate the timeline.
+   * Indicator field selected in the IndicatorFieldSelector component, passed to the {@link AddToTimelineContextMenu} to populate the timeline.
    */
   field: string;
 }
@@ -40,24 +39,9 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
   const [isPopoverOpen, setPopover] = useState(false);
 
   const popoverItems = [
-    <FilterIn
-      data={data}
-      field={field}
-      type={ComponentType.ContextMenu}
-      data-test-subj={FILTER_IN_BUTTON_TEST_ID}
-    />,
-    <FilterOut
-      data={data}
-      field={field}
-      type={ComponentType.ContextMenu}
-      data-test-subj={FILTER_OUT_BUTTON_TEST_ID}
-    />,
-    <AddToTimeline
-      data={data}
-      field={field}
-      type={ComponentType.ContextMenu}
-      data-test-subj={TIMELINE_BUTTON_TEST_ID}
-    />,
+    <FilterInContextMenu data={data} field={field} data-test-subj={FILTER_IN_BUTTON_TEST_ID} />,
+    <FilterOutContextMenu data={data} field={field} data-test-subj={FILTER_OUT_BUTTON_TEST_ID} />,
+    <AddToTimelineContextMenu data={data} field={field} data-test-subj={TIMELINE_BUTTON_TEST_ID} />,
   ];
 
   return (

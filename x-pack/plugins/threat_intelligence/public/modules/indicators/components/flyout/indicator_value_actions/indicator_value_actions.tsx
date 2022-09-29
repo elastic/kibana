@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
 import React, { VFC } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { Indicator } from '../../../../../../common/types/indicator';
-import { FilterIn } from '../../../../query_bar/components/filter_in';
-import { FilterOut } from '../../../../query_bar/components/filter_out';
-import { AddToTimeline } from '../../../../timeline/components/add_to_timeline';
+import { FilterInButtonIcon } from '../../../../query_bar/components/filter_in';
+import { FilterOutButtonIcon } from '../../../../query_bar/components/filter_out';
+import { AddToTimelineButtonIcon } from '../../../../timeline/components/add_to_timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils/field_value';
 
 export const TIMELINE_BUTTON_TEST_ID = 'TimelineButton';
@@ -28,10 +27,6 @@ interface IndicatorValueActions {
    */
   field: string;
   /**
-   * Only used with `EuiDataGrid` (see {@link AddToTimelineButtonProps}).
-   */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  /**
    * Used for unit and e2e tests.
    */
   ['data-test-subj']?: string;
@@ -40,28 +35,22 @@ interface IndicatorValueActions {
 export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   indicator,
   field,
-  Component,
-  ...props
+  'data-test-subj': dataTestSubj,
 }) => {
   const { key, value } = getIndicatorFieldAndValue(indicator, field);
   if (!fieldAndValueValid(key, value)) {
     return null;
   }
 
-  const filterInTestId = `${props['data-test-subj']}${FILTER_IN_BUTTON_TEST_ID}`;
-  const filterOutTestId = `${props['data-test-subj']}${FILTER_OUT_BUTTON_TEST_ID}`;
-  const timelineTestId = `${props['data-test-subj']}${TIMELINE_BUTTON_TEST_ID}`;
+  const filterInTestId = `${dataTestSubj}${FILTER_IN_BUTTON_TEST_ID}`;
+  const filterOutTestId = `${dataTestSubj}${FILTER_OUT_BUTTON_TEST_ID}`;
+  const timelineTestId = `${dataTestSubj}${TIMELINE_BUTTON_TEST_ID}`;
 
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center">
-      <FilterIn as={Component} data={indicator} field={field} data-test-subj={filterInTestId} />
-      <FilterOut as={Component} data={indicator} field={field} data-test-subj={filterOutTestId} />
-      <AddToTimeline
-        as={Component}
-        data={indicator}
-        field={field}
-        data-test-subj={timelineTestId}
-      />
+      <FilterInButtonIcon data={indicator} field={field} data-test-subj={filterInTestId} />
+      <FilterOutButtonIcon data={indicator} field={field} data-test-subj={filterOutTestId} />
+      <AddToTimelineButtonIcon data={indicator} field={field} data-test-subj={timelineTestId} />
     </EuiFlexGroup>
   );
 };

@@ -11,8 +11,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_indicators_filters_context';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
-import { FilterIn } from '.';
-import { ComponentType } from '../../../../../common/types/component_type';
+import { FilterInButtonIcon, FilterInContextMenu, FilterInCellAction } from '.';
 
 jest.mock('../../../indicators/hooks/use_indicators_filters_context');
 
@@ -22,48 +21,46 @@ const mockField: string = 'threat.feed.name';
 
 const mockTestId: string = 'abc';
 
-describe('<FilterIn />', () => {
+describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />', () => {
   beforeEach(() => {
     (
       useIndicatorsFiltersContext as jest.MockedFunction<typeof useIndicatorsFiltersContext>
     ).mockReturnValue(mockIndicatorsFiltersContext);
   });
 
+  it('should render an empty component (wrong data input)', () => {
+    const component = render(<FilterInButtonIcon data={''} field={mockField} />);
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render an empty component (wrong field input)', () => {
+    const component = render(<FilterInButtonIcon data={mockIndicator} field={''} />);
+
+    expect(component).toMatchSnapshot();
+  });
+
   it('should render one EuiButtonIcon', () => {
     const component = render(
-      <FilterIn data={mockIndicator} field={mockField} data-test-subj={mockTestId} />
+      <FilterInButtonIcon data={mockIndicator} field={mockField} data-test-subj={mockTestId} />
     );
 
     expect(component.getByTestId(mockTestId)).toBeInTheDocument();
     expect(component).toMatchSnapshot();
   });
 
+  it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
+    const component = render(<FilterInContextMenu data={mockIndicator} field={mockField} />);
+
+    expect(component).toMatchSnapshot();
+  });
+
   it('should render one Component (for EuiDataGrid use)', () => {
-    const mockType: ComponentType = ComponentType.EuiDataGrid;
     const mockComponent: FunctionComponent = () => <EuiButtonIcon iconType="plusInCircle" />;
 
     const component = render(
-      <FilterIn data={mockIndicator} field={mockField} type={mockType} as={mockComponent} />
+      <FilterInCellAction data={mockIndicator} field={mockField} Component={mockComponent} />
     );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
-    const mockType: ComponentType = ComponentType.ContextMenu;
-    const component = render(<FilterIn data={mockIndicator} field={mockField} type={mockType} />);
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should render an empty component (wrong data input)', () => {
-    const component = render(<FilterIn data={''} field={mockField} />);
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should render an empty component (wrong field input)', () => {
-    const component = render(<FilterIn data={mockIndicator} field={''} />);
 
     expect(component).toMatchSnapshot();
   });

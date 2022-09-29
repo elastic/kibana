@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './use_add_to_timeline';
 export * from './use_investigate_in_timeline';

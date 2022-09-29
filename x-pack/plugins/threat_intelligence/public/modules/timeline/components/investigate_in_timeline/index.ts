@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './investigate_in_timeline_button_icon';
+export * from './investigate_in_timeline';

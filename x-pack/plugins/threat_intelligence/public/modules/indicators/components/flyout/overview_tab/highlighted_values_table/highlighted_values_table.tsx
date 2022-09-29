@@ -34,7 +34,7 @@ interface HighlightedValuesTableProps {
  */
 export const HighlightedValuesTable: VFC<HighlightedValuesTableProps> = ({
   indicator,
-  ...props
+  'data-test-subj': dataTestSubj,
 }) => {
   const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
 
@@ -48,7 +48,7 @@ export const HighlightedValuesTable: VFC<HighlightedValuesTableProps> = ({
       search={false}
       indicator={indicator}
       fields={highlightedFields}
-      {...props}
+      data-test-subj={dataTestSubj}
     />
   );
 };
