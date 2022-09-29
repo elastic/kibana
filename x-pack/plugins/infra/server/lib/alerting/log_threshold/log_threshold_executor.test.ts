@@ -14,6 +14,8 @@ import {
   getGroupedESQuery,
   processUngroupedResults,
   processGroupByResults,
+  LogThresholdAlertFactory,
+  LogThresholdAlertLimit,
 } from './log_threshold_executor';
 import {
   Comparator,
@@ -408,7 +410,7 @@ describe('Log threshold executor', () => {
   describe('Results processors', () => {
     describe('Can process ungrouped results', () => {
       test('It handles the ALERT state correctly', () => {
-        const alertFactoryMock = jest.fn();
+        const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
         const ruleParams = {
           ...baseRuleParams,
           criteria: [positiveCriteria[0]],
@@ -441,7 +443,12 @@ describe('Log threshold executor', () => {
 
     describe('Can process grouped results', () => {
       test('It handles the ALERT state correctly', () => {
-        const alertFactoryMock = jest.fn();
+        const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
+        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
+          getValue: jest.fn().mockReturnValue(2),
+          setLimitReached: jest.fn(),
+        };
+
         const ruleParams = {
           ...baseRuleParams,
           criteria: [positiveCriteria[0]],
@@ -481,7 +488,7 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(results, ruleParams, alertFactoryMock);
+        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
         expect(alertFactoryMock.mock.calls.length).toBe(2);
 
         // First call, fifth argument
@@ -513,6 +520,8 @@ describe('Log threshold executor', () => {
             },
           },
         ]);
+
+        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(true);
       });
     });
   });
