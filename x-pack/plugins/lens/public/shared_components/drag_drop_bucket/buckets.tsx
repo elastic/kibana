@@ -50,7 +50,7 @@ export const DraggableBucketContainer = ({
       {(provided, state) => (
         <Container
           draggableProvided={provided}
-          isDragging={state.isDragging}
+          isDragging={state?.isDragging ?? false}
           {...bucketContainerProps}
         >
           {children}
