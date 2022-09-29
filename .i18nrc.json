@@ -60,6 +60,7 @@
     "kibana-react": "src/plugins/kibana_react",
     "kibanaOverview": "src/plugins/kibana_overview",
     "lists": "packages/kbn-securitysolution-list-utils/src",
+    "exceptionList-components": "packages/kbn-securitysolution-exception-list-components/src",
     "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
     "monaco": "packages/kbn-monaco/src",
     "navigation": "src/plugins/navigation",
