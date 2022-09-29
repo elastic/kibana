@@ -3,5 +3,17 @@
   "id": "@kbn/user-profile-components",
   "owner": "@elastic/kibana-security",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+      ],
+      "stripInternal": true
+    },
+  },
 }

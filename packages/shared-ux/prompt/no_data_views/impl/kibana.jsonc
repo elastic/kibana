@@ -3,5 +3,19 @@
   "id": "@kbn/shared-ux-prompt-no-data-views",
   "owner": "@elastic/shared-ux",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+        "react",
+        "@emotion/react/types/css-prop",
+        "@kbn/ambient-ui-types",
+      ],
+    },
+  },
 }

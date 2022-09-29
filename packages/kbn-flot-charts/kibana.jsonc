@@ -3,5 +3,11 @@
   "id": "@kbn/flot-charts",
   "owner": "@elastic/kibana-operations",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "main": "./index.js",
+    },
+    "noTsConfig": true
+  },
 }

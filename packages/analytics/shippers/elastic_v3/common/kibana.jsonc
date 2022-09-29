@@ -3,5 +3,16 @@
   "id": "@kbn/analytics-shippers-elastic-v3-common",
   "owner": "@elastic/kibana-core",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+      ],
+    },
+  },
 }

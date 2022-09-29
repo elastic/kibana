@@ -3,5 +3,16 @@
   "id": "@kbn/io-ts-utils",
   "owner": "@elastic/apm-ui",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+      ],
+    },
+  },
 }

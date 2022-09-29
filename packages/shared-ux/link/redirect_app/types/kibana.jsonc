@@ -3,5 +3,19 @@
   "id": "@kbn/shared-ux-link-redirect-app-types",
   "owner": "@elastic/shared-ux",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "main": "./index.js",
+    },
+    "tsInclude": [
+      "*.d.ts",
+    ],
+    "tsCompOptsOverrides": {
+      "types": [
+        "rxjs",
+        "@types/react",
+      ],
+    },
+  },
 }

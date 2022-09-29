@@ -3,5 +3,20 @@
   "id": "@kbn/ace",
   "owner": "@elastic/platform-deployment-management",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsInclude": [
+      "**/*.ts",
+      "src/ace/modes/x_json/worker/x_json.ace.worker.js",
+    ],
+    "tsCompOptsOverrides": {
+      "types": [
+        "node",
+      ],
+      "stripInternal": true
+    },
+  },
 }

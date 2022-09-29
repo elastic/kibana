@@ -3,5 +3,18 @@
   "id": "@kbn/shared-ux-page-kibana-template",
   "owner": "@elastic/shared-ux",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsInclude": [
+      "**/*.ts",
+      "**/*.tsx",
+    ],
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+        "@kbn/ambient-ui-types",
+      ],
+    },
+  },
 }

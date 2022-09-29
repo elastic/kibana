@@ -3,5 +3,19 @@
   "id": "@kbn/content-management-table-list",
   "owner": "@elastic/shared-ux",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+        "react",
+        "@kbn/ambient-ui-types",
+        "@kbn/ambient-storybook-types",
+      ],
+    },
+  },
 }

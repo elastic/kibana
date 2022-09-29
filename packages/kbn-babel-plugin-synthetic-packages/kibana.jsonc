@@ -4,5 +4,11 @@
   "devOnly": true,
   "owner": "@elastic/kibana-operations",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "main": "./babel_plugin_synthetic_packages.js",
+    },
+    "noTsConfig": true
+  },
 }

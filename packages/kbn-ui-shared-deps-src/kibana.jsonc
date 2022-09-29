@@ -3,5 +3,20 @@
   "id": "@kbn/ui-shared-deps-src",
   "owner": "@elastic/kibana-operations",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsInclude": [
+      "**/*.ts",
+      "**/*.js",
+    ],
+    "tsExclude": [
+      "**/*.config.js",
+    ],
+    "tsCompOptsOverrides": {
+      "types": [
+        "node",
+      ],
+      "allowJs": true
+    },
+  },
 }

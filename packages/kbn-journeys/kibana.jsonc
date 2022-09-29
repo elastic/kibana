@@ -5,4 +5,12 @@
   "devOnly": true,
   "runtimeDeps": [],
   "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsCompOptsOverrides": {
+      "types": [
+        "mocha",
+        "node",
+      ],
+    },
+  },
 }

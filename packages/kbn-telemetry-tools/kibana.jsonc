@@ -4,5 +4,10 @@
   "devOnly": true,
   "owner": "@elastic/kibana-core",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsCompOptsOverrides": {
+      "isolatedModules": true
+    },
+  },
 }

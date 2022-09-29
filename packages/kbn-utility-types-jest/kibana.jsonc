@@ -3,5 +3,10 @@
   "id": "@kbn/utility-types-jest",
   "owner": "@elastic/kibana-operations",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsCompOptsOverrides": {
+      "stripInternal": true
+    },
+  },
 }

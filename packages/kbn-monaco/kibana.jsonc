@@ -3,5 +3,23 @@
   "id": "@kbn/monaco",
   "owner": "@elastic/kibana-app-services",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "target_web/index.js",
+      "scripts": {
+        "build:antlr4ts": "../../node_modules/antlr4ts-cli/antlr4ts ./src/painless/antlr/painless_lexer.g4 ./src/painless/antlr/painless_parser.g4 && node ./scripts/fix_generated_antlr.js",
+      },
+    },
+    "tsInclude": [
+      "src/**/*",
+      "**/*.ts",
+    ],
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+      ],
+    },
+  },
 }

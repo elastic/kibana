@@ -3,5 +3,11 @@
   "id": "@kbn/timelion-grammar",
   "owner": "@elastic/kibana-vis-editors",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "main": "grammar/built_grammar.js",
+    },
+    "noTsConfig": true
+  },
 }

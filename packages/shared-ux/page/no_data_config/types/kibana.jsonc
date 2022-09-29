@@ -3,5 +3,13 @@
   "id": "@kbn/shared-ux-page-no-data-config-types",
   "owner": "@elastic/shared-ux",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsInclude": [
+      "*.d.ts",
+    ],
+    "tsCompOptsOverrides": {
+      "types": [],
+    },
+  },
 }

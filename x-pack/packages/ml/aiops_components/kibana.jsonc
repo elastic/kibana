@@ -3,5 +3,21 @@
   "id": "@kbn/aiops-components",
   "owner": "@elastic/ml-ui",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsCompOptsOverrides": {
+      "types": [
+        "@types/d3-brush",
+        "@types/d3-scale",
+        "@types/d3-selection",
+        "@types/d3-transition",
+        "jest",
+        "node",
+        "react",
+      ],
+    },
+  },
 }

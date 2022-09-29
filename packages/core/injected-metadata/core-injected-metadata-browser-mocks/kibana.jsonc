@@ -3,5 +3,10 @@
   "id": "@kbn/core-injected-metadata-browser-mocks",
   "owner": "@elastic/kibana-core",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+  },
 }

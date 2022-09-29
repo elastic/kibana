@@ -3,5 +3,12 @@
   "id": "@kbn/datemath",
   "owner": "@elastic/kibana-app-services",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsCompOptsOverrides": {
+      "types": [
+        "node",
+      ],
+    },
+  },
 }

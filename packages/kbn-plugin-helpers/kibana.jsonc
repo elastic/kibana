@@ -4,5 +4,12 @@
   "devOnly": true,
   "owner": "@elastic/kibana-operations",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "bin": {
+        "plugin-helpers": "bin/plugin-helpers.js",
+      },
+    },
+  },
 }

@@ -3,5 +3,10 @@
   "id": "@kbn/config-schema",
   "owner": "@elastic/kibana-core",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsCompOptsOverrides": {
+      "stripInternal": true
+    },
+  },
 }

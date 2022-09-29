@@ -4,4 +4,22 @@
   "owner": "@elastic/security-solution-platform",
   "runtimeDeps": [],
   "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsInclude": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.d.ts",
+    ],
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+        "react",
+        "@emotion/react/types/css-prop",
+      ],
+    },
+  },
 }

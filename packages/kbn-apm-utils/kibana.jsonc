@@ -3,5 +3,12 @@
   "id": "@kbn/apm-utils",
   "owner": "@elastic/apm-ui",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsCompOptsOverrides": {
+      "types": [
+        "node",
+      ],
+    },
+  },
 }

@@ -3,5 +3,17 @@
   "id": "@kbn/server-route-repository",
   "owner": "@elastic/apm-ui",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/web_index.js",
+    },
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+      ],
+      "noUnusedLocals": false
+    },
+  },
 }

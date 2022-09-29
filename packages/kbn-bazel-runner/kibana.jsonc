@@ -4,5 +4,15 @@
   "devOnly": true,
   "owner": "@elastic/kibana-operations",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsInclude": [
+      "**/*.js",
+      "**/*.ts",
+    ],
+    "tsCompOptsOverrides": {
+      "allowJs": true,
+      "checkJs": true
+    },
+  },
 }

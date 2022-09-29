@@ -3,5 +3,23 @@
   "id": "@kbn/coloring",
   "owner": "@elastic/kibana-vis-editors",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsInclude": [
+      "**/*.scss",
+      "**/*.ts",
+      "**/*.tsx",
+    ],
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+        "react",
+        "@emotion/react/types/css-prop",
+      ],
+    },
+  },
 }

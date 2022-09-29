@@ -3,5 +3,13 @@
   "id": "@kbn/mapbox-gl",
   "owner": "@elastic/kibana-gis",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsCompOptsOverrides": {
+      "types": [],
+    },
+  },
 }

@@ -4,5 +4,14 @@
   "devOnly": true,
   "owner": "@elastic/platform-deployment-management",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "main": "index.js",
+      "scripts": {
+        "format": "../../node_modules/.bin/prettier **/*.js --write",
+      },
+    },
+    "noTsConfig": true
+  },
 }

@@ -4,5 +4,14 @@
   "devOnly": true,
   "owner": "@elastic/kibana-operations",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsInclude": [
+      "**/*.ts",
+      "**/*.tsx",
+    ],
+    "tsCompOptsOverrides": {
+      "stripInternal": true
+    },
+  },
 }

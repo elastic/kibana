@@ -3,5 +3,10 @@
   "id": "@kbn/std",
   "owner": "@elastic/kibana-core",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsCompOptsOverrides": {
+      "stripInternal": true
+    },
+  },
 }

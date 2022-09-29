@@ -4,5 +4,18 @@
   "devOnly": true,
   "owner": "@elastic/kibana-operations",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "tsInclude": [
+      "**/*.ts",
+      "**/*.js",
+    ],
+    "tsExclude": [
+      "types/**/*",
+      "**/__fixtures__/**/*",
+    ],
+    "tsCompOptsOverrides": {
+      "stripInternal": true
+    },
+  },
 }

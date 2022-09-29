@@ -3,5 +3,16 @@
   "id": "@kbn/securitysolution-list-utils",
   "owner": "@elastic/security-solution-platform",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+      ],
+    },
+  },
 }

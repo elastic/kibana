@@ -3,5 +3,25 @@
   "id": "@kbn/i18n",
   "owner": "@elastic/kibana-core",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/src/browser.js",
+    },
+    "tsInclude": [
+      "**/*.ts",
+      "**/*.tsx",
+      "types/intl_format_cache.d.ts",
+      "types/intl_relativeformat.d.ts",
+    ],
+    "tsExclude": [
+      "**/__fixtures__/**/*",
+    ],
+    "tsCompOptsOverrides": {
+      "types": [
+        "jest",
+        "node",
+      ],
+    },
+  },
 }
