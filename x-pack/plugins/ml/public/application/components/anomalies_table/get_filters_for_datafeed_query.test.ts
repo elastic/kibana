@@ -68,7 +68,7 @@ describe('getFiltersForDSLQuery', () => {
       ]);
     });
 
-    test('returns empty array when invalid dataViewId', () => {
+    test('returns empty array when dataViewId is invalid', () => {
       const actual = getFiltersForDSLQuery(query, null, 'test-alias');
       expect(actual).toEqual([]);
     });
