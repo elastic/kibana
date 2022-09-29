@@ -169,7 +169,7 @@ const ExceptionsViewerComponent = ({
       setViewerState('loading');
     } else if (viewerState === 'loading' && !isLoadingReferences) {
       setViewerState(null);
-    } 
+    }
   }, [isLoadingReferences, isFetchReferencesError, setViewerState, viewerState]);
 
   const handleFetchItems = useCallback(
