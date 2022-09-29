@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
 import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
@@ -43,6 +43,9 @@ import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/componen
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
+import { Loader } from '../../../../common/components/loader';
+import { Panel } from '../../../../common/components/panel';
+import * as commonI18n from '../common/translations';
 import { usersActions } from '../../../../users/store';
 
 const TABLE_QUERY_ID = (riskEntity: RiskScoreEntity) =>
@@ -191,7 +194,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder data-test-subj={`entity_analytics_${riskEntity}s`}>
+      <Panel hasBorder data-test-subj={`entity_analytics_${riskEntity}s`}>
         <HeaderSection
           title={<RiskScoreHeaderTitle riskScoreEntity={riskEntity} />}
           titleSize="s"
@@ -201,6 +204,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           id={TABLE_QUERY_ID(riskEntity)}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
+          tooltip={commonI18n.HOST_RISK_TABLE_TOOLTIP}
         >
           {toggleStatus && (
             <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -249,7 +253,10 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-      </EuiPanel>
+        {(isTableLoading || isKpiLoading) && (
+          <Loader data-test-subj="loadingPanelRiskScore" overlay size="xl" />
+        )}
+      </Panel>
     </InspectButtonContainer>
   );
 };

@@ -46,7 +46,6 @@ const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, original
             <RiskScoreHeaderTitle
               title={i18n.RISK_DATA_TITLE(riskEntity)}
               riskScoreEntity={riskEntity}
-              showTooltip={false}
             />
           }
           toolTipContent={
