@@ -14,7 +14,7 @@ import { UserAvatar } from './user_avatar';
 import { UserToolTip } from './user_tooltip';
 
 /**
- * Renders an avatar with a tooltip given a user profile
+ * Renders a user avatar with tooltip
  */
 export const UserAvatarTip: FunctionComponent<UserAvatarProps> = ({ user, avatar, ...rest }) => {
   if (!user) {
