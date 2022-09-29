@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FilterInContextMenu } from '../../../query_bar/components/filter_in';
 import { FilterOutContextMenu } from '../../../query_bar/components/filter_out';
 import { AddToTimelineContextMenu } from '../../../timeline/components/add_to_timeline';
+import { useStyles } from './styles';
 
 export const POPOVER_BUTTON_TEST_ID = 'tiBarchartPopoverButton';
 export const TIMELINE_BUTTON_TEST_ID = 'tiBarchartTimelineButton';
@@ -36,6 +37,7 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
   data,
   field,
 }) => {
+  const styles = useStyles();
   const [isPopoverOpen, setPopover] = useState(false);
 
   const popoverItems = [
@@ -45,25 +47,27 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
   ];
 
   return (
-    <EuiPopover
-      data-test-subj={POPOVER_BUTTON_TEST_ID}
-      button={
-        <EuiToolTip content={BUTTON_LABEL}>
-          <EuiButtonIcon
-            aria-label={BUTTON_LABEL}
-            iconType="boxesHorizontal"
-            iconSize="s"
-            size="xs"
-            onClick={() => setPopover(!isPopoverOpen)}
-          />
-        </EuiToolTip>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setPopover(false)}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel size="s" items={popoverItems} />
-    </EuiPopover>
+    <div css={styles.contextMenu}>
+      <EuiPopover
+        data-test-subj={POPOVER_BUTTON_TEST_ID}
+        button={
+          <EuiToolTip content={BUTTON_LABEL}>
+            <EuiButtonIcon
+              aria-label={BUTTON_LABEL}
+              iconType="boxesHorizontal"
+              iconSize="s"
+              size="xs"
+              onClick={() => setPopover(!isPopoverOpen)}
+            />
+          </EuiToolTip>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopover(false)}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel size="s" items={popoverItems} />
+      </EuiPopover>
+    </div>
   );
 };
