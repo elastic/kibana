@@ -145,11 +145,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     }),
     [field, indexPattern.id, itemIndex]
   );
+  const canAddToWorkspace = hasSuggestionForField(value);
 
   const buttonAddToWorkspaceProps: FieldPopoverHeaderProps['buttonAddFieldToWorkspaceProps'] =
     useMemo(() => {
-      const isEnabled = hasSuggestionForField(value);
-      const buttonTitle = isEnabled
+      const buttonTitle = canAddToWorkspace
         ? i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
             defaultMessage: 'Add {field} to workspace',
             values: {
@@ -162,10 +162,10 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           });
 
       return {
-        isDisabled: !isEnabled,
+        isDisabled: !canAddToWorkspace,
         'aria-label': buttonTitle,
       };
-    }, [value, hasSuggestionForField]);
+    }, [value, canAddToWorkspace]);
 
   const dropOntoWorkspaceAndClose = useCallback(() => {
     dropOntoWorkspace(value);
