@@ -64,7 +64,7 @@ export function LayerPanel(
       newDatasourcestate: unknown,
       newVisualizationState: unknown
     ) => void;
-    onRemoveLayer: () => void;
+    onRemoveLayer: (layerId: string) => void;
     onCloneLayer: () => void;
     onRemoveDimension: (props: { columnId: string; layerId: string }) => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
@@ -332,7 +332,7 @@ export function LayerPanel(
                   isOnlyLayer={isOnlyLayer}
                   activeVisualization={activeVisualization}
                   layerType={activeVisualization.getLayerType(layerId, visualizationState)}
-                  onRemoveLayer={onRemoveLayer}
+                  onRemoveLayer={() => onRemoveLayer(layerId)}
                   onCloneLayer={onCloneLayer}
                   isTextBasedLanguage={isTextBasedLanguage}
                   core={core}

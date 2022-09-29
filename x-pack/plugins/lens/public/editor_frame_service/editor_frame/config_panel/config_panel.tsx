@@ -249,8 +249,9 @@ export function LayerPanels(
                   })
                 );
               }}
-              onRemoveLayer={() => {
-                const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
+              onRemoveLayer={(layerToRemoveId: string) => {
+                const datasourcePublicAPI =
+                  props.framePublicAPI.datasourceLayers?.[layerToRemoveId];
                 const datasourceId = datasourcePublicAPI?.datasourceId;
 
                 if (datasourceId) {
@@ -261,10 +262,15 @@ export function LayerPanels(
 
                   action?.execute({
                     trigger,
-                    fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
+                    fromDataView: layerDatasource.getUsedDataView(
+                      layerDatasourceState,
+                      layerToRemoveId
+                    ),
                     usedDataViews: layerDatasource
                       .getLayers(layerDatasourceState)
-                      .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
+                      .map((layer) =>
+                        layerDatasource.getUsedDataView(layerDatasourceState, layerToRemoveId)
+                      ),
                     defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
                   } as ActionExecutionContext);
                 }
@@ -272,7 +278,7 @@ export function LayerPanels(
                 dispatchLens(
                   removeOrClearLayer({
                     visualizationId: activeVisualization.id,
-                    layerId,
+                    layerId: layerToRemoveId,
                     layerIds,
                   })
                 );
