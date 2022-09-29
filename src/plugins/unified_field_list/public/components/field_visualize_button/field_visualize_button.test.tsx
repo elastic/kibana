@@ -34,6 +34,7 @@ const visualizeAction = createAction<VisualizeFieldContext>({
   execute: async (context: VisualizeFieldContext) => {
     mockExecuteAction(context);
   },
+  getHref: async () => '/app/test',
 });
 
 jest.spyOn(uiActions, 'getTriggerCompatibleActions').mockResolvedValue([visualizeAction]);
@@ -83,6 +84,8 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
       fieldName: fieldNameKeyword,
       originatingApp: ORIGINATING_APP,
     });
+
+    expect(wrapper!.find(EuiButton).prop('href')).toBe('/app/test');
   });
 
   it('should render correctly for geo fields', async () => {
