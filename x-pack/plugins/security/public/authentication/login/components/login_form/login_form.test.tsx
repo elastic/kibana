@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiIcon } from '@elastic/eui';
+import { EuiCallOut, EuiIcon } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
