@@ -21,11 +21,11 @@ import {
 export interface FieldVisualizeButtonProps {
   field: DataViewField;
   dataView: DataView;
-  multiFields?: DataViewField[];
-  contextualFields?: string[];
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   originatingApp: string; // plugin id
   uiActions: UiActionsStart;
+  multiFields?: DataViewField[];
+  contextualFields?: string[]; // names of fields which were also selected (like columns in Discover grid)
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   buttonProps?: Partial<EuiButtonProps>;
 }
 

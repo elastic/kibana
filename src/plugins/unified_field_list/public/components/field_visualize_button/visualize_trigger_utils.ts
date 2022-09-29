@@ -98,7 +98,7 @@ export async function getVisualizeInformation(
     // if the field has compatible actions use this field for visualizing
     if (actions.length > 0) {
       const triggerOptions = {
-        dataViewSpec: dataView?.toSpec(),
+        dataViewSpec: dataView?.toSpec(false),
         fieldName: f.name,
         contextualFields,
         trigger: getTrigger(f.type),
