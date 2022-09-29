@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -87,6 +87,10 @@ export const AddNote = React.memo<{
     [onCancelAddNote]
   );
 
+  const isAddNoteDisabled = useMemo(() => {
+    return newNote.trim().length === 0 && authenticatedUser !== null;
+  }, [newNote, authenticatedUser]);
+
   return (
     <AddNotesContainer onKeyDown={onKeyDown} role="dialog">
       <div style={{ width: '100%' }}>
@@ -108,7 +112,7 @@ export const AddNote = React.memo<{
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="add-note"
-              isDisabled={newNote.trim().length === 0}
+              isDisabled={isAddNoteDisabled}
               fill={true}
               onClick={handleClick}
             >
