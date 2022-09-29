@@ -11,23 +11,23 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { HostIsolationExceptionsList } from '../host_isolation_exceptions_list';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { HostIsolationExceptionsList } from '../../host_isolation_exceptions_list';
 import { act, waitFor } from '@testing-library/react';
-import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constants';
+import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../../common/constants';
 import {
   exceptionsListAllHttpMocks,
   fleetGetEndpointPackagePolicyListHttpMock,
-} from '../../../../mocks';
+} from '../../../../../mocks';
 import {
   clickOnEffectedPolicy,
   isEffectedPolicySelected,
-} from '../../../../components/effected_policy_select/test_utils';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../common/endpoint/service/artifacts';
+} from '../../../../../components/effected_policy_select/test_utils';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 
-jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../../common/components/user_privileges');
 
 describe('When on the host isolation exceptions entry form', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
