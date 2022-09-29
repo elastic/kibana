@@ -608,7 +608,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             agents: 'active:true',
             version: fleetServerVersion,
-            batchSize: 2,
+            batchSize: 3,
           })
           .expect(200);
 
@@ -626,7 +626,7 @@ export default function (providerContext: FtrProviderContext) {
         await new Promise((resolve, reject) => {
           let attempts = 0;
           const intervalId = setInterval(async () => {
-            if (attempts > 2) {
+            if (attempts > 4) {
               clearInterval(intervalId);
               reject('action timed out');
             }
@@ -636,7 +636,7 @@ export default function (providerContext: FtrProviderContext) {
             } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
             const action = actionStatuses.find((a: any) => a.actionId === actionId);
             // 2 upgradeable
-            if (action && action.nbAgentsActionCreated === 2) {
+            if (action && action.nbAgentsActionCreated === 2 && action.nbAgentsFailed === 3) {
               clearInterval(intervalId);
               await verifyActionResult();
               resolve({});
@@ -1016,7 +1016,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
         // attempt to upgrade agent in hosted agent policy
-        const { body } = await supertest
+        await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -1025,15 +1025,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(body).to.eql({
-          agent1: {
-            success: false,
-            error:
-              'Cannot upgrade agent in hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
-          },
-          agent2: { success: true },
-        });
-
         const [agent1data, agent2data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent1`),
           supertest.get(`/api/fleet/agents/agent2`),
@@ -1041,6 +1032,13 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.status).to.eql('FAILED');
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
       });
 
       it('enrolled in a hosted agent policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {
@@ -1076,7 +1074,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
         // attempt to upgrade agent in hosted agent policy
-        const { body } = await supertest
+        await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -1084,11 +1082,6 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent1', 'agent2'],
             force: true,
           });
-
-        expect(body).to.eql({
-          agent1: { success: true },
-          agent2: { success: true },
-        });
 
         const [agent1data, agent2data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent1`),
