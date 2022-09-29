@@ -25,16 +25,9 @@ export function makeFtrConfigProvider(
   steps: AnyStep[]
 ): FtrConfigProvider {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const baseConfig = (
-      await readConfigFile(
-        Path.resolve(
-          REPO_ROOT,
-          config.isXpack()
-            ? 'x-pack/test/functional/config.base.js'
-            : 'test/functional/config.base.js'
-        )
-      )
-    ).getAll();
+    const functionalConfig = await readConfigFile(
+      Path.resolve(REPO_ROOT, 'x-pack/test/functional/config.base.js')
+    );
 
     const testBuildId = process.env.BUILDKITE_BUILD_ID ?? `local-${uuidV4()}`;
     const testJobId = process.env.BUILDKITE_JOB_ID ?? `local-${uuidV4()}`;
@@ -56,20 +49,14 @@ export function makeFtrConfigProvider(
       ...(prId !== undefined ? { prId } : {}),
       ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
       journeyName: config.getName(),
+      performancePhase: process.env.TEST_PERFORMANCE_PHASE || 'not set',
     };
 
     return {
-      ...baseConfig,
-
-      mochaOpts: {
-        ...baseConfig.mochaOpts,
-        bail: true,
-      },
-
       services: commonFunctionalServices,
       pageObjects: {},
-
-      servicesRequiredForTestAnalysis: ['performance', 'journeyConfig'],
+      servers: functionalConfig.get('servers'),
+      esTestCluster: functionalConfig.get('esTestCluster'),
 
       junit: {
         reportName: `Journey: ${config.getName()}`,
@@ -79,19 +66,19 @@ export function makeFtrConfigProvider(
         },
       },
 
-      kbnTestServer: {
-        ...baseConfig.kbnTestServer,
-        // delay shutdown by 15 seconds to ensure that APM can report the data it collects during test execution
-        delayShutdown: process.env.TEST_PERFORMANCE_PHASE === 'TEST' ? 15_000 : 0,
+      mochaOpts: {
+        bail: true,
+      },
 
+      kbnTestServer: {
+        ...functionalConfig.get('kbnTestServer'),
         serverArgs: [
-          ...baseConfig.kbnTestServer.serverArgs,
+          ...functionalConfig.get('kbnTestServer.serverArgs'),
           `--telemetry.optIn=${process.env.TEST_PERFORMANCE_PHASE === 'TEST'}`,
           `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
         ],
-
         env: {
           ELASTIC_APM_ACTIVE: process.env.TEST_PERFORMANCE_PHASE ? 'true' : 'false',
           ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
@@ -121,6 +108,8 @@ export function makeFtrConfigProvider(
             .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
             .join(','),
         },
+        // delay shutdown by 15 seconds to ensure that APM can report the data it collects during test execution
+        delayShutdown: process.env.TEST_PERFORMANCE_PHASE === 'TEST' ? 15_000 : 0,
       },
     };
   };

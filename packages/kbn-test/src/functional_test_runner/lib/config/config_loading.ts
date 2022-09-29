@@ -116,34 +116,35 @@ async function executeConfigModule(
   }
 
   log.debug(`Loading config file from ${Path.relative(process.cwd(), options.path)}`);
-  const settings: Promise<any> = module.provider({
-    log,
-    esVersion,
-    async readConfigFile(p: string) {
-      const childModule = await getConfigModule({
-        primary: false,
-        path: p,
-      });
+  const settings = (async () =>
+    await module.provider({
+      log,
+      esVersion,
+      async readConfigFile(p: string) {
+        const childModule = await getConfigModule({
+          primary: false,
+          path: p,
+        });
 
-      return new Config({
-        settings: await executeConfigModule(
-          log,
-          esVersion,
-          {
-            path: childModule.path,
-            settingOverrides: {},
-            primary: false,
-          },
-          childModule
-        ),
-        primary: false,
-        path: p,
-        module: childModule,
-      });
-    },
-  });
+        return new Config({
+          settings: await executeConfigModule(
+            log,
+            esVersion,
+            {
+              path: childModule.path,
+              settingOverrides: {},
+              primary: false,
+            },
+            childModule
+          ),
+          primary: false,
+          path: p,
+          module: childModule,
+        });
+      },
+    }))();
 
-  cache.set(module.provider, Promise.resolve(settings));
+  cache.set(module.provider, settings);
 
   return defaultsDeep({}, options.settingOverrides, await settings);
 }

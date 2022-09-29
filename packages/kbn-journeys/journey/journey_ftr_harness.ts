@@ -110,8 +110,7 @@ export class JourneyFtrHarness {
       this.page.on('console', this.onConsoleEvent);
     }
 
-    await this.sendCDPCommands(this.context, this.page);
-
+    await this.setupCdpClient(this.context, this.page);
     this.trackTelemetryRequests(this.page);
     await this.interceptBrowserRequests(this.page);
   }
@@ -129,7 +128,7 @@ export class JourneyFtrHarness {
     ]);
   }
 
-  private async tearDownBrowserAndPage() {
+  private async teardownPlaywright() {
     if (this.page) {
       const telemetryTracker = this.telemetryTrackerSubs.get(this.page);
       this.telemetryTrackerSubs.delete(this.page);
@@ -141,14 +140,24 @@ export class JourneyFtrHarness {
       }
 
       this.log.info('destroying page');
-      await this.client?.detach();
       await this.page.close();
-      await this.context?.close();
+      this.page = undefined;
+    }
+
+    if (this.client) {
+      await this.client.detach();
+      this.client = undefined;
+    }
+
+    if (this.context) {
+      await this.context.close();
+      this.context = undefined;
     }
 
     if (this.browser) {
       this.log.info('closing browser');
       await this.browser.close();
+      this.browser = undefined;
     }
   }
 
@@ -178,11 +187,13 @@ export class JourneyFtrHarness {
     // alive for active requests
     // https://github.com/elastic/apm-agent-nodejs/issues/2088
     await setTimeout(3000);
+
+    this.apm = null;
   }
 
   private async onTeardown() {
     await Promise.all([
-      this.tearDownBrowserAndPage(),
+      this.teardownPlaywright(),
       this.teardownApm(),
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.unload(esArchive);
@@ -261,6 +272,7 @@ export class JourneyFtrHarness {
     if (this.browser) {
       return this.browser;
     }
+
     return await this.withSpan('Browser creation', 'setup', async () => {
       const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
       this.browser = await playwright.chromium.launch({ headless, timeout: 60_000 });
@@ -268,19 +280,20 @@ export class JourneyFtrHarness {
     });
   }
 
-  private async sendCDPCommands(context: BrowserContext, page: Page) {
-    const client = await context.newCDPSession(page);
+  private async setupCdpClient(context: BrowserContext, page: Page) {
+    if (this.client) {
+      return;
+    }
 
-    await client.send('Network.clearBrowserCache');
-    await client.send('Network.setCacheDisabled', { cacheDisabled: true });
-    await client.send('Network.emulateNetworkConditions', {
+    this.client = await context.newCDPSession(page);
+    await this.client.send('Network.clearBrowserCache');
+    await this.client.send('Network.setCacheDisabled', { cacheDisabled: true });
+    await this.client.send('Network.emulateNetworkConditions', {
       latency: 100,
       downloadThroughput: 750_000,
       uploadThroughput: 750_000,
       offline: false,
     });
-
-    return client;
   }
 
   private telemetryTrackerCount = 0;
