@@ -50,6 +50,9 @@ const getSLOResponseSchema = t.type({
 });
 
 const updateSLOParamsSchema = t.type({
+  path: t.type({
+    id: t.string,
+  }),
   body: t.partial({
     name: t.string,
     description: t.string,
@@ -60,10 +63,29 @@ const updateSLOParamsSchema = t.type({
   }),
 });
 
+const updateSLOResponseSchema = t.type({
+  id: t.string,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: rollingTimeWindowSchema,
+  budgeting_method: budgetingMethodSchema,
+  objective: objectiveSchema,
+  created_at: dateType,
+  updated_at: dateType,
+});
+
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
 type GetSLOResponse = t.TypeOf<typeof getSLOResponseSchema>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
+type UpdateSLOResponse = t.TypeOf<typeof updateSLOResponseSchema>;
 
 export { createSLOParamsSchema, deleteSLOParamsSchema, getSLOParamsSchema, updateSLOParamsSchema };
-export type { CreateSLOParams, CreateSLOResponse, GetSLOResponse, UpdateSLOParams };
+export type {
+  CreateSLOParams,
+  CreateSLOResponse,
+  GetSLOResponse,
+  UpdateSLOParams,
+  UpdateSLOResponse,
+};
