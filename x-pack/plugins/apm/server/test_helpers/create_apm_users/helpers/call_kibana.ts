@@ -13,7 +13,7 @@ export async function callKibana<T>({
   kibana,
   options,
 }: {
-  elasticsearch: Elasticsearch;
+  elasticsearch: Omit<Elasticsearch, 'node'>;
   kibana: Kibana;
   options: AxiosRequestConfig;
 }): Promise<T> {

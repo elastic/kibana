@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { asyncForEach } from '@kbn/std';
 import { AbortError, callKibana } from './helpers/call_kibana';
 import { createOrUpdateUser } from './helpers/create_or_update_user';
-
+import { ApmUsername, users } from './authentication';
+import { createCustomRole } from './helpers/create_custom_role';
 export interface Elasticsearch {
+  node: string;
   username: string;
   password: string;
 }
@@ -28,6 +31,7 @@ export async function createApmUsers({
     elasticsearch,
     kibana,
   });
+
   if (!isCredentialsValid) {
     throw new AbortError('Invalid username/password');
   }
@@ -36,24 +40,33 @@ export async function createApmUsers({
     elasticsearch,
     kibana,
   });
+
   if (!isSecurityEnabled) {
     throw new AbortError('Security must be enabled!');
   }
 
-  // user definitions
-  const users = [
-    { username: 'viewer', roles: ['viewer'] },
-    { username: 'editor', roles: ['editor'] },
-  ];
+  const apmUsers = Object.values(ApmUsername);
+  await asyncForEach(apmUsers, async (username) => {
+    const user = users[username];
+    const { builtInRoleNames = [], customRoleNames = [] } = user;
 
-  // create users
-  await Promise.all(
-    users.map(async (user) =>
-      createOrUpdateUser({ elasticsearch, kibana, user })
-    )
-  );
+    // create custom roles
+    await Promise.all(
+      customRoleNames.map(async (roleName) =>
+        createCustomRole({ elasticsearch, kibana, roleName })
+      )
+    );
 
-  return users;
+    // create user
+    const roles = builtInRoleNames.concat(customRoleNames);
+    await createOrUpdateUser({
+      elasticsearch,
+      kibana,
+      user: { username, roles },
+    });
+  });
+
+  return apmUsers;
 }
 
 async function getIsSecurityEnabled({

@@ -18,5 +18,6 @@
   "references": [
     { "path": "../../../test/tsconfig.json" },
     { "path": "../../../../test/tsconfig.json" },
+    { "path": "../tsconfig.json" },
   ]
 }
