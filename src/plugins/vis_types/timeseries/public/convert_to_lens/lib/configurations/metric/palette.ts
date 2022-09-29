@@ -23,8 +23,11 @@ type ColorStopsWithMinMax = Pick<
   'colorStops' | 'stops' | 'steps' | 'rangeMax' | 'rangeMin' | 'continuity'
 >;
 
-type MetricColorRule = Exclude<Panel['background_color_rules'], undefined>[number];
-type GaugeColorRule = Exclude<Panel['gauge_color_rules'], undefined>[number];
+type MetricColorRules = Exclude<Panel['background_color_rules'], undefined>;
+type GaugeColorRules = Exclude<Panel['gauge_color_rules'], undefined>;
+
+type MetricColorRule = MetricColorRules[number];
+type GaugeColorRule = GaugeColorRules[number];
 
 type ValidMetricColorRule = Omit<MetricColorRule, 'background_color' | 'color'> &
   (
@@ -199,7 +202,7 @@ const getCustomPalette = (
 };
 
 export const getPalette = (
-  rules: Exclude<Panel['background_color_rules'] | Panel['gauge_color_rules'], undefined>
+  rules: MetricColorRules | GaugeColorRules
 ): PaletteOutput<CustomPaletteParams> | null | undefined => {
   const validRules = (rules as Array<MetricColorRule | GaugeColorRule>).filter<
     ValidMetricColorRule | ValidGaugeColorRule
