@@ -29,15 +29,10 @@ function hasIntervalScale(columns: TableSuggestionColumn[]) {
 }
 
 function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
-  // Histograms are not good for pi. But we should not reject them on switching between partition charts.
-  const shouldRejectIntervals =
-    state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
-
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    shouldRejectIntervals ||
     table.columns.some((col) => col.operation.isStaticValue)
   );
 }
@@ -110,6 +105,10 @@ export function suggestions({
   }
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
+
+  // Histograms are not good for pi. But we should not hide suggestion on switching between partition charts.
+  const shouldHideSuggestion =
+    state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
 
   if (
     groups.length <= PartitionChartsMeta.pie.maxBuckets &&
@@ -309,11 +308,11 @@ export function suggestions({
   return [...results]
     .map((suggestion) => ({
       ...suggestion,
-      score: suggestion.score + 0.05 * groups.length,
+      score: shouldHideSuggestion ? 0 : suggestion.score + 0.05 * groups.length,
     }))
     .sort((a, b) => b.score - a.score)
     .map((suggestion) => ({
       ...suggestion,
-      hide: incompleteConfiguration || suggestion.hide,
+      hide: shouldHideSuggestion || incompleteConfiguration || suggestion.hide,
     }));
 }

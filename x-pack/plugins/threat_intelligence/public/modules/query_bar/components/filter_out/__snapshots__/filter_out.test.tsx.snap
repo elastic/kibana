@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<FilterOut /> should render an empty component (wrong data input) 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render an empty component (wrong data input) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -61,7 +61,7 @@ Object {
 }
 `;
 
-exports[`<FilterOut /> should render an empty component (wrong field input) 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render an empty component (wrong field input) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -122,7 +122,7 @@ Object {
 }
 `;
 
-exports[`<FilterOut /> should render one Component (for EuiDataGrid use) 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render one Component (for EuiDataGrid use) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -223,7 +223,7 @@ Object {
 }
 `;
 
-exports[`<FilterOut /> should render one EuiButtonIcon 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render one EuiButtonIcon 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -320,7 +320,7 @@ Object {
 }
 `;
 
-exports[`<FilterOut /> should render one EuiContextMenuItem (for EuiContextMenu use) 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render one EuiContextMenuItem (for EuiContextMenu use) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -340,7 +340,9 @@ Object {
           <span
             class="euiContextMenuItem__text"
           >
-            Filter Out
+            <span>
+              Filter Out
+            </span>
           </span>
         </span>
       </button>
@@ -362,7 +364,9 @@ Object {
         <span
           class="euiContextMenuItem__text"
         >
-          Filter Out
+          <span>
+            Filter Out
+          </span>
         </span>
       </span>
     </button>
