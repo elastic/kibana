@@ -30,7 +30,6 @@ export type ReturnUseFindExceptionListReferences = [
 
 /**
  * Hook for finding what rules are referenced by a set of exception lists
- * @param ruleExceptionLists array of exception list info stored on a rule
  */
 export const useFindExceptionListReferences = (): ReturnUseFindExceptionListReferences => {
   const toasts = useToasts();
