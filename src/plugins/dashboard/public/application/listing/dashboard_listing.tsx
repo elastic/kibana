@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
+import useMount from 'react-use/lib/useMount';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
 import {
   EuiLink,
   EuiButton,
@@ -15,30 +18,29 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import useMount from 'react-use/lib/useMount';
-import type { SavedObjectReference } from '@kbn/core/types';
-import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { TableListView, type UserContentCommonSchema } from '@kbn/content-management-table-list';
 
-import { attemptLoadDashboardByTitle } from '../lib';
-import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
   getDashboardBreadcrumb,
-  dashboardListingTable,
+  dashboardListingTableStrings,
   noItemsStrings,
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
+  dashboardSavedObjectErrorStrings,
 } from '../../dashboard_strings';
-import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
-import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { DashboardConstants } from '../..';
+import { DashboardRedirect } from '../../types';
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { getDashboardListItemLink } from './get_dashboard_list_item_link';
+import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
+import { DashboardAttributes } from '../embeddable';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -52,17 +54,18 @@ interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
 }
 
 const toTableListViewSavedObject = (
-  savedObject: Record<string, unknown>
+  savedObject: SimpleSavedObject<DashboardAttributes>
 ): DashboardSavedObjectUserContent => {
+  const { title, description, timeRestore } = savedObject.attributes;
   return {
-    id: savedObject.id as string,
-    updatedAt: savedObject.updatedAt! as string,
-    references: savedObject.references as SavedObjectReference[],
     type: 'dashboard',
+    id: savedObject.id,
+    updatedAt: savedObject.updatedAt!,
+    references: savedObject.references,
     attributes: {
-      title: (savedObject.title as string) ?? '',
-      description: savedObject.description as string,
-      timeRestore: savedObject.timeRestore as boolean,
+      title,
+      description,
+      timeRestore,
     },
   };
 };
@@ -81,18 +84,15 @@ export const DashboardListing = ({
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
-    services: { savedDashboards },
-  } = useKibana<DashboardAppServices>();
-
-  const {
     application,
+    data: { query },
+    dashboardSessionStorage,
+    settings: { uiSettings },
+    notifications: { toasts },
     chrome: { setBreadcrumbs },
     coreContext: { executionContext },
     dashboardCapabilities: { showWriteControls },
-    dashboardSessionStorage,
-    data: { query },
-    savedObjects: { client },
-    settings: { uiSettings },
+    dashboardSavedObject: { findDashboards, savedObjectsClient },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -125,7 +125,7 @@ export const DashboardListing = ({
       kbnUrlStateStorage
     );
     if (title) {
-      attemptLoadDashboardByTitle(title).then((result) => {
+      findDashboards.findByTitle(title).then((result) => {
         if (!result) return;
         redirectTo({
           destination: 'dashboard',
@@ -138,7 +138,7 @@ export const DashboardListing = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, client, redirectTo, query, kbnUrlStateStorage]);
+  }, [title, redirectTo, query, kbnUrlStateStorage, findDashboards]);
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -262,10 +262,11 @@ export const DashboardListing = ({
 
   const fetchItems = useCallback(
     (searchTerm: string, references?: SavedObjectsFindOptionsReference[]) => {
-      return savedDashboards
-        .find(searchTerm, {
-          hasReference: references,
+      return findDashboards
+        .findSavedObjects({
+          search: searchTerm,
           size: listingLimit,
+          hasReference: references,
         })
         .then(({ total, hits }) => {
           return {
@@ -274,16 +275,24 @@ export const DashboardListing = ({
           };
         });
     },
-    [listingLimit, savedDashboards]
+    [findDashboards, listingLimit]
   );
 
   const deleteItems = useCallback(
-    (dashboards: Array<{ id: string }>) => {
-      dashboards.map((d) => dashboardSessionStorage.clearState(d.id));
+    async (dashboardsToDelete: Array<{ id: string }>) => {
+      await Promise.all(
+        dashboardsToDelete.map(({ id }) => {
+          dashboardSessionStorage.clearState(id);
+          return savedObjectsClient.delete(DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE, id);
+        })
+      ).catch((error) => {
+        toasts.addError(error, {
+          title: dashboardSavedObjectErrorStrings.getErrorDeletingDashboardToast(),
+        });
+      });
       setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
-      return savedDashboards.delete(dashboards.map((d) => d.id));
     },
-    [savedDashboards, dashboardSessionStorage]
+    [savedObjectsClient, dashboardSessionStorage, toasts]
   );
 
   const editItem = useCallback(
@@ -292,7 +301,7 @@ export const DashboardListing = ({
     [redirectTo]
   );
 
-  const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTable;
+  const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
   return (
     <>
       {showNoDataPage && (

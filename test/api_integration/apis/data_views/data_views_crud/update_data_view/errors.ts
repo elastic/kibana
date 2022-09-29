@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it('returns error when update patch is empty', async () => {
+        it('returns success when update patch is empty', async () => {
           const title1 = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertest.post(config.path).send({
             [config.serviceKey]: {
@@ -65,9 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
             [config.serviceKey]: {},
           });
 
-          expect(response2.status).to.be(400);
-          expect(response2.body.statusCode).to.be(400);
-          expect(response2.body.message).to.be('Index pattern change set is empty.');
+          expect(response2.status).to.be(200);
         });
       });
     });
