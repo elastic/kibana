@@ -36,7 +36,7 @@ test('set correct defaults', () => {
       "hosts": Array [
         "http://localhost:9200",
       ],
-      "idleSocketTimeout": "PT9M",
+      "idleSocketTimeout": "PT1M",
       "ignoreVersionMismatch": false,
       "maxIdleSockets": 256,
       "maxSockets": Infinity,
