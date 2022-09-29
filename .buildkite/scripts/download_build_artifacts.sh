@@ -15,6 +15,13 @@ if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
   mkdir -p "$KIBANA_BUILD_LOCATION"
   tar -xzf kibana-default.tar.gz -C "$KIBANA_BUILD_LOCATION" --strip=1
 
+  if is_pr_with_label "ci:build-example-plugins"; then
+    # Testing against an example plugin distribution is not supported,
+    # mostly due to snapshot failures when testing UI element lists
+    rm -rf "$KIBANA_BUILD_LOCATION/plugins"
+    mkdir "$KIBANA_BUILD_LOCATION/plugins"
+  fi
+
   cd "$KIBANA_DIR"
 
   tar -xzf ../kibana-default-plugins.tar.gz
