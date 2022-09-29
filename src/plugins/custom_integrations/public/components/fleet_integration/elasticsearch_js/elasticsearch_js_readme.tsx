@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import icon from '../../../assets/language_clients/es.svg';
+import icon from '../../../assets/language_clients/nodejs.svg';
 
 const CenterColumn = styled(EuiFlexItem)`
   max-width: 740px;
@@ -64,7 +64,7 @@ const TopFlexGroup = styled(EuiFlexGroup)`
   padding: calc(${euiThemeVars.euiSizeXL} * 2) ${euiThemeVars.euiSizeM} 0 ${euiThemeVars.euiSizeM};
 `;
 
-export const SampleClientReadme = () => {
+export const ElasticsearchJsClientReadme = () => {
   const [apiKey, setApiKey] = useState<string | null>(null);
 
   return (
@@ -80,8 +80,8 @@ export const SampleClientReadme = () => {
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="customIntegrations.languageClients.sample.readme.title"
-                  defaultMessage="Elasticsearch Sample Client"
+                  id="customIntegrations.languageClients.JavascriptElasticsearch.readme.title"
+                  defaultMessage="Elasticsearch JavaScript Client"
                 />
               </h1>
             </EuiTitle>
@@ -98,8 +98,8 @@ export const SampleClientReadme = () => {
                   description={
                     <EuiText>
                       <FormattedMessage
-                        id="customIntegrations.languageClients.sample.readme.intro"
-                        defaultMessage="Getting started with the Sample Language Client requires a few steps."
+                        id="customIntegrations.languageClients.JavascriptElasticsearch.readme.intro"
+                        defaultMessage="Getting started with the Elasticsearch JavaScript Client requires a few steps."
                       />
                     </EuiText>
                   }
@@ -110,8 +110,8 @@ export const SampleClientReadme = () => {
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="customIntegrations.languageClients.sample.readme.install"
-                      defaultMessage="Install the Sample Language Client"
+                      id="customIntegrations.languageClients.JavascriptElasticsearch.readme.install"
+                      defaultMessage="Install the Elasticsearch JavaScript Client"
                     />
                   </h2>
                 </EuiTitle>
@@ -119,8 +119,8 @@ export const SampleClientReadme = () => {
                 <EuiSpacer size="s" />
 
                 <EuiCodeBlock language="shell" isCopyable>
-                  {`# Grab the sample language client from NPM and install it in your project \n`}
-                  {`$ npm install @elastic/elasticsearch-sample`}
+                  {`# Grab the Elasticsearch JavaScript client from NPM and install it in your project \n`}
+                  {`$ npm install @elastic/elasticsearch@<major>`}
                 </EuiCodeBlock>
               </EuiPageSection>
 
@@ -128,7 +128,7 @@ export const SampleClientReadme = () => {
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="customIntegrations.languageClients.sample.readme.createApiKey"
+                      id="customIntegrations.languageClients.JavascriptElasticsearch.readme.createApiKey"
                       defaultMessage="Create an API key"
                     />
                   </h2>
@@ -136,7 +136,7 @@ export const SampleClientReadme = () => {
 
                 <EuiText>
                   <FormattedMessage
-                    id="customIntegrations.languageClients.sample.readme.apiKey"
+                    id="customIntegrations.languageClients.JavascriptElasticsearch.readme.apiKey"
                     defaultMessage="Use the button bellow to generate an API key. You'll need this set up your client in the next step."
                   />
                 </EuiText>
@@ -164,29 +164,33 @@ export const SampleClientReadme = () => {
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="customIntegrations.languageClients.sample.readme.configure"
-                      defaultMessage="Configure the Sample Language Client"
+                      id="customIntegrations.languageClients.JavascriptElasticsearch.readme.configure"
+                      defaultMessage="Configure the Elasticsearch JavaScript Client"
                     />
                   </h2>
                 </EuiTitle>
 
                 <EuiText>
                   <FormattedMessage
-                    id="customIntegrations.languageClients.sample.readme.configureText"
+                    id="customIntegrations.languageClients.JavascriptElasticsearch.readme.configureText"
                     defaultMessage="Create an {filename} file in the root of your project, and add the following options."
                     values={{
-                      filename: <EuiCode>elastic.config.json</EuiCode>,
+                      filename: <EuiCode>index.js</EuiCode>,
                     }}
                   />
                 </EuiText>
 
                 <EuiSpacer size="s" />
 
-                <EuiCodeBlock isCopyable language="json">
+                <EuiCodeBlock isCopyable language="javascript">
                   {`
-{
-  "apiKey": "${apiKey || 'YOUR_API_KEY'}
-}
+// Import the client
+const { Client } = require('@elastic/elasticsearch');
+
+// Instantiate the client with an API key
+const client = new Client({
+  auth: { apiKey: '${apiKey || 'YOUR_API_KEY'}' }
+})
 
           `}
                 </EuiCodeBlock>
