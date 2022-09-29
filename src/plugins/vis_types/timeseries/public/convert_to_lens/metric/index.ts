@@ -17,7 +17,7 @@ import { getConfigurationForMetric as getConfiguration } from '../lib/configurat
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
 import { ConvertTsvbToLensVisualization } from '../types';
 import { ColumnsWithoutMeta, Layer as ExtendedLayer } from '../lib/convert';
-import { excludeMetaFromLayers, getUniqueBuckets } from '../utils';
+import { excludeMetaFromLayers, getUniqueBuckets } from './utils';
 
 const MAX_SERIES = 2;
 const MAX_BUCKETS = 2;
@@ -71,12 +71,9 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
     const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
 
     // handle multiple metrics
-    const metricsColumns = getMetricsColumns(
-      series,
-      currentIndexPattern!,
-      seriesNum,
-      reducedTimeRange
-    );
+    const metricsColumns = getMetricsColumns(series, currentIndexPattern!, seriesNum, {
+      reducedTimeRange,
+    });
     if (metricsColumns === null) {
       return null;
     }

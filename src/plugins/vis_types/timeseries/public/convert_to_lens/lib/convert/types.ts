@@ -91,6 +91,7 @@ export type ColumnsWithoutMeta =
   | DateHistogramColumn
   | BaseStaticValueColumn
   | BaseFormulaColumn;
+
 export type AnyColumnWithReferences = GenericColumnWithMeta<BaseAnyColumnWithReferences, Meta>;
 
 type CommonColumns = Exclude<BaseColumn, ColumnsWithoutMeta>;

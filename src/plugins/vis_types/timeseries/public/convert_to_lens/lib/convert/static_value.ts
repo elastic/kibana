@@ -8,12 +8,13 @@
 
 import uuid from 'uuid';
 import {
-  StaticValueColumn as BaseStaticValueColumn,
   StaticValueParams,
+  StaticValueColumn as BaseStaticValueColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { CommonColumnsConverterArgs, StaticValueColumn } from './types';
+import { CommonColumnsConverterArgs, FormulaColumn, StaticValueColumn } from './types';
 import type { Metric } from '../../../../common/types';
 import { createColumn, getFormat } from './column';
+import { createFormulaColumn } from './formula';
 
 export const convertToStaticValueParams = ({ value }: Metric): StaticValueParams => ({
   value,
@@ -54,3 +55,22 @@ export const createStaticValueColumn = (staticValue: number): BaseStaticValueCol
     value: staticValue.toString(),
   },
 });
+
+export const convertStaticValueToFormulaColumn = (
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
+  {
+    visibleSeriesCount = 0,
+    reducedTimeRange,
+  }: { visibleSeriesCount?: number; reducedTimeRange?: string } = {}
+): FormulaColumn | null => {
+  // Lens support reference lines only when at least one layer data exists
+  if (visibleSeriesCount === 1) {
+    return null;
+  }
+  const currentMetric = metrics[metrics.length - 1];
+  return createFormulaColumn(currentMetric.value ?? '', {
+    series,
+    metric: currentMetric,
+    dataView,
+  });
+};

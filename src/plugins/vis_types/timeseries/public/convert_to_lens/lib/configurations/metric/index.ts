@@ -8,10 +8,28 @@
 
 import color from 'color';
 import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { Panel } from '../../../../../common/types';
+import { Metric, Panel, Series } from '../../../../../common/types';
 import { Column, Layer } from '../../convert';
+import { getSeriesAgg } from '../../series';
 import { getGaugePalette, getPalette } from './palette';
 import { findMetricColumn, getMetricWithCollapseFn } from '../../../utils';
+
+const getMetricWithCollapseFn = (series: Series | undefined) => {
+  if (!series) {
+    return;
+  }
+  const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
+  const visibleMetric = metrics[metrics.length - 1];
+  return { metric: visibleMetric, collapseFn: seriesAgg };
+};
+
+const findMetricColumn = (metric: Metric | undefined, columns: Column[]) => {
+  if (!metric) {
+    return;
+  }
+
+  return columns.find((column) => 'meta' in column && column.meta.metricId === metric.id);
+};
 
 export const getConfigurationForMetric = (
   model: Panel,
