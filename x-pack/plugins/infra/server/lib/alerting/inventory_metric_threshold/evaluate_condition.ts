@@ -15,15 +15,18 @@ import { LogQueryFields } from '../../metrics/types';
 import { InfraSource } from '../../sources';
 import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
-type AdditionalContext = {
-  cloud: EcsFieldsResponse;
-  host: EcsFieldsResponse;
-  container: EcsFieldsResponse;
-  orchestrator: EcsFieldsResponse;
-  labels: EcsFieldsResponse;
-  tags: EcsFieldsResponse
+interface AdditionalContextField {
+  [x: string]: any;
+}
+
+export type AdditionalContext = {
+  cloud?: AdditionalContextField;
+  host?: AdditionalContextField;
+  container?: AdditionalContextField;
+  orchestrator?: AdditionalContextField;
+  labels?: AdditionalContextField;
+  tags?: AdditionalContextField
 };
 
 export type ConditionResult = InventoryMetricConditions & {

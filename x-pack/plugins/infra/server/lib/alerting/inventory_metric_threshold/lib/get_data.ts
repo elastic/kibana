@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/inventory_models/types';
 import { LogQueryFields } from '../../../metrics/types';
 import { InfraSource } from '../../../sources';
+import { AdditionalContext } from '../evaluate_condition';
 import { createRequest } from './create_request';
 
 interface BucketKey {
@@ -27,13 +28,7 @@ type Response = Record<string, {
   value: number | null;
   warn: boolean;
   trigger: boolean;
-  cloud?: EcsFieldsResponse;
-  host?: EcsFieldsResponse;
-  container?: EcsFieldsResponse;
-  orchestrator?: EcsFieldsResponse;
-  labels?: EcsFieldsResponse;
-  tags?: EcsFieldsResponse;
-}>;
+} & AdditionalContext>;
 
 type Metric = Record<string, { value: number | null }>;
 
@@ -73,22 +68,13 @@ export const getData = async (
     for (const bucket of nodes.buckets) {
       const metricId = customMetric && customMetric.field ? customMetric.id : metric;
       const bucketHits = bucket.additionalContext?.hits?.hits;
-
-      const additionalContext = bucketHits && bucketHits.length > 0 ?
-        {
-          cloud: bucketHits[0]._source?.cloud as unknown as EcsFieldsResponse,
-          host: bucketHits[0]._source?.host as unknown as EcsFieldsResponse,
-          container: bucketHits[0]._source?.container as unknown as EcsFieldsResponse,
-          orchestrator: bucketHits[0]._source?.orchestrator as unknown as EcsFieldsResponse,
-          labels: bucketHits[0]._source?.labels as unknown as EcsFieldsResponse,
-          tags: bucketHits[0]._source?.tags as unknown as EcsFieldsResponse,
-        } : null;
+      const additionalContextSource = bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
 
       previous[bucket.key.node] = {
         value: bucket?.[metricId]?.value ?? null,
         warn: bucket?.shouldWarn.value > 0 ?? false,
         trigger: bucket?.shouldTrigger.value > 0 ?? false,
-        ...additionalContext
+        ...additionalContextSource
       };
     }
     if (nextAfterKey) {
