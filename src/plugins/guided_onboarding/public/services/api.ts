@@ -300,6 +300,32 @@ export class ApiService {
 
     return undefined;
   }
+
+  /**
+   * An observable with the boolean value if the guided onboarding is currently active for the integration.
+   * Returns true, if the passed integration is used in the current guide's step.
+   * Returns false otherwise.
+   * @param {string} guideID the integration ID (package key) to check for in the guided onboarding config
+   * @return {Observable} an observable with the boolean value
+   */
+  public isGuidedOnboardingActiveForIntegration$(integration?: string): Observable<boolean> {
+    return this.fetchGuideState$().pipe(
+      map((state) => {
+        return isIntegrationInGuideStep(state, integration);
+      })
+    );
+  }
+
+  public async completeGuidedOnboardingForIntegration(integration?: string) {
+    if (integration) {
+      const currentState = await firstValueFrom(this.fetchGuideState$());
+      const isIntegrationStepActive = isIntegrationInGuideStep(currentState, integration);
+      if (isIntegrationStepActive) {
+        return await this.completeGuideStep(currentState.activeGuide, currentState.activeStep);
+      }
+    }
+    return undefined;
+  }
 }
 
 export const apiService = new ApiService();

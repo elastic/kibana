@@ -34,6 +34,7 @@ export interface StepConfig {
     path: string;
   };
   status?: StepStatus;
+  integration?: string;
 }
 export interface GuideConfig {
   title: string;

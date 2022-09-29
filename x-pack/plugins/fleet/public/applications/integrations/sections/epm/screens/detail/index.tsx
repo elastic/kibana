@@ -156,7 +156,7 @@ export function Detail() {
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUser();
-  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgkey);
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);

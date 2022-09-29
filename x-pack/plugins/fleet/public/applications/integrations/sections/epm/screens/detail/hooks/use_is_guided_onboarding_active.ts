@@ -10,37 +10,15 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { useStartServices } from '../../../../../hooks';
 
-const isElasticDefendIntegration = (packageKey: string): boolean => {
-  // TODO change to a regex
-  return packageKey.startsWith('endpoint');
-};
-
-const isKubernetesIntegration = (packageKey: string): boolean => {
-  // TODO change to a regex
-  return packageKey.startsWith('kubernetes');
-};
-
-// currently, we're only checking for endpoint and kubernetes integrations
-// for security and observability guides
-const getGuideStepByIntegration = (packageKey: string) => {
-  if (isElasticDefendIntegration(packageKey)) {
-    return { guideID: 'security', stepID: 'add_data' };
-  }
-  if (isKubernetesIntegration(packageKey)) {
-    return { guideID: 'observability', stepID: 'add_data' };
-  }
-  return { guideID: '', stepID: '' };
-};
-export const useIsGuidedOnboardingActive = (packageKey: string): boolean => {
+export const useIsGuidedOnboardingActive = (packageName?: string): boolean => {
   const [result, setResult] = useState<boolean>(false);
   const { guidedOnboarding } = useStartServices();
-  const { guideID, stepID } = getGuideStepByIntegration(packageKey);
-  const isGuidedOnboardingStepActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$(guideID, stepID)
+  const isGuidedOnboardingActiveForIntegration = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuidedOnboardingActiveForIntegration$(packageName)
   );
   useEffect(() => {
-    setResult(!!isGuidedOnboardingStepActive);
-  }, [isGuidedOnboardingStepActive]);
+    setResult(!!isGuidedOnboardingActiveForIntegration);
+  }, [isGuidedOnboardingActiveForIntegration]);
 
   return result;
 };
