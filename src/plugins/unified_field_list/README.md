@@ -8,11 +8,13 @@ This Kibana plugin contains components and services for field list UI (as in fie
 
 * `<FieldStats .../>` - loads and renders stats (Top values, Distribution) for a data view field.
 
+* `<FieldVisualizeButton .../>` - renders a button to open this field in Lens.
+
 * `<FieldPopover .../>` - a popover container component for a field.
 
 * `<FieldPopoverHeader .../>` - this header component included a field name and common actions.
-
-* `<FieldVisualizeButton .../>` - renders a button to open this field in Lens.
+* 
+* `<FieldPopoverVisualize .../>` - renders Visualize action in the popover footer.
 
 These components can be combined and customized as the following:
 ```
@@ -32,20 +34,20 @@ These components can be combined and customized as the following:
     />
   }
   renderContent={() => 
-    <FieldStats 
-      field={field}
-      dataViewOrDataViewId={dataView}
-      onAddFilter={onAddFilter}
-      ...
-    />
-  }
-  renderFooter={() => 
-    <FieldButtonVisualize
-      field={field}
-      datatView={dataView}
-      originatingApp={'<your app name>'}
-      ...
-    />
+    <>
+      <FieldStats 
+        field={field}
+        dataViewOrDataViewId={dataView}
+        onAddFilter={onAddFilter}
+        ...
+      />
+      <FieldPopoverVisualize
+        field={field}
+        datatView={dataView}
+        originatingApp={'<your app name>'}
+        ...
+      />
+    </>
   }
   ...
 />

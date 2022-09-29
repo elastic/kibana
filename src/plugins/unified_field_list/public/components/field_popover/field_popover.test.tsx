@@ -29,21 +29,6 @@ describe('UnifiedFieldList <FieldPopover />', () => {
     expect(wrapper.find(EuiPopoverFooter)).toHaveLength(0);
   });
 
-  it('should render correctly footer only', async () => {
-    const wrapper = mountWithIntl(
-      <FieldPopover
-        isOpen
-        closePopover={jest.fn()}
-        button={<EuiButton title="test" />}
-        renderFooter={() => <EuiText>{'footer'}</EuiText>}
-      />
-    );
-
-    expect(wrapper.find(EuiText).text()).toBe('footer');
-    expect(wrapper.find(EuiPopoverTitle)).toHaveLength(0);
-    expect(wrapper.find(EuiPopoverFooter)).toHaveLength(0);
-  });
-
   it('should render correctly with header and content', async () => {
     const wrapper = mountWithIntl(
       <FieldPopover
@@ -58,26 +43,6 @@ describe('UnifiedFieldList <FieldPopover />', () => {
     expect(wrapper.find(EuiText).first().text()).toBe('header');
     expect(wrapper.find(EuiText).last().text()).toBe('content');
     expect(wrapper.find(EuiPopoverTitle)).toHaveLength(1);
-    expect(wrapper.find(EuiPopoverFooter)).toHaveLength(0);
-  });
-
-  it('should render correctly with header, content and footer', async () => {
-    const wrapper = mountWithIntl(
-      <FieldPopover
-        isOpen
-        closePopover={jest.fn()}
-        button={<EuiButton title="test" />}
-        renderHeader={() => <EuiText>{'header'}</EuiText>}
-        renderContent={() => <EuiText>{'content'}</EuiText>}
-        renderFooter={() => <EuiText>{'footer'}</EuiText>}
-      />
-    );
-
-    expect(wrapper.find(EuiText).first().text()).toBe('header');
-    expect(wrapper.find(EuiText).at(1).text()).toBe('content');
-    expect(wrapper.find(EuiText).last().text()).toBe('footer');
-    expect(wrapper.find(EuiPopoverTitle)).toHaveLength(1);
-    expect(wrapper.find(EuiPopoverFooter)).toHaveLength(1);
   });
 
   it('should render nothing if popover is closed', async () => {
@@ -88,13 +53,11 @@ describe('UnifiedFieldList <FieldPopover />', () => {
         button={<EuiButton title="test" />}
         renderHeader={() => <EuiText>{'header'}</EuiText>}
         renderContent={() => <EuiText>{'content'}</EuiText>}
-        renderFooter={() => <EuiText>{'footer'}</EuiText>}
       />
     );
 
     expect(wrapper.text()).toBe('');
     expect(wrapper.find(EuiPopoverTitle)).toHaveLength(0);
-    expect(wrapper.find(EuiPopoverFooter)).toHaveLength(0);
   });
 
   it('should render correctly with popover header and content', async () => {
@@ -119,7 +82,6 @@ describe('UnifiedFieldList <FieldPopover />', () => {
 
     expect(wrapper.find(EuiPopoverTitle).text()).toBe(fieldName);
     expect(wrapper.find(EuiText).last().text()).toBe('content');
-    expect(wrapper.find(EuiPopoverFooter)).toHaveLength(0);
 
     wrapper
       .find(`[data-test-subj="fieldPopoverHeader_editField-${fieldName}"]`)

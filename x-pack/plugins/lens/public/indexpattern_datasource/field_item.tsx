@@ -24,7 +24,7 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
-  FieldVisualizeButton,
+  FieldPopoverVisualize,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { APP_ID } from '../../common/constants';
@@ -259,27 +259,16 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             onDeleteField={removeFieldAndClose}
           />
         )}
-        renderContent={() =>
-          !hideDetails ? (
-            <FieldItemPopoverContents
-              {...props}
-              dataViewField={dataViewField}
-              onAddFilter={addFilterAndClose}
-            />
-          ) : null
-        }
-        renderFooter={() =>
-          dataViewField.type === 'geo_point' || dataViewField.type === 'geo_shape' ? (
-            <FieldVisualizeButton
-              field={dataViewField}
-              dataView={{ ...indexPattern, toSpec: () => indexPattern.spec } as unknown as DataView}
-              originatingApp={APP_ID}
-              uiActions={props.uiActions}
-              buttonProps={{
-                'data-test-subj': `lensVisualize-GeoField-${dataViewField.name}`,
-              }}
-            />
-          ) : null
+        renderContent={
+          !hideDetails
+            ? () => (
+                <FieldItemPopoverContents
+                  {...props}
+                  dataViewField={dataViewField}
+                  onAddFilter={addFilterAndClose}
+                />
+              )
+            : undefined
         }
       />
     </li>
@@ -294,43 +283,58 @@ function FieldItemPopoverContents(
     onAddFilter: AddFieldFilterHandler | undefined;
   }
 ) {
-  const { query, filters, indexPattern, dataViewField, dateRange, core, onAddFilter } = props;
+  const { query, filters, indexPattern, dataViewField, dateRange, core, onAddFilter, uiActions } =
+    props;
   const services = useKibana<LensAppServices>().services;
 
   return (
-    <FieldStats
-      services={services}
-      query={query}
-      filters={filters}
-      fromDate={dateRange.fromDate}
-      toDate={dateRange.toDate}
-      dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
-      onAddFilter={onAddFilter}
-      field={dataViewField}
-      data-test-subj="lnsFieldListPanel"
-      overrideMissingContent={(params) => {
-        if (params?.noDataFound) {
-          // TODO: should we replace this with a default message "Analysis is not available for this field?"
-          const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
-          return (
-            <>
-              <EuiText size="s">
-                {isUsingSampling
-                  ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
-                      defaultMessage:
-                        'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
-                    })
-                  : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-                      defaultMessage:
-                        'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
-                    })}
-              </EuiText>
-            </>
-          );
-        }
+    <>
+      <FieldStats
+        services={services}
+        query={query}
+        filters={filters}
+        fromDate={dateRange.fromDate}
+        toDate={dateRange.toDate}
+        dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
+        onAddFilter={onAddFilter}
+        field={dataViewField}
+        data-test-subj="lnsFieldListPanel"
+        overrideMissingContent={(params) => {
+          if (params?.noDataFound) {
+            // TODO: should we replace this with a default message "Analysis is not available for this field?"
+            const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
+            return (
+              <>
+                <EuiText size="s">
+                  {isUsingSampling
+                    ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
+                        defaultMessage:
+                          'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
+                      })
+                    : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                        defaultMessage:
+                          'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+                      })}
+                </EuiText>
+              </>
+            );
+          }
 
-        return params.element;
-      }}
-    />
+          return params.element;
+        }}
+      />
+
+      {dataViewField.type === 'geo_point' || dataViewField.type === 'geo_shape' ? (
+        <FieldPopoverVisualize
+          field={dataViewField}
+          dataView={{ ...indexPattern, toSpec: () => indexPattern.spec } as unknown as DataView}
+          originatingApp={APP_ID}
+          uiActions={uiActions}
+          buttonProps={{
+            'data-test-subj': `lensVisualize-GeoField-${dataViewField.name}`,
+          }}
+        />
+      ) : null}
+    </>
   );
 }

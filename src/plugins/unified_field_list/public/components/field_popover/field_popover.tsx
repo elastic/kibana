@@ -7,13 +7,12 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiPopoverProps, EuiPopoverTitle, EuiPopoverFooter } from '@elastic/eui';
+import { EuiPopover, EuiPopoverProps, EuiPopoverTitle } from '@elastic/eui';
 import './field_popover.scss';
 
 export interface FieldPopoverProps extends EuiPopoverProps {
   renderHeader?: () => React.ReactNode;
   renderContent?: () => React.ReactNode;
-  renderFooter?: () => React.ReactNode;
 }
 
 export const FieldPopover: React.FC<FieldPopoverProps> = ({
@@ -21,12 +20,10 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   closePopover,
   renderHeader,
   renderContent,
-  renderFooter,
   ...otherPopoverProps
 }) => {
   const header = (isOpen && renderHeader?.()) || null;
   const content = (isOpen && renderContent?.()) || null;
-  const footer = (isOpen && renderFooter?.()) || null;
 
   return (
     <EuiPopover
@@ -41,9 +38,8 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
     >
       {isOpen && (
         <>
-          {(content || footer) && header ? <EuiPopoverTitle>{header}</EuiPopoverTitle> : header}
+          {content && header ? <EuiPopoverTitle>{header}</EuiPopoverTitle> : header}
           {content}
-          {(content || header) && footer ? <EuiPopoverFooter>{footer}</EuiPopoverFooter> : footer}
         </>
       )}
     </EuiPopover>

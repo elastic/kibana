@@ -9,7 +9,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -63,6 +63,7 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
           contextualFields={contextualFields}
           originatingApp={ORIGINATING_APP}
           uiActions={uiActions}
+          wrapInContainer={(element) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
         />
       );
     });
@@ -86,6 +87,7 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
     });
 
     expect(wrapper!.find(EuiButton).prop('href')).toBe('/app/test');
+    expect(wrapper!.find(EuiPopoverFooter).find(EuiButton).exists()).toBeTruthy(); // wrapped in a container
   });
 
   it('should render correctly for geo fields', async () => {

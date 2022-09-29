@@ -27,6 +27,7 @@ export interface FieldVisualizeButtonProps {
   contextualFields?: string[]; // names of fields which were also selected (like columns in Discover grid)
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   buttonProps?: Partial<EuiButtonProps>;
+  wrapInContainer?: (element: React.ReactElement) => React.ReactElement;
 }
 
 export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.memo(
@@ -39,6 +40,7 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
     originatingApp,
     uiActions,
     buttonProps,
+    wrapInContainer,
   }) => {
     const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
 
@@ -71,7 +73,7 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
       triggerVisualization(dataView);
     };
 
-    return (
+    const element = (
       <FieldVisualizeButtonInner
         field={field}
         visualizeInfo={visualizeInfo}
@@ -79,5 +81,7 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
         buttonProps={buttonProps}
       />
     );
+
+    return wrapInContainer?.(element) || element;
   }
 );

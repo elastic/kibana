@@ -20,7 +20,7 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
-  FieldVisualizeButton,
+  FieldPopoverVisualize,
 } from '@kbn/unified-field-list-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
@@ -452,6 +452,16 @@ function DiscoverFieldComponent({
             />
           </>
         )}
+
+        <FieldPopoverVisualize
+          field={field}
+          dataView={dataView}
+          multiFields={rawMultiFields}
+          trackUiMetric={trackUiMetric}
+          contextualFields={contextualFields}
+          originatingApp={PLUGIN_ID}
+          uiActions={getUiActions()}
+        />
       </>
     );
   };
@@ -474,17 +484,6 @@ function DiscoverFieldComponent({
         />
       )}
       renderContent={renderPopover}
-      renderFooter={() => (
-        <FieldVisualizeButton
-          field={field}
-          dataView={dataView}
-          multiFields={rawMultiFields}
-          trackUiMetric={trackUiMetric}
-          contextualFields={contextualFields}
-          originatingApp={PLUGIN_ID}
-          uiActions={getUiActions()}
-        />
-      )}
     />
   );
 }
