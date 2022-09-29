@@ -6,7 +6,8 @@
  */
 
 import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '@kbn/apm-plugin/common/environment_filter_values';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { APIClientRequestParamsOf, APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import expect from '@kbn/expect';
 import { JsonObject } from '@kbn/utility-types';
 import { cloneDeep, isPlainObject, merge } from 'lodash';
@@ -34,16 +35,16 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
     );
   }
 
-  function createAnnotation(body?: {
-    '@timestamp'?: string; message?: string; tags?: string[]; service?: { environment?: string; version: string }
-  }){
+  function createAnnotation(
+    body?: RecursivePartial<APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation'>['params']['body']>
+  ){
     return apmApiClient.annotationWriterUser({
       endpoint: 'POST /api/apm/services/{serviceName}/annotation',
       params: {
         path: {
           serviceName: 'opbeans-java',
         },
-        body: body as {'@timestamp': string; message?: string; tags?: string[]; service: { environment?: string; version: string }},
+        body: body as APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation'>['params']['body'],
       }
     });
   }
@@ -77,7 +78,6 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           });
         } catch (error: unknown) {
           const apiError = error as ApmApiError;
-          console.log(apiError);
 
           expect(apiError.res.status).eql(403);
           expect(apiError.res.body.message).eql('Annotations require at least a gold license or a trial license.');

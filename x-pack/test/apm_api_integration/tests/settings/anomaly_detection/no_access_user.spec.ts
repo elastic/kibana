@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ApmApiError } from 'x-pack/test/apm_api_integration/common/apm_api_supertest';
+import { ApmApiError } from '../../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
