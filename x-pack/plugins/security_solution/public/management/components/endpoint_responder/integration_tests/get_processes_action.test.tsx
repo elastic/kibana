@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
-} from '../console/components/console_manager/mocks';
+} from '../../console/components/console_manager/mocks';
 import React from 'react';
-import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
-import { enterConsoleCommand } from '../console/mocks';
+import { getEndpointResponseActionsConsoleCommands } from '../endpoint_response_actions_console_commands';
+import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
+import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
-import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import type { ResponderCapabilities } from '../../../../../common/endpoint/constants';
+import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/constants';
 
 describe('When using processes action from response actions console', () => {
   let render: (
@@ -161,6 +161,7 @@ describe('When using processes action from response actions console', () => {
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.processes).toHaveBeenCalledTimes(1);
+          expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
         });
 
         // Hide the console
@@ -182,20 +183,20 @@ describe('When using processes action from response actions console', () => {
         path: '/api/endpoint/action/1.2.3',
       });
       pendingDetailResponse.data.isCompleted = false;
+      apiMocks.responseProvider.actionDetails.mockClear();
       apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
       await render();
 
-      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(2);
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
 
       await consoleManagerMockAccess.openRunningConsole();
 
       await waitFor(() => {
-        expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(3);
+        expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(2);
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139707
-    it.skip('should display completion output if done (no additional API calls)', async () => {
+    it('should display completion output if done (no additional API calls)', async () => {
       await render();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
