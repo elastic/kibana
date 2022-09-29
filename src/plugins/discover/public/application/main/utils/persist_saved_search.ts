@@ -91,8 +91,9 @@ export async function persistSavedSearch(
     state: AppState;
   }
 ) {
+  debugger
   updateSavedSearch({ savedSearch, dataView, state, services });
-
+  debugger
   try {
     const id = await saveSavedSearch(
       savedSearch,

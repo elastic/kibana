@@ -212,11 +212,14 @@ export interface DiscoverStateContainer {
      */
     pauseAutoRefreshInterval: () => Promise<void>;
     fetch: (reset?: boolean) => void;
-    persistSavedSearch: (params: {
-      onError: (error: Error, savedSearch: SavedSearch) => void;
-      onSuccess: (id: string) => void;
-      saveOptions: SavedObjectSaveOpts;
-    }) => Promise<any>;
+    persistSavedSearch: (
+      savedSearch: SavedSearch,
+      params: {
+        onError: (error: Error, savedSearch: SavedSearch) => void;
+        onSuccess: (id: string) => void;
+        saveOptions: SavedObjectSaveOpts;
+      }
+    ) => Promise<any>;
   };
 }
 
@@ -262,19 +265,22 @@ function getSavedSearchContainer({
     savedSearch$.next(newSavedSearch);
     return newSavedSearch;
   };
-  const persist = ({
-    onError,
-    onSuccess,
-    saveOptions,
-    state,
-  }: {
-    onError: (error: Error, savedSearch: SavedSearch) => void;
-    onSuccess: (id: string) => void;
-    saveOptions: SavedObjectSaveOpts;
-    state: AppState;
-  }) => {
-    return persistSavedSearch(savedSearch, {
-      dataView: savedSearch.searchSource.getField('index')!,
+  const persist = (
+    nextSavedSearch: SavedSearch,
+    {
+      onError,
+      onSuccess,
+      saveOptions,
+      state,
+    }: {
+      onError: (error: Error, savedSearch: SavedSearch) => void;
+      onSuccess: (id: string) => void;
+      saveOptions: SavedObjectSaveOpts;
+      state: AppState;
+    }
+  ) => {
+    return persistSavedSearch(nextSavedSearch, {
+      dataView: nextSavedSearch.searchSource.getField('index')!,
       onError,
       onSuccess,
       state,
@@ -500,8 +506,8 @@ export function getDiscoverStateContainer({
         const msg = reset ? 'reset' : undefined;
         dataStateContainer.refetch$.next(msg);
       },
-      persistSavedSearch: ({ onError, onSuccess, saveOptions }) => {
-        return savedSearchContainer.persist({
+      persistSavedSearch: (nextSavedSearch, { onError, onSuccess, saveOptions }) => {
+        return savedSearchContainer.persist(nextSavedSearch, {
           onError,
           onSuccess,
           saveOptions,

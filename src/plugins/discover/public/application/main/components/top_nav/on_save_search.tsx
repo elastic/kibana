@@ -46,6 +46,7 @@ async function saveDataSource({
         }),
         'data-test-subj': 'saveSearchSuccess',
       });
+      debugger;
       if (navigateOrReloadSavedSearch) {
         if (id !== prevSavedSearchId) {
           navigateTo(`/view/${encodeURIComponent(id)}`);
@@ -77,7 +78,7 @@ async function saveDataSource({
       text: error.message,
     });
   }
-  return stateContainer.actions.persistSavedSearch({
+  return stateContainer.actions.persistSavedSearch(savedSearch, {
     onError,
     onSuccess,
     saveOptions,
@@ -145,6 +146,7 @@ export async function onSaveSearch({
       !dataView.isPersisted() && newCopyOnSave ? await updateAdHocDataViewId(dataView) : dataView;
 
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
+    debugger;
     const response = await saveDataSource({
       dataView: updatedDataView,
       saveOptions,
@@ -154,6 +156,7 @@ export async function onSaveSearch({
       stateContainer,
       navigateOrReloadSavedSearch,
     });
+    debugger;
     // If the save wasn't successful, put the original values back.
     if (!response.id || response.error) {
       savedSearch.title = currentTitle;
