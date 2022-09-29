@@ -488,6 +488,63 @@ describe('Execution', () => {
 
       expect(spy.fn).toHaveBeenCalledTimes(0);
     });
+
+    test('continues execution when error state is gone', async () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const observable$ = cold('abc|', { a, b, c });
+        const flakyFn = jest
+          .fn()
+          .mockImplementationOnce((value) => value)
+          .mockImplementationOnce(() => {
+            throw new Error('Some error.');
+          })
+          .mockImplementationOnce((value) => value);
+        const spyFn = jest.fn((value) => value);
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable$,
+        });
+        executor.registerFunction({
+          name: 'flaky',
+          args: {},
+          help: '',
+          fn: (value) => flakyFn(value),
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {},
+          help: '',
+          fn: (value) => spyFn(value),
+        });
+
+        const result = executor.run('observable | flaky | spy', null, {});
+
+        expectObservable(result).toBe('abc|', {
+          a: { partial: true, result: a },
+          b: {
+            partial: true,
+            result: {
+              type: 'error',
+              error: expect.objectContaining({ message: '[flaky] > Some error.' }),
+            },
+          },
+          c: { partial: false, result: c },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(2);
+        expect(spyFn).toHaveBeenNthCalledWith(1, a);
+        expect(spyFn).toHaveBeenNthCalledWith(2, c);
+      });
+    });
   });
 
   describe('state', () => {
