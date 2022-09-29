@@ -161,11 +161,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
-<<<<<<< HEAD
-    "canNavigateToLens": undefined,
-=======
     "canNavigateToLens": false,
->>>>>>> main
     "params": Object {
       "listenOnChange": true,
     },
