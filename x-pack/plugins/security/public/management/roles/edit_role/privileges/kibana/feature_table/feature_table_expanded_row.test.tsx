@@ -25,7 +25,7 @@ const createRole = (kibana: Role['kibana'] = []): Role => {
 };
 
 describe('FeatureTableExpandedRow', () => {
-  it('indicates sub-feature privileges are not customizable when canCustomizeSubFeaturePrivileges is false', () => {
+  it('indicates sub-feature privileges are not customizable when licenseAllowsSubFeatPrivCustomization is false', () => {
     const role = createRole([
       {
         base: [],
@@ -62,7 +62,7 @@ describe('FeatureTableExpandedRow', () => {
     expect(wrapper.find('EuiIconTip[data-test-subj="subFeaturesTip"]').length).toBe(1);
   });
 
-  it('indicates sub-feature privileges can be customized when canCustomizeSubFeaturePrivileges is true', () => {
+  it('indicates sub-feature privileges can be customized when licenseAllowsSubFeatPrivCustomization is true', () => {
     const role = createRole([
       {
         base: [],
