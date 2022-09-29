@@ -9,12 +9,12 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+type TestingModes = 'snapshot' | 'savedObject';
+type AppState = string | undefined;
 interface UrlState {
   globalState: string;
-  appState: string;
+  appState: AppState;
 }
-
-type TestingModes = 'snapshot' | 'savedObject';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
@@ -26,22 +26,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('share dashboard', () => {
     const getSharedUrl = async (mode: TestingModes): Promise<string> => {
-      if (mode === 'savedObject') {
+      let sharedUrl: string;
+      if (mode === 'snapshot') {
+        sharedUrl = await PageObjects.share.getSharedUrl(true);
+      } else {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.exportAsSavedObject();
+        sharedUrl = await PageObjects.share.getSharedUrl(false);
       }
-      const sharedUrl = await PageObjects.share.getSharedUrl(true);
       return sharedUrl;
     };
 
     const getStateFromUrl = (url: string): UrlState => {
       const globalStateStart = url.indexOf('_g');
       const appStateStart = url.indexOf('_a');
-      const globalState = url.substring(globalStateStart + 3, appStateStart - 1);
-      const appState = url.substring(appStateStart + 3, url.length);
+
+      // global state is always part of the URL, but app state is *not* - so, need to
+      // modify the logic depending on whether app state exists or not
+      if (appStateStart === -1) {
+        return {
+          globalState: url.substring(globalStateStart + 3),
+          appState: undefined,
+        };
+      }
       return {
-        globalState,
-        appState,
+        globalState: url.substring(globalStateStart + 3, appStateStart - 1),
+        appState: url.substring(appStateStart + 3, url.length),
       };
     };
 
@@ -68,31 +78,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    const testSharedState = async (mode: TestingModes) => {
-      describe('test "filters" state', async () => {
-        it('should not have "filters" state when no filters', async () => {
-          expect(await getSharedUrl(mode)).to.not.contain('filters');
-        });
+    const testFilterState = async (mode: TestingModes) => {
+      it('should not have "filters" state in either app or global state when no filters', async () => {
+        expect(await getSharedUrl(mode)).to.not.contain('filters');
+      });
 
-        it('unpinned filters should show up only in app state ', async () => {
-          await filterBar.addFilter('geo.src', 'is', 'AE');
-          await PageObjects.dashboard.waitForRenderComplete();
+      it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
+        await filterBar.addFilter('geo.src', 'is', 'AE');
+        await PageObjects.dashboard.waitForRenderComplete();
 
-          const sharedUrl = await getSharedUrl(mode);
-          const { globalState, appState } = getStateFromUrl(sharedUrl);
-          expect(globalState).to.not.contain('filters');
+        const sharedUrl = await getSharedUrl(mode);
+        const { globalState, appState } = getStateFromUrl(sharedUrl);
+        expect(globalState).to.not.contain('filters');
+        if (mode === 'snapshot') {
           expect(appState).to.contain('filters');
-        });
+        } else {
+          expect(sharedUrl).to.not.contain('appState');
+        }
+      });
 
-        it('pinned filters should show up only in global state', async () => {
-          await filterBar.toggleFilterPinned('geo.src');
-          await PageObjects.dashboard.waitForRenderComplete();
+      it('unpinned filters should be removed from app state when dashboard is saved', async () => {
+        await PageObjects.dashboard.clickQuickSave();
+        await PageObjects.dashboard.waitForRenderComplete();
 
-          const sharedUrl = await getSharedUrl(mode);
-          const { globalState, appState } = getStateFromUrl(sharedUrl);
-          expect(globalState).to.contain('filters');
+        const sharedUrl = await getSharedUrl(mode);
+        expect(sharedUrl).to.not.contain('appState');
+      });
+
+      it('pinned filter should show up only in global state', async () => {
+        // skipping until https://github.com/elastic/kibana/issues/142161 is resolved
+        await filterBar.toggleFilterPinned('geo.src');
+        await PageObjects.dashboard.clickQuickSave();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        const sharedUrl = await getSharedUrl(mode);
+        const { globalState, appState } = getStateFromUrl(sharedUrl);
+        expect(globalState).to.contain('filters');
+        if (mode === 'snapshot') {
           expect(appState).to.not.contain('filters');
-        });
+        }
       });
     };
 
@@ -120,8 +144,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('test remaining snapshot URL state', async () => {
-        await testSharedState('snapshot');
+      describe('test filter state', async () => {
+        await testFilterState('snapshot');
       });
 
       after(async () => {
@@ -132,8 +156,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('saved object share', async () => {
-      describe('test saved object URL state', async () => {
-        await testSharedState('savedObject');
+      describe('test filter state', async () => {
+        await testFilterState('savedObject');
       });
     });
   });
