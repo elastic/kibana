@@ -386,5 +386,6 @@ export async function mountApp(
     lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
+    stateTransfer.clearEditorState?.(APP_ID);
   };
 }
