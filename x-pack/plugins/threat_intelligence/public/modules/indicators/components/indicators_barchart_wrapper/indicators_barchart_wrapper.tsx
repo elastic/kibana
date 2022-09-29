@@ -6,7 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiProgress,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeRange } from '@kbn/es-query';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
@@ -17,6 +24,8 @@ import { IndicatorsBarChart } from '../indicators_barchart/indicators_barchart';
 import { ChartSeries } from '../../services/fetch_aggregated_indicators';
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
+
+export const CHART_UPDATE_PROGRESS_TEST_ID = 'tiBarchartWrapper-updating';
 
 export interface IndicatorsBarChartWrapperProps {
   /**
@@ -35,6 +44,12 @@ export interface IndicatorsBarChartWrapperProps {
   field: string;
 
   onFieldChange: (value: string) => void;
+
+  /** Is initial load in progress? */
+  isLoading?: boolean;
+
+  /** Is data update in progress? */
+  isFetching?: boolean;
 }
 
 /**
@@ -42,9 +57,21 @@ export interface IndicatorsBarChartWrapperProps {
  * and handles retrieving aggregated indicator data.
  */
 export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
-  ({ timeRange, indexPattern, series, dateRange, field, onFieldChange }) => {
+  ({ timeRange, indexPattern, isLoading, isFetching, series, dateRange, field, onFieldChange }) => {
+    if (isLoading) {
+      return (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiPanel hasShadow={false} hasBorder={false} paddingSize="xl">
+              <EuiLoadingSpinner size="xl" />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     return (
-      <>
+      <div style={{ position: 'relative' }}>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem>
             <EuiTitle size={'s'}>
@@ -64,12 +91,20 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {timeRange ? (
-          <IndicatorsBarChart indicators={series} dateRange={dateRange} field={field} />
-        ) : (
-          <></>
+
+        {isFetching && (
+          <EuiProgress
+            data-test-subj={CHART_UPDATE_PROGRESS_TEST_ID}
+            size="xs"
+            color="accent"
+            position="absolute"
+          />
         )}
-      </>
+
+        {timeRange && (
+          <IndicatorsBarChart indicators={series} dateRange={dateRange} field={field} />
+        )}
+      </div>
     );
   }
 );

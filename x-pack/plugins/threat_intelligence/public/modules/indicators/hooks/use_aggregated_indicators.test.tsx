@@ -88,6 +88,8 @@ describe('useAggregatedIndicators()', () => {
           "max": "2022-01-02T00:00:00.000Z",
           "min": "2022-01-01T00:00:00.000Z",
         },
+        "isFetching": true,
+        "isLoading": true,
         "onFieldChange": [Function],
         "selectedField": "threat.feed.name",
         "series": Array [],

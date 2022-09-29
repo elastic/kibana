@@ -49,6 +49,12 @@ export interface UseAggregatedIndicatorsValue {
    * Indicator field used to query the aggregated Indicators.
    */
   selectedField: string;
+
+  /** Is initial load in progress? */
+  isLoading?: boolean;
+
+  /** Is data update in progress? */
+  isFetching?: boolean;
 }
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
@@ -80,7 +86,7 @@ export const useAggregatedIndicators = ({
     [inspectorAdapters, queryService, searchService]
   );
 
-  const { data } = useQuery(
+  const { data, isLoading, isFetching } = useQuery(
     [
       'indicatorsBarchart',
       {
@@ -97,7 +103,8 @@ export const useAggregatedIndicators = ({
     }: {
       signal?: AbortSignal;
       queryKey: [string, FetchAggregatedIndicatorsParams];
-    }) => aggregatedIndicatorsQuery(queryParams, signal)
+    }) => aggregatedIndicatorsQuery(queryParams, signal),
+    { keepPreviousData: true }
   );
 
   const dateRange = useMemo(
@@ -110,5 +117,7 @@ export const useAggregatedIndicators = ({
     series: data || [],
     onFieldChange: setField,
     selectedField: field,
+    isLoading,
+    isFetching,
   };
 };
