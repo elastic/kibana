@@ -80,24 +80,20 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+        class="euiButton emotion-euiButtonDisplay-m-isDisabled-m-fill-disabled"
         data-test-subj="enableCollectionInterval"
         disabled=""
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner euiButtonContent__spinner emotion-euiLoadingSpinner-m"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m-euiButtonDisplayContent__spinner"
             role="progressbar"
           />
-          <span
-            class="euiButton__text"
-          >
-            Turn on monitoring
-          </span>
+          Turn on monitoring
         </span>
       </button>
     </div>
@@ -157,18 +153,14 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        class="euiButton euiButton--primary euiButton--fill"
+        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
-          <span
-            class="euiButton__text"
-          >
-            Turn on monitoring
-          </span>
+          Turn on monitoring
         </span>
       </button>
     </div>
