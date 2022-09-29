@@ -8,6 +8,7 @@ PKG_REQUIRE_NAME = "@kbn/shared-ux-markdown"
 SOURCE_FILES = glob(
   [
     "**/*.ts",
+    "**/*.ts*",
   ],
   exclude = [
     "**/*.config.js",
@@ -46,6 +47,10 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//react",
+  "@npm//@elastic/eui",
+  "@npm//react-use",
+  "//packages/kbn-shared-ux-utility",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -58,8 +63,12 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//@types/node",
+  "@npm//@elastic/eui",
   "@npm//@types/jest",
+  "@npm//@types/node",
+  "@npm//@types/react",
+  "//packages/kbn-ambient-ui-types",
+  "//packages/kbn-shared-ux-utility:npm_module_types",
 ]
 
 jsts_transpiler(

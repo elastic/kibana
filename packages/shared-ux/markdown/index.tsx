@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Markdown } from './markdown';
+export { Markdown as MarkdownComponent } from './markdown';

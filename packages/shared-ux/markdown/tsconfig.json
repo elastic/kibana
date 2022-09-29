@@ -8,10 +8,13 @@
     "stripInternal": false,
     "types": [
       "jest",
-      "node"
+      "node",
+      "react",
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
   ]
 }
