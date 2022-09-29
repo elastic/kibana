@@ -38,7 +38,7 @@ export const configSchema = schema.object({
   }),
   maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
-  idleSocketTimeout: schema.duration({ defaultValue: '9m' }),
+  idleSocketTimeout: schema.duration({ defaultValue: '60s' }),
   compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
     schema.string({
