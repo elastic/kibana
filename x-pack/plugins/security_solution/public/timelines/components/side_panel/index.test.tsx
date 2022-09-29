@@ -153,8 +153,17 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:EventDetails: rendering', () => {
     beforeEach(() => {
-      const mockState = { ...state };
-      mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventExpandedDetail;
+      const mockState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
+      mockState.timeline.timelineById[TimelineId.active].expandedDetail = eventExpandedDetail;
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventExpandedDetail;
       store = createStore(
         mockState,
@@ -214,6 +223,25 @@ describe('Details Panel Component', () => {
         scopeId: TimelineId.active,
         tabType: TimelineTabs.query,
       };
+      const newState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            ...state.timeline.timelineById,
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
+      newState.timeline.timelineById[TimelineId.active].activeTab = TimelineTabs.query;
+      newState.timeline.timelineById[TimelineId.active].expandedDetail = eventExpandedDetail;
+      store = createStore(
+        newState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...currentProps} />
@@ -225,9 +253,18 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:EventDetails: rendering in pinned tab', () => {
     beforeEach(() => {
-      const mockState = { ...state };
-      mockState.timeline.timelineById[TimelineId.test].activeTab = TimelineTabs.pinned;
-      mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventPinnedExpandedDetail;
+      const mockState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
+      mockState.timeline.timelineById[TimelineId.active].activeTab = TimelineTabs.pinned;
+      mockState.timeline.timelineById[TimelineId.active].expandedDetail = eventPinnedExpandedDetail;
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventPinnedExpandedDetail;
       mockState.timeline.timelineById[TimelineId.test].activeTab = TimelineTabs.pinned;
       store = createStore(
@@ -239,21 +276,21 @@ describe('Details Panel Component', () => {
       );
     });
 
-    test('it should have the attributes isDraggable to be true when timelineId and activeTab !== "pinned"', () => {
-      const currentProps = { ...mockProps, tabType: TimelineTabs.query };
+    test('it should have the attributes isDraggable to be false when timelineId !== "active" and activeTab === "pinned"', () => {
+      const currentProps = { ...mockProps, tabType: TimelineTabs.pinned };
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...currentProps} />
         </TestProviders>
       );
-      expect(wrapper.find(EventDetailsPanel).props().isDraggable).toBeTruthy();
+      expect(wrapper.find(EventDetailsPanel).props().isDraggable).toBeFalsy();
     });
 
-    test('it should have the attributes isDraggable to be false when timelineId and activeTab === "pinned"', () => {
+    test('it should have the attributes isDraggable to be false when timelineId === "active" and activeTab === "pinned"', () => {
       const currentProps = {
         ...mockProps,
         tabType: TimelineTabs.pinned,
-        scopeId: TimelineId.test,
+        scopeId: TimelineId.active,
       };
       const wrapper = mount(
         <TestProviders store={store}>
@@ -278,9 +315,18 @@ describe('Details Panel Component', () => {
         refetch: jest.fn(),
         inspect: {},
       });
-      const mockState = { ...state };
+      const mockState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = hostExpandedDetail;
-      mockState.timeline.timelineById[TimelineId.test].expandedDetail = hostExpandedDetail;
+      mockState.timeline.timelineById[TimelineId.active].expandedDetail = hostExpandedDetail;
       store = createStore(
         mockState,
         SUB_PLUGINS_REDUCER,
@@ -316,9 +362,18 @@ describe('Details Panel Component', () => {
         refetch: jest.fn(),
         inspect: {},
       });
-      const mockState = { ...state };
+      const mockState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = networkExpandedDetail;
-      mockState.timeline.timelineById[TimelineId.test].expandedDetail = networkExpandedDetail;
+      mockState.timeline.timelineById[TimelineId.active].expandedDetail = networkExpandedDetail;
       store = createStore(
         mockState,
         SUB_PLUGINS_REDUCER,
