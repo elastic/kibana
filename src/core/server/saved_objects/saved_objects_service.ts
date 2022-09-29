@@ -516,7 +516,7 @@ export class SavedObjectsService
     const createRepository = (
       esClient: ElasticsearchClient,
       includedHiddenTypes: string[] = [],
-      extensions: SavedObjectsExtensions | undefined
+      extensions?: SavedObjectsExtensions
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
