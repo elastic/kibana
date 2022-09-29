@@ -1856,14 +1856,6 @@
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_filter_state.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_filter_state.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/routes/map_page/url_state/global_sync.ts"
           },

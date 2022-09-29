@@ -768,13 +768,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreRequestHandlerContext",
-                "text": "CoreRequestHandlerContext"
-              }
+              "CoreRequestHandlerContext"
             ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
