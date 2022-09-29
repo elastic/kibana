@@ -45,13 +45,11 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
     refreshCases();
   }, [deselectCases, refreshCases]);
 
-  const { actions, modals } = useBulkActions({
+  const { panels, modals } = useBulkActions({
     selectedCases,
     onAction: closePopover,
     onActionSuccess: onRefresh,
   });
-
-  const panels = [{ id: 0, items: actions }];
 
   return (
     <>

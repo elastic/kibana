@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import { EuiContextMenuPanelItemDescriptor, EuiTableActionsColumnType } from '@elastic/eui';
+import { useCallback } from 'react';
+import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import { Case, CaseStatuses } from '../../../../common';
 
 import * as i18n from './translations';
-import { UseActionProps, UseBulkActionProps } from '../types';
+import { UseActionProps } from '../types';
 
 const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string => {
   const totalCases = cases.length;
@@ -28,16 +28,11 @@ const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string =>
   return '';
 };
 
-export const useBulkStatusAction = ({
-  selectedCases,
-  onAction,
-  onActionSuccess,
-  isDisabled,
-}: UseBulkActionProps) => {
+export const useStatusAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
   const { mutate: updateCases } = useUpdateCases();
 
   const handleUpdateCaseStatus = useCallback(
-    (status: CaseStatuses) => {
+    (selectedCases: Case[], status: CaseStatuses) => {
       onAction();
       const casesToUpdate = selectedCases.map((theCase) => ({
         status,
@@ -53,103 +48,39 @@ export const useBulkStatusAction = ({
         { onSuccess: onActionSuccess }
       );
     },
-    [onAction, selectedCases, updateCases, onActionSuccess]
+    [onAction, updateCases, onActionSuccess]
   );
 
-  const actions: EuiContextMenuPanelItemDescriptor[] = useMemo(
-    () => [
+  const getActions = (selectedCases: Case[]): EuiContextMenuPanelItemDescriptor[] => {
+    return [
       {
         name: i18n.BULK_ACTION_STATUS_OPEN,
-        icon: 'folderOpen',
-        onClick: () => handleUpdateCaseStatus(CaseStatuses.open),
+        icon: 'empty',
+        onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.open),
         disabled: isDisabled,
         'data-test-subj': 'cases-bulk-action-status-open',
         key: 'cases-bulk-action-status-open',
       },
       {
         name: i18n.BULK_ACTION_STATUS_IN_PROGRESS,
-        icon: 'folderExclamation',
-        onClick: () => handleUpdateCaseStatus(CaseStatuses['in-progress']),
+        icon: 'empty',
+        onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses['in-progress']),
         disabled: isDisabled,
         'data-test-subj': 'cases-bulk-action-status-in-progress',
         key: 'cases-bulk-action-status-in-progress',
       },
       {
         name: i18n.BULK_ACTION_STATUS_CLOSE,
-        icon: 'folderCheck',
-        onClick: () => handleUpdateCaseStatus(CaseStatuses.closed),
+        icon: 'empty',
+        onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.closed),
         disabled: isDisabled,
         'data-test-subj': 'cases-bulk-action-status-close',
         key: 'cases-bulk-status-action',
       },
-    ],
-    [handleUpdateCaseStatus, isDisabled]
-  );
+    ];
+  };
 
-  return { actions };
+  return { getActions };
 };
 
-export type UseBulkStatusAction = ReturnType<typeof useBulkStatusAction>;
-
-export const useStatusAction = ({ onActionSuccess }: UseActionProps) => {
-  const { mutate: updateCases } = useUpdateCases();
-
-  const handleUpdateCaseStatus = useCallback(
-    (theCase: Case, status: CaseStatuses) => {
-      updateCases(
-        {
-          cases: [
-            {
-              status,
-              id: theCase.id,
-              version: theCase.version,
-            },
-          ],
-          successToasterTitle: getStatusToasterMessage(status, [theCase]),
-        },
-        { onSuccess: onActionSuccess }
-      );
-    },
-    [onActionSuccess, updateCases]
-  );
-
-  const actions: EuiTableActionsColumnType<Case>['actions'] = useMemo(
-    () => [
-      {
-        name: i18n.OPEN_CASE,
-        description: i18n.OPEN_CASE,
-        icon: 'folderOpen',
-        type: 'icon',
-        isPrimary: false,
-        onClick: (theCase) => handleUpdateCaseStatus(theCase, CaseStatuses.open),
-        'data-test-subj': 'case-action-status-open',
-        key: 'case-action-status-open',
-      },
-      {
-        name: i18n.MARK_CASE_IN_PROGRESS,
-        description: i18n.MARK_CASE_IN_PROGRESS,
-        icon: 'folderExclamation',
-        type: 'icon',
-        isPrimary: false,
-        onClick: (theCase) => handleUpdateCaseStatus(theCase, CaseStatuses['in-progress']),
-        'data-test-subj': 'case-action-status-in-progress',
-        key: 'case-action-status-progress',
-      },
-      {
-        name: i18n.CLOSE_CASE,
-        description: i18n.CLOSE_CASE,
-        icon: 'folderCheck',
-        type: 'icon',
-        isPrimary: false,
-        onClick: (theCase) => handleUpdateCaseStatus(theCase, CaseStatuses.closed),
-        'data-test-subj': 'case-action-status-close',
-        key: 'case-action-status-close',
-      },
-    ],
-    [handleUpdateCaseStatus]
-  );
-
-  return { actions };
-};
-
-export type UseStatusAction = ReturnType<typeof useBulkStatusAction>;
+export type UseStatusAction = ReturnType<typeof useStatusAction>;

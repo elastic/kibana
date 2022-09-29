@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import React from 'react';
 
 import { Case } from '../../containers/types';
-import { useBulkDeleteAction } from '../actions/delete/use_delete_action';
-import { useBulkStatusAction } from '../actions/status/use_status_action';
+import { useDeleteAction } from '../actions/delete/use_delete_action';
+import { useStatusAction } from '../actions/status/use_status_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import * as i18n from './translations';
 
 interface UseBulkActionsProps {
   selectedCases: Case[];
@@ -20,7 +21,7 @@ interface UseBulkActionsProps {
 }
 
 interface UseBulkActionsReturnValue {
-  actions: EuiContextMenuPanelItemDescriptor[];
+  panels: EuiContextMenuPanelDescriptor[];
   modals: JSX.Element;
 }
 
@@ -31,19 +32,38 @@ export const useBulkActions = ({
 }: UseBulkActionsProps): UseBulkActionsReturnValue => {
   const isDisabled = selectedCases.length === 0;
 
-  const deleteAction = useBulkDeleteAction({
-    selectedCases,
+  const deleteAction = useDeleteAction({
     isDisabled,
     onAction,
     onActionSuccess,
   });
 
-  const statusAction = useBulkStatusAction({
-    selectedCases,
+  const statusAction = useStatusAction({
     isDisabled,
     onAction,
     onActionSuccess,
   });
+
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      title: i18n.ACTIONS,
+      items: [
+        { name: i18n.STATUS, panel: 1, disabled: isDisabled },
+        {
+          isSeparator: true,
+          key: 'actions-separator',
+        },
+        // TODO: permission check
+        deleteAction.getAction(selectedCases),
+      ],
+    },
+    {
+      id: 1,
+      title: i18n.STATUS,
+      items: statusAction.getActions(selectedCases),
+    },
+  ];
 
   return {
     modals: (
@@ -57,6 +77,6 @@ export const useBulkActions = ({
         ) : null}
       </>
     ),
-    actions: [...statusAction.actions, deleteAction.action],
+    panels,
   };
 };

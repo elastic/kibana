@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import { Case } from '../../containers/types';
-
-export interface UseBulkActionProps {
-  selectedCases: Case[];
+export interface UseActionProps {
   onAction: () => void;
   onActionSuccess: () => void;
   isDisabled: boolean;
-}
-
-export interface UseActionProps {
-  onActionSuccess: () => void;
 }

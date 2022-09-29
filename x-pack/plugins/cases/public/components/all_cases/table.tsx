@@ -130,6 +130,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         rowProps={tableRowProps}
         selection={showActions ? selection : undefined}
         sorting={sorting}
+        hasActions={false}
       />
     </Div>
   );

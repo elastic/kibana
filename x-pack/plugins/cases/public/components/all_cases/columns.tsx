@@ -107,7 +107,6 @@ export interface GetCasesColumn {
 
 interface UseCasesColumnsReturnValue {
   columns: CasesColumns[];
-  modals: JSX.Element;
 }
 
 export const useCasesColumns = ({
@@ -122,7 +121,7 @@ export const useCasesColumns = ({
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
 
-  const { actions, modals } = useActions({ permissions });
+  const { actions } = useActions({ permissions });
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {
@@ -305,7 +304,6 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-
     ...(isSelectorView
       ? [
           {
@@ -330,17 +328,10 @@ export const useCasesColumns = ({
           },
         ]
       : []),
-    ...(!isSelectorView && actions.length > 0
-      ? [
-          {
-            name: i18n.ACTIONS,
-            actions,
-          },
-        ]
-      : []),
+    ...(!isSelectorView && actions ? [actions] : []),
   ];
 
-  return { columns, modals };
+  return { columns };
 };
 
 interface Props {

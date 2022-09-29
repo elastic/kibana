@@ -5,31 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiContextMenuPanelItemDescriptor,
-  EuiIcon,
-  EuiTableActionsColumnType,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { Case } from '../../../../common';
 import { useDeleteCases } from '../../../containers/use_delete_cases';
 
 import * as i18n from './translations';
-import { UseActionProps, UseBulkActionProps } from '../types';
+import { UseActionProps } from '../types';
 
-export const useBulkDeleteAction = ({
-  selectedCases,
-  onAction,
-  isDisabled,
-}: UseBulkActionProps) => {
+export const useDeleteAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
   const euiTheme = useEuiTheme();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [caseToBeDeleted, setCaseToBeDeleted] = useState<Case[]>([]);
   const onCloseModal = useCallback(() => setIsModalVisible(false), []);
-  const openModal = useCallback(() => {
-    setIsModalVisible(true);
-  }, []);
+  const openModal = useCallback(
+    (selectedCases: Case[]) => {
+      onAction();
+      setIsModalVisible(true);
+      setCaseToBeDeleted(selectedCases);
+    },
+    [onAction]
+  );
 
   const { mutate: deleteCases } = useDeleteCases();
 
@@ -37,72 +33,27 @@ export const useBulkDeleteAction = ({
     onCloseModal();
     deleteCases(
       {
-        caseIds: selectedCases.map(({ id }) => id),
-        successToasterTitle: i18n.DELETED_CASES(selectedCases.length),
+        caseIds: caseToBeDeleted.map(({ id }) => id),
+        successToasterTitle: i18n.DELETED_CASES(caseToBeDeleted.length),
       },
-      { onSuccess: onAction }
+      { onSuccess: onActionSuccess }
     );
-  }, [deleteCases, onAction, onCloseModal, selectedCases]);
+  }, [deleteCases, onActionSuccess, onCloseModal, caseToBeDeleted]);
 
   const color = isDisabled ? euiTheme.euiTheme.colors.disabled : 'danger';
 
-  const action: EuiContextMenuPanelItemDescriptor = useMemo(
-    () => ({
+  const getAction = (selectedCases: Case[]) => {
+    return {
       name: <EuiTextColor color={color}>{i18n.BULK_ACTION_DELETE_LABEL}</EuiTextColor>,
-      onClick: openModal,
+      onClick: () => openModal(selectedCases),
       disabled: isDisabled,
       'data-test-subj': 'cases-bulk-action-delete',
       icon: <EuiIcon type="trash" size="m" color={color} />,
       key: 'cases-bulk-action-delete',
-    }),
-    [color, isDisabled, openModal]
-  );
+    };
+  };
 
-  return { action, isModalVisible, onConfirmDeletion, onCloseModal };
+  return { getAction, isModalVisible, onConfirmDeletion, onCloseModal };
 };
 
-export type UseBulkDeleteAction = ReturnType<typeof useBulkDeleteAction>;
-
-export const useDeleteAction = ({ onActionSuccess }: UseActionProps) => {
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [caseToBeDeleted, setCaseToBeDeleted] = useState<string>();
-  const onCloseModal = useCallback(() => setIsModalVisible(false), []);
-  const openModal = useCallback((theCase: Case) => {
-    setIsModalVisible(true);
-    setCaseToBeDeleted(theCase.id);
-  }, []);
-
-  const { mutate: deleteCases } = useDeleteCases();
-
-  const onConfirmDeletion = useCallback(() => {
-    onCloseModal();
-    if (caseToBeDeleted) {
-      deleteCases(
-        {
-          caseIds: [caseToBeDeleted],
-          successToasterTitle: i18n.DELETED_CASES(1),
-        },
-        { onSuccess: onActionSuccess }
-      );
-    }
-  }, [caseToBeDeleted, deleteCases, onActionSuccess, onCloseModal]);
-
-  const action: EuiTableActionsColumnType<Case>['actions'][number] = useMemo(
-    () => ({
-      name: i18n.DELETE_ACTION_LABEL,
-      description: i18n.DELETE_ACTION_LABEL,
-      icon: 'trash',
-      color: 'danger',
-      type: 'icon',
-      isPrimary: true,
-      onClick: openModal,
-      'data-test-subj': 'case-action-delete',
-      key: 'case-action-delete',
-    }),
-    [openModal]
-  );
-
-  return { action, isModalVisible, onConfirmDeletion, onCloseModal };
-};
-
-export type UseDeleteAction = ReturnType<typeof useBulkDeleteAction>;
+export type UseDeleteAction = ReturnType<typeof useDeleteAction>;

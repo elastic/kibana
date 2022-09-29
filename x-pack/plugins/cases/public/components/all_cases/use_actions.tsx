@@ -5,40 +5,127 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiTableActionsColumnType } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
+  EuiTableComputedColumnType,
+} from '@elastic/eui';
 import { Case, CasesPermissions } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useStatusAction } from '../actions/status/use_status_action';
 import { useRefreshCases } from './use_on_refresh_cases';
+import * as i18n from './translations';
 
 interface UseBulkActionsProps {
   permissions: CasesPermissions;
 }
 
 interface UseBulkActionsReturnValue {
-  actions: EuiTableActionsColumnType<Case>['actions'];
-  modals: JSX.Element;
+  actions: EuiTableComputedColumnType<Case>;
 }
 
-export const useActions = ({ permissions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
+const ActionColumnComponent: React.FC<{ theCase: Case; isDisabled: boolean }> = ({
+  theCase,
+  isDisabled,
+}) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
-  const deleteAction = useDeleteAction({ onActionSuccess: refreshCases });
-  const statusAction = useStatusAction({ onActionSuccess: refreshCases });
+  const deleteAction = useDeleteAction({
+    isDisabled,
+    onAction: closePopover,
+    onActionSuccess: refreshCases,
+  });
+
+  const statusAction = useStatusAction({
+    isDisabled,
+    onAction: closePopover,
+    onActionSuccess: refreshCases,
+  });
+
+  const getPanels = useCallback(
+    (): EuiContextMenuPanelDescriptor[] => [
+      {
+        id: 0,
+        title: i18n.ACTIONS,
+        items: [
+          {
+            name: i18n.STATUS,
+            panel: 1,
+            disabled: isDisabled,
+            key: `case-action-status-panel-${theCase.id}`,
+          },
+          {
+            isSeparator: true,
+            key: `actions-separator-${theCase.id}`,
+          },
+          // TODO: permission check
+          deleteAction.getAction([theCase]),
+        ],
+      },
+      {
+        id: 1,
+        title: i18n.STATUS,
+        items: statusAction.getActions([theCase]),
+      },
+    ],
+    [deleteAction, isDisabled, statusAction, theCase]
+  );
+
+  return (
+    <>
+      <EuiPopover
+        id={`case-action-popover-${theCase.id}`}
+        key={`case-action-popover-${theCase.id}`}
+        button={
+          <EuiButtonIcon
+            onClick={tooglePopover}
+            iconType="boxesHorizontal"
+            aria-label={i18n.ACTIONS}
+            color="text"
+            key={`case-action-popover-button-${theCase.id}`}
+          />
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={getPanels()}
+          key={`case-action-menu-${theCase.id}`}
+        />
+      </EuiPopover>
+      {deleteAction.isModalVisible ? (
+        <ConfirmDeleteCaseModal
+          totalCasesToBeDeleted={1}
+          onCancel={deleteAction.onCloseModal}
+          onConfirm={deleteAction.onConfirmDeletion}
+        />
+      ) : null}
+    </>
+  );
+};
+
+ActionColumnComponent.displayName = 'ActionColumnComponent';
+
+const ActionColumn = React.memo(ActionColumnComponent);
+
+export const useActions = ({ permissions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
+  const isDisabled = !permissions.update;
 
   return {
-    modals: (
-      <>
-        {deleteAction.isModalVisible ? (
-          <ConfirmDeleteCaseModal
-            totalCasesToBeDeleted={1}
-            onCancel={deleteAction.onCloseModal}
-            onConfirm={deleteAction.onConfirmDeletion}
-          />
-        ) : null}
-      </>
-    ),
-    actions: [...statusAction.actions, ...(permissions.delete ? [deleteAction.action] : [])],
+    actions: {
+      name: i18n.ACTIONS,
+      render: (theCase: Case) => {
+        return <ActionColumn theCase={theCase} key={theCase.id} isDisabled={isDisabled} />;
+      },
+    },
   };
 };
