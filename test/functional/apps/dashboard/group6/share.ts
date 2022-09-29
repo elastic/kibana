@@ -16,7 +16,26 @@ interface UrlState {
   appState: AppState;
 }
 
+const getStateFromUrl = (url: string): UrlState => {
+  const globalStateStart = url.indexOf('_g');
+  const appStateStart = url.indexOf('_a');
+
+  // global state is always part of the URL, but app state is *not* - so, need to
+  // modify the logic depending on whether app state exists or not
+  if (appStateStart === -1) {
+    return {
+      globalState: url.substring(globalStateStart + 3),
+      appState: undefined,
+    };
+  }
+  return {
+    globalState: url.substring(globalStateStart + 3, appStateStart - 1),
+    appState: url.substring(appStateStart + 3, url.length),
+  };
+};
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -24,60 +43,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const PageObjects = getPageObjects(['dashboard', 'common', 'share', 'timePicker']);
 
+  const getSharedUrl = async (mode: TestingModes): Promise<string> => {
+    await retry.waitFor('share menu to open', async () => {
+      await PageObjects.share.clickShareTopNavButton();
+      return await PageObjects.share.isShareMenuOpen();
+    });
+    if (mode === 'savedObject') {
+      await PageObjects.share.exportAsSavedObject();
+    }
+    const sharedUrl = await PageObjects.share.getSharedUrl();
+    return sharedUrl;
+  };
+
   describe('share dashboard', () => {
-    const getSharedUrl = async (mode: TestingModes): Promise<string> => {
-      let sharedUrl: string;
-      if (mode === 'snapshot') {
-        sharedUrl = await PageObjects.share.getSharedUrl(true);
-      } else {
-        await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.share.exportAsSavedObject();
-        sharedUrl = await PageObjects.share.getSharedUrl(false);
-      }
-      return sharedUrl;
-    };
-
-    const getStateFromUrl = (url: string): UrlState => {
-      const globalStateStart = url.indexOf('_g');
-      const appStateStart = url.indexOf('_a');
-
-      // global state is always part of the URL, but app state is *not* - so, need to
-      // modify the logic depending on whether app state exists or not
-      if (appStateStart === -1) {
-        return {
-          globalState: url.substring(globalStateStart + 3),
-          appState: undefined,
-        };
-      }
-      return {
-        globalState: url.substring(globalStateStart + 3, appStateStart - 1),
-        appState: url.substring(appStateStart + 3, url.length),
-      };
-    };
-
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
-      );
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-      });
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-
-      await PageObjects.dashboard.switchToEditMode();
-      const from = 'Sep 19, 2017 @ 06:31:44.000';
-      const to = 'Sep 23, 2018 @ 18:31:44.000';
-      await PageObjects.timePicker.setAbsoluteRange(from, to);
-      await PageObjects.dashboard.waitForRenderComplete();
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
     const testFilterState = async (mode: TestingModes) => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
         expect(await getSharedUrl(mode)).to.not.contain('filters');
@@ -106,7 +84,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('pinned filter should show up only in global state', async () => {
-        // skipping until https://github.com/elastic/kibana/issues/142161 is resolved
         await filterBar.toggleFilterPinned('geo.src');
         await PageObjects.dashboard.clickQuickSave();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -119,6 +96,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       });
     };
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.loadSavedDashboard('few panels');
+
+      await PageObjects.dashboard.switchToEditMode();
+      const from = 'Sep 19, 2017 @ 06:31:44.000';
+      const to = 'Sep 23, 2018 @ 18:31:44.000';
+      await PageObjects.timePicker.setAbsoluteRange(from, to);
+      await PageObjects.dashboard.waitForRenderComplete();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     describe('snapshot share', async () => {
       describe('test local state', async () => {
@@ -140,6 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should once again not have "panels" state when save is clicked', async () => {
           await PageObjects.dashboard.clickQuickSave();
           await PageObjects.dashboard.waitForRenderComplete();
+          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
           expect(await getSharedUrl('snapshot')).to.not.contain('panels');
         });
       });
