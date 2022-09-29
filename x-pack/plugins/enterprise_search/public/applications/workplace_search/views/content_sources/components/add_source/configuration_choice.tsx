@@ -47,7 +47,6 @@ const ConnectorCard: React.FC<CardProps> = ({
       hasBorder
       title={title}
       description={disabledMessage || description}
-      //betaBadgeProps={{ label: badgeLabel }}
       betaBadgeProps={badgeLabel ? { label: badgeLabel } : undefined}
       footer={
         <EuiButtonTo color="primary" to={to} isDisabled={!!disabledMessage}>
