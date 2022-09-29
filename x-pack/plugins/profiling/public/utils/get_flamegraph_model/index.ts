@@ -6,12 +6,8 @@
  */
 import d3 from 'd3';
 import { sum, uniqueId } from 'lodash';
-import {
-  createColumnarViewModel,
-  ElasticFlameGraph,
-  FlameGraphComparisonMode,
-  rgbToRGBA,
-} from '../../../common/flamegraph';
+import { createColumnarViewModel, rgbToRGBA } from '../../../common/columnar_view_model';
+import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { getInterpolationValue } from './get_interpolation_value';
 
 const nullColumnarViewModel = {

@@ -7,11 +7,12 @@
 
 import { sum } from 'lodash';
 import { createCalleeTree } from './callee';
-import { createColumnarViewModel, createFlameGraph } from './flamegraph';
+import { createColumnarViewModel } from './columnar_view_model';
+import { createFlameGraph } from './flamegraph';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
 
-describe('Flamegraph operations', () => {
+describe('Columnar view model operations', () => {
   test('1', () => {
     const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
 
