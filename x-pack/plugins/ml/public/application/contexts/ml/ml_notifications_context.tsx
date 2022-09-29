@@ -15,7 +15,7 @@ import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/stora
 import { useAsObservable } from '../../hooks';
 import type { NotificationsCountResponse } from '../../../../common/types/notifications';
 
-const NOTIFICATIONS_CHECK_INTERVAL = 5000;
+const NOTIFICATIONS_CHECK_INTERVAL = 60000;
 
 export const MlNotificationsContext = React.createContext<{
   notificationsCounts: NotificationsCountResponse;
@@ -23,10 +23,12 @@ export const MlNotificationsContext = React.createContext<{
   lastCheckedAt: number | null;
   /** Holds the value used for the actual request */
   latestRequestedAt: number | null;
+  setLastCheckedAt: (v: number) => void;
 }>({
   notificationsCounts: { info: 0, error: 0, warning: 0 },
   lastCheckedAt: null,
   latestRequestedAt: null,
+  setLastCheckedAt: () => {},
 });
 
 export const MlNotificationsContextProvider: FC = ({ children }) => {
@@ -36,7 +38,7 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
     },
   } = useMlKibana();
 
-  const [lastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
+  const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
   const lastCheckedAt$ = useAsObservable(lastCheckedAt);
 
   /** Holds the value used for the actual request */
@@ -77,7 +79,7 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
 
   return (
     <MlNotificationsContext.Provider
-      value={{ notificationsCounts, lastCheckedAt, latestRequestedAt }}
+      value={{ notificationsCounts, lastCheckedAt, setLastCheckedAt, latestRequestedAt }}
     >
       {children}
     </MlNotificationsContext.Provider>
