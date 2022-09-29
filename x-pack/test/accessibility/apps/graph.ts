@@ -63,12 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('saveCancelButton');
     });
 
-    it('Graph inspect panel', async function () {
-      await testSubjects.click('graphInspectButton');
-      await a11y.testAppSnapshot();
-      await testSubjects.click('graphInspectButton');
-    });
-
     it('Graph settings - advanced settings tab', async function () {
       await testSubjects.click('graphSettingsButton');
       await a11y.testAppSnapshot();
