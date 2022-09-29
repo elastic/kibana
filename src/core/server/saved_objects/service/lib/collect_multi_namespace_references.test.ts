@@ -38,7 +38,7 @@ import {
   setupRedactPassthrough,
 } from './respository.test.common';
 
-const SPACES = ['another-space']; // ['default', 'another-space'];
+const SPACES = ['another-space'];
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 
 const MULTI_NAMESPACE_OBJ_TYPE_1 = 'type-a';

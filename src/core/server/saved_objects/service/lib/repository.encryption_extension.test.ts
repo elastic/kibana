@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/no-shadow */
-
 import {
   pointInTimeFinderMock,
   mockGetCurrentTime,
@@ -60,6 +58,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
   const documentMigrator = createDocumentMigrator(registry);
 
   const namespace = 'foo-namespace';
+
   const encryptedSO = {
     id: 'encrypted-id',
     type: ENCRYPTED_TYPE,
@@ -125,7 +124,6 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
   describe('#get', () => {
     it('does not attempt to decrypt or strip attributes if type is not encryptable', async () => {
-      const namespace = 'foo-namespace';
       const options = { namespace };
 
       const response = getMockGetResponse(registry, {
@@ -151,7 +149,6 @@ describe('SavedObjectsRepository Encryption Extension', () => {
     });
 
     it('decrypts and strips attributes if type is encryptable', async () => {
-      const namespace = 'foo-namespace';
       const options = { namespace };
 
       const response = getMockGetResponse(registry, {
@@ -293,8 +290,8 @@ describe('SavedObjectsRepository Encryption Extension', () => {
     });
 
     describe('namespace', () => {
-      const doTest = async (namespace: string, expectNamespaceInDescriptor: boolean) => {
-        const options = { overwrite: true, namespace };
+      const doTest = async (optNamespace: string, expectNamespaceInDescriptor: boolean) => {
+        const options = { overwrite: true, namespace: optNamespace };
         mockEncryptionExt.isEncryptableType.mockReturnValue(true);
 
         await repository.create(
@@ -624,7 +621,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
   });
 
   describe('#find', () => {
-    const generateSearchResults = (namespace?: string) => {
+    const generateSearchResults = (space?: string) => {
       return {
         took: 1,
         timed_out: false,
@@ -634,7 +631,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           hits: [
             {
               _index: '.kibana',
-              _id: `${namespace ? `${namespace}:` : ''}${encryptedSO.type}:${encryptedSO.id}`,
+              _id: `${space ? `${space}:` : ''}${encryptedSO.type}:${encryptedSO.id}`,
               _score: 1,
               ...mockVersionProps,
               _source: {
@@ -644,11 +641,11 @@ describe('SavedObjectsRepository Encryption Extension', () => {
             },
             {
               _index: '.kibana',
-              _id: `${namespace ? `${namespace}:` : ''}index-pattern:logstash-*`,
+              _id: `${space ? `${space}:` : ''}index-pattern:logstash-*`,
               _score: 2,
               ...mockVersionProps,
               _source: {
-                namespace,
+                namespace: space,
                 originId: 'some-origin-id', // only one of the results has an originId, this is intentional to test both a positive and negative case
                 type: 'index-pattern',
                 ...mockTimestampFields,

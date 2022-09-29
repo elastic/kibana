@@ -17,31 +17,31 @@ interface Params {
 }
 
 export class SavedObjectsSpacesExtension implements ISavedObjectsSpacesExtension {
-  readonly _activeSpaceId: string;
-  readonly _spacesClient: ISpacesClient;
+  private readonly activeSpaceId: string;
+  private readonly spacesClient: ISpacesClient;
 
   constructor({ activeSpaceId, spacesClient }: Params) {
-    this._activeSpaceId = activeSpaceId;
-    this._spacesClient = spacesClient;
+    this.activeSpaceId = activeSpaceId;
+    this.spacesClient = spacesClient;
   }
 
   getCurrentNamespace(namespace: string | undefined): string | undefined {
     if (namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
-    return spaceIdToNamespace(this._activeSpaceId);
+    return spaceIdToNamespace(this.activeSpaceId);
   }
 
   async getSearchableNamespaces(namespaces: string[] | undefined): Promise<string[]> {
     if (!namespaces) {
       // If no namespaces option was specified, fall back to the active space.
-      return [this._activeSpaceId];
+      return [this.activeSpaceId];
     } else if (!namespaces.length) {
       // If the namespaces option is empty, return early and let the consumer handle it appropriately.
       return namespaces;
     }
 
-    const availableSpaces = await this._spacesClient.getAll({ purpose: 'findSavedObjects' });
+    const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
     if (namespaces.includes(ALL_SPACES_ID)) {
       return availableSpaces.map((space) => space.id);
     } else {
