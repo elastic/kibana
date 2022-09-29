@@ -8,7 +8,4 @@
 
 import { UnifiedHistogramPublicPlugin } from './plugin';
 
-export type { PanelsProps } from './panels';
-export { Panels, PANELS_MODE } from './panels';
-
 export const plugin = () => new UnifiedHistogramPublicPlugin();

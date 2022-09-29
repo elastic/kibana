@@ -20,7 +20,7 @@ export interface UnifiedHistogramServices {
 
 export type UnifiedHistogramStatus = 'loading' | 'complete' | 'partial' | 'error';
 
-export type UnifiedHistogramLayout = 'single' | 'fixed' | 'resizable';
+export type UnifiedHistogramLayoutStyle = 'fixed' | 'resizable';
 
 export interface TimechartBucketInterval {
   scaled?: boolean;

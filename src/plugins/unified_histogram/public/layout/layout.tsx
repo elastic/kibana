@@ -9,12 +9,12 @@
 import React, { ReactElement, RefObject, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { Panels, PANELS_MODE } from '../panels';
-import { UnifiedHistogramServices } from '../types';
+import { UnifiedHistogramLayoutStyle, UnifiedHistogramServices } from '../types';
 
 export interface UnifiedHistogramLayoutProps {
   services: UnifiedHistogramServices;
   className?: string;
-  mode: PANELS_MODE;
+  layout: UnifiedHistogramLayoutStyle;
   resizeRef: RefObject<HTMLDivElement>;
   topPanelHeight: number;
   minTopPanelHeight: number;
@@ -26,7 +26,7 @@ export interface UnifiedHistogramLayoutProps {
 
 export const UnifiedHistogramLayout = ({
   className,
-  mode,
+  layout = 'resizable',
   resizeRef,
   topPanelHeight,
   minTopPanelHeight,
@@ -51,7 +51,7 @@ export const UnifiedHistogramLayout = ({
       <InPortal node={mainPanelNode}>{mainPanel}</InPortal>
       <Panels
         className={className}
-        mode={mode}
+        mode={layout as PANELS_MODE}
         resizeRef={resizeRef}
         topPanelHeight={topPanelHeight}
         minTopPanelHeight={minTopPanelHeight}
