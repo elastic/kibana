@@ -69,7 +69,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
         updated_at: expect.anything(),
         created_at: expect.anything(),
       }),
-      { id: SOME_SLO.id }
+      { id: SOME_SLO.id, overwrite: true }
     );
   });
 

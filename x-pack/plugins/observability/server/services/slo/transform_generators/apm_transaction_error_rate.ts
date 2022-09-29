@@ -44,7 +44,7 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
   }
 
   private buildTransformId(slo: APMTransactionErrorRateSLO): string {
-    return getSLOTransformId(slo.id);
+    return getSLOTransformId(slo.id, slo.revision);
   }
 
   private buildSource(slo: APMTransactionErrorRateSLO) {
@@ -90,6 +90,12 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
             source: `emit('${slo.id}')`,
           },
         },
+        'slo.revision': {
+          type: 'long' as MappingRuntimeFieldType,
+          script: {
+            source: `emit(${slo.revision})`,
+          },
+        },
       },
       query: {
         bool: {
@@ -118,6 +124,11 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
       'slo.id': {
         terms: {
           field: 'slo.id',
+        },
+      },
+      'slo.revision': {
+        terms: {
+          field: 'slo.revision',
         },
       },
       '@timestamp': {

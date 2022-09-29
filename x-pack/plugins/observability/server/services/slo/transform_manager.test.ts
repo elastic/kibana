@@ -91,7 +91,7 @@ describe('TransformManager', () => {
       const transformId = await transformManager.install(slo);
 
       expect(esClientMock.transform.putTransform).toHaveBeenCalledTimes(1);
-      expect(transformId).toBe(`slo-${slo.id}`);
+      expect(transformId).toBe(`slo-${slo.id}-${slo.revision}`);
     });
   });
 

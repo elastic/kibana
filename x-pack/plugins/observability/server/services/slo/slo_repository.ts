@@ -22,7 +22,10 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract) {}
 
   async save(slo: SLO): Promise<SLO> {
-    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, slo, { id: slo.id });
+    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, slo, {
+      id: slo.id,
+      overwrite: true,
+    });
 
     return savedSLO.attributes;
   }
