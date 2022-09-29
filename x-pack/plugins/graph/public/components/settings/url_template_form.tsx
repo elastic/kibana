@@ -261,7 +261,15 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             defaultMessage: 'Toolbar icon',
           })}
         >
-          <div role="listbox">
+          <div
+            role="listbox"
+            aria-label={i18n.translate(
+              'xpack.graph.settings.drillDowns.toolbarIconPickerSelectionAriaLabel',
+              {
+                defaultMessage: 'Toolbar icon selection',
+              }
+            )}
+          >
             {urlTemplateIconChoices.map((icon) => (
               <LegacyIcon
                 aria-label={icon.label}
