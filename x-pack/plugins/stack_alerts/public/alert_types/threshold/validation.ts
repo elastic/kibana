@@ -12,6 +12,8 @@ import {
   builtInAggregationTypes,
   builtInComparators,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { fromKueryExpression } from '@kbn/es-query';
+import { toElasticsearchQuery } from '@kbn/es-query';
 import { IndexThresholdAlertParams } from './types';
 
 export const validateExpression = (alertParams: IndexThresholdAlertParams): ValidationResult => {
@@ -26,6 +28,7 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
     threshold,
     timeWindowSize,
     thresholdComparator,
+    filterKuery,
   } = alertParams;
   const validationResult = { errors: {} };
   const errors = {
@@ -37,8 +40,22 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
     threshold1: new Array<string>(),
     index: new Array<string>(),
     timeField: new Array<string>(),
+    filterKuery: new Array<string>(),
   };
   validationResult.errors = errors;
+
+  if (!!filterKuery) {
+    try {
+      toElasticsearchQuery(fromKueryExpression(filterKuery as string));
+    } catch (e) {
+      errors.filterKuery.push(
+        i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.invalidKql', {
+          defaultMessage: 'Filter query is invalid.',
+        })
+      );
+    }
+  }
+
   if (!index || index.length === 0) {
     errors.index.push(
       i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredIndexText', {

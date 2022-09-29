@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, Fragment, useEffect, useCallback, ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiCallOut, EuiEmptyPrompt, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiText,
+  EuiTitle,
+  EuiFieldSearch,
+  EuiFormRow,
+} from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -78,6 +86,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     threshold,
     timeWindowSize,
     timeWindowUnit,
+    filterKuery,
   } = ruleParams;
 
   const indexArray = indexParamToArray(index);
@@ -132,6 +141,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     const currentEsFields = await getFields(http, indices);
     setEsFields(currentEsFields);
   };
+
+  const handleFilterChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setRuleParams('filterKuery', e.target.value || undefined);
+    },
+    [setRuleParams]
+  );
 
   useEffect(() => {
     setDefaultExpressionValues();
@@ -260,6 +276,33 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           setRuleParams('timeWindowUnit', selectedWindowUnit)
         }
       />
+      <EuiSpacer />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.threshold.ui.filterTitle"
+            defaultMessage="Filter (Optional)"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        helpText={i18n.translate('xpack.stackAlerts.threshold.ui.filterKQLHelpText', {
+          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
+        })}
+        fullWidth
+        display="rowCompressed"
+        isInvalid={errors.filterKuery.length > 0}
+        error={errors.filterKuery}
+      >
+        <EuiFieldSearch
+          data-test-subj="filterKuery"
+          onChange={handleFilterChange}
+          value={filterKuery}
+          fullWidth
+          isInvalid={errors.filterKuery.length > 0}
+        />
+      </EuiFormRow>
       <EuiSpacer />
       <div className="actAlertVisualization__chart">
         {cannotShowVisualization ? (

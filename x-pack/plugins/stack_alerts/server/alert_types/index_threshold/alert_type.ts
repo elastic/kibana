@@ -165,6 +165,7 @@ export function getAlertType(
       timeWindowSize: params.timeWindowSize,
       timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
+      filterKuery: params.filterKuery,
     };
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
     const result = await (

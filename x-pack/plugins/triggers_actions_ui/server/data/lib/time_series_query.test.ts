@@ -53,6 +53,24 @@ describe('timeSeriesQuery', () => {
       `"invalid date format for dateStart: \\"x\\""`
     );
   });
+
+  it('filters the results when filter param is passed', async () => {
+    params.query = { ...params.query, filterKuery: 'event.provider: alerting' };
+    timeSeriesQuery(params);
+    // @ts-ignore
+    expect(esClient.search.mock.calls[0]![0].body.query.bool.filter[1]).toEqual({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          {
+            match: {
+              'event.provider': 'alerting',
+            },
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe('getResultFromEs', () => {
