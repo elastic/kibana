@@ -23,7 +23,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list-plugin/public/services/field_stats';
-import { FieldStats } from '@kbn/unified-field-list-plugin/public';
+import { FieldStats, FieldVisualizeButton } from '@kbn/unified-field-list-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 import { LensFieldIcon } from '../shared_components';
 
@@ -115,6 +115,13 @@ describe('IndexPattern Field Item', () => {
           name: 'ip_range',
           displayName: 'ip_range',
           type: 'ip_range',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'geo.coordinates',
+          displayName: 'geo.coordinates',
+          type: 'geo_shape',
           aggregatable: true,
           searchable: true,
         },
@@ -438,5 +445,29 @@ describe('IndexPattern Field Item', () => {
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.find(FieldVisualizeButton).exists()).toBeFalsy();
+  });
+
+  it('should not request field stats for geo fields but render Visualize button', async () => {
+    const wrapper = await getComponent({
+      ...defaultProps,
+      field: {
+        name: 'geo.coordinates',
+        displayName: 'geo.coordinates',
+        type: 'geo_shape',
+        aggregatable: true,
+        searchable: true,
+      },
+    });
+
+    await clickField(wrapper, 'geo.coordinates');
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalled();
+    expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.find(FieldVisualizeButton).exists()).toBeTruthy();
   });
 });
