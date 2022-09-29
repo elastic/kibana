@@ -27,12 +27,5 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(200);
     });
-
-    it('get return error if template not found', async () => {
-      const response = await supertest
-        .get(devToolPrebuiltContentPath('test'))
-        .set('kbn-xsrf', 'true');
-      expect(response.status).to.be(400);
-    });
   });
 }

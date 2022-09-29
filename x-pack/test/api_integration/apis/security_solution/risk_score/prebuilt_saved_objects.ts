@@ -41,9 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes legacy prebuilt saved objects for host risk score dashboards', async () => {
-      const {
-        body: { saved_objects: createdHostRiskScoreDashboards },
-      } = await supertest
+      await supertest
         .post(prebuiltSavedObjectsBulkCreateUrl(hostRiskScoreDashboards))
         .set('kbn-xsrf', 'true');
 
@@ -71,15 +69,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.text).to.be(
         JSON.stringify([
           ...legacyHostRiskScoreSavedObjects,
-          ...createdHostRiskScoreDashboards.map((s) => `Deleted saved object: ${s.id}`),
+          ...createdHostRiskScoreDashboards.map(
+            (s: { id: string }) => `Deleted saved object: ${s.id}`
+          ),
         ])
       );
     });
 
     it('deletes legacy prebuilt saved objects for user risk score dashboards', async () => {
-      const {
-        body: { saved_objects: createdUserRiskScoreDashboards },
-      } = await supertest
+      await supertest
         .post(prebuiltSavedObjectsBulkCreateUrl(userRiskScoreDashboards))
         .set('kbn-xsrf', 'true');
 
@@ -107,7 +105,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.text).to.be(
         JSON.stringify([
           ...legacyUserRiskScoreSavedObjects,
-          ...createdUserRiskScoreDashboards.map((s) => `Deleted saved object: ${s.id}`),
+          ...createdUserRiskScoreDashboards.map(
+            (s: { id: string }) => `Deleted saved object: ${s.id}`
+          ),
         ])
       );
     });

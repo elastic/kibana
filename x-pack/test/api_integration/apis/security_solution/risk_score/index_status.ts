@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Indices status', () => {
     beforeEach(async () => {
-      const response = await supertest
+      await supertest
         .post(RISK_SCORE_DELETE_INDICES)
         .set('kbn-xsrf', 'true')
         .send({
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
     afterEach(async () => {
-      const response = await supertest
+      await supertest
         .post(RISK_SCORE_DELETE_INDICES)
         .set('kbn-xsrf', 'true')
         .send({
