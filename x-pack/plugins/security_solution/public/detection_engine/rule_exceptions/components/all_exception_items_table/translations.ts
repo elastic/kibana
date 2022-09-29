@@ -38,8 +38,7 @@ export const EXCEPTION_EMPTY_PROMPT_BODY = i18n.translate(
 export const EXCEPTION_EMPTY_ENDPOINT_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.exceptions.allItems.endpoint.emptyPromptBody',
   {
-    defaultMessage:
-      'There are no endpoint exceptions. Endpoint exceptions are applied to the endpoint and the detection rule. Create your first endpoint exception.',
+    defaultMessage: 'There are no endpoint exceptions. Create your first endpoint exception.',
   }
 );
 
@@ -112,3 +111,25 @@ export const EXCEPTION_ITEM_DELETE_TEXT = (itemName: string) =>
     values: { itemName },
     defaultMessage: '"{itemName}" deleted successfully.',
   });
+
+export const ENDPOINT_EXCEPTIONS_TAB_ABOUT = i18n.translate(
+  'xpack.securitySolution.exceptions.allExceptionItems.exceptionEndpointDetailsDescription',
+  {
+    defaultMessage:
+      'Endpoint exceptions are added to both the detection rule and the Elastic Endpoint agent on your hosts.',
+  }
+);
+
+export const EXCEPTIONS_TAB_ABOUT = i18n.translate(
+  'xpack.securitySolution.exceptions.allExceptionItems.exceptionDetectionDetailsDescription',
+  {
+    defaultMessage: 'Rule exceptions are added to the detection rule.',
+  }
+);
+
+export const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.allExceptionItems.searchPlaceholder',
+  {
+    defaultMessage: 'Filter exceptions using simple query syntax, for example, name:"my list"',
+  }
+);
