@@ -13,7 +13,6 @@ import { ChartData } from './point_series';
 import { Histogram } from './histogram';
 import React from 'react';
 import * as hooks from '../../hooks/use_data_state';
-import { GetStateReturn } from '../../services/discover_state';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 
 const chartData = {
@@ -77,13 +76,6 @@ function mountComponent(fetchStatus: FetchStatus) {
     services: unifiedHistogramServicesMock,
     savedSearchData$: charts$,
     timefilterUpdateHandler,
-    stateContainer: {
-      appStateContainer: {
-        getState: () => ({
-          interval: 'auto',
-        }),
-      },
-    } as unknown as GetStateReturn,
   };
 
   return mountWithIntl(<Histogram {...props} />);

@@ -15,7 +15,6 @@ import { setHeaderActionMenuMounter, setUiActions } from '../../../../kibana_ser
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { GetStateReturn } from '../../services/discover_state';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { ChartData } from './point_series';
@@ -104,15 +103,7 @@ async function mountComponent(isTimeBased: boolean = false) {
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     state: { columns: [] },
-    stateContainer: {
-      appStateContainer: {
-        getState: () => ({
-          interval: 'auto',
-        }),
-      },
-    } as unknown as GetStateReturn,
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
-    setDiscoverViewMode: jest.fn(),
     isTimeBased,
     onResetChartHeight: jest.fn(),
   };

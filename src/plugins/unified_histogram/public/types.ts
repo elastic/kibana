@@ -13,7 +13,6 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
-  storage: Storage;
   theme: Theme;
   uiSettings: IUiSettingsClient;
   fieldFormats: FieldFormatsStart;

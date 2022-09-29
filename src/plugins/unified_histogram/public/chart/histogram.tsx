@@ -44,14 +44,13 @@ import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin
 import { DataCharts$, DataChartsMessage } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { GetStateReturn } from '../../services/discover_state';
 import { UnifiedHistogramServices } from '../types';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
   savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
-  stateContainer: GetStateReturn;
+  interval?: string;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -68,7 +67,7 @@ export function Histogram({
   services: { data, theme, uiSettings, fieldFormats },
   savedSearchData$,
   timefilterUpdateHandler,
-  stateContainer,
+  interval,
 }: HistogramProps) {
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
@@ -131,7 +130,7 @@ export function Histogram({
       defaultMessage: '(interval: {value})',
       values: {
         value: `${
-          stateContainer.appStateContainer.getState().interval === 'auto'
+          interval === 'auto'
             ? `${i18n.translate('unifiedHistogram.histogramTimeRangeIntervalAuto', {
                 defaultMessage: 'Auto',
               })} - `
@@ -140,7 +139,7 @@ export function Histogram({
       },
     });
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
-  }, [from, to, toMoment, bucketInterval, stateContainer]);
+  }, [from, to, interval, bucketInterval?.description, toMoment]);
 
   if (!chartData && fetchStatus === FetchStatus.LOADING) {
     return (
@@ -198,8 +197,8 @@ export function Histogram({
    * see https://github.com/elastic/kibana/issues/27410
    * TODO: Once the Discover query has been update, we should change the below to use the new field
    */
-  const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
-  const xInterval = interval.asMilliseconds();
+  const { intervalESValue, intervalESUnit, interval: chartDataInterval } = chartData.ordered;
+  const xInterval = chartDataInterval.asMilliseconds();
 
   const xValues = chartData.xAxisOrderedValues;
   const lastXValue = xValues[xValues.length - 1];

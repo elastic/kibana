@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { HitsCounter } from '../hits_counter';
-import { GetStateReturn } from '../../services/discover_state';
 import { Histogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
@@ -38,14 +37,14 @@ export function Chart({
   savedSearch,
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
-  stateContainer,
   dataView,
   hideChart,
-  chartHiddenKey,
   interval,
   isTimeBased,
   appendHistogram,
   onResetChartHeight,
+  onHideChartChange,
+  onIntervalChange,
 }: {
   services: UnifiedHistogramServices;
   className?: string;
@@ -53,16 +52,16 @@ export function Chart({
   savedSearch: SavedSearch;
   savedSearchDataChart$: DataCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
-  stateContainer: GetStateReturn;
   dataView: DataView;
   isTimeBased: boolean;
   hideChart?: boolean;
-  chartHiddenKey: string;
   interval?: string;
   appendHistogram?: ReactElement;
   onResetChartHeight?: () => void;
+  onHideChartChange?: (hideChart: boolean) => void;
+  onIntervalChange?: (interval: string) => void;
 }) {
-  const { data, storage } = services;
+  const { data } = services;
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
 
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
@@ -104,9 +103,8 @@ export function Chart({
   const toggleHideChart = useCallback(() => {
     const newHideChart = !hideChart;
     chartRef.current.moveFocus = !newHideChart;
-    storage.set(chartHiddenKey, newHideChart);
-    stateContainer.setAppState({ hideChart: newHideChart });
-  }, [hideChart, stateContainer, storage]);
+    onHideChartChange?.(newHideChart);
+  }, [hideChart, onHideChartChange]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -120,7 +118,7 @@ export function Chart({
   );
   const panels = useChartPanels({
     toggleHideChart,
-    onChangeInterval: (newInterval) => stateContainer.setAppState({ interval: newInterval }),
+    onChangeInterval: (newInterval) => onIntervalChange?.(newInterval),
     closePopover: () => setShowChartOptionsPopover(false),
     onResetChartHeight,
     hideChart,
@@ -216,7 +214,7 @@ export function Chart({
               services={services}
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
-              stateContainer={stateContainer}
+              interval={interval}
             />
           </section>
           {appendHistogram}
