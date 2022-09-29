@@ -55,7 +55,7 @@ export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalPr
   }, [indexName]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} style={{ width: 800 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h1>
@@ -138,7 +138,10 @@ const ModalSteps: React.FC = () => {
       ),
     },
     {
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Test),
+      onClick: () => {
+        if (!isPipelineDataValid) return;
+        setAddInferencePipelineStep(AddInferencePipelineSteps.Test);
+      },
       status: isPipelineDataValid ? 'incomplete' : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.test.title',
@@ -148,7 +151,10 @@ const ModalSteps: React.FC = () => {
       ),
     },
     {
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Review),
+      onClick: () => {
+        if (!isPipelineDataValid) return;
+        setAddInferencePipelineStep(AddInferencePipelineSteps.Review);
+      },
       status: isPipelineDataValid ? 'incomplete' : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.review.title',
