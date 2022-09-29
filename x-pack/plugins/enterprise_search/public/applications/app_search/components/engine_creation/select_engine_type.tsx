@@ -36,7 +36,7 @@ export const SelectEngineType: React.FC = () => {
       <EuiStepsHorizontal
         steps={[
           {
-            onClick: () => {},
+            onClick: () => { },
             status: 'current',
             title: i18n.translate(
               'xpack.enterpriseSearch.appSearch.engineCreation.steps.searchEngineType.label',
@@ -55,7 +55,7 @@ export const SelectEngineType: React.FC = () => {
             ),
           },
           {
-            onClick: () => {},
+            onClick: () => { },
             status: 'disabled',
             title: i18n.translate(
               'xpack.enterpriseSearch.appSearch.engineCreation.steps.review.label',
@@ -155,10 +155,6 @@ export const SelectEngineType: React.FC = () => {
                   `,
                 }
               )}
-              betaBadgeProps={{
-                label: 'Beta',
-                tooltipContent: 'This module is not GA. Please help us by reporting any bugs.',
-              }}
               selectable={{
                 isSelected: engineType === 'elasticsearch',
                 onClick: () => setEngineType('elasticsearch'),
