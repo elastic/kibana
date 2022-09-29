@@ -8,9 +8,9 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
-import { Column, Layer } from '../../convert';
+import { Column, FormulaColumn, Layer } from '../../convert';
 import { createPanel, createSeries } from '../../__mocks__';
-import { getConfigurationForMetric } from '.';
+import { getConfigurationForMetric, getConfigurationForGauge } from '.';
 
 const mockGetPalette = jest.fn();
 
@@ -188,6 +188,157 @@ describe('getConfigurationForMetric', () => {
     };
     const config = getConfigurationForMetric(model, layer);
     expect(config).toBeNull();
+    expect(mockGetPalette).toBeCalledTimes(1);
+  });
+});
+
+describe('getConfigurationForGauge', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetPalette.mockReturnValue(undefined);
+  });
+
+  const metricId = 'some-id';
+  const maxColumnId = 'col-id-1';
+  const metric = { id: metricId, type: METRIC_TYPES.COUNT };
+  const gaugeMaxColumn: FormulaColumn = {
+    references: [],
+    columnId: maxColumnId,
+    operationType: 'formula',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'number',
+    params: { formula: '100' },
+    meta: { metricId },
+  };
+
+  test('should return null if no series was provided', () => {
+    const layerId = 'layer-id-1';
+    const model = createPanel({ series: [] });
+    const layer: Layer = {
+      columns: [],
+      columnOrder: [],
+      indexPatternId: 'some-index-pattern',
+      layerId,
+    };
+    const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
+
+    expect(config).toBeNull();
+    expect(mockGetPalette).toBeCalledTimes(0);
+  });
+
+  test('should return null if only series agg', () => {
+    const layerId = 'layer-id-1';
+    const metric1 = { id: 'metric-id-2', type: TSVB_METRIC_TYPES.SERIES_AGG, function: 'min' };
+    const model = createPanel({
+      series: [createSeries({ metrics: [metric1] })],
+    });
+    const layer: Layer = {
+      columns: [],
+      columnOrder: [],
+      indexPatternId: 'some-index-pattern',
+      layerId,
+    };
+    const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
+
+    expect(config).toBeNull();
+    expect(mockGetPalette).toBeCalledTimes(0);
+  });
+
+  test('should return null if palette is invalid', () => {
+    mockGetPalette.mockReturnValueOnce(null);
+    const layerId = 'layer-id-1';
+    const columnId = 'col-id-1';
+    const model = createPanel({
+      series: [createSeries({ metrics: [metric] })],
+    });
+    const layer: Layer = {
+      columns: [
+        {
+          columnId,
+          operationType: 'count',
+          dataType: 'number',
+          params: {},
+          sourceField: 'document',
+          isBucketed: false,
+          isSplit: false,
+          meta: { metricId },
+        },
+      ],
+      columnOrder: [],
+      indexPatternId: 'some-index-pattern',
+      layerId,
+    };
+    const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
+    expect(config).toBeNull();
+    expect(mockGetPalette).toBeCalledTimes(1);
+  });
+
+  test('should return config with color if palette is not valid', () => {
+    const layerId = 'layer-id-1';
+    const metric1 = { id: 'metric-id-1', type: TSVB_METRIC_TYPES.SERIES_AGG, function: 'sum' };
+    const color = '#fff';
+    const model = createPanel({ series: [createSeries({ metrics: [metric, metric1], color })] });
+    const layer: Layer = {
+      columns: [],
+      columnOrder: [],
+      indexPatternId: 'some-index-pattern',
+      layerId,
+    };
+    const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
+
+    expect(config).toEqual({
+      breakdownByAccessor: undefined,
+      collapseFn: 'sum',
+      layerId: 'layer-id-1',
+      layerType: 'data',
+      metricAccessor: undefined,
+      palette: undefined,
+      maxAccessor: maxColumnId,
+      color: '#FFFFFF',
+    });
+    expect(mockGetPalette).toBeCalledTimes(1);
+  });
+
+  test('should return config with palette', () => {
+    const palette = { type: 'custom', name: 'default', params: {} };
+    mockGetPalette.mockReturnValue(palette);
+    const layerId = 'layer-id-1';
+    const columnId1 = 'col-id-1';
+
+    const metric1 = { id: 'metric-id-1', type: TSVB_METRIC_TYPES.SERIES_AGG, function: 'sum' };
+    const color = '#fff';
+    const model = createPanel({ series: [createSeries({ metrics: [metric, metric1], color })] });
+    const bucketColumnId = 'bucket-column-id-1';
+    const bucket = { columnId: bucketColumnId } as Column;
+    const layer: Layer = {
+      columns: [
+        {
+          columnId: columnId1,
+          operationType: 'count',
+          dataType: 'number',
+          params: {},
+          sourceField: 'document',
+          isBucketed: false,
+          isSplit: false,
+          meta: { metricId },
+        },
+      ],
+      columnOrder: [],
+      indexPatternId: 'some-index-pattern',
+      layerId,
+    };
+    const config = getConfigurationForGauge(model, layer, bucket, gaugeMaxColumn);
+
+    expect(config).toEqual({
+      breakdownByAccessor: bucket.columnId,
+      collapseFn: 'sum',
+      layerId,
+      layerType: 'data',
+      metricAccessor: columnId1,
+      palette,
+      maxAccessor: maxColumnId,
+    });
     expect(mockGetPalette).toBeCalledTimes(1);
   });
 });
