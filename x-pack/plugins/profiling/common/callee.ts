@@ -35,7 +35,6 @@ export interface CalleeTree {
   FileID: FileID[];
   Label: string[];
 
-  Samples: number[];
   CountInclusive: number[];
   CountExclusive: number[];
 }
@@ -57,7 +56,6 @@ function initCalleeTree(capacity: number): CalleeTree {
     FrameID: new Array(capacity),
     FileID: new Array(capacity),
     Label: new Array(capacity),
-    Samples: new Array(capacity),
     CountInclusive: new Array(capacity),
     CountExclusive: new Array(capacity),
   };
@@ -69,7 +67,6 @@ function initCalleeTree(capacity: number): CalleeTree {
   tree.FrameID[0] = metadata.FrameID;
   tree.FileID[0] = metadata.FileID;
   tree.Label[0] = 'root: Represents 100% of CPU time.';
-  tree.Samples[0] = 0;
   tree.CountInclusive[0] = 0;
   tree.CountExclusive[0] = 0;
 
@@ -93,8 +90,7 @@ function insertNode(
   tree.FrameID[node] = metadata.FrameID;
   tree.FileID[node] = metadata.FileID;
   tree.Label[node] = getCalleeLabel(metadata);
-  tree.Samples[node] = samples;
-  tree.CountInclusive[node] = 0;
+  tree.CountInclusive[node] = samples;
   tree.CountExclusive[node] = 0;
 
   tree.Size++;
@@ -139,7 +135,7 @@ export function createCalleeTree(
     const samples = events.get(stackTraceID) ?? 0;
 
     let currentNode = 0;
-    tree.Samples[currentNode] += samples;
+    tree.CountInclusive[currentNode] += samples;
 
     for (let i = 0; i < lenStackTrace; i++) {
       const frameID = stackTrace.FrameIDs[i];
@@ -173,10 +169,8 @@ export function createCalleeTree(
 
         node = insertNode(tree, currentNode, metadata, frameGroupID, samples);
       } else {
-        tree.Samples[node] += samples;
+        tree.CountInclusive[node] += samples;
       }
-
-      tree.CountInclusive[node] += samples;
 
       if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
@@ -187,7 +181,6 @@ export function createCalleeTree(
   }
 
   tree.CountExclusive[0] = 0;
-  tree.CountInclusive[0] = tree.Samples[0];
 
   return tree;
 }

@@ -17,7 +17,6 @@ describe('Callee operations', () => {
 
     const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
 
-    expect(tree.Samples[0]).toEqual(totalSamples);
     expect(tree.CountInclusive[0]).toEqual(totalSamples);
     expect(tree.CountExclusive[0]).toEqual(0);
   });
