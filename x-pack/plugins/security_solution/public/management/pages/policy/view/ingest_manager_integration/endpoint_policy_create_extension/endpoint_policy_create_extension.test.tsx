@@ -14,6 +14,15 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 
+const mockNewPackage : NewPackagePolicy = {
+  id: 'someid',
+  inputs: ["someInput"],
+  name: 'someName',
+  namespace: 'someNamespace',
+  enabled: true,
+  policy_id: 'somePolicyid'
+}
+
 describe('Onboarding Component new section', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
@@ -27,7 +36,7 @@ describe('Onboarding Component new section', () => {
     it('renders EndpointPolicyCreateExtension options correctly (Default to Endpoint)', async () => {
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension
-          newPolicy={{ id: 'someid', inputs:["someInput"] } as NewPackagePolicy}
+          newPolicy={mockNewPackage}
           onChange={jest.fn()}
         />
       );
@@ -40,7 +49,7 @@ describe('Onboarding Component new section', () => {
     it('renders EndpointPolicyCreateExtension options correctly (set to Cloud)', async () => {
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension
-          newPolicy={{ id: 'someid', inputs:["someInput"] } as NewPackagePolicy}
+          newPolicy={mockNewPackage}
           onChange={jest.fn()}
         />
       );
@@ -53,7 +62,7 @@ describe('Onboarding Component new section', () => {
       const mockedOnChange = jest.fn();
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension
-          newPolicy={{ id: 'someid', inputs:["someInput"] } as NewPackagePolicy}
+          newPolicy={mockNewPackage}
           onChange={mockedOnChange}
         />
       );
