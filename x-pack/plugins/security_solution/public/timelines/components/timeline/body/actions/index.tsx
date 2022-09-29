@@ -12,6 +12,11 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { dataTableActions } from '../../../../store/data_table';
+import {
+  isInTableScope,
+  isTimelineScope,
+} from '../../../../../common/components/event_details/helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
@@ -21,11 +26,7 @@ import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import {
-  setActiveTabTimeline,
-  updateTimelineGraphEventId,
-  updateTimelineSessionViewConfig,
-} from '../../../../store/timeline/actions';
+import { setActiveTabTimeline } from '../../../../store/timeline/actions';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -74,6 +75,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const timelineType = useShallowEqualSelector(
+    (state) =>
+      (isTimelineScope(timelineId) ? getTimeline(state, timelineId) : timelineDefaults).timelineType
+  );
   const { startTransaction } = useStartTransaction();
 
   const isEnterprisePlus = useLicense().isEnterprise();
@@ -108,9 +113,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }),
     [eventIdToNoteIds, eventId, isEventPinned, onPinEvent, onUnPinEvent]
   );
-  const timelineType = useShallowEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
-  );
   const eventType = getEventType(ecsData);
 
   const isContextMenuDisabled = useMemo(() => {
@@ -127,7 +129,15 @@ const ActionsComponent: React.FC<ActionProps> = ({
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
 
     const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
+    if (isInTableScope(timelineId)) {
+      dispatch(
+        dataTableActions.updateTableGraphEventId({ id: timelineId, graphEventId: ecsData._id })
+      );
+    } else if (isTimelineScope(timelineId)) {
+      dispatch(
+        timelineActions.updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id })
+      );
+    }
     if (timelineId === TimelineId.active) {
       if (dataGridIsFullScreen) {
         setTimelineFullScreen(true);
@@ -185,7 +195,15 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }
     }
     if (sessionViewConfig !== null) {
-      dispatch(updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig }));
+      if (isInTableScope(timelineId)) {
+        dispatch(
+          dataTableActions.updateTableSessionViewConfig({ id: timelineId, sessionViewConfig })
+        );
+      } else if (isTimelineScope(timelineId)) {
+        dispatch(
+          timelineActions.updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig })
+        );
+      }
     }
   }, [
     startTransaction,
