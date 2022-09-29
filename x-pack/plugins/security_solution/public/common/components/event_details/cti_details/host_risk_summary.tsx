@@ -31,7 +31,6 @@ const HostRiskSummaryComponent: React.FC<{
             <RiskScoreHeaderTitle
               title={i18n.HOST_RISK_DATA_TITLE}
               riskScoreEntity={RiskScoreEntity.host}
-              showTooltip={false}
             />
           }
           toolTipContent={
