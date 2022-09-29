@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { BucketContainerProps } from './types';
+import { TooltipWrapper } from '../tooltip_wrapper';
 
 export const DefaultBucketContainer = ({
   idx,
@@ -41,36 +42,58 @@ export const DefaultBucketContainer = ({
             color="transparent"
             {...(draggableProvided?.dragHandleProps ?? {})}
           >
-            <EuiIcon
-              size="s"
-              color={
-                euiTheme.colors[isInvalid ? 'danger' : isNotDraggable ? 'disabled' : 'subduedText']
-              }
-              type={isInvalid ? 'alert' : 'grab'}
-              title={
-                isInvalid
-                  ? invalidMessage
-                  : i18n.translate('xpack.lens.customBucketContainer.dragToReorder', {
-                      defaultMessage: 'Drag to reorder',
-                    })
-              }
-              data-test-subj={`${dataTestSubj}-dragToReorder-${idx}`}
-            />
+            <TooltipWrapper
+              tooltipContent={i18n.translate(
+                'xpack.lens.fieldsBucketContainer.dragHandleDisabled',
+                {
+                  defaultMessage: 'Reordering requires more than one field to be defined.',
+                }
+              )}
+              condition={isNotDraggable ?? true}
+            >
+              <EuiIcon
+                size="s"
+                color={
+                  euiTheme.colors[
+                    isInvalid ? 'danger' : isNotDraggable ? 'disabled' : 'subduedText'
+                  ]
+                }
+                type={isInvalid ? 'alert' : 'grab'}
+                title={
+                  isInvalid
+                    ? invalidMessage
+                    : i18n.translate('xpack.lens.customBucketContainer.dragToReorder', {
+                        defaultMessage: 'Drag to reorder',
+                      })
+                }
+                data-test-subj={`${dataTestSubj}-dragToReorder-${idx}`}
+              />
+            </TooltipWrapper>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconSize="s"
-            iconType="cross"
-            color="danger"
-            onClick={onRemoveClick}
-            aria-label={removeTitle}
-            title={removeTitle}
-            disabled={isNotRemovable}
-            data-test-subj={`${dataTestSubj}-remove-${idx}`}
-            style={{ marginRight: euiTheme.size.xs }}
-          />
+          <TooltipWrapper
+            tooltipContent={i18n.translate(
+              'xpack.lens.fieldsBucketContainer.deleteButtonDisabled',
+              {
+                defaultMessage: 'A minimum of one field must be defined.',
+              }
+            )}
+            condition={isNotRemovable ?? false}
+          >
+            <EuiButtonIcon
+              iconSize="s"
+              iconType="cross"
+              color="danger"
+              onClick={onRemoveClick}
+              aria-label={removeTitle}
+              title={removeTitle}
+              disabled={isNotRemovable}
+              data-test-subj={`${dataTestSubj}-remove-${idx}`}
+              style={{ marginRight: euiTheme.size.xs }}
+            />
+          </TooltipWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
