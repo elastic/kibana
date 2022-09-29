@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './investigate_in_timeline_button_icon';
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/security_solution'],
+};
