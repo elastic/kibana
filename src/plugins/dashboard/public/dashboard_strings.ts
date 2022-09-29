@@ -46,11 +46,6 @@ export const getDashboardBreadcrumb = () =>
     defaultMessage: 'Dashboard',
   });
 
-export const getDashboardPageTitle = () =>
-  i18n.translate('dashboard.dashboardPageTitle', {
-    defaultMessage: 'Dashboards',
-  });
-
 export const dashboardFeatureCatalog = {
   getTitle: () =>
     i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
@@ -226,17 +221,6 @@ export const getDashboard60Warning = () =>
   i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
     defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
   });
-
-export const dashboardReadonlyBadge = {
-  getText: () =>
-    i18n.translate('dashboard.badge.readOnly.text', {
-      defaultMessage: 'Read only',
-    }),
-  getTooltip: () =>
-    i18n.translate('dashboard.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save dashboards',
-    }),
-};
 
 export const dashboardSaveToastStrings = {
   getSuccessString: (dashTitle: string) =>
