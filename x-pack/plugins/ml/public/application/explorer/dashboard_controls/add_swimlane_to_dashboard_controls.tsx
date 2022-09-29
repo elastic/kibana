@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DashboardSavedObject } from '@kbn/dashboard-plugin/public';
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { getDefaultSwimlanePanelTitle } from '../../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
@@ -30,7 +30,7 @@ export interface DashboardItem {
   id: string;
   title: string;
   description: string | undefined;
-  attributes: DashboardSavedObject;
+  attributes: DashboardAttributes;
 }
 
 export type EuiTableProps = EuiInMemoryTableProps<DashboardItem>;

@@ -74,6 +74,11 @@ import {
   EMPTY_DROPPABLE_DATA_PROVIDER_GROUP,
   GET_TIMELINE_GRID_CELL,
   HOVER_ACTIONS,
+  TIMELINE_SWITCHQUERYLANGUAGE_BUTTON,
+  TIMELINE_SHOWQUERYBARMENU_BUTTON,
+  TIMELINE_LUCENELANGUAGE_BUTTON,
+  TIMELINE_KQLLANGUAGE_BUTTON,
+  TIMELINE_QUERY,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -180,6 +185,16 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
   return cy.get(SAVE_FILTER_BTN).click();
+};
+
+export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
+  cy.get(TIMELINE_SHOWQUERYBARMENU_BUTTON).click();
+  cy.get(TIMELINE_SWITCHQUERYLANGUAGE_BUTTON).click();
+  if (language === 'lucene') {
+    cy.get(TIMELINE_LUCENELANGUAGE_BUTTON).click();
+  } else {
+    cy.get(TIMELINE_KQLLANGUAGE_BUTTON).click();
+  }
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -290,6 +305,10 @@ export const createNewTimelineTemplate = () => {
 
 export const executeTimelineKQL = (query: string) => {
   cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+};
+
+export const executeTimelineSearch = (query: string) => {
+  cy.get(TIMELINE_QUERY).type(`${query} {enter}`, { force: true });
 };
 
 export const expandFirstTimelineEventDetails = () => {
