@@ -202,6 +202,6 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, u
   }
 }
 
-describe.skip('coreQueryTypes wrapper', () => {
+describe('coreQueryTypes wrapper', () => {
   test('this test suite is meant to be called via the export', () => {});
 });

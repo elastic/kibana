@@ -12,8 +12,7 @@ import {
   builtInAggregationTypes,
   builtInComparators,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { fromKueryExpression } from '@kbn/es-query';
-import { toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IndexThresholdAlertParams } from './types';
 
 export const validateExpression = (alertParams: IndexThresholdAlertParams): ValidationResult => {
