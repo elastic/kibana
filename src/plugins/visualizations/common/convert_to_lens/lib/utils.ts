@@ -150,7 +150,7 @@ export const isStdDevAgg = (metric: SchemaConfig): metric is SchemaConfig<METRIC
   return metric.aggType === METRIC_TYPES.STD_DEV;
 };
 
-export const getCutomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
+export const getCustomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
   return metrics.reduce<IAggConfig[]>((acc, metric) => {
     if (
       isSiblingPipeline(metric) &&
