@@ -26,36 +26,36 @@ export const FieldsBucketContainer = ({
   draggableProvided,
   isNotRemovable,
   isNotDraggable,
+  isDragging,
   'data-test-subj': dataTestSubj = 'lns-fieldsBucketContainer',
 }: BucketContainerProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPanel
-      paddingSize="none"
-      hasShadow={false}
-      hasBorder={false}
-      color="subdued"
+      paddingSize="xs"
+      hasShadow={true}
+      color={isDragging ? 'plain' : 'transparent'}
       data-test-subj={dataTestSubj}
     >
       <EuiFlexGroup direction={'row'} gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            paddingSize="none"
-            color="transparent"
-            style={isNotDraggable ? { cursor: 'no-drop' } : {}}
-            {...(draggableProvided?.dragHandleProps ?? {})}
+        <EuiFlexItem grow={false} {...(draggableProvided?.dragHandleProps ?? {})}>
+          <TooltipWrapper
+            tooltipContent={i18n.translate('xpack.lens.fieldsBucketContainer.dragHandleDisabled', {
+              defaultMessage: 'Reordering requires more than one field to be defined.',
+            })}
+            condition={isNotDraggable ?? true}
           >
             <EuiIcon
               size="s"
-              color={euiTheme.colors[isNotDraggable ? 'disabled' : 'subduedText']}
+              color={euiTheme.colors[isNotDraggable ? 'disabled' : 'text']}
               type="grab"
-              title={i18n.translate('xpack.lens.fieldsBucketContainer.dragToReorder', {
+              aria-label={i18n.translate('xpack.lens.fieldsBucketContainer.dragToReorder', {
                 defaultMessage: 'Drag to reorder',
               })}
               data-test-subj={`${dataTestSubj}-dragToReorder-${idx}`}
             />
-          </EuiPanel>
+          </TooltipWrapper>
         </EuiFlexItem>
         <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
           {children}
@@ -65,7 +65,7 @@ export const FieldsBucketContainer = ({
             tooltipContent={i18n.translate(
               'xpack.lens.fieldsBucketContainer.deleteButtonDisabled',
               {
-                defaultMessage: 'This function requires a minimum of one field defined',
+                defaultMessage: 'A minimum of one field must be defined.',
               }
             )}
             condition={isNotRemovable ?? false}
@@ -74,7 +74,6 @@ export const FieldsBucketContainer = ({
               iconType="trash"
               color="danger"
               aria-label={removeTitle}
-              title={removeTitle}
               onClick={onRemoveClick}
               data-test-subj={`${dataTestSubj}-removeField-${idx}`}
               isDisabled={isNotRemovable}

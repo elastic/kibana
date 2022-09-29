@@ -13,6 +13,7 @@ export interface BucketContainerProps {
   removeTitle: string;
   idx: number;
   onRemoveClick: () => void;
+  isDragging?: boolean;
   draggableProvided?: DraggableProvided;
   isInvalid?: boolean;
   invalidMessage?: string;

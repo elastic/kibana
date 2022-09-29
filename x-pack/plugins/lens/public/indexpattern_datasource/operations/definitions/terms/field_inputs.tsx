@@ -96,7 +96,7 @@ export function FieldInputs({
         }}
         droppableId="TOP_TERMS_DROPPABLE_AREA"
         items={localValues}
-        color="subdued"
+        bgColor="subdued"
       >
         {localValues.map(({ id, value, isNew }, index, arrayRef) => {
           // need to filter the available fields for multiple terms
