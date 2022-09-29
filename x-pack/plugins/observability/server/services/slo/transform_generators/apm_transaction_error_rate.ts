@@ -10,11 +10,12 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
 import {
-  getSLODestinationIndexName,
-  getSLOIngestPipelineName,
+  SLO_DESTINATION_INDEX_NAME,
+  SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
 import {
@@ -22,14 +23,13 @@ import {
   APMTransactionErrorRateSLO,
   SLO,
 } from '../../../types/models';
-import { ALL_VALUE } from '../../../types/schema';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
 
 export class ApmTransactionErrorRateTransformGenerator implements TransformGenerator {
-  public getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest {
+  public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!apmTransactionErrorRateSLOSchema.is(slo)) {
       throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -37,7 +37,7 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildSource(slo),
-      this.buildDestination(slo, spaceId),
+      this.buildDestination(),
       this.buildGroupBy(),
       this.buildAggregations(slo)
     );
@@ -106,10 +106,10 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
     };
   }
 
-  private buildDestination(slo: APMTransactionErrorRateSLO, spaceId: string) {
+  private buildDestination() {
     return {
-      pipeline: getSLOIngestPipelineName(spaceId),
-      index: getSLODestinationIndexName(spaceId),
+      pipeline: SLO_INGEST_PIPELINE_NAME,
+      index: SLO_DESTINATION_INDEX_NAME,
     };
   }
 

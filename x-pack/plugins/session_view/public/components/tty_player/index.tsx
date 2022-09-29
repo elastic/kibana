@@ -47,7 +47,8 @@ export const TTYPlayer = ({
   const ref = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data, fetchNextPage, hasNextPage, isFetching } = useFetchIOEvents(sessionEntityId);
+  const { data, fetchNextPage, hasNextPage, isFetching, refetch } =
+    useFetchIOEvents(sessionEntityId);
   const { lines, processStartMarkers } = useIOLines(data?.pages);
   const [fontSize, setFontSize] = useState(DEFAULT_TTY_FONT_SIZE);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -66,6 +67,13 @@ export const TTYPlayer = ({
 
   const currentProcessEvent = lines[Math.min(lines.length - 1, currentLine)]?.event;
   const tty = currentProcessEvent?.process?.tty;
+
+  useEffect(() => {
+    if (show) {
+      // refetch the most recent page when tty player is loaded
+      refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+    }
+  }, [refetch, show]);
 
   useEffect(() => {
     if (
@@ -126,7 +134,12 @@ export const TTYPlayer = ({
             <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
-            <TTYSearchBar lines={lines} seekToLine={seekToLine} xTermSearchFn={search} />
+            <TTYSearchBar
+              lines={lines}
+              seekToLine={seekToLine}
+              xTermSearchFn={search}
+              setIsPlaying={setIsPlaying}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
