@@ -10,7 +10,7 @@ import type { LensAttributes } from '../../types';
 export const kpiUniqueFlowIdsLensAttributes: LensAttributes = {
   title: '[Network] Unique flow IDs',
   description: '',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   state: {
     visualization: {
       layerId: '5d46d48f-6ce8-46be-a797-17ad50642564',
