@@ -29,7 +29,6 @@ import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
-import { maybeAddCloudLinks } from './cloud_ui_tweaks';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
@@ -189,10 +188,6 @@ export class SecurityPlugin
     this.analyticsService.start({ http: core.http });
 
     const navControlService = this.navControlService.start({ core, authc: this.authc });
-
-    if (cloud?.isCloudEnabled && !core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
-      maybeAddCloudLinks({ authc: this.authc, chrome: core.chrome, cloud, navControlService });
-    }
 
     return {
       uiApi: getUiApi({ core }),

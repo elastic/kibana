@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
-
-import type { UserMenuLink } from '..';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { UserMenuLink } from '@kbn/security-plugin/public';
 
 export const createUserMenuLinks = (cloud: CloudStart): UserMenuLink[] => {
   const { profileUrl, organizationUrl } = cloud;
@@ -16,7 +15,7 @@ export const createUserMenuLinks = (cloud: CloudStart): UserMenuLink[] => {
 
   if (profileUrl) {
     userMenuLinks.push({
-      label: i18n.translate('xpack.security.userMenuLinks.profileLinkText', {
+      label: i18n.translate('xpack.cloudLinks.userMenuLinks.profileLinkText', {
         defaultMessage: 'Edit profile',
       }),
       iconType: 'user',
@@ -28,7 +27,7 @@ export const createUserMenuLinks = (cloud: CloudStart): UserMenuLink[] => {
 
   if (organizationUrl) {
     userMenuLinks.push({
-      label: i18n.translate('xpack.security.userMenuLinks.accountLinkText', {
+      label: i18n.translate('xpack.cloudLinks.userMenuLinks.accountLinkText', {
         defaultMessage: 'Account & Billing',
       }),
       iconType: 'gear',

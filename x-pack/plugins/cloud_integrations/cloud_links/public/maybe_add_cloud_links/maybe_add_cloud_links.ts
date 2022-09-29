@@ -7,28 +7,22 @@
 
 import { catchError, defer, filter, map, of } from 'rxjs';
 
+import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ChromeStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
-import type { AuthenticationServiceStart, SecurityNavControlServiceStart } from '..';
 import { createUserMenuLinks } from './user_menu_links';
 
 export interface MaybeAddCloudLinksDeps {
-  authc: AuthenticationServiceStart;
+  security: SecurityPluginStart;
   chrome: ChromeStart;
   cloud: CloudStart;
-  navControlService: SecurityNavControlServiceStart;
 }
 
-export function maybeAddCloudLinks({
-  authc,
-  chrome,
-  cloud,
-  navControlService,
-}: MaybeAddCloudLinksDeps): void {
+export function maybeAddCloudLinks({ security, chrome, cloud }: MaybeAddCloudLinksDeps): void {
   if (cloud.isCloudEnabled) {
-    defer(() => authc.getCurrentUser())
+    defer(() => security.authc.getCurrentUser())
       .pipe(
         // Check if user is a cloud user.
         map((user) => user.elastic_cloud_user),
@@ -38,7 +32,7 @@ export function maybeAddCloudLinks({
         map(() => {
           if (cloud.deploymentUrl) {
             chrome.setCustomNavLink({
-              title: i18n.translate('xpack.security.deploymentLinkLabel', {
+              title: i18n.translate('xpack.cloudLinks.deploymentLinkLabel', {
                 defaultMessage: 'Manage this deployment',
               }),
               euiIconType: 'logoCloud',
@@ -46,7 +40,7 @@ export function maybeAddCloudLinks({
             });
           }
           const userMenuLinks = createUserMenuLinks(cloud);
-          navControlService.addUserMenuLinks(userMenuLinks);
+          security.navControlService.addUserMenuLinks(userMenuLinks);
         })
       )
       .subscribe();

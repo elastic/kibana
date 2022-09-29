@@ -7,6 +7,6 @@
 
 export const maybeAddCloudLinksMock = jest.fn();
 
-jest.doMock('./cloud_ui_tweaks', () => ({
+jest.doMock('./maybe_add_cloud_links', () => ({
   maybeAddCloudLinks: maybeAddCloudLinksMock,
 }));
