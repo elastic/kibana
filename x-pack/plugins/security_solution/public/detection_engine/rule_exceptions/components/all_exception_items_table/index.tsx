@@ -165,12 +165,12 @@ const ExceptionsViewerComponent = ({
   useEffect(() => {
     if (isFetchReferencesError) {
       setViewerState('error');
-    } else if (isLoadingReferences) {
+    } else if (viewerState == null && isLoadingReferences) {
       setViewerState('loading');
-    } else {
+    } else if (viewerState === 'loading' && !isLoadingReferences) {
       setViewerState(null);
-    }
-  }, [isLoadingReferences, isFetchReferencesError, setViewerState]);
+    } 
+  }, [isLoadingReferences, isFetchReferencesError, setViewerState, viewerState]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
