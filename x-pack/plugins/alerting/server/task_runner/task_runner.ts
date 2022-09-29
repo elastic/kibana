@@ -421,7 +421,6 @@ export class TaskRunner<
         checkHasReachedAlertLimit();
 
         this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
-
         ruleRunMetricsStore.setSearchMetrics([
           wrappedScopedClusterClient.getMetrics(),
           wrappedSearchSourceClient.getMetrics(),
