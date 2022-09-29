@@ -20,10 +20,10 @@ import { getAlertDetailsNavTabs } from './utils/navigation';
 import { DEFAULT_ALERTS_INDEX, SecurityPageName } from '../../../../common/constants';
 import { eventID } from '../../../../common/endpoint/models/event';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
-import { AlertDetailsLoadingPage } from './components/loading-page';
-import { AlertDetailsErrorPage } from './components/error-page';
+import { AlertDetailsLoadingPage } from './components/loading_page';
+import { AlertDetailsErrorPage } from './components/error_page';
 import { AlertDetailsHeader } from './components/header';
-import { useGetFieldsData } from './utils/use-get-fields-data';
+import { useGetFieldsData } from './utils/use_get_fields_data';
 
 export const AlertDetailsPage = memo(() => {
   const { detailName: eventId } = useParams<{ detailName: string }>();
