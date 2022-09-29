@@ -23,7 +23,7 @@
   "related_integrations": [
     {
       "package": "google_workspace",
-      "version": "1.2.0"
+      "version": "^1.2.0"
     }
   ],
   "required_fields": [
@@ -92,5 +92,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }
