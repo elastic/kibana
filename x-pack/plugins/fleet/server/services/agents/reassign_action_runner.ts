@@ -72,7 +72,7 @@ export async function reassignBatch(
     throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
   }
 
-  await bulkUpdateAgents(
+  const res = await bulkUpdateAgents(
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,
@@ -82,6 +82,12 @@ export async function reassignBatch(
       },
     }))
   );
+
+  res.items
+    .filter((item) => !item.success)
+    .forEach((item) => {
+      errors[item.id] = item.error!;
+    });
 
   const actionId = options.actionId ?? uuid();
   const errorCount = Object.keys(errors).length;

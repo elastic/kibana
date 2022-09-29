@@ -405,6 +405,7 @@ export async function bulkUpdateAgents(
     {
       update: {
         _id: agentId,
+        retry_on_conflict: 3,
       },
     },
     {
