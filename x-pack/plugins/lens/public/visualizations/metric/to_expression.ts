@@ -27,12 +27,14 @@ function computePaletteParams(params: CustomPaletteParams) {
 
 const getTrendlineExpression = (
   state: MetricVisualizationState,
-  datasourceExpression?: Ast,
-  collapseExpression?: AstFunction
+  datasourceExpressionsByLayers: Record<string, Ast>,
+  collapseExpression: AstFunction | undefined
 ): Ast | undefined => {
-  if (!state.trendlineMetricAccessor || !state.trendlineTimeAccessor) {
+  if (!state.trendlineLayerId || !state.trendlineMetricAccessor || !state.trendlineTimeAccessor) {
     return;
   }
+
+  const datasourceExpression = datasourceExpressionsByLayers[state.trendlineLayerId];
 
   return {
     type: 'expression',
@@ -46,6 +48,7 @@ const getTrendlineExpression = (
           breakdownBy: state.trendlineBreakdownByAccessor
             ? [state.trendlineBreakdownByAccessor]
             : [],
+          inspectorTableId: [state.trendlineLayerId],
           ...(datasourceExpression
             ? {
                 table: [
@@ -117,13 +120,11 @@ export const toExpression = (
       } as AstFunction)
     : undefined;
 
-  const trendlineExpression = state.trendlineLayerId
-    ? getTrendlineExpression(
-        state,
-        datasourceExpressionsByLayers[state.trendlineLayerId],
-        collapseExpressionFunction
-      )
-    : undefined;
+  const trendlineExpression = getTrendlineExpression(
+    state,
+    datasourceExpressionsByLayers,
+    collapseExpressionFunction
+  );
 
   return {
     type: 'expression',
@@ -154,6 +155,7 @@ export const toExpression = (
             : [],
           maxCols: [state.maxCols ?? DEFAULT_MAX_COLUMNS],
           minTiles: maxPossibleTiles ? [maxPossibleTiles] : [],
+          inspectorTableId: [state.layerId],
         },
       },
     ],

@@ -299,6 +299,9 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
+                "inspectorTableId": Array [
+                  "first",
+                ],
                 "max": Array [
                   "max-metric-col-id",
                 ],
@@ -360,6 +363,9 @@ describe('metric visualization', () => {
                 ],
                 "color": Array [
                   "static-color",
+                ],
+                "inspectorTableId": Array [
+                  "first",
                 ],
                 "max": Array [
                   "max-metric-col-id",
@@ -426,6 +432,9 @@ describe('metric visualization', () => {
                   "breakdownBy": Array [
                     "trendline-breakdown-col-id",
                   ],
+                  "inspectorTableId": Array [
+                    "second",
+                  ],
                   "metric": Array [
                     "trendline-metric-col-id",
                   ],
@@ -449,6 +458,9 @@ describe('metric visualization', () => {
               Object {
                 "arguments": Object {
                   "breakdownBy": Array [],
+                  "inspectorTableId": Array [
+                    "second",
+                  ],
                   "metric": Array [
                     "trendline-metric-col-id",
                   ],
@@ -738,8 +750,8 @@ describe('metric visualization', () => {
       expect(supportedLayers[0].initialDimensions).toBeUndefined();
       expect(supportedLayers[0]).toMatchInlineSnapshot(`
         Object {
+          "canAddViaMenu": true,
           "disabled": true,
-          "hideFromMenu": true,
           "initialDimensions": undefined,
           "label": "Visualization",
           "type": "data",
@@ -748,8 +760,9 @@ describe('metric visualization', () => {
 
       expect({ ...supportedLayers[1], initialDimensions: undefined }).toMatchInlineSnapshot(`
         Object {
+          "canAddViaMenu": true,
           "disabled": false,
-          "hideFromMenu": true,
+          "hidden": true,
           "initialDimensions": undefined,
           "label": "Trendline",
           "type": "metricTrendline",
