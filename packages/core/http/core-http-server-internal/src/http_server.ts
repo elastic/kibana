@@ -8,6 +8,7 @@
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
+const Brok = require('brok');
 import url from 'url';
 import uuid from 'uuid';
 import {
@@ -149,7 +150,13 @@ export class HttpServer {
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
     await this.server.register([HapiStaticFiles]);
-    this.config = config;
+    await this.server.register({
+      plugin: Brok,
+      options: {
+          compress: { quality: 3 }
+      }
+  });
+  this.config = config;
 
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
