@@ -25,12 +25,6 @@ export const useAnimatedProgressBarBackground = (color: string) => {
 
     return css({
       'progress[value]': {
-        display: 'block',
-        width: '100%',
-        WebkitAppearance: 'none',
-        MozAppearance: 'none',
-        appearance: 'none',
-        border: 'none',
         animation: 'aiopsAnimatedProgress 4s infinite linear',
 
         '::-webkit-progress-inner-element': {
