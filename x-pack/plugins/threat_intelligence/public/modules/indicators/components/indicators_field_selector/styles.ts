@@ -9,7 +9,7 @@ import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
   const comboBox: CSSObject = {
-    maxWidth: '400px',
+    'max-width': '400px',
     width: '400px',
   };
 
