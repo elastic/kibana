@@ -132,6 +132,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
+/src/dev/build/tasks/bundle_fleet_packages.ts
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
@@ -742,6 +743,8 @@ packages/core/http/core-http-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-common @elastic/kibana-core
 packages/core/http/core-http-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
+packages/core/http/core-http-request-handler-context-server @elastic/kibana-core
+packages/core/http/core-http-request-handler-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server @elastic/kibana-core
@@ -912,6 +915,7 @@ packages/kbn-rule-data-utils @elastic/apm-ui
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
+packages/kbn-securitysolution-exception-list-components @elastic/security-solution-platform
 packages/kbn-securitysolution-hook-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-solution-platform

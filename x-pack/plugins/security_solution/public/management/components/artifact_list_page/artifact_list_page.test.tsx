@@ -12,7 +12,7 @@ import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-lib
 import userEvent from '@testing-library/user-event';
 import type { ArtifactListPageRenderingSetup } from './mocks';
 import { getArtifactListPageRenderingSetup } from './mocks';
-import { getDeferred } from '../mocks';
+import { getDeferred } from '../../mocks/utils';
 
 jest.mock('../../../common/components/user_privileges');
 

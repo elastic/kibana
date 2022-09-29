@@ -120,7 +120,16 @@ export const Default: Story<void> = () => {
     <StoryProvidersComponent
       kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
     >
-      <IndicatorsBarChartWrapper timeRange={mockTimeRange} indexPattern={mockIndexPattern} />
+      <IndicatorsBarChartWrapper
+        dateRange={{ min: moment(), max: moment() }}
+        timeRange={mockTimeRange}
+        indexPattern={mockIndexPattern}
+        series={[]}
+        field={''}
+        onFieldChange={function (value: string): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
     </StoryProvidersComponent>
   );
 };
