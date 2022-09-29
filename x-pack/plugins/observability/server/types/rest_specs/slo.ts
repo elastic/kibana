@@ -6,10 +6,18 @@
  */
 
 import * as t from 'io-ts';
-import { commonSLOSchema } from '../schema';
+import { dateType, indicatorSchema } from '../schema';
+import { budgetingMethodSchema, objectiveSchema, rollingTimeWindowSchema } from '../schema/slo';
 
 const createSLOParamsSchema = t.type({
-  body: commonSLOSchema,
+  body: t.type({
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    time_window: rollingTimeWindowSchema,
+    budgeting_method: budgetingMethodSchema,
+    objective: objectiveSchema,
+  }),
 });
 
 const createSLOResponseSchema = t.type({
@@ -28,11 +36,34 @@ const getSLOParamsSchema = t.type({
   }),
 });
 
-const getSLOResponseSchema = t.intersection([t.type({ id: t.string }), commonSLOSchema]);
+const getSLOResponseSchema = t.type({
+  id: t.string,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: rollingTimeWindowSchema,
+  budgeting_method: budgetingMethodSchema,
+  objective: objectiveSchema,
+  revision: t.number,
+  created_at: dateType,
+  updated_at: dateType,
+});
+
+const updateSLOParamsSchema = t.type({
+  body: t.partial({
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    time_window: rollingTimeWindowSchema,
+    budgeting_method: budgetingMethodSchema,
+    objective: objectiveSchema,
+  }),
+});
 
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
 type GetSLOResponse = t.TypeOf<typeof getSLOResponseSchema>;
+type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 
-export { createSLOParamsSchema, deleteSLOParamsSchema, getSLOParamsSchema };
-export type { CreateSLOParams, CreateSLOResponse, GetSLOResponse };
+export { createSLOParamsSchema, deleteSLOParamsSchema, getSLOParamsSchema, updateSLOParamsSchema };
+export type { CreateSLOParams, CreateSLOResponse, GetSLOResponse, UpdateSLOParams };
