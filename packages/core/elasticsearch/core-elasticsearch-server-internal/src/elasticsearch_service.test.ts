@@ -30,7 +30,6 @@ import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService, SetupDeps } from './elasticsearch_service';
 import { duration } from 'moment';
@@ -136,7 +135,7 @@ describe('#preboot', () => {
       );
     });
 
-    it('creates a ClusterClient using the internal AgentManager', async () => {
+    it('creates a ClusterClient using the internal AgentManager as AgentFactoryProvider ', async () => {
       const prebootContract = await elasticsearchService.preboot();
       const customConfig = { keepAlive: true };
       const clusterClient = prebootContract.createClient('custom-type', customConfig);
@@ -202,9 +201,9 @@ describe('#setup', () => {
     );
   });
 
-  it('returns an AgentManager as part of the contract', async () => {
+  it('returns an AgentStore as part of the contract', async () => {
     const setupContract = await elasticsearchService.setup(setupDeps);
-    expect(setupContract.agentManager).toBeInstanceOf(AgentManager);
+    expect(typeof setupContract.agentStore.getAgents).toEqual('function');
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {

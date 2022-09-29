@@ -39,6 +39,8 @@ RUNTIME_DEPS = [
   "//packages/kbn-logging",
   "@npm//moment",
   "@npm//getos",
+  ### test dependencies
+  "//packages/core/elasticsearch/core-elasticsearch-client-server-mocks",
 ]
 
 TYPES_DEPS = [
