@@ -72,7 +72,7 @@ import { BackToExternalAppButton } from '../../../components/back_to_external_ap
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 const MAX_PAGINATED_ITEM = 9999;
-const TRANSFORM_URL = '/data/transform';
+const TRANSFORMS_URL = '/data/transform';
 
 const StyledDatePicker = styled.div`
   .euiFormControlLayout--group {
@@ -622,7 +622,7 @@ export const EndpointList = () => {
               <LinkToApp
                 data-test-subj="failed-transform-restart-link"
                 appId="management"
-                appPath={TRANSFORM_URL}
+                appPath={TRANSFORMS_URL}
               >
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.list.transformFailed.restartLink"

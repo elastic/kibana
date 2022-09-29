@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { TRANSFORMS_URL } from '../../../../../common/constants';
 import {
   GET_TRANSFORM_STATE_ERROR_MESSAGE,
   GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE,
@@ -26,7 +26,6 @@ import type {
   StopTransformsResult,
 } from './types';
 
-const TRANSFORM_API_BASE_PATH = `/api/transform`;
 const toastLifeTimeMs = 600000;
 
 const getErrorToastMessage = ({
@@ -47,7 +46,7 @@ export async function createTransform({
   transformId,
 }: CreateTransform) {
   const res = await http
-    .put<CreateTransformResult>(`${TRANSFORM_API_BASE_PATH}/transforms/${transformId}`, {
+    .put<CreateTransformResult>(`${TRANSFORMS_URL}/transforms/${transformId}`, {
       body: JSON.stringify(options),
       signal,
     })
@@ -94,7 +93,7 @@ export async function startTransforms({
   transformIds,
 }: StartTransforms) {
   const res = await http
-    .post<StartTransformsResult>(`${TRANSFORM_API_BASE_PATH}/start_transforms`, {
+    .post<StartTransformsResult>(`${TRANSFORMS_URL}/start_transforms`, {
       body: JSON.stringify(
         transformIds.map((id) => ({
           id,
@@ -144,7 +143,7 @@ export async function getTransformState({
 }: GetTransformState) {
   const res = await http
     .get<{ transforms: Array<{ id: string; state: string }>; count: number }>(
-      `${TRANSFORM_API_BASE_PATH}/transforms/${transformId}/_stats`,
+      `${TRANSFORMS_URL}/transforms/${transformId}/_stats`,
       {
         signal,
       }
@@ -205,7 +204,7 @@ export async function stopTransforms({
 }: StopTransforms) {
   const states = await getTransformsState({ http, signal, transformIds });
   const res = await http
-    .post<StopTransformsResult>(`${TRANSFORM_API_BASE_PATH}/stop_transforms`, {
+    .post<StopTransformsResult>(`${TRANSFORMS_URL}/stop_transforms`, {
       body: JSON.stringify(
         states.reduce(
           (acc, state) =>
@@ -269,7 +268,7 @@ export async function deleteTransforms({
 }: DeleteTransforms) {
   await stopTransforms({ http, signal, transformIds });
   const res = await http
-    .post<DeleteTransformsResult>(`${TRANSFORM_API_BASE_PATH}/delete_transforms`, {
+    .post<DeleteTransformsResult>(`${TRANSFORMS_URL}/delete_transforms`, {
       body: JSON.stringify({
         transformsInfo: transformIds.map((id) => ({
           id,

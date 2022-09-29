@@ -7,6 +7,10 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  RISK_SCORE_CREATE_STORED_SCRIPT,
+  RISK_SCORE_DELETE_STORED_SCRIPT,
+} from '../../../../../common/constants';
 import { createStoredScript, deleteStoredScript } from './stored_scripts';
 
 const mockRequest = jest.fn();
@@ -44,7 +48,7 @@ describe('createStoredScript', () => {
     jest.clearAllMocks();
   });
   it('create stored script', () => {
-    expect(mockRequest.mock.calls[0][0]).toEqual(`/internal/risk_score/stored_scripts/create`);
+    expect(mockRequest.mock.calls[0][0]).toEqual(RISK_SCORE_CREATE_STORED_SCRIPT);
   });
 
   it('handles error', () => {
@@ -70,7 +74,7 @@ describe('deleteStoredScript', () => {
     jest.clearAllMocks();
   });
   it('delete stored script', () => {
-    expect(mockRequest.mock.calls[0][0]).toEqual(`/internal/risk_score/stored_scripts/delete`);
+    expect(mockRequest.mock.calls[0][0]).toEqual(RISK_SCORE_DELETE_STORED_SCRIPT);
   });
 
   it('handles error', () => {

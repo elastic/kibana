@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/securitysolution-io-ts-list-types';
+import { INGEST_PIPELINES_URL } from '../../../../../common/constants';
 import { createIngestPipeline, deleteIngestPipelines } from './ingest_pipelines';
 
 const mockRequest = jest.fn();
@@ -44,7 +45,7 @@ describe('createIngestPipeline', () => {
     jest.clearAllMocks();
   });
   it('create ingest pipeline', () => {
-    expect(mockRequest.mock.calls[0][0]).toEqual(`/api/ingest_pipelines`);
+    expect(mockRequest.mock.calls[0][0]).toEqual(INGEST_PIPELINES_URL);
   });
 
   it('handles error', () => {
