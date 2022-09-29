@@ -11,7 +11,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import type { GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
 import { ChatConfig, ServicesProvider } from './services';
@@ -31,7 +31,7 @@ interface CloudChatConfig {
 
 export class CloudChatPlugin implements Plugin {
   private readonly config: CloudChatConfig;
-  private chatConfig$ = new Subject<ChatConfig>();
+  private chatConfig$ = new ReplaySubject<ChatConfig>(1);
 
   constructor(initializerContext: PluginInitializerContext<CloudChatConfig>) {
     this.config = initializerContext.config.get();

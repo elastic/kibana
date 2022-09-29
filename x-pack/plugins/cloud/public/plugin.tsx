@@ -12,7 +12,6 @@ import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cl
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { getFullCloudUrl } from './utils';
-import { ServicesProvider } from './services';
 
 export interface CloudConfigType {
   id?: string;
@@ -108,14 +107,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
     const CloudContextProvider: FC = ({ children }) => {
       return (
-        <ServicesProvider isCloudEnabled={this.isCloudEnabled}>
+        <>
           {this.contextProviders.reduce(
             (acc, ContextProvider) => (
               <ContextProvider> {acc} </ContextProvider>
             ),
             children
           )}
-        </ServicesProvider>
+        </>
       );
     };
 
