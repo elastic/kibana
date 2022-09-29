@@ -139,7 +139,7 @@ Example: Visualize the change in bytes received over time:
     'xpack.lens.indexPattern.differences.documentation.quick',
     {
       defaultMessage: `
-      The change, or difference, between the values in subsequent intervals.
+      The change between the values in subsequent intervals.
       `,
     }
   ),
