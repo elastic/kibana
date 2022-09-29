@@ -8,6 +8,7 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/steps/checks/precommit_hook.sh
 .buildkite/scripts/steps/checks/ftr_configs.sh
 .buildkite/scripts/steps/checks/bazel_packages.sh
+.buildkite/scripts/steps/checks/event_log.sh
 .buildkite/scripts/steps/checks/telemetry.sh
 .buildkite/scripts/steps/checks/ts_projects.sh
 .buildkite/scripts/steps/checks/jest_configs.sh
