@@ -1047,7 +1047,7 @@ describe('xy_visualization', () => {
           frame,
           layerId: 'first',
         }).groups;
-        expect(splitGroup.required).toBe(true);
+        expect(splitGroup.requiredMinDimensionCount).toBe(1);
       });
 
       test.each([
@@ -1087,7 +1087,7 @@ describe('xy_visualization', () => {
             frame,
             layerId: 'first',
           }).groups;
-          expect(splitGroup.required).toBe(false);
+          expect(splitGroup.requiredMinDimensionCount).toBe(0);
         }
       );
 
@@ -1236,7 +1236,7 @@ describe('xy_visualization', () => {
             frame,
             layerId: 'first',
           }).groups;
-          expect(splitGroup.required).toBe(true);
+          expect(splitGroup.requiredMinDimensionCount).toBe(1);
         }
       );
     });

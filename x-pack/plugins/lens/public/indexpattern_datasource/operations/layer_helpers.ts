@@ -68,6 +68,7 @@ interface ColumnChange {
   columnParams?: Record<string, unknown>;
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
   references?: Array<Omit<ColumnChange, 'layer'>>;
+  respectOrder?: boolean;
 }
 
 interface ColumnCopy {
@@ -362,6 +363,7 @@ export function insertNewColumn({
   columnParams,
   initialParams,
   references,
+  respectOrder,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -394,7 +396,14 @@ export function insertNewColumn({
       : operationDefinition.buildColumn({ ...baseOptions, layer });
 
     return updateDefaultLabels(
-      addOperationFn(layer, buildColumnFn, columnId, visualizationGroups, targetGroup),
+      addOperationFn(
+        layer,
+        buildColumnFn,
+        columnId,
+        visualizationGroups,
+        targetGroup,
+        respectOrder
+      ),
       indexPattern
     );
   }
@@ -445,7 +454,14 @@ export function insertNewColumn({
         )
       : operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds });
     return updateDefaultLabels(
-      addOperationFn(tempLayer, buildColumnFn, columnId, visualizationGroups, targetGroup),
+      addOperationFn(
+        tempLayer,
+        buildColumnFn,
+        columnId,
+        visualizationGroups,
+        targetGroup,
+        respectOrder
+      ),
       indexPattern
     );
   }
@@ -468,7 +484,8 @@ export function insertNewColumn({
           operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
           columnId,
           visualizationGroups,
-          targetGroup
+          targetGroup,
+          respectOrder
         ),
         indexPattern
       );
@@ -508,7 +525,7 @@ export function insertNewColumn({
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
   return updateDefaultLabels(
-    addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup),
+    addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup, respectOrder),
     indexPattern
   );
 }
@@ -1154,7 +1171,8 @@ function addBucket(
   column: BaseIndexPatternColumn,
   addedColumnId: string,
   visualizationGroups: VisualizationDimensionGroupConfig[],
-  targetGroup?: string
+  targetGroup?: string,
+  respectOrder?: boolean
 ): IndexPatternLayer {
   const [buckets, metrics] = partition(
     layer.columnOrder,
@@ -1166,7 +1184,7 @@ function addBucket(
   );
 
   let updatedColumnOrder: string[] = [];
-  if (oldDateHistogramIndex > -1 && column.operationType === 'terms') {
+  if (oldDateHistogramIndex > -1 && column.operationType === 'terms' && !respectOrder) {
     // Insert the new terms bucket above the first date histogram
     updatedColumnOrder = [
       ...buckets.slice(0, oldDateHistogramIndex),
