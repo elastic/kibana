@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { CloudStart } from '.';
-import { ServicesProvider } from './services';
 
 function createSetupMock() {
   return {
@@ -23,14 +22,10 @@ function createSetupMock() {
   };
 }
 
-const config = {
-  isCloudEnabled: true,
-};
-
 const getContextProvider: () => React.FC =
   () =>
   ({ children }) =>
-    <ServicesProvider {...config}>{children}</ServicesProvider>;
+    <>{children}</>;
 
 const createStartMock = (): jest.Mocked<CloudStart> => ({
   CloudContextProvider: jest.fn(getContextProvider()),
