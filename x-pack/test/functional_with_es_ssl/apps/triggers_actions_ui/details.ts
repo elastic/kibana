@@ -252,6 +252,56 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      it('should snooze the rule for a set duration', async () => {
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        await snoozeBadge.click();
+
+        const snooze8h = await testSubjects.find('linkSnooze8h');
+        await snooze8h.click();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
+        });
+
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozed');
+        await snoozeBadge.click();
+
+        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
+        await snoozeCancel.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should add snooze schedule', async () => {
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        await snoozeBadge.click();
+
+        const addScheduleButton = await testSubjects.find('ruleAddSchedule');
+        await addScheduleButton.click();
+
+        const saveScheduleButton = await testSubjects.find('scheduler-saveSchedule');
+        await saveScheduleButton.click();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
+        });
+
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-scheduled');
+        await snoozeBadge.click();
+
+        const snoozeCancel = await testSubjects.find('ruleRemoveAllSchedules');
+        await snoozeCancel.click();
+
+        const confirmButton = await testSubjects.find('confirmModalConfirmButton');
+        await confirmButton.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
       it('should unsnooze the rule', async () => {
         const actionsDropdown = await testSubjects.find('statusDropdown');
 
