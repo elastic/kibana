@@ -58,7 +58,7 @@ export async function fetchFrequentItems(
   logger: Logger,
   emitError: (m: string) => void
 ) {
-  // get unique fields that are left
+  // get unique fields from change points
   const fields = [...new Set(changePoints.map((t) => t.fieldName))];
 
   // TODO add query params
@@ -94,6 +94,8 @@ export async function fetchFrequentItems(
     sampleProbability = Math.min(0.5, minDocCount / totalDocCount);
   }
 
+  logger.debug(`frequent_items sample probability: ${sampleProbability}`);
+
   // frequent items can be slow, so sample and use 10% min_support
   const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
     sample: {
@@ -106,7 +108,7 @@ export async function fetchFrequentItems(
           frequent_items: {
             minimum_set_size: 2,
             size: 200,
-            minimum_support: 0.01,
+            minimum_support: 0.1,
             fields: aggFields,
           },
         },
