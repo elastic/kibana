@@ -65,6 +65,12 @@ export const OUTPUT_MESSAGES = Object.freeze({
         defaultMessage: 'Execution completed',
       }
     ),
+    comment: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.comment',
+      {
+        defaultMessage: 'Comment',
+      }
+    ),
   },
 });
 
