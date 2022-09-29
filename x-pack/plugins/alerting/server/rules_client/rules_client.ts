@@ -118,7 +118,9 @@ import {
 import { AlertingRulesConfig } from '../config';
 import {
   formatExecutionLogResult,
+  formatExecutionKPIResult,
   getExecutionLogAggregation,
+  getExecutionKPIAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { IExecutionLogResult, IExecutionErrorsResult } from '../../common';
 import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
@@ -379,6 +381,19 @@ export interface GetExecutionLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+}
+
+export interface GetRuleExecutionKPIParams {
+  id: string;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+}
+
+export interface GetGlobalExecutionKPIParams {
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
 }
 
 export interface GetGlobalExecutionLogParams {
@@ -1034,6 +1049,125 @@ export class RulesClient {
     } catch (err) {
       this.logger.debug(
         `rulesClient.getActionErrorLog(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getGlobalExecutionKpiWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+  }: GetGlobalExecutionKPIParams) {
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_GLOBAL_EXECUTION_KPI,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_GLOBAL_EXECUTION_KPI,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'alert',
+        authorizationTuple.filter as KueryNode,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionKPIAggregation(filter),
+        }
+      );
+
+      return formatExecutionKPIResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getGlobalExecutionKpiWithAuth(): error searching global execution KPI: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getRuleExecutionKPI({ id, dateStart, dateEnd, filter }: GetRuleExecutionKPIParams) {
+    this.logger.debug(`getRuleExecutionKPI(): getting execution KPI for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetRuleExecutionKPI,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionKPIAggregation(filter),
+        },
+        rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+
+      return formatExecutionKPIResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getRuleExecutionKPI(): error searching execution KPI for rule ${id}: ${err.message}`
       );
       throw err;
     }
@@ -2270,7 +2404,7 @@ export class RulesClient {
         const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 
         for (const instanceId of recoveredAlertInstanceIds) {
-          const { group: actionGroup, subgroup: actionSubgroup } =
+          const { group: actionGroup } =
             recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
           const instanceState = recoveredAlertInstances[instanceId].getState();
           const message = `instance '${instanceId}' has recovered due to the rule was disabled`;
@@ -2285,7 +2419,6 @@ export class RulesClient {
             message,
             state: instanceState,
             group: actionGroup,
-            subgroup: actionSubgroup,
             namespace: this.namespace,
             spaceId: this.spaceId,
             savedObjects: [

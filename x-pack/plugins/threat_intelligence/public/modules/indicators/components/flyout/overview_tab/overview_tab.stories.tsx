@@ -10,7 +10,7 @@ import { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../../common/types/indicator';
 import { IndicatorsFlyoutOverview } from '.';
-import { IndicatorsFiltersContext } from '../../../context';
+import { IndicatorsFiltersContext } from '../../../containers/indicators_filters';
 
 export default {
   component: IndicatorsFlyoutOverview,

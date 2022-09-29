@@ -8,6 +8,7 @@
   },
   "include": [
     "__jest__/**/*",
+    "integration_tests/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
