@@ -17,7 +17,7 @@ import type {
   IInterpreterRenderHandlers,
   Datatable,
 } from '@kbn/expressions-plugin/public';
-import type { NavigateToLensContext } from '@kbn/visualizations-plugin/common';
+import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
@@ -217,13 +217,13 @@ export interface InitializationOptions {
   isFullEditor?: boolean;
 }
 
-export type VisualizeEditorContext = {
+export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
-} & NavigateToLensContext;
+} & NavigateToLensContext<T>;
 
 export interface GetDropPropsArgs<T = unknown> {
   state: T;
@@ -1129,7 +1129,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getSuggestionFromConvertToLensContext?: (
     props: VisualizationStateFromContextChangeProps
-  ) => Suggestion;
+  ) => Suggestion | undefined;
 }
 
 // Use same technique as TriggerContext
