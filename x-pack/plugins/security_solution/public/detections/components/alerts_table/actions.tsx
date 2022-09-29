@@ -22,6 +22,7 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
   ALERT_RULE_PARAMETERS,
+  ALERT_RULE_CREATED_BY,
 } from '@kbn/rule-data-utils';
 
 import type { TGridModel } from '@kbn/timelines-plugin/public';
@@ -480,6 +481,7 @@ const createThresholdTimeline = async (
       },
       to: thresholdTo,
       ruleNote: noteContent,
+      ruleAuthor,
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -675,6 +677,7 @@ export const sendAlertToTimelineAction = async ({
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
   const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
+  const ruleAuthor = getField(ecsData, ALERT_RULE_CREATED_BY);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
   const timelineId = !isEmpty(ruleTimelineId)

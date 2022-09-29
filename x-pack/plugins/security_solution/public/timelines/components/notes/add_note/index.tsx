@@ -18,6 +18,7 @@ import { useDispatch } from 'react-redux';
 
 import { appActions } from '../../../../common/store/app';
 import type { Note } from '../../../../common/lib/note';
+import { useCurrentUser } from '../../../../common/lib/kibana/hooks';
 import type { AssociateNote, UpdateInternalNewNote } from '../helpers';
 import { updateAndAssociateNode } from '../helpers';
 import * as i18n from '../translations';
@@ -54,22 +55,24 @@ export const AddNote = React.memo<{
   autoFocusDisabled?: boolean;
 }>(({ associateNote, newNote, onCancelAddNote, updateNewNote, autoFocusDisabled = false }) => {
   const dispatch = useDispatch();
-
+  const authenticatedUser = useCurrentUser();
   const updateNote = useCallback(
     (note: Note) => dispatch(appActions.updateNote({ note })),
     [dispatch]
   );
 
-  const handleClick = useCallback(
-    () =>
+  const handleClick = useCallback(() => {
+    const user = authenticatedUser?.username;
+    if (user) {
       updateAndAssociateNode({
         associateNote,
         newNote,
         updateNewNote,
         updateNote,
-      }),
-    [associateNote, newNote, updateNewNote, updateNote]
-  );
+        user,
+      });
+    }
+  }, [associateNote, newNote, updateNewNote, updateNote, authenticatedUser]);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
