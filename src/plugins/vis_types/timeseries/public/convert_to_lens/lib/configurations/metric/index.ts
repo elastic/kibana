@@ -21,7 +21,6 @@ export const getConfigurationForMetric = (
   const [primarySeries, secondarySeries] = model.series.filter(({ hidden }) => !hidden);
 
   const primaryMetricWithCollapseFn = getMetricWithCollapseFn(primarySeries);
-
   if (!primaryMetricWithCollapseFn || !primaryMetricWithCollapseFn.metric) {
     return null;
   }
@@ -29,7 +28,6 @@ export const getConfigurationForMetric = (
   const secondaryMetricWithCollapseFn = getMetricWithCollapseFn(secondarySeries);
   const primaryColumn = findMetricColumn(primaryMetricWithCollapseFn.metric, layer.columns);
   const secondaryColumn = findMetricColumn(secondaryMetricWithCollapseFn?.metric, layer.columns);
-
   if (primaryMetricWithCollapseFn.collapseFn && secondaryMetricWithCollapseFn?.collapseFn) {
     return null;
   }
