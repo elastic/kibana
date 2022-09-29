@@ -11,6 +11,11 @@ import { subj } from '@kbn/test-subj-selector';
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/security_dashboard_data'],
 })
+  .step('Open Security App and Wait for Fleet Setup', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/security/get_started`));
+    await page.waitForSelector(subj('siem-landing-page'), { timeout: 60000 });
+  })
+
   .step('Go to Security Network Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/security/network`));
     await page.waitForSelector(subj('mapContainer'), { timeout: 60000 });
