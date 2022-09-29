@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, pick, reduce } from 'lodash';
+import { isEmpty, pick, reduce, isArray } from 'lodash';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -37,18 +37,29 @@ export const convertPackQueriesToSO = (queries) =>
     }>
   );
 
-// @ts-expect-error update types
-export const convertSOQueriesToPack = (queries, options?: { removeMultiLines?: boolean }) =>
+export const convertSOQueriesToPack = (
+  // @ts-expect-error update types
+  queries,
+  options?: { removeMultiLines?: boolean; removeResultType?: boolean }
+) =>
   reduce(
     queries,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    (acc, { id: queryId, ecs_mapping, query, platform, ...rest }, key) => {
+    (acc, { id: queryId, ecs_mapping, query, platform, removed, snapshot, ...rest }, key) => {
+      const resultType = !snapshot ? { removed, snapshot } : {};
       const index = queryId ? queryId : key;
       acc[index] = {
         ...rest,
         query: options?.removeMultiLines ? removeMultilines(query) : query,
-        ...(!isEmpty(ecs_mapping) ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) } : {}),
+        ...(!isEmpty(ecs_mapping)
+          ? isArray(ecs_mapping)
+            ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
+            : { ecs_mapping }
+          : {}),
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
+        ...(options?.removeResultType
+          ? resultType
+          : { ...(snapshot ? { snapshot } : {}), ...(removed ? { removed } : {}) }),
       };
 
       return acc;
