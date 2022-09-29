@@ -438,13 +438,11 @@ export const ExceptionListsTable = React.memo(() => {
 
   useEffect(() => {
     setPagination({
-      page: activePage,
+      page: activePage + 1, // off-by-one error
       perPage: rowSize,
       total: 0,
     });
-    refreshExceptions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, setPagination]);
+  }, [activePage, rowSize, setPagination]);
 
   const goToPage = (pageNumber: number) => setActivePage(pageNumber);
 
@@ -583,7 +581,7 @@ export const ExceptionListsTable = React.memo(() => {
         </EuiPopover>
         <EuiPagination
           aria-label={'Custom pagination example'}
-          pageCount={pagination.total / rowSize}
+          pageCount={Math.ceil(pagination.total / rowSize)}
           activePage={activePage}
           onPageClick={goToPage}
         />
