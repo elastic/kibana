@@ -921,6 +921,44 @@ describe('MetricVisComponent', function () {
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('should convert null values to NaN', () => {
+    const metricId = faker.random.word();
+
+    const tableWNull: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: metricId,
+          name: metricId,
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [{ [metricId]: null }],
+    };
+
+    const metricConfig = shallow(
+      <MetricVis
+        config={{
+          metric: {
+            progressDirection: 'vertical',
+            maxCols: 5,
+          },
+          dimensions: {
+            metric: metricId,
+          },
+        }}
+        data={tableWNull}
+        {...defaultProps}
+      />
+    )
+      .find(Metric)
+      .props().data![0][0]! as MetricWNumber;
+
+    expect(metricConfig.value).toBeNaN();
+  });
+
   describe('filter events', () => {
     const fireEventSpy = jest.fn();
 

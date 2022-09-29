@@ -231,7 +231,7 @@ export const MetricVis = ({
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
   ).map((row, rowIdx) => {
-    const value = row[primaryMetricColumn.id];
+    const value: number = row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
     const title = breakdownByColumn
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
