@@ -217,7 +217,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         },
       },
     ];
-  }, [setEventsDeleted, observabilityRuleTypeRegistry]);
+  }, [setEventsDeleted, observabilityRuleTypeRegistry, config]);
 
   const onStateChange = useCallback(
     (state: TGridState) => {
