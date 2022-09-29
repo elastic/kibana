@@ -67,7 +67,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const validationResult = validateMonitor(monitorWithDefaults as MonitorFields);
 
-    if (!validationResult.valid) {
+    if (!validationResult.valid || !validationResult.decodedMonitor) {
       const { reason: message, details, payload } = validationResult;
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
@@ -78,8 +78,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     try {
       const { errors, newMonitor } = await syncNewMonitor({
-        normalizedMonitor: monitorWithDefaults,
-        monitor,
+        normalizedMonitor: validationResult.decodedMonitor,
         server,
         syntheticsMonitorClient,
         savedObjectsClient,
@@ -140,7 +139,6 @@ export const createNewSavedObjectMonitor = async ({
 
 export const syncNewMonitor = async ({
   id,
-  monitor,
   server,
   syntheticsMonitorClient,
   savedObjectsClient,
@@ -150,7 +148,6 @@ export const syncNewMonitor = async ({
   spaceId,
 }: {
   id?: string;
-  monitor: SyntheticsMonitor;
   normalizedMonitor: SyntheticsMonitor;
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
@@ -201,7 +198,7 @@ export const syncNewMonitor = async ({
       formatTelemetryEvent({
         errors: syncErrors,
         monitor: monitorSavedObject,
-        isInlineScript: Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+        isInlineScript: Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
         kibanaVersion: server.kibanaVersion,
       })
     );

@@ -96,6 +96,114 @@ export default function ({ getService }: FtrProviderContext) {
       icmpProjectMonitors = setUniqueIds(getFixtureJson('project_icmp_monitor'));
     });
 
+    it('project monitors - handles browser monitors', async () => {
+      const successfulMonitors = [projectMonitors.monitors[0]];
+
+      try {
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(projectMonitors)
+        );
+
+        expect(messages).to.have.length(2);
+        expect(messages[1].updatedMonitors).eql([]);
+        expect(messages[1].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
+        expect(messages[1].failedMonitors).eql([]);
+
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          const decryptedCreatedMonitor = await supertest
+            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(decryptedCreatedMonitor.body.attributes).to.eql({
+            __ui: {
+              is_zip_url_tls_enabled: false,
+              script_source: {
+                file_name: '',
+                is_generated_script: false,
+              },
+            },
+            config_id: '',
+            custom_heartbeat_id: `${journeyId}-test-suite-default`,
+            enabled: true,
+            'filter_journeys.match': 'check if title is present',
+            'filter_journeys.tags': [],
+            form_monitor_type: 'multistep',
+            ignore_https_errors: false,
+            journey_id: journeyId,
+            locations: [
+              {
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+                id: 'localhost',
+                isInvalid: false,
+                isServiceManaged: true,
+                label: 'Local Synthetics Service',
+                status: 'experimental',
+                url: 'mockDevUrl',
+              },
+            ],
+            name: 'check if title is present',
+            namespace: 'default',
+            origin: 'project',
+            original_space: 'default',
+            playwright_options: '{"headless":true,"chromiumSandbox":false}',
+            playwright_text_assertion: '',
+            project_id: 'test-suite',
+            params: '',
+            revision: 1,
+            schedule: {
+              number: '10',
+              unit: 'm',
+            },
+            screenshots: 'on',
+            'service.name': '',
+            'source.zip_url.folder': '',
+            'source.zip_url.proxy_url': '',
+            'source.zip_url.url': '',
+            'source.zip_url.password': '',
+            'source.zip_url.username': '',
+            synthetics_args: [],
+            tags: [],
+            'throttling.config': '5d/3u/20l',
+            'throttling.download_speed': '5',
+            'throttling.is_enabled': true,
+            'throttling.latency': '20',
+            'throttling.upload_speed': '3',
+            'ssl.certificate': '',
+            'ssl.certificate_authorities': '',
+            'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+            'ssl.verification_mode': 'full',
+            'ssl.key': '',
+            'ssl.key_passphrase': '',
+            'source.inline.script': '',
+            'source.project.content':
+              'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
+            timeout: null,
+            type: 'browser',
+            'url.port': null,
+            urls: '',
+          });
+        }
+      } finally {
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, httpProjectMonitors.project);
+          }),
+        ]);
+      }
+    });
+
     it('project monitors - handles http monitors', async () => {
       const kibanaVersion = await kibanaServer.version.get();
       const successfulMonitors = [httpProjectMonitors.monitors[1]];
@@ -130,7 +238,12 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
+          const decryptedCreatedMonitor = await supertest
+            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
               is_tls_enabled: false,
             },
@@ -138,6 +251,16 @@ export default function ({ getService }: FtrProviderContext) {
             'check.response.status': ['200'],
             config_id: '',
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
+            'check.response.body.negative': [],
+            'check.response.body.positive': ['Saved', 'saved'],
+            'check.response.headers': {},
+            'check.request.body': {
+              type: 'text',
+              value: '',
+            },
+            'check.request.headers': {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
             enabled: false,
             form_monitor_type: 'http',
             journey_id: journeyId,
@@ -161,6 +284,8 @@ export default function ({ getService }: FtrProviderContext) {
             origin: 'project',
             original_space: 'default',
             project_id: 'test-suite',
+            username: '',
+            password: '',
             proxy_url: '',
             'response.include_body': 'always',
             'response.include_headers': false,
@@ -174,10 +299,13 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
             'ssl.verification_mode': 'full',
+            'ssl.key': '',
+            'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
             timeout: '80',
             type: 'http',
             urls: Array.isArray(monitor.urls) ? monitor.urls?.[0] : monitor.urls,
+            'url.port': null,
           });
         }
       } finally {
@@ -223,12 +351,19 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
+          const decryptedCreatedMonitor = await supertest
+            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
               is_tls_enabled: false,
             },
             config_id: '',
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
+            'check.receive': '',
+            'check.send': '',
             enabled: true,
             form_monitor_type: 'tcp',
             journey_id: journeyId,
@@ -263,10 +398,13 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
             'ssl.verification_mode': 'full',
+            'ssl.key': '',
+            'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
             timeout: '16',
             type: 'tcp',
             hosts: Array.isArray(monitor.hosts) ? monitor.hosts?.[0] : monitor.hosts,
+            'url.port': null,
           });
         }
       } finally {
@@ -312,7 +450,12 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
+          const decryptedCreatedMonitor = await supertest
+            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(decryptedCreatedMonitor.body.attributes).to.eql({
             config_id: '',
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,

@@ -111,15 +111,7 @@ describe('ActionsPopover', () => {
     const enableButton = getByText('Disable monitor');
     fireEvent.click(enableButton);
     expect(updateMonitorEnabledState).toHaveBeenCalledTimes(1);
-    expect(updateMonitorEnabledState.mock.calls[0]).toEqual([
-      {
-        id: 'somelongstring',
-        isEnabled: true,
-        location: { id: 'us_central', isServiceManaged: true },
-        name: 'Monitor 1',
-      },
-      false,
-    ]);
+    expect(updateMonitorEnabledState.mock.calls[0]).toEqual([false]);
   });
 
   it('sets enabled state to true', async () => {
@@ -139,14 +131,6 @@ describe('ActionsPopover', () => {
     const enableButton = getByText('Enable monitor');
     fireEvent.click(enableButton);
     expect(updateMonitorEnabledState).toHaveBeenCalledTimes(1);
-    expect(updateMonitorEnabledState.mock.calls[0]).toEqual([
-      {
-        id: 'somelongstring',
-        isEnabled: false,
-        location: { id: 'us_central', isServiceManaged: true },
-        name: 'Monitor 1',
-      },
-      true,
-    ]);
+    expect(updateMonitorEnabledState.mock.calls[0]).toEqual([true]);
   });
 });

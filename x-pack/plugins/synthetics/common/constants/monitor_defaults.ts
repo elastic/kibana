@@ -108,6 +108,7 @@ export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
   [ConfigKey.MAX_REDIRECTS]: '0',
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
+  [ConfigKey.PORT]: null,
 };
 
 export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
@@ -144,6 +145,7 @@ export const DEFAULT_TCP_SIMPLE_FIELDS: TCPSimpleFields = {
   [ConfigKey.HOSTS]: '',
   [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
+  [ConfigKey.PORT]: null,
 };
 
 export const DEFAULT_TCP_ADVANCED_FIELDS: TCPAdvancedFields = {

@@ -33,6 +33,7 @@ export const getTCPJsonToJavascriptNormalizer = (key: ConfigKey) => {
 export const tcpNormalizers: TCPNormalizerMap = {
   [ConfigKey.METADATA]: getTCPJsonToJavascriptNormalizer(ConfigKey.METADATA),
   [ConfigKey.HOSTS]: getTCPNormalizer(ConfigKey.HOSTS),
+  [ConfigKey.PORT]: getTCPNormalizer(ConfigKey.PORT),
   [ConfigKey.PROXY_URL]: getTCPNormalizer(ConfigKey.PROXY_URL),
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: getTCPNormalizer(ConfigKey.PROXY_USE_LOCAL_RESOLVER),
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: getTCPNormalizer(ConfigKey.RESPONSE_RECEIVE_CHECK),

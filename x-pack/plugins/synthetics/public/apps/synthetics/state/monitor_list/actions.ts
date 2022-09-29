@@ -10,7 +10,6 @@ import { createAction } from '@reduxjs/toolkit';
 import {
   EncryptedSyntheticsMonitor,
   MonitorManagementListResult,
-  MonitorOverviewItem,
 } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
@@ -23,7 +22,7 @@ export const fetchMonitorListAction = createAsyncAction<
 
 export interface UpsertMonitorRequest {
   id: string;
-  monitor: EncryptedSyntheticsMonitor | MonitorOverviewItem;
+  monitor: Partial<EncryptedSyntheticsMonitor>;
 }
 export const fetchUpsertMonitorAction = createAction<UpsertMonitorRequest>('fetchUpsertMonitor');
 export const fetchUpsertSuccessAction = createAction<{
