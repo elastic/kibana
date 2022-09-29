@@ -197,22 +197,17 @@ export class ProjectMonitorFormatter {
     try {
       await this.validatePermissions({ monitor });
 
-      const { normalizedFields: normalizedMonitor, unsupportedKeys } = normalizeProjectMonitor({
+      const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
         monitor,
         locations: this.locations,
         privateLocations: this.privateLocations,
         projectId: this.projectId,
         namespace: this.spaceId,
+        version: this.server.kibanaVersion,
       });
 
-      if (unsupportedKeys.length) {
-        this.failedMonitors.push({
-          id: monitor.id,
-          reason: 'Unsupported Heartbeat option',
-          details: `The following Heartbeat options are not supported for ${
-            monitor.type
-          } project monitors in ${this.server.kibanaVersion}: ${unsupportedKeys.join('|')}`,
-        });
+      if (errors.length) {
+        this.failedMonitors.push(...errors);
         this.handleStreamingMessage({
           message: `${monitor.id}: failed to create or update monitor`,
         });
