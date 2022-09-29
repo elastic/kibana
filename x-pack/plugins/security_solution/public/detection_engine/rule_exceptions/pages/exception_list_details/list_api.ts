@@ -68,6 +68,7 @@ export const fetchListExceptionItems = async ({
       totalItemCount: inputTotalItemCount,
     } = pagination || {};
 
+    // TODO transform Pagination object from Frontend=>Backend & <=
     const {
       page: pageIndex,
       per_page: pageSize,
@@ -81,7 +82,7 @@ export const fetchListExceptionItems = async ({
       search,
       pagination: {
         perPage: inputPageSize,
-        page: inputPageIndex || 0 + 1,
+        page: (inputPageIndex || 0) + 1,
         total: inputTotalItemCount,
       } as ServerPagination,
       signal: abortCtrl.signal,
