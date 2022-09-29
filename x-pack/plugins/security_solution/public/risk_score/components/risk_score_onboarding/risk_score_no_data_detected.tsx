@@ -7,14 +7,14 @@
 
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 
-import { HeaderSection } from '../../header_section';
+import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
 import { RiskScoreHeaderTitle } from './risk_score_header_title';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
-import type { inputsModel } from '../../../store';
-import * as overviewI18n from '../../../../overview/components/entity_analytics/common/translations';
+import type { inputsModel } from '../../../common/store';
+import * as overviewI18n from '../../../overview/components/entity_analytics/common/translations';
 
 const RiskScoresNoDataDetectedComponent = ({
   entityType,

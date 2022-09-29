@@ -10,20 +10,20 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { last } from 'lodash/fp';
-import { RiskScoresDeprecated } from '../../../common/components/risk_score/risk_score_deprecated';
+import { RiskScoresDeprecated } from '../../../risk_score/components/risk_score_deprecated';
 import type { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
 import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
 import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
 import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { RiskScoreOverTime } from '../../../common/components/risk_score_over_time';
+import { RiskScoreOverTime } from '../../../risk_score/components/risk_score_over_time';
 import { TopRiskScoreContributors } from '../../../common/components/top_risk_score_contributors';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 import { RISKY_HOSTS_DASHBOARD_TITLE } from './constants';
-import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
-import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { RiskScoreDisable } from '../../../risk_score/components/risk_score_disabled';
+import { RiskScoresNoDataDetected } from '../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import type { State } from '../../../common/store';
@@ -102,7 +102,9 @@ const HostRiskTabBodyComponent: React.FC<
   const lastHostRiskItem = last(data);
 
   if (!isModuleEnabled && !loading) {
-    return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
+    return (
+      <RiskScoreDisable entityType={RiskScoreEntity.host} refetch={refetch} timerange={timerange} />
+    );
   }
 
   if (isDeprecated && !loading) {

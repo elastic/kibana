@@ -8,13 +8,13 @@
 import { EuiButton, EuiConfirmModal } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSpaceId } from '../../../hooks/use_space_id';
-import { useKibana } from '../../../lib/kibana';
-import type { inputsModel } from '../../../store';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useKibana } from '../../../common/lib/kibana';
+import type { inputsModel } from '../../../common/store';
 import { upgradeHostRiskScoreModule, upgradeUserRiskScoreModule } from './utils';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useRiskScoreToastContent } from './use_risk_score_toast_content';
-import { REQUEST_NAMES, useFetch } from '../../../hooks/use_fetch';
+import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
 import { RiskScoreDocLink } from './risk_score_doc_link';
 
 const RiskScoreUpgradeButtonComponent = ({

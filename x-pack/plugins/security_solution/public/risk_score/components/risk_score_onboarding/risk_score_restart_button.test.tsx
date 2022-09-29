@@ -7,8 +7,8 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { TestProviders } from '../../../mock/test_providers';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { TestProviders } from '../../../common/mock';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
 
 import { restartRiskScoreTransforms } from './utils';

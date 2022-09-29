@@ -8,10 +8,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
-import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../users/store/model';
-import { RiskScoresDeprecated } from '../../../../common/components/risk_score/risk_score_deprecated';
+import { RiskScoresDeprecated } from '../../../../risk_score/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
@@ -39,9 +38,9 @@ import { hostsActions } from '../../../../hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
-import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
-import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
-import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { RiskScoreDisable } from '../../../../risk_score/components/risk_score_disabled';
+import { RiskScoreHeaderTitle } from '../../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
+import { RiskScoresNoDataDetected } from '../../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
@@ -175,11 +174,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   }
 
   if (!isModuleEnabled && !isTableLoading) {
-    return riskEntity === RiskScoreEntity.host ? (
-      <EntityAnalyticsHostRiskScoreDisable refetch={refreshPage} timerange={timerange} />
-    ) : (
-      <EntityAnalyticsUserRiskScoreDisable refetch={refreshPage} timerange={timerange} />
-    );
+    return <RiskScoreDisable entityType={riskEntity} refetch={refreshPage} timerange={timerange} />;
   }
 
   if (isDeprecated && !isTableLoading) {

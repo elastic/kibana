@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { RiskScoresDeprecated } from '../../../common/components/risk_score/risk_score_deprecated';
+import { RiskScoresDeprecated } from '../../../risk_score/components/risk_score_deprecated';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRiskScoreTable } from '../../components/host_risk_score_table';
@@ -22,8 +22,8 @@ import {
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../common/search_strategy';
-import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
-import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { RiskScoreDisable } from '../../../risk_score/components/risk_score_disabled';
+import { RiskScoresNoDataDetected } from '../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -79,7 +79,9 @@ export const HostRiskScoreQueryTabBody = ({
   });
 
   if (!isModuleEnabled && !loading) {
-    return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
+    return (
+      <RiskScoreDisable entityType={RiskScoreEntity.host} refetch={refetch} timerange={timerange} />
+    );
   }
 
   if (isDeprecated && !loading) {

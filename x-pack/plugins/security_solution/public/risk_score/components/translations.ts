@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../common/search_strategy';
 
 export const HOST = i18n.translate('xpack.securitySolution.riskScore.overview.hostTitle', {
   defaultMessage: 'Host',

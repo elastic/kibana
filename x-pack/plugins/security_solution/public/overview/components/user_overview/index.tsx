@@ -36,7 +36,7 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { useUserRiskScore } from '../../../risk_score/containers';
 import { RiskScore } from '../../../common/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
-import { RiskScoreHeaderTitle } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import { RiskScoreHeaderTitle } from '../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel

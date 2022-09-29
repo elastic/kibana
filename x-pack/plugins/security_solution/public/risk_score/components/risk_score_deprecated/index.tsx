@@ -7,13 +7,13 @@
 
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { RiskScoreUpgradeButton } from '../risk_score_onboarding/risk_score_upgrade_button';
-import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
-import type { inputsModel } from '../../../store';
-import { HeaderSection } from '../../header_section';
+import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
+import type { inputsModel } from '../../../common/store';
+import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
-import * as overviewI18n from '../../../../overview/components/entity_analytics/common/translations';
+import * as overviewI18n from '../../../overview/components/entity_analytics/common/translations';
 import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
 
 export const RiskScoresDeprecated = ({

@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { RiskScoreOverTime, scoreFormatter } from '.';
-import { TestProviders } from '../../mock';
+import { TestProviders } from '../../../common/mock';
 import { LineSeries } from '@elastic/charts';
 
 const mockLineSeries = LineSeries as jest.Mock;

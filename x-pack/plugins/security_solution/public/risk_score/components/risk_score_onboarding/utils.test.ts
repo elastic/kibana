@@ -5,25 +5,25 @@
  * 2.0.
  */
 import type { HttpSetup } from '@kbn/core/public';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
   getLegacyIngestPipelineName,
   getRiskScoreLatestTransformId,
   getRiskScorePivotTransformId,
-} from '../../../../../common/utils/risk_score_modules';
+} from '../../../../common/utils/risk_score_modules';
 import {
   bulkDeletePrebuiltSavedObjects,
   bulkCreatePrebuiltSavedObjects,
-} from '../../../../risk_score/containers/onboarding/api';
+} from '../../containers/onboarding/api';
 
-import * as api from '../../../../risk_score/containers/onboarding/api';
+import * as api from '../../containers/onboarding/api';
 import {
   installRiskScoreModule,
   restartRiskScoreTransforms,
   uninstallLegacyRiskScoreModule,
 } from './utils';
 
-jest.mock('../../../../risk_score/containers/onboarding/api');
+jest.mock('../../containers/onboarding/api');
 
 const mockHttp = {
   post: jest.fn(),

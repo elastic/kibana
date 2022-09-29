@@ -6,9 +6,9 @@
  */
 import React from 'react';
 
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { NavItemBetaBadge } from '../../navigation/nav_item_beta_badge';
-import * as i18n from '../../../../overview/components/entity_analytics/common/translations';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { NavItemBetaBadge } from '../../../common/components/navigation/nav_item_beta_badge';
+import * as i18n from '../../../overview/components/entity_analytics/common/translations';
 import { TECHNICAL_PREVIEW } from './translations';
 
 const RiskScoreHeaderTitleComponent = ({

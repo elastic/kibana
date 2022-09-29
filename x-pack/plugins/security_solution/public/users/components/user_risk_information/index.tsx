@@ -28,7 +28,7 @@ import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
 import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
-import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
+import { RiskScoreDocLink } from '../../../risk_score/components/risk_score_onboarding/risk_score_doc_link';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {

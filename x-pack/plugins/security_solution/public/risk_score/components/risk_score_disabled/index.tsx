@@ -6,19 +6,21 @@
  */
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
+import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
+import type { inputsModel } from '../../../common/store';
 import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
-import type { inputsModel } from '../../../store';
-import { HeaderSection } from '../../header_section';
+import { HeaderSection } from '../../../common/components/header_section';
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { RiskScoreEnableButton } from '../risk_score_onboarding/risk_score_enable_button';
 import * as i18n from './translations';
 
-const EntityAnalyticsUserRiskScoreDisableComponent = ({
+const RiskScoreDisableComponent = ({
+  entityType,
   refetch,
   timerange,
 }: {
+  entityType: RiskScoreEntity;
   refetch: inputsModel.Refetch;
   timerange: {
     from: string;
@@ -29,16 +31,13 @@ const EntityAnalyticsUserRiskScoreDisableComponent = ({
 
   return (
     <EuiPanel hasBorder>
-      <HeaderSection
-        title={<RiskScoreHeaderTitle riskScoreEntity={RiskScoreEntity.user} />}
-        titleSize="s"
-      />
+      <HeaderSection title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />} titleSize="s" />
       <EuiEmptyPrompt
-        title={<h2>{i18n.ENABLE_USER_RISK_SCORE}</h2>}
+        title={<h2>{i18n.ENABLE_RISK_SCORE(entityType)}</h2>}
         body={
           <>
-            {i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}{' '}
-            <RiskScoreDocLink riskScoreEntity={RiskScoreEntity.user} />
+            {i18n.ENABLE_RISK_SCORE_DESCRIPTION(entityType)}{' '}
+            <RiskScoreDocLink riskScoreEntity={entityType} />
           </>
         }
         actions={
@@ -46,7 +45,7 @@ const EntityAnalyticsUserRiskScoreDisableComponent = ({
             <RiskScoreEnableButton
               disabled={!signalIndexExists}
               refetch={refetch}
-              riskScoreEntity={RiskScoreEntity.user}
+              riskScoreEntity={entityType}
               timerange={timerange}
             />
           </EuiToolTip>
@@ -56,7 +55,5 @@ const EntityAnalyticsUserRiskScoreDisableComponent = ({
   );
 };
 
-export const EntityAnalyticsUserRiskScoreDisable = React.memo(
-  EntityAnalyticsUserRiskScoreDisableComponent
-);
-EntityAnalyticsUserRiskScoreDisable.displayName = 'EntityAnalyticsUserRiskScoreDisable';
+export const RiskScoreDisable = React.memo(RiskScoreDisableComponent);
+RiskScoreDisable.displayName = 'RiskScoreDisable';

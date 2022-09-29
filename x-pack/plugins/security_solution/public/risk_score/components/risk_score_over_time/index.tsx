@@ -20,13 +20,13 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
-import { chartDefaultSettings, useTheme } from '../charts/common';
-import { useTimeZone } from '../../lib/kibana';
-import { histogramDateTimeFormatter } from '../utils';
-import { HeaderSection } from '../header_section';
-import { InspectButton, InspectButtonContainer } from '../inspect';
+import { chartDefaultSettings, useTheme } from '../../../common/components/charts/common';
+import { useTimeZone } from '../../../common/lib/kibana';
+import { histogramDateTimeFormatter } from '../../../common/components/utils';
+import { HeaderSection } from '../../../common/components/header_section';
+import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
-import { PreferenceFormattedDate } from '../formatted_date';
+import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
 import { isUserRiskScore } from '../../../../common/search_strategy';
 

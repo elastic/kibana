@@ -6,9 +6,9 @@
  */
 import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import * as utils from '../../../../../common/utils/risk_score_modules';
-import type { inputsModel } from '../../../store';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
+import * as utils from '../../../../common/utils/risk_score_modules';
+import type { inputsModel } from '../../../common/store';
 
 import {
   createIngestPipeline,
@@ -22,7 +22,7 @@ import {
   stopTransforms,
   bulkCreatePrebuiltSavedObjects,
   bulkDeletePrebuiltSavedObjects,
-} from '../../../../risk_score/containers/onboarding/api';
+} from '../../containers/onboarding/api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
   INSTALLATION_ERROR,
@@ -30,7 +30,7 @@ import {
   TRANSFORM_CREATION_ERROR_MESSAGE,
   TRANSFORM_DELETION_ERROR_MESSAGE,
   UNINSTALLATION_ERROR,
-} from '../../../../risk_score/containers/onboarding/api/translations';
+} from '../../containers/onboarding/api/translations';
 
 interface InstallRiskyScoreModule {
   dashboard?: DashboardStart;
