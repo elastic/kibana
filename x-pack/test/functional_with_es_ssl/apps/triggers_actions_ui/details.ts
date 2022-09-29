@@ -896,6 +896,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the event log list and can filter/sort', async () => {
         await browser.refresh();
+        await (await testSubjects.find('eventLogListTab')).click();
 
         // Check to see if the experimental is enabled, if not, just return
         const tabbedContentExists = await testSubjects.exists('ruleDetailsTabbedContent');
