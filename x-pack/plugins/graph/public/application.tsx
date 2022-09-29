@@ -27,6 +27,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 
 import './index.scss';
@@ -70,6 +71,7 @@ export interface GraphDependencies {
   uiSettings: IUiSettingsClient;
   history: ScopedHistory<unknown>;
   spaces?: SpacesApi;
+  inspect: InspectorPublicPluginStart;
 }
 
 export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;
