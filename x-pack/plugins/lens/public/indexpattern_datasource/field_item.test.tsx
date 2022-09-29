@@ -9,9 +9,11 @@ import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { IndexPattern } from '../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -47,6 +49,11 @@ const mockedServices = {
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   charts: chartPluginMock.createSetupContract(),
   uiSettings: coreMock.createStart().uiSettings,
+  discover: {
+    locator: {
+      getRedirectUrl: jest.fn(() => 'discover_url'),
+    },
+  } as unknown as DiscoverStart,
 };
 
 const InnerFieldItemWrapper: React.FC<FieldItemProps> = (props) => {
@@ -413,5 +420,19 @@ describe('IndexPattern Field Item', () => {
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
+  });
+
+  it('should display Explore in discover button', async () => {
+    const wrapper = await mountWithIntl(<InnerFieldItemWrapper {...defaultProps} />);
+
+    await clickField(wrapper, 'bytes');
+
+    await wrapper.update();
+
+    const exploreInDiscoverBtn = findTestSubject(
+      wrapper,
+      'lnsFieldListPanel-exploreInDiscover-bytes'
+    );
+    expect(exploreInDiscoverBtn.length).toBe(1);
   });
 });
