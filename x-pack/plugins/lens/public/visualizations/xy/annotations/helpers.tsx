@@ -414,7 +414,7 @@ export const getAnnotationsConfiguration = ({
         invalidMessage: i18n.translate('xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp', {
           defaultMessage: 'Annotations require a time based chart to work. Add a date histogram.',
         }),
-        required: false,
+        requiredMinDimensionCount: 0,
         supportsMoreColumns: true,
         supportFieldFormat: false,
         enableDimensionEditor: true,

@@ -315,7 +315,7 @@ export const getMetricVisualization = ({
           enableDimensionEditor: true,
           enableFormatSelector: true,
           formatSelectorOptions: formatterOptions,
-          required: true,
+          requiredMinDimensionCount: 1,
         },
         {
           groupId: GROUP_ID.SECONDARY_METRIC,
@@ -341,7 +341,7 @@ export const getMetricVisualization = ({
           enableDimensionEditor: true,
           enableFormatSelector: true,
           formatSelectorOptions: formatterOptions,
-          required: false,
+          requiredMinDimensionCount: 0,
         },
         {
           groupId: GROUP_ID.MAX,
@@ -367,7 +367,7 @@ export const getMetricVisualization = ({
           formatSelectorOptions: formatterOptions,
           supportStaticValue: true,
           prioritizedOperation: 'max',
-          required: false,
+          requiredMinDimensionCount: 0,
           groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
             defaultMessage:
               'If the maximum value is specified, the minimum value is fixed at zero.',
@@ -393,7 +393,7 @@ export const getMetricVisualization = ({
           enableDimensionEditor: true,
           enableFormatSelector: true,
           formatSelectorOptions: formatterOptions,
-          required: false,
+          requiredMinDimensionCount: 0,
         },
       ],
     };

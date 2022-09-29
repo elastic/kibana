@@ -461,7 +461,7 @@ export const getReferenceConfiguration = ({
       accessors: config.map(({ forAccessor, color }) => getSingleColorConfig(forAccessor, color)),
       filterOperations: isNumericMetric,
       supportsMoreColumns: true,
-      required: false,
+      requiredMinDimensionCount: 0,
       enableDimensionEditor: true,
       supportStaticValue: true,
       paramEditorCustomProps: {

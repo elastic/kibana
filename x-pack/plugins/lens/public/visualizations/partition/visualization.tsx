@@ -168,7 +168,7 @@ export const getPieVisualization = ({
       }
 
       const primaryGroupConfigBaseProps = {
-        required: true,
+        requiredMinDimensionCount: 1,
         groupId: 'primaryGroups',
         accessors,
         enableDimensionEditor: true,
@@ -284,7 +284,7 @@ export const getPieVisualization = ({
       accessors: layer.metric ? [{ columnId: layer.metric }] : [],
       supportsMoreColumns: !layer.metric,
       filterOperations: numberMetricOperations,
-      required: true,
+      requiredMinDimensionCount: 1,
       dataTestSubj: 'lnsPie_sizeByDimensionPanel',
     });
 
