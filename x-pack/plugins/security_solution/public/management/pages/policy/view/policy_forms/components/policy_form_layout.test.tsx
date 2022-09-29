@@ -109,6 +109,7 @@ describe('Policy Form Layout', () => {
       const cancelbutton = policyFormLayoutView.find(
         'EuiButtonEmpty[data-test-subj="policyDetailsCancelButton"]'
       );
+      console.log(cancelbutton.debug());
       expect(cancelbutton).toHaveLength(1);
       expect(cancelbutton.text()).toEqual('Cancel');
     });

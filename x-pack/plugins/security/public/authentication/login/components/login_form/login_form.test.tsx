@@ -144,7 +144,7 @@ describe('LoginForm', () => {
 
     wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username' } });
     wrapper.find('input[name="password"]').simulate('change', { target: { value: 'password' } });
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button[data-test-subj="loginSubmit"]').simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -176,7 +176,7 @@ describe('LoginForm', () => {
 
     wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username' } });
     wrapper.find('input[name="password"]').simulate('change', { target: { value: 'password' } });
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button[data-test-subj="loginSubmit"]').simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -211,7 +211,7 @@ describe('LoginForm', () => {
 
     wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username1' } });
     wrapper.find('input[name="password"]').simulate('change', { target: { value: 'password1' } });
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button[data-test-subj="loginSubmit"]').simulate('click');
 
     await act(async () => {
       await nextTick();
