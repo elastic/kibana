@@ -227,7 +227,7 @@
         "label": "Language",
         "description": [],
         "signature": [
-          "\"eql\" | \"kuery\" | \"lucene\""
+          "\"eql\" | \"lucene\" | \"kuery\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -242,7 +242,7 @@
         "label": "LanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
+          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -660,7 +660,7 @@
         "label": "ThreatLanguage",
         "description": [],
         "signature": [
-          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
+          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
@@ -675,7 +675,7 @@
         "label": "ThreatLanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
+          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
@@ -871,21 +871,6 @@
         "description": [],
         "signature": [
           "string | null"
-        ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-io-ts-alerting-types",
-        "id": "def-common.ThrottleOrUndefinedOrNull",
-        "type": "Type",
-        "tags": [],
-        "label": "ThrottleOrUndefinedOrNull",
-        "description": [],
-        "signature": [
-          "string | null | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",
         "deprecated": false,
@@ -1379,24 +1364,6 @@
           "<({ framework: string; tactic: { id: string; name: string; reference: string; }; } & { technique?: ({ id: string; name: string; reference: string; } & { subtechnique?: { id: string; name: string; reference: string; }[] | undefined; })[] | undefined; })[], ({ framework: string; tactic: { id: string; name: string; reference: string; }; } & { technique?: ({ id: string; name: string; reference: string; } & { subtechnique?: { id: string; name: string; reference: string; }[] | undefined; })[] | undefined; })[] | undefined, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_threat_array/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-io-ts-alerting-types",
-        "id": "def-common.DefaultThrottleNull",
-        "type": "Object",
-        "tags": [],
-        "label": "DefaultThrottleNull",
-        "description": [
-          "\nTypes the DefaultThrottleNull as:\n  - If null or undefined, then a null will be set"
-        ],
-        "signature": [
-          "Type",
-          "<string | null, string | null | undefined, unknown>"
-        ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_throttle_null/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2921,7 +2888,14 @@
         "label": "throttle",
         "description": [],
         "signature": [
-          "StringC"
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"no_actions\">, ",
+          "LiteralC",
+          "<\"rule\">, ",
+          "Type",
+          "<string, string, unknown>]>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",
         "deprecated": false,
@@ -2938,31 +2912,15 @@
         "signature": [
           "UnionC",
           "<[",
-          "StringC",
-          ", ",
-          "NullC",
-          "]>"
-        ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-io-ts-alerting-types",
-        "id": "def-common.throttleOrNullOrUndefined",
-        "type": "Object",
-        "tags": [],
-        "label": "throttleOrNullOrUndefined",
-        "description": [],
-        "signature": [
           "UnionC",
           "<[",
-          "StringC",
-          ", ",
+          "LiteralC",
+          "<\"no_actions\">, ",
+          "LiteralC",
+          "<\"rule\">, ",
+          "Type",
+          "<string, string, unknown>]>, ",
           "NullC",
-          ", ",
-          "UndefinedC",
           "]>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",

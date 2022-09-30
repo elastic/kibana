@@ -20,6 +20,7 @@ import Color from 'color';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
+import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
 import { fetchIndexPattern } from '../../../../../common/index_patterns_utils';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';
@@ -69,7 +70,7 @@ export const getLayers = async (
   dataSourceLayers: Record<number, Layer>,
   model: Panel,
   dataViews: DataViewsPublicPluginStart
-): Promise<XYLayerConfig[]> => {
+): Promise<XYLayerConfig[] | null> => {
   const nonAnnotationsLayers: XYLayerConfig[] = Object.keys(dataSourceLayers).map((key) => {
     const series = model.series[parseInt(key, 10)];
     const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
@@ -136,68 +137,70 @@ export const getLayers = async (
     (a) => typeof a.index_pattern === 'object' && 'id' in a.index_pattern && a.index_pattern.id
   );
 
-  const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
-    Object.entries(annotationsByIndexPattern).map(async ([indexPatternId, annotations]) => {
-      const convertedAnnotations: EventAnnotationConfig[] = [];
-      const { indexPattern } = (await fetchIndexPattern({ id: indexPatternId }, dataViews)) || {};
+  try {
+    const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
+      Object.entries(annotationsByIndexPattern).map(async ([indexPatternId, annotations]) => {
+        const convertedAnnotations: EventAnnotationConfig[] = [];
+        const { indexPattern } = (await fetchIndexPattern({ id: indexPatternId }, dataViews)) || {};
 
-      if (indexPattern) {
-        annotations.forEach((a: Annotation) => {
-          const lensAnnotation = convertAnnotation(a, indexPattern);
-          if (lensAnnotation) {
-            convertedAnnotations.push(lensAnnotation);
-          }
-        });
-        return {
-          layerId: v4(),
-          layerType: 'annotations',
-          ignoreGlobalFilters: true,
-          annotations: convertedAnnotations,
-          indexPatternId,
-        };
-      }
-    })
-  );
+        if (indexPattern) {
+          annotations.forEach((a: Annotation) => {
+            const lensAnnotation = convertAnnotation(a, indexPattern);
+            if (lensAnnotation) {
+              convertedAnnotations.push(lensAnnotation);
+            }
+          });
+          return {
+            layerId: v4(),
+            layerType: 'annotations',
+            ignoreGlobalFilters: true,
+            annotations: convertedAnnotations,
+            indexPatternId,
+          };
+        }
+      })
+    );
 
-  return nonAnnotationsLayers.concat(...annotationsLayers.filter(nonNullable));
+    return nonAnnotationsLayers.concat(...annotationsLayers.filter(nonNullable));
+  } catch (e) {
+    return null;
+  }
 };
 
 const convertAnnotation = (
   annotation: Annotation,
   dataView: DataView
 ): EventAnnotationConfig | undefined => {
-  if (annotation.query_string) {
-    const extraFields = annotation.fields
-      ? annotation.fields
-          ?.replace(/\s/g, '')
-          ?.split(',')
-          .map((field) => {
-            const dataViewField = dataView.getFieldByName(field);
-            return dataViewField && dataViewField.aggregatable ? field : undefined;
-          })
-          .filter(nonNullable)
-      : undefined;
-    return {
-      type: 'query',
-      id: annotation.id,
-      label: 'Event',
-      key: {
-        type: 'point_in_time',
-      },
-      color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
-      timeField: annotation.time_field,
-      icon:
-        annotation.icon &&
-        ICON_TYPES_MAP[annotation.icon] &&
-        typeof ICON_TYPES_MAP[annotation.icon] === 'string'
-          ? ICON_TYPES_MAP[annotation.icon]
-          : 'triangle',
-      filter: {
-        type: 'kibana_query',
-        ...annotation.query_string,
-      },
-      extraFields,
-      isHidden: annotation.hidden,
-    };
-  }
+  const extraFields = annotation.fields
+    ?.replace(/\s/g, '')
+    ?.split(',')
+    .map((field) => {
+      const dataViewField = dataView.getFieldByName(field);
+      return dataViewField && dataViewField.aggregatable ? field : undefined;
+    })
+    .filter(nonNullable);
+
+  return {
+    type: 'query',
+    id: annotation.id,
+    label: 'Event',
+    key: {
+      type: 'point_in_time',
+    },
+    color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
+    timeField: annotation.time_field || dataView.timeFieldName,
+    icon:
+      annotation.icon &&
+      ICON_TYPES_MAP[annotation.icon] &&
+      typeof ICON_TYPES_MAP[annotation.icon] === 'string'
+        ? ICON_TYPES_MAP[annotation.icon]
+        : 'triangle',
+    filter: {
+      type: 'kibana_query',
+      query: annotation.query_string?.query || '*',
+      language: annotation.query_string?.language || getDefaultQueryLanguage(),
+    },
+    extraFields,
+    isHidden: annotation.hidden,
+  };
 };

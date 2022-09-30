@@ -45,7 +45,7 @@ describe('eql_executor', () => {
 
   describe('eqlExecutor', () => {
     it('should set a warning when exception list for eql rule contains value list exceptions', async () => {
-      await eqlExecutor({
+      const result = await eqlExecutor({
         inputIndex: DEFAULT_INDEX_PATTERN,
         runtimeMappings: {},
         completeRule: eqlCompleteRule,
@@ -60,10 +60,11 @@ describe('eql_executor', () => {
         exceptionFilter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
       });
-      expect(ruleExecutionLogger.warn).toHaveBeenCalled();
-      expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
-        "The following exceptions won't be applied to rule execution"
-      );
+      expect(result.warningMessages).toEqual([
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`,
+      ]);
     });
   });
 });

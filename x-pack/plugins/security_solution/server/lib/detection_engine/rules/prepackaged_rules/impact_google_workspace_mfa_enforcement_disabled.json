@@ -23,7 +23,7 @@
   "related_integrations": [
     {
       "package": "google_workspace",
-      "version": "1.2.0"
+      "version": "^1.2.0"
     }
   ],
   "required_fields": [
@@ -64,7 +64,8 @@
     "Continuous Monitoring",
     "SecOps",
     "Configuration Audit",
-    "Impact"
+    "Impact",
+    "has_guide"
   ],
   "threat": [
     {
@@ -85,5 +86,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 102
 }
