@@ -11,7 +11,7 @@ import { TestProviders } from '../../../common/mock';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 import { useHostRiskScore, useUserRiskScore } from '../../containers';
-import { RiskTabBody } from '.';
+import { RiskDetailsTabBody } from '.';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { HostsType } from '../../../hosts/store/model';
 import { UsersType } from '../../../users/store/model';
@@ -59,7 +59,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
     it("doesn't skip when both toggleStatus are true", () => {
       render(
         <TestProviders>
-          <RiskTabBody {...defaultProps} />
+          <RiskDetailsTabBody {...defaultProps} />
         </TestProviders>
       );
       expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
@@ -71,7 +71,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
 
       render(
         <TestProviders>
-          <RiskTabBody {...defaultProps} />
+          <RiskDetailsTabBody {...defaultProps} />
         </TestProviders>
       );
       expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
@@ -82,7 +82,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
 
       render(
         <TestProviders>
-          <RiskTabBody {...defaultProps} />
+          <RiskDetailsTabBody {...defaultProps} />
         </TestProviders>
       );
       expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
