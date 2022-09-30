@@ -34,7 +34,7 @@ const DIFFERENTIAL_OPTION = {
   inputDisplay: (
     <FormattedMessage
       id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialValueLabel"
-      defaultMessage="Diffential"
+      defaultMessage="Differential"
     />
   ),
 };
