@@ -11,7 +11,7 @@ import { IndicatorsFiltersContextValue } from '../../modules/indicators/containe
 export const mockIndicatorsFiltersContext: IndicatorsFiltersContextValue = {
   filterManager: {
     getFilters: () => [],
-    setFilters: () => {},
+    setFilters: () => window.alert('setFilters'),
   } as unknown as FilterManager,
   filters: [],
   filterQuery: {
