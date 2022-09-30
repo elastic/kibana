@@ -11175,7 +11175,6 @@
     "xpack.enterpriseSearch.content.searchIndex.totalStats.domainCountCardLabel": "域计数",
     "xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel": "采集类型",
     "xpack.enterpriseSearch.content.searchIndices.actions.columnTitle": "操作",
-    "xpack.enterpriseSearch.content.searchIndices.content.breadcrumb": "内容",
     "xpack.enterpriseSearch.content.searchIndices.create.buttonTitle": "创建新索引",
     "xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle": "文档计数",
     "xpack.enterpriseSearch.content.searchIndices.health.columnTitle": "索引运行状况",
