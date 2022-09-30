@@ -1,4 +1,4 @@
-[[machine-learning-api]]
+[[machine-learning-apis]]
 == Machine learning APIs
 
 preview::[]

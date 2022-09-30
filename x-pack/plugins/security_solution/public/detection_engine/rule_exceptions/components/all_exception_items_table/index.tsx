@@ -6,7 +6,9 @@
  */
 
 import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import styled from 'styled-components';
+
+import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
@@ -37,6 +39,10 @@ import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
 
+const StyledText = styled(EuiText)`
+  font-style: italic;
+`;
+
 const STATES_SEARCH_HIDDEN: ViewerState[] = ['error', 'empty'];
 const STATES_PAGINATION_UTILITY_HIDDEN: ViewerState[] = [
   'loading',
@@ -51,7 +57,7 @@ const initialState: State = {
     pageIndex: 0,
     pageSize: 25,
     totalItemCount: 0,
-    pageSizeOptions: [1, 5, 10, 25, 50, 100, 200, 300],
+    pageSizeOptions: [5, 10, 25, 50, 100, 200, 300],
   },
   exceptions: [],
   exceptionToEdit: null,
@@ -70,12 +76,15 @@ export interface GetExceptionItemProps {
 interface ExceptionsViewerProps {
   rule: Rule | null;
   listTypes: ExceptionListTypeEnum[];
+  /* Used for when displaying exceptions for a rule that has since been deleted, forcing read only view */
+  isViewReadOnly: boolean;
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
   rule,
   listTypes,
+  isViewReadOnly,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
@@ -160,7 +169,7 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [isLoadingReferences, fetchReferenceFailed, allReferences, fetchReferences] =
+  const [isLoadingReferences, isFetchReferencesError, allReferences, fetchReferences] =
     useFindExceptionListReferences();
 
   useEffect(() => {
@@ -171,6 +180,16 @@ const ExceptionsViewerComponent = ({
       fetchReferences(listsToQuery);
     }
   }, [exceptionListsToQuery, fetchReferences]);
+
+  useEffect(() => {
+    if (isFetchReferencesError) {
+      setViewerState('error');
+    } else if (viewerState == null && isLoadingReferences) {
+      setViewerState('loading');
+    } else if (viewerState === 'loading' && !isLoadingReferences) {
+      setViewerState(null);
+    }
+  }, [isLoadingReferences, isFetchReferencesError, setViewerState, viewerState]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -228,8 +247,6 @@ const ExceptionsViewerComponent = ({
   const handleGetExceptionListItems = useCallback(
     async (options?: GetExceptionItemProps) => {
       try {
-        setViewerState('loading');
-
         const { pageIndex, itemsPerPage, total, data } = await handleFetchItems(options);
         setViewerState(total > 0 ? null : 'empty');
 
@@ -241,6 +258,8 @@ const ExceptionsViewerComponent = ({
             total,
           },
         });
+
+        setViewerState(total > 0 ? null : 'empty');
       } catch (e) {
         setViewerState('error');
 
@@ -349,25 +368,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(!canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, canUserCRUD, hasIndexWrite]);
-
-  useEffect((): void => {
-    if (fetchReferenceFailed) {
-      setViewerState('error');
-    } else if (isLoadingReferences) {
-      setViewerState('loading');
-    } else {
-      setViewerState(null);
-    }
-  }, [
-    setReadOnly,
-    canUserCRUD,
-    hasIndexWrite,
-    fetchReferenceFailed,
-    isLoadingReferences,
-    setViewerState,
-  ]);
+    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
@@ -416,6 +418,12 @@ console.log({currenFlyout, exceptionToEditList, rule, exceptionToEdit})
 
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
+          <StyledText size="s">
+            {listType === ExceptionListTypeEnum.ENDPOINT
+              ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT
+              : i18n.EXCEPTIONS_TAB_ABOUT}
+          </StyledText>
+          <EuiSpacer size="l" />
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
             <ExceptionsViewerSearchBar
               canAddException={isReadOnly}

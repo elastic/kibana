@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui';
 
-import * as i18n from '../../utils/translations';
+import * as i18n from './translations';
 import type { GetExceptionItemProps } from '.';
 
 const ITEMS_SCHEMA = {
@@ -81,7 +81,7 @@ const ExceptionsViewerSearchBarComponent = ({
       <EuiFlexItem grow={true}>
         <EuiSearchBar
           box={{
-            placeholder: 'Search on the fields below: e.g. name:"my list"',
+            placeholder: i18n.SEARCH_PLACEHOLDER,
             incremental: true,
             schema: ITEMS_SCHEMA,
             'data-test-subj': 'exceptionsViewerSearchBar',

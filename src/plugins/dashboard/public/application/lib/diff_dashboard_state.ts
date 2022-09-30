@@ -6,14 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { xor, omit, isEmpty } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from '@kbn/es-query';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { xor, omit, isEmpty, pick } from 'lodash';
 
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  type Filter,
+  isFilterPinned,
+  TimeRange,
+} from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/common';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
+
 import { DashboardContainerInput } from '../..';
-import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import { areTimesEqual } from './filter_utils';
+import { DashboardPanelMap } from '../embeddable';
+import { DashboardOptions, DashboardState } from '../../types';
+import { pluginServices } from '../../services/plugin_services';
 
 const stateKeystoIgnore = [
   'expandedPanelId',
@@ -90,19 +101,76 @@ export const diffDashboardState = async ({
     getEmbeddable
   );
   const optionsAreEqual = getOptionsAreEqual(originalState.options, newState.options);
-  const filtersAreEqual = getFiltersAreEqual(originalState.filters, newState.filters, true);
   const controlGroupIsEqual = persistableControlGroupInputIsEqual(
     originalState.controlGroupInput,
     newState.controlGroupInput
   );
 
+  const filterStateDiff = getFiltersAreEqual(originalState.filters, newState.filters, true)
+    ? {}
+    : {
+        filters: newState.filters.filter((f) => !isFilterPinned(f)),
+      };
+
+  const timeStatediff = getTimeSettingsAreEqual({
+    currentTimeRestore: newState.timeRestore,
+    lastSaved: { ...pick(originalState, ['timeRange', 'timeRestore', 'refreshInterval']) },
+  })
+    ? {}
+    : pick(newState, ['timeRange', 'timeRestore', 'refreshInterval']);
+
   return {
     ...commonStateDiff,
     ...(panelsAreEqual ? {} : { panels: newState.panels }),
-    ...(filtersAreEqual ? {} : { filters: newState.filters }),
     ...(optionsAreEqual ? {} : { options: newState.options }),
     ...(controlGroupIsEqual ? {} : { controlGroupInput: newState.controlGroupInput }),
+    ...filterStateDiff,
+    ...timeStatediff,
   };
+};
+
+interface TimeStateDiffArg {
+  timeRange?: TimeRange;
+  timeRestore?: boolean;
+  refreshInterval?: RefreshInterval;
+}
+
+export const getTimeSettingsAreEqual = ({
+  lastSaved,
+  currentTimeRestore,
+}: {
+  lastSaved?: TimeStateDiffArg;
+  currentTimeRestore?: boolean;
+}) => {
+  const {
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+  } = pluginServices.getServices();
+
+  if (currentTimeRestore !== lastSaved?.timeRestore) return false;
+  if (!currentTimeRestore) return true;
+
+  const currentRange = timefilter.getTime();
+  const lastRange = lastSaved?.timeRange ?? timefilter.getTimeDefaults();
+  if (
+    !areTimesEqual(currentRange.from, lastRange.from) ||
+    !areTimesEqual(currentRange.to, lastRange.to)
+  ) {
+    return false;
+  }
+
+  const currentInterval = timefilter.getRefreshInterval();
+  const lastInterval = lastSaved?.refreshInterval ?? timefilter.getRefreshIntervalDefaults();
+  if (
+    currentInterval.pause !== lastInterval.pause ||
+    currentInterval.value !== lastInterval.value
+  ) {
+    return false;
+  }
+  return true;
 };
 
 const getFiltersAreEqual = (
@@ -111,7 +179,7 @@ const getFiltersAreEqual = (
   ignorePinned?: boolean
 ): boolean => {
   return compareFilters(
-    filtersA,
+    ignorePinned ? filtersA.filter((f) => !isFilterPinned(f)) : filtersA,
     ignorePinned ? filtersB.filter((f) => !isFilterPinned(f)) : filtersB,
     COMPARE_ALL_OPTIONS
   );

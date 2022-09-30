@@ -45,7 +45,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Impact"
+    "Impact",
+    "has_guide"
   ],
   "threat": [
     {
