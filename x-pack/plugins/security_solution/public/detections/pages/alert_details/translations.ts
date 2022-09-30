@@ -24,14 +24,14 @@ export const BACK_TO_ALERTS_LINK = i18n.translate(
 export const LOADING_PAGE_MESSAGE = i18n.translate(
   'xpack.securitySolution.alerts.alertDetails.loadingPage.message',
   {
-    defaultMessage: 'Loading alert details page...',
+    defaultMessage: 'Loading details page...',
   }
 );
 
 export const ERROR_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.alerts.alertDetails.errorPage.title',
   {
-    defaultMessage: 'Unable to load the alerts details page',
+    defaultMessage: 'Unable to load the details page',
   }
 );
 
@@ -39,6 +39,6 @@ export const ERROR_PAGE_BODY = i18n.translate(
   'xpack.securitySolution.alerts.alertDetails.errorPage.message',
   {
     defaultMessage:
-      'There was an error loading the alerts details page. Please confirm the following id points to a valid alert document',
+      'There was an error loading the details page. Please confirm the following id points to a valid document',
   }
 );

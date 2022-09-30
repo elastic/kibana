@@ -14,7 +14,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { licenseService } from '../../../../../common/hooks/use_license';
-import { APP_UI_ID } from '@kbn/security-solution-plugin/common/constants';
 
 jest.mock('../../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),

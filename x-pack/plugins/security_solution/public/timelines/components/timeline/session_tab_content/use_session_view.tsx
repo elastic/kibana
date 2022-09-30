@@ -242,7 +242,7 @@ export const useSessionView = ({
       return SourcererScopeName.default;
     }
   }, [timelineId]);
-  const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
+  const { openEventDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
     isFlyoutView: timelineId !== TimelineId.active,
     entityType,
     sourcererScope,
@@ -256,15 +256,15 @@ export const useSessionView = ({
     return sessionViewConfig !== null
       ? sessionView.getSessionView({
           ...sessionViewConfig,
-          loadAlertDetails: openDetailsPanel,
+          loadAlertDetails: openEventDetailsPanel,
           isFullScreen: fullScreen,
           height: heightMinusSearchBar,
         })
       : null;
-  }, [fullScreen, openDetailsPanel, sessionView, sessionViewConfig, height]);
+  }, [fullScreen, openEventDetailsPanel, sessionView, sessionViewConfig, height]);
 
   return {
-    openDetailsPanel,
+    openEventDetailsPanel,
     shouldShowDetailsPanel,
     SessionView: sessionViewComponent,
     DetailsPanel,

@@ -8,12 +8,13 @@
 import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { activeTimeline } from '../../../containers/active_timeline_context';
-import type { TimelineTabs } from '../../../../../common/types/timeline';
-import { TimelineId } from '../../../../../common/types/timeline';
+import type { TimelineExpandedDetailType } from '../../../../../common/types/timeline';
+import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
@@ -27,7 +28,14 @@ export interface UseDetailPanelConfig {
 }
 
 export interface UseDetailPanelReturn {
-  openDetailsPanel: (eventId?: string, onClose?: () => void) => void;
+  openEventDetailsPanel: (eventId?: string, onClose?: () => void) => void;
+  openHostDetailsPanel: (hostName: string, onClose?: () => void) => void;
+  openNetworkDetailsPanel: (
+    ip: string,
+    flowTarget: FlowTargetSourceDest,
+    onClose?: () => void
+  ) => void;
+  openUserDetailsPanel: (userName: string, onClose?: () => void) => void;
   handleOnDetailsPanelClosed: () => void;
   DetailsPanel: JSX.Element | null;
   shouldShowDetailsPanel: boolean;
@@ -38,16 +46,18 @@ export const useDetailPanel = ({
   isFlyoutView,
   sourcererScope,
   timelineId,
-  tabType,
+  tabType = TimelineTabs.query,
 }: UseDetailPanelConfig): UseDetailPanelReturn => {
   const { browserFields, selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScope);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const dispatch = useDispatch();
+  const eventDetailsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const expandedDetail = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults)?.expandedDetail
   );
   const onPanelClose = useRef(() => {});
+  const noopPanelClose = () => {};
 
   const shouldShowDetailsPanel = useMemo(() => {
     if (
@@ -61,29 +71,56 @@ export const useDetailPanel = ({
     return false;
   }, [expandedDetail, tabType]);
 
+  // We could just surface load details panel, but rather than have users be concerned
+  // of the config for a panel, they can just pass the base necessary values to a panel specific function
   const loadDetailsPanel = useCallback(
-    (eventId?: string) => {
-      if (eventId) {
+    (panelConfig?: TimelineExpandedDetailType) => {
+      if (panelConfig) {
         dispatch(
           timelineActions.toggleDetailPanel({
-            panelView: 'eventDetail',
+            ...panelConfig,
             tabType,
             timelineId,
-            params: {
-              eventId,
-              indexName: selectedPatterns.join(','),
-            },
           })
         );
       }
     },
-    [dispatch, selectedPatterns, tabType, timelineId]
+    [dispatch, tabType, timelineId]
   );
 
-  const openDetailsPanel = useCallback(
+  const openEventDetailsPanel = useCallback(
     (eventId?: string, onClose?: () => void) => {
-      loadDetailsPanel(eventId);
-      onPanelClose.current = onClose ?? (() => {});
+      if (eventId) {
+        loadDetailsPanel({
+          panelView: 'eventDetail',
+          params: { eventId, indexName: eventDetailsIndex },
+        });
+      }
+      onPanelClose.current = onClose ?? noopPanelClose;
+    },
+    [loadDetailsPanel, eventDetailsIndex]
+  );
+
+  const openHostDetailsPanel = useCallback(
+    (hostName: string, onClose?: () => void) => {
+      loadDetailsPanel({ panelView: 'hostDetail', params: { hostName } });
+      onPanelClose.current = onClose ?? noopPanelClose;
+    },
+    [loadDetailsPanel]
+  );
+
+  const openNetworkDetailsPanel = useCallback(
+    (ip: string, flowTarget: FlowTargetSourceDest, onClose?: () => void) => {
+      loadDetailsPanel({ panelView: 'networkDetail', params: { ip, flowTarget } });
+      onPanelClose.current = onClose ?? noopPanelClose;
+    },
+    [loadDetailsPanel]
+  );
+
+  const openUserDetailsPanel = useCallback(
+    (userName: string, onClose?: () => void) => {
+      loadDetailsPanel({ panelView: 'userDetail', params: { userName } });
+      onPanelClose.current = onClose ?? noopPanelClose;
     },
     [loadDetailsPanel]
   );
@@ -128,7 +165,10 @@ export const useDetailPanel = ({
   );
 
   return {
-    openDetailsPanel,
+    openEventDetailsPanel,
+    openHostDetailsPanel,
+    openNetworkDetailsPanel,
+    openUserDetailsPanel,
     handleOnDetailsPanelClosed,
     shouldShowDetailsPanel,
     DetailsPanel,

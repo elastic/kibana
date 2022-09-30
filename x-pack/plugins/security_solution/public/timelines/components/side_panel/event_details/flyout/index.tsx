@@ -106,6 +106,7 @@ export const useToGetInternalFlyout = () => {
         <FlyoutHeaderContent
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           isAlert={isAlert}
+          eventId={alertId}
           isolateAction={isolateAction}
           loading={isLoading || loading}
           ruleName={ruleName}
@@ -116,6 +117,7 @@ export const useToGetInternalFlyout = () => {
     },
     [
       isAlert,
+      alertId,
       isHostIsolationPanelOpen,
       isolateAction,
       loading,

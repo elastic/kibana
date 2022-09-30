@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Ecs } from '../../../../../common/ecs';
+
 // This data was generated using the endpoint test alert generator
 export const getMockAlertDetailsFieldsResponse = () => ({
   _index: '.internal.alerts-security.alerts-default-000001',
@@ -108,6 +110,8 @@ export const getMockAlertDetailsFieldsResponse = () => ({
     'Endpoint.policy.applied.version': [5],
     'dll.hash.md5': ['1f2d082566b0fc5f2c238a5180db7451'],
     'kibana.alert.ancestors.id': ['7L3AioMBWJvcpv7vlX2O'],
+    'user.name': ['root'],
+    'source.ip': ['10.184.3.46'],
     'signal.rule.rule_name_override': ['message'],
     'process.group_leader.name': ['fake leader'],
     'host.os.full': ['Windows Server 2016'],
@@ -1788,6 +1792,20 @@ export const getMockAlertDetailsTimelineResponse = () => [
     isObjectArray: false,
   },
   {
+    category: 'user',
+    field: 'user.name',
+    values: ['root'],
+    originalValue: ['root'],
+    isObjectArray: false,
+  },
+  {
+    category: 'source',
+    field: 'source.ip',
+    values: ['10.184.3.46'],
+    originalValue: ['10.184.3.46'],
+    isObjectArray: false,
+  },
+  {
     category: 'Endpoint',
     field: 'Endpoint.policy.applied.endpoint_policy_version',
     values: ['3'],
@@ -1915,35 +1933,26 @@ export const getMockAlertDetailsTimelineResponse = () => [
   },
 ];
 
-export const getMockAlertNestedDetailsTimelineResponse = () => ({
+export const getMockAlertNestedDetailsTimelineResponse = (): Ecs => ({
   _id: 'f6aa8643ecee466753c45308ea8dc72aba0a44e1faac5f6183fd2ad6666c1325',
   timestamp: '2022-09-29T19:40:26.051Z',
   _index: '.internal.alerts-security.alerts-default-000001',
   kibana: {
     alert: {
       rule: {
-        consumer: ['siem'],
         from: ['now-10m'],
         name: ['Endpoint Security'],
         to: ['now'],
         uuid: ['738e91f2-402e-11ed-be15-7be3bb26d7b2'],
         type: ['query'],
         version: ['100'],
+        parameters: {},
       },
       workflow_status: ['open'],
       original_time: ['2022-10-09T07:14:42.194Z'],
-      reason: [
-        'malware event with process explorer.exe, on Host-4cfuh42w7g created medium alert Endpoint Security.',
-      ],
-      original_event: {
-        kind: ['alert'],
-        module: ['endpoint'],
-      },
       severity: ['medium'],
-      risk_score: ['47'],
     },
   },
-  '@timestamp': ['2022-09-29T19:40:26.051Z'],
   event: {
     code: ['memory_signature'],
     module: ['endpoint'],
@@ -1963,6 +1972,9 @@ export const getMockAlertNestedDetailsTimelineResponse = () => ({
     id: ['04794e4e-59cb-4c4a-a8ee-3e6c5b65743c'],
     ip: ['10.184.3.36', '10.170.218.86'],
   },
+  source: {
+    ip: ['10.184.3.46'],
+  },
   agent: {
     type: ['endpoint'],
     id: ['d08ed3f8-9852-4d0c-a5b1-b48060705369'],
@@ -1974,13 +1986,12 @@ export const getMockAlertNestedDetailsTimelineResponse = () => ({
       sha256: ['fake sha256'],
     },
     parent: {
-      pid: ['1'],
+      pid: [1],
     },
-    pid: ['2'],
+    pid: [2],
     name: ['explorer.exe'],
     entity_id: ['d3v4to81q9'],
     executable: ['C:/fake/explorer.exe'],
-    start: ['2022-10-09T07:14:42.194Z'],
     entry_leader: {
       entity_id: ['b74mw1jkrm'],
       name: ['fake entry'],
@@ -1996,6 +2007,9 @@ export const getMockAlertNestedDetailsTimelineResponse = () => ({
       name: ['fake leader'],
       pid: ['116'],
     },
+  },
+  user: {
+    name: ['root'],
   },
 });
 

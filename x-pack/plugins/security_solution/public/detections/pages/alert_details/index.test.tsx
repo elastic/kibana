@@ -16,18 +16,35 @@ import {
   mockAlertNestedDetailsTimelineResponse,
 } from './__mocks__';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 
-// Mock npm modules
+// Node modules mocks
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
 }));
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => mockDispatch,
+}));
+
 (useParams as jest.Mock).mockReturnValue(mockAlertDetailsFieldsResponse._id);
 
 // Internal Mocks
+jest.mock('../../../timelines/containers/details');
 jest.mock('../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
 }));
+
+jest.mock('../../../timelines/store/timeline', () => ({
+  ...jest.requireActual('../../../timelines/store/timeline'),
+  timelineActions: {
+    createTimeline: jest.fn().mockReturnValue('new-timeline'),
+  },
+}));
+
 jest.mock('../../../common/containers/sourcerer', () => {
   const mockSourcererReturn = {
     browserFields: {},
@@ -40,15 +57,6 @@ jest.mock('../../../common/containers/sourcerer', () => {
     useSourcererDataView: jest.fn().mockReturnValue(mockSourcererReturn),
   };
 });
-jest.mock('../../../timelines/containers/details', () => ({
-  useTimelineEventsDetails: jest.fn(() => [
-    false,
-    mockAlertDetailsTimelineResponse,
-    mockAlertDetailsFieldsResponse,
-    mockAlertNestedDetailsTimelineResponse,
-    jest.fn(),
-  ]),
-}));
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -71,9 +79,41 @@ const getMockHistory = () => ({
   listen: jest.fn(),
 });
 
-// Cypress tests can be found in x-pack/plugins/security_solution/cypress/e2e/detection_alert_details
 describe('Alert Details Page', () => {
-  it('should render the summary page by default', () => {
+  it('should render the loading page', () => {
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([true, null, null, null, jest.fn()]);
+    const { getByTestId } = render(
+      <TestProviders>
+        <Router history={getMockHistory()}>
+          <AlertDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+
+    expect(getByTestId('alert-details-page-loading')).toBeVisible();
+  });
+
+  it('should render the error page', () => {
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, null, null, null, jest.fn()]);
+    const { getByTestId } = render(
+      <TestProviders>
+        <Router history={getMockHistory()}>
+          <AlertDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+
+    expect(getByTestId('alert-details-page-error')).toBeVisible();
+  });
+
+  it('should render the header', () => {
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([
+      false,
+      mockAlertDetailsTimelineResponse,
+      mockAlertDetailsFieldsResponse,
+      mockAlertNestedDetailsTimelineResponse,
+      jest.fn(),
+    ]);
     const { getByTestId } = render(
       <TestProviders>
         <Router history={getMockHistory()}>
@@ -85,5 +125,24 @@ describe('Alert Details Page', () => {
     expect(getByTestId('header-page-title')).toHaveTextContent(
       mockAlertDetailsFieldsResponse.fields[ALERT_RULE_NAME][0]
     );
+  });
+
+  it('should create a timeline', () => {
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([
+      false,
+      mockAlertDetailsTimelineResponse,
+      mockAlertDetailsFieldsResponse,
+      mockAlertNestedDetailsTimelineResponse,
+      jest.fn(),
+    ]);
+    render(
+      <TestProviders>
+        <Router history={getMockHistory()}>
+          <AlertDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+
+    expect(mockDispatch).toHaveBeenCalledWith('new-timeline');
   });
 });

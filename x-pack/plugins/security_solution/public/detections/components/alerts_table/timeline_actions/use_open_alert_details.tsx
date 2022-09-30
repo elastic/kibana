@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiContextMenuItem, EuiIcon } from '@elastic/eui';
+import React from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -16,7 +16,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 interface Props {
   ruleId?: string;
   closePopover: () => void;
-  eventId: string;
+  alertId: string | null;
 }
 
 export const ACTION_OPEN_ALERT_DETAILS_PAGE = i18n.translate(
@@ -26,32 +26,26 @@ export const ACTION_OPEN_ALERT_DETAILS_PAGE = i18n.translate(
   }
 );
 
-export const useOpenAlertDetailsAction = ({ ruleId, closePopover, eventId }: Props) => {
+export const useOpenAlertDetailsAction = ({ ruleId, closePopover, alertId }: Props) => {
   const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
   const alertDetailsActionItems = [];
-  const { onClick: goToAlertDetails } = useGetSecuritySolutionLinkProps()({
+  const { href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
-    path: getAlertDetailsUrl(eventId),
+    path: alertId ? getAlertDetailsUrl(alertId) : '',
   });
 
-  const handleMenuClick = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      goToAlertDetails(ev);
-      closePopover();
-    },
-    [closePopover, goToAlertDetails]
-  );
-
   // We check ruleId to confirm this is an alert, as this page does not support events as of 8.6
-  if (ruleId && eventId && isAlertDetailsPageEnabled) {
+  if (ruleId && alertId && isAlertDetailsPageEnabled) {
     alertDetailsActionItems.push(
       <EuiContextMenuItem
         key="open-alert-details-item"
+        icon="popout"
         data-test-subj="open-alert-details-page-menu-item"
-        onClick={handleMenuClick}
+        href={href}
+        onClick={closePopover}
+        target="_blank"
       >
-        {ACTION_OPEN_ALERT_DETAILS_PAGE} <EuiIcon type="link" />
+        {ACTION_OPEN_ALERT_DETAILS_PAGE}
       </EuiContextMenuItem>
     );
   }

@@ -11,6 +11,7 @@ import { LOADING_PAGE_MESSAGE } from '../translations';
 
 export const AlertDetailsLoadingPage = memo(({ eventId }: { eventId: string }) => (
   <EuiEmptyPrompt
+    data-test-subj="alert-details-page-loading"
     color="subdued"
     icon={<EuiLoadingSpinner data-test-subj="loading-spinner" size="l" />}
     body={<p>{LOADING_PAGE_MESSAGE}</p>}

@@ -317,6 +317,7 @@ export enum TimelineId {
   hostsPageEvents = 'hosts-page-events',
   networkPageEvents = 'network-page-events',
   hostsPageSessions = 'hosts-page-sessions-v2',
+  detectionsAlertDetailsPage = 'detections-alert-details-page',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   active = 'timeline-1',

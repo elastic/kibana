@@ -18,9 +18,9 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 
 jest.mock('../../../../common/components/user_privileges');
 
-const mockGetSecuritySolutionLinkOnClick = jest.fn();
+const testSecuritySolutionLinkHref = 'test-url';
 jest.mock('../../../../common/components/links', () => ({
-  useGetSecuritySolutionLinkProps: () => () => ({ onClick: mockGetSecuritySolutionLinkOnClick }),
+  useGetSecuritySolutionLinkProps: () => () => ({ href: testSecuritySolutionLinkHref }),
 }));
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
@@ -287,14 +287,23 @@ describe('Alert table context menu', () => {
   });
 
   describe('Open  alert details action', () => {
-    test('it does not render the open alert details action button if rule uuid is not set', () => {
+    test('it does not render the open alert details page action if kibana.alert.rule.uuid is not set', () => {
       const nonAlertProps = {
         ...props,
         ecsRowData: {
           ...ecsRowData,
-          kibana: undefined,
+          kibana: {
+            alert: {
+              workflow_status: ['open'],
+              rule: {
+                parameters: {},
+                uuid: [],
+              },
+            },
+          },
         },
       };
+
       const wrapper = mount(
         <AlertContextMenu {...nonAlertProps} timelineId={TimelineId.active} />,
         {
@@ -315,16 +324,6 @@ describe('Alert table context menu', () => {
       wrapper.find(actionMenuButton).simulate('click');
 
       expect(wrapper.find(openAlertDetailsPageButton).first().exists()).toEqual(true);
-    });
-
-    test('it navigates to the alert details summary page when clicked', () => {
-      const wrapper = mount(<AlertContextMenu {...props} timelineId={TimelineId.active} />, {
-        wrappingComponent: TestProviders,
-      });
-
-      wrapper.find(actionMenuButton).simulate('click');
-      wrapper.find(openAlertDetailsPageButton).first().simulate('click');
-      expect(mockGetSecuritySolutionLinkOnClick).toHaveBeenCalled();
     });
   });
 });

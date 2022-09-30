@@ -318,6 +318,7 @@ export enum TimelineId {
   networkPageEvents = 'network-page-events',
   hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
   detectionsRulesDetailsPage = 'detections-rules-details-page',
+  detectionsAlertDetailsPage = 'detections-alert-details-page',
   detectionsPage = 'detections-page',
   active = 'timeline-1',
   casePage = 'timeline-case',

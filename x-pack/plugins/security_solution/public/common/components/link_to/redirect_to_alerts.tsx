@@ -9,8 +9,6 @@ import { ALERTS_PATH } from '../../../../common/constants';
 import type { AlertDetailRouteType } from '../../../detections/pages/alert_details/types';
 import { appendSearch } from './helpers';
 
-export const getAlertDetailsNoTabUrl = (alertId: string) => `${ALERTS_PATH}/${alertId}`;
-
 export const getAlertDetailsUrl = (alertId: string, search?: string) =>
   `/${alertId}/summary${appendSearch(search)}`;
 

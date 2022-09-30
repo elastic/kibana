@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Switch, useParams } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
+import { EuiSpacer } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
+import { timelineActions } from '../../../timelines/store/timeline';
+import { TimelineId } from '../../../../common/types';
+import { useGetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -23,26 +28,41 @@ import { useTimelineEventsDetails } from '../../../timelines/containers/details'
 import { AlertDetailsLoadingPage } from './components/loading_page';
 import { AlertDetailsErrorPage } from './components/error_page';
 import { AlertDetailsHeader } from './components/header';
-import { useGetFieldsData } from './utils/use_get_fields_data';
+import { DetailsSummaryTab } from './tabs/summary';
 
 export const AlertDetailsPage = memo(() => {
   const { detailName: eventId } = useParams<{ detailName: string }>();
+  const dispatch = useDispatch();
   const currentSpaceId = useSpaceId();
-  // TODO: We should update useTimelineEventDetails to use useQuery and have a refetching tracker
-  const { runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
+  const sourcererDataView = useSourcererDataView(SourcererScopeName.detections);
   const spaceAlertsIndexAlias = `${DEFAULT_ALERTS_INDEX}-${currentSpaceId}`;
-  const [loading, detailsData, rawEventData, ecsData, refetchEventData] = useTimelineEventsDetails({
+  const [loading, detailsData, searchHit, dataAsNestedObject] = useTimelineEventsDetails({
     indexName: spaceAlertsIndexAlias,
     eventId,
-    runtimeMappings,
+    runtimeMappings: sourcererDataView.runtimeMappings,
     skip: !eventID,
   });
   const dataNotFound = !loading && !detailsData;
   const hasData = !loading && detailsData;
 
-  const getFieldsData = useGetFieldsData(rawEventData?.fields);
-  const timestamp = getFieldsData(TIMESTAMP);
-  const ruleName = getFieldsData(ALERT_RULE_NAME);
+  // Example of using useGetFieldsData. Only place it is used currently
+  const getFieldsData = useGetFieldsData(searchHit?.fields);
+  const timestamp = getFieldsData(TIMESTAMP) as string;
+  const ruleName = getFieldsData(ALERT_RULE_NAME) as string;
+
+  useEffect(() => {
+    // TODO: move detail panel to it's own redux state
+    dispatch(
+      timelineActions.createTimeline({
+        id: TimelineId.detectionsAlertDetailsPage,
+        columns: [],
+        dataViewId: null,
+        indexNames: [],
+        expandedDetail: {},
+        show: false,
+      })
+    );
+  }, [dispatch]);
 
   return (
     <>
@@ -52,9 +72,14 @@ export const AlertDetailsPage = memo(() => {
         <>
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
           <SecuritySolutionTabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
+          <EuiSpacer size="l" />
           <Switch>
             <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>
-              <h1>{'Summary Page'}</h1>
+              <DetailsSummaryTab
+                dataAsNestedObject={dataAsNestedObject}
+                detailsData={detailsData}
+                sourcererDataView={sourcererDataView}
+              />
             </Route>
           </Switch>
         </>

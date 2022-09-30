@@ -203,7 +203,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const { osqueryActionItems } = useOsqueryContextActionItem({ handleClick: handleOnOsqueryClick });
 
   const { alertDetailsActionItems } = useOpenAlertDetailsAction({
-    eventId: ecsRowData?._id,
+    alertId,
     closePopover,
     ruleId,
   });

@@ -48,6 +48,7 @@ export enum TimelineId {
   hostsPageSessions = 'hosts-page-sessions-v2',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
+  detectionsAlertDetailsPage = 'detections-alert-details-page',
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
