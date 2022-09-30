@@ -297,7 +297,7 @@ export function MonitorDetailFlyout(props: Props) {
               header={URL_HEADER_TEXT}
               content={
                 monitorDetail.data?.url?.full ? (
-                  <EuiLink href={monitorDetail.data.url.full}>
+                  <EuiLink external href={monitorDetail.data.url.full}>
                     {monitorDetail.data.url.full}
                   </EuiLink>
                 ) : (
