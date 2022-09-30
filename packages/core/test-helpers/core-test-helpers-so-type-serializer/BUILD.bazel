@@ -45,8 +45,8 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/semver",
   "//packages/kbn-std:npm_module_types",
-  "//packages/core/savec-objects/core-saved-objects-common:npm_module_types",
-  "//packages/core/savec-objects/core-saved-objects-server:npm_module_types",
+  "//packages/core/saved-objects/core-saved-objects-common:npm_module_types",
+  "//packages/core/saved-objects/core-saved-objects-server:npm_module_types",
 ]
 
 jsts_transpiler(
