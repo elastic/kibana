@@ -221,7 +221,12 @@ export async function executeAlert(
       alertLimit
     );
   } else {
-    processUngroupedResults(await getUngroupedResults(query, esClient), ruleParams, alertFactory);
+    processUngroupedResults(
+      await getUngroupedResults(query, esClient),
+      ruleParams,
+      alertFactory,
+      alertLimit
+    );
   }
 }
 
@@ -286,7 +291,8 @@ export async function executeRatioAlert(
       numeratorUngroupedResults,
       denominatorUngroupedResults,
       ruleParams,
-      alertFactory
+      alertFactory,
+      alertLimit
     );
   }
 }
@@ -318,7 +324,8 @@ const getESQuery = (
 export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
   params: CountRuleParams,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
@@ -344,6 +351,9 @@ export const processUngroupedResults = (
       },
     ];
     alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value, actions);
+    alertLimit.setLimitReached(alertLimit.getValue() <= 1);
+  } else {
+    alertLimit.setLimitReached(false);
   }
 };
 
@@ -351,7 +361,8 @@ export const processUngroupedRatioResults = (
   numeratorResults: UngroupedSearchQueryResponse,
   denominatorResults: UngroupedSearchQueryResponse,
   params: RatioRuleParams,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -381,6 +392,9 @@ export const processUngroupedRatioResults = (
       },
     ];
     alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value, actions);
+    alertLimit.setLimitReached(alertLimit.getValue() <= 1);
+  } else {
+    alertLimit.setLimitReached(false);
   }
 };
 
