@@ -411,6 +411,11 @@ describe('Log threshold executor', () => {
     describe('Can process ungrouped results', () => {
       test('It handles the ALERT state correctly', () => {
         const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
+        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
+          getValue: jest.fn().mockReturnValue(2),
+          setLimitReached: jest.fn(),
+        };
+
         const ruleParams = {
           ...baseRuleParams,
           criteria: [positiveCriteria[0]],
@@ -423,7 +428,7 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(results, ruleParams, alertFactoryMock);
+        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
 
         // first call, fifth argument
         expect(alertFactoryMock.mock.calls[0][4]).toEqual([
@@ -438,6 +443,8 @@ describe('Log threshold executor', () => {
             },
           },
         ]);
+
+        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
       });
     });
 
