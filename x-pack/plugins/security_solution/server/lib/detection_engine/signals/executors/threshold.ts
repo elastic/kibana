@@ -34,7 +34,7 @@ import type {
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
-  logUnprocessedExceptionsWarnings,
+  getUnprocessedExceptionsWarnings,
 } from '../utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
@@ -81,7 +81,10 @@ export const thresholdExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('thresholdExecutor', async () => {
-    logUnprocessedExceptionsWarnings(unprocessedExceptions, ruleExecutionLogger);
+    const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+    if (exceptionsWarning) {
+      result.warningMessages.push(exceptionsWarning);
+    }
 
     // Get state or build initial state (on upgrade)
     const { signalHistory, searchErrors: previousSearchErrors } = state.initialized

@@ -167,6 +167,21 @@ describe('TTYPlayer/hooks', () => {
       expect(result.current.currentLine).toBe(initialProps.lines.length - 1);
     });
 
+    it('should not print the first line twice after playback starts', async () => {
+      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+        initialProps,
+      });
+
+      rerender({ ...initialProps, isPlaying: true });
+      act(() => {
+        // advance render loop
+        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS);
+      });
+      rerender({ ...initialProps, isPlaying: false });
+
+      expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
+    });
+
     it('will allow a plain text search highlight on the last line printed', async () => {
       const { result: xTermResult } = renderHook((props) => useXtermPlayer(props), {
         initialProps,

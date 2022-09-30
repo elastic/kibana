@@ -199,10 +199,17 @@ export function getVisualizeFieldSuggestions({
     const allSuggestions = suggestions.filter(
       (s) => s.visualizationId === visualizeTriggerFieldContext.type
     );
-    return activeVisualization?.getSuggestionFromConvertToLensContext?.({
+    const visualization = visualizationMap[visualizeTriggerFieldContext.type] || null;
+    return visualization?.getSuggestionFromConvertToLensContext?.({
       suggestions: allSuggestions,
       context: visualizeTriggerFieldContext,
     });
+  }
+  // suggestions for visualizing textbased languages
+  if (visualizeTriggerFieldContext && 'query' in visualizeTriggerFieldContext) {
+    if (visualizeTriggerFieldContext.query) {
+      return suggestions.find((s) => s.datasourceId === 'textBasedLanguages');
+    }
   }
 
   if (suggestions.length) {
