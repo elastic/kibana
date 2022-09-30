@@ -171,6 +171,7 @@ export interface ArtifactFlyoutProps {
   labels?: Partial<typeof ARTIFACT_FLYOUT_LABELS>;
   'data-test-subj'?: string;
   size?: EuiFlyoutSize;
+  secondaryFlyoutInfo: React.ReactNode;
 }
 
 /**
@@ -188,6 +189,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     submitHandler,
     labels: _labels = {},
     'data-test-subj': dataTestSubj,
+    secondaryFlyoutInfo,
     size = 'm',
   }) => {
     const {
