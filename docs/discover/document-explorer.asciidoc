@@ -28,7 +28,7 @@ The chart size is saved in the browser.
 
 [float]
 [[document-explorer-customize]]
-=== Define the table structure
+=== Customize the table
 
 Refine your view by resizing the table columns and rows, setting the column sort order, and filtering the data.
 
@@ -84,12 +84,24 @@ image::images/document-explorer-multi-field.png[Multi field sort in the document
 
 . To change the sort order, select a field in the pop-up, and then drag it to the new location.
 
+[float]
+[[document-explorer-edit-field]]
+==== Edit a field
+
+Customize how {kib} displays a field.
+
+. Click the column header for the field, and then select *Edit data view field.*
+
+. In the Edit field form, change the field name and format.
++
+For detailed information on formatting options, refer to <<managing-fields, Format data fields>>.
+
 
 [float]
 [[document-explorer-compare-data]]
 ==== Filter the documents
 
-Narrow your results to a subset of documents so you're comparing the just data of interest.
+Narrow your results to a subset of documents so you're comparing just the data of interest.
 
 . Select the documents you want to compare.
 
@@ -103,10 +115,13 @@ image::images/document-explorer-compare-data.png[Compare data in the document ta
 ==== Set rows per page
 
 By default, the document table displays 100 rows per page. To change this number,
-click *Rows per page*.
+use the *Rows per page* menu.
 
 [role="screenshot"]
 image::images/document-table-rows-per-page.png["Menu with options for setting the number of rows in the document table"]
+
+To customize the default number of rows per page, go to *Stack Managaement > Advanced Settings*
+and search for *rows per page*.
 
 [float]
 [[document-explorer-full-screen]]
