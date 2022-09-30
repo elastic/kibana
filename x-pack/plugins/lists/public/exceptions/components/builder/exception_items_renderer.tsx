@@ -92,7 +92,7 @@ export interface ExceptionBuilderProps {
     type: ExceptionListType
   ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
-  ruleName?: string;
+  ruleName: string;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
 }
