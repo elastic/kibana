@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map, sum } from 'lodash';
+import { sum } from 'lodash';
 import { createCalleeTree } from './callee';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
@@ -21,7 +21,8 @@ describe('Callee operations', () => {
 
   test('inclusive count for each node should be greater than or equal to its children', () => {
     const allGreaterThanOrEqual = tree.Edges.map(
-      (children, i) => tree.CountInclusive[i] >= sum(map(children, (j) => tree.CountInclusive[j]))
+      (children, i) =>
+        tree.CountInclusive[i] >= sum([...children.values()].map((j) => tree.CountInclusive[j]))
     );
     expect(allGreaterThanOrEqual).toBeTruthy();
   });
