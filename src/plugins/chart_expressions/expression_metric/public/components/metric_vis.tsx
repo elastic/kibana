@@ -274,6 +274,15 @@ export const MetricVis = ({
         ...baseMetric,
         trend: config.metric.trends[trendId],
         trendShape: 'area',
+        trendA11yTitle: i18n.translate('expressionMetricVis.trendA11yTitle', {
+          defaultMessage: '{dataTitle} over time.',
+          values: {
+            dataTitle: primaryMetricColumn.name,
+          },
+        }),
+        trendA11yDescription: i18n.translate('expressionMetricVis.trendA11yDescription', {
+          defaultMessage: 'A line chart showing the trend of the primary metric over time.',
+        }),
       };
 
       return metricWTrend;
