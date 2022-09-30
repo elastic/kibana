@@ -41,6 +41,7 @@ import type {
   HttpAuth,
   IAuthHeadersStorage,
 } from '@kbn/core-http-server';
+import Brok from 'brok';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -53,7 +54,6 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 // @ts-expect-error
-import Brok from 'brok';
 
 /** @internal */
 export interface HttpServerSetup {
