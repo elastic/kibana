@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type {
+  HttpResourcesRenderOptions,
+  HttpResourcesResponseOptions,
+  HttpResourcesServiceToolkit,
+  HttpResourcesRequestHandler,
+  HttpResources,
+} from './src';

@@ -60,6 +60,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "//packages/core/http/core-http-server:npm_module_types",
+  "//packages/core/http/core-http-request-handler-context-server:npm_module_types",
 ]
 
 jsts_transpiler(

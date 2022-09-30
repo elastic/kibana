@@ -14,9 +14,9 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '../mocks';
 import { renderingMock } from '../rendering/rendering_service.mock';
-import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
+import { HttpResourcesService, type PrebootDeps, type SetupDeps } from './http_resources_service';
 import { httpResourcesMock } from './http_resources_service.mock';
-import { HttpResources } from '..';
+import type { HttpResources } from '@kbn/core-http-resources-server';
 
 const coreContext = mockCoreContext.create();
 
