@@ -9,13 +9,21 @@ import { Interception } from 'cypress/types/net-stubbing';
 import 'cypress-axe';
 import moment from 'moment';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
+import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
 
 Cypress.Commands.add('loginAsViewerUser', () => {
-  return cy.loginAs({ username: 'viewer', password: 'changeme' });
+  return cy.loginAs({ username: ApmUsername.viewerUser, password: 'changeme' });
 });
 
 Cypress.Commands.add('loginAsEditorUser', () => {
-  return cy.loginAs({ username: 'editor', password: 'changeme' });
+  return cy.loginAs({ username: ApmUsername.editorUser, password: 'changeme' });
+});
+
+Cypress.Commands.add('loginAsMonitorUser', () => {
+  return cy.loginAs({
+    username: ApmUsername.apmMonitorIndices,
+    password: 'changeme',
+  });
 });
 
 Cypress.Commands.add(

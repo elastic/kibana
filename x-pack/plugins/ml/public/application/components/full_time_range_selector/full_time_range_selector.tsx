@@ -23,7 +23,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { setFullTimeRange } from './full_time_range_selector_service';
-import { useStorage } from '../../contexts/ml/use_storage';
+import { useStorage } from '../../contexts/storage';
 import { ML_FROZEN_TIER_PREFERENCE } from '../../../../common/types/storage';
 import { GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 

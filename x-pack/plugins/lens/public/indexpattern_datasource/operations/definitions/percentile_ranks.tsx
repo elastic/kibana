@@ -266,4 +266,12 @@ Example: Get the percentage of values which are below of 100:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.percentileRanks.documentation.quick',
+    {
+      defaultMessage: `
+The percentage of values that are below a specific value. For example, when a value is greater than or equal to 95% of the calculated values, the value is the 95th percentile rank.
+      `,
+    }
+  ),
 };
