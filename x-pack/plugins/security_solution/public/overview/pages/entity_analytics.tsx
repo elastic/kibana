@@ -45,7 +45,7 @@ const EntityAnalyticsComponent = () => {
               )}
             </HeaderPage>
             {!isPlatinumOrTrialLicense && capabilitiesFetched ? (
-              <Paywall featureDescription={i18n.ENTITY_ANALYTICS_LICENSE_DESC} />
+              <Paywall heading={i18n.ENTITY_ANALYTICS_LICENSE_DESC} />
             ) : isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
