@@ -42,13 +42,18 @@ describe('isAuthorizedInAllSpaces', () => {
     );
     expect(type1Result).toBe(true);
 
-    const type2Result = isAuthorizedInAllSpaces(
+    // check for all authorized spaces
+    const type2AllSpacesResult = isAuthorizedInAllSpaces(
       'type-2',
       'action',
       ['space-1', 'space-2'],
       typeMap
     );
-    expect(type2Result).toBe(true);
+    expect(type2AllSpacesResult).toBe(true);
+
+    // check for subset of authorized spaces
+    const type2Space2Result = isAuthorizedInAllSpaces('type-2', 'action', ['space-2'], typeMap);
+    expect(type2Space2Result).toBe(true);
   });
 
   test('returns false if the user is not authorized for the type in the given spaces', () => {

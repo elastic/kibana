@@ -172,7 +172,7 @@ describe('#encryptAttributes', () => {
       attrThree: 'three',
     });
 
-    await expect(service.encryptAttributes).toBeCalledTimes(1); // ToDo: should the extension even bother calling encrypt if the type is not encryptable? See Decrypt as example.
+    await expect(service.encryptAttributes).not.toBeCalled();
   });
 
   test('encrypts attributes if the type is registered', async () => {

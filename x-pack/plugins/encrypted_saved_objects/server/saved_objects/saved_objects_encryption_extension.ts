@@ -71,6 +71,10 @@ export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionE
     attributes: T
   ): Promise<T> {
     const { type, id, namespace } = descriptor;
+    if (!this._service.isRegistered(type)) {
+      return attributes;
+    }
+
     const normalizedDescriptor = {
       type,
       id,

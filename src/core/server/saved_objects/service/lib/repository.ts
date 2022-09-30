@@ -188,7 +188,7 @@ export interface SavedObjectsIncrementCounterField {
  * @internal
  */
 export interface SavedObjectsFindInternalOptions {
-  /** This is used for internal consumers that need to use a PIT finder but want to prevent extensions from functioning.
+  /** This is used for calls internal to the SO doamain that need to use a PIT finder but want to prevent extensions from functioning.
    * We use the SOR's PointInTimeFinder internally when searching for aliases and shared origins for saved objects, but we
    * need to disable the extensions for that to function correctly.
    * Before, when we had SOC wrappers, the SOR's PointInTimeFinder did not have any of the wrapper functionality applied.
@@ -346,7 +346,7 @@ export class SavedObjectsRepository {
     attributes: T,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
     const {
       migrationVersion,
       coreMigrationVersion,
@@ -501,7 +501,7 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
     const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const time = getCurrentTime();
 
@@ -784,7 +784,7 @@ export class SavedObjectsRepository {
     objects: SavedObjectsCheckConflictsObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsCheckConflictsResponse> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
 
     if (objects.length === 0) {
       return { errors: [] };
@@ -903,7 +903,7 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -1342,7 +1342,7 @@ export class SavedObjectsRepository {
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
 
     if (objects.length === 0) {
       return { saved_objects: [] };
@@ -1535,7 +1535,7 @@ export class SavedObjectsRepository {
     objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
     const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
       registry: this._registry,
       allowedTypes: this._allowedTypes,
@@ -1579,7 +1579,7 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -1655,7 +1655,7 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
     const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
       registry: this._registry,
       allowedTypes: this._allowedTypes,
@@ -1692,7 +1692,7 @@ export class SavedObjectsRepository {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -1846,7 +1846,7 @@ export class SavedObjectsRepository {
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
     options: SavedObjectsCollectMultiNamespaceReferencesOptions = {}
   ) {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
     return collectMultiNamespaceReferences({
       registry: this._registry,
       allowedTypes: this._allowedTypes,
@@ -1874,7 +1874,7 @@ export class SavedObjectsRepository {
     spacesToRemove: string[],
     options: SavedObjectsUpdateObjectsSpacesOptions = {}
   ) {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
     return updateObjectsSpaces({
       mappings: this._mappings,
       registry: this._registry,
@@ -1903,7 +1903,7 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
     const time = getCurrentTime();
 
     let bulkGetRequestIndexCounter = 0;
@@ -2198,7 +2198,7 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsRemoveReferencesToOptions = {}
   ): Promise<SavedObjectsRemoveReferencesToResponse> {
-    const namespace = this.getCurrentNamespace(options);
+    const namespace = this.getCurrentNamespace(options.namespace);
     const { refresh = true } = options;
 
     // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
@@ -2859,7 +2859,7 @@ export class SavedObjectsRepository {
    * If the spaces extension is *not* enabled, we should simply normalize the namespace option so that `'default'` can be used
    * interchangeably with `undefined`.
    */
-  private getCurrentNamespace({ namespace }: { namespace?: string }) {
+  private getCurrentNamespace(namespace?: string) {
     if (this._spacesExtension) {
       return this._spacesExtension.getCurrentNamespace(namespace);
     }

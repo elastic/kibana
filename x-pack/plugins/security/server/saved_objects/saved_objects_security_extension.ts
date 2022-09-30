@@ -148,7 +148,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
 
     if (unauthorizedTypes.size > 0) {
-      const targetTypes = Array.from(unauthorizedTypes).sort().join(',');
+      const targetTypes = [...unauthorizedTypes].sort().join(',');
       const msg = `Unable to ${action} ${targetTypes}`;
       const error = this.errors.decorateForbiddenError(new Error(msg));
       auditCallback?.(error);
