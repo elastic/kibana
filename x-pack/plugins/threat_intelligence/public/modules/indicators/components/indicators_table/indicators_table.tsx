@@ -13,6 +13,8 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiProgress,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,7 +25,7 @@ import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indi
 import { cellRendererFactory } from './cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
-import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
+import { IndicatorsFlyout } from '../flyout';
 import { useToolbarOptions } from './hooks/use_toolbar_options';
 import { ColumnSettingsValue } from './hooks/use_column_settings';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
@@ -39,7 +41,8 @@ export interface IndicatorsTableProps {
   /**
    * If true, no data is available yet
    */
-  isLoading: boolean;
+  isLoading?: boolean;
+  isFetching?: boolean;
   indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
   columnSettings: ColumnSettingsValue;
@@ -54,6 +57,8 @@ const gridStyle = {
   fontSize: 's',
 } as const;
 
+export const TABLE_UPDATE_PROGRESS_TEST_ID = `${TABLE_TEST_ID}-updating` as const;
+
 export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   indicators,
   indicatorCount,
@@ -61,6 +66,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangeItemsPerPage,
   pagination,
   isLoading,
+  isFetching,
   browserFields,
   columnSettings: { columns, columnVisibility, handleResetColumns, handleToggleColumn, sorting },
 }) => {
@@ -157,44 +163,57 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     }
 
     return (
-      <EuiDataGrid
-        aria-labelledby="indicators-table"
-        leadingControlColumns={leadingControlColumns}
-        rowCount={indicatorCount}
-        renderCellValue={renderCellValue}
-        toolbarVisibility={toolbarOptions}
-        pagination={{
-          ...pagination,
-          onChangeItemsPerPage,
-          onChangePage,
-        }}
-        gridStyle={gridStyle}
-        data-test-subj={TABLE_TEST_ID}
-        sorting={sorting}
-        columnVisibility={columnVisibility}
-        columns={mappedColumns}
-      />
+      <>
+        {isFetching && (
+          <EuiProgress
+            data-test-subj={TABLE_UPDATE_PROGRESS_TEST_ID}
+            size="xs"
+            color="accent"
+            position="absolute"
+          />
+        )}
+        <EuiSpacer size="xs" />
+
+        <EuiDataGrid
+          aria-labelledby="indicators-table"
+          leadingControlColumns={leadingControlColumns}
+          rowCount={indicatorCount}
+          renderCellValue={renderCellValue}
+          toolbarVisibility={toolbarOptions}
+          pagination={{
+            ...pagination,
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
+          gridStyle={gridStyle}
+          data-test-subj={TABLE_TEST_ID}
+          sorting={sorting}
+          columnVisibility={columnVisibility}
+          columns={mappedColumns}
+        />
+      </>
     );
   }, [
-    columnVisibility,
-    mappedColumns,
-    indicatorCount,
-    leadingControlColumns,
     isLoading,
+    indicatorCount,
+    isFetching,
+    leadingControlColumns,
+    renderCellValue,
+    toolbarOptions,
+    pagination,
     onChangeItemsPerPage,
     onChangePage,
-    pagination,
-    renderCellValue,
     sorting,
-    toolbarOptions,
+    columnVisibility,
+    mappedColumns,
   ]);
 
   return (
-    <div>
-      <IndicatorsTableContext.Provider value={indicatorTableContextValue}>
+    <IndicatorsTableContext.Provider value={indicatorTableContextValue}>
+      <div style={{ position: 'relative' }}>
         {flyoutFragment}
         {gridFragment}
-      </IndicatorsTableContext.Provider>
-    </div>
+      </div>
+    </IndicatorsTableContext.Provider>
   );
 };

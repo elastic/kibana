@@ -8,6 +8,7 @@
 import { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { formatPipelineName } from '../../common/ml_inference_pipeline';
 import { ErrorCode } from '../../common/types/error_codes';
 
 import { formatMlPipelineBody } from '../lib/pipelines/create_pipeline_definitions';
@@ -41,14 +42,14 @@ export const createAndReferenceMlInferencePipeline = async (
   pipelineName: string,
   modelId: string,
   sourceField: string,
-  destinationField: string,
+  destinationField: string | null | undefined,
   esClient: ElasticsearchClient
 ): Promise<CreatedPipeline> => {
   const createPipelineResult = await createMlInferencePipeline(
     pipelineName,
     modelId,
     sourceField,
-    destinationField || modelId,
+    destinationField,
     esClient
   );
 
@@ -76,7 +77,7 @@ export const createMlInferencePipeline = async (
   pipelineName: string,
   modelId: string,
   sourceField: string,
-  destinationField: string,
+  destinationField: string | null | undefined,
   esClient: ElasticsearchClient
 ): Promise<CreatedPipeline> => {
   const inferencePipelineGeneratedName = getPrefixedInferencePipelineProcessorName(pipelineName);
@@ -99,7 +100,7 @@ export const createMlInferencePipeline = async (
     inferencePipelineGeneratedName,
     modelId,
     sourceField,
-    destinationField,
+    destinationField || formatPipelineName(pipelineName),
     esClient
   );
 
