@@ -845,7 +845,6 @@ export function FormulaEditor({
                         anchorPosition="leftCenter"
                         isOpen={isHelpOpen}
                         closePopover={() => setIsHelpOpen(false)}
-                        ownFocus={false}
                         button={
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
