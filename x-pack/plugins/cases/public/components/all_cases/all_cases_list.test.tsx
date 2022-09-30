@@ -28,7 +28,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
-import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
+import { GetCasesColumn, useCasesColumns, UseCasesColumnsReturnValue } from './columns';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -97,10 +97,6 @@ describe('AllCasesListGeneric', () => {
   };
 
   const defaultColumnArgs = {
-    caseDetailsNavigation: {
-      href: jest.fn(),
-      onClick: jest.fn(),
-    },
     filterStatus: CaseStatuses.open,
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
@@ -236,7 +232,7 @@ describe('AllCasesListGeneric', () => {
       expect(column.find('span').text()).toEqual(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+    const { result } = renderHook<GetCasesColumn, UseCasesColumnsReturnValue>(
       () => useCasesColumns(defaultColumnArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -244,7 +240,7 @@ describe('AllCasesListGeneric', () => {
     );
 
     await waitFor(() => {
-      result.current.map(
+      result.current.columns.map(
         (i, key) =>
           i.name != null &&
           !Object.prototype.hasOwnProperty.call(i, 'actions') &&
@@ -675,7 +671,7 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+    const { result } = renderHook<GetCasesColumn, UseCasesColumnsReturnValue>(
       () =>
         useCasesColumns({
           ...defaultColumnArgs,
@@ -686,7 +682,7 @@ describe('AllCasesListGeneric', () => {
       }
     );
 
-    expect(result.current.find((i) => i.name === 'Status')).toBeFalsy();
+    expect(result.current.columns.find((i) => i.name === 'Status')).toBeFalsy();
 
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="cases-table"]').exists()).toBeTruthy();

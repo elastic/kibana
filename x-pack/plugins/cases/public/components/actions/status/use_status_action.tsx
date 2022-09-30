@@ -12,6 +12,7 @@ import { Case, CaseStatuses } from '../../../../common';
 
 import * as i18n from './translations';
 import { UseActionProps } from '../types';
+import { statuses } from '../../status';
 
 const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string => {
   const totalCases = cases.length;
@@ -28,7 +29,16 @@ const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string =>
   return '';
 };
 
-export const useStatusAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
+interface UseStatusActionProps extends UseActionProps {
+  selectedStatus?: CaseStatuses;
+}
+
+export const useStatusAction = ({
+  onAction,
+  onActionSuccess,
+  isDisabled,
+  selectedStatus,
+}: UseStatusActionProps) => {
   const { mutate: updateCases } = useUpdateCases();
 
   const handleUpdateCaseStatus = useCallback(
@@ -51,27 +61,30 @@ export const useStatusAction = ({ onAction, onActionSuccess, isDisabled }: UseAc
     [onAction, updateCases, onActionSuccess]
   );
 
+  const getStatusIcon = (status: CaseStatuses): string =>
+    selectedStatus && selectedStatus === status ? 'check' : 'empty';
+
   const getActions = (selectedCases: Case[]): EuiContextMenuPanelItemDescriptor[] => {
     return [
       {
-        name: i18n.BULK_ACTION_STATUS_OPEN,
-        icon: 'empty',
+        name: statuses[CaseStatuses.open].label,
+        icon: getStatusIcon(CaseStatuses.open),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.open),
         disabled: isDisabled,
         'data-test-subj': 'cases-bulk-action-status-open',
         key: 'cases-bulk-action-status-open',
       },
       {
-        name: i18n.BULK_ACTION_STATUS_IN_PROGRESS,
-        icon: 'empty',
+        name: statuses[CaseStatuses['in-progress']].label,
+        icon: getStatusIcon(CaseStatuses['in-progress']),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses['in-progress']),
         disabled: isDisabled,
         'data-test-subj': 'cases-bulk-action-status-in-progress',
         key: 'cases-bulk-action-status-in-progress',
       },
       {
-        name: i18n.BULK_ACTION_STATUS_CLOSE,
-        icon: 'empty',
+        name: statuses[CaseStatuses.closed].label,
+        icon: getStatusIcon(CaseStatuses.closed),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.closed),
         disabled: isDisabled,
         'data-test-subj': 'cases-bulk-action-status-close',

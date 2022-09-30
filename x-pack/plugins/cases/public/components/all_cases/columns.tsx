@@ -47,7 +47,7 @@ import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { Status } from '../status';
 
-export type CasesColumns =
+type CasesColumns =
   | EuiTableActionsColumnType<Case>
   | EuiTableComputedColumnType<Case>
   | EuiTableFieldDataColumnType<Case>;
@@ -106,7 +106,7 @@ export interface GetCasesColumn {
   showSolutionColumn?: boolean;
 }
 
-interface UseCasesColumnsReturnValue {
+export interface UseCasesColumnsReturnValue {
   columns: CasesColumns[];
 }
 

@@ -25,9 +25,7 @@ describe('UtilityBarAction', () => {
   test('it renders a popover', () => {
     const wrapper = mount(
       <TestProviders>
-        <UtilityBarAction iconType="alert" popoverContent={() => <p>{'Test popover'}</p>}>
-          {'Test action'}
-        </UtilityBarAction>
+        <UtilityBarAction iconType="alert">{'Test action'}</UtilityBarAction>
       </TestProviders>
     );
 

@@ -13,12 +13,14 @@ import {
   EuiPopover,
   EuiTableComputedColumnType,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Case, CasesPermissions } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useStatusAction } from '../actions/status/use_status_action';
 import { useRefreshCases } from './use_on_refresh_cases';
 import * as i18n from './translations';
+import { statuses } from '../status';
 
 interface UseBulkActionsProps {
   permissions: CasesPermissions;
@@ -46,6 +48,7 @@ const ActionColumnComponent: React.FC<{ theCase: Case; isDisabled: boolean }> = 
     isDisabled,
     onAction: closePopover,
     onActionSuccess: refreshCases,
+    selectedStatus: theCase.status,
   });
 
   const getPanels = useCallback(
@@ -55,7 +58,13 @@ const ActionColumnComponent: React.FC<{ theCase: Case; isDisabled: boolean }> = 
         title: i18n.ACTIONS,
         items: [
           {
-            name: i18n.STATUS,
+            name: (
+              <FormattedMessage
+                defaultMessage="Status: {status}"
+                id="xpack.cases.allCasesView.statusWithValue"
+                values={{ status: <b>{statuses[theCase.status].label}</b> }}
+              />
+            ),
             panel: 1,
             disabled: isDisabled,
             key: `case-action-status-panel-${theCase.id}`,
@@ -123,6 +132,7 @@ export const useActions = ({ permissions }: UseBulkActionsProps): UseBulkActions
   return {
     actions: {
       name: i18n.ACTIONS,
+      align: 'right',
       render: (theCase: Case) => {
         return <ActionColumn theCase={theCase} key={theCase.id} isDisabled={isDisabled} />;
       },
