@@ -726,6 +726,15 @@ interface OsqueryColumn {
   index: boolean;
 }
 
+const prepareEcsFieldsToValidate = (ecsMapping: Array<{ id: string }>): string[] =>
+  ecsMapping
+    ?.map((_: unknown, index: number) => [
+      `ecs_mapping[${index}].result.value`,
+      `ecs_mapping[${index}].key`,
+    ])
+    .join(',')
+    .split(',');
+
 export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
   const {
     setError,
@@ -737,8 +746,10 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
   } = useFormContext<{ query: string; ecs_mapping: ECSMapping }>();
 
   useEffect(() => {
-    registerRoot('ecs_mapping');
-  }, [registerRoot]);
+    registerRoot('ecs_mapping', {
+      validate: () => isEmpty(errorsRoot.ecs_mapping),
+    });
+  }, [errorsRoot, registerRoot]);
 
   const [query, ecsMapping] = watchRoot(['query', 'ecs_mapping']);
   const { control, trigger, watch, formState, resetField, getFieldState } = useForm<{
@@ -756,6 +767,15 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     control,
     name: 'ecsMappingArray',
   });
+
+  useEffect(() => {
+    // Additional 'suspended' validation of osquery ecs fields. fieldsToValidateOnChange doesn't work because it happens before the osquerySchema gets updated.
+    const fieldsToValidate = prepareEcsFieldsToValidate(fields);
+    // it is always at least 2 - empty fields
+    if (fieldsToValidate.length > 2) {
+      setTimeout(() => trigger('ecsMappingArray'), 0);
+    }
+  }, [query, fields, trigger]);
 
   const formValue = watch();
   const ecsMappingArrayState = getFieldState('ecsMappingArray', formState);
