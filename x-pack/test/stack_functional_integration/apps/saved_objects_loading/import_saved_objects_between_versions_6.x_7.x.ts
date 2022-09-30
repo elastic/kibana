@@ -11,35 +11,36 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
+  const PageObjects = getPageObjects([
+    'common',
+    'settings',
+    'header',
+    'savedObjects',
+    'spaceSelector',
+    'home',
+  ]);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/116061
-  describe.only('Export import saved objects between versions - 6.8.x -> 7.x', function () {
-    beforeEach(async function () {
-      // await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare');
-      await kibanaServer.uiSettings.replace({});
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.unload('x-pack/test/functional/es_archives/getting_started/shakespeare');
+  describe('Export import saved objects between versions - 6.8.x -> 7.x', function () {
+    before(async function () {
+      await PageObjects.common.navigateToApp('management', { insertTimestamp: false });
     });
 
     it('should be able to import 6.8 saved objects into 7.x', async function () {
+      await PageObjects.common.navigateToUrl('management', 'kibana/objects', {
+        basePath: `/s/6x`,
+        ensureCurrentUrl: false,
+        shouldLoginIfPrompted: false,
+        shouldUseHashForSubUrl: false,
+      });
       await retry.tryForTime(10000, async () => {
         const existingSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
-        // Kibana always has 1 advanced setting as a saved object
+        // Kibana always has 1 advanced setting as a saved object per space
         await expect(existingSavedObjects).to.be('Export 1 object');
       });
       await PageObjects.savedObjects.importFile(
@@ -55,9 +56,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // This test is because of this bug - https://github.com/elastic/kibana/issues/101430
     // This test is also getting backported into 7.13.x
     it('should be able to import 7.12.x saved objects -by value panels with drilldowns into 7.x', async function () {
+      await PageObjects.common.navigateToUrl('management', 'kibana/objects', {
+        basePath: `/s/7x`,
+        ensureCurrentUrl: false,
+        shouldLoginIfPrompted: false,
+        shouldUseHashForSubUrl: false,
+      });
       await retry.tryForTime(10000, async () => {
         const existingSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
-        // Kibana always has 1 advanced setting as a saved object
+        // Kibana always has 1 advanced setting as a saved object per space
         await expect(existingSavedObjects).to.be('Export 1 object');
       });
       await PageObjects.savedObjects.importFile(
