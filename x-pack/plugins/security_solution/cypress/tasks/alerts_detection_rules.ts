@@ -60,6 +60,7 @@ import {
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
+import { waitTillPrebuiltRulesReadyToInstall } from './api_calls/prebuilt_rules';
 
 export const enableRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
@@ -132,16 +133,19 @@ export const deleteRuleFromDetailsPage = () => {
 };
 
 export const duplicateSelectedRules = () => {
+  cy.log('Duplicate selected rules');
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
 };
 
 export const enableSelectedRules = () => {
+  cy.log('Enable selected rules');
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(ENABLE_RULE_BULK_BTN).click();
 };
 
 export const disableSelectedRules = () => {
+  cy.log('Disable selected rules');
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DISABLE_RULE_BULK_BTN).click();
 };
@@ -169,7 +173,9 @@ export const goToTheRuleDetailsOf = (ruleName: string) => {
 };
 
 export const loadPrebuiltDetectionRules = () => {
-  cy.get(LOAD_PREBUILT_RULES_BTN)
+  cy.log('load prebuilt detection rules');
+  waitTillPrebuiltRulesReadyToInstall();
+  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 })
     .should('be.enabled')
     .pipe(($el) => $el.trigger('click'))
     .should('be.disabled');
@@ -179,7 +185,9 @@ export const loadPrebuiltDetectionRules = () => {
  * load prebuilt rules by clicking button on page header
  */
 export const loadPrebuiltDetectionRulesFromHeaderBtn = () => {
-  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click().should('not.exist');
+  cy.log('load prebuilt detection rules from header');
+  waitTillPrebuiltRulesReadyToInstall();
+  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN, { timeout: 300000 }).click().should('not.exist');
 };
 
 export const openIntegrationsPopover = () => {
@@ -231,11 +239,13 @@ export const unselectNumberOfRules = (numberOfRules: number) => {
 };
 
 export const selectAllRules = () => {
+  cy.log('Select all rules');
   cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
   cy.get(SELECT_ALL_RULES_BTN).contains('Clear');
 };
 
 export const clearAllRuleSelection = () => {
+  cy.log('Clear all rules selection');
   cy.get(SELECT_ALL_RULES_BTN).contains('Clear').click();
   cy.get(SELECT_ALL_RULES_BTN).contains('Select all');
 };
@@ -291,14 +301,21 @@ export const waitForRulesTableToBeRefreshed = () => {
 };
 
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
-  cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
+  cy.log('Wait for prebuilt rules to be loaded');
+  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
   cy.get(RULES_TABLE).should('exist');
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 
-export const waitForRuleToChangeStatus = () => {
-  cy.get(RULE_SWITCH_LOADER).should('exist');
-  cy.get(RULE_SWITCH_LOADER).should('not.exist');
+/**
+ * Wait till the rules on the rules management page get updated, i.e., there are
+ * no rules with the loading indicator on the page. Rules display a loading
+ * indicator after some actions such as enable, disable, or bulk actions.
+ */
+export const waitForRuleToUpdate = () => {
+  cy.log('Wait for rules to update');
+  cy.get(RULE_SWITCH_LOADER, { timeout: 300000 }).should('exist');
+  cy.get(RULE_SWITCH_LOADER, { timeout: 300000 }).should('not.exist');
 };
 
 export const checkAutoRefresh = (ms: number, condition: string) => {
