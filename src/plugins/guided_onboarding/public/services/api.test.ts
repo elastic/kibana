@@ -38,6 +38,15 @@ const mockActiveSearchGuideState: GuideState = {
   ],
 };
 
+const securityGuide = 'security';
+const dataStep = 'add_data';
+const rulesStep = 'rules';
+const unsetGuide = 'unset';
+const unsetStep = 'unset';
+
+const endpointIntegration = 'endpoint';
+const kubernetesIntegration = 'kubernetes';
+
 describe('GuidedOnboarding ApiService', () => {
   let httpClient: jest.Mocked<HttpSetup>;
   let apiService: ApiService;
@@ -327,6 +336,89 @@ describe('GuidedOnboarding ApiService', () => {
       await apiService.completeGuideStep(searchGuide, firstStep);
       // Expect only 1 call from updateGuideState()
       expect(httpClient.put).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('isGuidedOnboardingActiveForIntegration$', () => {
+    it('returns true if the integration is part of the active step', async (done) => {
+      httpClient.get.mockResolvedValue({
+        state: { activeGuide: securityGuide, activeStep: dataStep },
+      });
+      apiService.setup(httpClient);
+      subscription = apiService
+        .isGuidedOnboardingActiveForIntegration$(endpointIntegration)
+        .subscribe((isIntegrationInGuideStep) => {
+          if (isIntegrationInGuideStep) {
+            done();
+          }
+        });
+    });
+
+    it('returns false if another integration is part of the active step', async (done) => {
+      httpClient.get.mockResolvedValue({
+        state: { activeGuide: securityGuide, activeStep: dataStep },
+      });
+      apiService.setup(httpClient);
+      subscription = apiService
+        .isGuidedOnboardingActiveForIntegration$(kubernetesIntegration)
+        .subscribe((isIntegrationInGuideStep) => {
+          if (!isIntegrationInGuideStep) {
+            done();
+          }
+        });
+    });
+
+    it('returns false if no guide is active', async (done) => {
+      httpClient.get.mockResolvedValue({
+        state: { activeGuide: unsetGuide, activeStep: unsetStep },
+      });
+      apiService.setup(httpClient);
+      subscription = apiService
+        .isGuidedOnboardingActiveForIntegration$(endpointIntegration)
+        .subscribe((isIntegrationInGuideStep) => {
+          if (!isIntegrationInGuideStep) {
+            done();
+          }
+        });
+    });
+  });
+
+  describe('completeGuidedOnboardingForIntegration', () => {
+    it(`completes the step if it's active for the integration`, async () => {
+      httpClient.get.mockResolvedValue({
+        state: { activeGuide: securityGuide, activeStep: dataStep },
+      });
+      apiService.setup(httpClient);
+
+      await apiService.completeGuidedOnboardingForIntegration(endpointIntegration);
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      // this assertion depends on the guides config
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({
+          activeGuide: securityGuide,
+          activeStep: rulesStep,
+        }),
+      });
+    });
+
+    it(`does nothing if the step has a different integration`, async () => {
+      httpClient.get.mockResolvedValue({
+        state: { activeGuide: securityGuide, activeStep: dataStep },
+      });
+      apiService.setup(httpClient);
+
+      await apiService.completeGuidedOnboardingForIntegration(kubernetesIntegration);
+      expect(httpClient.put).not.toHaveBeenCalled();
+    });
+
+    it(`does nothing if no guide is active`, async () => {
+      httpClient.get.mockResolvedValue({
+        state: { activeGuide: unsetGuide, activeStep: unsetStep },
+      });
+      apiService.setup(httpClient);
+
+      await apiService.completeGuidedOnboardingForIntegration(endpointIntegration);
+      expect(httpClient.put).not.toHaveBeenCalled();
     });
   });
 });
