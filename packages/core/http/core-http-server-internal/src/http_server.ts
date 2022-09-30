@@ -52,6 +52,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
+// @ts-expect-error
 import Brok from 'brok';
 
 /** @internal */
