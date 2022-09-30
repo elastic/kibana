@@ -8,13 +8,18 @@
 import { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
+import { of } from 'rxjs';
+
 import { useStartServices } from '../../../../../hooks';
 
 export const useIsGuidedOnboardingActive = (packageName?: string): boolean => {
   const [result, setResult] = useState<boolean>(false);
   const { guidedOnboarding } = useStartServices();
   const isGuidedOnboardingActiveForIntegration = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuidedOnboardingActiveForIntegration$(packageName)
+    // if guided onboarding is not available, return false
+    guidedOnboarding.guidedOnboardingApi
+      ? guidedOnboarding.guidedOnboardingApi.isGuidedOnboardingActiveForIntegration$(packageName)
+      : of(false)
   );
   useEffect(() => {
     setResult(!!isGuidedOnboardingActiveForIntegration);
