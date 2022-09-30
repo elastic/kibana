@@ -9,6 +9,25 @@
 import type { SavedObject } from '../../../types';
 
 /**
+ * The CheckAuthorizationParams interface contains settings for checking
+ * authorization via the ISavedObjectsSecurityExtension.
+ */
+export interface EncryptedObjectDescriptor {
+  /**
+   * A set of types to check.
+   */
+  type: string;
+  /**
+   * A set of spaces to check.
+   */
+  id: string;
+  /**
+   * An array of actions to check.
+   */
+  namespace?: string;
+}
+
+/**
  * The ISavedObjectsEncryptionExtension interface defines the functions of a saved objects
  * repository encryption extension. It contains functions for determining if a type is
  * encryptable, encrypting object attributes, and decrypting or stripping object attributes.

@@ -365,6 +365,7 @@ export type {
   SavedObjectsFindInternalOptions,
   SavedObjectsRepository,
   ISavedObjectsEncryptionExtension,
+  EncryptedObjectDescriptor,
   CheckAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,

@@ -11,6 +11,7 @@ export { SavedObjectsClientProvider } from './scoped_client_provider';
 
 export type {
   ISavedObjectsEncryptionExtension,
+  EncryptedObjectDescriptor,
   CheckAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,

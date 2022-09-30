@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { ISavedObjectsEncryptionExtension } from './encryption';
+export type { ISavedObjectsEncryptionExtension, EncryptedObjectDescriptor } from './encryption';
 export type {
   CheckAuthorizationParams,
   AuthorizationTypeEntry,

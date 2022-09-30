@@ -14,6 +14,7 @@ export {
 export type {
   SavedObjectsRepository,
   ISavedObjectsEncryptionExtension,
+  EncryptedObjectDescriptor,
   CheckAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,

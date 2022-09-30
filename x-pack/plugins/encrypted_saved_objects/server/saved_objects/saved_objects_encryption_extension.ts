@@ -6,6 +6,7 @@
  */
 
 import type {
+  EncryptedObjectDescriptor,
   ISavedObjectsEncryptionExtension,
   ISavedObjectTypeRegistry,
   SavedObject,
@@ -67,13 +68,14 @@ export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionE
   }
 
   async encryptAttributes<T extends Record<string, unknown>>(
-    descriptor: { type: string; id: string; namespace: string | undefined },
+    descriptor: EncryptedObjectDescriptor,
     attributes: T
   ): Promise<T> {
-    const { type, id, namespace } = descriptor;
-    if (!this._service.isRegistered(type)) {
+    if (!this._service.isRegistered(descriptor.type)) {
       return attributes;
     }
+
+    const { type, id, namespace } = descriptor;
 
     const normalizedDescriptor = {
       type,

@@ -443,7 +443,7 @@ export class SavedObjectsRepository {
       attributes: await this.optionallyEncryptAttributes(
         type,
         id,
-        savedObjectNamespace, // only used for multi-namespace object types (ToDo: edit? only used for single namespace???)
+        savedObjectNamespace, // if single namespace type, this is the first in initialNamespaces. If multi-namespace type this is options.namespace/current namespace.
         attributes
       ),
       migrationVersion,
@@ -515,14 +515,14 @@ export class SavedObjectsRepository {
       }
     >;
     const expectedResults = objects.map<ExpectedResult>((object) => {
-      const { type, id: optionalId, initialNamespaces, version } = object;
+      const { type, id: requestId, initialNamespaces, version } = object;
       let error: DecoratedError | undefined;
       let id: string = ''; // Assign to make TS happy, the ID will be validated (or randomly generated if needed) during getValidId below
       if (!this._allowedTypes.includes(type)) {
         error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
       } else {
         try {
-          id = this.getValidId(type, optionalId, version, overwrite);
+          id = this.getValidId(type, requestId, version, overwrite);
           this.validateInitialNamespaces(type, initialNamespaces);
           this.validateOriginId(type, object);
         } catch (e) {
@@ -533,12 +533,12 @@ export class SavedObjectsRepository {
       if (error) {
         return {
           tag: 'Left',
-          value: { id: optionalId, type, error: errorContent(error) },
+          value: { id: requestId, type, error: errorContent(error) },
         };
       }
 
-      const method = optionalId && overwrite ? 'index' : 'create';
-      const requiresNamespacesCheck = optionalId && this._registry.isMultiNamespace(type);
+      const method = requestId && overwrite ? 'index' : 'create';
+      const requiresNamespacesCheck = requestId && this._registry.isMultiNamespace(type);
 
       return {
         tag: 'Right',
@@ -554,7 +554,7 @@ export class SavedObjectsRepository {
     if (validObjects.length === 0) {
       // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
       return {
-        // Technically the returned array should only contain SavedObject results, but for errors this is not true (we cast to 'any' below)
+        // Technically the returned array should only contain SavedObject results, but for errors this is not true (we cast to 'unknown' below)
         saved_objects: expectedResults.map<SavedObject<T>>(
           ({ value }) => value as unknown as SavedObject<T>
         ),
@@ -1210,8 +1210,10 @@ export class SavedObjectsRepository {
         // If the user is unauthorized to find *anything* they requested, return an empty response
         this._securityExtension.addAuditEvent({
           action: AuditAction.FIND,
-          error: new Error('unauthorized'), // TODO: improve this error message?
+          error: new Error(`User is unauthorized for any requested types/spaces.`),
           // TODO: include object type(s) that were requested?
+          // requestedTypes: types,
+          // requestedSpaces: namespaces,
         });
         return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
       }
@@ -2587,8 +2589,10 @@ export class SavedObjectsRepository {
         // If the user is unauthorized to find *anything* they requested, return an empty response
         this._securityExtension.addAuditEvent({
           action: AuditAction.OPEN_POINT_IN_TIME,
-          error: new Error('unauthorized'), // TODO: improve this error message?
+          error: new Error('User is unauthorized for any requested types/spaces.'),
           // TODO: include object type(s) that were requested?
+          // requestedTypes: types,
+          // requestedSpaces: namespaces,
         });
         throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
       }
@@ -2596,6 +2600,8 @@ export class SavedObjectsRepository {
         action: AuditAction.OPEN_POINT_IN_TIME,
         outcome: 'unknown',
         // TODO: include object type(s) that were requested?
+        // requestedTypes: types,
+        // requestedSpaces: namespaces,
       });
     }
 
