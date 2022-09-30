@@ -30,7 +30,7 @@ import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
-import type { EuiButtonIconColor } from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -516,7 +516,7 @@ export interface LayerAction {
   description?: string;
   execute: () => void | Promise<void>;
   icon: IconType;
-  color?: EuiButtonIconColor;
+  color?: EuiButtonIconProps['color'];
   isCompatible: boolean;
   'data-test-subj'?: string;
 }
