@@ -13,6 +13,7 @@ import { JsonObject } from '@kbn/utility-types';
 import { cloneDeep, isPlainObject, merge } from 'lodash';
 import { ApmApiError } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { expectToReject } from '../../common/utils/expect_to_reject';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
@@ -36,7 +37,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   }
 
   function createAnnotation(
-    body?: RecursivePartial<APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation'>['params']['body']>
+    body: APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation'>['params']['body']
   ){
     return apmApiClient.annotationWriterUser({
       endpoint: 'POST /api/apm/services/{serviceName}/annotation',
@@ -44,21 +45,24 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         path: {
           serviceName: 'opbeans-java',
         },
-        body: body as APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation'>['params']['body'],
+        body,
       }
     });
   }
 
-  function getAnnotation(query: {
-    start: string; end: string; environment: string;
-  }) {
+  function getAnnotation(query: RecursivePartial<APIClientRequestParamsOf<'GET /api/apm/services/{serviceName}/annotation/search'>['params']['query']>) {
     return apmApiClient.readUser({
       endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
       params: {
         path: {
           serviceName: 'opbeans-java',
         },
-        query,
+        query: {
+          environment: ENVIRONMENT_ALL.value,
+          start: new Date().toISOString(),
+          end: new Date().toISOString(),
+          ...query,
+        },
       }
     });
   }
@@ -66,8 +70,8 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   registry.when('Annotations with a basic license', { config: 'basic', archives: [] }, () => {
     describe('when creating an annotation', () => {
       it('fails with a 403 forbidden', async () => {
-        try {
-          await createAnnotation({
+        const err = await expectToReject<ApmApiError>(() =>
+          createAnnotation({
             '@timestamp': new Date().toISOString(),
             message: 'New deployment',
             tags: ['foo'],
@@ -75,13 +79,11 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
               version: '1.1',
               environment: 'production',
             },
-          });
-        } catch (error: unknown) {
-          const apiError = error as ApmApiError;
+          })
+        );
 
-          expect(apiError.res.status).eql(403);
-          expect(apiError.res.body.message).eql('Annotations require at least a gold license or a trial license.');
-        }
+        expect(err.res.status).to.be(403);
+        expect(err.res.body.message).eql('Annotations require at least a gold license or a trial license.');
       });
     });
   });
@@ -98,37 +100,34 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
       });
 
       it('fails with a 400 bad request if data is missing', async () => {
-        try {
-          await createAnnotation();
-        } catch (error: unknown) {
-          const apiError = error as ApmApiError;
+        const err = await expectToReject<ApmApiError>(() =>
+          // @ts-expect-error
+          createAnnotation()
+        );
 
-          expect(apiError.res.status).eql(400);
-        }
+        expect(err.res.status).to.be(400);
       });
 
       it('fails with a 400 bad request if data is invalid', async () => {
-        try {
-          await createAnnotation({
+        const invalidTimestampErr = await expectToReject<ApmApiError>(() =>
+          // @ts-expect-error
+          createAnnotation({
             '@timestamp': 'foo',
             message: 'foo',
-          });
-        } catch (error: unknown) {
-          const apiError = error as ApmApiError;
+          })
+        );
 
-          expect(apiError.res.status).eql(400);
-        }
+        expect(invalidTimestampErr.res.status).to.be(400);
 
-        try {
-          await createAnnotation({
+        const err = await expectToReject<ApmApiError>(() =>
+          // @ts-expect-error
+          createAnnotation({
             '@timestamp': new Date().toISOString(),
             message: 'New deployment',
-          });
-        } catch (error: unknown) {
-          const apiError = error as ApmApiError;
+          })
+        );
 
-          expect(apiError.res.status).eql(400);
-        }
+        expect(err.res.status).to.be(400);
       });
 
       it('completes with a 200 and the created annotation if data is complete and valid', async () => {

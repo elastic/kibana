@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { ApmApiError } from '../../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { expectToReject } from '../../../common/utils/expect_to_reject';
 
 export default function apiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -34,27 +35,19 @@ export default function apiTest({ getService }: FtrProviderContext) {
     describe('when user does not have read access to ML', () => {
       describe('when calling the endpoint for listing jobs', () => {
         it('returns an error because the user does not have access', async () => {
-          try {
-            await getJobs();
-          } catch (error: unknown) {
-            const apiError = error as ApmApiError;
+          const err = await expectToReject<ApmApiError>(() => getJobs());
 
-            expect(apiError.res.status).eql(403);
-            expect(apiError.res.body.message).eql('Forbidden');
-          }
+          expect(err.res.status).to.be(403);
+          expect(err.res.body.message).eql('Forbidden');
         });
       });
 
       describe('when calling create endpoint', () => {
         it('returns an error because the user does not have access', async () => {
-          try {
-            await createJobs(['production', 'staging']);
-          } catch (error: unknown) {
-            const apiError = error as ApmApiError;
+          const err = await expectToReject<ApmApiError>(() => createJobs(['production', 'staging']));
 
-            expect(apiError.res.status).eql(403);
-            expect(apiError.res.body.message).eql('Forbidden');
-          }
+          expect(err.res.status).to.be(403);
+          expect(err.res.body.message).eql('Forbidden');
         });
       });
     });
