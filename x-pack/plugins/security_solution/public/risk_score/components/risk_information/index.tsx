@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { getRiskEntityTranslation } from '../translations';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
@@ -139,7 +140,7 @@ const RiskInformationFlyout = ({
         <EuiSpacer size="l" />
         <FormattedMessage
           id="xpack.securitySolution.riskInformation.learnMore"
-          defaultMessage="You can learn more about user risk {riskScoreDocumentationLink}"
+          defaultMessage="You can learn more about {riskEntity} risk {riskScoreDocumentationLink}"
           values={{
             riskScoreDocumentationLink: (
               <RiskScoreDocLink
@@ -152,6 +153,7 @@ const RiskInformationFlyout = ({
                 }
               />
             ),
+            riskEntity: getRiskEntityTranslation(riskEntity, true),
           }}
         />
       </EuiFlyoutBody>
