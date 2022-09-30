@@ -123,3 +123,5 @@ export const BACK_TO_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';
 
 export const DEFINE_RULE_PANEL_PROGRESS =
   '[data-test-subj="defineRule"] [data-test-subj="stepPanelProgress"]';
+
+export const EDIT_RULE_SETTINGS_LINK = '[data-test-subj="editRuleSettingsLink"]';
