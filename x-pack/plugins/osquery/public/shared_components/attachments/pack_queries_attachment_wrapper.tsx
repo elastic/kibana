@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useLayoutEffect, useState } from 'react';
-import { useKibana } from '../../common/lib/kibana';
-import { getAddToTimeline } from '../../timelines/get_add_to_timeline';
+import React, { useLayoutEffect, useState } from 'react';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 
@@ -22,11 +20,7 @@ export const PackQueriesAttachmentWrapper = ({
   agentIds,
   queryId,
 }: PackQueriesAttachmentWrapperProps) => {
-  const {
-    services: { timelines, appName },
-  } = useKibana();
   const [isLive, setIsLive] = useState(false);
-  const addToTimelineButton = getAddToTimeline(timelines, appName);
 
   const { data } = useLiveQueryDetails({
     actionId,
@@ -38,17 +32,6 @@ export const PackQueriesAttachmentWrapper = ({
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
 
-  const addToTimeline = useCallback(
-    (payload) => {
-      if (!actionId || !addToTimelineButton) {
-        return <></>;
-      }
-
-      return addToTimelineButton(payload);
-    },
-    [actionId, addToTimelineButton]
-  );
-
   return (
     <PackQueriesStatusTable
       actionId={actionId}
@@ -58,7 +41,6 @@ export const PackQueriesAttachmentWrapper = ({
       expirationDate={data?.expiration}
       agentIds={agentIds}
       hideAddToCases={true}
-      addToTimeline={addToTimeline}
     />
   );
 };

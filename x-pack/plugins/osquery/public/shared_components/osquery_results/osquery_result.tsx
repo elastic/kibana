@@ -20,13 +20,7 @@ interface OsqueryResultProps extends Omit<OsqueryActionResultsProps, 'alertId'> 
   startDate: string;
 }
 
-export const OsqueryResult = ({
-  actionId,
-  ruleName,
-  addToTimeline,
-  agentIds,
-  startDate,
-}: OsqueryResultProps) => {
+export const OsqueryResult = ({ actionId, ruleName, agentIds, startDate }: OsqueryResultProps) => {
   const { data } = useLiveQueryDetails({
     actionId,
   });
@@ -47,7 +41,6 @@ export const OsqueryResult = ({
           startDate={data?.['@timestamp']}
           expirationDate={data?.expiration}
           agentIds={agentIds}
-          addToTimeline={addToTimeline}
         />
       </EuiComment>
       <EuiSpacer size="s" />

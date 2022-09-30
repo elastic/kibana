@@ -24,14 +24,12 @@ interface PackFieldWrapperProps {
     action_id?: string;
     agents?: string[];
   };
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
   submitButtonContent?: React.ReactNode;
   showResultsHeader?: boolean;
 }
 
 export const PackFieldWrapper = ({
   liveQueryDetails,
-  addToTimeline,
   submitButtonContent,
   showResultsHeader,
 }: PackFieldWrapperProps) => {
@@ -66,7 +64,6 @@ export const PackFieldWrapper = ({
               agentIds={agentIds}
               // @ts-expect-error update types
               data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
-              addToTimeline={addToTimeline}
               showResultsHeader={showResultsHeader}
             />
           </EuiFlexItem>

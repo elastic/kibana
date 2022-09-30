@@ -7,10 +7,8 @@
 
 import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { ReactElement } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import type { AddToTimelinePayload } from '../../../timelines/get_add_to_timeline';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 
@@ -21,7 +19,6 @@ interface ResultTabsProps {
   ecsMapping?: ECSMapping;
   failedAgentsCount?: number;
   endDate?: string;
-  addToTimeline?: (payload: AddToTimelinePayload) => ReactElement;
   liveQueryActionId?: string;
   hideAddToCases?: boolean;
 }
@@ -33,7 +30,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   endDate,
   failedAgentsCount,
   startDate,
-  addToTimeline,
   liveQueryActionId,
   hideAddToCases = false,
 }) => {
@@ -49,7 +45,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             ecsMapping={ecsMapping}
             startDate={startDate}
             endDate={endDate}
-            addToTimeline={addToTimeline}
             liveQueryActionId={liveQueryActionId}
             hideAddToCases={hideAddToCases}
           />
@@ -74,7 +69,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       ecsMapping,
       startDate,
       endDate,
-      addToTimeline,
       liveQueryActionId,
       hideAddToCases,
       failedAgentsCount,

@@ -28,13 +28,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import type { AddToTimelinePayload } from '../timelines/get_add_to_timeline';
+import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
 import { useActionResults } from '../action_results/use_action_results';
-import { generateEmptyDataMessage } from './translations';
+import { generateEmptyDataMessage, OSQUERY_APP_NAME } from './translations';
 import {
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
@@ -53,7 +53,6 @@ export interface ResultsTableComponentProps {
   ecsMapping?: ECSMapping;
   endDate?: string;
   startDate?: string;
-  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
   liveQueryActionId?: string;
   hideAddToCases: boolean;
 }
@@ -64,7 +63,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ecsMapping,
   startDate,
   endDate,
-  addToTimeline,
   liveQueryActionId,
   hideAddToCases,
 }) => {
@@ -85,7 +83,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     skip: !hasActionResultsPrivileges,
   });
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
-  const { getUrlForApp } = useKibana().services.application;
+  const {
+    application: { getUrlForApp },
+    appName,
+  } = useKibana().services;
 
   const getFleetAppUrl = useCallback(
     (agentId) =>
@@ -308,7 +309,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const data = allResultsData?.edges;
-    if (addToTimeline && data) {
+    if (data) {
       return [
         {
           id: 'timeline',
@@ -320,19 +321,19 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             };
             const eventId = data[visibleRowIndex]?._id;
 
-            return addToTimeline({ query: ['_id', eventId], isIcon: true });
+            return <AddToTimelineButton field="_id" value={eventId} isIcon={true} />;
           },
         },
       ];
     }
 
     return [];
-  }, [addToTimeline, allResultsData?.edges]);
+  }, [allResultsData?.edges]);
 
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
-      showFullScreenSelector: !addToTimeline,
+      showFullScreenSelector: appName === OSQUERY_APP_NAME,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -347,7 +348,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             endDate={endDate}
             startDate={startDate}
           />
-          {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
+          <AddToTimelineButton field="action_id" value={actionId} />
           <AddToCaseWrapper
             actionId={liveQueryActionId}
             queryId={actionId}
@@ -357,7 +358,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </>
       ),
     }),
-    [actionId, addToTimeline, agentIds, endDate, hideAddToCases, liveQueryActionId, startDate]
+    [actionId, agentIds, appName, endDate, hideAddToCases, liveQueryActionId, startDate]
   );
 
   useEffect(

@@ -6,7 +6,6 @@
  */
 
 import { get, map } from 'lodash';
-import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   EuiBasicTable,
@@ -24,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
@@ -33,6 +31,7 @@ import type { PackItem } from '../../packs/types';
 import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
 import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
+import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 
 const TruncateTooltipText = styled.div`
   width: 100%;
@@ -121,7 +120,6 @@ interface PackQueriesStatusTableProps {
   data?: PackQueryStatusItem[];
   startDate?: string;
   expirationDate?: string;
-  addToTimeline?: (payload: AddToTimelinePayload) => ReactElement;
   hideAddToCases?: boolean;
   showResultsHeader?: boolean;
 }
@@ -133,7 +131,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   data,
   startDate,
   expirationDate,
-  addToTimeline,
   hideAddToCases = false,
   showResultsHeader,
 }) => {
@@ -209,7 +206,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   endDate={expirationDate}
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
-                  addToTimeline={addToTimeline}
                   hideAddToCases={hideAddToCases}
                 />
               </EuiFlexItem>
@@ -220,7 +216,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [actionId, startDate, expirationDate, agentIds, addToTimeline, hideAddToCases]
+    [actionId, startDate, expirationDate, agentIds, hideAddToCases]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -249,8 +245,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           render: renderLensResultsAction,
         },
         {
-          render: (item: { action_id: string }) =>
-            addToTimeline && addToTimeline({ query: ['action_id', item.action_id], isIcon: true }),
+          render: (item: { action_id: string }) => (
+            <AddToTimelineButton field="action_id" value={item.action_id} isIcon={true} />
+          ),
         },
         {
           render: (item: { action_id: string }) => (
@@ -268,7 +265,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       return resultActions.map((action) => action.render(row));
     },
-    [actionId, addToTimeline, agentIds, renderDiscoverResultsAction, renderLensResultsAction]
+    [actionId, agentIds, hideAddToCases, renderDiscoverResultsAction, renderLensResultsAction]
   );
   const columns = useMemo(
     () => [

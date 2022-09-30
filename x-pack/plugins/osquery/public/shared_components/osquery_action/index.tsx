@@ -10,7 +10,6 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OsqueryEmptyPrompt, OsqueryNotAvailablePrompt } from '../prompts';
-import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { AGENT_STATUS_ERROR, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQuery } from '../../live_queries';
@@ -22,7 +21,6 @@ export interface OsqueryActionProps {
   defaultValues?: {};
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
@@ -30,7 +28,6 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   formType = 'simple',
   defaultValues,
   hideAgentsField,
-  addToTimeline,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
@@ -94,7 +91,6 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
       formType={formType}
       agentId={agentId}
       hideAgentsField={hideAgentsField}
-      addToTimeline={addToTimeline}
       {...defaultValues}
     />
   );
