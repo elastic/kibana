@@ -55,6 +55,7 @@ const EnableRiskScoreComponent = ({
         body={
           <>
             {text.body}
+            {` `}
             <RiskScoreDocLink riskScoreEntity={entityType} />
           </>
         }
