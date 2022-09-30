@@ -35,7 +35,6 @@ export const PackFieldWrapper = ({
   liveQueryDetails,
   addToTimeline,
   submitButtonContent,
-  addToCase,
   showResultsHeader,
 }: PackFieldWrapperProps) => {
   const { data: packsData } = usePacks({});
@@ -70,7 +69,6 @@ export const PackFieldWrapper = ({
               // @ts-expect-error update types
               data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
               addToTimeline={addToTimeline}
-              addToCase={addToCase}
               showResultsHeader={showResultsHeader}
             />
           </EuiFlexItem>

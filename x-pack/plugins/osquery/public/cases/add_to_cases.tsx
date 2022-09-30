@@ -6,22 +6,31 @@
  */
 
 import React from 'react';
+
 import { useKibana } from '../common/lib/kibana';
 import type { AddToCaseButtonProps } from './add_to_cases_button';
 import { AddToCaseButton } from './add_to_cases_button';
 
 const CASES_OWNER: string[] = [];
 
-export const AddToCaseWrapper: React.FC<AddToCaseButtonProps> = React.memo((props) => {
-  const { cases } = useKibana().services;
-  const casePermissions = cases.helpers.canUseCases();
-  const CasesContext = cases.ui.getCasesContext();
+type AddToCaseWRapperProps = Omit<AddToCaseButtonProps, 'actionId'>;
+export const AddToCaseWrapper: React.FC<AddToCaseWRapperProps & { actionId?: string }> = React.memo(
+  (props) => {
+    const { cases } = useKibana().services;
 
-  return (
-    <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
-      <AddToCaseButton {...props} />
-    </CasesContext>
-  );
-});
+    if (props.hideAddToCases || !props.actionId) {
+      return <></>;
+    }
+
+    const casePermissions = cases.helpers.canUseCases();
+    const CasesContext = cases.ui.getCasesContext();
+
+    return (
+      <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
+        <AddToCaseButton {...props} actionId={props.actionId} />
+      </CasesContext>
+    );
+  }
+);
 
 AddToCaseWrapper.displayName = 'AddToCaseWrapper';

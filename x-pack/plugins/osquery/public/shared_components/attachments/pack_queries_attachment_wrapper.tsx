@@ -12,7 +12,7 @@ import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_sta
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 
 interface PackQueriesAttachmentWrapperProps {
-  actionId?: string;
+  actionId: string;
   agentIds: string[];
   queryId: string;
 }
@@ -28,11 +28,13 @@ export const PackQueriesAttachmentWrapper = ({
   const [isLive, setIsLive] = useState(false);
   const addToTimelineButton = getAddToTimeline(timelines, appName);
 
+  console.log({ actionId, queryId });
   const { data } = useLiveQueryDetails({
     actionId,
     isLive,
     ...(queryId ? { queryIds: [queryId] } : {}),
   });
+  console.log({ data });
 
   useLayoutEffect(() => {
     setIsLive(() => !(data?.status === 'completed'));
@@ -57,6 +59,7 @@ export const PackQueriesAttachmentWrapper = ({
       startDate={data?.['@timestamp']}
       expirationDate={data?.expiration}
       agentIds={agentIds}
+      hideAddToCases={true}
       addToTimeline={addToTimeline}
     />
   );

@@ -32,6 +32,7 @@ import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
 import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
+import { AddToCaseWrapper } from '../../cases/add_to_cases';
 
 const TruncateTooltipText = styled.div`
   width: 100%;
@@ -121,17 +122,7 @@ interface PackQueriesStatusTableProps {
   startDate?: string;
   expirationDate?: string;
   addToTimeline?: (payload: AddToTimelinePayload) => ReactElement;
-  addToCase?: ({
-    actionId,
-    isIcon,
-    isDisabled,
-    queryId,
-  }: {
-    actionId?: string;
-    isIcon?: boolean;
-    isDisabled?: boolean;
-    queryId?: string;
-  }) => ReactElement;
+  hideAddToCases?: boolean;
   showResultsHeader?: boolean;
 }
 
@@ -143,7 +134,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   startDate,
   expirationDate,
   addToTimeline,
-  addToCase,
+  hideAddToCases = false,
   showResultsHeader,
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
@@ -199,22 +190,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderLensResultsAction = useCallback((item) => <PackViewInLensAction item={item} />, []);
-  const handleAddToCase = useCallback(
-    (payload: { actionId?: string; isIcon?: boolean; queryId: string }) =>
-      // eslint-disable-next-line react/display-name
-      () => {
-        if (addToCase) {
-          return addToCase({
-            actionId: payload.actionId,
-            isIcon: payload.isIcon,
-            queryId: payload.queryId,
-          });
-        }
 
-        return <></>;
-      },
-    [addToCase]
-  );
   const getHandleErrorsToggle = useCallback(
     (item) => () => {
       setItemIdToExpandedRowMap((prevValue) => {
@@ -226,6 +202,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
             <EuiFlexGroup gutterSize="xl">
               <EuiFlexItem>
                 <ResultTabs
+                  liveQueryActionId={actionId}
                   actionId={item.action_id}
                   startDate={startDate}
                   ecsMapping={item.ecs_mapping}
@@ -233,7 +210,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
                   addToTimeline={addToTimeline}
-                  addToCase={addToCase && handleAddToCase({ queryId: item.action_id, actionId })}
+                  hideAddToCases={hideAddToCases}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -243,7 +220,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [startDate, expirationDate, agentIds, addToTimeline, addToCase, handleAddToCase, actionId]
+    [actionId, startDate, expirationDate, agentIds, addToTimeline, hideAddToCases]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -276,20 +253,22 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
             addToTimeline && addToTimeline({ query: ['action_id', item.action_id], isIcon: true }),
         },
         {
-          render: (item: { action_id: string }) =>
-            addToCase &&
-            addToCase({
-              actionId,
-              queryId: item.action_id,
-              isIcon: true,
-              isDisabled: !item.action_id,
-            }),
+          render: (item: { action_id: string }) => (
+            <AddToCaseWrapper
+              hideAddToCases={hideAddToCases}
+              actionId={actionId}
+              agentIds={agentIds}
+              queryId={item.action_id}
+              isIcon={true}
+              isDisabled={!item.action_id}
+            />
+          ),
         },
       ];
 
       return resultActions.map((action) => action.render(row));
     },
-    [actionId, addToCase, addToTimeline, renderDiscoverResultsAction, renderLensResultsAction]
+    [actionId, addToTimeline, agentIds, renderDiscoverResultsAction, renderLensResultsAction]
   );
   const columns = useMemo(
     () => [
@@ -388,7 +367,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   return (
     <>
-      {showResultsHeader && <PackResultsHeader queryIds={queryIds} actionId={actionId} />}
+      {showResultsHeader && (
+        <PackResultsHeader queryIds={queryIds} actionId={actionId} agentIds={agentIds} />
+      )}
 
       <StyledEuiBasicTable
         items={data ?? EMPTY_ARRAY}

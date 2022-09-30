@@ -42,6 +42,7 @@ import {
 } from '../packs/pack_queries_status_table';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -53,7 +54,8 @@ export interface ResultsTableComponentProps {
   endDate?: string;
   startDate?: string;
   addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
-  addToCase?: ({ actionId }: { actionId?: string }) => React.ReactElement;
+  liveQueryActionId?: string;
+  hideAddToCases: boolean;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -63,7 +65,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
   addToTimeline,
-  addToCase,
+  liveQueryActionId,
+  hideAddToCases,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -345,11 +348,17 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             startDate={startDate}
           />
           {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
-          {addToCase && addToCase({ actionId })}
+          <AddToCaseWrapper
+            actionId={liveQueryActionId}
+            queryId={actionId}
+            agentIds={agentIds}
+            hideAddToCases={hideAddToCases}
+          />
+          {/* {addToCase && addToCase({ actionId })}*/}
         </>
       ),
     }),
-    [actionId, addToCase, addToTimeline, endDate, startDate]
+    [actionId, addToTimeline, agentIds, endDate, hideAddToCases, liveQueryActionId, startDate]
   );
 
   useEffect(
