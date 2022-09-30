@@ -108,6 +108,18 @@ export async function upgradeBatch(
     options.upgradeDurationSeconds
   );
 
+  await bulkUpdateAgents(
+    esClient,
+    agentsToUpdate.map((agent) => ({
+      agentId: agent.id,
+      data: {
+        upgraded_at: null,
+        upgrade_started_at: now,
+      },
+    })),
+    errors
+  );
+
   const actionId = options.actionId ?? uuid();
   const errorCount = Object.keys(errors).length;
   const total = options.total ?? agentsToUpdate.length + errorCount;
@@ -140,17 +152,6 @@ export async function upgradeBatch(
       }))
     );
   }
-
-  await bulkUpdateAgents(
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agentId: agent.id,
-      data: {
-        upgraded_at: null,
-        upgrade_started_at: now,
-      },
-    }))
-  );
 
   return {
     actionId,

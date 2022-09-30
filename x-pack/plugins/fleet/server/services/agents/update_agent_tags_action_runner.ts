@@ -90,7 +90,8 @@ export async function updateTagsBatch(
       data: {
         tags: getNewTags(agent),
       },
-    }))
+    })),
+    errors
   );
 
   const actionId = options.actionId ?? uuid();
