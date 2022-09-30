@@ -18,7 +18,7 @@ export const urlAllowListValidator = <T>(urlKey: string) => {
       configurationUtilities.ensureUriAllowed(url);
     } catch (allowListError) {
       throw new Error(
-        i18n.translate('xpack.stackConnectors.subActionsFramework.urlValidationError', {
+        i18n.translate('xpack.actions.subActionsFramework.urlValidationError', {
           defaultMessage: 'error validating url: {message}',
           values: {
             message: allowListError.message,
