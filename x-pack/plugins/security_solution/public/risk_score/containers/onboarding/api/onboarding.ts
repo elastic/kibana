@@ -9,8 +9,13 @@ import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core
 
 import { INTERNAL_RISK_SCORE_URL } from '../../../../../common/constants';
 
-import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { INSTALLATION_ERROR } from './translations';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import {
+  HOST_RISK_SCORES_ENABLED_TITLE,
+  INSTALLATION_ERROR,
+  RISK_SCORES_ENABLED_TEXT,
+  USER_RISK_SCORES_ENABLED_TITLE,
+} from './translations';
 
 interface Options {
   riskScoreEntity: RiskScoreEntity;
@@ -44,13 +49,14 @@ export const onboardingRiskScore = async ({
       signal,
     })
     .then((result) => {
-      const resp = Object.entries(result).reduce(
-        (acc, [key, res]) => {
+      const resp = result.reduce(
+        (acc, curr) => {
+          const [[key, res]] = Object.entries(curr);
           if (res.success) {
             return res.success != null ? { ...acc, success: [...acc.success, `${key}`] } : acc;
           } else {
             return res.error != null
-              ? { ...acc, error: [...acc.error, `${key}: ${res?.error?.error?.message}`] }
+              ? { ...acc, error: [...acc.error, `${key}: ${res?.error?.message}`] }
               : acc;
           }
         },
@@ -67,7 +73,11 @@ export const onboardingRiskScore = async ({
         });
       } else {
         notifications?.toasts?.addSuccess({
-          text: `${resp.success.join(', ')} installed`,
+          title:
+            options.riskScoreEntity === RiskScoreEntity.user
+              ? USER_RISK_SCORES_ENABLED_TITLE
+              : HOST_RISK_SCORES_ENABLED_TITLE,
+          text: RISK_SCORES_ENABLED_TEXT(resp.success.join(', ')),
           toastLifeTimeMs,
         });
       }

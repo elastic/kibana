@@ -16,12 +16,10 @@ export const createIngestPipeline = async ({
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  options: string | Pipeline;
+  options: Pipeline;
 }) => {
-  const pipeline = typeof options === 'string' ? JSON.parse(options) : options;
-
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { name, description, processors, version, on_failure } = pipeline;
+  const { name, description, processors, version, on_failure } = options;
 
   try {
     await esClient.ingest.putPipeline({

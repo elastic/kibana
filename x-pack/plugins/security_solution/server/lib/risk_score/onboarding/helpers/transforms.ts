@@ -73,7 +73,7 @@ export const createTransformIfNotExists = async (
   }
 };
 
-export const startTransformIfNotStarted = async (
+const checkTransformState = async (
   esClient: ElasticsearchClient,
   transformId: string,
   logger: Logger
@@ -95,40 +95,7 @@ export const startTransformIfNotStarted = async (
       };
     }
 
-    const fetchedTransformStats = transformStats.transforms[0];
-    if (fetchedTransformStats.state === 'stopped') {
-      try {
-        return await esClient.transform.startTransform({ transform_id: transformId });
-      } catch (startErr) {
-        const startError = transformError(startErr);
-
-        logger.error(`Failed starting transform ${transformId}: ${startError.message}`);
-        return {
-          [transformId]: {
-            success: false,
-            error: startError,
-          },
-        };
-      }
-    } else if (
-      fetchedTransformStats.state === 'stopping' ||
-      fetchedTransformStats.state === 'aborting' ||
-      fetchedTransformStats.state === 'failed'
-    ) {
-      logger.error(
-        `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
-      );
-      return {
-        [transformId]: {
-          success: false,
-          error: transformError(
-            new Error(
-              `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
-            )
-          ),
-        },
-      };
-    }
+    return transformStats.transforms[0];
   } catch (statsErr) {
     const statsError = transformError(statsErr);
 
@@ -140,4 +107,98 @@ export const startTransformIfNotStarted = async (
       },
     };
   }
+};
+
+export const startTransformIfNotStarted = async (
+  esClient: ElasticsearchClient,
+  transformId: string,
+  logger: Logger
+) => {
+  const fetchedTransformStats = await checkTransformState(esClient, transformId, logger);
+  if (fetchedTransformStats.state === 'stopped') {
+    try {
+      await esClient.transform.startTransform({ transform_id: transformId });
+      return { [transformId]: { success: true, error: null } };
+    } catch (startErr) {
+      const startError = transformError(startErr);
+
+      logger.error(`Failed starting transform ${transformId}: ${startError.message}`);
+      return {
+        [transformId]: {
+          success: false,
+          error: startError,
+        },
+      };
+    }
+  } else if (
+    fetchedTransformStats.state === 'stopping' ||
+    fetchedTransformStats.state === 'aborting' ||
+    fetchedTransformStats.state === 'failed'
+  ) {
+    logger.error(
+      `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
+    );
+    return {
+      [transformId]: {
+        success: false,
+        error: transformError(
+          new Error(
+            `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
+          )
+        ),
+      },
+    };
+  }
+};
+
+const stopTransform = async (
+  esClient: ElasticsearchClient,
+  transformId: string,
+  logger: Logger
+) => {
+  const fetchedTransformStats = await checkTransformState(esClient, transformId, logger);
+  if (fetchedTransformStats.state) {
+    try {
+      await esClient.transform.stopTransform({ transform_id: transformId });
+      return { [transformId]: { success: true, error: null } };
+    } catch (startErr) {
+      const startError = transformError(startErr);
+
+      logger.error(`Failed stopping transform ${transformId}: ${startError.message}`);
+      return {
+        [transformId]: {
+          success: false,
+          error: startError,
+        },
+      };
+    }
+  } else {
+    logger.error(
+      `Not stopping transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
+    );
+    return {
+      [transformId]: {
+        success: false,
+        error: transformError(
+          new Error(
+            `Not stopping transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
+          )
+        ),
+      },
+    };
+  }
+};
+
+export const restartTransform = (
+  esClient: ElasticsearchClient,
+  transformId: string,
+  logger: Logger
+) => {
+  return stopTransform(esClient, transformId, logger).then((result) => {
+    if (result[transformId].success) {
+      return startTransformIfNotStarted(esClient, transformId, logger);
+    } else {
+      return result;
+    }
+  });
 };

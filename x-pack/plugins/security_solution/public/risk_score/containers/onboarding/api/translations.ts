@@ -119,3 +119,23 @@ export const DELETE_SAVED_OBJECTS_FAILURE = i18n.translate(
     defaultMessage: `Failed to delete saved objects`,
   }
 );
+
+export const HOST_RISK_SCORES_ENABLED_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.hostRiskScoresEnabledTitle',
+  {
+    defaultMessage: `Host Risk Scores enabled`,
+  }
+);
+
+export const USER_RISK_SCORES_ENABLED_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.userRiskScoresEnabledTitle',
+  {
+    defaultMessage: `User Risk Scores enabled`,
+  }
+);
+
+export const RISK_SCORES_ENABLED_TEXT = (items: string) =>
+  i18n.translate('xpack.securitySolution.riskScore.savedObjects.bulkCreateSuccessTitle', {
+    values: { items },
+    defaultMessage: `{items} imported successfully`,
+  });

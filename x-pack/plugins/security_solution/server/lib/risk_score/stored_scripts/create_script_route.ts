@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { RISK_SCORE_CREATE_STORED_SCRIPT } from '../../../../common/constants';

@@ -11,10 +11,6 @@ import * as utils from '../../../../../common/utils/risk_score_modules';
 import type { inputsModel } from '../../../store';
 
 import {
-  createIngestPipeline,
-  createIndices,
-  createStoredScript,
-  createTransform,
   startTransforms,
   deleteStoredScripts,
   deleteTransforms,
@@ -26,9 +22,6 @@ import {
 } from '../../../../risk_score/containers/onboarding/api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
-  INSTALLATION_ERROR,
-  START_TRANSFORMS_ERROR_MESSAGE,
-  TRANSFORM_CREATION_ERROR_MESSAGE,
   TRANSFORM_DELETION_ERROR_MESSAGE,
   UNINSTALLATION_ERROR,
 } from '../../../../risk_score/containers/onboarding/api/translations';
@@ -138,6 +131,7 @@ const installHostRiskScoreModule = async ({
   await restartRiskScoreTransforms({
     http,
     notifications,
+    refetch,
     renderDocLink,
     riskScoreEntity: RiskScoreEntity.host,
     spaceId,
@@ -157,10 +151,10 @@ const installHostRiskScoreModule = async ({
       templateName: `${RiskScoreEntity.host}RiskScoreDashboards`,
     },
   });
-  console.log();
-  // if (refetch) {
-  //   refetch();
-  // }
+
+  if (refetch) {
+    refetch();
+  }
 };
 
 const installUserRiskScoreModule = async ({
@@ -273,10 +267,9 @@ const installUserRiskScoreModule = async ({
     theme,
   });
 
-  console.log();
-  // if (refetch) {
-  //   refetch();
-  // }
+  if (refetch) {
+    refetch();
+  }
 };
 
 export const installRiskScoreModule = async (settings: InstallRiskyScoreModule) => {

@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { Tag } from './utils';
 import { RISK_SCORE_TAG_DESCRIPTION, getRiskScoreTagName } from './utils';
@@ -39,9 +41,11 @@ export const findRiskScoreTag = async ({
 
 export const findOrCreateRiskScoreTag = async ({
   riskScoreEntity,
+  logger,
   savedObjectsClient,
   spaceId = 'default',
 }: {
+  logger: Logger;
   riskScoreEntity: RiskScoreEntity;
   savedObjectsClient: SavedObjectsClientContract;
   spaceId?: string;
@@ -61,15 +65,39 @@ export const findOrCreateRiskScoreTag = async ({
   };
 
   if (existingRiskScoreTag?.id != null) {
-    return tag;
+    logger.error(`${riskScoreEntity}RiskScoreDashboards already exists`);
+    return {
+      [`${riskScoreEntity}RiskScoreDashboards`]: {
+        success: false,
+        error: transformError(
+          new Error(`${riskScoreEntity}RiskScoreDashboards was not created as it already exists`)
+        ),
+      },
+    };
   } else {
-    const { id: tagId } = await savedObjectsClient.create('tag', {
-      name: tagName,
-      description: RISK_SCORE_TAG_DESCRIPTION,
-      color: '#6edb7f',
-    });
+    try {
+      const { id: tagId } = await savedObjectsClient.create('tag', {
+        name: tagName,
+        description: RISK_SCORE_TAG_DESCRIPTION,
+        color: '#6edb7f',
+      });
 
-    return { ...tag, id: tagId };
+      return { ...tag, id: tagId };
+    } catch (e) {
+      logger.error(
+        `${riskScoreEntity}RiskScoreDashboards cannot be installed as failed to create the tag`
+      );
+      return {
+        [`${riskScoreEntity}RiskScoreDashboards`]: {
+          success: false,
+          error: transformError(
+            new Error(
+              `${riskScoreEntity}RiskScoreDashboards was not created as failed to create the tag`
+            )
+          ),
+        },
+      };
+    }
   }
 };
 
