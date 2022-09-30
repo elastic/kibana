@@ -51,7 +51,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion"
+    "Defense Evasion",
+    "has_guide"
   ],
   "threat": [
     {
