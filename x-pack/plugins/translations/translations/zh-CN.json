@@ -25868,7 +25868,6 @@
     "xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip": "在当前选定的时间范围内具有相同值的告警的总计数。此值不受其他筛选影响。",
     "xpack.securitySolution.alertDetails.overview.highlightedFields.field": "字段",
     "xpack.securitySolution.alertDetails.overview.highlightedFields.value": "值",
-    "xpack.securitySolution.alertDetails.overview.hostRiskDataTitle": "主机风险数据",
     "xpack.securitySolution.alertDetails.overview.insights": "洞见",
     "xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_process_ancestry": "按进程体系列出相关告警",
     "xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_process_ancestry_error": "无法获取告警。",
