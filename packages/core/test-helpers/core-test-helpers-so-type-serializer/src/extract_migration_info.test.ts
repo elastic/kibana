@@ -23,22 +23,37 @@ const dummySchema = schema.object({});
 
 describe('extractMigrationInfo', () => {
   describe('simple fields', () => {
-    it('returns the name from the SO type', () => {
+    it('returns the `name` from the SO type', () => {
       const type = createType({ name: 'my-type' });
       const output = extractMigrationInfo(type);
       expect(output.name).toEqual('my-type');
     });
 
-    it('returns the namespaceType from the SO type', () => {
+    it('returns the `namespaceType` from the SO type', () => {
       const type = createType({ namespaceType: 'multiple-isolated' });
       const output = extractMigrationInfo(type);
       expect(output.namespaceType).toEqual('multiple-isolated');
     });
 
-    it('returns the convertToMultiNamespaceTypeVersion from the SO type', () => {
+    it('returns the `convertToMultiNamespaceTypeVersion` from the SO type', () => {
       const type = createType({ convertToMultiNamespaceTypeVersion: '6.6.6' });
       const output = extractMigrationInfo(type);
       expect(output.convertToMultiNamespaceTypeVersion).toEqual('6.6.6');
+    });
+
+    it('returns the `convertToAliasScript` from the SO type', () => {
+      const type = createType({ convertToAliasScript: 'some_value' });
+      const output = extractMigrationInfo(type);
+      expect(output.convertToAliasScript).toEqual('some_value');
+    });
+
+    it('returns true for `hasExcludeOnUpgrade` if the SO type specifies `excludeOnUpgrade`', () => {
+      expect(
+        extractMigrationInfo(createType({ excludeOnUpgrade: jest.fn() })).hasExcludeOnUpgrade
+      ).toEqual(true);
+      expect(
+        extractMigrationInfo(createType({ excludeOnUpgrade: undefined })).hasExcludeOnUpgrade
+      ).toEqual(false);
     });
   });
 

@@ -46,6 +46,16 @@ describe('getMigrationHash', () => {
         getMigrationHash(createType({ convertToMultiNamespaceTypeVersion: undefined }))
       ).not.toEqual(getMigrationHash(createType({ convertToMultiNamespaceTypeVersion: '6.6.6' })));
     });
+    it('returns different hashes if `convertToAliasScript` changes', () => {
+      expect(getMigrationHash(createType({ convertToAliasScript: undefined }))).not.toEqual(
+        getMigrationHash(createType({ convertToAliasScript: 'some_script' }))
+      );
+    });
+    it('returns different hashes if `excludeOnUpgrade` is defined or not', () => {
+      expect(getMigrationHash(createType({ excludeOnUpgrade: undefined }))).not.toEqual(
+        getMigrationHash(createType({ excludeOnUpgrade: jest.fn() }))
+      );
+    });
   });
 
   describe('migrations', () => {

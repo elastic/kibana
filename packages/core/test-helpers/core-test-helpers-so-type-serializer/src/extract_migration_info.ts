@@ -14,10 +14,12 @@ import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 export interface SavedObjectTypeMigrationInfo {
   name: string;
   namespaceType: SavedObjectsNamespaceType;
+  convertToAliasScript?: string;
   convertToMultiNamespaceTypeVersion?: string;
   migrationVersions: string[];
   schemaVersions: string[];
   mappings: Record<string, unknown>;
+  hasExcludeOnUpgrade: boolean;
 }
 
 /**
@@ -38,9 +40,11 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
   return {
     name: soType.name,
     namespaceType: soType.namespaceType,
+    convertToAliasScript: soType.convertToAliasScript,
     convertToMultiNamespaceTypeVersion: soType.convertToMultiNamespaceTypeVersion,
     migrationVersions,
     schemaVersions,
     mappings: getFlattenedObject(soType.mappings ?? {}),
+    hasExcludeOnUpgrade: !!soType.excludeOnUpgrade,
   };
 };

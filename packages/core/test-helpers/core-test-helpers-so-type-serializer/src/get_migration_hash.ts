@@ -20,6 +20,8 @@ export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigra
   const hashParts = [
     migInfo.name,
     migInfo.namespaceType,
+    migInfo.convertToAliasScript ?? 'none',
+    migInfo.hasExcludeOnUpgrade,
     migInfo.convertToMultiNamespaceTypeVersion ?? 'none',
     migInfo.migrationVersions.join(','),
     migInfo.schemaVersions.join(','),
