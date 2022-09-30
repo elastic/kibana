@@ -50,7 +50,7 @@ function ofName(
   timeScale: string | undefined,
   reducedTimeRange: string | undefined
 ) {
-  if (field?.customLabel) {
+  if (field?.customLabel && field?.type !== 'document') {
     return field.customLabel;
   }
 

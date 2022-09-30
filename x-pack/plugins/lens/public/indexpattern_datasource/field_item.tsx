@@ -97,6 +97,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     () =>
       filterManager
         ? (clickedField, values, operation) => {
+            closePopover();
             const newFilters = generateFilters(
               filterManager,
               clickedField,
@@ -105,7 +106,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               indexPattern
             );
             filterManager.addFilters(newFilters);
-            closePopover();
           }
         : undefined,
     [indexPattern, filterManager, closePopover]
@@ -115,8 +115,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     () =>
       editField && dataViewField.name !== DOCUMENT_FIELD_NAME
         ? (name: string) => {
-            editField(name);
             closePopover();
+            editField(name);
           }
         : undefined,
     [editField, closePopover, dataViewField.name]
@@ -126,8 +126,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     () =>
       removeField
         ? (name: string) => {
-            removeField(name);
             closePopover();
+            removeField(name);
           }
         : undefined,
     [removeField, closePopover]
@@ -147,8 +147,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   );
 
   const dropOntoWorkspaceAndClose = useCallback(() => {
-    dropOntoWorkspace(value);
     closePopover();
+    dropOntoWorkspace(value);
   }, [dropOntoWorkspace, closePopover, value]);
 
   const onDragStart = useCallback(() => {
