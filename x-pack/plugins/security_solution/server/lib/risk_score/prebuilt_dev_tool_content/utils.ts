@@ -33,7 +33,7 @@ const getRiskyHostPrebuiltDevToolsContent = ({ spaceId = 'default' }: { spaceId?
     createInitScriptOptions: getRiskHostCreateInitScriptOptions(spaceId, stringifyScript),
     createMapScriptOptions: getRiskHostCreateMapScriptOptions(spaceId, stringifyScript),
     createReduceScriptOptions: getRiskHostCreateReduceScriptOptions(spaceId, stringifyScript),
-    createIngestPipelineOptions: getRiskScoreIngestPipelineOptions(
+    createIngestPipelineOptions: getRiskScoreIngestPipelineOptions<true>(
       riskScoreEntity,
       spaceId,
       stringifyScript
@@ -70,7 +70,7 @@ const getRiskyUserPrebuiltDevToolsContent = ({ spaceId = 'default' }: { spaceId?
     createLevelScriptOptions: getRiskUserCreateLevelScriptOptions(spaceId, stringifyScript),
     createMapScriptOptions: getRiskUserCreateMapScriptOptions(spaceId, stringifyScript),
     createReduceScriptOptions: getRiskUserCreateReduceScriptOptions(spaceId, stringifyScript),
-    createIngestPipelineOptions: getRiskScoreIngestPipelineOptions(
+    createIngestPipelineOptions: getRiskScoreIngestPipelineOptions<true>(
       riskScoreEntity,
       spaceId,
       stringifyScript

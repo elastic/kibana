@@ -22,5 +22,10 @@ export const createIndex = async ({
   client: IScopedClusterClient;
   options: CreateEsIndexBodySchema;
 }) => {
-  await client.asCurrentUser.indices.create(options);
+  try {
+    await client.asCurrentUser.indices.create(options);
+    return { [options.index]: { success: true } };
+  } catch (error) {
+    return { [options.index]: { error } };
+  }
 };

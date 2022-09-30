@@ -32,5 +32,10 @@ export const createStoredScript = async ({
   client: IScopedClusterClient;
   options: CreateStoredScriptBodySchema;
 }) => {
-  await client.asCurrentUser.putScript(options);
+  try {
+    await client.asCurrentUser.putScript(options);
+    return { [options.id]: { success: true } };
+  } catch (error) {
+    return { [options.id]: { error } };
+  }
 };

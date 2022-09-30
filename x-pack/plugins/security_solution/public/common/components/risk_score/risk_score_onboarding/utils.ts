@@ -22,6 +22,7 @@ import {
   stopTransforms,
   bulkCreatePrebuiltSavedObjects,
   bulkDeletePrebuiltSavedObjects,
+  onboardingRiskScore,
 } from '../../../../risk_score/containers/onboarding/api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
@@ -61,79 +62,14 @@ const installHostRiskScoreModule = async ({
   theme,
   timerange,
 }: InstallRiskyScoreModule) => {
-  /**
-   * console_templates/enable_host_risk_score.console
-   * Step 1 Upload script: ml_hostriskscore_levels_script_{spaceId}
-   */
-  await createStoredScript({
+  await onboardingRiskScore({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskHostCreateLevelScriptOptions(spaceId),
-  });
-
-  /**
-   * console_templates/enable_host_risk_score.console
-   * Step 2 Upload script: ml_hostriskscore_init_script_{spaceId}
-   */
-  await createStoredScript({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    options: utils.getRiskHostCreateInitScriptOptions(spaceId),
-  });
-
-  /**
-   * console_templates/enable_host_risk_score.console
-   * Step 3 Upload script: ml_hostriskscore_map_script_{spaceId}
-   */
-  await createStoredScript({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    options: utils.getRiskHostCreateMapScriptOptions(spaceId),
-  });
-
-  /**
-   * console_templates/enable_host_risk_score.console
-   * Step 4 Upload script: ml_hostriskscore_reduce_script_{spaceId}
-   */
-  await createStoredScript({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    options: utils.getRiskHostCreateReduceScriptOptions(spaceId),
-  });
-
-  /**
-   * console_templates/enable_host_risk_score.console
-   * Step 5 Upload the ingest pipeline: ml_hostriskscore_ingest_pipeline_{spaceId}
-   */
-  await createIngestPipeline({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    options: utils.getRiskScoreIngestPipelineOptions(RiskScoreEntity.host, spaceId),
-  });
-
-  /**
-   * console_templates/enable_host_risk_score.console
-   * Step 6 create ml_host_risk_score_{spaceId} index
-   */
-  await createIndices({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    options: utils.getCreateRiskScoreIndicesOptions({
-      spaceId,
+    options: {
       riskScoreEntity: RiskScoreEntity.host,
-    }),
+    },
   });
 
   /**
@@ -152,17 +88,18 @@ const installHostRiskScoreModule = async ({
 
   /**
    * console_templates/enable_host_risk_score.console
-   * Step 9 create ml_host_risk_score_latest_{spaceId} index
+   * Step 8 Start the pivot transform
    */
-  await createIndices({
+  const pivotTransformId = [utils.getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId)];
+  await startTransforms({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getCreateRiskScoreLatestIndicesOptions({
-      spaceId,
-      riskScoreEntity: RiskScoreEntity.host,
-    }),
+    errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(
+      pivotTransformId.length
+    )}`,
+    transformIds: pivotTransformId,
   });
 
   /**
@@ -184,20 +121,18 @@ const installHostRiskScoreModule = async ({
 
   /**
    * console_templates/enable_host_risk_score.console
-   * Step 8 Start the pivot transform
    * Step 11 Start the latest transform
    */
-  const transformIds = [
-    utils.getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId),
-    utils.getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId),
-  ];
+  const latestTransformId = [utils.getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId)];
   await startTransforms({
     http,
     theme,
     renderDocLink,
     notifications,
-    errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(transformIds.length)}`,
-    transformIds,
+    errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(
+      latestTransformId.length
+    )}`,
+    transformIds: latestTransformId,
   });
 
   await restartRiskScoreTransforms({
@@ -223,10 +158,10 @@ const installHostRiskScoreModule = async ({
       templateName: `${RiskScoreEntity.host}RiskScoreDashboards`,
     },
   });
-
-  if (refetch) {
-    refetch();
-  }
+  console.log();
+  // if (refetch) {
+  //   refetch();
+  // }
 };
 
 const installUserRiskScoreModule = async ({
@@ -240,66 +175,14 @@ const installUserRiskScoreModule = async ({
   theme,
   timerange,
 }: InstallRiskyScoreModule) => {
-  /**
-   * console_templates/enable_user_risk_score.console
-   * Step 1 Upload script: ml_userriskscore_levels_script_{spaceId}
-   */
-  await createStoredScript({
+  await onboardingRiskScore({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskUserCreateLevelScriptOptions(spaceId),
-  });
-
-  /**
-   * console_templates/enable_user_risk_score.console
-   * Step 2 Upload script: ml_userriskscore_map_script_{spaceId}
-   */
-  await createStoredScript({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    options: utils.getRiskUserCreateMapScriptOptions(spaceId),
-  });
-
-  /**
-   * console_templates/enable_user_risk_score.console
-   * Step 3 Upload script: ml_userriskscore_reduce_script_{spaceId}
-   */
-  await createStoredScript({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    options: utils.getRiskUserCreateReduceScriptOptions(spaceId),
-  });
-
-  /**
-   * console_templates/enable_user_risk_score.console
-   * Step 4 Upload ingest pipeline: ml_userriskscore_ingest_pipeline_{spaceId}
-   */
-  await createIngestPipeline({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    options: utils.getRiskScoreIngestPipelineOptions(RiskScoreEntity.user, spaceId),
-  });
-  /**
-   * console_templates/enable_user_risk_score.console
-   * Step 5 create ml_user_risk_score_{spaceId} index
-   */
-  await createIndices({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    options: utils.getCreateRiskScoreIndicesOptions({
-      spaceId,
+    options: {
       riskScoreEntity: RiskScoreEntity.user,
-    }),
+    },
   });
 
   /**
@@ -318,17 +201,18 @@ const installUserRiskScoreModule = async ({
 
   /**
    * console_templates/enable_user_risk_score.console
-   * Step 8 create ml_user_risk_score_latest_{spaceId} index
+   * Step 7 Start the pivot transform
    */
-  await createIndices({
+  const pivotTransformId = [utils.getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId)];
+  await startTransforms({
+    errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(
+      pivotTransformId.length
+    )}`,
     http,
-    theme,
-    renderDocLink,
     notifications,
-    options: utils.getCreateRiskScoreLatestIndicesOptions({
-      spaceId,
-      riskScoreEntity: RiskScoreEntity.user,
-    }),
+    renderDocLink,
+    theme,
+    transformIds: pivotTransformId,
   });
 
   /**
@@ -349,20 +233,18 @@ const installUserRiskScoreModule = async ({
   });
   /**
    * console_templates/enable_user_risk_score.console
-   * Step 7 Start the pivot transform
    * Step 10 Start the latest transform
    */
-  const transformIds = [
-    utils.getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId),
-    utils.getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId),
-  ];
+  const latestTransformId = [utils.getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId)];
   await startTransforms({
-    errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(transformIds.length)}`,
+    errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(
+      latestTransformId.length
+    )}`,
     http,
     notifications,
     renderDocLink,
     theme,
-    transformIds,
+    transformIds: latestTransformId,
   });
 
   /**
@@ -393,9 +275,10 @@ const installUserRiskScoreModule = async ({
     theme,
   });
 
-  if (refetch) {
-    refetch();
-  }
+  console.log();
+  // if (refetch) {
+  //   refetch();
+  // }
 };
 
 export const installRiskScoreModule = async (settings: InstallRiskyScoreModule) => {
