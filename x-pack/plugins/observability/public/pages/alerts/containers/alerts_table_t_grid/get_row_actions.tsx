@@ -9,6 +9,7 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
 import { ObservabilityActions } from '../../components/observability_actions';
 import type { ObservabilityActionsProps } from '../../components/observability_actions';
+import type { ConfigSchema } from '../../../../plugin';
 
 const buildData = (alerts: EcsFieldsResponse): ObservabilityActionsProps['data'] => {
   return Object.entries(alerts).reduce<ObservabilityActionsProps['data']>(
@@ -17,7 +18,10 @@ const buildData = (alerts: EcsFieldsResponse): ObservabilityActionsProps['data']
   );
 };
 const fakeSetEventsDeleted = () => [];
-export const getRowActions = (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) => {
+export const getRowActions = (
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
+  config: ConfigSchema
+) => {
   return () => ({
     renderCustomActionsRow: (
       alert: EcsFieldsResponse,
@@ -33,6 +37,7 @@ export const getRowActions = (observabilityRuleTypeRegistry: ObservabilityRuleTy
           observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
           setEventsDeleted={fakeSetEventsDeleted}
           setFlyoutAlert={setFlyoutAlert}
+          config={config}
         />
       );
     },

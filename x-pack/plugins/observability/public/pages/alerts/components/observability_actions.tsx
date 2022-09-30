@@ -19,7 +19,6 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { ActionProps } from '@kbn/timelines-plugin/common';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { parseAlert } from './parse_alert';
@@ -33,6 +32,7 @@ import { RULE_DETAILS_PAGE_ID } from '../../rule_details/types';
 import type { TopAlert } from '../containers/alerts_page/types';
 import { ObservabilityRuleTypeRegistry } from '../../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/types';
+import { ConfigSchema } from '../../../plugin';
 
 export type ObservabilityActionsProps = Pick<
   ActionProps,
@@ -41,6 +41,7 @@ export type ObservabilityActionsProps = Pick<
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   id?: string;
+  config: ConfigSchema;
 };
 
 export function ObservabilityActions({
@@ -49,12 +50,12 @@ export function ObservabilityActions({
   ecsData,
   id: pageId,
   observabilityRuleTypeRegistry,
+  config,
   setFlyoutAlert,
 }: ObservabilityActionsProps) {
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const [openActionsPopoverId, setActionsPopover] = useState(null);
   const { cases, http } = useKibana<ObservabilityAppServices>().services;
-  const { config } = usePluginContext();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -108,7 +109,6 @@ export function ObservabilityActions({
     selectCaseModal.open({ attachments: caseAttachments });
     closeActionsPopover();
   }, [caseAttachments, closeActionsPopover, selectCaseModal]);
-
   const actionsMenuItems = useMemo(() => {
     return [
       ...(userCasesPermissions.create && userCasesPermissions.read
@@ -143,7 +143,7 @@ export function ObservabilityActions({
         : []),
 
       ...[
-        config.unsafe.alertDetails.enabled && linkToAlert ? (
+        config?.unsafe?.alertDetails.enabled && linkToAlert ? (
           <EuiContextMenuItem
             key="viewAlertDetailsPage"
             data-test-subj="viewAlertDetailsPage"

@@ -153,7 +153,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     timelines,
     application: { capabilities },
   } = useKibana<ObservabilityAppServices>().services;
-  const { observabilityRuleTypeRegistry } = usePluginContext();
+  const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
@@ -210,13 +210,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
                 setEventsDeleted={setEventsDeleted}
                 setFlyoutAlert={setFlyoutAlert}
                 observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+                config={config}
               />
             </EuiFlexGroup>
           );
         },
       },
     ];
-  }, [setEventsDeleted, observabilityRuleTypeRegistry]);
+  }, [setEventsDeleted, observabilityRuleTypeRegistry, config]);
 
   const onStateChange = useCallback(
     (state: TGridState) => {
