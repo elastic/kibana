@@ -34,3 +34,7 @@ export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInp
 export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSelectInput"]';
 
 export const FORM_VALIDATION_ERROR = '.euiFormErrorText';
+
+export const JSON_EDITOR = "[data-test-subj='actionJsonEditor']";
+
+export const INDEX_SELECTOR = "[data-test-subj='.index-siem-ActionTypeSelectOption']";

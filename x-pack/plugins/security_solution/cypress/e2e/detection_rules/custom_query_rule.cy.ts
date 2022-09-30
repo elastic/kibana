@@ -6,6 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
+import type { Mitre } from '../../objects/rule';
 import {
   getNewRule,
   getExistingRule,
@@ -13,6 +14,7 @@ import {
   getEditedRule,
   getNewOverrideRule,
 } from '../../objects/rule';
+import type { CompleteTimeline } from '../../objects/timeline';
 import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
 import {
@@ -37,6 +39,7 @@ import {
   RULE_NAME_INPUT,
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
   SCHEDULE_INTERVAL_UNITS_INPUT,
+  SCHEDULE_CONTINUE_BUTTON,
   SEVERITY_DROPDOWN,
   TAGS_CLEAR_BUTTON,
   TAGS_FIELD,
@@ -82,7 +85,7 @@ import {
   createAndEnableRule,
   fillAboutRule,
   fillAboutRuleAndContinue,
-  fillDefineCustomRuleWithImportedQueryAndContinue,
+  fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
   goToAboutStepTab,
   goToActionsStepTab,
@@ -102,19 +105,21 @@ describe('Custom query rules', () => {
     login();
   });
   describe('Custom detection rules creation', () => {
-    const expectedUrls = getNewRule().referenceUrls.join('');
-    const expectedFalsePositives = getNewRule().falsePositivesExamples.join('');
-    const expectedTags = getNewRule().tags.join('');
-    const expectedMitre = formatMitreAttackDescription(getNewRule().mitre);
+    const expectedUrls = getNewRule().referenceUrls?.join('');
+    const expectedFalsePositives = getNewRule().falsePositivesExamples?.join('');
+    const expectedTags = getNewRule().tags?.join('');
+    const mitreAttack = getNewRule().mitre as Mitre[];
+    const expectedMitre = formatMitreAttackDescription(mitreAttack);
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
+      const timeline = getNewRule().timeline as CompleteTimeline;
       deleteAlertsAndRules();
-      createTimeline(getNewRule().timeline).then((response) => {
+      createTimeline(timeline).then((response) => {
         cy.wrap({
           ...getNewRule(),
           timeline: {
-            ...getNewRule().timeline,
+            ...timeline,
             id: response.body.data.persistTimeline.timeline.savedObjectId,
           },
         }).as('rule');
@@ -123,7 +128,7 @@ describe('Custom query rules', () => {
 
     it('Creates and enables a new rule', function () {
       visit(RULE_CREATION);
-      fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
+      fillDefineCustomRuleAndContinue(this.rule);
       fillAboutRuleAndContinue(this.rule);
       fillScheduleRuleAndContinue(this.rule);
 
@@ -138,6 +143,7 @@ describe('Custom query rules', () => {
       cy.get(RULE_NAME_INPUT).invoke('val').should('eql', this.rule.name);
       cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
       cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
+      cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 
       createAndEnableRule();
 
@@ -176,11 +182,11 @@ describe('Custom query rules', () => {
       cy.get(SCHEDULE_DETAILS).within(() => {
         getDetails(RUNS_EVERY_DETAILS).should(
           'have.text',
-          `${getNewRule().runsEvery.interval}${getNewRule().runsEvery.type}`
+          `${getNewRule().runsEvery?.interval}${getNewRule().runsEvery?.type}`
         );
         getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
           'have.text',
-          `${getNewRule().lookBack.interval}${getNewRule().lookBack.type}`
+          `${getNewRule().lookBack?.interval}${getNewRule().lookBack?.type}`
         );
       });
 
@@ -293,7 +299,7 @@ describe('Custom query rules', () => {
 
     context('Edition', () => {
       const rule = getEditedRule();
-      const expectedEditedtags = rule.tags.join('');
+      const expectedEditedtags = rule.tags?.join('');
       const expectedEditedIndexPatterns =
         rule.dataSource.type === 'indexPatterns' &&
         rule.dataSource.index &&
@@ -343,7 +349,7 @@ describe('Custom query rules', () => {
         // expect about step to populate
         cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
         cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
-        cy.get(TAGS_FIELD).should('have.text', existingRule.tags.join(''));
+        cy.get(TAGS_FIELD).should('have.text', existingRule.tags?.join(''));
         cy.get(SEVERITY_DROPDOWN).should('have.text', existingRule.severity);
         cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', existingRule.riskScore);
 
