@@ -15,7 +15,7 @@ import {
 } from '@kbn/event-annotation-plugin/public';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
-import { isDraggedField } from '../../../utils';
+import { isDraggedDataViewField } from '../../../utils';
 import { layerTypes } from '../../../../common';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -185,7 +185,7 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
   const targetAnnotation = targetLayer.annotations.find(({ id }) => id === target.columnId);
   const targetDataView = frame.dataViews.indexPatterns[targetLayer.indexPatternId];
 
-  if (isDraggedField(source)) {
+  if (isDraggedDataViewField(source)) {
     const timeField = targetDataView.timeFieldName;
     switch (dropType) {
       case 'field_add':

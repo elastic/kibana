@@ -69,7 +69,7 @@ import {
   isColumnInvalid,
   cloneLayer,
 } from './utils';
-import { isDraggedField } from '../utils';
+import { isDraggedDataViewField } from '../utils';
 import { normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -613,7 +613,7 @@ export function getIndexPatternDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {
-      return isDraggedField(draggedField)
+      return isDraggedDataViewField(draggedField)
         ? getDatasourceSuggestionsForField(
             state,
             draggedField.indexPatternId,
