@@ -210,6 +210,7 @@ Sets the interval at which {kib} tries to remove expired and invalid sessions fr
 +
 TIP: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
+[float]
 [[security-encrypted-saved-objects-settings]]
 ==== Encrypted saved objects settings
 
@@ -217,10 +218,22 @@ These settings control the encryption of saved objects with sensitive data. For 
 
 
 [[xpack-encryptedSavedObjects-encryptionKey]] xpack.encryptedSavedObjects.encryptionKey::
-An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {es}. If not set, {kib} will generate a random key on startup, but certain features won't be available until you set the encryption key explicitly.
+An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {es}. Certain features won't be available until you set the encryption key explicitly.
 
 [[xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys]] xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys::
 An optional list of previously used encryption keys. Like <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>>, these must be at least 32 characters in length. {kib} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
+
+[float]
+[[security-reporting-settings]]
+==== Secure reporting settings
+
+These settings control the encryption of report data. For more details, refer to <<reporting-settings-kb>>.
+
+IMPORTANT: In high-availability deployments, make sure you use the same encryption key for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
+
+[[xpack-securitySettings-reporting-encryptionKey]] `xpack.reporting.encryptionKey`::
+An arbitrary string of at least 32 characters that is used to encrypt sensitive reporting data before being stored in {es}. By default, {kib} generates a random key when it starts, which causes pending reports to fail after restart. Configure `xpack.reporting.encryptionKey` to preserve the same key across multiple restarts and multiple {kib} instances.
+
 
 [float]
 [[audit-logging-settings]]
@@ -275,7 +288,7 @@ TIP: We recommend using `json` format to allow ingesting {kib} audit logs into {
 
 [float]
 [[audit-logging-file-appender,file appender]]
-==== File appender
+===== File appender
 
 The `file` appender writes to a file and can be configured using the following settings:
 
@@ -284,7 +297,7 @@ Required. Full file path the log file should be written to.
 
 [float]
 [[audit-logging-rolling-file-appender, rolling file appender]]
-==== Rolling file appender
+===== Rolling file appender
 
 The `rolling-file` appender writes to a file and rotates it using a rolling strategy, when a particular policy is triggered:
 
@@ -303,7 +316,7 @@ Refer to <<audit-logging-numeric-strategy>> for strategy specific settings.
 
 [float]
 [[audit-logging-size-limit-policy, size limit policy]]
-==== Size limit triggering policy
+===== Size limit triggering policy
 
 The `size-limit` triggering policy will rotate the file when it reaches a certain size:
 
@@ -312,7 +325,7 @@ Maximum size the log file should reach before a rollover should be performed. *D
 
 [float]
 [[audit-logging-time-interval-policy, time interval policy]]
-==== Time interval triggering policy
+===== Time interval triggering policy
 
 The `time-interval` triggering policy will rotate the file every given interval of time:
 
@@ -324,7 +337,7 @@ Whether the interval should be adjusted to cause the next rollover to occur on t
 
 [float]
 [[audit-logging-numeric-strategy, numeric strategy]]
-==== Numeric rolling strategy
+===== Numeric rolling strategy
 
 The `numeric` rolling strategy will suffix the log file with a given pattern when rolling over, and will retain a fixed number of rolled files:
 
@@ -336,7 +349,7 @@ Maximum number of files to keep. Once this number is reached, oldest files will 
 
 [float]
 [[audit-logging-pattern-layout, pattern layout]]
-==== Pattern layout
+===== Pattern layout
 
 The `pattern` layout outputs a string, formatted using a pattern with special placeholders, which will be replaced with data from the actual log message:
 
@@ -348,7 +361,7 @@ Optional. Set to `true` to enable highlighting log messages with colors.
 
 [float]
 [[audit-logging-ignore-filters]]
-==== Ignore filters
+===== Ignore filters
 
 xpack.security.audit.ignore_filters[] {ess-icon}::
 List of filters that determine which events should be excluded from the audit log. An event will get filtered out if at least one of the provided filters matches.
