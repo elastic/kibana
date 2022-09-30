@@ -51,7 +51,6 @@ export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
         <Settings
           showLegend
-          showLegendExtra
           legendPosition={Position.Right}
           legendSize={DEFAULT_LEGEND_SIZE}
           legendAction={({ label }) => <IndicatorBarchartLegendAction field={field} data={label} />}
