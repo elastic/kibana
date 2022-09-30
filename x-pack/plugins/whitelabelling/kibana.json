@@ -1,0 +1,16 @@
+{
+  "id": "whitelabelling",
+  "version": "kibana",
+  "description": "Contains all the key functionality of Kibana's unified search experience.Contains all the key functionality of Kibana's unified search experience.",
+  "owner": {
+    "name": "Whitelabelling",
+    "githubTeam": "shared-ux-tex"
+  },
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["licensing"],
+  "requiredBundles": [],
+  "configPath": [
+    "whitelabelling"
+  ]
+}

@@ -18,15 +18,21 @@ import './loading_indicator.scss';
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
+  customLogo?: string;
 }
 
-export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
+export class LoadingIndicator extends React.Component<
+  LoadingIndicatorProps,
+  { visible: boolean; customLogo: string | undefined }
+> {
   public static defaultProps = { showAsBar: false };
 
   private loadingCountSubscription?: Subscription;
+  // private customLogoSubscription?: Subscription;
 
   state = {
     visible: false,
+    customLogo: undefined,
   };
 
   private timer: any;
@@ -44,6 +50,12 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
         });
       }, 250);
     });
+    /*  if (this.props.customLogo$) {
+      this.customLogoSubscription = this.props.customLogo$.subscribe((customLogo) => {
+        debugger;
+        this.setState({ ...this.state, customLogo });
+      });
+    }*/
   }
 
   componentWillUnmount() {
@@ -52,6 +64,10 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       this.loadingCountSubscription.unsubscribe();
       this.loadingCountSubscription = undefined;
     }
+    /* if (this.customLogoSubscription) {
+      this.customLogoSubscription.unsubscribe();
+      this.customLogoSubscription = undefined;
+    }*/
   }
 
   render() {
@@ -76,7 +92,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       />
     ) : (
       <EuiIcon
-        type="logoElastic"
+        type={this.props.customLogo ? this.props.customLogo : 'logoElastic'}
         size="l"
         data-test-subj={testSubj}
         className="chrHeaderLogo__cluster"

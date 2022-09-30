@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import Url from 'url';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
-import { ElasticMark } from './elastic_mark';
+import { CustomLogo } from './elastic_mark';
 import { LoadingIndicator } from '../loading_indicator';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
@@ -83,9 +83,16 @@ interface Props {
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
   loadingCount$?: ReturnType<HttpStart['getLoadingCount$']>;
+  customLogo: string | undefined;
 }
 
-export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables }: Props) {
+export function HeaderLogo({
+  href,
+  navigateToApp,
+  customLogo,
+  loadingCount$,
+  ...observables
+}: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
 
@@ -99,8 +106,8 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator loadingCount$={loadingCount$!} />
-      <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
+      <LoadingIndicator loadingCount$={loadingCount$!} customLogo={customLogo} />
+      <CustomLogo className="chrHeaderLogo__mark" aria-hidden={true} />
     </a>
   );
 }

@@ -42,6 +42,7 @@ function mockProps() {
     basePath: http.basePath,
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
+    customLogo$: new BehaviorSubject(undefined),
     onIsLockedUpdate: () => {},
   };
 }
