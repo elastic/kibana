@@ -370,8 +370,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
       [indexPattern],
       getEsQueryConfig(services.uiSettings)
     );
-
-    if (!services.discover) {
+    if (!services.discover || !services.application.capabilities.discover.show) {
       return;
     }
     return services.discover.locator!.getRedirectUrl({
