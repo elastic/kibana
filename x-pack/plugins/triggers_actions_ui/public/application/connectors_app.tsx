@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import { Switch, Route, Redirect, Router } from 'react-router-dom';
+import { Switch, Route, Router } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,15 +31,14 @@ import {
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
+import { ConnectorsHome } from './connectors_home';
 
-const TriggersActionsUIHome = lazy(() => import('./home'));
-const RuleDetailsRoute = lazy(
-  () => import('./sections/rule_details/components/rule_details_route')
+const ActionsConnectorsList = lazy(
+  () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
 
 export interface TriggersAndActionsUiServices extends CoreStart {
@@ -73,10 +72,8 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { dataViews, uiSettings, theme$ } = deps;
-  const sections: Section[] = ['rules', 'logs', 'alerts'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
-  const sectionsRegex = sections.join('|');
   setDataViewsService(dataViews);
   return (
     <I18nProvider>
@@ -84,7 +81,9 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
-              <AppWithoutRouter sectionsRegex={sectionsRegex} />
+              <ConnectorsHome>
+                <AppWithoutRouter />
+              </ConnectorsHome>
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>
@@ -93,7 +92,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   );
 };
 
-export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
+export const AppWithoutRouter = () => {
   const {
     actions: { validateEmailAddresses },
   } = useKibana().services;
@@ -101,21 +100,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
       <Switch>
-        <Route
-          path={`/:section(${sectionsRegex})`}
-          component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
-        />
-        <Route
-          path={routeToRuleDetails}
-          component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
-        />
-        <Route
-          exact
-          path={legacyRouteToRuleDetails}
-          render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
-        />
-        <Redirect from={'/'} to="rules" />
-        <Redirect from={'/alerts'} to="rules" />
+        <Route path={'/'} component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')} />
       </Switch>
     </ConnectorProvider>
   );

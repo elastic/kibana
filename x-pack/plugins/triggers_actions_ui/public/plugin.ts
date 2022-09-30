@@ -179,7 +179,7 @@ export class Plugin
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-      defaultMessage: 'Rules and Connectors',
+      defaultMessage: 'Rules',
     });
     const featureDescription = i18n.translate(
       'xpack.triggersActionsUI.managementSection.displayDescription',
@@ -192,6 +192,15 @@ export class Plugin
       plugins.home.featureCatalogue.register({
         id: PLUGIN_ID,
         title: featureTitle,
+        description: featureDescription,
+        icon: 'watchesApp',
+        path: '/app/management/insightsAndAlerting/triggersActions',
+        showOnHomePage: false,
+        category: 'admin',
+      });
+      plugins.home.featureCatalogue.register({
+        id: 'triggersActionsConnectors',
+        title: 'Connectors',
         description: featureDescription,
         icon: 'watchesApp',
         path: '/app/management/insightsAndAlerting/triggersActions',
@@ -212,6 +221,53 @@ export class Plugin
         ];
 
         const { renderApp } = await import('./application/app');
+
+        // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+        // subset of this privilege are not authorized to access this endpoint and will receive a 404
+        // error that causes the Alerting view to fail to load.
+        let kibanaFeatures: KibanaFeature[];
+        try {
+          kibanaFeatures = await pluginsStart.features.getFeatures();
+        } catch (err) {
+          kibanaFeatures = [];
+        }
+
+        return renderApp({
+          ...coreStart,
+          actions: plugins.actions,
+          data: pluginsStart.data,
+          dataViews: pluginsStart.dataViews,
+          dataViewEditor: pluginsStart.dataViewEditor,
+          charts: pluginsStart.charts,
+          alerting: pluginsStart.alerting,
+          spaces: pluginsStart.spaces,
+          unifiedSearch: pluginsStart.unifiedSearch,
+          isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+          element: params.element,
+          theme$: params.theme$,
+          storage: new Storage(window.localStorage),
+          setBreadcrumbs: params.setBreadcrumbs,
+          history: params.history,
+          actionTypeRegistry,
+          ruleTypeRegistry,
+          alertsTableConfigurationRegistry,
+          kibanaFeatures,
+        });
+      },
+    });
+
+    plugins.management.sections.section.insightsAndAlerting.registerApp({
+      id: 'connectors',
+      title: 'Connectors',
+      order: 0,
+      async mount(params: ManagementAppMountParams) {
+        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+          CoreStart,
+          PluginsStart,
+          unknown
+        ];
+
+        const { renderApp } = await import('./application/connectors_app');
 
         // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
         // subset of this privilege are not authorized to access this endpoint and will receive a 404
