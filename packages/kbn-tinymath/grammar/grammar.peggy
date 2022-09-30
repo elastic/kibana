@@ -11,6 +11,32 @@
       max: location.end.offset
     }
   }
+
+  const symbolsToFn = {
+    '+': 'add', '-': 'subtract',
+    '*': 'multiply', '/': 'divide',
+    '<': 'lt', '>': 'gt', '==': 'eq',
+    '<=': 'lte', '>=': 'gte',
+  }
+
+  // Shared function for AST operations
+  function parseSymbol(left, rest){
+    const topLevel = rest.reduce((acc, [name, right]) => ({
+      type: 'function',
+      name: symbolsToFn[name],
+      args: [acc, right],
+    }), left);
+    if (typeof topLevel === 'object') {
+      topLevel.location = simpleLocation(location());
+      topLevel.text = text();
+    }
+    return topLevel;
+  }
+  
+  // op is always defined, while eq can be null for gt and lt cases
+  function getComparisonSymbol([op, eq]){
+    return symbolsToFn[op+(eq || '')];
+  }
 }
 
 start
@@ -71,38 +97,35 @@ Variable
 // expressions
 
 Expression
+  = Comparison 
+  / MathOperation
+  
+MathOperation 
   = AddSubtract
+  / MultiplyDivide
+  / Factor
+  
+Comparison
+  = _ left:MathOperation op:(('>' / '<')('=')? / '=''=') right:MathOperation _ {
+    return {
+      type: 'function',
+      name: getComparisonSymbol(op),
+      args: [left, right],
+      location: simpleLocation(location()),
+      text: text()
+    };
+  }
 
 AddSubtract
   = _ left:MultiplyDivide rest:(('+' / '-') MultiplyDivide)+ _ {
-    const topLevel = rest.reduce((acc, curr) => ({
-      type: 'function',
-      name: curr[0] === '+' ? 'add' : 'subtract',
-      args: [acc, curr[1]],
-    }), left);
-    if (typeof topLevel === 'object') {
-      topLevel.location = simpleLocation(location());
-      topLevel.text = text();
-    }
-    return topLevel;
+    return parseSymbol(left, rest, {'+': 'add', '-': 'subtract'});
   }
-  / MultiplyDivide
 
 MultiplyDivide
   = _ left:Factor rest:(('*' / '/') Factor)* _ {
-    const topLevel = rest.reduce((acc, curr) => ({
-      type: 'function',
-      name: curr[0] === '*' ? 'multiply' : 'divide',
-      args: [acc, curr[1]],
-    }), left);
-    if (typeof topLevel === 'object') {
-      topLevel.location = simpleLocation(location());
-      topLevel.text = text();
-    }
-    return topLevel;
+    return parseSymbol(left, rest, {'*': 'multiply', '/': 'divide'});
   }
-  / Factor
-
+ 
 Factor
   = Group
   / Function
