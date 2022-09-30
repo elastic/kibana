@@ -44,6 +44,7 @@ const { subtract } = require('./subtract');
 const { sum } = require('./sum');
 const { tan } = require('./tan');
 const { unique } = require('./unique');
+const { eq, lt, gt, lte, gte, ifelse } = require('./comparison');
 
 module.exports = {
   functions: {
@@ -61,6 +62,7 @@ module.exports = {
     first,
     fix,
     floor,
+    ifelse,
     last,
     log,
     log10,
@@ -85,5 +87,10 @@ module.exports = {
     sum,
     tan,
     unique,
+    eq,
+    lt,
+    gt,
+    lte,
+    gte,
   },
 };
