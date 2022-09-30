@@ -21,9 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   // FLAKY: https://github.com/elastic/kibana/issues/116061
-  describe.only('Export import saved objects between versions - 6.8.x -> 7.x', function () {
+  describe.skip('Export import saved objects between versions - 6.8.x -> 7.x', function () {
     beforeEach(async function () {
-      // await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare');
       await kibanaServer.uiSettings.replace({});
