@@ -10,19 +10,19 @@ exports[`TransactionActionMenu component matches the snapshot 1`] = `
       class="euiPopover__anchor css-16vtueo-render"
     >
       <button
-        class="euiButton euiButton--primary"
+        class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
         type="button"
       >
         <span
-          class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+          class="emotion-euiButtonDisplayContent-right"
         >
           <span
-            class="euiButtonContent__icon"
+            class="emotion-euiButtonDisplayContent__icon-m"
             color="inherit"
             data-euiicon-type="arrowDown"
           />
           <span
-            class="euiButton__text"
+            class="eui-textTruncate"
           >
             Investigate
           </span>
