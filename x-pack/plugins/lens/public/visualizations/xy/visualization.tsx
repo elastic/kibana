@@ -21,7 +21,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { generateId } from '../../id_generator';
 import {
-  isDraggedField,
+  isDraggedDataViewField,
   isOperationFromCompatibleGroup,
   isOperationFromTheSameGroup,
   renewIDs,
@@ -381,7 +381,7 @@ export const getXyVisualization = ({
       return;
     }
 
-    if (isDraggedField(dropProps.source)) {
+    if (isDraggedDataViewField(dropProps.source)) {
       if (dropProps.source.field.type === 'document') {
         return;
       }
