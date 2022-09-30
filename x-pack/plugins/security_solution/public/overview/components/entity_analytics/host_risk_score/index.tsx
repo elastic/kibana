@@ -37,6 +37,7 @@ import { RiskScoresNoDataDetected } from '../../../../common/components/risk_sco
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
+import * as commonI18n from '../common/translations';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
@@ -161,6 +162,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
           id={TABLE_QUERY_ID}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
+          tooltip={commonI18n.HOST_RISK_TABLE_TOOLTIP}
         >
           {toggleStatus && (
             <EuiFlexGroup alignItems="center" gutterSize="m">

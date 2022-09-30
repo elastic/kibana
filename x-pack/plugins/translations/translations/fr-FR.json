@@ -28301,7 +28301,6 @@
     "xpack.securitySolution.exceptions.referenceModalCancelButton": "Annuler",
     "xpack.securitySolution.exceptions.referenceModalDeleteButton": "Retirer la liste d'exceptions",
     "xpack.securitySolution.exceptions.referenceModalTitle": "Retirer la liste d'exceptions",
-    "xpack.securitySolution.exceptions.searchPlaceholder": "par ex. Exemple de liste de noms",
     "xpack.securitySolution.exceptions.viewer.addCommentPlaceholder": "Ajouter un nouveau commentaire...",
     "xpack.securitySolution.exceptions.viewer.addToClipboard": "Commentaire",
     "xpack.securitySolution.exceptions.viewer.addToDetectionsListLabel": "Ajouter une exception à une règle",
