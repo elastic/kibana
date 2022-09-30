@@ -92,8 +92,6 @@ export function DashboardApp({
   useEffect(() => {
     onAppLeave((actions) => {
       if (dashboardAppState.hasUnsavedChanges && !getStateTransfer().isTransferInProgress) {
-        // eslint-disable-next-line no-console
-        console.log('leaving app');
         return actions.confirm(
           leaveConfirmStrings.getLeaveSubtitle(),
           leaveConfirmStrings.getLeaveTitle()
@@ -102,8 +100,6 @@ export function DashboardApp({
       return actions.default();
     });
     return () => {
-      // eslint-disable-next-line no-console
-      console.log('unmounting');
       // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
       onAppLeave((actions) => actions.default());
     };
