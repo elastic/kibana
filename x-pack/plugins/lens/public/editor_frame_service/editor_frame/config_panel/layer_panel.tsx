@@ -322,7 +322,7 @@ export function LayerPanel(
           isOnlyLayer,
           isTextBasedLanguage,
           onCloneLayer,
-          onRemoveLayer,
+          onRemoveLayer: () => onRemoveLayer(layerId),
         }),
       ].filter((i) => i.isCompatible),
     [
