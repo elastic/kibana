@@ -23,7 +23,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   className?: string;
   services: UnifiedHistogramServices;
   status: UnifiedHistogramStatus;
-  hits: number;
+  hits?: number;
   histogram?: UnifiedHistogramContext;
   resizeRef: RefObject<HTMLDivElement>;
   topPanelHeight?: number;
@@ -87,7 +87,7 @@ export const UnifiedHistogramLayout = ({
           className={chartClassName}
           services={services}
           status={status}
-          hits={hits}
+          hits={hits ?? 0}
           histogram={histogram}
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}

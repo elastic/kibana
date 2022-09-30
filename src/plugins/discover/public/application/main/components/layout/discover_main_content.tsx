@@ -7,6 +7,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -15,22 +16,29 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import React, { RefObject, useCallback, useMemo, useState } from 'react';
+import React, { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import { Panels, PANELS_MODE } from '@kbn/unified-histogram-plugin/public';
+import { Panels, PANELS_MODE, UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
+import { DataChartsMessage, DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DiscoverChart } from '../chart';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
+import {
+  getVisualizeInformation,
+  triggerVisualizeActions,
+} from '../sidebar/lib/visualize_trigger_utils';
+import { useDataState } from '../../hooks/use_data_state';
 
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
@@ -76,7 +84,7 @@ export const DiscoverMainContent = ({
   columns,
   resizeRef,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric, storage } = useDiscoverServices();
+  const { trackUiMetric, storage, data, theme, uiSettings, fieldFormats } = useDiscoverServices();
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -110,9 +118,10 @@ export const DiscoverMainContent = ({
   const minTopPanelHeight = euiTheme.base * 8;
   const minMainPanelHeight = euiTheme.base * 10;
 
-  const [topPanelHeight, setTopPanelHeight] = useState(
-    Number(storage.get(HISTOGRAM_HEIGHT_KEY)) || defaultTopPanelHeight
-  );
+  const [topPanelHeight, setTopPanelHeight] = useState(() => {
+    const storedHeight = storage.get(HISTOGRAM_HEIGHT_KEY);
+    return storedHeight ? Number(storedHeight) : undefined;
+  });
 
   const storeTopPanelHeight = useCallback(
     (newTopPanelHeight: number) => {
@@ -144,6 +153,120 @@ export const DiscoverMainContent = ({
     : showFixedPanels
     ? PANELS_MODE.FIXED
     : PANELS_MODE.RESIZABLE;
+
+  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
+  const [canVisualize, setCanVisualize] = useState(false);
+
+  useEffect(() => {
+    if (!timeField) return;
+    getVisualizeInformation(timeField, dataView, savedSearch.columns || []).then((info) => {
+      setCanVisualize(Boolean(info));
+    });
+  }, [dataView, savedSearch.columns, timeField]);
+
+  const onEditVisualization = useCallback(() => {
+    if (!timeField) {
+      return;
+    }
+    triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
+  }, [dataView, savedSearch.columns, timeField]);
+
+  const {
+    chartData,
+    bucketInterval,
+    fetchStatus: chartFetchStatus,
+    error,
+  } = useDataState(savedSearchData$.charts$);
+
+  const { result: hits, fetchStatus: hitsFetchStatus } = useDataState(savedSearchData$.totalHits$);
+
+  const histogram = {
+    hidden: hideChart,
+    timeInterval: state.interval,
+    bucketInterval,
+    chart: chartData,
+    error,
+  };
+
+  return (
+    <UnifiedHistogramLayout
+      className="dscPageContent__inner"
+      services={{ data, theme, uiSettings, fieldFormats }}
+      status={}
+      hits={hits}
+      histogram={histogram}
+      resizeRef={resizeRef}
+      topPanelHeight={topPanelHeight}
+      appendHitsCounter={
+        savedSearch?.id ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="refresh"
+              data-test-subj="resetSavedSearch"
+              onClick={resetSavedSearch}
+              size="s"
+              aria-label={i18n.translate('discover.reloadSavedSearchButton', {
+                defaultMessage: 'Reset search',
+              })}
+            >
+              <FormattedMessage
+                id="discover.reloadSavedSearchButton"
+                defaultMessage="Reset search"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : undefined
+      }
+      onTopPanelHeightChange={onTopPanelHeightChange}
+      onEditVisualization={canVisualize ? onEditVisualization : undefined}
+      onResetChartHeight={resetTopPanelHeight}
+      onHideChartChange={(newHideChart) => stateContainer.setAppState({ hideChart: newHideChart })}
+      onIntervalChange={(newInterval) => stateContainer.setAppState({ interval: newInterval })}
+    >
+      <EuiFlexGroup
+        className="eui-fullHeight"
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+      >
+        {!isPlainRecord && (
+          <EuiFlexItem grow={false}>
+            {!showFixedPanels && <EuiSpacer size="s" />}
+            <EuiHorizontalRule margin="none" />
+            <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
+          </EuiFlexItem>
+        )}
+        {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+          <DiscoverDocuments
+            documents$={savedSearchData$.documents$}
+            expandedDoc={expandedDoc}
+            dataView={dataView}
+            navigateTo={navigateTo}
+            onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+            savedSearch={savedSearch}
+            setExpandedDoc={setExpandedDoc}
+            state={state}
+            stateContainer={stateContainer}
+            onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+          />
+        ) : (
+          <FieldStatisticsTableMemoized
+            availableFields$={savedSearchData$.availableFields$}
+            savedSearch={savedSearch}
+            dataView={dataView}
+            query={state.query}
+            filters={state.filters}
+            columns={columns}
+            stateContainer={stateContainer}
+            onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+            trackUiMetric={trackUiMetric}
+            savedSearchRefetch$={savedSearchRefetch$}
+            savedSearchDataTotalHits$={savedSearchData$.totalHits$}
+          />
+        )}
+      </EuiFlexGroup>
+    </UnifiedHistogramLayout>
+  );
 
   return (
     <>
