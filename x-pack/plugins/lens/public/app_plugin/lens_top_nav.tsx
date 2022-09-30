@@ -382,24 +382,6 @@ export const LensTopNavMenu = ({
   }, [query]);
 
   useEffect(() => {
-    if (
-      initialContext &&
-      isOfAggregateQueryType(query) &&
-      'dataViewSpec' in initialContext &&
-      allLoaded
-    ) {
-      dispatch(
-        switchAndCleanDatasource({
-          newDatasourceId: 'textBasedLanguages',
-          visualizationId: visualization?.activeId,
-          currentIndexPatternId: initialContext.dataViewSpec.id,
-          isFromContext: true,
-        })
-      );
-    }
-  }, [allLoaded, dispatch, initialContext, query, visualization?.activeId]);
-
-  useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
       closeFieldEditor.current?.();
