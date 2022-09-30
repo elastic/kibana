@@ -1562,12 +1562,14 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
               groupId: 'x',
               layerId: 'first',
               filterOperations: (op: OperationMetadata) => op.isBucketed,
+              indexPatternId: 'indexPattern1',
             },
             target: {
               filterOperations: (op: OperationMetadata) => op.isBucketed,
               columnId: 'newCol',
               groupId: 'x',
               layerId: 'second',
+              indexPatternId: 'indexPattern1',
             },
             dimensionGroups: defaultDimensionGroups,
             dropType: 'move_compatible',
@@ -2161,6 +2163,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
               groupId: 'y',
               layerId: 'second',
               filterOperations: (op) => !op.isBucketed,
+              indexPatternId: 'test',
             },
           };
 
@@ -2224,6 +2227,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
                 groupId: 'y',
                 layerId: 'second',
                 filterOperations: (op) => !op.isBucketed,
+                indexPatternId: 'test',
               },
             })
           ).toEqual(true);

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isDraggedField } from '../../../utils';
 import {
   DatasourceDimensionDropHandlerProps,
   DragDropOperation,
@@ -12,6 +13,7 @@ import {
   isOperation,
   StateSetter,
   VisualizationDimensionGroupConfig,
+  DraggedField,
 } from '../../../types';
 import {
   insertOrReplaceColumn,
@@ -25,9 +27,8 @@ import {
   deleteColumnInLayers,
 } from '../../operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
-import { isDraggedField } from '../../pure_utils';
 import { getNewOperation, getField } from './get_drop_props';
-import { IndexPatternPrivateState, DraggedField, DataViewDragDropOperation } from '../../types';
+import { IndexPatternPrivateState, DataViewDragDropOperation } from '../../types';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
   state: IndexPatternPrivateState;

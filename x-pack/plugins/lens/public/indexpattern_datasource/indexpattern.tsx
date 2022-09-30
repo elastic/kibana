@@ -69,7 +69,8 @@ import {
   isColumnInvalid,
   cloneLayer,
 } from './utils';
-import { normalizeOperationDataType, isDraggedField } from './pure_utils';
+import { isDraggedField } from '../utils';
+import { normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
@@ -177,10 +178,6 @@ export function getIndexPatternDatasource({
 
     getPersistableState(state: IndexPatternPrivateState) {
       return extractReferences(state);
-    },
-
-    getCurrentIndexPatternId(state: IndexPatternPrivateState) {
-      return state.currentIndexPatternId;
     },
 
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
@@ -778,7 +775,10 @@ export function getIndexPatternDatasource({
         injectReferences(persistableState1, references1),
         injectReferences(persistableState2, references2)
       ),
-    getUsedDataView: (state: IndexPatternPrivateState, layerId: string) => {
+    getUsedDataView: (state: IndexPatternPrivateState, layerId?: string) => {
+      if (!layerId) {
+        return state.currentIndexPatternId;
+      }
       return state.layers[layerId].indexPatternId;
     },
     getUsedDataViews: (state) => {

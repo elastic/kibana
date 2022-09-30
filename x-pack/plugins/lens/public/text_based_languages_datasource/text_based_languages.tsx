@@ -224,10 +224,6 @@ export function getTextBasedLanguagesDatasource({
     getLayers(state: TextBasedLanguagesPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
-    getCurrentIndexPatternId(state: TextBasedLanguagesPrivateState) {
-      const layers = Object.values(state.layers);
-      return layers?.[0]?.index;
-    },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
       const { layers } = state;
@@ -238,7 +234,11 @@ export function getTextBasedLanguagesDatasource({
         })
       );
     },
-    getUsedDataView: (state: TextBasedLanguagesPrivateState, layerId: string) => {
+    getUsedDataView: (state: TextBasedLanguagesPrivateState, layerId?: string) => {
+      if (!layerId) {
+        const layers = Object.values(state.layers);
+        return layers?.[0]?.index;
+      }
       return state.layers[layerId].index;
     },
 
