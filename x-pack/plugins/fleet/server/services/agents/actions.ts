@@ -246,7 +246,8 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
             upgraded_at: null,
             upgrade_started_at: null,
           },
-        }))
+        })),
+        {}
       );
     }
   }
