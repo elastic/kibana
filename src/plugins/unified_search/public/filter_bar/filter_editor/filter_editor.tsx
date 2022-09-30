@@ -176,6 +176,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
                   onClick={this.onSubmit}
                   isDisabled={!this.isFilterValid()}
                   data-test-subj="saveFilter"
+                  style={{ position: 'relative' }}
                 >
                   {this.props.mode === 'add' ? addButtonLabel : updateButtonLabel}
                 </EuiButton>
@@ -185,6 +186,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
                   flush="right"
                   onClick={this.props.onCancel}
                   data-test-subj="cancelSaveFilter"
+                  style={{ position: 'relative' }}
                 >
                   <FormattedMessage
                     id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
