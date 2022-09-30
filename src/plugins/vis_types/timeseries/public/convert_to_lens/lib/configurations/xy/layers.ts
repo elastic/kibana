@@ -63,7 +63,7 @@ function getColor(
 }
 
 function nonNullable<T>(value: T): value is NonNullable<T> {
-  return value !== null && value !== undefined;
+  return value != null;
 }
 
 export const getLayers = async (
@@ -132,16 +132,22 @@ export const getLayers = async (
     return nonAnnotationsLayers;
   }
 
-  const annotationsByIndexPattern = groupBy(
-    model.annotations,
-    (a) => typeof a.index_pattern === 'object' && 'id' in a.index_pattern && a.index_pattern.id
-  );
+  const annotationsByIndexPatternAndIgnoreFlag = groupBy(model.annotations, (a) => {
+    const id = typeof a.index_pattern === 'object' && 'id' in a.index_pattern && a.index_pattern.id;
+    return `${id}-${Boolean(a.ignore_global_filters)}`;
+  });
 
   try {
     const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
-      Object.entries(annotationsByIndexPattern).map(async ([indexPatternId, annotations]) => {
+      Object.values(annotationsByIndexPatternAndIgnoreFlag).map(async (annotations) => {
+        const [firstAnnotation] = annotations;
+        const indexPatternId =
+          typeof firstAnnotation.index_pattern === 'string'
+            ? firstAnnotation.index_pattern
+            : firstAnnotation.index_pattern?.id;
         const convertedAnnotations: EventAnnotationConfig[] = [];
-        const { indexPattern } = (await fetchIndexPattern({ id: indexPatternId }, dataViews)) || {};
+        const { indexPattern } =
+          (await fetchIndexPattern(indexPatternId && { id: indexPatternId }, dataViews)) || {};
 
         if (indexPattern) {
           annotations.forEach((a: Annotation) => {
@@ -153,9 +159,9 @@ export const getLayers = async (
           return {
             layerId: v4(),
             layerType: 'annotations',
-            ignoreGlobalFilters: true,
+            ignoreGlobalFilters: Boolean(firstAnnotation.ignore_global_filters),
             annotations: convertedAnnotations,
-            indexPatternId,
+            indexPatternId: indexPattern.id!,
           };
         }
       })
@@ -173,7 +179,7 @@ const convertAnnotation = (
 ): EventAnnotationConfig | undefined => {
   const extraFields = annotation.fields
     ?.replace(/\s/g, '')
-    ?.split(',')
+    .split(',')
     .map((field) => {
       const dataViewField = dataView.getFieldByName(field);
       return dataViewField && dataViewField.aggregatable ? field : undefined;

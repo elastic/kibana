@@ -43,6 +43,7 @@ import {
   selectDatasourceStates,
 } from '../../../state_management';
 import { onDropForVisualization } from './buttons/drop_targets_utils';
+import { getSharedActions } from './layer_actions/layer_actions';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -310,6 +311,39 @@ export function LayerPanel(
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage = Boolean(datasource?.isTextBasedLanguage());
 
+  const compatibleActions = useMemo(
+    () =>
+      [
+        ...(activeVisualization.getSupportedActionsForLayer?.(
+          layerId,
+          visualizationState,
+          updateVisualization
+        ) || []),
+        ...getSharedActions({
+          activeVisualization,
+          core,
+          layerIndex,
+          layerType: activeVisualization.getLayerType(layerId, visualizationState),
+          isOnlyLayer,
+          isTextBasedLanguage,
+          onCloneLayer,
+          onRemoveLayer,
+        }),
+      ].filter((i) => i.isCompatible),
+    [
+      activeVisualization,
+      core,
+      isOnlyLayer,
+      isTextBasedLanguage,
+      layerId,
+      layerIndex,
+      onCloneLayer,
+      onRemoveLayer,
+      updateVisualization,
+      visualizationState,
+    ]
+  );
+
   return (
     <>
       <section tabIndex={-1} ref={registerLayerRef} className="lnsLayerPanel">
@@ -332,16 +366,7 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LayerActions
-                  layerIndex={layerIndex}
-                  isOnlyLayer={isOnlyLayer}
-                  activeVisualization={activeVisualization}
-                  layerType={activeVisualization.getLayerType(layerId, visualizationState)}
-                  onRemoveLayer={onRemoveLayer}
-                  onCloneLayer={onCloneLayer}
-                  isTextBasedLanguage={isTextBasedLanguage}
-                  core={core}
-                />
+                <LayerActions actions={compatibleActions} layerIndex={layerIndex} />
               </EuiFlexItem>
             </EuiFlexGroup>
             {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}

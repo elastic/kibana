@@ -22,10 +22,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { LayerAction } from './types';
-import { Visualization } from '../../../../types';
+import type { LayerAction, Visualization } from '../../../../types';
 import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
-import { LayerType, layerTypes } from '../../../..';
+import { type LayerType, layerTypes } from '../../../..';
 
 interface RemoveLayerAction {
   execute: () => void;
