@@ -254,16 +254,6 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     if (!hit._source || !hit._source.agents || !hit._source.action_id) {
       continue;
     }
-    await createAgentAction(esClient, {
-      id: cancelActionId,
-      type: 'CANCEL',
-      agents: hit._source.agents,
-      data: {
-        target_id: hit._source.action_id,
-      },
-      created_at: now,
-      expiration: hit._source.expiration,
-    });
     if (hit._source.type === 'UPGRADE') {
       await bulkUpdateAgents(
         esClient,
@@ -277,6 +267,16 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
         {}
       );
     }
+    await createAgentAction(esClient, {
+      id: cancelActionId,
+      type: 'CANCEL',
+      agents: hit._source.agents,
+      data: {
+        target_id: hit._source.action_id,
+      },
+      created_at: now,
+      expiration: hit._source.expiration,
+    });
   }
 
   return {
