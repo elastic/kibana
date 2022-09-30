@@ -23,7 +23,6 @@ import {
   FieldStats,
   FieldPopover,
   FieldPopoverHeader,
-  FieldPopoverHeaderProps,
   FieldPopoverVisualize,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -146,27 +145,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     }),
     [field, indexPattern.id, itemIndex]
   );
-  const canAddToWorkspace = hasSuggestionForField(value);
-
-  const buttonAddToWorkspaceProps: FieldPopoverHeaderProps['buttonAddFieldToWorkspaceProps'] =
-    useMemo(() => {
-      const buttonTitle = canAddToWorkspace
-        ? i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
-            defaultMessage: 'Add {field} to workspace',
-            values: {
-              field: value.field.name,
-            },
-          })
-        : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabled', {
-            defaultMessage:
-              "This field can't be added to the workspace automatically. You can still use it directly in the configuration panel.",
-          });
-
-      return {
-        isDisabled: !canAddToWorkspace,
-        'aria-label': buttonTitle,
-      };
-    }, [value, canAddToWorkspace]);
 
   const dropOntoWorkspaceAndClose = useCallback(() => {
     dropOntoWorkspace(value);
@@ -249,17 +227,35 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             />
           </DragDrop>
         }
-        renderHeader={() => (
-          <FieldPopoverHeader
-            field={dataViewField}
-            closePopover={closePopover}
-            buttonAddFieldToWorkspaceProps={buttonAddToWorkspaceProps}
-            onAddFieldToWorkspace={dropOntoWorkspaceAndClose}
-            onAddFilter={addFilterAndClose}
-            onEditField={editFieldAndClose}
-            onDeleteField={removeFieldAndClose}
-          />
-        )}
+        renderHeader={() => {
+          const canAddToWorkspace = hasSuggestionForField(value);
+          const buttonTitle = canAddToWorkspace
+            ? i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
+                defaultMessage: 'Add {field} to workspace',
+                values: {
+                  field: value.field.name,
+                },
+              })
+            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabled', {
+                defaultMessage:
+                  "This field can't be added to the workspace automatically. You can still use it directly in the configuration panel.",
+              });
+
+          return (
+            <FieldPopoverHeader
+              field={dataViewField}
+              closePopover={closePopover}
+              buttonAddFieldToWorkspaceProps={{
+                isDisabled: !canAddToWorkspace,
+                'aria-label': buttonTitle,
+              }}
+              onAddFieldToWorkspace={dropOntoWorkspaceAndClose}
+              onAddFilter={addFilterAndClose}
+              onEditField={editFieldAndClose}
+              onDeleteField={removeFieldAndClose}
+            />
+          );
+        }}
         renderContent={
           !hideDetails
             ? () => (
