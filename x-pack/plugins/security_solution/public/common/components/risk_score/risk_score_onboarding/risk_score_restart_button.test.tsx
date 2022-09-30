@@ -15,6 +15,8 @@ import { restartRiskScoreTransforms } from './utils';
 
 jest.mock('./utils');
 
+const mockRestartRiskScoreTransforms = restartRiskScoreTransforms as jest.Mock;
+
 describe('RiskScoreRestartButton', () => {
   const mockRefetch = jest.fn();
   beforeEach(() => {
@@ -43,8 +45,10 @@ describe('RiskScoreRestartButton', () => {
       await act(async () => {
         await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
       });
-      expect(restartRiskScoreTransforms).toHaveBeenCalled();
-      expect(restartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(riskScoreEntity);
+      expect(mockRestartRiskScoreTransforms).toHaveBeenCalled();
+      expect(mockRestartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(
+        riskScoreEntity
+      );
     });
 
     it('Update button state while installing', async () => {
