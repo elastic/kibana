@@ -182,7 +182,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
       <EnableRiskScore
         {...status}
         entityType={riskEntity}
-        refetch={refetch}
+        refetch={refreshPage}
         timerange={timerange}
       />
     );

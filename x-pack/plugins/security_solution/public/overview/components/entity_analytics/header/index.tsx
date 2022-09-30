@@ -69,7 +69,7 @@ export const EntityAnalyticsHeader = () => {
     services: { ml, http },
   } = useKibana();
 
-  const [goToHostRiskTabFilterdByCritical, hostRiskTabUrl] = useMemo(() => {
+  const [goToHostRiskTabFilteredByCritical, hostRiskTabUrl] = useMemo(() => {
     const { onClick, href } = getSecuritySolutionLinkProps({
       deepLinkId: SecurityPageName.hosts,
       path: getTabsOnHostsUrl(HostsTableType.risk),
@@ -92,7 +92,7 @@ export const EntityAnalyticsHeader = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
-  const [goToUserRiskTabFilterdByCritical, userRiskTabUrl] = useMemo(() => {
+  const [goToUserRiskTabFilteredByCritical, userRiskTabUrl] = useMemo(() => {
     const { onClick, href } = getSecuritySolutionLinkProps({
       deepLinkId: SecurityPageName.users,
       path: getTabsOnUsersUrl(UsersTableType.risk),
@@ -161,7 +161,7 @@ export const EntityAnalyticsHeader = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <LinkAnchor
-                  onClick={goToHostRiskTabFilterdByCritical}
+                  onClick={goToHostRiskTabFilteredByCritical}
                   href={hostRiskTabUrl}
                   data-test-subj="critical_hosts_link"
                 >
@@ -183,7 +183,7 @@ export const EntityAnalyticsHeader = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <LinkAnchor
-                  onClick={goToUserRiskTabFilterdByCritical}
+                  onClick={goToUserRiskTabFilteredByCritical}
                   href={userRiskTabUrl}
                   data-test-subj="critical_users_link"
                 >
