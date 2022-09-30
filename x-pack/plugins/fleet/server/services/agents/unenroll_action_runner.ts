@@ -116,7 +116,12 @@ export async function unenrollBatch(
     });
   }
 
-  await createErrorActionResults(esClient, actionId, outgoingErrors);
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    outgoingErrors,
+    'cannot unenroll from a hosted policy or already unenrolled'
+  );
 
   return {
     actionId,

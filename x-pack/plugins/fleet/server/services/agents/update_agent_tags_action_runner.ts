@@ -115,7 +115,12 @@ export async function updateTagsBatch(
     }))
   );
 
-  await createErrorActionResults(esClient, actionId, errors);
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'cannot modified tags on hosted agents'
+  );
 
   return { actionId };
 }

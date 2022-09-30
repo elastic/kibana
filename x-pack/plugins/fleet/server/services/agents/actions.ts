@@ -105,11 +105,16 @@ export async function bulkCreateAgentActions(
 export async function createErrorActionResults(
   esClient: ElasticsearchClient,
   actionId: string,
-  errors: Record<Agent['id'], Error>
+  errors: Record<Agent['id'], Error>,
+  errorMessage: string
 ) {
   const errorCount = Object.keys(errors).length;
   if (errorCount > 0) {
-    appContextService.getLogger().info(`Writing error action results of ${errorCount} agents`);
+    appContextService
+      .getLogger()
+      .info(
+        `Writing error action results of ${errorCount} agents. Possibly failed validation: ${errorMessage}.`
+      );
 
     // writing out error result for those agents that have errors, so the action is not going to stay in progress forever
     await bulkCreateAgentActionResults(

@@ -99,7 +99,12 @@ export async function reassignBatch(
     },
   });
 
-  await createErrorActionResults(esClient, actionId, errors);
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'already assigned or assigned to hosted policy'
+  );
 
   return { actionId };
 }

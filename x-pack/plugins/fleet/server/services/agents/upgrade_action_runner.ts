@@ -134,7 +134,12 @@ export async function upgradeBatch(
     ...rollingUpgradeOptions,
   });
 
-  await createErrorActionResults(esClient, actionId, errors);
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'cannot upgrade hosted agent or agent not upgradeable'
+  );
 
   return {
     actionId,
