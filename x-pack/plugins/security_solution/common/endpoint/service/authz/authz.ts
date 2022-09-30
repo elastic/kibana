@@ -20,23 +20,32 @@ import type { MaybeImmutable } from '../../types';
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
-  fleetAuthz: FleetAuthz | undefined, // TODO: Remove `undefined` type when `fleetAuthz` is needed and used.
-  userRoles: MaybeImmutable<string[]>
+  fleetAuthz: FleetAuthz,
+  userRoles: MaybeImmutable<string[]>,
+  isEndpointRbacEnabled: boolean = false
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
   const hasEndpointManagementAccess = userRoles.includes('superuser');
+  const canIsolateHost = isEndpointRbacEnabled
+    ? fleetAuthz.packagePrivileges?.endpoint?.actions?.writeHostIsolation?.executePackageAction ||
+      false
+    : hasEndpointManagementAccess;
+  const canWriteProcessOperations = isEndpointRbacEnabled
+    ? fleetAuthz.packagePrivileges?.endpoint?.actions?.writeProcessOperations
+        ?.executePackageAction || false
+    : hasEndpointManagementAccess;
 
   return {
     canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
     canAccessEndpointManagement: hasEndpointManagementAccess,
     canCreateArtifactsByPolicy: hasEndpointManagementAccess && isPlatinumPlusLicense,
     // Response Actions
-    canIsolateHost: isPlatinumPlusLicense && hasEndpointManagementAccess,
-    canUnIsolateHost: hasEndpointManagementAccess,
-    canKillProcess: hasEndpointManagementAccess && isEnterpriseLicense,
-    canSuspendProcess: hasEndpointManagementAccess && isEnterpriseLicense,
-    canGetRunningProcesses: hasEndpointManagementAccess && isEnterpriseLicense,
+    canIsolateHost: canIsolateHost && isPlatinumPlusLicense,
+    canUnIsolateHost: canIsolateHost,
+    canKillProcess: canWriteProcessOperations && isEnterpriseLicense,
+    canSuspendProcess: canWriteProcessOperations && isEnterpriseLicense,
+    canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
     canAccessResponseConsole: hasEndpointManagementAccess && isEnterpriseLicense,
   };
 };

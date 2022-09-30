@@ -17,7 +17,7 @@ import type {
   IInterpreterRenderHandlers,
   Datatable,
 } from '@kbn/expressions-plugin/public';
-import type { NavigateToLensContext } from '@kbn/visualizations-plugin/common';
+import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
@@ -217,13 +217,13 @@ export interface InitializationOptions {
   isFullEditor?: boolean;
 }
 
-export type VisualizeEditorContext = {
+export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
-} & NavigateToLensContext;
+} & NavigateToLensContext<T>;
 
 export interface GetDropPropsArgs<T = unknown> {
   state: T;
@@ -259,8 +259,10 @@ export interface Datasource<T = unknown, P = unknown> {
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   getCurrentIndexPatternId: (state: T) => string;
+  getUnifiedSearchErrors?: (state: T) => Error[];
 
   insertLayer: (state: T, newLayerId: string) => T;
+  createEmptyLayer: (indexPatternId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   cloneLayer: (
@@ -466,6 +468,10 @@ export interface DatasourcePublicAPI {
    * Retrieve the specific source id for the current state
    */
   getSourceId: () => string | undefined;
+  /**
+   * Returns true if this is a text based language datasource
+   */
+  isTextBasedLanguage: () => boolean;
   /**
    * Collect all defined filters from all the operations in the layer. If it returns undefined, this means that filters can't be constructed for the current layer
    */
@@ -698,7 +704,6 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportsMoreColumns: boolean;
   dimensionsTooMany?: number;
   /** If required, a warning will appear if accessors are empty */
-  required?: boolean;
   requiredMinDimensionCount?: number;
   dataTestSubj?: string;
   prioritizedOperation?: string;
@@ -1123,7 +1128,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getSuggestionFromConvertToLensContext?: (
     props: VisualizationStateFromContextChangeProps
-  ) => Suggestion;
+  ) => Suggestion | undefined;
 }
 
 // Use same technique as TriggerContext
