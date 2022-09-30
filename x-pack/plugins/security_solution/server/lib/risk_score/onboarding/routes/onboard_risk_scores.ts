@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { Logger } from '@kbn/core/server';
 
 import { INTERNAL_RISK_SCORE_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -17,10 +18,7 @@ import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { installRiskScoreModule } from '../helpers/install_risk_score_module';
 import { onboardingRiskScoreSchema } from '../schema';
 
-export const onboardRiskScoresRoute = (
-  router: SecuritySolutionPluginRouter,
-  security: SetupPlugins['security']
-) => {
+export const onboardRiskScoresRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
     {
       path: INTERNAL_RISK_SCORE_URL,
@@ -39,9 +37,11 @@ export const onboardRiskScoresRoute = (
         const spaceId = securitySolution?.getSpaceId();
 
         const { client } = (await context.core).elasticsearch;
+        const esClient = client.asCurrentUser;
 
         const res = await installRiskScoreModule({
-          client,
+          esClient,
+          logger,
           riskScoreEntity,
           spaceId,
         });

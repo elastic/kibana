@@ -186,15 +186,15 @@ export const initRoutes = (
   getSourcererDataViewRoute(router, getStartServices);
 
   // risky score module
-  createEsIndexRoute(router);
+  createEsIndexRoute(router, logger);
   deleteEsIndicesRoute(router);
-  createStoredScriptRoute(router);
+  createStoredScriptRoute(router, logger);
   deleteStoredScriptRoute(router);
   readPrebuiltDevToolContentRoute(router);
   createPrebuiltSavedObjectsRoute(router, security);
   deletePrebuiltSavedObjectsRoute(router, security);
   getRiskScoreIndexStatusRoute(router);
-  onboardRiskScoresRoute(router);
+  onboardRiskScoresRoute(router, logger);
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.

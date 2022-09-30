@@ -5,9 +5,12 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import {
+  getCreateLatestTransformOptions,
+  getCreateMLHostPivotTransformOptions,
+  getCreateMLUserPivotTransformOptions,
   getCreateRiskScoreIndicesOptions,
   getCreateRiskScoreLatestIndicesOptions,
   getRiskHostCreateInitScriptOptions,
@@ -15,7 +18,9 @@ import {
   getRiskHostCreateMapScriptOptions,
   getRiskHostCreateReduceScriptOptions,
   getRiskScoreIngestPipelineOptions,
+  getRiskScoreLatestTransformId,
   getRiskScoreLevelScriptId,
+  getRiskScorePivotTransformId,
   getRiskUserCreateLevelScriptOptions,
   getRiskUserCreateMapScriptOptions,
   getRiskUserCreateReduceScriptOptions,
@@ -23,9 +28,12 @@ import {
 import { createIndex } from '../../indices/lib/create_index';
 import { createStoredScript } from '../../stored_scripts/lib/create_script';
 import type { Pipeline } from '../../../../../common/types/risk_scores';
+import { createAndStartTransform } from './transforms';
+import { createIngestPipeline } from './ingest_pipeline';
 
 interface InstallRiskScoreModule {
-  client: IScopedClusterClient;
+  esClient: ElasticsearchClient;
+  logger: Logger;
   riskScoreEntity: RiskScoreEntity;
   spaceId: string;
 }
@@ -51,39 +59,9 @@ export interface Pipeline {
   isManaged?: boolean;
 }
 
-const createIngestPipeline = async ({
-  client,
-  options,
-}: {
-  client: IScopedClusterClient;
-  options: string | Pipeline;
-}) => {
-  const pipeline = typeof options === 'string' ? JSON.parse(options) : options;
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { name, description, processors, version, on_failure } = pipeline;
-
-  try {
-    await client.asCurrentUser.ingest.putPipeline({
-      id: name,
-      body: {
-        description,
-        processors,
-        version,
-        on_failure,
-      },
-    });
-
-    return { [name]: { success: true } };
-  } catch (error) {
-    console.log('----+++++++--------');
-    console.log(error);
-    return { [name]: { error } };
-  }
-};
-
-const hostRiskScoreIngestPipelineGrouping = async ({
-  client,
+const createHostRiskScoreIngestPipelineGrouping = async ({
+  esClient,
+  logger,
   riskScoreEntity,
   spaceId,
 }: InstallRiskScoreModule) => {
@@ -94,7 +72,8 @@ const hostRiskScoreIngestPipelineGrouping = async ({
   const createLevelScriptOptions = getRiskHostCreateLevelScriptOptions(spaceId);
 
   const createStoredScriptResult = await createStoredScript({
-    client,
+    esClient,
+    logger,
     options: createLevelScriptOptions,
   });
 
@@ -104,7 +83,8 @@ const hostRiskScoreIngestPipelineGrouping = async ({
    */
   const createIngestPipelineOptions = getRiskScoreIngestPipelineOptions(riskScoreEntity, spaceId);
   const createIngestPipelineResult = await createIngestPipeline({
-    client,
+    esClient,
+    logger,
     options: createIngestPipelineOptions,
   });
 
@@ -112,13 +92,20 @@ const hostRiskScoreIngestPipelineGrouping = async ({
 };
 
 const installHostRiskScoreModule = async ({
-  client,
+  esClient,
   riskScoreEntity,
+  logger,
   spaceId,
 }: InstallRiskScoreModule) => {
   const result = await Promise.all([
-    hostRiskScoreIngestPipelineGrouping({
-      client,
+    /**
+     * console_templates/enable_host_risk_score.console
+     * Step 1 Upload script: ml_hostriskscore_levels_script_{spaceId}
+     * Step 5 Upload the ingest pipeline: ml_hostriskscore_ingest_pipeline_{spaceId}
+     */
+    createHostRiskScoreIngestPipelineGrouping({
+      esClient,
+      logger,
       riskScoreEntity,
       spaceId,
     }),
@@ -127,7 +114,8 @@ const installHostRiskScoreModule = async ({
      * Step 2 Upload script: ml_hostriskscore_init_script_{spaceId}
      */
     createStoredScript({
-      client,
+      esClient,
+      logger,
       options: getRiskHostCreateInitScriptOptions(spaceId),
     }),
 
@@ -136,7 +124,8 @@ const installHostRiskScoreModule = async ({
      * Step 3 Upload script: ml_hostriskscore_map_script_{spaceId}
      */
     createStoredScript({
-      client,
+      esClient,
+      logger,
       options: getRiskHostCreateMapScriptOptions(spaceId),
     }),
 
@@ -145,7 +134,8 @@ const installHostRiskScoreModule = async ({
      * Step 4 Upload script: ml_hostriskscore_reduce_script_{spaceId}
      */
     createStoredScript({
-      client,
+      esClient,
+      logger,
       options: getRiskHostCreateReduceScriptOptions(spaceId),
     }),
 
@@ -154,7 +144,8 @@ const installHostRiskScoreModule = async ({
      * Step 6 create ml_host_risk_score_{spaceId} index
      */
     createIndex({
-      client,
+      esClient,
+      logger,
       options: getCreateRiskScoreIndicesOptions({
         spaceId,
         riskScoreEntity,
@@ -166,7 +157,8 @@ const installHostRiskScoreModule = async ({
      * Step 9 create ml_host_risk_score_latest_{spaceId} index
      */
     createIndex({
-      client,
+      esClient,
+      logger,
       options: getCreateRiskScoreLatestIndicesOptions({
         spaceId,
         riskScoreEntity,
@@ -174,11 +166,40 @@ const installHostRiskScoreModule = async ({
     }),
   ]);
 
-  return result.flat();
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 7 create transform: ml_hostriskscore_pivot_transform_{spaceId}
+   * Step 8 Start the pivot transform
+   */
+  const createAndStartPivotTransform = await createAndStartTransform({
+    esClient,
+    logger,
+    transform: {
+      transform_id: getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId),
+      ...getCreateMLHostPivotTransformOptions({ spaceId }),
+    },
+  });
+
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 10 create transform: ml_hostriskscore_latest_transform_{spaceId}
+   * Step 11 Start the latest transform
+   */
+  const createAndStartLatestTransform = await createAndStartTransform({
+    esClient,
+    logger,
+    transform: {
+      transform_id: getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId),
+      ...getCreateLatestTransformOptions({ spaceId, riskScoreEntity: RiskScoreEntity.host }),
+    },
+  });
+
+  return [...result, createAndStartPivotTransform, createAndStartLatestTransform].flat();
 };
 
-const userRiskScoreIngestPipelineGrouping = async ({
-  client,
+const createUserRiskScoreIngestPipelineGrouping = async ({
+  esClient,
+  logger,
   riskScoreEntity,
   spaceId,
 }: InstallRiskScoreModule) => {
@@ -189,7 +210,8 @@ const userRiskScoreIngestPipelineGrouping = async ({
   const createLevelScriptOptions = getRiskUserCreateLevelScriptOptions(spaceId);
 
   const createStoredScriptResult = await createStoredScript({
-    client,
+    esClient,
+    logger,
     options: createLevelScriptOptions,
   });
 
@@ -199,7 +221,8 @@ const userRiskScoreIngestPipelineGrouping = async ({
    */
   const createIngestPipelineOptions = getRiskScoreIngestPipelineOptions(riskScoreEntity, spaceId);
   const createIngestPipelineResult = await createIngestPipeline({
-    client,
+    esClient,
+    logger,
     options: createIngestPipelineOptions,
   });
 
@@ -207,18 +230,45 @@ const userRiskScoreIngestPipelineGrouping = async ({
 };
 
 const installUserRiskScoreModule = async ({
-  client,
+  esClient,
+  logger,
   riskScoreEntity,
   spaceId,
 }: InstallRiskScoreModule) => {
   const result = await Promise.all([
-    userRiskScoreIngestPipelineGrouping({ client, riskScoreEntity, spaceId }),
+    /**
+     * console_templates/enable_user_risk_score.console
+     * Step 1 Upload script: ml_userriskscore_levels_script_{spaceId}
+     * Step 4 Upload ingest pipeline: ml_userriskscore_ingest_pipeline_{spaceId}
+     */
+    createUserRiskScoreIngestPipelineGrouping({ esClient, logger, riskScoreEntity, spaceId }),
+    /**
+     * console_templates/enable_user_risk_score.console
+     * Step 2 Upload script: ml_userriskscore_map_script_{spaceId}
+     */
+    createStoredScript({
+      esClient,
+      logger,
+      options: getRiskUserCreateMapScriptOptions(spaceId),
+    }),
+
+    /**
+     * console_templates/enable_user_risk_score.console
+     * Step 3 Upload script: ml_userriskscore_reduce_script_{spaceId}
+     */
+    createStoredScript({
+      esClient,
+      logger,
+      options: getRiskUserCreateReduceScriptOptions(spaceId),
+    }),
+
     /**
      * console_templates/enable_user_risk_score.console
      * Step 5 create ml_user_risk_score_{spaceId} index
      */
     createIndex({
-      client,
+      esClient,
+      logger,
       options: getCreateRiskScoreIndicesOptions({
         spaceId,
         riskScoreEntity,
@@ -229,32 +279,44 @@ const installUserRiskScoreModule = async ({
      * Step 8 create ml_user_risk_score_latest_{spaceId} index
      */
     createIndex({
-      client,
+      esClient,
+      logger,
       options: getCreateRiskScoreLatestIndicesOptions({
         spaceId,
         riskScoreEntity,
       }),
     }),
-    /**
-     * console_templates/enable_user_risk_score.console
-     * Step 2 Upload script: ml_userriskscore_map_script_{spaceId}
-     */
-    createStoredScript({
-      client,
-      options: getRiskUserCreateMapScriptOptions(spaceId),
-    }),
-
-    /**
-     * console_templates/enable_user_risk_score.console
-     * Step 3 Upload script: ml_userriskscore_reduce_script_{spaceId}
-     */
-    createStoredScript({
-      client,
-      options: getRiskUserCreateReduceScriptOptions(spaceId),
-    }),
   ]);
 
-  return result.flat();
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 6 create Transform: ml_userriskscore_pivot_transform_{spaceId}
+   * Step 7 Start the pivot transform
+   */
+  const createAndStartPivotTransform = await createAndStartTransform({
+    esClient,
+    logger,
+    transform: {
+      transform_id: getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId),
+      ...getCreateMLUserPivotTransformOptions({ spaceId }),
+    },
+  });
+
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 9 create Transform: ml_userriskscore_latest_transform_{spaceId}
+   * Step 10 Start the latest transform
+   */
+  const createAndStartLatestTransform = await createAndStartTransform({
+    esClient,
+    logger,
+    transform: {
+      transform_id: getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId),
+      ...getCreateMLUserPivotTransformOptions({ spaceId }),
+    },
+  });
+
+  return [...result, createAndStartPivotTransform, createAndStartLatestTransform].flat();
 };
 
 export const installRiskScoreModule = async (settings: InstallRiskScoreModule) => {

@@ -6,12 +6,13 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { RISK_SCORE_CREATE_STORED_SCRIPT } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { createStoredScriptBodySchema, createStoredScript } from './lib/create_script';
 
-export const createStoredScriptRoute = (router: SecuritySolutionPluginRouter) => {
+export const createStoredScriptRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.put(
     {
       path: RISK_SCORE_CREATE_STORED_SCRIPT,
@@ -23,19 +24,19 @@ export const createStoredScriptRoute = (router: SecuritySolutionPluginRouter) =>
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const { client } = (await context.core).elasticsearch;
+      const esClient = client.asCurrentUser;
       const options = request.body;
-      try {
-        await createStoredScript({
-          client,
-          options,
-        });
+      const result = await createStoredScript({
+        esClient,
+        logger,
+        options,
+      });
+
+      const error = result[options.id].error;
+      if (error != null) {
+        return siemResponse.error({ statusCode: error.statusCode, body: error.message });
+      } else {
         return response.ok({ body: options });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
     }
   );
