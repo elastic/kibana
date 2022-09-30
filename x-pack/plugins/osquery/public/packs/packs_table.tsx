@@ -130,7 +130,7 @@ const PacksTableComponent = () => {
       const playText = i18n.translate('xpack.osquery.packs.table.runActionAriaLabel', {
         defaultMessage: 'Run {savedQueryName}',
         values: {
-          savedQueryName: item.attributes.name,
+          packName: item.attributes.name,
         },
       });
 
