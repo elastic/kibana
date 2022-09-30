@@ -11,7 +11,6 @@ import {
   AGENT_POLICY_SUMMARY_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
   GET_PROCESSES_ROUTE,
-  HOST_METADATA_LIST_ROUTE,
   ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
@@ -41,11 +40,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const apiList = [
-      {
-        method: 'get',
-        path: HOST_METADATA_LIST_ROUTE,
-        body: undefined,
-      },
       {
         method: 'get',
         path: `${ACTION_STATUS_ROUTE}?agent_ids=1`,
