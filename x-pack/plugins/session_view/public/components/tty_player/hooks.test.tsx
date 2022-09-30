@@ -11,7 +11,6 @@ import { ProcessEventsPage } from '../../../common/types/process_tree';
 import {
   DEFAULT_TTY_FONT_SIZE,
   DEFAULT_TTY_PLAYSPEED_MS,
-  TTY_LINES_PER_FRAME,
 } from '../../../common/constants';
 
 const VIM_LINE_START = 22;
@@ -132,9 +131,7 @@ describe('TTYPlayer/hooks', () => {
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
       });
 
-      const expectedLineNumber = Math.min(initialProps.lines.length - 1, TTY_LINES_PER_FRAME * 10);
-
-      expect(result.current.currentLine).toBe(expectedLineNumber);
+      expect(result.current.currentLine).toBe(10);
     });
 
     it('allows the user to stop', async () => {
@@ -150,9 +147,7 @@ describe('TTYPlayer/hooks', () => {
       act(() => {
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
       });
-      const expectedLineNumber = Math.min(initialProps.lines.length - 1, TTY_LINES_PER_FRAME * 10);
-
-      expect(result.current.currentLine).toBe(expectedLineNumber); // should not have advanced
+      expect(result.current.currentLine).toBe(10); // should not have advanced
     });
 
     it('should stop when it reaches the end of the array of lines', async () => {
@@ -180,6 +175,39 @@ describe('TTYPlayer/hooks', () => {
       rerender({ ...initialProps, isPlaying: false });
 
       expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
+    });
+
+    it('ensure the first few render loops have printed the right lines', async () => {
+      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+        initialProps,
+      });
+
+      const LOOPS = 6;
+
+      rerender({ ...initialProps, isPlaying: true });
+
+      act(() => {
+        // advance render loop
+        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * LOOPS);
+      });
+
+      rerender({ ...initialProps, isPlaying: false });
+
+      expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
+      expect(result.current.terminal.buffer.active.getLine(1)?.translateToString(true)).toBe(',');
+      expect(result.current.terminal.buffer.active.getLine(2)?.translateToString(true)).toBe(
+        '                             Some Companies Puppet instance'
+      );
+      expect(result.current.terminal.buffer.active.getLine(3)?.translateToString(true)).toBe(
+        '             |  |    |       CentOS Stream release 8 on x86_64'
+      );
+      expect(result.current.terminal.buffer.active.getLine(4)?.translateToString(true)).toBe(
+        '  ***********************    Load average: 1.23, 1.01, 0.63'
+      );
+      expect(result.current.terminal.buffer.active.getLine(5)?.translateToString(true)).toBe(
+        '  ************************   '
+      );
+      expect(result.current.currentLine).toBe(LOOPS);
     });
 
     it('will allow a plain text search highlight on the last line printed', async () => {
