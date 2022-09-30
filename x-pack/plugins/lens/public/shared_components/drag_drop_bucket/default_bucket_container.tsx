@@ -77,7 +77,7 @@ export const DefaultBucketContainer = ({
             tooltipContent={i18n.translate(
               'xpack.lens.fieldsBucketContainer.deleteButtonDisabled',
               {
-                defaultMessage: 'A minimum of one field must be defined.',
+                defaultMessage: 'A minimum of one item is required.',
               }
             )}
             condition={isNotRemovable ?? false}
