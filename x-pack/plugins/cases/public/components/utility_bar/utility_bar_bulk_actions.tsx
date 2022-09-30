@@ -49,6 +49,9 @@ export const UtilityBarBulkActions = React.memo<UtilityBarActionProps>(
               iconSize={iconSize}
               iconType={iconType}
               onClick={onButtonClick}
+              dataTestSubj={
+                dataTestSubj ? `${dataTestSubj}-link-icon` : 'utility-bar-bulk-actions-link-icon'
+              }
             >
               {buttonTitle}
             </LinkIcon>

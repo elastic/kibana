@@ -291,20 +291,16 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    ...(!isSelectorView
-      ? [
-          {
-            name: i18n.STATUS,
-            render: (theCase: Case) => {
-              if (theCase.status === null || theCase.status === undefined) {
-                return getEmptyTagValue();
-              }
+    {
+      name: i18n.STATUS,
+      render: (theCase: Case) => {
+        if (theCase.status === null || theCase.status === undefined) {
+          return getEmptyTagValue();
+        }
 
-              return <Status type={theCase.status} />;
-            },
-          },
-        ]
-      : []),
+        return <Status type={theCase.status} />;
+      },
+    },
     {
       name: i18n.SEVERITY,
       render: (theCase: Case) => {

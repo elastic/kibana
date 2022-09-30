@@ -87,7 +87,7 @@ export const useStatusAction = ({
         icon: getStatusIcon(CaseStatuses.closed),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.closed),
         disabled: isDisabled,
-        'data-test-subj': 'cases-bulk-action-status-close',
+        'data-test-subj': 'cases-bulk-action-status-closed',
         key: 'cases-bulk-status-action',
       },
     ];

@@ -49,7 +49,13 @@ export const useBulkActions = ({
       id: 0,
       title: i18n.ACTIONS,
       items: [
-        { name: i18n.STATUS, panel: 1, disabled: isDisabled },
+        {
+          name: i18n.STATUS,
+          panel: 1,
+          disabled: isDisabled,
+          'data-test-subj': 'case-bulk-action-status',
+          key: 'case-bulk-action-status',
+        },
         {
           isSeparator: true,
           key: 'actions-separator',

@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import '../../common/mock/match_media';
-import { ExternalServiceColumn } from './columns';
+import { ExternalServiceColumn } from './use_cases_columns';
 import { useGetCasesMockState } from '../../containers/mock';
 import { connectors } from '../configure_cases/__mock__';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';

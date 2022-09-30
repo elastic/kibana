@@ -21,7 +21,7 @@ import {
 import { CaseStatuses, caseStatuses } from '../../../common/api';
 
 import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { useCasesColumns } from './columns';
+import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 

@@ -62,12 +62,13 @@ const ActionColumnComponent: React.FC<{ theCase: Case; isDisabled: boolean }> = 
               <FormattedMessage
                 defaultMessage="Status: {status}"
                 id="xpack.cases.allCasesView.statusWithValue"
-                values={{ status: <b>{statuses[theCase.status].label}</b> }}
+                values={{ status: <b>{statuses[theCase.status]?.label ?? '-'}</b> }}
               />
             ),
             panel: 1,
             disabled: isDisabled,
             key: `case-action-status-panel-${theCase.id}`,
+            'data-test-subj': `case-action-status-panel-${theCase.id}`,
           },
           {
             isSeparator: true,
@@ -91,6 +92,7 @@ const ActionColumnComponent: React.FC<{ theCase: Case; isDisabled: boolean }> = 
       <EuiPopover
         id={`case-action-popover-${theCase.id}`}
         key={`case-action-popover-${theCase.id}`}
+        data-test-subj={`case-action-popover-${theCase.id}`}
         button={
           <EuiButtonIcon
             onClick={tooglePopover}
@@ -98,6 +100,7 @@ const ActionColumnComponent: React.FC<{ theCase: Case; isDisabled: boolean }> = 
             aria-label={i18n.ACTIONS}
             color="text"
             key={`case-action-popover-button-${theCase.id}`}
+            data-test-subj={`case-action-popover-button-${theCase.id}`}
           />
         }
         isOpen={isPopoverOpen}

@@ -15,21 +15,24 @@ export interface UtilityBarActionProps extends LinkIconProps {
 }
 
 export const UtilityBarAction = React.memo<UtilityBarActionProps>(
-  ({ dataTestSubj, children, color, disabled, href, iconSide, iconSize, iconType, onClick }) => (
-    <BarAction data-test-subj={dataTestSubj}>
-      <LinkIcon
-        color={color}
-        disabled={disabled}
-        href={href}
-        iconSide={iconSide}
-        iconSize={iconSize}
-        iconType={iconType}
-        onClick={onClick}
-      >
-        {children}
-      </LinkIcon>
-    </BarAction>
-  )
+  ({ dataTestSubj, children, color, disabled, href, iconSide, iconSize, iconType, onClick }) => {
+    return (
+      <BarAction data-test-subj={dataTestSubj}>
+        <LinkIcon
+          color={color}
+          disabled={disabled}
+          href={href}
+          iconSide={iconSide}
+          iconSize={iconSize}
+          iconType={iconType}
+          onClick={onClick}
+          dataTestSubj={dataTestSubj ? `${dataTestSubj}-link-icon` : 'utility-bar-action-link-icon'}
+        >
+          {children}
+        </LinkIcon>
+      </BarAction>
+    );
+  }
 );
 
 UtilityBarAction.displayName = 'UtilityBarAction';
