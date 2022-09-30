@@ -30,8 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/141093
-  describe.skip('rules list', function () {
+  describe('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -198,6 +197,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
+      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
+        return await testSubjects.isDisplayed('disableButton');
+      });
       await testSubjects.click('disableButton');
 
       await refreshAlertsList();
