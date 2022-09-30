@@ -30,6 +30,7 @@ import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { EuiButtonIconColor } from '@elastic/eui';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -228,14 +229,7 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
 export interface GetDropPropsArgs<T = unknown> {
   state: T;
   source?: DraggingIdentifier;
-  target: {
-    layerId: string;
-    groupId: string;
-    columnId: string;
-    filterOperations: (meta: OperationMetadata) => boolean;
-    prioritizedOperation?: string;
-    isNewColumn?: boolean;
-  };
+  target: DragDropOperation;
   indexPatterns: IndexPatternMap;
 }
 
@@ -258,7 +252,6 @@ export interface Datasource<T = unknown, P = unknown> {
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
-  getCurrentIndexPatternId: (state: T) => string;
   getUnifiedSearchErrors?: (state: T) => Error[];
 
   insertLayer: (state: T, newLayerId: string) => T;
@@ -441,7 +434,7 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * Get the used DataView value from state
    */
-  getUsedDataView: (state: T, layerId: string) => string;
+  getUsedDataView: (state: T, layerId?: string) => string;
   /**
    * Get all the used DataViews from state
    */
@@ -514,6 +507,17 @@ export interface DatasourceDataPanelProps<T = unknown> {
   usedIndexPatterns?: string[];
 }
 
+/** @internal **/
+export interface LayerAction {
+  displayName: string;
+  description?: string;
+  execute: () => void | Promise<void>;
+  icon: IconType;
+  color?: EuiButtonIconColor;
+  isCompatible: boolean;
+  'data-test-subj'?: string;
+}
+
 interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
    * For example, limiting to only bucketed or only numeric operations.
@@ -582,7 +586,15 @@ export interface DragDropOperation {
   groupId: string;
   columnId: string;
   filterOperations: (operation: OperationMetadata) => boolean;
+  indexPatternId?: string;
+  isNewColumn?: boolean;
+  prioritizedOperation?: string;
 }
+
+export type DraggedField = DragDropIdentifier & {
+  field: IndexPatternField;
+  indexPatternId: string;
+};
 
 export function isOperation(operationCandidate: unknown): operationCandidate is DragDropOperation {
   return (
@@ -892,6 +904,7 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
 
+  getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**
    * Retrieve the used DataViews in the visualization
    */
@@ -961,6 +974,16 @@ export interface Visualization<T = unknown, P = unknown> {
       staticValue?: unknown;
     }>;
   }>;
+  /**
+   * returns a list of custom actions supported by the visualization layer.
+   * Default actions like delete/clear are not included in this list and are managed by the editor frame
+   * */
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>
+  ) => LayerAction[];
+  /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
@@ -1021,6 +1044,10 @@ export interface Visualization<T = unknown, P = unknown> {
     dropType: DropType;
     group?: VisualizationDimensionGroupConfig;
   }) => T;
+
+  getDropProps?: (
+    dropProps: GetDropPropsArgs
+  ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
 
   /**
    * Additional editor that gets rendered inside the dimension popover.

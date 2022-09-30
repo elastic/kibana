@@ -84,13 +84,13 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
-      if (!validationResult.valid) {
+      if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;
         return response.badRequest({ body: { message, attributes: { details, ...payload } } });
       }
 
       const monitorWithRevision = {
-        ...editedMonitor,
+        ...validationResult.decodedMonitor,
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
       const formattedMonitor = formatSecrets(monitorWithRevision);
@@ -102,7 +102,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         syntheticsMonitorClient,
         savedObjectsClient,
         request,
-        normalizedMonitor: editedMonitor,
+        normalizedMonitor: validationResult.decodedMonitor,
         monitorWithRevision: formattedMonitor,
         spaceId,
       });
