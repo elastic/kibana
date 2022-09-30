@@ -388,9 +388,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   return (
     <>
-      {showResultsHeader && (
-        <PackResultsHeader queryIds={queryIds} actionId={actionId} addToCase={addToCase} />
-      )}
+      {showResultsHeader && <PackResultsHeader queryIds={queryIds} actionId={actionId} />}
 
       <StyledEuiBasicTable
         items={data ?? EMPTY_ARRAY}

@@ -19,7 +19,7 @@ export const AddToCaseWrapper: React.FC<AddToCaseButtonProps> = React.memo((prop
 
   return (
     <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
-      <AddToCaseButton {...props} />{' '}
+      <AddToCaseButton {...props} />
     </CasesContext>
   );
 });

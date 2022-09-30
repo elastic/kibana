@@ -20,7 +20,7 @@ const ADD_TO_CASE = i18n.translate(
 );
 
 export interface AddToCaseButtonProps {
-  queryId: string;
+  queryId?: string;
   agentIds?: string[];
   actionId: string;
   isIcon?: boolean;
@@ -36,6 +36,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   isDisabled,
   iconProps,
 }) => {
+  console.log({ actionId, agentIds, queryId, isIcon, isDisabled, iconProps });
   const { cases } = useKibana().services;
 
   const casePermissions = cases.helpers.canUseCases();

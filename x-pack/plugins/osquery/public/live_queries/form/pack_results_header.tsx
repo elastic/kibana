@@ -4,21 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ReactElement } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { AddToCaseWrapper } from '../../cases/add_to_cases';
 
 interface PackResultsHeadersProps {
   actionId?: string;
-  addToCase?: ({
-    isIcon,
-    iconProps,
-  }: {
-    isIcon: boolean;
-    iconProps: Record<string, string>;
-  }) => ReactElement;
   queryIds: Array<{ value: string; field: string }>;
 }
 
@@ -33,7 +26,7 @@ const StyledIconsList = styled(EuiFlexItem)`
   padding-left: 10px;
 `;
 
-export const PackResultsHeader = ({ actionId, addToCase }: PackResultsHeadersProps) => (
+export const PackResultsHeader = ({ actionId }: PackResultsHeadersProps) => (
   <>
     <EuiSpacer size={'l'} />
     <EuiFlexGroup direction="row" gutterSize="m">
@@ -49,16 +42,13 @@ export const PackResultsHeader = ({ actionId, addToCase }: PackResultsHeadersPro
       </StyledResultsHeading>
       <StyledIconsList grow={false}>
         <span>
-          {actionId &&
-            addToCase &&
-            addToCase({
-              isIcon: true,
-              iconProps: {
-                color: 'text',
-                size: 'xs',
-                iconSize: 'l',
-              },
-            })}
+          {actionId && (
+            <AddToCaseWrapper
+              actionId={actionId}
+              isIcon={true}
+              iconProps={{ color: 'text', size: 'xs', iconSize: 'l' }}
+            />
+          )}
         </span>
       </StyledIconsList>
     </EuiFlexGroup>
