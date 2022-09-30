@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SubsetTGridModel } from '../../../timelines/store/data_table/model';
+import { tableDefaults } from '../../store/data_table/defaults';
+import type { SubsetTGridModel } from '../../store/data_table/model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { tableDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   COLUMN_SESSION_START,
   COLUMN_EXECUTABLE,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SubsetTGridModel } from '../../../timelines/store/data_table/model';
+import { tableDefaults } from '../../store/data_table/defaults';
+import type { SubsetTGridModel } from '../../store/data_table/model';
 import { defaultEventHeaders } from './default_event_headers';
-import { tableDefaults } from '../../../timelines/store/timeline/defaults';
 
 export const eventsDefaultModel: SubsetTGridModel = {
   ...tableDefaults,

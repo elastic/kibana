@@ -6,7 +6,7 @@
  */
 import type { TableById, TGridModel } from '@kbn/timelines-plugin/public/types';
 import { createSelector } from 'reselect';
-import type { State } from '../../../common/store/types';
+import type { State } from '../types';
 
 export { getManageDataTableById, getTGridByIdSelector } from '@kbn/timelines-plugin/public';
 

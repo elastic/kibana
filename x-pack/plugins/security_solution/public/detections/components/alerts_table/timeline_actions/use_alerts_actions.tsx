@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { useBulkActionItems } from '@kbn/timelines-plugin/public';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { TableId, TimelineId } from '../../../../../common/types';
-import { dataTableActions } from '../../../../timelines/store/data_table';
+import { dataTableActions } from '../../../../common/store/data_table';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';

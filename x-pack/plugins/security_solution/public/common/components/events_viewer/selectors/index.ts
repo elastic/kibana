@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { getTableByIdSelector } from '../../../../timelines/store/data_table/selectors';
+import { getTableByIdSelector } from '../../../store/data_table/selectors';
 import {
   getTimelineSelector,
   globalFiltersQuerySelector,

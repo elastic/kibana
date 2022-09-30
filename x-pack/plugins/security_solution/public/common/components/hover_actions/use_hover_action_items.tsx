@@ -13,8 +13,9 @@ import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
-import { tableDefaults, timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { dataTableSelectors } from '../../../timelines/store/data_table';
+import { tableDefaults } from '../../store/data_table/defaults';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { dataTableSelectors } from '../../store/data_table';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';

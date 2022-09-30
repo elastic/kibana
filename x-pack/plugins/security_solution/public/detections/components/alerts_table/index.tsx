@@ -11,7 +11,8 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { dataTableActions, dataTableSelectors } from '../../../timelines/store/data_table';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import type { RowRendererId, TableIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
@@ -27,7 +28,6 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { combineQueries } from '../../../common/lib/kuery';
-import { tableDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { AdditionalFiltersAction } from './additional_filters_action';
 import {

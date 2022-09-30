@@ -17,7 +17,7 @@ import { TimelineId, TableId } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
-import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
+import { dataTableActions, dataTableSelectors } from '../../../../common/store/data_table';
 
 export interface UseDetailPanelConfig {
   entityType?: EntityType;

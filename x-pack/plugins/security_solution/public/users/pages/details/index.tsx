@@ -19,7 +19,7 @@ import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '../../../../common/types';
-import { dataTableSelectors } from '../../../timelines/store/data_table';
+import { dataTableSelectors } from '../../../common/store/data_table';
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';

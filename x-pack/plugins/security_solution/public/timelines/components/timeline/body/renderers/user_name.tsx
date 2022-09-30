@@ -10,7 +10,7 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
-import { dataTableActions } from '../../../../store/data_table';
+import { dataTableActions } from '../../../../../common/store/data_table';
 import {
   isInTableScope,
   isTimelineScope,

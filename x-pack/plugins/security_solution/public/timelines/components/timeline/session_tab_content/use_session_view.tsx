@@ -33,9 +33,10 @@ import {
 } from '../../../../common/containers/use_full_screen';
 import { detectionsTimelineIds } from '../../../containers/helpers';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { tableDefaults, timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
+import { dataTableActions, dataTableSelectors } from '../../../../common/store/data_table';
+import { tableDefaults } from '../../../../common/store/data_table/defaults';
 
 export interface SessionViewConfig {
   sessionEntityId: string;

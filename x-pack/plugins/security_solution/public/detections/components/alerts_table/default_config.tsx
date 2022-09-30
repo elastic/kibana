@@ -13,9 +13,9 @@ import {
 
 import type { Filter } from '@kbn/es-query';
 import type { SubsetTGridModel } from '@kbn/timelines-plugin/public';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { RowRendererId } from '../../../../common/types/timeline';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { tableDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   getColumns,
   getRulePreviewColumns,

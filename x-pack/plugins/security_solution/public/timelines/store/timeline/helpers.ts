@@ -1574,48 +1574,6 @@ export const setInitializeTimelineSettings = ({
     : timelineById;
 };
 
-interface UpdateTableItemsPerPageParams {
-  id: string;
-  itemsPerPage: number;
-  timelineById: TimelineById;
-}
-
-export const updateTableItemsPerPage = ({
-  id,
-  itemsPerPage,
-  timelineById,
-}: UpdateTableItemsPerPageParams) => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      itemsPerPage,
-    },
-  };
-};
-
-interface UpdateTablePerPageOptionsParams {
-  id: string;
-  itemsPerPageOptions: number[];
-  timelineById: TimelineById;
-}
-
-export const updateTablePerPageOptions = ({
-  id,
-  itemsPerPageOptions,
-  timelineById,
-}: UpdateTablePerPageOptionsParams) => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      itemsPerPageOptions,
-    },
-  };
-};
-
 interface ApplyDeltaToTableColumnWidth {
   id: string;
   columnId: string;

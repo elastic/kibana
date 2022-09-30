@@ -25,7 +25,8 @@ import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 
 import { isTab } from '@kbn/timelines-plugin/public';
-import { dataTableActions, dataTableSelectors } from '../../../timelines/store/data_table';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -56,7 +57,6 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
-import { tableDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   buildAlertStatusFilter,
   buildShowBuildingBlockFilter,

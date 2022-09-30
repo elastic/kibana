@@ -12,7 +12,7 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { dataTableActions } from '../../../../store/data_table';
+import { dataTableActions } from '../../../../../common/store/data_table';
 import {
   isInTableScope,
   isTimelineScope,

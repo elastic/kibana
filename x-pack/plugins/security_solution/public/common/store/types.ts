@@ -21,7 +21,7 @@ import type { NetworkPluginState } from '../../network/store';
 import type { ManagementPluginState } from '../../management';
 import type { UsersPluginState } from '../../users/store';
 import type { GlobalUrlParam } from './global_url_param';
-import type { DataTableState } from '../../timelines/store/data_table/types';
+import type { DataTableState } from './data_table/types';
 
 export type State = HostsPluginState &
   UsersPluginState &

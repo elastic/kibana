@@ -24,8 +24,8 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
-import { dataTableSelectors } from '../../timelines/store/data_table';
-import type { DataTableReducer } from '../../timelines/store/data_table';
+import { dataTableSelectors } from './data_table';
+import type { DataTableReducer } from './data_table';
 
 type ComposeType = typeof compose;
 declare global {

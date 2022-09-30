@@ -49,15 +49,15 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../timelines/components/timeline/helpers';
-import { tableDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
-import { dataTableSelectors } from '../../timelines/store/data_table';
+import { dataTableSelectors } from '../../common/store/data_table';
 import { useLicense } from '../../common/hooks/use_license';
+import { tableDefaults } from '../../common/store/data_table/defaults';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.

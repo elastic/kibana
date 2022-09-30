@@ -104,9 +104,9 @@ import {
   setSelectedTableEvents,
   setDeletedTableEvents,
   setInitializeTimelineSettings,
-  updateTableItemsPerPage,
-  updateTablePerPageOptions,
   applyDeltaToTableColumnWidth,
+  updateTimelinePerPageOptions,
+  updateTimelineItemsPerPage,
 } from './helpers';
 
 import type { TimelineState } from './types';
@@ -529,7 +529,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(updateItemsPerPage, (state, { id, itemsPerPage }) => ({
     ...state,
-    timelineById: updateTableItemsPerPage({
+    timelineById: updateTimelineItemsPerPage({
       id,
       itemsPerPage,
       timelineById: state.timelineById,
@@ -537,7 +537,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(updateItemsPerPageOptions, (state, { id, itemsPerPageOptions }) => ({
     ...state,
-    timelineById: updateTablePerPageOptions({
+    timelineById: updateTimelinePerPageOptions({
       id,
       itemsPerPageOptions,
       timelineById: state.timelineById,

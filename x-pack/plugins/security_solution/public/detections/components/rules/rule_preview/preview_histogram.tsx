@@ -13,7 +13,7 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useDispatch, useSelector } from 'react-redux';
 import type { DataViewBase } from '@kbn/es-query';
 import type { SortColumnTable } from '@kbn/timelines-plugin/common/types';
-import { dataTableActions } from '../../../../timelines/store/data_table';
+import { dataTableActions } from '../../../../common/store/data_table';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';

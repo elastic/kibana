@@ -6,7 +6,7 @@
  */
 
 import type { TableIdLiteral } from '../../../../common/types';
-import type { TGridModel } from '../../store/data_table/model';
+import type { TGridModel } from '../../../common/store/data_table/model';
 
 export interface DataTablesStorage {
   getAllDataTables: () => Record<TableIdLiteral, TGridModel>;

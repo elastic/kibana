@@ -14,7 +14,7 @@ import { createTimelineFavoriteEpic } from '../../timelines/store/timeline/epic_
 import { createTimelineNoteEpic } from '../../timelines/store/timeline/epic_note';
 import { createTimelinePinnedEventEpic } from '../../timelines/store/timeline/epic_pinned_event';
 import type { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
-import { createDataTableLocalStorageEpic } from '../../timelines/store/data_table/epic_local_storage';
+import { createDataTableLocalStorageEpic } from './data_table/epic_local_storage';
 
 export const createRootEpic = <State>(): Epic<
   Action,

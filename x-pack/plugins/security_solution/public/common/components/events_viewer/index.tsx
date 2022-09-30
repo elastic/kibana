@@ -17,7 +17,7 @@ import type {
 } from '@kbn/timelines-plugin/common/types';
 import type { SubsetTGridModel } from '@kbn/timelines-plugin/public';
 import type { TableId } from '../../../../common/types';
-import { dataTableActions } from '../../../timelines/store/data_table';
+import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 import type { inputsModel, State } from '../../store';

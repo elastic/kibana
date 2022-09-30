@@ -30,7 +30,7 @@ import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { timelineActions } from '../../store/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { dataTableActions } from '../../store/data_table';
+import { dataTableActions } from '../../../common/store/data_table';
 
 const getUniqueId = ({
   contextId,

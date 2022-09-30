@@ -27,8 +27,8 @@ import { initDataView, SourcererScopeName } from './sourcerer/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
-import type { DataTableReducer } from '../../timelines/store/data_table';
-import type { DataTableState } from '../../timelines/store/data_table/types';
+import type { DataTableReducer } from './data_table';
+import type { DataTableState } from './data_table/types';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &

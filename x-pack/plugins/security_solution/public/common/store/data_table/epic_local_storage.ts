@@ -11,7 +11,7 @@ import type { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
 
 import type { TableIdLiteral } from '../../../../common/types/timeline';
-import { addTableInStorage } from '../../containers/local_storage';
+import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
 import {
   removeColumn,
@@ -24,7 +24,7 @@ import {
   updateItemsPerPage,
   updateSort,
 } from './actions';
-import type { TimelineEpicDependencies } from '../timeline/types';
+import type { TimelineEpicDependencies } from '../../../timelines/store/timeline/types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 

@@ -22,7 +22,7 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { dataTableActions } from '../../../../store/data_table';
+import { dataTableActions } from '../../../../../common/store/data_table';
 
 interface Props {
   contextId: string;

@@ -12,7 +12,7 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 
-import { dataTableActions } from '../../../timelines/store/data_table';
+import { dataTableActions } from '../../store/data_table';
 import type { TableId } from '../../../../common/types/timeline';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';

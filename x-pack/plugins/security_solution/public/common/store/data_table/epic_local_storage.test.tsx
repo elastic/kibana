@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 
 // we don't have the types for waitFor just yet, so using "as waitFor" for when we do
 import { waitFor } from '@testing-library/react';
-import '../../../common/mock/match_media';
+import '../../mock/match_media';
 import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
@@ -18,10 +18,10 @@ import {
   defaultHeaders,
   createSecuritySolutionStorageMock,
   kibanaObservable,
-} from '../../../common/mock';
+} from '../../mock';
 
-import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
+import type { State } from '..';
+import { createStore } from '..';
 import {
   removeColumn,
   upsertColumn,
@@ -32,19 +32,19 @@ import {
   updateItemsPerPage,
   updateSort,
 } from './actions';
-import { DefaultCellRenderer } from '../../components/timeline/cell_rendering/default_cell_renderer';
-import type { Props as StatefulEventsViewerProps } from '../../../common/components/events_viewer';
-import { defaultRowRenderers } from '../../components/timeline/body/renderers';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+import type { Props as StatefulEventsViewerProps } from '../../components/events_viewer';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
-import { addTableInStorage } from '../../containers/local_storage';
+import { addTableInStorage } from '../../../timelines/containers/local_storage';
 import { Direction } from '../../../../common/search_strategy';
 import { tGridReducer } from '@kbn/timelines-plugin/public';
-import { StatefulEventsViewer } from '../../../common/components/events_viewer';
-import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
-import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
+import { StatefulEventsViewer } from '../../components/events_viewer';
+import { eventsDefaultModel } from '../../components/events_viewer/default_model';
+import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import { EntityType } from '@kbn/timelines-plugin/common';
-import { getDefaultControlColumn } from '../../components/timeline/body/control_columns';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { SourcererScopeName } from '../sourcerer/model';
 import { TableId } from '../../../../common/types';
 
 jest.mock('../../containers/local_storage');

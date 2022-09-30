@@ -19,7 +19,7 @@ import {
 import { TableId } from '../../../../common/types/timeline';
 import { mockTGridModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import type { TGridModel } from '../../store/data_table/model';
+import type { TGridModel } from '../../../common/store/data_table/model';
 
 jest.mock('../../../common/lib/kibana');
 

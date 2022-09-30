@@ -21,7 +21,7 @@ import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 import { UserDetailsPanel } from './user_details';
-import { dataTableActions, dataTableSelectors } from '../../store/data_table';
+import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
