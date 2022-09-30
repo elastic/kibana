@@ -15,7 +15,7 @@ import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type {
   IndexPatternRef,
-  TextBasedLanguagesPersistedState,
+  TextBasedLanguagesPrivateState,
   TextBasedLanguagesLayerColumn,
 } from './types';
 
@@ -36,7 +36,7 @@ export async function loadIndexPatternRefs(
 }
 
 export async function getStateFromAggregateQuery(
-  state: TextBasedLanguagesPersistedState,
+  state: TextBasedLanguagesPrivateState,
   query: AggregateQuery,
   dataViews: DataViewsPublicPluginStart,
   data: DataPublicPluginStart,
@@ -45,13 +45,14 @@ export async function getStateFromAggregateQuery(
   const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
   const errors: Error[] = [];
   const layerIds = Object.keys(state.layers);
+  const context = state.initialContext;
   const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromTextBasedQuery(query);
   // get the id of the dataview
   const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
-  let columns: TextBasedLanguagesLayerColumn[] = [];
+  let allColumns: TextBasedLanguagesLayerColumn[] = [];
   let timeFieldName;
   try {
     const table = await fetchDataFromAggregateQuery(query, dataViews, data, expressions);
@@ -59,7 +60,8 @@ export async function getStateFromAggregateQuery(
     timeFieldName = dataView.timeFieldName;
     columnsFromQuery = table?.columns ?? [];
     const existingColumns = state.layers[newLayerId].allColumns;
-    columns = [
+
+    allColumns = [
       ...existingColumns,
       ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
     ];
@@ -73,7 +75,7 @@ export async function getStateFromAggregateQuery(
         index,
         query,
         columns: state.layers[newLayerId].columns ?? [],
-        allColumns: columns,
+        allColumns,
         timeField: timeFieldName,
         errors,
       },
@@ -84,6 +86,7 @@ export async function getStateFromAggregateQuery(
     ...tempState,
     fieldList: columnsFromQuery ?? [],
     indexPatternRefs,
+    initialContext: context,
   };
 }
 

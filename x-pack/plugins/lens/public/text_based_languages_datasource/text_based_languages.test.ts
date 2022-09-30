@@ -12,6 +12,7 @@ import { TextBasedLanguagesPersistedState, TextBasedLanguagesPrivateState } from
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedLanguagesDatasource } from './text_based_languages';
+import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, Datasource } from '../types';
 
 jest.mock('../id_generator');
@@ -269,6 +270,97 @@ describe('IndexPattern Data Source', () => {
           },
         } as unknown as TextBasedLanguagesPrivateState)
       ).toEqual(['a']);
+    });
+  });
+
+  describe('#getDatasourceSuggestionsForVisualizeField', () => {
+    (generateId as jest.Mock).mockReturnValue(`newid`);
+    it('should create the correct layers', () => {
+      const state = {
+        layers: {},
+        initialContext: {
+          contextualFields: ['bytes', 'dest'],
+          query: { sql: 'SELECT * FROM "foo"' },
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+      } as unknown as TextBasedLanguagesPrivateState;
+      const suggestions = textBasedLanguagesDatasource.getDatasourceSuggestionsForVisualizeField(
+        state,
+        '1',
+        '',
+        indexPatterns
+      );
+      expect(suggestions[0].state).toEqual({
+        ...state,
+        layers: {
+          newid: {
+            allColumns: [
+              {
+                columnId: 'newid',
+                fieldName: 'bytes',
+                meta: {
+                  type: 'number',
+                },
+              },
+              {
+                columnId: 'newid',
+                fieldName: 'dest',
+                meta: {
+                  type: 'string',
+                },
+              },
+            ],
+            columns: [
+              {
+                columnId: 'newid',
+                fieldName: 'bytes',
+                meta: {
+                  type: 'number',
+                },
+              },
+              {
+                columnId: 'newid',
+                fieldName: 'dest',
+                meta: {
+                  type: 'string',
+                },
+              },
+            ],
+            index: 'foo',
+            query: {
+              sql: 'SELECT * FROM "foo"',
+            },
+          },
+        },
+      });
+
+      expect(suggestions[0].table).toEqual({
+        changeType: 'initial',
+        columns: [
+          {
+            columnId: 'newid',
+            operation: {
+              dataType: 'number',
+              isBucketed: false,
+              label: 'bytes',
+            },
+          },
+          {
+            columnId: 'newid',
+            operation: {
+              dataType: 'string',
+              isBucketed: true,
+              label: 'dest',
+            },
+          },
+        ],
+        isMultiRow: false,
+        layerId: 'newid',
+      });
     });
   });
 

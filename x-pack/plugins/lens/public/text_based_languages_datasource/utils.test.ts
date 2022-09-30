@@ -84,6 +84,18 @@ describe('Text based languages utils', () => {
             index: '',
           },
         },
+        indexPatternRefs: [],
+        fieldList: [],
+        initialContext: {
+          contextualFields: ['bytes', 'dest'],
+          query: { sql: 'SELECT * FROM "foo"' },
+          fieldName: '',
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
       };
       const dataViewsMock = dataViewPluginMocks.createStartContract();
       const dataMock = dataPluginMock.createStartContract();
@@ -113,6 +125,16 @@ describe('Text based languages utils', () => {
       );
 
       expect(updatedState).toStrictEqual({
+        initialContext: {
+          contextualFields: ['bytes', 'dest'],
+          query: { sql: 'SELECT * FROM "foo"' },
+          fieldName: '',
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
         fieldList: [
           {
             name: 'timestamp',
