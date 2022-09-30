@@ -438,7 +438,10 @@ export const ExceptionListsTable = React.memo(() => {
 
   useEffect(() => {
     setPagination({
-      page: activePage + 1, // off-by-one error
+      // off-by-one error
+      // we should really update the api to be zero-index based
+      // the same way the pagination component in EUI is zero based.
+      page: activePage + 1,
       perPage: rowSize,
       total: 0,
     });
