@@ -72,7 +72,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await goToSourceForIndexBasedDataVisualizer('ft_module_sample_logs');
         await ml.dataVisualizerIndexBased.assertRandomSamplingOption(
           'dvRandomSamplerOptionOnManual',
-          100
+          50
         );
       });
     });

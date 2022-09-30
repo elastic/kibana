@@ -244,45 +244,47 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         | 'dvRandomSamplerOptionOff',
       expectedProbability?: number
     ) {
-      await browser.pressKeys(browser.keys.ESCAPE);
-      await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsButton');
-      await testSubjects.existOrFail('dvRandomSamplerOptionsPopover');
+      await retry.tryForTime(2000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsButton');
+        await testSubjects.existOrFail('dvRandomSamplerOptionsPopover');
 
-      if (expectedOption === 'dvRandomSamplerOptionOff') {
-        await testSubjects.existOrFail('dvRandomSamplerOptionOff');
-        await testSubjects.missingOrFail('dvRandomSamplerProbabilityRange');
-        await testSubjects.missingOrFail('dvRandomSamplerAutomaticProbabilityMsg');
-      }
-
-      if (expectedOption === 'dvRandomSamplerOptionOnManual') {
-        await testSubjects.existOrFail('dvRandomSamplerOptionOnManual');
-        await testSubjects.existOrFail('dvRandomSamplerProbabilityRange');
-        if (expectedProbability !== undefined) {
-          const probability = await testSubjects.getAttribute(
-            'dvRandomSamplerProbabilityRange',
-            'value'
-          );
-          expect(probability).to.eql(
-            `${probability}`,
-            `Expected probability to be ${expectedProbability}, got ${probability}`
-          );
+        if (expectedOption === 'dvRandomSamplerOptionOff') {
+          await testSubjects.existOrFail('dvRandomSamplerOptionOff');
+          await testSubjects.missingOrFail('dvRandomSamplerProbabilityRange');
+          await testSubjects.missingOrFail('dvRandomSamplerAutomaticProbabilityMsg');
         }
-      }
 
-      if (expectedOption === 'dvRandomSamplerOptionOnAutomatic') {
-        await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic');
-        await testSubjects.existOrFail('dvRandomSamplerAutomaticProbabilityMsg');
-
-        if (expectedProbability !== undefined) {
-          const probabilityText = await testSubjects.getVisibleText(
-            'dvRandomSamplerAutomaticProbabilityMsg'
-          );
-          expect(probabilityText).to.contain(
-            `${expectedProbability}`,
-            `Expected probability to be ${expectedProbability}, got ${probabilityText}`
-          );
+        if (expectedOption === 'dvRandomSamplerOptionOnManual') {
+          await testSubjects.existOrFail('dvRandomSamplerOptionOnManual');
+          await testSubjects.existOrFail('dvRandomSamplerProbabilityRange');
+          if (expectedProbability !== undefined) {
+            const probability = await testSubjects.getAttribute(
+              'dvRandomSamplerProbabilityRange',
+              'value'
+            );
+            expect(expectedProbability).to.eql(
+              `${probability}`,
+              `Expected probability to be ${expectedProbability}, got ${probability}`
+            );
+          }
         }
-      }
+
+        if (expectedOption === 'dvRandomSamplerOptionOnAutomatic') {
+          await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic');
+          await testSubjects.existOrFail('dvRandomSamplerAutomaticProbabilityMsg');
+
+          if (expectedProbability !== undefined) {
+            const probabilityText = await testSubjects.getVisibleText(
+              'dvRandomSamplerAutomaticProbabilityMsg'
+            );
+            expect(probabilityText).to.contain(
+              `${expectedProbability}`,
+              `Expected probability text to contain ${expectedProbability}, got ${probabilityText}`
+            );
+          }
+        }
+      });
     },
 
     async setRandomSamplingOption(
@@ -291,15 +293,21 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         | 'dvRandomSamplerOptionOnManual'
         | 'dvRandomSamplerOptionOff'
     ) {
-      // escape popover
-      await browser.pressKeys(browser.keys.ESCAPE);
-      await this.assertRandomSamplingOptionsButtonExists();
-      await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsButton');
-      await testSubjects.existOrFail('dvRandomSamplerOptionsPopover');
-
-      await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsSelect');
-      await testSubjects.click(option);
       await retry.tryForTime(2000, async () => {
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await this.assertRandomSamplingOptionsButtonExists();
+        await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsButton');
+        await testSubjects.existOrFail('dvRandomSamplerOptionsPopover');
+
+        await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsSelect');
+
+        await testSubjects.existOrFail('dvRandomSamplerOptionOff');
+        await testSubjects.existOrFail('dvRandomSamplerOptionOnManual');
+        await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic');
+
+        await testSubjects.click(option);
+
         await this.assertRandomSamplingOption(option);
       });
     },
