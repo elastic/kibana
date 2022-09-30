@@ -145,6 +145,7 @@ export class LayerGroup implements ILayer {
   getLayerIcon(isTocIcon: boolean): LayerIcon {
     return {
       icon: <EuiIcon size="m" type="layers" />,
+      tooltipContent: '',
     };
   }
 
@@ -177,15 +178,23 @@ export class LayerGroup implements ILayer {
   }
 
   showAtZoomLevel(zoom: number): boolean {
-    return false;
+    return zoom >= this.getMinZoom() && zoom <= this.getMaxZoom();
   }
 
   getMinZoom(): number {
-    return MIN_ZOOM;
+    let min = MIN_ZOOM;
+    this._children.forEach(child => {
+      min = Math.max(min, child.getMinZoom());
+    });
+    return min;
   }
 
   getMaxZoom(): number {
-    return MAX_ZOOM;
+    let max = MAX_ZOOM;
+    this._children.forEach(child => {
+      max = Math.min(max, child.getMaxZoom());
+    });
+    return max;
   }
 
   getMinSourceZoom(): number {
