@@ -63,7 +63,9 @@ export function triggerVisualizeActions(
 }
 
 export function triggerVisualizeActionsTextBasedLanguages(
+  uiActions: UiActionsStart,
   contextualFields: string[],
+  originatingApp: string,
   dataView?: DataView,
   query?: AggregateQuery
 ) {
@@ -72,10 +74,10 @@ export function triggerVisualizeActionsTextBasedLanguages(
     dataViewSpec: dataView.toSpec(false),
     fieldName: '',
     contextualFields,
-    originatingApp: PLUGIN_ID,
+    originatingApp,
     query,
   };
-  getUiActions().getTrigger(VISUALIZE_FIELD_TRIGGER).exec(triggerOptions);
+  uiActions.getTrigger(VISUALIZE_FIELD_TRIGGER).exec(triggerOptions);
 }
 
 export interface VisualizeInformation {

@@ -10,6 +10,7 @@ export { type FieldVisualizeButtonProps, FieldVisualizeButton } from './field_vi
 
 export {
   triggerVisualizeActions,
+  triggerVisualizeActionsTextBasedLanguages,
   getVisualizeInformation,
   type VisualizeInformation,
 } from './visualize_trigger_utils';

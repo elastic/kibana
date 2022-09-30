@@ -29,6 +29,7 @@ export {
   type FieldVisualizeButtonProps,
   getVisualizeInformation,
   triggerVisualizeActions,
+  triggerVisualizeActionsTextBasedLanguages,
   type VisualizeInformation,
 } from './components/field_visualize_button';
 export { loadFieldStats } from './services/field_stats';
