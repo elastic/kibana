@@ -130,7 +130,7 @@ export function MonitorDetailFlyout(props: Props) {
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiTitle>
+                <EuiTitle size="xs">
                   <h2>{monitorSavedObject?.attributes.name}</h2>
                 </EuiTitle>
               </EuiFlexItem>
@@ -193,7 +193,7 @@ export function MonitorDetailFlyout(props: Props) {
             />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{DURATION_HEADER_TEXT}</h3>
             </EuiTitle>
             <ExploratoryViewEmbeddable
@@ -248,10 +248,10 @@ export function MonitorDetailFlyout(props: Props) {
               ]}
             />
             <EuiSpacer />
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{MONITOR_DETAILS_HEADER_TEXT}</h3>
             </EuiTitle>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
             <BodyInfo
               header={LAST_RUN_HEADER_TEXT}
               content={
