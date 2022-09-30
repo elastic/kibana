@@ -68,6 +68,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
           iconType={'casesApp'}
           onClick={handleClick}
           isDisabled={isDisabled || !hasCasesPermissions}
+          aria-label={ADD_TO_CASE}
           {...iconProps}
         />
       </EuiToolTip>
@@ -80,6 +81,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
       iconType="casesApp"
       onClick={handleClick}
       isDisabled={isDisabled || !hasCasesPermissions}
+      aria-label={ADD_TO_CASE}
     >
       {ADD_TO_CASE}
     </EuiButtonEmpty>
