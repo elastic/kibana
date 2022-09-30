@@ -119,7 +119,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
           content={
             <FormattedMessage
               id="xpack.ml.trainedModels.nodesList.modelsList.modelAvgInferenceTimeTooltipMessage"
-              defaultMessage="If caching is enabled fast cache hits are included when calculating the avg time"
+              defaultMessage="If caching is enabled, fast cache hits are included when calculating the average inference time"
             />
           }
         >
