@@ -1455,10 +1455,9 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@50.0.1":
-  version "50.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-50.0.1.tgz#a0ee66668c857be7cfea2e134e0b84930d1564c5"
-  integrity sha512-O1L8rot0dycTQo/0eW7aD2P4K3Bh1LtzMgRBXYZAtIpbzdxveRkl8fOlIkGxeeHE4YNvntUJaJWeyT+ngGg7QA==
+"@elastic/charts@file:../elastic-charts/packages/charts/elastic-charts-50.0.0.tgz":
+  version "50.0.0"
+  resolved "file:../elastic-charts/packages/charts/elastic-charts-50.0.0.tgz#46462bc951d7faced6c819163a7d2cef11c64960"
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"

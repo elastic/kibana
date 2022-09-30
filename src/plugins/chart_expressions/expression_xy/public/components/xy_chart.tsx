@@ -19,6 +19,7 @@ import {
   ElementClickListener,
   BrushEndListener,
   XYBrushEvent,
+  Tooltip as TooltipSpec,
   LegendPositionConfig,
   DisplayValueStyle,
   RecursivePartial,
@@ -166,19 +167,29 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
 
 function createSplitPoint(
   accessor: string | number,
-  value: string | number,
+  value: string | number | string[],
   rows: Datatable['rows'],
   table: Datatable
 ) {
   const splitPointRowIndex = rows.findIndex((row) => {
+    if (Array.isArray(value)) {
+      return value.includes(row[accessor]);
+    }
     return row[accessor] === value;
   });
   if (splitPointRowIndex !== -1) {
     return {
       row: splitPointRowIndex,
       column: table.columns.findIndex((column) => column.id === accessor),
-      value: table.rows[splitPointRowIndex][accessor],
-      table,
+      value: Array.isArray(value) ? value : table.rows[splitPointRowIndex][accessor],
+      table: Array.isArray(value)
+        ? {
+            ...table,
+            rows: table.rows.map((r, i) =>
+              i === splitPointRowIndex ? { ...r, [accessor]: value } : r
+            ),
+          }
+        : table,
     };
   }
 }
@@ -630,6 +641,118 @@ export function XYChart({
     onClickValue(context);
   };
 
+  const multiClickHandler: ElementClickListener = (values: any) => {
+    // [
+    //     {
+    //         "seriesIdentifier": {
+    //             "key": "groupId{left}spec{87ad1081-de57-4db4-b0dc-cb880240b6ee:91b1d251-8ad2-4f2a-842f-0e899294ef37:81a90fa6-e290-429f-acb3-edcaad38452f:c91b4187-2ce5-4b98-9be1-83fb714ff15b}yAccessor{81a90fa6-e290-429f-acb3-edcaad38452f}splitAccessors{c91b4187-2ce5-4b98-9be1-83fb714ff15b-css}",
+    //             "specId": "87ad1081-de57-4db4-b0dc-cb880240b6ee:91b1d251-8ad2-4f2a-842f-0e899294ef37:81a90fa6-e290-429f-acb3-edcaad38452f:c91b4187-2ce5-4b98-9be1-83fb714ff15b",
+    //             "seriesKeys": [
+    //                 "css",
+    //                 "81a90fa6-e290-429f-acb3-edcaad38452f"
+    //             ],
+    //             "xAccessor": "91b1d251-8ad2-4f2a-842f-0e899294ef37",
+    //             "yAccessor": "81a90fa6-e290-429f-acb3-edcaad38452f",
+    //             "splitAccessors": {}
+    //         },
+    //         "valueAccessor": "y1",
+    //         "label": "css",
+    //         "value": 7,
+    //         "formattedValue": "7",
+    //         "markValue": null,
+    //         "color": "#d36086",
+    //         "isHighlighted": false,
+    //         "isVisible": true,
+    //         "datum": {
+    //             "c91b4187-2ce5-4b98-9be1-83fb714ff15b": "css",
+    //             "91b1d251-8ad2-4f2a-842f-0e899294ef37": 1664348400000,
+    //             "81a90fa6-e290-429f-acb3-edcaad38452f": 7
+    //         }
+    //     },
+    //     {
+    //         "seriesIdentifier": {
+    //             "key": "groupId{left}spec{87ad1081-de57-4db4-b0dc-cb880240b6ee:91b1d251-8ad2-4f2a-842f-0e899294ef37:81a90fa6-e290-429f-acb3-edcaad38452f:c91b4187-2ce5-4b98-9be1-83fb714ff15b}yAccessor{81a90fa6-e290-429f-acb3-edcaad38452f}splitAccessors{c91b4187-2ce5-4b98-9be1-83fb714ff15b-gz}",
+    //             "specId": "87ad1081-de57-4db4-b0dc-cb880240b6ee:91b1d251-8ad2-4f2a-842f-0e899294ef37:81a90fa6-e290-429f-acb3-edcaad38452f:c91b4187-2ce5-4b98-9be1-83fb714ff15b",
+    //             "seriesKeys": [
+    //                 "gz",
+    //                 "81a90fa6-e290-429f-acb3-edcaad38452f"
+    //             ],
+    //             "xAccessor": "91b1d251-8ad2-4f2a-842f-0e899294ef37",
+    //             "yAccessor": "81a90fa6-e290-429f-acb3-edcaad38452f",
+    //             "splitAccessors": {}
+    //         },
+    //         "valueAccessor": "y1",
+    //         "label": "gz",
+    //         "value": 7,
+    //         "formattedValue": "7",
+    //         "markValue": null,
+    //         "color": "#6092c0",
+    //         "isHighlighted": false,
+    //         "isVisible": true,
+    //         "datum": {
+    //             "c91b4187-2ce5-4b98-9be1-83fb714ff15b": "gz",
+    //             "91b1d251-8ad2-4f2a-842f-0e899294ef37": 1664348400000,
+    //             "81a90fa6-e290-429f-acb3-edcaad38452f": 7
+    //         }
+    //     }
+    // ]
+    // this cast is safe because we are rendering a cartesian chart
+    const layerIndex = dataLayers.findIndex((l) =>
+      values[0].seriesIdentifier.seriesKeys.some((key: string | number) =>
+        l.accessors.some(
+          (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+        )
+      )
+    );
+
+    if (layerIndex === -1) {
+      return;
+    }
+
+    const layer = dataLayers[layerIndex];
+    const { table } = layer;
+
+    if (layer.splitAccessors?.length !== 1) return;
+    const xColumn = layer.xAccessor && getColumnByAccessor(layer.xAccessor, table.columns);
+    const xAccessor = layer.xAccessor
+      ? getAccessorByDimension(layer.xAccessor, table.columns)
+      : undefined;
+
+    const xFormat = xColumn ? fieldFormats[layer.layerId].xAccessors[xColumn.id] : undefined;
+    const currentXFormatter =
+      xAccessor && formattedDatatables[layer.layerId]?.formattedColumns[xAccessor] && xColumn
+        ? formatFactory(xFormat)
+        : xAxisFormatter;
+
+    const rowIndex = table.rows.findIndex((row) => {
+      if (xAccessor) {
+        if (formattedDatatables[layer.layerId]?.formattedColumns[xAccessor]) {
+          // stringify the value to compare with the chart value
+          return (
+            currentXFormatter.convert(row[xAccessor]) ===
+            values[0].datum[values[0].seriesIdentifier.xAccessor]
+          );
+        }
+        return row[xAccessor] === values[0].datum[values[0].seriesIdentifier.xAccessor];
+      }
+    });
+
+    const splitAccessor = getAccessorByDimension(layer.splitAccessors![0], table.columns);
+    const point = createSplitPoint(
+      splitAccessor,
+      values.map((v) => v.datum[splitAccessor]),
+      formattedDatatables[layer.layerId].table.rows,
+      table
+    );
+
+    if (!point) return;
+
+    const context: FilterEvent['data'] = {
+      data: [point],
+    };
+    onClickValue(context);
+  };
+
   const brushHandler = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
@@ -744,6 +867,49 @@ export function XYChart({
         }}
       >
         <Chart ref={chartRef}>
+          <TooltipSpec
+            boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+            headerFormatter={
+              !args.detailedTooltip
+                ? ({ value }) => (
+                    <TooltipHeader
+                      value={value}
+                      formatter={safeXAccessorLabelRenderer}
+                      xDomain={rawXDomain}
+                    />
+                  )
+                : undefined
+            }
+            actions={[
+              {
+                label: () => 'Filter selected series',
+                onSelect: (values) => {
+                  multiClickHandler(values);
+                },
+              },
+            ]}
+            customTooltip={
+              args.detailedTooltip
+                ? ({ header, values }) => (
+                    <Tooltip
+                      header={header}
+                      values={values}
+                      titles={titles}
+                      fieldFormats={fieldFormats}
+                      formatFactory={formatFactory}
+                      formattedDatatables={formattedDatatables}
+                      splitAccessors={{
+                        splitColumnAccessor: splitColumnId,
+                        splitRowAccessor: splitRowId,
+                      }}
+                      layers={dataLayers}
+                      xDomain={isTimeViz ? rawXDomain : undefined}
+                    />
+                  )
+                : undefined
+            }
+            type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
+          />
           <Settings
             noResults={
               <EmptyPlaceholder
@@ -788,37 +954,37 @@ export function XYChart({
               markSizeRatio: args.markSizeRatio,
             }}
             baseTheme={chartBaseTheme}
-            tooltip={{
-              boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-              headerFormatter: !args.detailedTooltip
-                ? ({ value }) => (
-                    <TooltipHeader
-                      value={value}
-                      formatter={safeXAccessorLabelRenderer}
-                      xDomain={rawXDomain}
-                    />
-                  )
-                : undefined,
-              customTooltip: args.detailedTooltip
-                ? ({ header, values }) => (
-                    <Tooltip
-                      header={header}
-                      values={values}
-                      titles={titles}
-                      fieldFormats={fieldFormats}
-                      formatFactory={formatFactory}
-                      formattedDatatables={formattedDatatables}
-                      splitAccessors={{
-                        splitColumnAccessor: splitColumnId,
-                        splitRowAccessor: splitRowId,
-                      }}
-                      layers={dataLayers}
-                      xDomain={isTimeViz ? rawXDomain : undefined}
-                    />
-                  )
-                : undefined,
-              type: args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None,
-            }}
+            // tooltip={{
+            //   boundary: document.getElementById('app-fixed-viewport') ?? undefined,
+            //   headerFormatter: !args.detailedTooltip
+            //     ? ({ value }) => (
+            //         <TooltipHeader
+            //           value={value}
+            //           formatter={safeXAccessorLabelRenderer}
+            //           xDomain={rawXDomain}
+            //         />
+            //       )
+            //     : undefined,
+            //   customTooltip: args.detailedTooltip
+            //     ? ({ header, values }) => (
+            //         <Tooltip
+            //           header={header}
+            //           values={values}
+            //           titles={titles}
+            //           fieldFormats={fieldFormats}
+            //           formatFactory={formatFactory}
+            //           formattedDatatables={formattedDatatables}
+            //           splitAccessors={{
+            //             splitColumnAccessor: splitColumnId,
+            //             splitRowAccessor: splitRowId,
+            //           }}
+            //           layers={dataLayers}
+            //           xDomain={isTimeViz ? rawXDomain : undefined}
+            //         />
+            //       )
+            //     : undefined,
+            //   type: args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None,
+            // }}
             allowBrushingLastHistogramBin={isTimeViz}
             rotation={shouldRotate ? 90 : 0}
             xDomain={xDomain}
