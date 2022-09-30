@@ -25,6 +25,7 @@ __tmp__
 
 # Ignore example plugin builds
 /examples/*/build
+/x-pack/examples/*/build
 
 # Ignore certain functional test runner artifacts
 /test/*/failure_debug
