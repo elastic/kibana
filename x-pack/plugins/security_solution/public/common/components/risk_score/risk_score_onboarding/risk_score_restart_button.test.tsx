@@ -33,7 +33,7 @@ describe('RiskScoreRestartButton', () => {
       );
     });
 
-    it('calls restartRiskScoreTransforms', async () => {
+    it('calls restartRiskScoreTransforms with correct entity', async () => {
       render(
         <TestProviders>
           <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={riskScoreEntity} />
@@ -43,8 +43,9 @@ describe('RiskScoreRestartButton', () => {
       await act(async () => {
         await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
       });
-
+      console.log(restartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity);
       expect(restartRiskScoreTransforms).toHaveBeenCalled();
+      expect(restartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(riskScoreEntity);
     });
 
     it('Update button state while installing', async () => {

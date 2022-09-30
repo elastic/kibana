@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import { useKibana } from '../../../lib/kibana';
 import type { inputsModel } from '../../../store';
@@ -39,7 +39,7 @@ const RiskScoreRestartButtonComponent = ({
       notifications,
       refetch,
       renderDocLink,
-      riskScoreEntity: RiskScoreEntity.host,
+      riskScoreEntity,
       spaceId,
       theme,
     });
