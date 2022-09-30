@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export * from './indicators_barchart';
+export * from './use_aggregated_indicators';
+export * from './use_indicators_filters_context';
+export * from './use_indicators_total_count';
+export * from './use_sourcerer_data_view';
