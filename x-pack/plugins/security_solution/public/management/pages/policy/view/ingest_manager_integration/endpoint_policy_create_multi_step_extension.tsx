@@ -21,7 +21,7 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
       <MediumCustomSpacer />
 
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ alignItems: 'center' }}>
           <LargeSecurityLogo />
         </EuiFlexItem>
 
@@ -33,15 +33,15 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
       </EuiFlexGroup>
 
       <MediumCustomSpacer />
-
       <Details />
+      <LargeCustomSpacer />
     </Container>
   );
 });
 EndpointPolicyCreateMultiStepExtension.displayName = 'EndpointPolicyCreateMultiStepExtension';
 
 const Container = styled('div')`
-  width: 820px;
+  padding: 0 23px;
 `;
 
 const Title = () => (
@@ -74,7 +74,7 @@ const LargeSecurityLogo = () => (
 );
 
 const Features = () => (
-  <EuiFlexGroup alignItems="center" gutterSize="s">
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiIcon type="check" />
     </EuiFlexItem>
