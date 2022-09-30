@@ -33,43 +33,37 @@ export const DefaultBucketContainer = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel paddingSize="none" hasShadow={false} hasBorder={true} data-test-subj={dataTestSubj}>
+    <EuiPanel
+      paddingSize="none"
+      hasShadow={false}
+      hasBorder={true}
+      data-test-subj={dataTestSubj}
+      style={{ padding: '0 ' + euiTheme.size.xs }}
+    >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            paddingSize="xs"
-            style={isNotDraggable ? { cursor: 'no-drop' } : {}}
-            color="transparent"
-            {...(draggableProvided?.dragHandleProps ?? {})}
+        <EuiFlexItem grow={false} {...(draggableProvided?.dragHandleProps ?? {})}>
+          <TooltipWrapper
+            tooltipContent={i18n.translate('xpack.lens.fieldsBucketContainer.dragHandleDisabled', {
+              defaultMessage: 'Reordering requires more than one item.',
+            })}
+            condition={isNotDraggable ?? true}
           >
-            <TooltipWrapper
-              tooltipContent={i18n.translate(
-                'xpack.lens.fieldsBucketContainer.dragHandleDisabled',
-                {
-                  defaultMessage: 'Reordering requires more than one field to be defined.',
-                }
-              )}
-              condition={isNotDraggable ?? true}
-            >
-              <EuiIcon
-                size="s"
-                color={
-                  euiTheme.colors[
-                    isInvalid ? 'danger' : isNotDraggable ? 'disabled' : 'subduedText'
-                  ]
-                }
-                type={isInvalid ? 'alert' : 'grab'}
-                title={
-                  isInvalid
-                    ? invalidMessage
-                    : i18n.translate('xpack.lens.customBucketContainer.dragToReorder', {
-                        defaultMessage: 'Drag to reorder',
-                      })
-                }
-                data-test-subj={`${dataTestSubj}-dragToReorder-${idx}`}
-              />
-            </TooltipWrapper>
-          </EuiPanel>
+            <EuiIcon
+              size="s"
+              color={
+                euiTheme.colors[isInvalid ? 'danger' : isNotDraggable ? 'disabled' : 'subduedText']
+              }
+              type={isInvalid ? 'alert' : 'grab'}
+              aria-label={
+                isInvalid
+                  ? invalidMessage
+                  : i18n.translate('xpack.lens.customBucketContainer.dragToReorder', {
+                      defaultMessage: 'Drag to reorder',
+                    })
+              }
+              data-test-subj={`${dataTestSubj}-dragToReorder-${idx}`}
+            />
+          </TooltipWrapper>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
