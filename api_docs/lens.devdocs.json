@@ -4532,7 +4532,15 @@
               },
               " | ",
               "VisualizeEditorContext",
-              " | undefined) => T) | undefined"
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.Configuration",
+                "text": "Configuration"
+              },
+              "> | undefined) => T) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -4586,7 +4594,15 @@
                   },
                   " | ",
                   "VisualizeEditorContext",
-                  " | undefined"
+                  "<",
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.Configuration",
+                    "text": "Configuration"
+                  },
+                  "> | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -6415,7 +6431,7 @@
             "signature": [
               "((props: VisualizationStateFromContextChangeProps) => ",
               "Suggestion",
-              ") | undefined"
+              " | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,

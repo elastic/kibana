@@ -298,7 +298,7 @@
           "label": "languageClientsUiComponents",
           "description": [],
           "signature": [
-            "Map<string, React.FC<{}>>"
+            "{ [x: string]: React.FC<{}>; }"
           ],
           "path": "src/plugins/custom_integrations/public/types.ts",
           "deprecated": false,
