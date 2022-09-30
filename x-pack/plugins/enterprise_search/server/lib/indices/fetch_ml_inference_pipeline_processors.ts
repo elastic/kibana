@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 
+import { getMlModelTypesForModelConfig } from '../../../common/ml_inference_pipeline';
 import { InferencePipeline, TrainedModelState } from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
@@ -68,18 +67,6 @@ export const fetchPipelineProcessorInferenceData = async (
     },
     [] as InferencePipelineData[]
   );
-};
-
-export const getMlModelTypesForModelConfig = (trainedModel: MlTrainedModelConfig): string[] => {
-  if (!trainedModel) return [];
-
-  const isBuiltIn = trainedModel.tags?.includes(BUILT_IN_MODEL_TAG);
-
-  return [
-    trainedModel.model_type,
-    ...Object.keys(trainedModel.inference_config || {}),
-    ...(isBuiltIn ? [BUILT_IN_MODEL_TAG] : []),
-  ].filter((type): type is string => type !== undefined);
 };
 
 export const getMlModelConfigsForModelIds = async (

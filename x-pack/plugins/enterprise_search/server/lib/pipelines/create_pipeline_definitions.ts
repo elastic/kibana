@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { generateMlInferencePipelineBody } from '../../../common/ml_inference_pipeline';
+import { MlInferencePipeline } from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
-import { getMlModelTypesForModelConfig } from '../indices/fetch_ml_inference_pipeline_processors';
 
 export interface CreatedPipelines {
   created: string[];
-}
-
-export interface MlInferencePipeline extends IngestPipeline {
-  version?: number;
 }
 
 /**
@@ -237,43 +233,10 @@ export const formatMlPipelineBody = async (
   // this will raise a 404 if model doesn't exist
   const models = await esClient.ml.getTrainedModels({ model_id: modelId });
   const model = models.trained_model_configs[0];
-  // if model returned no input field, insert a placeholder
-  const modelInputField =
-    model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
-  const modelTypes = getMlModelTypesForModelConfig(model);
-  const modelVersion = model.version;
-  return {
-    description: '',
-    processors: [
-      {
-        remove: {
-          field: `ml.inference.${destinationField}`,
-          ignore_missing: true,
-        },
-      },
-      {
-        inference: {
-          field_map: {
-            [sourceField]: modelInputField,
-          },
-          model_id: modelId,
-          target_field: `ml.inference.${destinationField}`,
-        },
-      },
-      {
-        append: {
-          field: '_source._ingest.processors',
-          value: [
-            {
-              model_version: modelVersion,
-              pipeline: pipelineName,
-              processed_timestamp: '{{{ _ingest.timestamp }}}',
-              types: modelTypes,
-            },
-          ],
-        },
-      },
-    ],
-    version: 1,
-  };
+  return generateMlInferencePipelineBody({
+    destinationField,
+    model,
+    pipelineName,
+    sourceField,
+  });
 };
