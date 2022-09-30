@@ -10,7 +10,7 @@ import { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeParams, Services } from '../types';
+import { ActionTypeParams, Services, ValidatorServices } from '../types';
 import { SubActionConnector } from './sub_action_connector';
 
 export interface ServiceParams<Config, Secrets> {
@@ -34,6 +34,25 @@ export type IServiceAbstract<Config, Secrets> = abstract new (
   params: ServiceParams<Config, Secrets>
 ) => SubActionConnector<Config, Secrets>;
 
+export enum ValidatorType {
+  CONFIG,
+  SECRETS,
+}
+
+interface Validate<T> {
+  validate: ValidateFn<T>;
+}
+
+export type ValidateFn<T> = (obj: T, services: ValidatorServices) => void;
+
+export interface ConfigValidator<T> extends Validate<T> {
+  type: ValidatorType.CONFIG;
+}
+
+export interface SecretsValidator<T> extends Validate<T> {
+  type: ValidatorType.SECRETS;
+}
+
 export interface SubActionConnectorType<Config, Secrets> {
   id: string;
   name: string;
@@ -43,6 +62,7 @@ export interface SubActionConnectorType<Config, Secrets> {
     config: Type<Config>;
     secrets: Type<Secrets>;
   };
+  validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   Service: IService<Config, Secrets>;
 }
 
