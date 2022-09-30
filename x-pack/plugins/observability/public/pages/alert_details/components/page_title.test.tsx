@@ -22,7 +22,7 @@ describe('Page Title', () => {
 
   it('should display a title when it is passed', () => {
     const { getByText } = renderComp(defaultProps);
-    expect(getByText('Great success')).toBeTruthy();
+    expect(getByText(defaultProps.title)).toBeTruthy();
   });
 
   it('should display an active badge when active is true', async () => {

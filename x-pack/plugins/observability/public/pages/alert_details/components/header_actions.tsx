@@ -20,13 +20,9 @@ import { TopAlert } from '../../alerts';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
-  externalConnector?: {
-    name: string;
-    onViewInExternalApp: (alertId: string) => void;
-  };
 }
 
-export function HeaderActions({ alert, externalConnector }: HeaderActionsProps) {
+export function HeaderActions({ alert }: HeaderActionsProps) {
   const {
     http,
     cases: {
@@ -69,7 +65,7 @@ export function HeaderActions({ alert, externalConnector }: HeaderActionsProps) 
     selectCaseModal.open({ attachments });
   };
 
-  const handleViewRuleConditions = () => {
+  const handleViewRuleDetails = () => {
     setIsPopoverOpen(false);
     setRuleConditionsFlyoutOpen(true);
   };
@@ -77,12 +73,6 @@ export function HeaderActions({ alert, externalConnector }: HeaderActionsProps) 
   const handleOpenSnoozeModal = () => {
     setIsPopoverOpen(false);
     setSnoozeModalOpen(true);
-  };
-
-  const handleOpenInExternalApp = () => {
-    if (alert) {
-      externalConnector?.onViewInExternalApp(alert.fields[ALERT_UUID]);
-    }
   };
 
   return (
@@ -108,26 +98,13 @@ export function HeaderActions({ alert, externalConnector }: HeaderActionsProps) 
           <EuiButtonEmpty
             size="s"
             color="text"
-            onClick={handleAddToCase}
-            data-test-subj="add-to-case-button"
-          >
-            <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.addToCase', {
-                defaultMessage: 'Add to case',
-              })}
-            </EuiText>
-          </EuiButtonEmpty>
-
-          <EuiButtonEmpty
-            size="s"
-            color="text"
             disabled={!alert?.fields[ALERT_RULE_UUID]}
-            onClick={handleViewRuleConditions}
-            data-test-subj="view-rule-conditions-button"
+            onClick={handleViewRuleDetails}
+            data-test-subj="view-rule-details-button"
           >
             <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.viewRuleConditons', {
-                defaultMessage: 'View rule conditions',
+              {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
+                defaultMessage: 'View rule details',
               })}
             </EuiText>
           </EuiButtonEmpty>
@@ -145,21 +122,18 @@ export function HeaderActions({ alert, externalConnector }: HeaderActionsProps) 
             </EuiText>
           </EuiButtonEmpty>
 
-          {externalConnector ? (
-            <EuiButtonEmpty
-              size="s"
-              color="text"
-              onClick={handleOpenInExternalApp}
-              data-test-subj="view-in-external-app-button"
-            >
-              <EuiText size="s">
-                {i18n.translate('xpack.observability.alertDetails.viewInExternalApp', {
-                  defaultMessage: 'View in {name}',
-                  values: { name: externalConnector.name },
-                })}
-              </EuiText>
-            </EuiButtonEmpty>
-          ) : null}
+          <EuiButtonEmpty
+            size="s"
+            color="text"
+            onClick={handleAddToCase}
+            data-test-subj="add-to-case-button"
+          >
+            <EuiText size="s">
+              {i18n.translate('xpack.observability.alertDetails.addToCase', {
+                defaultMessage: 'Add to case',
+              })}
+            </EuiText>
+          </EuiButtonEmpty>
         </EuiFlexGroup>
       </EuiPopover>
 

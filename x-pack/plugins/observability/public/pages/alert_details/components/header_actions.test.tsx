@@ -52,8 +52,6 @@ describe('Header Actions', () => {
     mockKibana();
   });
 
-  const mockViewInExternalApp = jest.fn();
-
   it('should display an actions button', () => {
     const { queryByTestId } = render(<HeaderActions alert={alertWithTags} />);
     expect(queryByTestId('alert-details-header-actions-menu-button')).toBeTruthy();
@@ -81,22 +79,5 @@ describe('Header Actions', () => {
         ],
       });
     });
-  });
-
-  it('should show a connector action if passed an externalConnector prop', async () => {
-    const { findByRole, getByTestId } = render(
-      <HeaderActions
-        alert={alertWithTags}
-        externalConnector={{ name: 'foo', onViewInExternalApp: mockViewInExternalApp }}
-      />
-    );
-
-    fireEvent.click(await findByRole('button', { name: 'Actions' }));
-    const button = getByTestId('view-in-external-app-button');
-    expect(button).toBeTruthy();
-
-    fireEvent.click(button);
-
-    expect(mockViewInExternalApp).toBeCalledTimes(1);
   });
 });
