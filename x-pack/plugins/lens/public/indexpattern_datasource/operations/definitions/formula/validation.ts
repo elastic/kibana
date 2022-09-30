@@ -273,7 +273,7 @@ function getMessageFromId<K extends ErrorTypes>({
     case 'wrongTypeArgument':
       message = i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongTypeArgument', {
         defaultMessage:
-          'The {name} argument for the operation {operation} in the Formula is of the wrong type: {expectedType} instead of {type}',
+          'The {name} argument for the operation {operation} in the Formula is of the wrong type: {type} instead of {expectedType}',
         values: {
           operation: out.operation,
           name: out.name,
