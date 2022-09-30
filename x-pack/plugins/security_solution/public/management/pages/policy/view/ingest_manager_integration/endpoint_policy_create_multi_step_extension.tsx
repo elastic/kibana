@@ -6,13 +6,110 @@
  */
 
 import React, { memo } from 'react';
-import type { PackagePolicyCreateMultiStepExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { EuiText, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import styled from 'styled-components';
 
 /**
- * TBD: A component to be displayed in multi step onboarding process.
+ * A component to be displayed in multi step onboarding process.
  */
-export const EndpointPolicyCreateMultiStepExtension =
-  memo<PackagePolicyCreateMultiStepExtensionComponentProps>(({ newPolicy }) => {
-    return <></>;
-  });
+export const EndpointPolicyCreateMultiStepExtension = memo(() => {
+  return (
+    <Container>
+      <LargeCustomSpacer />
+      <Title />
+      <MediumCustomSpacer />
+
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <LargeSecurityLogo />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <div>
+            <Features />
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <MediumCustomSpacer />
+
+      <Details />
+    </Container>
+  );
+});
 EndpointPolicyCreateMultiStepExtension.displayName = 'EndpointPolicyCreateMultiStepExtension';
+
+const Container = styled('div')`
+  width: 820px;
+`;
+
+const Title = () => (
+  <EuiText>
+    <h3>
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.title"
+        defaultMessage="We'll save your integration with our recommended defaults."
+      />
+    </h3>
+  </EuiText>
+);
+
+const LargeCustomSpacer = () => (
+  <>
+    <EuiSpacer size="m" />
+    <EuiSpacer size="xxl" />
+  </>
+);
+
+const MediumCustomSpacer = () => (
+  <>
+    <EuiSpacer size="m" />
+    <EuiSpacer size="xl" />
+  </>
+);
+
+const LargeSecurityLogo = () => (
+  <EuiIcon type="logoSecurity" style={{ width: '128px', height: '128px' }} />
+);
+
+const Features = () => (
+  <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexItem grow={false}>
+      <EuiIcon type="check" />
+    </EuiFlexItem>
+
+    <EuiFlexItem>
+      <EuiText size="m">
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.feature"
+            defaultMessage="Windows, Mac, and Linux event collection"
+          />
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const Details = () => (
+  <EuiText size="m" color="subdued">
+    <p>
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.details"
+        defaultMessage="You can change this later by editing the Endpoint Security integration agent policy.
+      Read more about Endpoint security configuration in our {docsPage}."
+        values={{
+          docsPage: (
+            <EuiLink href="https://www.elastic.co/guide/en/security/master/configure-endpoint-integration-policy.html">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.docsPage"
+                defaultMessage="documentation"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </p>
+  </EuiText>
+);
