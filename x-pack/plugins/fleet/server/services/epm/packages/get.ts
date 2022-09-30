@@ -170,7 +170,6 @@ export async function getPackageInfo({
       pkgVersion: resolvedPkgVersion,
       savedObjectsClient,
       installedPkg: savedObject?.attributes,
-      getPkgInfoFromArchive: packageInfo?.type === 'input',
       ignoreUnverified,
     }));
   }
@@ -235,13 +234,12 @@ interface PackageResponse {
 }
 type GetPackageResponse = PackageResponse | undefined;
 
-// gets package from install_source if it exists otherwise gets from registry
+// gets package from install_source
 export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
   installedPkg?: Installation;
   savedObjectsClient: SavedObjectsClientContract;
-  getPkgInfoFromArchive?: boolean;
   ignoreUnverified?: boolean;
 }): Promise<PackageResponse> {
   const logger = appContextService.getLogger();
@@ -250,7 +248,6 @@ export async function getPackageFromSource(options: {
     pkgVersion,
     installedPkg,
     savedObjectsClient,
-    getPkgInfoFromArchive = true,
     ignoreUnverified = false,
   } = options;
   let res: GetPackageResponse;
@@ -295,10 +292,7 @@ export async function getPackageFromSource(options: {
     }
   } else {
     // else package is not installed or installed and missing from cache and storage and installed from registry
-    res = await Registry.getRegistryPackage(pkgName, pkgVersion, {
-      getPkgInfoFromArchive,
-      ignoreUnverified,
-    });
+    res = await Registry.getRegistryPackage(pkgName, pkgVersion, { ignoreUnverified });
     logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion} from registry`);
   }
   if (!res) {

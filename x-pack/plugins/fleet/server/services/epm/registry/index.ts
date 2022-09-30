@@ -250,13 +250,35 @@ export async function getInfo(name: string, version: string) {
   });
 }
 
+// Check that the packageInfo exists in cache
+// If not, retrieve it from the archive
+async function getPackageInfoFromArchiveOrCache(
+  name: string,
+  version: string,
+  archiveBuffer: Buffer,
+  archivePath: string
+): Promise<ArchivePackage | RegistryPackage> {
+  const cachedInfo = getPackageInfo({ name, version });
+
+  if (!cachedInfo) {
+    const { packageInfo } = await generatePackageInfoFromArchiveBuffer(
+      archiveBuffer,
+      ensureContentType(archivePath)
+    );
+    setPackageInfo({ packageInfo, name, version });
+    return packageInfo;
+  } else {
+    return cachedInfo;
+  }
+}
+
 export async function getRegistryPackage(
   name: string,
   version: string,
-  options?: { ignoreUnverified?: boolean; getPkgInfoFromArchive?: boolean }
+  options?: { ignoreUnverified?: boolean }
 ): Promise<{
   paths: string[];
-  packageInfo: ArchivePackage;
+  packageInfo: ArchivePackage | RegistryPackage;
   verificationResult?: PackageVerificationResult;
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
@@ -289,18 +311,13 @@ export async function getRegistryPackage(
       })
     );
   }
-  const { packageInfo } = await generatePackageInfoFromArchiveBuffer(
+
+  const packageInfo = await getPackageInfoFromArchiveOrCache(
+    name,
+    version,
     archiveBuffer,
-    ensureContentType(archivePath)
+    archivePath
   );
-  const cachedInfo = getPackageInfo({ name, version });
-
-  if (options?.getPkgInfoFromArchive && !cachedInfo) {
-    setPackageInfo({ packageInfo, name, version });
-  }
-
-  // replace this function with generatePackageInfoFromArchiveBuffer
-  // const packageInfo = await getInfo(name, version);
   return { paths, packageInfo, verificationResult };
 }
 
