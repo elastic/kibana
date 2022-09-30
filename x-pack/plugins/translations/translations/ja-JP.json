@@ -11159,7 +11159,6 @@
     "xpack.enterpriseSearch.content.searchIndex.totalStats.domainCountCardLabel": "ドメインカウント",
     "xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel": "インジェスチョンタイプ",
     "xpack.enterpriseSearch.content.searchIndices.actions.columnTitle": "アクション",
-    "xpack.enterpriseSearch.content.searchIndices.content.breadcrumb": "コンテンツ",
     "xpack.enterpriseSearch.content.searchIndices.create.buttonTitle": "新しいインデックスを作成",
     "xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle": "ドキュメント数",
     "xpack.enterpriseSearch.content.searchIndices.health.columnTitle": "インデックス正常性",
