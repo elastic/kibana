@@ -768,13 +768,15 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
-                  dispatch(
-                    switchAndCleanDatasource({
-                      newDatasourceId: 'indexpattern',
-                      visualizationId: visualization?.activeId,
-                      currentIndexPatternId: dataView?.id,
-                    })
-                  );
+                  if (isOnTextBasedMode) {
+                    dispatch(
+                      switchAndCleanDatasource({
+                        newDatasourceId: 'indexpattern',
+                        visualizationId: visualization?.activeId,
+                        currentIndexPatternId: dataView?.id,
+                      })
+                    );
+                  }
                   dispatchChangeIndexPattern(dataView);
                   setCurrentIndexPattern(dataView);
                 }
@@ -783,7 +785,14 @@ export const LensTopNavMenu = ({
             });
           }
         : undefined,
-    [canEditDataView, dataViewEditor, dispatch, dispatchChangeIndexPattern, visualization?.activeId]
+    [
+      canEditDataView,
+      dataViewEditor,
+      dispatch,
+      dispatchChangeIndexPattern,
+      isOnTextBasedMode,
+      visualization?.activeId,
+    ]
   );
 
   const onCreateDefaultAdHocDataView = useCallback(
@@ -794,10 +803,25 @@ export const LensTopNavMenu = ({
       if (dataView.fields.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
       }
+      if (isOnTextBasedMode) {
+        dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'indexpattern',
+            visualizationId: visualization?.activeId,
+            currentIndexPatternId: dataView?.id,
+          })
+        );
+      }
       dispatchChangeIndexPattern(dataView);
       setCurrentIndexPattern(dataView);
     },
-    [dataViewsService, dispatchChangeIndexPattern]
+    [
+      dataViewsService,
+      dispatch,
+      dispatchChangeIndexPattern,
+      isOnTextBasedMode,
+      visualization?.activeId,
+    ]
   );
 
   // setting that enables/disables SQL
