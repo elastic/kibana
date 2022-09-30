@@ -1,0 +1,57 @@
+---
+id: kibCoreReviewingSoPr
+slug: /kibana-dev-docs/review/reviewing-so-pr
+title: Reviewing SavedObject PRs
+description: How to review PRs that changes savedObjects registration
+date: 2022-09-30
+tags: ['kibana','dev', 'contributor', 'api docs']
+---
+
+# Reviewing SavedObject PRs
+
+## Automatic test-based review request
+
+PRs modifying / adding / deleting any SO type registration will be identified by the integration
+test located at `src/core/server/integration_tests/saved_objects/migrations/check_registered_types.test.ts`.
+
+This test will fail any time a potential migration-impactful change is performed on any SO type registration,
+and will force the PR's author to update the test's snapshot, which will trigger a review from the Core team.
+
+## What and how to review?
+
+Reviews will likely be triggered when one, or more, of these scenarios occurs:
+- a new type was added
+- a type was removed (no longer registered)
+- a new migration function was added
+- a mapping change was performed
+- a new validation schema was added
+
+### A new type was added / 
+
+We have another integration test asserting for this (`src/core/server/integration_tests/saved_objects/migrations/type_registrations.test.ts`)
+
+In case of addition of a new type, there's isn't much to review, except checking if the type is registered as `hidden: true` and encourage to do so otherwise. 
+
+### a type was removed
+
+The same integration test from previous chapter also needs to be updated. 
+
+For this scenario, we need to check that `REMOVED_TYPES` (`packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/unused_types.ts`)
+was properly updated (but, again, the integration test will fail otherwise)
+
+### A new migration function was added
+
+- Review the migration function (owners are supposed to do it, but an additional review doesn't hurt)
+- Make sure that the migration function is properly tested by unit tests and, ideally, integration tests backed by real data
+- If the migration function is moving/creating/deleting/mutating fields, make sure that the type's mappings were updated accordingly
+
+### A mapping change was performed
+
+- Make sure a migration function was added to reflect the changes.
+- If migration function is present, refer to previous section.
+- If the type is registering validation schemas, make sure a new schema was added reflecting the changes of model.
+
+### A new validation schema was added
+
+- Make sure the associated mapping changes were performed, and that a migration function was added accordingly.
+- Refer to prior sections to see what to check. 
