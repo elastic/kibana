@@ -7,7 +7,7 @@
 
 import React, { FC, VFC } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
+import { IndicatorsBarChartWrapper } from './components/barchart';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
 import { DefaultPageLayout } from '../../components/layout';
@@ -53,10 +53,11 @@ const IndicatorsPageContent: VFC = () => {
     handleRefresh,
     indicatorCount,
     indicators,
-    isLoading,
     onChangeItemsPerPage,
     onChangePage,
     pagination,
+    isLoading: isLoadingIndicators,
+    isFetching: isFetchingIndicators,
   } = useIndicators({
     filters,
     filterQuery,
@@ -64,7 +65,14 @@ const IndicatorsPageContent: VFC = () => {
     sorting: columnSettings.sorting.columns,
   });
 
-  const { dateRange, series, selectedField, onFieldChange } = useAggregatedIndicators({
+  const {
+    dateRange,
+    series,
+    selectedField,
+    onFieldChange,
+    isLoading: isLoadingAggregatedIndicators,
+    isFetching: isFetchingAggregatedIndicators,
+  } = useAggregatedIndicators({
     timeRange,
     filters,
     filterQuery,
@@ -97,7 +105,10 @@ const IndicatorsPageContent: VFC = () => {
           indexPattern={indexPattern}
           field={selectedField}
           onFieldChange={onFieldChange}
+          isFetching={isFetchingAggregatedIndicators}
+          isLoading={isLoadingAggregatedIndicators}
         />
+
         <IndicatorsTable
           browserFields={browserFields}
           indexPattern={indexPattern}
@@ -105,7 +116,8 @@ const IndicatorsPageContent: VFC = () => {
           pagination={pagination}
           indicatorCount={indicatorCount}
           indicators={indicators}
-          isLoading={isLoading}
+          isLoading={isLoadingIndicators}
+          isFetching={isFetchingIndicators}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
         />
