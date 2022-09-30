@@ -183,7 +183,7 @@ export function MonitorDetailFlyout(props: Props) {
                   field: 'monitor.status',
                   render: (statusString: string) => (
                     <EuiBadge color={statusString === 'up' ? 'success' : 'danger'}>
-                      {statusString}
+                      {capitalize(statusString)}
                     </EuiBadge>
                   ),
                 },
