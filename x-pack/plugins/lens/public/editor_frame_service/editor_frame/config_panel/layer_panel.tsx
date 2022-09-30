@@ -307,6 +307,8 @@ export function LayerPanel(
   );
 
   const { dataViews } = props.framePublicAPI;
+  const [datasource] = Object.values(framePublicAPI.datasourceLayers);
+  const isTextBasedLanguage = Boolean(datasource?.isTextBasedLanguage());
 
   return (
     <>
@@ -337,6 +339,7 @@ export function LayerPanel(
                   layerType={activeVisualization.getLayerType(layerId, visualizationState)}
                   onRemoveLayer={onRemoveLayer}
                   onCloneLayer={onCloneLayer}
+                  isTextBasedLanguage={isTextBasedLanguage}
                   core={core}
                 />
               </EuiFlexItem>
@@ -378,20 +381,25 @@ export function LayerPanel(
             let errorText: string = '';
 
             if (!isEmptyLayer) {
-              if (group.requiredMinDimensionCount) {
-                errorText = i18n.translate(
-                  'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
-                  {
-                    defaultMessage: 'Requires {requiredMinDimensionCount} fields',
-                    values: {
-                      requiredMinDimensionCount: group.requiredMinDimensionCount,
-                    },
-                  }
-                );
-              } else if (group.required && group.accessors.length === 0) {
-                errorText = i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
-                  defaultMessage: 'Requires field',
-                });
+              if (
+                group.requiredMinDimensionCount &&
+                group.requiredMinDimensionCount > group.accessors.length
+              ) {
+                if (group.requiredMinDimensionCount > 1) {
+                  errorText = i18n.translate(
+                    'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
+                    {
+                      defaultMessage: 'Requires {requiredMinDimensionCount} fields',
+                      values: {
+                        requiredMinDimensionCount: group.requiredMinDimensionCount,
+                      },
+                    }
+                  );
+                } else {
+                  errorText = i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
+                    defaultMessage: 'Requires field',
+                  });
+                }
               } else if (group.dimensionsTooMany && group.dimensionsTooMany > 0) {
                 errorText = i18n.translate(
                   'xpack.lens.editorFrame.tooManyDimensionsSingularWarningLabel',
@@ -405,7 +413,7 @@ export function LayerPanel(
                 );
               }
             }
-            const isOptional = !group.required && !group.suggestedValue;
+            const isOptional = !group.requiredMinDimensionCount && !group.suggestedValue;
             return (
               <EuiFormRow
                 className="lnsLayerPanel__row"
@@ -450,18 +458,34 @@ export function LayerPanel(
                         const { columnId } = accessorConfig;
                         return (
                           <DraggableDimensionButton
+                            activeVisualization={activeVisualization}
                             registerNewButtonRef={registerNewButtonRef}
-                            columnId={columnId}
+                            order={[2, layerIndex, groupIndex, accessorIndex]}
+                            target={{
+                              id: columnId,
+                              layerId,
+                              columnId,
+                              groupId: group.groupId,
+                              filterOperations: group.filterOperations,
+                              prioritizedOperation: group.prioritizedOperation,
+                              indexPatternId: layerDatasource
+                                ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
+                                : activeVisualization.getUsedDataView?.(
+                                    visualizationState,
+                                    layerId
+                                  ),
+                              humanData: {
+                                label: columnLabelMap?.[columnId] ?? '',
+                                groupLabel: group.groupLabel,
+                                position: accessorIndex + 1,
+                                layerNumber: layerIndex + 1,
+                              },
+                            }}
                             group={group}
-                            accessorIndex={accessorIndex}
-                            groupIndex={groupIndex}
                             key={columnId}
                             state={layerDatasourceState}
-                            label={columnLabelMap?.[columnId] ?? ''}
                             layerDatasource={layerDatasource}
                             datasourceLayers={framePublicAPI.datasourceLayers}
-                            layerIndex={layerIndex}
-                            layerId={layerId}
                             onDragStart={() => setHideTooltip(true)}
                             onDragEnd={() => setHideTooltip(false)}
                             onDrop={onDrop}
@@ -559,10 +583,27 @@ export function LayerPanel(
 
                   {group.supportsMoreColumns ? (
                     <EmptyDimensionButton
+                      activeVisualization={activeVisualization}
+                      order={[2, layerIndex, groupIndex, group.accessors.length]}
                       group={group}
-                      layerId={layerId}
-                      groupIndex={groupIndex}
-                      layerIndex={layerIndex}
+                      target={{
+                        layerId,
+                        groupId: group.groupId,
+                        filterOperations: group.filterOperations,
+                        prioritizedOperation: group.prioritizedOperation,
+                        isNewColumn: true,
+                        indexPatternId: layerDatasource
+                          ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
+                          : activeVisualization.getUsedDataView?.(visualizationState, layerId),
+                        humanData: {
+                          groupLabel: group.groupLabel,
+                          layerNumber: layerIndex + 1,
+                          position: group.accessors.length + 1,
+                          label: i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
+                            defaultMessage: 'Empty dimension',
+                          }),
+                        },
+                      }}
                       layerDatasource={layerDatasource}
                       state={layerDatasourceState}
                       datasourceLayers={framePublicAPI.datasourceLayers}
