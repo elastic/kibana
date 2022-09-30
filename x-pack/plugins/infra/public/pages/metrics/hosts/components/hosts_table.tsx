@@ -280,6 +280,8 @@ interface Props {
   query: Query;
   searchSessionId: string;
   onRefetch: () => void;
+  onLoading: (isLoading: boolean) => void;
+  isLensLoading: boolean;
 }
 export const HostsTable: React.FunctionComponent<Props> = ({
   dataView,
@@ -287,6 +289,8 @@ export const HostsTable: React.FunctionComponent<Props> = ({
   query,
   searchSessionId,
   onRefetch,
+  onLoading,
+  isLensLoading,
 }) => {
   const {
     services: { lens },
@@ -294,36 +298,35 @@ export const HostsTable: React.FunctionComponent<Props> = ({
   const LensComponent = lens?.EmbeddableComponent;
   const [noData, setNoData] = useState(false);
 
+  if (noData && !isLensLoading) {
+    return (
+      <NoData
+        titleText={i18n.translate('xpack.infra.metrics.emptyViewTitle', {
+          defaultMessage: 'There is no data to display.',
+        })}
+        bodyText={i18n.translate('xpack.infra.metrics.emptyViewDescription', {
+          defaultMessage: 'Try adjusting your time or filter.',
+        })}
+        refetchText={i18n.translate('xpack.infra.metrics.refetchButtonLabel', {
+          defaultMessage: 'Check for new data',
+        })}
+        onRefetch={onRefetch}
+        testString="metricsEmptyViewState"
+      />
+    );
+  }
   return (
-    <>
-      {noData && (
-        <NoData
-          titleText={i18n.translate('xpack.infra.metrics.emptyViewTitle', {
-            defaultMessage: 'There is no data to display.',
-          })}
-          bodyText={i18n.translate('xpack.infra.metrics.emptyViewDescription', {
-            defaultMessage: 'Try adjusting your time or filter.',
-          })}
-          refetchText={i18n.translate('xpack.infra.metrics.refetchButtonLabel', {
-            defaultMessage: 'Check for new data',
-          })}
-          onRefetch={onRefetch}
-          testString="metricsEmptyViewState"
-        />
-      )}
-      <div style={{ display: noData ? 'none' : 'block' }}>
-        <LensComponent
-          id="hostsView"
-          timeRange={timeRange}
-          attributes={getLensHostsTable(dataView, query)}
-          searchSessionId={searchSessionId}
-          onLoad={(isLoading, adapters) => {
-            if (!isLoading && adapters?.tables) {
-              setNoData(adapters?.tables.tables.default?.rows.length === 0);
-            }
-          }}
-        />
-      </div>
-    </>
+    <LensComponent
+      id="hostsView"
+      timeRange={timeRange}
+      attributes={getLensHostsTable(dataView, query)}
+      searchSessionId={searchSessionId}
+      onLoad={(isLoading, adapters) => {
+        if (!isLoading && adapters?.tables) {
+          setNoData(adapters?.tables.tables.default?.rows.length === 0);
+          onLoading(false);
+        }
+      }}
+    />
   );
 };
