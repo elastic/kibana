@@ -43,7 +43,7 @@ const RiskScoreRestartButtonComponent = ({
       spaceId,
       theme,
     });
-  }, [fetch, http, notifications, refetch, renderDocLink, spaceId, theme]);
+  }, [fetch, http, notifications, refetch, renderDocLink, riskScoreEntity, spaceId, theme]);
 
   return (
     <EuiButton
