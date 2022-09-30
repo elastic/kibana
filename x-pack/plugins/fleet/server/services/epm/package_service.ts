@@ -19,6 +19,7 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
+  ArchivePackage,
   BundledPackage,
 } from '../../types';
 import { checkSuperuser } from '../../routes/security';
@@ -49,7 +50,7 @@ export interface PackageClient {
   getRegistryPackage(
     packageName: string,
     packageVersion: string
-  ): Promise<{ packageInfo: RegistryPackage; paths: string[] }>;
+  ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,

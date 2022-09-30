@@ -256,29 +256,30 @@ export async function getRegistryPackage(
   options?: { ignoreUnverified?: boolean; getPkgInfoFromArchive?: boolean }
 ): Promise<{
   paths: string[];
-  packageInfo: RegistryPackage;
+  packageInfo: ArchivePackage;
   verificationResult?: PackageVerificationResult;
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
   let paths = getArchiveFilelist({ name, version });
   let verificationResult = verifyPackage ? getVerificationResult({ name, version }) : undefined;
+
+  const {
+    archiveBuffer,
+    archivePath,
+    verificationResult: latestVerificationResult,
+  } = await withPackageSpan('Fetch package archive from registry', () =>
+    fetchArchiveBuffer({
+      pkgName: name,
+      pkgVersion: version,
+      shouldVerify: verifyPackage,
+      ignoreUnverified: options?.ignoreUnverified,
+    })
+  );
+  if (latestVerificationResult) {
+    verificationResult = latestVerificationResult;
+    setVerificationResult({ name, version }, latestVerificationResult);
+  }
   if (!paths || paths.length === 0) {
-    const {
-      archiveBuffer,
-      archivePath,
-      verificationResult: latestVerificationResult,
-    } = await withPackageSpan('Fetch package archive from registry', () =>
-      fetchArchiveBuffer({
-        pkgName: name,
-        pkgVersion: version,
-        shouldVerify: verifyPackage,
-        ignoreUnverified: options?.ignoreUnverified,
-      })
-    );
-    if (latestVerificationResult) {
-      verificationResult = latestVerificationResult;
-      setVerificationResult({ name, version }, latestVerificationResult);
-    }
     paths = await withPackageSpan('Unpack archive', () =>
       unpackBufferToCache({
         name,
@@ -287,17 +288,19 @@ export async function getRegistryPackage(
         contentType: ensureContentType(archivePath),
       })
     );
-    const cachedInfo = getPackageInfo({ name, version });
-    if (options?.getPkgInfoFromArchive && !cachedInfo) {
-      const { packageInfo } = await generatePackageInfoFromArchiveBuffer(
-        archiveBuffer,
-        ensureContentType(archivePath)
-      );
-      setPackageInfo({ packageInfo, name, version });
-    }
+  }
+  const { packageInfo } = await generatePackageInfoFromArchiveBuffer(
+    archiveBuffer,
+    ensureContentType(archivePath)
+  );
+  const cachedInfo = getPackageInfo({ name, version });
+
+  if (options?.getPkgInfoFromArchive && !cachedInfo) {
+    setPackageInfo({ packageInfo, name, version });
   }
 
-  const packageInfo = await getInfo(name, version);
+  // replace this function with generatePackageInfoFromArchiveBuffer
+  // const packageInfo = await getInfo(name, version);
   return { paths, packageInfo, verificationResult };
 }
 
