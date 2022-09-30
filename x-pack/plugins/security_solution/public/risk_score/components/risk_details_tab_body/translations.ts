@@ -9,14 +9,6 @@ import { i18n } from '@kbn/i18n';
 import type { RiskScoreEntity } from '../../../../common/search_strategy';
 import { getRiskEntityTranslation } from '../translations';
 
-export const RISKY_DASHBOARD_TITLE = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.riskTabBody.riskDashboard.title', {
-    defaultMessage: 'Current Risk Score For {riskEntity}',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity),
-    },
-  });
-
 export const RISK_SCORE_OVER_TIME = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.riskTabBody.scoreOverTimeTitle', {
     defaultMessage: '{riskEntity} risk score over time',

@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
-import { RiskTabBody } from '../../../risk_score/components/risk_tab_body';
+import { RiskDetailsTabBody } from '../../../risk_score/components/risk_details_tab_body';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { UsersTableType } from '../../store/model';
 import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';
@@ -68,7 +68,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
           />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
-          <RiskTabBody
+          <RiskDetailsTabBody
             {...tabProps}
             riskEntity={RiskScoreEntity.user}
             entityName={tabProps.userName}

@@ -8,6 +8,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../../constants';
 import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
@@ -27,7 +28,7 @@ import {
   useUserRiskScore,
 } from '../../containers';
 import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { RiskScoreEntity, buildEntityNameFilter } from '../../../../common/search_strategy';
+import { buildEntityNameFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
@@ -39,7 +40,10 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
-const RiskTabBodyComponent: React.FC<
+const getDashboardTitle = (riskEntity: RiskScoreEntity) =>
+  riskEntity === RiskScoreEntity.host ? RISKY_HOSTS_DASHBOARD_TITLE : RISKY_USERS_DASHBOARD_TITLE;
+
+const RiskDetailsTabBodyComponent: React.FC<
   Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     entityName: string;
     riskEntity: RiskScoreEntity;
@@ -68,7 +72,7 @@ const RiskTabBodyComponent: React.FC<
   const { buttonHref } = useDashboardButtonHref({
     to: endDate,
     from: startDate,
-    title: i18n.RISKY_DASHBOARD_TITLE(riskEntity),
+    title: getDashboardTitle(riskEntity),
   });
 
   const timerange = useMemo(
@@ -196,8 +200,8 @@ const RiskTabBodyComponent: React.FC<
   );
 };
 
-RiskTabBodyComponent.displayName = 'RiskTabBodyComponent';
+RiskDetailsTabBodyComponent.displayName = 'RiskDetailsTabBodyComponent';
 
-export const RiskTabBody = React.memo(RiskTabBodyComponent);
+export const RiskDetailsTabBody = React.memo(RiskDetailsTabBodyComponent);
 
-RiskTabBody.displayName = 'RiskTabBody';
+RiskDetailsTabBody.displayName = 'RiskDetailsTabBody';
