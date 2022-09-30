@@ -11,7 +11,12 @@ import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/
 
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
+import {
+  formatPipelineName,
+  generateMlInferencePipelineBody,
+} from '../../../../../../../common/ml_inference_pipeline';
 import { HttpError, Status } from '../../../../../../../common/types/api';
+import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
@@ -37,10 +42,15 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   sourceField: '',
 };
 
+export enum AddInferencePipelineSteps {
+  Configuration,
+  Test,
+  Review,
+}
+
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
 
 interface MLInferenceProcessorsActions {
-  clearFormErrors: () => void;
   createApiError: (error: HttpError) => HttpError;
   createApiSuccess: typeof CreateMlInferencePipelineApiLogic.actions.apiSuccess;
   createPipeline: () => void;
@@ -49,10 +59,10 @@ interface MLInferenceProcessorsActions {
   makeMappingRequest: typeof MappingsApiLogic.actions.makeRequest;
   mappingsApiError(error: HttpError): HttpError;
   mlModelsApiError(error: HttpError): HttpError;
-  setCreateErrors(errors: string[]): { errors: string[] };
-  setFormErrors: (inputErrors: AddInferencePipelineFormErrors) => {
-    inputErrors: AddInferencePipelineFormErrors;
+  setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => {
+    step: AddInferencePipelineSteps;
   };
+  setCreateErrors(errors: string[]): { errors: string[] };
   setIndexName: (indexName: string) => { indexName: string };
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
@@ -62,6 +72,7 @@ interface MLInferenceProcessorsActions {
 export interface AddInferencePipelineModal {
   configuration: InferencePipelineConfiguration;
   indexName: string;
+  step: AddInferencePipelineSteps;
 }
 
 interface MLInferenceProcessorsValues {
@@ -69,8 +80,10 @@ interface MLInferenceProcessorsValues {
   createErrors: string[];
   formErrors: AddInferencePipelineFormErrors;
   isLoading: boolean;
+  isPipelineDataValid: boolean;
   mappingData: typeof MappingsApiLogic.values.data;
   mappingStatus: Status;
+  mlInferencePipeline?: MlInferencePipeline;
   mlModelsData: typeof MLModelsApiLogic.values.data;
   mlModelsStatus: typeof MLModelsApiLogic.values.apiStatus;
   sourceFields: string[] | undefined;
@@ -83,6 +96,7 @@ export const MLInferenceLogic = kea<
   actions: {
     clearFormErrors: true,
     createPipeline: true,
+    setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => ({ step }),
     setCreateErrors: (errors: string[]) => ({ errors }),
     setFormErrors: (inputErrors: AddInferencePipelineFormErrors) => ({ inputErrors }),
     setIndexName: (indexName: string) => ({ indexName }),
@@ -124,12 +138,6 @@ export const MLInferenceLogic = kea<
       const {
         addInferencePipelineModal: { configuration, indexName },
       } = values;
-      const validationErrors = validateInferencePipelineConfiguration(configuration);
-      if (validationErrors !== undefined) {
-        actions.setFormErrors(validationErrors);
-        return;
-      }
-      actions.clearFormErrors();
 
       actions.makeCreatePipelineRequest({
         indexName,
@@ -155,8 +163,10 @@ export const MLInferenceLogic = kea<
           ...EMPTY_PIPELINE_CONFIGURATION,
         },
         indexName: '',
+        step: AddInferencePipelineSteps.Configuration,
       },
       {
+        setAddInferencePipelineStep: (modal, { step }) => ({ ...modal, step }),
         setIndexName: (modal, { indexName }) => ({ ...modal, indexName }),
         setInferencePipelineConfiguration: (modal, { configuration }) => ({
           ...modal,
@@ -171,20 +181,46 @@ export const MLInferenceLogic = kea<
         setCreateErrors: (_, { errors }) => errors,
       },
     ],
-    formErrors: [
-      {},
-      {
-        clearFormErrors: () => ({}),
-        setFormErrors: (_, { inputErrors }) => inputErrors,
-      },
-    ],
   },
   selectors: ({ selectors }) => ({
+    formErrors: [
+      () => [selectors.addInferencePipelineModal],
+      (modal: AddInferencePipelineModal) =>
+        validateInferencePipelineConfiguration(modal.configuration),
+    ],
     isLoading: [
       () => [selectors.mlModelsStatus, selectors.mappingStatus],
       (mlModelsStatus, mappingStatus) =>
         !API_REQUEST_COMPLETE_STATUSES.includes(mlModelsStatus) ||
         !API_REQUEST_COMPLETE_STATUSES.includes(mappingStatus),
+    ],
+    isPipelineDataValid: [
+      () => [selectors.formErrors],
+      (errors: AddInferencePipelineFormErrors) => Object.keys(errors).length === 0,
+    ],
+    mlInferencePipeline: [
+      () => [
+        selectors.isPipelineDataValid,
+        selectors.addInferencePipelineModal,
+        selectors.mlModelsData,
+      ],
+      (
+        isPipelineDataValid: boolean,
+        { configuration }: AddInferencePipelineModal,
+        models: MLInferenceProcessorsValues['mlModelsData']
+      ) => {
+        if (!isPipelineDataValid) return undefined;
+        const model = models?.find((mlModel) => mlModel.model_id === configuration.modelID);
+        if (!model) return undefined;
+
+        return generateMlInferencePipelineBody({
+          destinationField:
+            configuration.destinationField || formatPipelineName(configuration.pipelineName),
+          model,
+          pipelineName: configuration.pipelineName,
+          sourceField: configuration.sourceField,
+        });
+      },
     ],
     sourceFields: [
       () => [selectors.mappingStatus, selectors.mappingData],

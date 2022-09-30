@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export * from './indicators_barchart_wrapper';
+export { NewBucketButton } from './new_bucket_button';
+export { FieldsBucketContainer } from './fields_bucket_container';
+
+export * from './buckets';
