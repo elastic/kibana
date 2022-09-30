@@ -229,6 +229,31 @@ describe('getLayers', () => {
     ],
     series: [createSeries({ metrics: staticValueMetric })],
   });
+
+  const panelWithSingleAnnotationWithoutQueryStringAndTimefield = createPanel({
+    annotations: [
+      {
+        fields: 'geo.src,host',
+        template: 'Security Error from {{geo.src}} on {{host}}',
+        id: 'ann1',
+        color: 'rgba(211,49,21,0.7)',
+        icon: 'fa-asterisk',
+        ignore_global_filters: 1,
+        ignore_panel_filters: 1,
+        time_field: '',
+        query_string: {
+          query: '',
+          language: 'lucene',
+        },
+        hidden: true,
+        index_pattern: {
+          id: 'test',
+        },
+      },
+    ],
+    series: [createSeries({ metrics: staticValueMetric })],
+  });
+
   const panelWithMultiAnnotations = createPanel({
     annotations: [
       {
@@ -412,6 +437,51 @@ describe('getLayers', () => {
       ],
     ],
     [
+      'annotation layer should gets correct default params',
+      [dataSourceLayersWithStatic, panelWithSingleAnnotationWithoutQueryStringAndTimefield],
+      [
+        {
+          layerType: 'referenceLine',
+          accessors: ['column-id-1'],
+          layerId: 'test-layer-1',
+          yConfig: [
+            {
+              forAccessor: 'column-id-1',
+              axisMode: 'right',
+              color: '#68BC00',
+              fill: 'below',
+            },
+          ],
+        },
+        {
+          layerId: 'test-id',
+          layerType: 'annotations',
+          ignoreGlobalFilters: true,
+          annotations: [
+            {
+              color: '#D33115',
+              extraFields: ['geo.src'],
+              filter: {
+                language: 'lucene',
+                query: '*',
+                type: 'kibana_query',
+              },
+              icon: 'asterisk',
+              id: 'ann1',
+              isHidden: true,
+              key: {
+                type: 'point_in_time',
+              },
+              label: 'Event',
+              timeField: 'test_field',
+              type: 'query',
+            },
+          ],
+          indexPatternId: 'test',
+        },
+      ],
+    ],
+    [
       'multiple annotations with different data views create separate layers',
       [dataSourceLayersWithStatic, panelWithMultiAnnotations],
       [
@@ -507,6 +577,7 @@ const mockedIndices = [
   {
     id: 'test',
     title: 'test',
+    timeFieldName: 'test_field',
     getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
   },
 ] as unknown as DataView[];
