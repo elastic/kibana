@@ -45,7 +45,7 @@ import {
   createSavedQueryRule,
   createCustomRuleEnabled,
 } from '../../tasks/api_calls/rules';
-import { createSlackConnector } from '../../tasks/api_calls/the_connectors';
+import { createSlackConnector } from '../../tasks/api_calls/connectors';
 
 import {
   getEqlRule,
