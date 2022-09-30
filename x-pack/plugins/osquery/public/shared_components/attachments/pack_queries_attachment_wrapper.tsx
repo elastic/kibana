@@ -28,13 +28,11 @@ export const PackQueriesAttachmentWrapper = ({
   const [isLive, setIsLive] = useState(false);
   const addToTimelineButton = getAddToTimeline(timelines, appName);
 
-  console.log({ actionId, queryId });
   const { data } = useLiveQueryDetails({
     actionId,
     isLive,
     ...(queryId ? { queryIds: [queryId] } : {}),
   });
-  console.log({ data });
 
   useLayoutEffect(() => {
     setIsLive(() => !(data?.status === 'completed'));
