@@ -20,12 +20,17 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { generateId } from '../../id_generator';
-import { renewIDs } from '../../utils';
+import {
+  isDraggedDataViewField,
+  isOperationFromCompatibleGroup,
+  isOperationFromTheSameGroup,
+  renewIDs,
+} from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
-import type { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
+import { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
 import {
   State,
   visualizationTypes,
@@ -364,6 +369,39 @@ export const getXyVisualization = ({
   getMainPalette: (state) => {
     if (!state || state.layers.length === 0) return;
     return getFirstDataLayer(state.layers)?.palette;
+  },
+
+  getDropProps(dropProps) {
+    if (!dropProps.source) {
+      return;
+    }
+    const srcDataView = dropProps.source.indexPatternId;
+    const targetDataView = dropProps.target.indexPatternId;
+    if (!targetDataView || srcDataView !== targetDataView) {
+      return;
+    }
+
+    if (isDraggedDataViewField(dropProps.source)) {
+      if (dropProps.source.field.type === 'document') {
+        return;
+      }
+      return dropProps.target.isNewColumn
+        ? { dropTypes: ['field_add'] }
+        : { dropTypes: ['field_replace'] };
+    }
+
+    if (isOperationFromTheSameGroup(dropProps.source, dropProps.target)) {
+      return dropProps.target.isNewColumn
+        ? { dropTypes: ['duplicate_compatible'] }
+        : { dropTypes: ['reorder'] };
+    }
+    if (isOperationFromCompatibleGroup(dropProps.source, dropProps.target)) {
+      return {
+        dropTypes: dropProps.target.isNewColumn
+          ? ['move_compatible', 'duplicate_compatible']
+          : ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
+      };
+    }
   },
 
   onDrop(props) {
@@ -723,6 +761,9 @@ export const getXyVisualization = ({
   },
   getUniqueLabels(state) {
     return getUniqueLabels(state.layers);
+  },
+  getUsedDataView(state, layerId) {
+    return getAnnotationsLayers(state.layers).find((l) => l.layerId === layerId)?.indexPatternId;
   },
   getUsedDataViews(state) {
     return (
