@@ -66,7 +66,7 @@ export const DiscoverTopNav = ({
     [dataView]
   );
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
 
   const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
 
@@ -141,6 +141,19 @@ export const DiscoverTopNav = ({
     [canEditDataView, dataViewEditor, onChangeDataView]
   );
 
+  const onCreateDefaultAdHocDataView = useCallback(
+    async (pattern: string) => {
+      const newDataView = await dataViews.create({
+        title: pattern,
+      });
+      if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
+        newDataView.timeFieldName = '@timestamp';
+      }
+      onChangeDataView(newDataView.id!);
+    },
+    [dataViews, onChangeDataView]
+  );
+
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -201,6 +214,7 @@ export const DiscoverTopNav = ({
     currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
+    onCreateDefaultAdHocDataView,
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews: adHocDataViewList,

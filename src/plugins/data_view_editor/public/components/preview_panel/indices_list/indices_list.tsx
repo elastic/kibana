@@ -27,7 +27,7 @@ import {
 import { Pager } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MatchedItem, Tag } from '../../../types';
+import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 
 interface IndicesListProps {
   indices: MatchedItem[];

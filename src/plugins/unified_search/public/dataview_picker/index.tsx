@@ -63,6 +63,8 @@ export interface DataViewPickerProps {
    * Also works as a flag to show the create dataview button.
    */
   onDataViewCreated?: () => void;
+
+  onCreateDefaultAdHocDataView?: (pattern: string) => void;
   /**
    * List of the supported text based languages (SQL, ESQL) etc.
    * Defined per application, if not provided, no text based languages
@@ -104,6 +106,7 @@ export const DataViewPicker = ({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  onCreateDefaultAdHocDataView,
   isDisabled,
 }: DataViewPickerPropsExtended) => {
   return (
@@ -113,6 +116,7 @@ export const DataViewPicker = ({
       onChangeDataView={onChangeDataView}
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
+      onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
       adHocDataViews={adHocDataViews}
       selectableProps={selectableProps}

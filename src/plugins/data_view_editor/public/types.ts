@@ -17,7 +17,12 @@ import {
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewsPublicPluginStart,
+  INDEX_PATTERN_TYPE,
+  MatchedItem,
+} from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
@@ -80,51 +85,6 @@ export interface StartPlugins {
 
 export type CloseEditor = () => void;
 
-export interface MatchedItem {
-  name: string;
-  tags: Tag[];
-  item: {
-    name: string;
-    backing_indices?: string[];
-    timestamp_field?: string;
-    indices?: string[];
-    aliases?: string[];
-    attributes?: ResolveIndexResponseItemIndexAttrs[];
-    data_stream?: string;
-  };
-}
-
-// for showing index matches
-export interface ResolveIndexResponse {
-  indices?: ResolveIndexResponseItemIndex[];
-  aliases?: ResolveIndexResponseItemAlias[];
-  data_streams?: ResolveIndexResponseItemDataStream[];
-}
-
-export interface ResolveIndexResponseItem {
-  name: string;
-}
-
-export interface ResolveIndexResponseItemDataStream extends ResolveIndexResponseItem {
-  backing_indices: string[];
-  timestamp_field: string;
-}
-
-export interface ResolveIndexResponseItemAlias extends ResolveIndexResponseItem {
-  indices: string[];
-}
-
-export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem {
-  aliases?: string[];
-  attributes?: ResolveIndexResponseItemIndexAttrs[];
-  data_stream?: string;
-}
-
-export interface Tag {
-  name: string;
-  key: string;
-  color: string;
-}
 // end for index matches
 
 export interface IndexPatternTableItem {
@@ -135,24 +95,12 @@ export interface IndexPatternTableItem {
   sort: string;
 }
 
-export enum ResolveIndexResponseItemIndexAttrs {
-  OPEN = 'open',
-  CLOSED = 'closed',
-  HIDDEN = 'hidden',
-  FROZEN = 'frozen',
-}
-
 export interface RollupIndiciesCapability {
   aggs: Record<string, IndexPatternAggRestrictions>;
   error: string;
 }
 
 export type RollupIndicesCapsResponse = Record<string, RollupIndiciesCapability>;
-
-export enum INDEX_PATTERN_TYPE {
-  ROLLUP = 'rollup',
-  DEFAULT = 'default',
-}
 
 export interface IndexPatternConfig {
   title: string;

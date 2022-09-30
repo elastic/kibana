@@ -12,20 +12,20 @@ import { i18n } from '@kbn/i18n';
 import { Tag, INDEX_PATTERN_TYPE } from '../types';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
 
-const aliasLabel = i18n.translate('indexPatternEditor.aliasLabel', { defaultMessage: 'Alias' });
-const dataStreamLabel = i18n.translate('indexPatternEditor.dataStreamLabel', {
+const aliasLabel = i18n.translate('dataViews.aliasLabel', { defaultMessage: 'Alias' });
+const dataStreamLabel = i18n.translate('dataViews.dataStreamLabel', {
   defaultMessage: 'Data stream',
 });
 
-const indexLabel = i18n.translate('indexPatternEditor.indexLabel', {
+const indexLabel = i18n.translate('dataViews.indexLabel', {
   defaultMessage: 'Index',
 });
 
-const frozenLabel = i18n.translate('indexPatternEditor.frozenLabel', {
+const frozenLabel = i18n.translate('dataViews.frozenLabel', {
   defaultMessage: 'Frozen',
 });
 
-const rollupLabel = i18n.translate('indexPatternEditor.rollupLabel', {
+const rollupLabel = i18n.translate('dataViews.rollupLabel', {
   defaultMessage: 'Rollup',
 });
 

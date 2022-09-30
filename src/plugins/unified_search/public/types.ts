@@ -86,5 +86,6 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   storage: IStorageWrapper;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   usageCollection?: UsageCollectionStart;
 }
