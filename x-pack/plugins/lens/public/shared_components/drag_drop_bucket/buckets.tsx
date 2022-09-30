@@ -97,7 +97,6 @@ export function DragDropBuckets<T = unknown>({
       <EuiPanel
         paddingSize="none"
         color={isDragging ? 'success' : bgColor}
-        style={{ overflow: 'hidden' }}
         hasShadow={false}
         hasBorder={false}
       >
