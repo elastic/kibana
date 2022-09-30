@@ -127,6 +127,15 @@ export type ActionsConfig = TypeOf<typeof configSchema>;
 export function getValidatedConfig(logger: Logger, originalConfig: ActionsConfig): ActionsConfig {
   const proxyBypassHosts = originalConfig.proxyBypassHosts;
   const proxyOnlyHosts = originalConfig.proxyOnlyHosts;
+  const proxyUrl = originalConfig.proxyUrl;
+
+  if (proxyUrl) {
+    try {
+      new URL(proxyUrl);
+    } catch (err) {
+      logger.warn(`The confguration xpack.actions.proxyUrl: ${proxyUrl} is invalid.`);
+    }
+  }
 
   if (proxyBypassHosts && proxyOnlyHosts) {
     logger.warn(
