@@ -263,8 +263,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
               'dvRandomSamplerProbabilityRange',
               'value'
             );
-            expect(expectedProbability).to.eql(
-              `${probability}`,
+            expect(probability).to.eql(
+              `${expectedProbability}`,
               `Expected probability to be ${expectedProbability}, got ${probability}`
             );
           }
