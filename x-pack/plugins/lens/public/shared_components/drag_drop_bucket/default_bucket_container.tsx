@@ -88,7 +88,6 @@ export const DefaultBucketContainer = ({
               color="danger"
               onClick={onRemoveClick}
               aria-label={removeTitle}
-              title={removeTitle}
               disabled={isNotRemovable}
               data-test-subj={`${dataTestSubj}-remove-${idx}`}
               style={{ marginRight: euiTheme.size.xs }}
