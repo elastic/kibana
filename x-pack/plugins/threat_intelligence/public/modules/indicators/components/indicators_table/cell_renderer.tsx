@@ -10,16 +10,10 @@ import { useContext, useEffect } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator } from '../../../../../common/types/indicator';
-import { getDisplayName } from '../../lib/display_name';
-import { IndicatorField } from '../indicator_field/indicator_field';
+import { IndicatorFieldValue } from '../indicator_field_value';
 import { IndicatorsTableContext } from './context';
 import { ActionsRowCell } from './actions_row_cell';
-
-export enum ComputedIndicatorFieldId {
-  DisplayName = 'display_name',
-}
 
 export const cellRendererFactory = (from: number) => {
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
@@ -35,7 +29,7 @@ export const cellRendererFactory = (from: number) => {
 
     const darkMode = uiSettings.get('theme:darkMode');
 
-    const { indicators, expanded, fieldTypesMap } = indicatorsTableContext;
+    const { indicators, expanded } = indicatorsTableContext;
 
     const indicator: Indicator | undefined = indicators[rowIndex - from];
 
@@ -59,12 +53,6 @@ export const cellRendererFactory = (from: number) => {
       return <ActionsRowCell indicator={indicator} />;
     }
 
-    if (columnId === ComputedIndicatorFieldId.DisplayName) {
-      const displayName = getDisplayName(indicator);
-      const displayNameValue = displayName.value;
-      return displayNameValue || EMPTY_VALUE;
-    }
-
-    return <IndicatorField indicator={indicator} field={columnId} fieldTypesMap={fieldTypesMap} />;
+    return <IndicatorFieldValue indicator={indicator} field={columnId} />;
   };
 };

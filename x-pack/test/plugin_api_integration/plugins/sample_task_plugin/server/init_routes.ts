@@ -113,6 +113,55 @@ export function initRoutes(
 
   router.post(
     {
+      path: `/api/sample_tasks/bulk_enable`,
+      validate: {
+        body: schema.object({
+          taskIds: schema.arrayOf(schema.string()),
+          runSoon: schema.boolean({ defaultValue: true }),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) {
+      const { taskIds, runSoon } = req.body;
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.bulkEnable(taskIds, runSoon) });
+      } catch (err) {
+        return res.ok({ body: { taskIds, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/sample_tasks/bulk_disable`,
+      validate: {
+        body: schema.object({
+          taskIds: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) {
+      const { taskIds } = req.body;
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.bulkDisable(taskIds) });
+      } catch (err) {
+        return res.ok({ body: { taskIds, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
       path: `/api/sample_tasks/bulk_update_schedules`,
       validate: {
         body: schema.object({

@@ -64,6 +64,7 @@ describe('Executor', () => {
       config,
       secrets,
       services,
+      configurationUtilities: mockedActionsConfig,
     });
 
     expect(res).toEqual({
@@ -84,6 +85,7 @@ describe('Executor', () => {
       config,
       secrets,
       services,
+      configurationUtilities: mockedActionsConfig,
     });
 
     expect(res).toEqual({
@@ -104,6 +106,7 @@ describe('Executor', () => {
       config,
       secrets,
       services,
+      configurationUtilities: mockedActionsConfig,
     });
 
     expect(res).toEqual({
@@ -122,6 +125,7 @@ describe('Executor', () => {
       config,
       secrets,
       services,
+      configurationUtilities: mockedActionsConfig,
     });
 
     expect(res).toEqual({
@@ -135,7 +139,14 @@ describe('Executor', () => {
     const executor = createExecutor(TestNoSubActions);
 
     await expect(async () =>
-      executor({ actionId, params, config, secrets, services })
+      executor({
+        actionId,
+        params,
+        config,
+        secrets,
+        services,
+        configurationUtilities: mockedActionsConfig,
+      })
     ).rejects.toThrowError('You should register at least one subAction for your connector type');
   });
 
@@ -149,6 +160,7 @@ describe('Executor', () => {
         config,
         secrets,
         services,
+        configurationUtilities: mockedActionsConfig,
       })
     ).rejects.toThrowError(
       'Sub action "not-exist" is not registered. Connector id: test-action-id. Connector name: Test. Connector type: .test'
@@ -165,6 +177,7 @@ describe('Executor', () => {
         config,
         secrets,
         services,
+        configurationUtilities: mockedActionsConfig,
       })
     ).rejects.toThrowError(
       'Method "not-exist" does not exists in service. Sub action: "testUrl". Connector id: test-action-id. Connector name: Test. Connector type: .test'
@@ -181,6 +194,7 @@ describe('Executor', () => {
         config,
         secrets,
         services,
+        configurationUtilities: mockedActionsConfig,
       })
     ).rejects.toThrowError(
       'Method "notAFunction" must be a function. Connector id: test-action-id. Connector name: Test. Connector type: .test'
@@ -191,7 +205,14 @@ describe('Executor', () => {
     const executor = createExecutor(TestExecutor);
 
     await expect(async () =>
-      executor({ actionId, params: { ...params, subAction: 'echo' }, config, secrets, services })
+      executor({
+        actionId,
+        params: { ...params, subAction: 'echo' },
+        config,
+        secrets,
+        services,
+        configurationUtilities: mockedActionsConfig,
+      })
     ).rejects.toThrowError(
       'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])'
     );

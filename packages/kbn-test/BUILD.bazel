@@ -8,15 +8,27 @@ PKG_REQUIRE_NAME = "@kbn/test"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*"
+    "src/failed_tests_reporter/es_config",
+    "**/*.html",
+    "**/*.js",
+    "**/*.ts",
   ],
   exclude = [
+    "types/**/*",
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
     "**/*.snap",
     "**/__fixture__/**",
     "**/__fixtures__/**",
     "**/__snapshots__/**",
-  ]
+    "**/integration_tests/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
 )
 
 SRCS = SOURCE_FILES
@@ -87,6 +99,7 @@ TYPES_DEPS = [
   "//packages/kbn-tooling-log:npm_module_types",
   "//packages/kbn-bazel-packages:npm_module_types",
   "//packages/kbn-get-repo-files:npm_module_types",
+  "//packages/kbn-ftr-screenshot-filename:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@jest/console",
   "@npm//@jest/reporters",
@@ -104,6 +117,7 @@ TYPES_DEPS = [
   "@npm//jest-snapshot",
   "@npm//redux",
   "@npm//rxjs",
+  "@npm//playwright",
   "@npm//xmlbuilder",
   "@npm//@types/archiver",
   "@npm//@types/chance",
@@ -132,7 +146,6 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  root_input_dir = "src",
 )
 
 ts_config(
@@ -153,7 +166,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

@@ -109,40 +109,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a1",
-    "index": ".kibana",
-    "source": {
-      "type": "fleet-agent-actions",
-      "fleet-agent-actions": {
-        "agent_id": "agent1",
-        "type": "POLICY_CHANGE",
-        "created_at": "2020-03-15T03:47:15.129Z",
-        "sent_at": "2020-03-04T15:03:07+0000"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a2",
-    "index": ".kibana",
-    "source": {
-      "type": "fleet-agent-actions",
-      "fleet-agent-actions": {
-        "agent_id": "agent1",
-        "type": "POLICY_CHANGE",
-        "created_at": "2020-03-15T03:47:15.129Z",
-        "sent_at": "2020-03-04T15:03:07+0000"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "ingest-agent-policies:policy1",
     "index": ".kibana",
     "source": {

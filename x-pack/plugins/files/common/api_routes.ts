@@ -5,14 +5,8 @@
  * 2.0.
  */
 
+import type { TypeOf, Type } from '@kbn/config-schema';
 import { PLUGIN_ID } from './constants';
-import type {
-  FileJSON,
-  Pagination,
-  FilesMetrics,
-  FileShareJSON,
-  FileShareJSONWithToken,
-} from './types';
 
 export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
@@ -21,6 +15,27 @@ export const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
 export const FILES_SHARE_API_BASE_PATH = `${API_BASE_PATH}/shares`;
 
 export const FILES_PUBLIC_API_BASE_PATH = `${API_BASE_PATH}/public`;
+
+export interface EndpointInputs<
+  P extends Type<unknown> = Type<unknown>,
+  Q extends Type<unknown> = Type<unknown>,
+  B extends Type<unknown> = Type<unknown>
+> {
+  params?: P;
+  query?: Q;
+  body?: B;
+}
+
+export interface CreateRouteDefinition<Inputs extends EndpointInputs, R> {
+  inputs: {
+    params: TypeOf<NonNullable<Inputs['params']>>;
+    query: TypeOf<NonNullable<Inputs['query']>>;
+    body: TypeOf<NonNullable<Inputs['body']>>;
+  };
+  output: R;
+}
+
+export type AnyEndpoint = CreateRouteDefinition<EndpointInputs, unknown>;
 
 /**
  * Abstract type definition for API route inputs and outputs.
@@ -42,168 +57,17 @@ export interface HttpApiInterfaceEntryDefinition<
   output: R;
 }
 
-export type CreateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  unknown,
-  {
-    name: string;
-    alt?: string;
-    meta?: Record<string, unknown>;
-    mimeType?: string;
-  },
-  { file: FileJSON }
->;
-
-export type DeleteFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  {
-    id: string;
-  },
-  unknown,
-  unknown,
-  { ok: true }
->;
-
-export type DownloadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  {
-    id: string;
-    fileName?: string;
-  },
-  unknown,
-  unknown,
-  any
->;
-
-export type GetByIdFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  {
-    id: string;
-  },
-  unknown,
-  unknown,
-  { file: FileJSON }
->;
-
-export type ListFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  Pagination,
-  unknown,
-  { files: FileJSON[] }
->;
-
-export type UpdateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  { id: string },
-  unknown,
-  { name?: string; alt?: string; meta?: Record<string, unknown> },
-  { file: FileJSON }
->;
-
-export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  { id: string },
-  unknown,
-  { body: unknown },
-  {
-    ok: true;
-    size: number;
-  }
->;
-
-export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  Pagination,
-  {
-    /**
-     * Filter for set of file-kinds
-     */
-    kind?: string[];
-
-    /**
-     * Filter for match on names
-     */
-    name?: string[];
-
-    /**
-     * Filter for set of meta attributes matching this object
-     */
-    meta?: {};
-
-    /**
-     * Filter for match on extensions
-     */
-    extension?: string[];
-
-    /**
-     * Filter for match on extensions
-     */
-    status?: string[];
-  },
-  { files: FileJSON[] }
->;
-
-export type FilesMetricsHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  unknown,
-  unknown,
-  FilesMetrics
->;
-
-export type FileShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  {
-    fileId: string;
-  },
-  unknown,
-  {
-    /**
-     * Unix timestamp of when the share will expire.
-     */
-    validUntil?: number;
-    /**
-     * Optional name to uniquely identify this share instance.
-     */
-    name?: string;
-  },
-  FileShareJSONWithToken
->;
-
-export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  {
-    /**
-     * Share token id
-     */
-    id: string;
-  },
-  unknown,
-  unknown,
-  {
-    ok: true;
-  }
->;
-
-export type FileGetShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  {
-    /**
-     * ID of the share object
-     */
-    id: string;
-  },
-  unknown,
-  unknown,
-  {
-    share: FileShareJSON;
-  }
->;
-
-export type FileListSharesHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  Pagination & { forFileId?: string },
-  unknown,
-  {
-    shares: FileShareJSON[];
-  }
->;
-
-export type FilePublicDownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  { fileName?: string },
-  { token: string },
-  unknown,
-  // Should be a readable stream
-  any
->;
+export type { Endpoint as CreateFileKindHttpEndpoint } from '../server/routes/file_kind/create';
+export type { Endpoint as DeleteFileKindHttpEndpoint } from '../server/routes/file_kind/delete';
+export type { Endpoint as DownloadFileKindHttpEndpoint } from '../server/routes/file_kind/download';
+export type { Endpoint as GetByIdFileKindHttpEndpoint } from '../server/routes/file_kind/get_by_id';
+export type { Endpoint as ListFileKindHttpEndpoint } from '../server/routes/file_kind/list';
+export type { Endpoint as UpdateFileKindHttpEndpoint } from '../server/routes/file_kind/update';
+export type { Endpoint as UploadFileKindHttpEndpoint } from '../server/routes/file_kind/upload';
+export type { Endpoint as FindFilesHttpEndpoint } from '../server/routes/find';
+export type { Endpoint as FilesMetricsHttpEndpoint } from '../server/routes/metrics';
+export type { Endpoint as FileShareHttpEndpoint } from '../server/routes/file_kind/share/share';
+export type { Endpoint as FileUnshareHttpEndpoint } from '../server/routes/file_kind/share/unshare';
+export type { Endpoint as FileGetShareHttpEndpoint } from '../server/routes/file_kind/share/get';
+export type { Endpoint as FileListSharesHttpEndpoint } from '../server/routes/file_kind/share/list';
+export type { Endpoint as FilePublicDownloadHttpEndpoint } from '../server/routes/public_facing/download';

@@ -14,6 +14,7 @@ import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecurityPageName } from '../../app/types';
 import type { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
@@ -29,7 +30,7 @@ import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -103,7 +104,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         const [min, max] = x;
         dispatch(
           setAbsoluteRangeDatePicker({
-            id: 'global',
+            id: InputsModelId.global,
             from: new Date(min).toISOString(),
             to: new Date(max).toISOString(),
           })
@@ -159,7 +160,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-              <SiemSearchBar indexPattern={indexPattern} id="global" />
+              <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
             </FiltersGlobal>
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>

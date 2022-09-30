@@ -35,7 +35,7 @@ import { getESAssetMetadata } from '../meta';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
 import { getAsset } from './common';
-import { installTransform } from './install';
+import { installTransforms } from './install';
 
 describe('test transform install', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -122,7 +122,7 @@ describe('test transform install', () => {
       ],
     });
 
-    await installTransform(
+    await installTransforms(
       {
         name: 'endpoint',
         version: '0.16.0-dev.0',
@@ -320,7 +320,7 @@ describe('test transform install', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    await installTransform(
+    await installTransforms(
       {
         name: 'endpoint',
         version: '0.16.0-dev.0',
@@ -422,7 +422,7 @@ describe('test transform install', () => {
       ],
     });
 
-    await installTransform(
+    await installTransforms(
       {
         name: 'endpoint',
         version: '0.16.0-dev.0',
@@ -556,7 +556,7 @@ describe('test transform install', () => {
       )
     );
 
-    await installTransform(
+    await installTransforms(
       {
         name: 'endpoint',
         version: '0.16.0-dev.0',

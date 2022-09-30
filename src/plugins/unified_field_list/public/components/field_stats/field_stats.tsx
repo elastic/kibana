@@ -20,19 +20,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import DateMath from '@kbn/datemath';
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiProgress,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Axis,
   Chart,
@@ -48,6 +37,14 @@ import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
 import { canProvideStatsForField } from '../../../common/utils/field_stats_utils';
 import { loadFieldStats } from '../../services/field_stats';
+import type { AddFieldFilterHandler } from '../../types';
+import {
+  FieldTopValues,
+  getOtherCount,
+  getBucketsValuesCount,
+  getDefaultColor,
+} from './field_top_values';
+import { FieldSummaryMessage } from './field_summary_message';
 
 interface State {
   isLoading: boolean;
@@ -74,13 +71,18 @@ export interface FieldStatsProps {
   toDate: string;
   dataViewOrDataViewId: DataView | string;
   field: DataViewField;
+  color?: string;
   'data-test-subj'?: string;
-  overrideMissingContent?: (params?: { noDataFound?: boolean }) => JSX.Element | null;
+  overrideMissingContent?: (params: {
+    element: JSX.Element;
+    noDataFound?: boolean;
+  }) => JSX.Element | null;
   overrideFooter?: (params: {
     element: JSX.Element;
     totalDocuments?: number;
     sampledDocuments?: number;
   }) => JSX.Element;
+  onAddFilter?: AddFieldFilterHandler;
 }
 
 const FieldStatsComponent: React.FC<FieldStatsProps> = ({
@@ -91,11 +93,12 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   toDate,
   dataViewOrDataViewId,
   field,
+  color = getDefaultColor(),
   'data-test-subj': dataTestSubject = 'fieldStats',
   overrideMissingContent,
   overrideFooter,
+  onAddFilter,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, changeState] = useState<State>({
     isLoading: false,
@@ -103,28 +106,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [dataView, changeDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isCanceledRef = useRef<boolean>(false);
-
-  const topValueStyles = useMemo(
-    () => css`
-      margin-bottom: ${euiTheme.size.s};
-
-      &:last-of-type {
-        margin-bottom: 0;
-      }
-    `,
-    [euiTheme]
-  );
-
-  const topValueProgressStyles = useMemo(
-    () => css`
-      background-color: ${euiTheme.colors.lightestShade};
-
-      &::-webkit-progress-bar {
-        background-color: ${euiTheme.colors.lightestShade};
-      }
-    `,
-    [euiTheme]
-  );
 
   const setState: typeof changeState = useCallback(
     (nextState) => {
@@ -157,7 +138,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
       setDataView(loadedDataView);
 
-      if (state.isLoading || !canProvideStatsForField(field)) {
+      if (state.isLoading) {
         return;
       }
 
@@ -204,6 +185,20 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
+  const customChartTheme: typeof chartTheme = useMemo(() => {
+    return color
+      ? {
+          ...chartTheme,
+          barSeriesStyle: {
+            ...chartTheme.barSeriesStyle,
+            rect: {
+              ...(chartTheme.barSeriesStyle?.rect || {}),
+              fill: color,
+            },
+          },
+        }
+      : chartTheme;
+  }, [chartTheme, color]);
 
   const { isLoading, histogram, topValues, sampledValues, sampledDocuments, totalDocuments } =
     state;
@@ -212,19 +207,18 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const fromDateParsed = DateMath.parse(fromDate);
   const toDateParsed = DateMath.parse(toDate);
 
-  const totalValuesCount =
-    topValues && topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
-  const otherCount = sampledValues && totalValuesCount ? sampledValues - totalValuesCount : 0;
+  const bucketsValuesCount = getBucketsValuesCount(topValues?.buckets);
+  const otherCount = getOtherCount(bucketsValuesCount, sampledValues!);
 
   if (
-    totalValuesCount &&
+    bucketsValuesCount &&
     histogram &&
     histogram.buckets.length &&
     topValues &&
     topValues.buckets.length
   ) {
     // Default to histogram when top values are less than 10% of total
-    histogramDefault = otherCount / totalValuesCount > 0.9;
+    histogramDefault = otherCount / bucketsValuesCount > 0.9;
   }
 
   const [showingHistogram, setShowingHistogram] = useState(histogramDefault);
@@ -240,39 +234,114 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const formatter = dataView.getFormatterForField(field);
   let title = <></>;
 
-  if (field.type.includes('range')) {
+  function combineWithTitleAndFooter(el: React.ReactElement) {
+    const countsElement = totalDocuments ? (
+      <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
+        {sampledDocuments && sampledDocuments < totalDocuments ? (
+          <FormattedMessage
+            id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
+            defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+            values={{
+              sampledDocuments,
+              sampledDocumentsFormatted: (
+                <strong>
+                  {fieldFormats
+                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                    .convert(sampledDocuments)}
+                </strong>
+              ),
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel"
+            defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+            values={{
+              totalDocuments,
+              totalDocumentsFormatted: (
+                <strong>
+                  {fieldFormats
+                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                    .convert(totalDocuments)}
+                </strong>
+              ),
+            }}
+          />
+        )}
+      </EuiText>
+    ) : (
+      <></>
+    );
+
     return (
       <>
-        <EuiText size="s">
-          {i18n.translate('unifiedFieldList.fieldStats.notAvailableForRangeFieldDescription', {
-            defaultMessage: `Summary information is not available for range type fields.`,
-          })}
-        </EuiText>
+        {title ? <div data-test-subj={`${dataTestSubject}-title`}>{title}</div> : <></>}
+
+        <EuiSpacer size="s" />
+
+        {el}
+
+        {overrideFooter ? (
+          overrideFooter?.({ element: countsElement, totalDocuments, sampledDocuments })
+        ) : (
+          <>
+            <EuiSpacer size="m" />
+            {countsElement}
+          </>
+        )}
       </>
     );
   }
 
-  if (field.type === 'murmur3') {
-    return (
-      <>
-        <EuiText size="s">
-          {i18n.translate('unifiedFieldList.fieldStats.notAvailableForMurmur3FieldDescription', {
-            defaultMessage: `Summary information is not available for murmur3 fields.`,
-          })}
-        </EuiText>
-      </>
+  if (!canProvideStatsForField(field)) {
+    const messageNoAnalysis = (
+      <FieldSummaryMessage
+        message={i18n.translate('unifiedFieldList.fieldStats.notAvailableForThisFieldDescription', {
+          defaultMessage: 'Analysis is not available for this field.',
+        })}
+      />
     );
-  }
 
-  if (field.type === 'geo_point' || field.type === 'geo_shape') {
-    return overrideMissingContent ? overrideMissingContent() : null;
+    return overrideMissingContent
+      ? overrideMissingContent({
+          noDataFound: false,
+          element: messageNoAnalysis,
+        })
+      : messageNoAnalysis;
   }
 
   if (
     (!histogram || histogram.buckets.length === 0) &&
     (!topValues || topValues.buckets.length === 0)
   ) {
-    return overrideMissingContent ? overrideMissingContent({ noDataFound: true }) : null;
+    const messageNoData =
+      sampledDocuments && totalDocuments && sampledDocuments < totalDocuments ? (
+        <FieldSummaryMessage
+          message={i18n.translate('unifiedFieldList.fieldStats.noFieldDataInSampleDescription', {
+            defaultMessage:
+              'No field data for {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}.',
+            values: {
+              sampledDocuments,
+              sampledDocumentsFormatted: fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(sampledDocuments),
+            },
+          })}
+        />
+      ) : (
+        <FieldSummaryMessage
+          message={i18n.translate('unifiedFieldList.fieldStats.noFieldDataDescription', {
+            defaultMessage: 'No field data for the current search.',
+          })}
+        />
+      );
+
+    return overrideMissingContent
+      ? overrideMissingContent({
+          noDataFound: true,
+          element: messageNoData,
+        })
+      : messageNoData;
   }
 
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
@@ -317,57 +386,15 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
-            defaultMessage: 'Top values',
-          })}
+          {field.aggregatable
+            ? i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
+                defaultMessage: 'Top values',
+              })
+            : i18n.translate('unifiedFieldList.fieldStats.examplesLabel', {
+                defaultMessage: 'Examples',
+              })}
         </h6>
       </EuiTitle>
-    );
-  }
-
-  function combineWithTitleAndFooter(el: React.ReactElement) {
-    const countsElement = totalDocuments ? (
-      <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
-        {sampledDocuments && (
-          <>
-            {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
-              defaultMessage: '{percentage}% of',
-              values: {
-                percentage: Math.round((sampledDocuments / totalDocuments) * 100),
-              },
-            })}{' '}
-          </>
-        )}
-        <strong>
-          {fieldFormats
-            .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-            .convert(totalDocuments)}
-        </strong>{' '}
-        {i18n.translate('unifiedFieldList.fieldStats.ofDocumentsLabel', {
-          defaultMessage: 'documents',
-        })}
-      </EuiText>
-    ) : (
-      <></>
-    );
-
-    return (
-      <>
-        {title ? title : <></>}
-
-        <EuiSpacer size="s" />
-
-        {el}
-
-        {overrideFooter ? (
-          overrideFooter?.({ element: countsElement, totalDocuments, sampledDocuments })
-        ) : (
-          <>
-            <EuiSpacer />
-            {countsElement}
-          </>
-        )}
-      </>
     );
   }
 
@@ -378,48 +405,47 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (field.type === 'date') {
       return combineWithTitleAndFooter(
-        <Chart
-          data-test-subj={`${dataTestSubject}-histogram`}
-          size={{ height: 200, width: 300 - 32 }}
-        >
-          <Settings
-            tooltip={{ type: TooltipType.None }}
-            theme={chartTheme}
-            baseTheme={chartBaseTheme}
-            xDomain={
-              fromDateParsed && toDateParsed
-                ? {
-                    min: fromDateParsed.valueOf(),
-                    max: toDateParsed.valueOf(),
-                    minInterval: Math.round(
-                      (toDateParsed.valueOf() - fromDateParsed.valueOf()) / 10
-                    ),
-                  }
-                : undefined
-            }
-          />
+        <div data-test-subj={`${dataTestSubject}-histogram`}>
+          <Chart size={{ height: 200, width: 300 - 32 }}>
+            <Settings
+              tooltip={{ type: TooltipType.None }}
+              theme={customChartTheme}
+              baseTheme={chartBaseTheme}
+              xDomain={
+                fromDateParsed && toDateParsed
+                  ? {
+                      min: fromDateParsed.valueOf(),
+                      max: toDateParsed.valueOf(),
+                      minInterval: Math.round(
+                        (toDateParsed.valueOf() - fromDateParsed.valueOf()) / 10
+                      ),
+                    }
+                  : undefined
+              }
+            />
 
-          <Axis
-            id="key"
-            position={Position.Bottom}
-            tickFormat={
-              fromDateParsed && toDateParsed
-                ? niceTimeFormatter([fromDateParsed.valueOf(), toDateParsed.valueOf()])
-                : undefined
-            }
-            showOverlappingTicks={true}
-          />
+            <Axis
+              id="key"
+              position={Position.Bottom}
+              tickFormat={
+                fromDateParsed && toDateParsed
+                  ? niceTimeFormatter([fromDateParsed.valueOf(), toDateParsed.valueOf()])
+                  : undefined
+              }
+              showOverlappingTicks={true}
+            />
 
-          <HistogramBarSeries
-            data={histogram.buckets}
-            id={specId}
-            xAccessor={'key'}
-            yAccessors={['count']}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            timeZone="local"
-          />
-        </Chart>
+            <HistogramBarSeries
+              data={histogram.buckets}
+              id={specId}
+              xAccessor={'key'}
+              yAccessors={['count']}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              timeZone="local"
+            />
+          </Chart>
+        </div>
       );
     }
 
@@ -432,7 +458,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
           <Settings
             rotation={90}
             tooltip={{ type: TooltipType.None }}
-            theme={chartTheme}
+            theme={customChartTheme}
             baseTheme={chartBaseTheme}
           />
 
@@ -457,97 +483,16 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   }
 
   if (topValues && topValues.buckets.length) {
-    const digitsRequired = topValues.buckets.some(
-      (topValue) => !Number.isInteger(topValue.count / sampledValues!)
-    );
     return combineWithTitleAndFooter(
-      <div data-test-subj={`${dataTestSubject}-topValues`}>
-        {topValues.buckets.map((topValue) => {
-          const formatted = formatter.convert(topValue.key);
-          return (
-            <div css={topValueStyles} key={topValue.key}>
-              <EuiFlexGroup
-                alignItems="stretch"
-                key={topValue.key}
-                gutterSize="xs"
-                responsive={false}
-              >
-                <EuiFlexItem
-                  grow={true}
-                  className="eui-textTruncate"
-                  data-test-subj={`${dataTestSubject}-topValues-value`}
-                >
-                  {formatted === '' ? (
-                    <EuiText size="xs" color="subdued">
-                      <em>
-                        {i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                          defaultMessage: 'Empty string',
-                        })}
-                      </em>
-                    </EuiText>
-                  ) : (
-                    <EuiToolTip content={formatted} delay="long">
-                      <EuiText size="xs" color="subdued" className="eui-textTruncate">
-                        {formatted}
-                      </EuiText>
-                    </EuiToolTip>
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={false}
-                  data-test-subj={`${dataTestSubject}-topValues-valueCount`}
-                >
-                  <EuiText size="xs" textAlign="left" color="accent">
-                    {(Math.round((topValue.count / sampledValues!) * 1000) / 10).toFixed(
-                      digitsRequired ? 1 : 0
-                    )}
-                    %
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiProgress
-                css={topValueProgressStyles}
-                value={topValue.count / sampledValues!}
-                max={1}
-                size="s"
-                color="accent"
-              />
-            </div>
-          );
-        })}
-        {otherCount ? (
-          <>
-            <EuiFlexGroup alignItems="stretch" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={true} className="eui-textTruncate">
-                <EuiText size="xs" className="eui-textTruncate" color="subdued">
-                  {i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
-                    defaultMessage: 'Other',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false} className="eui-textTruncate">
-                <EuiText size="xs" color="subdued">
-                  {(Math.round((otherCount / sampledValues!) * 1000) / 10).toFixed(
-                    digitsRequired ? 1 : 0
-                  )}
-                  %
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiProgress
-              css={topValueProgressStyles}
-              value={otherCount / sampledValues!}
-              max={1}
-              size="s"
-              color="subdued"
-            />
-          </>
-        ) : (
-          <></>
-        )}
-      </div>
+      <FieldTopValues
+        buckets={topValues.buckets}
+        dataView={dataView}
+        field={field}
+        sampledValuesCount={sampledValues!}
+        color={color}
+        data-test-subj={dataTestSubject}
+        onAddFilter={onAddFilter}
+      />
     );
   }
 

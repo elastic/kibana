@@ -98,7 +98,7 @@ The `EmbeddableComponent` also takes a set of callbacks to react to user interac
 
 ## Handling data views
 
-Currently it's necessary to have a data view saved object to use the Lens embeddable. Use the data view service to find an existing data view for a given index pattern or create a new one if it doesn't exist yet:
+In most cases it makes sense to have a data view saved object to use the Lens embeddable. Use the data view service to find an existing data view for a given index pattern or create a new one if it doesn't exist yet:
 ```ts
 let dataView = (await dataViews.find('my-pattern-*', 1))[0];
 if (!dataView) {
@@ -109,6 +109,47 @@ if (!dataView) {
 }
 const dataViewIdForLens = dataView.id;
 ```
+
+### Ad-hoc data views
+
+In some cases a globally accessible data view is not desirable:
+* You need some special runtime fields which only make sense in the context of that one visualization and you don't want to "pollute" the global data view for all consumers
+* It's a "one-off" visualization which is built on data that's not normally used and having a global data view object for it would be weird
+* You want to allow a read-only user to work with data and no data view exists yet - the user isn't allowed to create data views but they are allowed to access the data
+
+In these situations ad-hoc data views are useful - these are data views which are stored as part of the Lens visualization itself, so they do not show up in other contexts. In the UI you can create these by opening the data view picker, selecting "Create a data view" and then using the "Use without saving" button.
+
+Ad-hoc data views are part of the Lens attributes stored in `state.adHocDataViews`. Each data view is defined by its JSON-serializable `DataViewSpec` object. If a layer is using an ad hoc data view, the reference goes into the `state.internalReferences` array instead of the external `references` array.
+
+Example:
+```json
+"state": {
+  // ...
+  "internalReferences": [
+    {
+      "type": "index-pattern",
+      "id": "adhoc-1",
+      "name": "indexpattern-datasource-layer-layer1"
+    }
+  ],
+  "adHocDataViews": {
+    "adhoc-1": {
+      "id": "adhoc-1",
+      "title": "my-pattern*",
+      "timeFieldName": "@timestamp",
+      "sourceFilters": [],
+      "fieldFormats": {},
+      "runtimeFieldMap": {},
+      "fieldAttrs": {},
+      "allowNoIndex": false,
+      "name": "My ad-hoc data view"
+    }
+  }
+}
+```
+
+**Important!** To prevent conflicts, it's important to not re-use ad-hoc data view ids for different specs. If you change the spec in some way, make sure to also change its id. This even applies across multiple embeddables, sessions, etc. Ideally, the id will be globally unique. You can use the `uuid` package to generate a new unique id every time when you are changing the spec in some way. However, make sure to also not change the id on every single render either, as this will have a substantial performance impact.
+
 ## Refreshing a Lens embeddable
 
 The Lens embeddable is handling data fetching internally, this means as soon as the props change, it will trigger a new request if necessary. However, in some situations it's necessary to trigger a refresh even if the configuration of the chart doesn't change at all. Refreshing is managed using search sessions is Lens. To trigger a refresh without changing the actual configuration of a Lens embeddable, follow these steps:
@@ -117,6 +158,21 @@ The Lens embeddable is handling data fetching internally, this means as soon as 
 * Pass the current session id to the Lens embeddable component via the `searchSessionId` property
 * When refreshing, simply call `session.start` again and update your state - Lens will discard the existing cache and re-fetch even if the query doesn't change at all
 * When unmounting your app, call `session.clear` to end the current session
+
+## Getting data tables and requests/responses
+
+The Lens embeddable is handling both data fetching and rendering - all the user has to do is to supply the configuration. However in some cases the resulting values are necessary for other parts of the UI - to access them pass supply an `onLoad` callback prop to the component. It will be called with an `adapters` object which allows you to access the current data tables and requests/responses:
+
+```tsx
+<EmbeddableComponent
+  // ...
+  onLoad={(isLoading, adapters) => {
+    if (adapters?.tables) {
+      // use the current data table, e.g. putting it into the react state of the consuming application.
+    }
+  }}
+/>
+```
 
 # Lens Development
 
@@ -134,6 +190,9 @@ Run all tests from the `x-pack` root directory
 - API Functional tests:
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`
+- Performance journeys:
+  - Run `node scripts/functional_tests_server.js --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
+  - Run `node scripts/functional_test_runner --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
 
 ## Developing tips
 

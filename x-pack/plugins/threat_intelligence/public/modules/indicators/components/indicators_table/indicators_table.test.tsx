@@ -7,11 +7,15 @@
 
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { IndicatorsTable, IndicatorsTableProps } from './indicators_table';
+import {
+  IndicatorsTable,
+  IndicatorsTableProps,
+  TABLE_UPDATE_PROGRESS_TEST_ID,
+} from './indicators_table';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { BUTTON_TEST_ID } from '../open_indicator_flyout_button/open_indicator_flyout_button';
-import { TITLE_TEST_ID } from '../indicators_flyout/indicators_flyout';
+import { BUTTON_TEST_ID } from '../open_indicator_flyout_button';
+import { TITLE_TEST_ID } from '../flyout';
 import { SecuritySolutionDataViewBase } from '../../../../types';
 
 const stub = () => {};
@@ -22,9 +26,22 @@ const tableProps: IndicatorsTableProps = {
   indicators: [],
   pagination: { pageSize: 10, pageIndex: 0, pageSizeOptions: [10] },
   indicatorCount: 0,
-  loading: false,
+  isLoading: false,
   browserFields: {},
   indexPattern: { fields: [], title: '' } as SecuritySolutionDataViewBase,
+  columnSettings: {
+    columnVisibility: {
+      visibleColumns: [],
+      setVisibleColumns: () => {},
+    },
+    columns: [],
+    handleResetColumns: () => {},
+    handleToggleColumn: () => {},
+    sorting: {
+      columns: [],
+      onSort: () => {},
+    },
+  },
 };
 
 const indicatorsFixture: Indicator[] = [
@@ -43,16 +60,35 @@ const indicatorsFixture: Indicator[] = [
 ];
 
 describe('<IndicatorsTable />', () => {
-  it('should render loading spinner when loading', async () => {
+  it('should render loading spinner when doing initial loading', async () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
-          <IndicatorsTable {...tableProps} loading={true} />
+          <IndicatorsTable {...tableProps} isLoading={true} />
         </TestProvidersComponent>
       );
     });
 
     expect(screen.queryByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('should render loading indicator when doing data update', async () => {
+    await act(async () => {
+      render(
+        <TestProvidersComponent>
+          <IndicatorsTable
+            {...tableProps}
+            indicatorCount={indicatorsFixture.length}
+            indicators={indicatorsFixture}
+            isFetching={true}
+          />
+        </TestProvidersComponent>
+      );
+    });
+
+    screen.debug();
+
+    expect(screen.queryByTestId(TABLE_UPDATE_PROGRESS_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render datagrid when loading is done', async () => {
@@ -61,7 +97,8 @@ describe('<IndicatorsTable />', () => {
         <TestProvidersComponent>
           <IndicatorsTable
             {...tableProps}
-            loading={false}
+            isLoading={false}
+            isFetching={false}
             indicatorCount={indicatorsFixture.length}
             indicators={indicatorsFixture}
           />
@@ -79,5 +116,8 @@ describe('<IndicatorsTable />', () => {
     });
 
     expect(screen.queryByTestId(TITLE_TEST_ID)).toBeInTheDocument();
+
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TABLE_UPDATE_PROGRESS_TEST_ID)).not.toBeInTheDocument();
   });
 });

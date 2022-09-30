@@ -46,7 +46,7 @@ import type {
 } from '@kbn/timelines-plugin/common';
 import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 
-import type { TopAlert } from '../alerts_page/alerts_page';
+import type { TopAlert } from '../alerts_page/types';
 
 import { getRenderCellValue } from '../../components/render_cell_value';
 import { observabilityAppId, observabilityFeatureId } from '../../../../../common';
@@ -153,7 +153,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     timelines,
     application: { capabilities },
   } = useKibana<ObservabilityAppServices>().services;
-  const { observabilityRuleTypeRegistry } = usePluginContext();
+  const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
@@ -210,13 +210,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
                 setEventsDeleted={setEventsDeleted}
                 setFlyoutAlert={setFlyoutAlert}
                 observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+                config={config}
               />
             </EuiFlexGroup>
           );
         },
       },
     ];
-  }, [setEventsDeleted, observabilityRuleTypeRegistry]);
+  }, [setEventsDeleted, observabilityRuleTypeRegistry, config]);
 
   const onStateChange = useCallback(
     (state: TGridState) => {

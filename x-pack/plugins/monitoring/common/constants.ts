@@ -568,12 +568,12 @@ export const LEGACY_RULES = [
 
 /**
  * Matches the id for the built-in in email action type
- * See x-pack/plugins/actions/server/builtin_action_types/email.ts
+ * See x-pack/plugins/stack_connectors/server/connector_types/stack/email/index.ts
  */
 export const ALERT_ACTION_TYPE_EMAIL = '.email';
 /**
  * Matches the id for the built-in in log action type
- * See x-pack/plugins/actions/server/builtin_action_types/log.ts
+ * See x-pack/plugins/stack_connectors/server/connector_types/stack/server_log/index.ts
  */
 export const ALERT_ACTION_TYPE_LOG = '.server-log';
 
@@ -592,10 +592,11 @@ export const SAVED_OBJECT_TELEMETRY = 'monitoring-telemetry';
 export const TELEMETRY_METRIC_BUTTON_CLICK = 'btnclick__';
 
 export type INDEX_PATTERN_TYPES =
-  | 'elasticsearch'
-  | 'kibana'
-  | 'logstash'
-  | 'beats'
-  | 'enterprisesearch';
+  | typeof ELASTICSEARCH_SYSTEM_ID
+  | typeof KIBANA_SYSTEM_ID
+  | typeof LOGSTASH_SYSTEM_ID
+  | typeof BEATS_SYSTEM_ID
+  | typeof ENTERPRISE_SEARCH_SYSTEM_ID
+  | typeof APM_SYSTEM_ID;
 
 export type DS_INDEX_PATTERN_TYPES = typeof DS_INDEX_PATTERN_METRICS | typeof DS_INDEX_PATTERN_LOGS;

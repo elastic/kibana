@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const HOST_RISK_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.hostsRiskDashboard.hostRiskToolTip',
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.hostRiskToolTip',
   {
     defaultMessage:
       'Host risk classification is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
@@ -16,53 +16,50 @@ export const HOST_RISK_TOOLTIP = i18n.translate(
 );
 
 export const HOST_RISK = i18n.translate(
-  'xpack.securitySolution.hostsRiskDashboard.hostRiskClassificationTitle',
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.hostRiskClassificationTitle',
   {
     defaultMessage: 'Host risk classification',
   }
 );
 
 export const HOST_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.hostsRiskDashboard.hostRiskScoreTitle',
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.hostRiskScoreTitle',
   {
     defaultMessage: 'Host risk score',
   }
 );
 
-export const HOST_NAME = i18n.translate('xpack.securitySolution.hostsRiskDashboard.hostNameTitle', {
-  defaultMessage: 'Host Name',
-});
-
-export const HOST_RISK_TITLE = i18n.translate('xpack.securitySolution.hostsRiskDashboard.title', {
-  defaultMessage: 'Host Risk Scores',
-});
-
-export const TOTAL_LABEL = i18n.translate('xpack.securitySolution.hostsRiskDashboard.totalLabel', {
-  defaultMessage: 'Total',
-});
-
-export const VIEW_ALL = i18n.translate('xpack.securitySolution.hostsRiskDashboard.viewAllLabel', {
-  defaultMessage: 'View all',
-});
-
-export const ENABLE_HOST_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.hostsRiskDashboard.enableHostRiskScore',
+export const HOST_NAME = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.hostNameTitle',
   {
-    defaultMessage: 'Enable Host Risk Score',
+    defaultMessage: 'Host Name',
   }
 );
 
-export const ENABLE_HOST_RISK_SCORE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.hostsRiskDashboard.enableHostRiskScoreDescription',
+export const TOTAL_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.totalLabel',
   {
-    defaultMessage:
-      'Once you have enabled this feature you can get quick access to the host risk scores in this section.',
+    defaultMessage: 'Total',
   }
 );
 
-export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
-  'xpack.securitySolution.hostsRiskDashboard.enableRiskScorePopoverTitle',
+export const VIEW_ALL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.viewAllLabel',
   {
-    defaultMessage: 'Alerts need to be available before enabling module',
+    defaultMessage: 'View all',
+  }
+);
+
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.learnMore',
+  {
+    defaultMessage: 'Learn more',
+  }
+);
+
+export const ENABLE_VIA_DEV_TOOLS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.enableViaDevToolsButtonTitle',
+  {
+    defaultMessage: 'Enable via Dev Tools',
   }
 );

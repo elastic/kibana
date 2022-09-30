@@ -161,7 +161,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       ];
       const accessAgreementEnabled =
         allowAccessAgreement &&
-        config.authc.sortedProviders.some((provider) => provider.hasAccessAgreement);
+        (!!config.accessAgreement?.message ||
+          config.authc.sortedProviders.some((provider) => provider.hasAccessAgreement));
 
       const httpAuthSchemes = config.authc.http.schemes.filter((scheme) =>
         WELL_KNOWN_AUTH_SCHEMES.includes(scheme.toLowerCase())

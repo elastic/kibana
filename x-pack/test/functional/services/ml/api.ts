@@ -29,6 +29,8 @@ export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 type ModelType = 'regression' | 'classification';
 
+export const INTERNAL_MODEL_IDS = ['lang_ident_model_1'];
+
 export const SUPPORTED_TRAINED_MODELS = {
   TINY_FILL_MASK: {
     name: 'pt_tiny_fill_mask',
@@ -271,6 +273,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return state;
     },
 
+    async getJobMemoryStatus(jobId: string): Promise<'hard_limit' | 'soft_limit' | 'ok'> {
+      const jobStats = await this.getADJobStats(jobId);
+
+      expect(jobStats.jobs).to.have.length(
+        1,
+        `Expected job stats to have exactly one job (got '${jobStats.length}')`
+      );
+      return jobStats.jobs[0].model_size_stats.memory_status;
+    },
+
     async getADJobStats(jobId: string): Promise<any> {
       log.debug(`Fetching anomaly detection job stats for job ${jobId}...`);
       const { body: jobStats, status } = await esSupertest.get(
@@ -295,6 +307,27 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           throw new Error(`expected job state to be ${expectedJobState} but got ${state}`);
         }
       });
+    },
+
+    async waitForJobMemoryStatus(
+      jobId: string,
+      expectedMemoryStatus: 'hard_limit' | 'soft_limit' | 'ok',
+      timeout: number = 2 * 60 * 1000
+    ) {
+      await retry.waitForWithTimeout(
+        `job memory status to be ${expectedMemoryStatus}`,
+        timeout,
+        async () => {
+          const memoryStatus = await this.getJobMemoryStatus(jobId);
+          if (memoryStatus === expectedMemoryStatus) {
+            return true;
+          } else {
+            throw new Error(
+              `expected job memory status to be ${expectedMemoryStatus} but got ${memoryStatus}`
+            );
+          }
+        }
+      );
     },
 
     async getDatafeedState(datafeedId: string): Promise<DATAFEED_STATE> {
@@ -574,6 +607,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async hasNotifications(query: object) {
+      const body = await es.search({
+        index: '.ml-notifications*',
+        body: {
+          size: 10000,
+          query,
+        },
+      });
+
+      return body.hits.hits.length > 0;
+    },
+
     async adJobExist(jobId: string) {
       this.validateJobId(jobId);
       try {
@@ -602,6 +647,24 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           return true;
         } else {
           throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
+        }
+      });
+    },
+
+    async waitForJobNotificationsToIndex(jobId: string, timeout: number = 60 * 1000) {
+      await retry.waitForWithTimeout(`Notifications for '${jobId}' to exist`, timeout, async () => {
+        if (
+          await this.hasNotifications({
+            term: {
+              job_id: {
+                value: jobId,
+              },
+            },
+          })
+        ) {
+          return true;
+        } else {
+          throw new Error(`expected '${jobId}' notifications to exist`);
         }
       });
     },
@@ -1205,13 +1268,57 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Trained model definition uploaded');
     },
 
-    async deleteTrainedModelES(modelId: string) {
-      log.debug(`Creating trained model with id "${modelId}"`);
-      const { body: model, status } = await esSupertest.delete(`/_ml/trained_models/${modelId}`);
-      this.assertResponseStatusCode(200, status, model);
+    async getTrainedModelsES() {
+      log.debug(`Getting trained models`);
+      const { body, status } = await esSupertest.get(`/_ml/trained_models`);
+      this.assertResponseStatusCode(200, status, body);
 
-      log.debug('> Trained model created');
-      return model;
+      log.debug('> Trained models fetched');
+      return body;
+    },
+
+    async deleteTrainedModelES(modelId: string) {
+      log.debug(`Deleting trained model with id "${modelId}"`);
+      const { body, status } = await esSupertest
+        .delete(`/_ml/trained_models/${modelId}`)
+        .query({ force: true });
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model deleted');
+    },
+
+    async deleteAllTrainedModelsES() {
+      log.debug(`Deleting all trained models`);
+      const getModelsRsp = await this.getTrainedModelsES();
+      for (const model of getModelsRsp.trained_model_configs) {
+        if (this.isInternalModelId(model.model_id)) {
+          log.debug(`> Skipping internal ${model.model_id}`);
+          continue;
+        }
+        await this.deleteTrainedModelES(model.model_id);
+      }
+    },
+
+    async stopTrainedModelDeploymentES(modelId: string) {
+      log.debug(`Stopping trained model deployment with id "${modelId}"`);
+      const { body, status } = await esSupertest.post(
+        `/_ml/trained_models/${modelId}/deployment/_stop`
+      );
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model deployment stopped');
+    },
+
+    async stopAllTrainedModelDeploymentsES() {
+      log.debug(`Stopping all trained model deployments`);
+      const getModelsRsp = await this.getTrainedModelsES();
+      for (const model of getModelsRsp.trained_model_configs) {
+        if (this.isInternalModelId(model.model_id)) {
+          log.debug(`> Skipping internal ${model.model_id}`);
+          continue;
+        }
+        await this.stopTrainedModelDeploymentES(model.model_id);
+      }
     },
 
     async createTestTrainedModels(
@@ -1302,6 +1409,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Model alias created');
+    },
+
+    isInternalModelId(modelId: string) {
+      return INTERNAL_MODEL_IDS.includes(modelId);
     },
 
     /**

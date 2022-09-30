@@ -235,6 +235,7 @@ export const getLegacyMetricVisualization = ({
       groups: [
         {
           groupId: 'metric',
+          dataTestSubj: 'lnsLegacyMetric_metricDimensionPanel',
           paramEditorCustomProps: {
             headingLabel: i18n.translate('xpack.lens.metric.headingLabel', {
               defaultMessage: 'Value',
@@ -257,7 +258,7 @@ export const getLegacyMetricVisualization = ({
           filterOperations: (op: OperationMetadata) =>
             !op.isBucketed && legacyMetricSupportedTypes.has(op.dataType),
           enableDimensionEditor: true,
-          required: true,
+          requiredMinDimensionCount: 1,
         },
       ],
     };

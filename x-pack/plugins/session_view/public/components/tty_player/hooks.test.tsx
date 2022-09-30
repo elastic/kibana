@@ -8,9 +8,13 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
 import { ProcessEventsPage } from '../../../common/types/process_tree';
-import { DEFAULT_TTY_FONT_SIZE, DEFAULT_TTY_PLAYSPEED_MS } from '../../../common/constants';
+import {
+  DEFAULT_TTY_FONT_SIZE,
+  DEFAULT_TTY_PLAYSPEED_MS,
+  TTY_LINES_PER_FRAME,
+} from '../../../common/constants';
 
-const VIM_LINE_START = 19;
+const VIM_LINE_START = 22;
 
 describe('TTYPlayer/hooks', () => {
   beforeAll(() => {
@@ -42,16 +46,16 @@ describe('TTYPlayer/hooks', () => {
         initialProps: { pages: initial },
       });
 
-      expect(result.current.length).toBeGreaterThan(0);
-      expect(typeof result.current[0].value).toBe('string');
+      expect(result.current.lines.length).toBeGreaterThan(0);
+      expect(typeof result.current.lines[0].value).toBe('string');
 
       // test memoization
-      let last = result.current;
+      let last = result.current.lines;
       rerender();
-      expect(result.current === last).toBeTruthy();
-      last = result.current;
+      expect(result.current.lines === last).toBeTruthy();
+      last = result.current.lines;
       rerender({ pages: [...initial] });
-      expect(result.current === last).toBeFalsy();
+      expect(result.current.lines === last).toBeFalsy();
     });
   });
 
@@ -62,7 +66,7 @@ describe('TTYPlayer/hooks', () => {
       const events = sessionViewIOEventsMock?.events?.map((event) => event._source);
       const pages: ProcessEventsPage[] = [{ events, total: events?.length }];
       const { result } = renderHook(() => useIOLines(pages));
-      const lines = result.current;
+      const lines = result.current.lines;
       const div = document.createElement('div');
       const mockRef = { current: div };
       initialProps = {
@@ -72,6 +76,7 @@ describe('TTYPlayer/hooks', () => {
         lines,
         hasNextPage: false,
         fetchNextPage: () => null,
+        isFetching: false,
         fontSize: DEFAULT_TTY_FONT_SIZE,
       };
     });
@@ -127,7 +132,9 @@ describe('TTYPlayer/hooks', () => {
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
       });
 
-      expect(result.current.currentLine).toBe(10);
+      const expectedLineNumber = Math.min(initialProps.lines.length - 1, TTY_LINES_PER_FRAME * 10);
+
+      expect(result.current.currentLine).toBe(expectedLineNumber);
     });
 
     it('allows the user to stop', async () => {
@@ -143,7 +150,9 @@ describe('TTYPlayer/hooks', () => {
       act(() => {
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
       });
-      expect(result.current.currentLine).toBe(10); // should still be ten.
+      const expectedLineNumber = Math.min(initialProps.lines.length - 1, TTY_LINES_PER_FRAME * 10);
+
+      expect(result.current.currentLine).toBe(expectedLineNumber); // should not have advanced
     });
 
     it('should stop when it reaches the end of the array of lines', async () => {
@@ -156,6 +165,21 @@ describe('TTYPlayer/hooks', () => {
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * initialProps.lines.length + 100);
       });
       expect(result.current.currentLine).toBe(initialProps.lines.length - 1);
+    });
+
+    it('should not print the first line twice after playback starts', async () => {
+      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+        initialProps,
+      });
+
+      rerender({ ...initialProps, isPlaying: true });
+      act(() => {
+        // advance render loop
+        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS);
+      });
+      rerender({ ...initialProps, isPlaying: false });
+
+      expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
     });
 
     it('will allow a plain text search highlight on the last line printed', async () => {

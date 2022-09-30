@@ -5,10 +5,9 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "rootDir": "src",
     "types": []
   },
   "include": [
-    "src/**/*",
+    "**/*.ts",
   ]
 }

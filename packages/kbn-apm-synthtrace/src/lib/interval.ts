@@ -11,12 +11,18 @@ import { EntityIterable } from './entity_iterable';
 import { EntityGenerator } from './entity_generator';
 import { Serializable } from './serializable';
 
-export function parseInterval(interval: string): [number, unitOfTime.DurationConstructor] {
+export function parseInterval(interval: string): {
+  intervalAmount: number;
+  intervalUnit: unitOfTime.DurationConstructor;
+} {
   const args = interval.match(/(\d+)(s|m|h|d)/);
   if (!args || args.length < 3) {
     throw new Error('Failed to parse interval');
   }
-  return [Number(args[1]), args[2] as any];
+  return {
+    intervalAmount: Number(args[1]),
+    intervalUnit: args[2] as unitOfTime.DurationConstructor,
+  };
 }
 
 export interface IntervalOptions {
@@ -31,9 +37,9 @@ export interface IntervalOptions {
 
 export class Interval implements Iterable<number> {
   constructor(public readonly options: IntervalOptions) {
-    const parsed = parseInterval(options.interval);
-    this.intervalAmount = parsed[0];
-    this.intervalUnit = parsed[1];
+    const { intervalAmount, intervalUnit } = parseInterval(options.interval);
+    this.intervalAmount = intervalAmount;
+    this.intervalUnit = intervalUnit;
     this.from = this.options.from;
     this.to = this.options.to;
   }
@@ -66,7 +72,7 @@ export class Interval implements Iterable<number> {
     return new Interval({ ...this.options, intervalUpper, rateUpper });
   }
 
-  ratePerMinute(): number {
+  estimatedRatePerMinute(): number {
     const rate = this.options.rateUpper
       ? Math.max(1, this.options.rateUpper)
       : this.options.yieldRate ?? 1;
