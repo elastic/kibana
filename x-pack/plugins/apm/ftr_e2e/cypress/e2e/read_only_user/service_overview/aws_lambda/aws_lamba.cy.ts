@@ -44,7 +44,7 @@ describe('Service overview - aws lambda', () => {
     cy.visitKibana(serviceOverviewHref);
     cy.wait(`@${name}`);
 
-    cy.contains('Cold start rate');
+    cy.contains('Test - Cold start rate');
     cy.contains('Time spent by span type').should('not.exist');
   });
 });
