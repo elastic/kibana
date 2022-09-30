@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { LEARN_MORE } from '../../../../overview/components/entity_analytics/host_risk_score/translations';
+import { LEARN_MORE } from '../../../../overview/components/entity_analytics/risk_score/translations';
 
 const RiskScoreDocLinkComponent = ({
   riskScoreEntity,

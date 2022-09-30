@@ -25834,7 +25834,6 @@
     "xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip": "現在選択した時間範囲内で同じ値のアラートの合計件数。この値は追加のフィルターによる影響は受けません。",
     "xpack.securitySolution.alertDetails.overview.highlightedFields.field": "フィールド",
     "xpack.securitySolution.alertDetails.overview.highlightedFields.value": "値",
-    "xpack.securitySolution.alertDetails.overview.hostRiskDataTitle": "ホストリスクデータ",
     "xpack.securitySolution.alertDetails.overview.insights": "インサイト",
     "xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_process_ancestry": "上位プロセス別関連アラート",
     "xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_process_ancestry_error": "アラートを取得できませんでした。",

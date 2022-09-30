@@ -8,32 +8,40 @@
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { RiskScore } from '../../../../common/components/severity/common';
-import * as i18n from './translations';
 import { UsersTableType } from '../../../../users/store/model';
-import type { RiskSeverity, UserRiskScore } from '../../../../../common/search_strategy';
-import { RiskScoreFields } from '../../../../../common/search_strategy';
-import { UserDetailsLink } from '../../../../common/components/links';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
+import { HostsTableType } from '../../../../hosts/store/model';
+import { RiskScore } from '../../../../common/components/severity/common';
+import type { HostRiskScore, RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
+import * as i18n from './translations';
 
-type UserRiskScoreColumns = Array<EuiBasicTableColumn<UserRiskScore>>;
+type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore>>;
 
-export const getUserRiskScoreColumns = (): UserRiskScoreColumns => [
+export const getRiskScoreColumns = (riskEntity: RiskScoreEntity): HostRiskScoreColumns => [
   {
-    field: 'user.name',
-    name: i18n.USER_NAME,
+    field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+    name: i18n.ENTITY_NAME(riskEntity),
     truncateText: false,
     mobileOptions: { show: true },
-    render: (userName: string) => {
-      if (userName != null && userName.length > 0) {
-        return <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />;
+    render: (entityName: string) => {
+      if (entityName != null && entityName.length > 0) {
+        return riskEntity === RiskScoreEntity.host ? (
+          <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
+        ) : (
+          <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
+        );
       }
       return getEmptyTagValue();
     },
   },
   {
-    field: RiskScoreFields.userRiskScore,
-    name: i18n.USER_RISK_SCORE,
+    field:
+      riskEntity === RiskScoreEntity.host
+        ? RiskScoreFields.hostRiskScore
+        : RiskScoreFields.userRiskScore,
+    name: i18n.RISK_SCORE_TITLE(riskEntity),
     truncateText: true,
     mobileOptions: { show: true },
     render: (riskScore: number) => {
@@ -48,11 +56,12 @@ export const getUserRiskScoreColumns = (): UserRiskScoreColumns => [
     },
   },
   {
-    field: RiskScoreFields.userRisk,
+    field:
+      riskEntity === RiskScoreEntity.host ? RiskScoreFields.hostRisk : RiskScoreFields.userRisk,
     name: (
-      <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
+      <EuiToolTip content={i18n.ENTITY_RISK_TOOLTIP(riskEntity)}>
         <>
-          {i18n.USER_RISK}
+          {i18n.ENTITY_RISK(riskEntity)}
           <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>

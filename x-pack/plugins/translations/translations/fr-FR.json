@@ -25859,7 +25859,6 @@
     "xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip": "Nombre total d'alertes de même valeur dans la plage temporelle actuellement sélectionnée. Cette valeur n'est pas affectée par d'autres filtres.",
     "xpack.securitySolution.alertDetails.overview.highlightedFields.field": "Champ",
     "xpack.securitySolution.alertDetails.overview.highlightedFields.value": "Valeur",
-    "xpack.securitySolution.alertDetails.overview.hostRiskDataTitle": "Données de risque de l’hôte",
     "xpack.securitySolution.alertDetails.overview.insights": "Informations exploitables",
     "xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_process_ancestry": "Alertes connexes par processus ancêtre",
     "xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_process_ancestry_error": "Impossible de récupérer les alertes.",
