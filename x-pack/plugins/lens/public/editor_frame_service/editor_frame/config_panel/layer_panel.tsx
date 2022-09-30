@@ -458,18 +458,34 @@ export function LayerPanel(
                         const { columnId } = accessorConfig;
                         return (
                           <DraggableDimensionButton
+                            activeVisualization={activeVisualization}
                             registerNewButtonRef={registerNewButtonRef}
-                            columnId={columnId}
+                            order={[2, layerIndex, groupIndex, accessorIndex]}
+                            target={{
+                              id: columnId,
+                              layerId,
+                              columnId,
+                              groupId: group.groupId,
+                              filterOperations: group.filterOperations,
+                              prioritizedOperation: group.prioritizedOperation,
+                              indexPatternId: layerDatasource
+                                ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
+                                : activeVisualization.getUsedDataView?.(
+                                    visualizationState,
+                                    layerId
+                                  ),
+                              humanData: {
+                                label: columnLabelMap?.[columnId] ?? '',
+                                groupLabel: group.groupLabel,
+                                position: accessorIndex + 1,
+                                layerNumber: layerIndex + 1,
+                              },
+                            }}
                             group={group}
-                            accessorIndex={accessorIndex}
-                            groupIndex={groupIndex}
                             key={columnId}
                             state={layerDatasourceState}
-                            label={columnLabelMap?.[columnId] ?? ''}
                             layerDatasource={layerDatasource}
                             datasourceLayers={framePublicAPI.datasourceLayers}
-                            layerIndex={layerIndex}
-                            layerId={layerId}
                             onDragStart={() => setHideTooltip(true)}
                             onDragEnd={() => setHideTooltip(false)}
                             onDrop={onDrop}
@@ -567,10 +583,27 @@ export function LayerPanel(
 
                   {group.supportsMoreColumns ? (
                     <EmptyDimensionButton
+                      activeVisualization={activeVisualization}
+                      order={[2, layerIndex, groupIndex, group.accessors.length]}
                       group={group}
-                      layerId={layerId}
-                      groupIndex={groupIndex}
-                      layerIndex={layerIndex}
+                      target={{
+                        layerId,
+                        groupId: group.groupId,
+                        filterOperations: group.filterOperations,
+                        prioritizedOperation: group.prioritizedOperation,
+                        isNewColumn: true,
+                        indexPatternId: layerDatasource
+                          ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
+                          : activeVisualization.getUsedDataView?.(visualizationState, layerId),
+                        humanData: {
+                          groupLabel: group.groupLabel,
+                          layerNumber: layerIndex + 1,
+                          position: group.accessors.length + 1,
+                          label: i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
+                            defaultMessage: 'Empty dimension',
+                          }),
+                        },
+                      }}
                       layerDatasource={layerDatasource}
                       state={layerDatasourceState}
                       datasourceLayers={framePublicAPI.datasourceLayers}
