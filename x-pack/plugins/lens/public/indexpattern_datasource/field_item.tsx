@@ -8,7 +8,7 @@
 import './field_item.scss';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiIconTip, EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FieldButton } from '@kbn/react-field';
@@ -26,7 +26,7 @@ import {
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
 } from '@kbn/unified-field-list-plugin/public';
-import { generateFilters } from '@kbn/data-plugin/public';
+import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { APP_ID } from '../../common/constants';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
@@ -36,6 +36,7 @@ import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon
 import type { LensAppServices } from '../app_plugin/types';
 import { debouncedComponent } from '../debounced_component';
 import { getFieldType } from './pure_utils';
+import { combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -287,6 +288,41 @@ function FieldItemPopoverContents(
     props;
   const services = useKibana<LensAppServices>().services;
 
+  const exploreInDiscover = useMemo(() => {
+    const meta = {
+      id: indexPattern.id,
+      columns: [dataViewField.name],
+      filters: {
+        enabled: {
+          lucene: [],
+          kuery: [],
+        },
+        disabled: {
+          lucene: [],
+          kuery: [],
+        },
+      },
+    };
+    const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+      query,
+      filters,
+      meta,
+      [indexPattern],
+      getEsQueryConfig(services.uiSettings)
+    );
+
+    if (!services.discover) {
+      return;
+    }
+    return services.discover.locator!.getRedirectUrl({
+      dataViewSpec: indexPattern?.spec,
+      timeRange: services.data.query.timefilter.timefilter.getTime(),
+      filters: newFilters,
+      query: newQuery,
+      columns: meta.columns,
+    });
+  }, [dataViewField.name, filters, indexPattern, query, services]);
+
   return (
     <>
       <FieldStats
@@ -334,6 +370,20 @@ function FieldItemPopoverContents(
             'data-test-subj': `lensVisualize-GeoField-${dataViewField.name}`,
           }}
         />
+      ) : exploreInDiscover ? (
+        <EuiPopoverFooter>
+          <EuiButton
+            fullWidth
+            size="s"
+            href={exploreInDiscover}
+            target="_blank"
+            data-test-subj={`lnsFieldListPanel-exploreInDiscover-${dataViewField.name}`}
+          >
+            {i18n.translate('xpack.lens.indexPattern.fieldExploreInDiscover', {
+              defaultMessage: 'Explore values in Discover',
+            })}
+          </EuiButton>
+        </EuiPopoverFooter>
       ) : null}
     </>
   );
