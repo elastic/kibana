@@ -11,7 +11,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 
 type TestResponse = Record<string, any>;
