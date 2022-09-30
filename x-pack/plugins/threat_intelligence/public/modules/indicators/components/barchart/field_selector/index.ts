@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './indicators_field_selector';
+export * from './field_selector';
