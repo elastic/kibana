@@ -10,6 +10,8 @@ import sinon from 'sinon';
 import {
   executeAlert,
   executeRatioAlert,
+  LogThresholdAlertFactory,
+  LogThresholdAlertLimit,
 } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
 import {
   Comparator,
@@ -30,7 +32,11 @@ export default function ({ getService }: FtrProviderContext) {
       describe('without group by', () => {
         it('should work', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake();
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertLimit = {
+            getValue: sinon.fake.returns(100),
+            setLimitReached: sinon.fake(),
+          } as SinonSpiesOf<LogThresholdAlertLimit>;
           const ruleParams = {
             count: {
               comparator: Comparator.GT_OR_EQ,
@@ -53,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
             {},
             esClient,
             alertFactory,
+            alertLimit,
             timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(1);
@@ -74,13 +81,18 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           ]);
+          expect(alertLimit.setLimitReached.calledOnceWith(false)).to.be(true);
         });
       });
 
       describe('with group by', () => {
         it('should work', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake();
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertLimit = {
+            getValue: sinon.fake.returns(2),
+            setLimitReached: sinon.fake(),
+          } as SinonSpiesOf<LogThresholdAlertLimit>;
           const ruleParams = {
             count: {
               comparator: Comparator.GT_OR_EQ,
@@ -104,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
             {},
             esClient,
             alertFactory,
+            alertLimit,
             timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(2);
@@ -125,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           ]);
+          expect(alertLimit.setLimitReached.calledOnceWith(true)).to.be(true);
         });
       });
     });
@@ -136,7 +150,11 @@ export default function ({ getService }: FtrProviderContext) {
       describe('without group by', () => {
         it('should work', async () => {
           const timestamp = new Date(DATES.ten_thousand_plus.max);
-          const alertFactory = sinon.fake();
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertLimit = {
+            getValue: sinon.fake.returns(2),
+            setLimitReached: sinon.fake(),
+          } as SinonSpiesOf<LogThresholdAlertLimit>;
           const ruleParams = {
             count: {
               comparator: Comparator.GT_OR_EQ,
@@ -156,6 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
             {},
             esClient,
             alertFactory,
+            alertLimit,
             timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(1);
@@ -179,13 +198,18 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           ]);
+          expect(alertLimit.setLimitReached.calledOnceWith(false)).to.be(true);
         });
       });
 
       describe('with group by', () => {
         it('should work', async () => {
           const timestamp = new Date(DATES.ten_thousand_plus.max);
-          const alertFactory = sinon.fake();
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertLimit = {
+            getValue: sinon.fake.returns(2),
+            setLimitReached: sinon.fake(),
+          } as SinonSpiesOf<LogThresholdAlertLimit>;
           const ruleParams = {
             count: {
               comparator: Comparator.GT_OR_EQ,
@@ -206,6 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
             {},
             esClient,
             alertFactory,
+            alertLimit,
             timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(1);
@@ -229,8 +254,18 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           ]);
+          expect(alertLimit.setLimitReached.calledOnceWith(false)).to.be(true);
         });
       });
     });
   });
 }
+
+type SinonSpyOf<SpyTarget extends (...args: any[]) => any> = sinon.SinonSpy<
+  Parameters<SpyTarget>,
+  ReturnType<SpyTarget>
+>;
+
+type SinonSpiesOf<SpyTarget extends Record<string, (...args: any[]) => any>> = {
+  [Key in keyof SpyTarget]: SinonSpyOf<SpyTarget[Key]>;
+};
