@@ -17,7 +17,8 @@ export {
   NewBucketButton,
   DraggableBucketContainer,
   DragDropBuckets,
-} from './drag_drop_bucket/buckets';
+  FieldsBucketContainer,
+} from './drag_drop_bucket';
 export { RangeInputField } from './range_input_field';
 export {
   BucketAxisBoundsControl,
