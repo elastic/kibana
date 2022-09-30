@@ -12,5 +12,5 @@
 
 import { renderApp } from './app';
 
-import { createStore, createInitialState } from './common/store';
-export { renderApp, createStore, createInitialState };
+import { createStoreFactory, createInitialState } from './common/store';
+export { renderApp, createStoreFactory, createInitialState };

@@ -405,36 +405,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.storage,
         this.experimentalFeatures
       );
-      /* this._store = createStore(
-        createInitialState(
-          {
-            ...subPlugins.hosts.store.initialState,
-            ...subPlugins.users.store.initialState,
-            ...subPlugins.network.store.initialState,
-            ...timelineInitialState,
-            ...subPlugins.management.store.initialState,
-          },
-          {
-            defaultDataView,
-            kibanaDataViews,
-            signalIndexName: signal.name,
-            enableExperimental: this.experimentalFeatures,
-          },
-          dataTableInitialState
-        ),
-        {
-          ...subPlugins.hosts.store.reducer,
-          ...subPlugins.users.store.reducer,
-          ...subPlugins.network.store.reducer,
-          timeline: timelineReducer,
-          ...subPlugins.management.store.reducer,
-          ...tGridReducer,
-        },
-        { dataTable: tGridReducer },
-        libs$.pipe(pluck('kibana')),
-        this.storage,
-        [...(subPlugins.management.store.middleware ?? [])]
-      );*/
     }
     if (startPlugins.timelines) {
       startPlugins.timelines.setTGridEmbeddedStore(this._store);
