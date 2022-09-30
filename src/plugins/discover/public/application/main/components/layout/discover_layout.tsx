@@ -155,7 +155,7 @@ export function DiscoverLayout({
   const onFieldEdited = useCallback(async () => {
     if (!dataView.isPersisted()) {
       const updateDataView = await updateAdHocDataViewId(dataView);
-      stateContainer.setAppState({ index: updateDataView.id! });
+      stateContainer.replaceUrlAppState({ index: updateDataView.id! });
     }
     savedSearchRefetch$.next('reset');
   }, [dataView, savedSearchRefetch$, stateContainer, updateAdHocDataViewId]);
