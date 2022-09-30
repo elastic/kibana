@@ -41,5 +41,14 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response.header).not.to.have.property('content-encoding');
         });
     });
+
+    it(`supports brotli compression`, async () => {
+      await supertest
+        .get('/app/kibana')
+        .set('accept-encoding', 'br')
+        .then((response) => {
+          expect(response.header).to.have.property('content-encoding', 'br');
+        });
+    });
   });
 }
