@@ -61,8 +61,9 @@ export const getConfigurationForGauge = (
   }
 
   const primaryColumn = findMetricColumn(primaryMetricWithCollapseFn.metric, layer.columns);
+  const primaryColor = primarySeries.color ? color(primarySeries.color).hex() : undefined;
 
-  const gaugePalette = getPalette(model.gauge_color_rules ?? []);
+  const gaugePalette = getPalette(model.gauge_color_rules ?? [], primaryColor);
   if (gaugePalette === null) {
     return null;
   }
@@ -75,8 +76,6 @@ export const getConfigurationForGauge = (
     maxAccessor: gaugeMaxColumn.columnId,
     palette: gaugePalette,
     collapseFn: primaryMetricWithCollapseFn.collapseFn,
-    ...(gaugePalette
-      ? {}
-      : { color: primarySeries.color ? color(primarySeries.color).hex() : undefined }),
+    ...(gaugePalette ? {} : { color: primaryColor }),
   };
 };

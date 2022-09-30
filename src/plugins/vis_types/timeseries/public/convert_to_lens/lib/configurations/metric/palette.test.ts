@@ -9,6 +9,7 @@
 import { getPalette } from './palette';
 
 describe('getPalette', () => {
+  const baseColor = '#fff';
   const invalidRules = [
     { id: 'some-id-0' },
     { id: 'some-id-1', value: 10 },
@@ -180,27 +181,27 @@ describe('getPalette', () => {
 
   describe('Gauge', () => {
     test('should return undefined if no filled rules was provided', () => {
-      expect(getPalette([])).toBeUndefined();
-      expect(getPalette(invalidRules)).toBeUndefined();
+      expect(getPalette([], baseColor)).toBeUndefined();
+      expect(getPalette(invalidRules, baseColor)).toBeUndefined();
     });
 
     test('should return undefined if only one valid rule is provided and it is not lte', () => {
-      expect(getPalette([])).toBeUndefined();
+      expect(getPalette([], baseColor)).toBeUndefined();
       expect(
-        getPalette([
-          ...invalidRules,
-          { id: 'some-id-5', operator: 'gt', value: 100, gauge: '#000' },
-        ])
+        getPalette(
+          [...invalidRules, { id: 'some-id-5', operator: 'gt', value: 100, gauge: '#000' }],
+          baseColor
+        )
       ).toBeUndefined();
     });
 
     test('should return custom palette if only one valid rule is provided and it is lte', () => {
-      expect(getPalette([])).toBeUndefined();
+      expect(getPalette([], baseColor)).toBeUndefined();
       expect(
-        getPalette([
-          ...invalidRules,
-          { id: 'some-id-5', operator: 'lte', value: 100, gauge: '#000' },
-        ])
+        getPalette(
+          [...invalidRules, { id: 'some-id-5', operator: 'lte', value: 100, gauge: '#000' }],
+          baseColor
+        )
       ).toEqual({
         name: 'custom',
         params: {
@@ -221,62 +222,77 @@ describe('getPalette', () => {
     });
 
     test('should return undefined if more than two types of rules', () => {
-      expect(getPalette([])).toBeUndefined();
+      expect(getPalette([], baseColor)).toBeUndefined();
       expect(
-        getPalette([
-          ...invalidRules,
-          { id: 'some-id-5', operator: 'lte', value: 100, gauge: '#000' },
-          { id: 'some-id-6', operator: 'gte', value: 150, gauge: '#000' },
-          { id: 'some-id-7', operator: 'lt', value: 200, gauge: '#000' },
-        ])
+        getPalette(
+          [
+            ...invalidRules,
+            { id: 'some-id-5', operator: 'lte', value: 100, gauge: '#000' },
+            { id: 'some-id-6', operator: 'gte', value: 150, gauge: '#000' },
+            { id: 'some-id-7', operator: 'lt', value: 200, gauge: '#000' },
+          ],
+          baseColor
+        )
       ).toBeUndefined();
     });
 
     test('should return undefined if two types of rules and last rule is not lte', () => {
-      expect(getPalette([])).toBeUndefined();
+      expect(getPalette([], baseColor)).toBeUndefined();
       expect(
-        getPalette([
-          ...invalidRules,
-          { id: 'some-id-5', operator: 'gte', value: 100, gauge: '#000' },
-          { id: 'some-id-7', operator: 'lt', value: 200, gauge: '#000' },
-          { id: 'some-id-6', operator: 'gte', value: 150, gauge: '#000' },
-        ])
+        getPalette(
+          [
+            ...invalidRules,
+            { id: 'some-id-5', operator: 'gte', value: 100, gauge: '#000' },
+            { id: 'some-id-7', operator: 'lt', value: 200, gauge: '#000' },
+            { id: 'some-id-6', operator: 'gte', value: 150, gauge: '#000' },
+          ],
+          baseColor
+        )
       ).toBeUndefined();
     });
 
     test('should return undefined if all rules are lte', () => {
-      expect(getPalette([])).toBeUndefined();
+      expect(getPalette([], baseColor)).toBeUndefined();
       expect(
-        getPalette([
-          ...invalidRules,
-          { id: 'some-id-5', operator: 'lte', value: 100, gauge: '#000' },
-          { id: 'some-id-7', operator: 'lte', value: 200, gauge: '#000' },
-          { id: 'some-id-6', operator: 'lte', value: 150, gauge: '#000' },
-        ])
+        getPalette(
+          [
+            ...invalidRules,
+            { id: 'some-id-5', operator: 'lte', value: 100, gauge: '#000' },
+            { id: 'some-id-7', operator: 'lte', value: 200, gauge: '#000' },
+            { id: 'some-id-6', operator: 'lte', value: 150, gauge: '#000' },
+          ],
+          baseColor
+        )
       ).toBeUndefined();
     });
 
     test('should return undefined if two types of rules and all except last one are lt and last one is not lte', () => {
-      expect(getPalette([])).toBeUndefined();
+      expect(getPalette([], baseColor)).toBeUndefined();
       expect(
-        getPalette([
-          ...invalidRules,
-          { id: 'some-id-5', operator: 'lt', value: 100, gauge: '#000' },
-          { id: 'some-id-7', operator: 'gte', value: 200, gauge: '#000' },
-          { id: 'some-id-6', operator: 'lt', value: 150, gauge: '#000' },
-        ])
+        getPalette(
+          [
+            ...invalidRules,
+            { id: 'some-id-5', operator: 'lt', value: 100, gauge: '#000' },
+            { id: 'some-id-7', operator: 'gte', value: 200, gauge: '#000' },
+            { id: 'some-id-6', operator: 'lt', value: 150, gauge: '#000' },
+          ],
+          baseColor
+        )
       ).toBeUndefined();
     });
 
     test('should return custom palette if two types of rules and all except last one is lt and last one is lte', () => {
-      expect(getPalette([])).toBeUndefined();
+      expect(getPalette([], baseColor)).toBeUndefined();
       expect(
-        getPalette([
-          ...invalidRules,
-          { id: 'some-id-5', operator: 'lt', value: 100, gauge: '#000' },
-          { id: 'some-id-7', operator: 'lte', value: 200, gauge: '#000' },
-          { id: 'some-id-6', operator: 'lt', value: 150, gauge: '#000' },
-        ])
+        getPalette(
+          [
+            ...invalidRules,
+            { id: 'some-id-5', operator: 'lt', value: 100, gauge: '#000' },
+            { id: 'some-id-7', operator: 'lte', value: 200, gauge: '#000' },
+            { id: 'some-id-6', operator: 'lt', value: 150, gauge: '#000' },
+          ],
+          baseColor
+        )
       ).toEqual({
         name: 'custom',
         params: {
@@ -305,31 +321,36 @@ describe('getPalette', () => {
     });
 
     test('should return custom palette if last one is lte and all previous are gte', () => {
-      expect(getPalette([])).toBeUndefined();
+      expect(getPalette([], baseColor)).toBeUndefined();
       expect(
-        getPalette([
-          ...invalidRules,
-          { id: 'some-id-5', operator: 'gte', value: 100, gauge: '#000' },
-          { id: 'some-id-7', operator: 'lte', value: 200, gauge: '#000' },
-          { id: 'some-id-6', operator: 'gte', value: 150, gauge: '#000' },
-        ])
+        getPalette(
+          [
+            ...invalidRules,
+            { id: 'some-id-5', operator: 'gte', value: 100, gauge: '#000' },
+            { id: 'some-id-7', operator: 'lte', value: 200, gauge: '#000' },
+            { id: 'some-id-6', operator: 'gte', value: 150, gauge: '#000' },
+          ],
+          baseColor
+        )
       ).toEqual({
         name: 'custom',
         params: {
           colorStops: [
+            { color: baseColor, stop: -Infinity },
             { color: '#000000', stop: 100 },
             { color: '#000000', stop: 150 },
           ],
-          continuity: 'none',
+          continuity: 'below',
           maxSteps: 5,
           name: 'custom',
           progression: 'fixed',
           rangeMax: 200,
-          rangeMin: 100,
+          rangeMin: -Infinity,
           rangeType: 'number',
           reverse: false,
-          steps: 2,
+          steps: 3,
           stops: [
+            { color: baseColor, stop: 100 },
             { color: '#000000', stop: 150 },
             { color: '#000000', stop: 200 },
           ],
