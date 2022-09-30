@@ -29,20 +29,19 @@ interface CasesTableProps {
   data: Cases;
   filterOptions: FilterOptions;
   goToCreateCase?: () => void;
-  handleIsLoading: (a: boolean) => void;
   isCasesLoading: boolean;
   isCommentUpdating: boolean;
   isDataEmpty: boolean;
   isSelectorView?: boolean;
   onChange: EuiBasicTableProps<Case>['onChange'];
   pagination: Pagination;
-  refreshCases: (a?: boolean) => void;
   selectedCases: Case[];
   selection: EuiTableSelectionType<Case>;
   showActions: boolean;
   sorting: EuiBasicTableProps<Case>['sorting'];
   tableRef: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
+  deselectCases: () => void;
 }
 
 const Div = styled.div`
@@ -54,20 +53,19 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   data,
   filterOptions,
   goToCreateCase,
-  handleIsLoading,
   isCasesLoading,
   isCommentUpdating,
   isDataEmpty,
   isSelectorView,
   onChange,
   pagination,
-  refreshCases,
   selectedCases,
   selection,
   showActions,
   sorting,
   tableRef,
   tableRowProps,
+  deselectCases,
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
@@ -93,9 +91,8 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         data={data}
         enableBulkActions={showActions}
         filterOptions={filterOptions}
-        handleIsLoading={handleIsLoading}
         selectedCases={selectedCases}
-        refreshCases={refreshCases}
+        deselectCases={deselectCases}
       />
       <EuiBasicTable
         className={classnames({ isSelectorView })}

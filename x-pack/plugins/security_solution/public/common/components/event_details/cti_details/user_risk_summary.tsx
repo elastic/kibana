@@ -31,7 +31,6 @@ const UserRiskSummaryComponent: React.FC<{
             <RiskScoreHeaderTitle
               title={i18n.USER_RISK_DATA_TITLE}
               riskScoreEntity={RiskScoreEntity.user}
-              showTooltip={false}
             />
           }
           toolTipContent={
