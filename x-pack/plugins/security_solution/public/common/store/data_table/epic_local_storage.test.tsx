@@ -47,7 +47,7 @@ import { getDefaultControlColumn } from '../../../timelines/components/timeline/
 import { SourcererScopeName } from '../sourcerer/model';
 import { TableId } from '../../../../common/types';
 
-jest.mock('../../containers/local_storage');
+jest.mock('../../../timelines/containers/local_storage');
 
 const addTableInStorageMock = addTableInStorage as jest.Mock;
 
