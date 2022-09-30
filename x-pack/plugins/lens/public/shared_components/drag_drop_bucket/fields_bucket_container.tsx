@@ -42,7 +42,7 @@ export const FieldsBucketContainer = ({
         <EuiFlexItem grow={false} {...(draggableProvided?.dragHandleProps ?? {})}>
           <TooltipWrapper
             tooltipContent={i18n.translate('xpack.lens.fieldsBucketContainer.dragHandleDisabled', {
-              defaultMessage: 'Reordering requires more than one field to be defined.',
+              defaultMessage: 'Reordering requires more than one item.',
             })}
             condition={isNotDraggable ?? true}
           >
