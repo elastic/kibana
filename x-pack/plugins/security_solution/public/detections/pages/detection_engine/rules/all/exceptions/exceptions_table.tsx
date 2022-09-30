@@ -584,7 +584,7 @@ export const ExceptionListsTable = React.memo(() => {
         </EuiPopover>
         <EuiPagination
           aria-label={'Custom pagination example'}
-          pageCount={Math.ceil(pagination.total / rowSize)}
+          pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
           activePage={activePage}
           onPageClick={goToPage}
         />
