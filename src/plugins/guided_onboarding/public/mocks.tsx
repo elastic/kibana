@@ -6,17 +6,22 @@
  * Side Public License, v 1.
  */
 
-jest.mock('./services/api');
-import { ApiService } from './services/api';
-
-const mockApi = ApiService as unknown as jest.Mocked<ApiService>;
+import { BehaviorSubject } from 'rxjs';
 import { GuidedOnboardingPluginStart } from '.';
 
-const startMock: jest.Mocked<GuidedOnboardingPluginStart> = {
-  guidedOnboardingApi: mockApi,
+const apiServiceMock: jest.Mocked<GuidedOnboardingPluginStart> = {
+  guidedOnboardingApi: {
+    isGuidedOnboardingActiveForIntegration$: () => new BehaviorSubject(false),
+    completeGuidedOnboardingForIntegration: jest.fn(),
+    isGuideStepActive$: () => new BehaviorSubject(false),
+    completeGuideStep: jest.fn(),
+    fetchGuideState$: jest.fn(),
+    updateGuideState: jest.fn(),
+    setup: jest.fn(),
+  },
 };
 
 export const guidedOnboardingMock = {
   createSetup: () => {},
-  createStart: () => startMock,
+  createStart: () => apiServiceMock,
 };

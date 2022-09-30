@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { GuideId, GuideStepIds, StepStatus } from '../common/types';
 import { ApiService } from './services/api';
+import { HttpSetup } from '@kbn/core/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingPluginSetup {}
 
 export interface GuidedOnboardingPluginStart {
-  guidedOnboardingApi?: ApiService;
+  guidedOnboardingApi?: GuidedOnboardingApi;
 }
 
 export interface AppPluginStartDependencies {
@@ -24,6 +26,25 @@ export interface AppPluginStartDependencies {
 export interface ClientConfigType {
   ui: boolean;
 }
+export interface GuidedOnboardingApi {
+  setup: (httpClient: HttpSetup) => void;
+  fetchGuideState$: () => Observable<GuidedOnboardingState>;
+  updateGuideState: (
+    newState: GuidedOnboardingState
+  ) => Promise<{ state: GuidedOnboardingState } | undefined>;
+  isGuideStepActive$: (guideID: string, stepID: string) => Observable<boolean>;
+  completeGuideStep: (
+    guideID: string,
+    stepID: string
+  ) => Promise<{ state: GuidedOnboardingState } | undefined>;
+  isGuidedOnboardingActiveForIntegration$: (integration?: string) => Observable<boolean>;
+  completeGuidedOnboardingForIntegration: (
+    integration?: string
+  ) => Promise<{ state: GuidedOnboardingState } | undefined>;
+}
+
+export type UseCase = 'observability' | 'security' | 'search';
+export type StepStatus = 'incomplete' | 'complete' | 'in_progress';
 
 export interface StepConfig {
   id: GuideStepIds;

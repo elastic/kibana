@@ -9,11 +9,14 @@
 import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
 
+import { API_BASE_PATH } from '../../common';
+import { GuidedOnboardingApi, GuidedOnboardingState, UseCase } from '../types';
+import { getNextStep, isIntegrationInGuideStep, isLastStep } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '../../common/types';
 import { isLastStep, getGuideConfig } from './helpers';
 
-export class ApiService {
+export class ApiService implements GuidedOnboardingApi {
   private client: HttpSetup | undefined;
   private onboardingGuideState$!: BehaviorSubject<GuideState | undefined>;
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -316,7 +319,9 @@ export class ApiService {
     );
   }
 
-  public async completeGuidedOnboardingForIntegration(integration?: string) {
+  public async completeGuidedOnboardingForIntegration(
+    integration?: string
+  ): Promise<{ state: GuidedOnboardingState } | undefined> {
     if (integration) {
       const currentState = await firstValueFrom(this.fetchGuideState$());
       const isIntegrationStepActive = isIntegrationInGuideStep(currentState, integration);
