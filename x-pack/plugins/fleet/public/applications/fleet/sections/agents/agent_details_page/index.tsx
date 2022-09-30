@@ -31,6 +31,7 @@ import {
   AgentDetailsActionMenu,
   AgentDetailsContent,
   AgentDashboardLink,
+  AgentDiagnostics,
 } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
@@ -151,6 +152,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_logs', { agentId, tabId: 'logs' }),
         isSelected: tabId === 'logs',
       },
+      {
+        id: 'diagnostics',
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
+          defaultMessage: 'Diagnostics',
+        }),
+        href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
+        isSelected: tabId === 'diagnostics',
+      },
     ];
   }, [getHref, agentId, tabId]);
 
@@ -220,6 +229,12 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         path={FLEET_ROUTING_PATHS.agent_details_logs}
         render={() => {
           return <AgentLogs agent={agent} agentPolicy={agentPolicy} />;
+        }}
+      />
+      <Route
+        path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
+        render={() => {
+          return <AgentDiagnostics agentId={agent.id} />;
         }}
       />
       <Route

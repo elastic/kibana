@@ -103,6 +103,16 @@ export const TableRowActions: React.FunctionComponent<{
           id="xpack.fleet.agentList.upgradeOneButton"
           defaultMessage="Upgrade agent"
         />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="download"
+        disabled={!hasFleetAllPrivileges}
+        href={getHref('agent_details_diagnostics', { agentId: agent.id })}
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.diagnosticsOneButton"
+          defaultMessage="Request diagnostics .zip"
+        />
       </EuiContextMenuItem>
     );
   }

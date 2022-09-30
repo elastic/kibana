@@ -10,7 +10,7 @@ import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useKibanaVersion } from '../../../../hooks';
+import { useAuthz, useKibanaVersion, useLink } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -33,6 +33,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const isUnenrolling = agent.status === 'unenrolling';
+  const { getHref } = useLink();
 
   const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
 
@@ -130,6 +131,16 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             <FormattedMessage
               id="xpack.fleet.agentList.upgradeOneButton"
               defaultMessage="Upgrade agent"
+            />
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            icon="download"
+            disabled={!hasFleetAllPrivileges}
+            href={getHref('agent_details_diagnostics', { agentId: agent.id })}
+          >
+            <FormattedMessage
+              id="xpack.fleet.agentList.diagnosticsOneButton"
+              defaultMessage="Request diagnostics .zip"
             />
           </EuiContextMenuItem>,
         ]}
