@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiBetaBadge, EuiContextMenuItem, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -29,9 +29,9 @@ export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
   const engineCreationPath = !indexName
     ? `${APP_SEARCH_PLUGIN.URL}${ENGINE_CREATION_PATH}`
     : generateEncodedPath(`${APP_SEARCH_PLUGIN.URL}${ENGINE_CREATION_PATH}?:indexKey=:indexName`, {
-      indexKey: ESINDEX_QUERY_PARAMETER,
-      indexName,
-    });
+        indexKey: ESINDEX_QUERY_PARAMETER,
+        indexName,
+      });
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
