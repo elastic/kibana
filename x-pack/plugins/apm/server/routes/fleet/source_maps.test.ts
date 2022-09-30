@@ -19,7 +19,6 @@ const packagePolicy = {
   namespace: 'default',
   policy_id: '7a87c160-c961-11eb-81e2-f7327d61c92a',
   enabled: true,
-  output_id: '',
   inputs: [
     {
       policy_template: 'apmserver',
