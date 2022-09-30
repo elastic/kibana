@@ -34,7 +34,7 @@ export const FieldsBucketContainer = ({
   return (
     <EuiPanel
       paddingSize="xs"
-      hasShadow={true}
+      hasShadow={isDragging}
       color={isDragging ? 'plain' : 'transparent'}
       data-test-subj={dataTestSubj}
     >
