@@ -90,7 +90,7 @@ The maximum number of idle sockets to keep open between {kib} and {es}. If more 
 
 [[elasticsearch-idleSocketTimeout]] `elasticsearch.idleSocketTimeout`::
 The timeout for idle sockets kept open between {kib} and {es}. If the socket is idle for longer than this timeout, it will be closed. If you have a transparent proxy between {kib} and {es} be sure to set this value lower than or equal to the proxy's timeout.
-*Default: `9m`*
+*Default: `60s`*
 
 `elasticsearch.customHeaders`::
  | Header names and values to send to {es}. Any custom headers cannot be
