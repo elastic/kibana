@@ -10,10 +10,7 @@ import { render } from '@testing-library/react';
 import { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import {
-  CHART_UPDATE_PROGRESS_TEST_ID,
-  IndicatorsBarChartWrapper,
-} from './indicators_barchart_wrapper';
+import { CHART_UPDATE_PROGRESS_TEST_ID, IndicatorsBarChartWrapper } from '.';
 import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
 import moment from 'moment';
 

@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { IndicatorsFieldSelector } from './indicators_field_selector';
+import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
+import { IndicatorsFieldSelector } from '.';
 
 const mockIndexPattern: DataView = {
   fields: [

@@ -9,9 +9,9 @@ import moment from 'moment-timezone';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { IndicatorsBarChart } from './indicators_barchart';
-import { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
+import { IndicatorsBarChart } from '.';
+import { ChartSeries } from '../../../services';
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');

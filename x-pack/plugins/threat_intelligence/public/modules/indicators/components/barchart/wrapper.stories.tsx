@@ -17,12 +17,8 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
-import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
-import {
-  Aggregation,
-  AGGREGATION_NAME,
-  ChartSeries,
-} from '../../services/fetch_aggregated_indicators';
+import { IndicatorsBarChartWrapper } from '.';
+import { Aggregation, AGGREGATION_NAME, ChartSeries } from '../../services';
 
 export default {
   component: IndicatorsBarChartWrapper,

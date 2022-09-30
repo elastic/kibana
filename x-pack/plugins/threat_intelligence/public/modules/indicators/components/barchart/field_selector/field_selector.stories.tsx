@@ -8,8 +8,8 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { IndicatorsFieldSelector } from './indicators_field_selector';
+import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
+import { IndicatorsFieldSelector } from '.';
 
 const mockIndexPattern: DataView = {
   fields: [

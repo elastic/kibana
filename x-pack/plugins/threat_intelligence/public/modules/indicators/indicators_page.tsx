@@ -7,7 +7,7 @@
 
 import React, { FC, VFC } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
+import { IndicatorsBarChartWrapper } from './components/barchart';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
 import { DefaultPageLayout } from '../../components/layout';

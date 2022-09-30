@@ -9,10 +9,10 @@ import moment from 'moment';
 import React from 'react';
 import { Story } from '@storybook/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
-import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
-import { IndicatorsBarChart } from './indicators_barchart';
-import { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
+import { mockKibanaTimelinesService } from '../../../../../common/mocks/mock_kibana_timelines_service';
+import { IndicatorsBarChart } from '.';
+import { ChartSeries } from '../../../services';
 
 const mockIndicators: ChartSeries[] = [
   {

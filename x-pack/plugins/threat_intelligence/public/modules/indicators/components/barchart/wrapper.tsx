@@ -19,9 +19,9 @@ import { TimeRange } from '@kbn/es-query';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { SecuritySolutionDataViewBase } from '../../../../types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { IndicatorsFieldSelector } from '../indicators_field_selector/indicators_field_selector';
-import { IndicatorsBarChart } from '../indicators_barchart/indicators_barchart';
-import { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import { IndicatorsFieldSelector } from './field_selector';
+import { IndicatorsBarChart } from './barchart';
+import { ChartSeries } from '../../services';
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
 
@@ -33,7 +33,7 @@ export interface IndicatorsBarChartWrapperProps {
    */
   timeRange?: TimeRange;
   /**
-   * List of fields coming from the Security Solution sourcerer data view, passed down to the {@link IndicatorFieldSelector} to populate the dropdown.
+   * List of fields coming from the Security Solution sourcerer data view, passed down to the {@link IndicatorsFieldSelector} to populate the dropdown.
    */
   indexPattern: SecuritySolutionDataViewBase;
 

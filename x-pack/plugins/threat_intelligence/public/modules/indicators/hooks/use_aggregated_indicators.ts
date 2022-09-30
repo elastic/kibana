@@ -13,7 +13,7 @@ import { useInspector } from '../../../hooks/use_inspector';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
-import { useSourcererDataView } from './use_sourcerer_data_view';
+import { useSourcererDataView } from '.';
 import {
   ChartSeries,
   createFetchAggregatedIndicators,
@@ -22,11 +22,17 @@ import {
 
 export interface UseAggregatedIndicatorsParam {
   /**
-   * From and To values passed to the {@link }useAggregatedIndicators} hook
+   * From and To values passed to the {@link useAggregatedIndicators} hook
    * to query indicators for the Indicators barchart.
    */
   timeRange?: TimeRange;
+  /**
+   * Filters data passed to the {@link useAggregatedIndicators} hook to query indicators.
+   */
   filters: Filter[];
+  /**
+   * Query data passed to the {@link useAggregatedIndicators} hook to query indicators.
+   */
   filterQuery: Query;
 }
 
