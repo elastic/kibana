@@ -22,23 +22,17 @@ import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
 import type {
-  TimechartBucketInterval,
+  UnifiedHistogramContext,
   UnifiedHistogramServices,
   UnifiedHistogramStatus,
 } from '../types';
-import type { ChartData } from '../types';
 
 export interface ChartProps {
-  services: UnifiedHistogramServices;
   className?: string;
-  isTimeBased: boolean;
-  hideChart?: boolean;
-  interval?: string;
+  services: UnifiedHistogramServices;
   status: UnifiedHistogramStatus;
   hits: number;
-  chartData: ChartData;
-  bucketInterval: TimechartBucketInterval;
-  error?: Error;
+  histogram?: UnifiedHistogramContext;
   appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
   onEditVisualization?: () => void;
@@ -50,16 +44,11 @@ export interface ChartProps {
 const HistogramMemoized = memo(Histogram);
 
 export function Chart({
-  services,
   className,
-  hideChart,
-  interval,
-  isTimeBased,
+  services,
   status,
   hits,
-  chartData,
-  bucketInterval,
-  error,
+  histogram,
   appendHitsCounter,
   appendHistogram,
   onEditVisualization,
@@ -87,13 +76,13 @@ export function Chart({
     if (chartRef.current.moveFocus && chartRef.current.element) {
       chartRef.current.element.focus();
     }
-  }, [hideChart]);
+  }, [histogram?.hidden]);
 
   const toggleHideChart = useCallback(() => {
-    const newHideChart = !hideChart;
+    const newHideChart = !histogram?.hidden;
     chartRef.current.moveFocus = !newHideChart;
     onHideChartChange?.(newHideChart);
-  }, [hideChart, onHideChartChange]);
+  }, [histogram?.hidden, onHideChartChange]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -105,13 +94,13 @@ export function Chart({
     },
     [data]
   );
+
   const panels = useChartPanels({
+    histogram,
     toggleHideChart,
     onChangeInterval: (newInterval) => onIntervalChange?.(newInterval),
     closePopover: () => setShowChartOptionsPopover(false),
     onResetChartHeight,
-    hideChart,
-    interval,
   });
 
   return (
@@ -130,7 +119,7 @@ export function Chart({
           >
             <HitsCounter hits={hits} status={status} append={appendHitsCounter} />
           </EuiFlexItem>
-          {isTimeBased && (
+          {histogram && (
             <EuiFlexItem className="unifiedHistogramResultCount__toggle" grow={false}>
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                 {onEditVisualization && (
@@ -185,7 +174,7 @@ export function Chart({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {isTimeBased && !hideChart && (
+      {histogram && !histogram.hidden && (
         <EuiFlexItem>
           <section
             ref={(element) => (chartRef.current.element = element)}
@@ -197,12 +186,9 @@ export function Chart({
           >
             <HistogramMemoized
               services={services}
-              timefilterUpdateHandler={timefilterUpdateHandler}
-              interval={interval}
               status={status}
-              chartData={chartData}
-              bucketInterval={bucketInterval}
-              error={error}
+              histogram={histogram}
+              timefilterUpdateHandler={timefilterUpdateHandler}
             />
           </section>
           {appendHistogram}

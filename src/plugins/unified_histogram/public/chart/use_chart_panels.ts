@@ -12,23 +12,28 @@ import type {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { search } from '@kbn/data-plugin/public';
+import { UnifiedHistogramContext } from '../types';
 
 export function useChartPanels({
+  histogram,
   toggleHideChart,
   onChangeInterval,
   closePopover,
   onResetChartHeight,
-  hideChart,
-  interval,
 }: {
+  histogram?: UnifiedHistogramContext;
   toggleHideChart: () => void;
   onChangeInterval: (value: string) => void;
   closePopover: () => void;
   onResetChartHeight?: () => void;
-  hideChart?: boolean;
-  interval?: string;
 }) {
-  const selectedOptionIdx = search.aggs.intervalOptions.findIndex((opt) => opt.val === interval);
+  if (!histogram) {
+    return [];
+  }
+
+  const selectedOptionIdx = search.aggs.intervalOptions.findIndex(
+    (opt) => opt.val === histogram.timeInterval
+  );
   const intervalDisplay =
     selectedOptionIdx > -1
       ? search.aggs.intervalOptions[selectedOptionIdx].display
@@ -36,14 +41,14 @@ export function useChartPanels({
 
   const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [
     {
-      name: !hideChart
+      name: !histogram.hidden
         ? i18n.translate('unifiedHistogram.hideChart', {
             defaultMessage: 'Hide chart',
           })
         : i18n.translate('unifiedHistogram.showChart', {
             defaultMessage: 'Show chart',
           }),
-      icon: !hideChart ? 'eyeClosed' : 'eye',
+      icon: !histogram.hidden ? 'eyeClosed' : 'eye',
       onClick: () => {
         toggleHideChart();
         closePopover();
@@ -51,7 +56,7 @@ export function useChartPanels({
       'data-test-subj': 'unifiedHistogramChartToggle',
     },
   ];
-  if (!hideChart) {
+  if (!histogram.hidden) {
     if (onResetChartHeight) {
       mainPanelItems.push({
         name: i18n.translate('unifiedHistogram.resetChartHeight', {
@@ -87,7 +92,7 @@ export function useChartPanels({
       items: mainPanelItems,
     },
   ];
-  if (!hideChart) {
+  if (!histogram.hidden) {
     panels.push({
       id: 1,
       initialFocusedItemIndex: selectedOptionIdx > -1 ? selectedOptionIdx : 0,
@@ -100,13 +105,13 @@ export function useChartPanels({
           return {
             name: display,
             label: display,
-            icon: val === interval ? 'check' : 'empty',
+            icon: val === histogram.timeInterval ? 'check' : 'empty',
             onClick: () => {
               onChangeInterval(val);
               closePopover();
             },
             'data-test-subj': `unifiedHistogramTimeInterval-${display}`,
-            className: val === interval ? 'unifiedHistogramIntervalSelected' : '',
+            className: val === histogram.timeInterval ? 'unifiedHistogramIntervalSelected' : '',
           };
         }),
     });

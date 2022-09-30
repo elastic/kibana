@@ -47,20 +47,16 @@ import {
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import { css } from '@emotion/react';
 import type {
-  TimechartBucketInterval,
+  UnifiedHistogramContext,
   UnifiedHistogramServices,
   UnifiedHistogramStatus,
 } from '../types';
-import type { ChartData } from '../types';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
-  timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
-  interval?: string;
   status: UnifiedHistogramStatus;
-  chartData: ChartData;
-  bucketInterval: TimechartBucketInterval;
-  error?: Error;
+  histogram: UnifiedHistogramContext;
+  timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -75,12 +71,9 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 
 export function Histogram({
   services: { data, theme, uiSettings, fieldFormats },
-  timefilterUpdateHandler,
-  interval,
   status,
-  chartData,
-  bucketInterval,
-  error,
+  histogram: { timeInterval, bucketInterval, chart, error },
+  timefilterUpdateHandler,
 }: HistogramProps) {
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
@@ -113,7 +106,6 @@ export function Histogram({
   );
 
   const { timefilter } = data.query.timefilter;
-
   const { from, to } = timefilter.getAbsoluteTime();
   const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
 
@@ -139,7 +131,7 @@ export function Histogram({
       defaultMessage: '(interval: {value})',
       values: {
         value: `${
-          interval === 'auto'
+          timeInterval === 'auto'
             ? `${i18n.translate('unifiedHistogram.histogramTimeRangeIntervalAuto', {
                 defaultMessage: 'Auto',
               })} - `
@@ -148,11 +140,11 @@ export function Histogram({
       },
     });
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
-  }, [from, to, interval, bucketInterval?.description, toMoment]);
+  }, [from, to, timeInterval, bucketInterval?.description, toMoment]);
 
   const { euiTheme } = useEuiTheme();
 
-  if (!chartData && status === 'loading') {
+  if (!chart && status === 'loading') {
     const chartLoadingCss = css`
       display: flex;
       flex-direction: column;
@@ -215,12 +207,12 @@ export function Histogram({
     );
   }
 
-  if (!chartData) {
+  if (!chart) {
     return null;
   }
 
   const formatXValue = (val: string) => {
-    const xAxisFormat = chartData.xAxisFormat.params!.pattern;
+    const xAxisFormat = chart.xAxisFormat.params!.pattern;
     return moment(val).format(xAxisFormat);
   };
 
@@ -231,17 +223,17 @@ export function Histogram({
    * see https://github.com/elastic/kibana/issues/27410
    * TODO: Once the Discover query has been update, we should change the below to use the new field
    */
-  const { intervalESValue, intervalESUnit, interval: chartDataInterval } = chartData.ordered;
-  const xInterval = chartDataInterval.asMilliseconds();
+  const { intervalESValue, intervalESUnit, interval } = chart.ordered;
+  const xInterval = interval.asMilliseconds();
 
-  const xValues = chartData.xAxisOrderedValues;
+  const xValues = chart.xAxisOrderedValues;
   const lastXValue = xValues[xValues.length - 1];
 
-  const domain = chartData.ordered;
+  const domain = chart.ordered;
   const domainStart = domain.min.valueOf();
   const domainEnd = domain.max.valueOf();
 
-  const domainMin = Math.min(chartData.values[0]?.x, domainStart);
+  const domainMin = Math.min(chart.values[0]?.x, domainStart);
   const domainMax = Math.max(domainEnd - xInterval, lastXValue);
 
   const xDomain = {
@@ -259,7 +251,7 @@ export function Histogram({
     type: TooltipType.VerticalCursor,
   };
 
-  const xAxisFormatter = fieldFormats.deserialize(chartData.yAxisFormat);
+  const xAxisFormatter = fieldFormats.deserialize(chart.yAxisFormat);
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 
@@ -351,10 +343,10 @@ export function Histogram({
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
-            data={chartData.values}
+            data={chart.values}
             yNice
             timeZone={timeZone}
-            name={chartData.yAxisLabel}
+            name={chart.yAxisLabel}
           />
         </Chart>
       </div>
