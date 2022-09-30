@@ -45,6 +45,10 @@ interface ValidationErrors {
     message: string;
     type: { operation: string; params: string };
   };
+  wrongTypeArgument: {
+    message: string;
+    type: { operation: string; name: string; type: string; expectedType: string };
+  };
   wrongFirstArgument: {
     message: string;
     type: { operation: string; type: string; argument: string | number };
@@ -260,6 +264,18 @@ function getMessageFromId<K extends ErrorTypes>({
         values: { operation: out.operation, params: out.params },
       });
       break;
+    case 'wrongTypeArgument':
+      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongTypeArgument', {
+        defaultMessage:
+          'The {name} argument for the operation {operation} in the Formula is of the wrong type: {expectedType} instead of {type}',
+        values: {
+          operation: out.operation,
+          name: out.name,
+          type: out.type,
+          expectedType: out.expectedType,
+        },
+      });
+      break;
     case 'duplicateArgument':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationDuplicateParams', {
         defaultMessage:
@@ -404,6 +420,7 @@ export function runASTValidation(
 ) {
   return [
     ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations),
+    ...checkTopNodeReturnType(ast),
     ...runFullASTValidation(ast, layer, indexPattern, operations, currentColumn),
   ];
 }
@@ -619,6 +636,27 @@ function validateNameArguments(
     );
   }
   return errors;
+}
+
+const DEFAULT_RETURN_TYPE = 'number';
+function checkTopNodeReturnType(ast: TinymathAST): ErrorWrapper[] {
+  if (
+    isObject(ast) &&
+    ast.type === 'function' &&
+    ast.text &&
+    (tinymathFunctions[ast.name]?.outputType || DEFAULT_RETURN_TYPE) !== DEFAULT_RETURN_TYPE
+  ) {
+    return [
+      getMessageFromId({
+        messageId: 'wrongReturnedType',
+        values: {
+          text: ast.text,
+        },
+        locations: getNodeLocation(ast),
+      }),
+    ];
+  }
+  return [];
 }
 
 function runFullASTValidation(
@@ -978,7 +1016,34 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
       );
     }
 
-    // no need to iterate all the arguments, one field is anough to trigger the error
+    const wrongTypeArgumentIndex = positionalArguments.findIndex(({ type }, index) => {
+      const arg = node.args[index];
+      if (arg != null) {
+        if (!isObject(arg)) {
+          return typeof arg !== type;
+        }
+        if (arg.type === 'function' && tinymathFunctions[arg.name]) {
+          const { outputType = 'number' } = tinymathFunctions[arg.name];
+          return outputType !== type;
+        }
+      }
+    });
+    if (wrongTypeArgumentIndex > -1) {
+      errors.push(
+        getMessageFromId({
+          messageId: 'wrongTypeArgument',
+          values: {
+            operation: node.name,
+            name: positionalArguments[wrongTypeArgumentIndex].name,
+            type: typeof node.args[wrongTypeArgumentIndex],
+            expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
+          },
+          locations: node.location ? [node.location] : [],
+        })
+      );
+    }
+
+    // no need to iterate all the arguments, one field is enough to trigger the error
     const hasFieldAsArgument = positionalArguments.some((requirements, index) => {
       const arg = node.args[index];
       if (arg != null && typeof arg !== 'number') {

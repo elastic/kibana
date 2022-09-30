@@ -118,6 +118,7 @@ function getTypeI18n(type: string) {
 export const tinymathFunctions: Record<
   string,
   {
+    section: 'math' | 'comparison';
     positionalArguments: Array<{
       name: string;
       optional?: boolean;
@@ -133,6 +134,7 @@ export const tinymathFunctions: Record<
   }
 > = {
   add: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -159,6 +161,7 @@ Example: Offset count by a static value
     }),
   },
   subtract: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -180,6 +183,7 @@ Example: Calculate the range of a field
     }),
   },
   multiply: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -204,6 +208,7 @@ Example: Calculate price after constant tax rate
     }),
   },
   divide: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -227,6 +232,7 @@ Example: \`divide(sum(bytes), 2)\`
     }),
   },
   abs: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -242,6 +248,7 @@ Example: Calculate average distance to sea level \`abs(average(altitude))\`
     }),
   },
   cbrt: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -258,6 +265,7 @@ Example: Calculate side length from volume
     }),
   },
   ceil: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -274,6 +282,7 @@ Example: Round up price to the next dollar
     }),
   },
   clamp: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -306,6 +315,7 @@ clamp(
     }),
   },
   cube: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -322,6 +332,7 @@ Example: Calculate volume from side length
     }),
   },
   exp: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -339,6 +350,7 @@ Example: Calculate the natural exponential function
     }),
   },
   fix: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -355,6 +367,7 @@ Example: Rounding towards zero
     }),
   },
   floor: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -371,6 +384,7 @@ Example: Round down a price
     }),
   },
   log: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -396,6 +410,7 @@ log(sum(bytes), 2)
     }),
   },
   mod: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -416,6 +431,7 @@ Example: Calculate last three digits of a value
     }),
   },
   pow: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -436,6 +452,7 @@ Example: Calculate volume based on side length
     }),
   },
   round: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -461,6 +478,7 @@ round(sum(bytes), 2)
     }),
   },
   sqrt: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -477,6 +495,7 @@ Example: Calculate side length based on area
     }),
   },
   square: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -493,6 +512,7 @@ Example: Calculate area based on side length
     }),
   },
   pick_max: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -513,6 +533,7 @@ Example: Find the maximum between two fields averages
     }),
   },
   pick_min: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -533,6 +554,7 @@ Example: Find the minimum between two fields averages
     }),
   },
   lt: {
+    section: 'comparison',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -550,14 +572,15 @@ Performs a lower than comparison between two values.
 To be used as condition for \`ifelse\` comparison function.
 Also works with \`<\` symbol.
 
-Example: Compare two fields average and return the lowest
-\`ifelse(average(memory) < average(bytes), average(memory), average(bytes))\`
+Example: Returns true if the average of bytes is lower than the average amount of memory
+\`average(bytes) <= average(memory)\`
 
-Example: \`ifelse(lt(average(bytes), 1000), 1, 0)\`
+Example: \`lt(average(bytes), 1000)\`
     `,
     }),
   },
   gt: {
+    section: 'comparison',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -575,14 +598,15 @@ Performs a greater than comparison between two values.
 To be used as condition for \`ifelse\` comparison function.
 Also works with \`>\` symbol.
 
-Example: Compare two fields average and return the highest
-\`ifelse(average(memory) > average(bytes), average(memory), average(bytes))\`
+Example: Returns true if the average of bytes is greater than the average amount of memory
+\`average(bytes) > average(memory)\`
 
-Example: \`ifelse(gt(average(bytes), 1000), 1, 0)\`
+Example: \`gt(average(bytes), 1000)\`
     `,
     }),
   },
   eq: {
+    section: 'comparison',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -600,14 +624,15 @@ Performs an equality comparison between two values.
 To be used as condition for \`ifelse\` comparison function.
 Also works with \`==\` symbol.
 
-Example: Returns 1 if two sums of a field match exactly the same value
-\`ifelse(sum(revenues) == sum(costs), min(revenues), min(costs))\`
+Example: Returns true if the average of bytes is exactly the same amount of average memory
+\`average(bytes) == average(memory)\`
 
-Example: \`ifelse(eq(sum(revenues), sum(costs)), 0, 1)\`
+Example: \`eq(sum(bytes), 1000000)\`
     `,
     }),
   },
   lte: {
+    section: 'comparison',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -625,14 +650,15 @@ Performs a lower than or equal comparison between two values.
 To be used as condition for \`ifelse\` comparison function.
 Also works with \`<=\` symbol.
 
-Example: Compare two fields average and return the lowest
-\`ifelse(average(memory) <= average(bytes), average(memory), average(bytes))\`
+Example: Returns true if the average of bytes is lower than or equal to the average amount of memory
+\`average(bytes) <= average(memory)\`
 
-Example: \`ifelse(lte(average(bytes), 1000), 1, 0)\`
+Example: \`lte(average(bytes), 1000)\`
     `,
     }),
   },
   gte: {
+    section: 'comparison',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -648,16 +674,17 @@ Example: \`ifelse(lte(average(bytes), 1000), 1, 0)\`
       defaultMessage: `
 Performs a greater than comparison between two values.
 To be used as condition for \`ifelse\` comparison function.
-Also works with \`>\` symbol.
+Also works with \`>=\` symbol.
 
-Example: Compare two fields average and return the highest
-\`ifelse(average(memory) >= average(bytes), average(memory), average(bytes))\`
+Example: Returns true if the average of bytes is greater than or equal to the average amount of memory
+\`average(bytes) >= average(memory)\`
 
-Example: \`ifelse(gte(average(bytes), 1000), 1, 0)\`
+Example: \`gte(average(bytes), 1000)\`
     `,
     }),
   },
   ifelse: {
+    section: 'comparison',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.condition', { defaultMessage: 'condition' }),
@@ -677,7 +704,7 @@ Example: \`ifelse(gte(average(bytes), 1000), 1, 0)\`
 Returns a value depending on whether the element of condition is true or false.
 
 Example: Compare two fields average and return the highest
-\`ifelse(average(memory) >= average(bytes), average(memory), average(bytes))\`
+\`ifelse( average(memory) >= average(bytes), average(memory), average(bytes))\`
     `,
     }),
   },
