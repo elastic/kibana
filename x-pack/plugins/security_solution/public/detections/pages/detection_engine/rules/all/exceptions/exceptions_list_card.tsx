@@ -51,10 +51,11 @@ interface ExceptionsListCardProps {
     listId: string;
     namespaceType: NamespaceType;
   }) => () => Promise<void>;
+  readOnly: boolean;
 }
 
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
-  ({ exceptionsList, http, handleDelete, handleExport }) => {
+  ({ exceptionsList, http, handleDelete, handleExport, readOnly }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const onItemActionsClick = () => setIsPopoverOpen((isOpen) => !isOpen);
@@ -65,7 +66,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
         <EuiFlexItem>
           <EuiPanel>
             {
-              <>
+              <React.Fragment key={exceptionsList.list_id}>
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={true}>
                     <EuiFlexGroup direction="column">
@@ -108,6 +109,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                       button={
                         <EuiButtonIcon
                           isDisabled={false}
+                          data-test-subj="exceptionsListCardOverflowActions"
                           aria-label="Exception item actions menu"
                           iconType="boxesHorizontal"
                           onClick={onItemActionsClick}
@@ -122,6 +124,8 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                         items={[
                           <EuiContextMenuItem
                             key={'delete'}
+                            disabled={exceptionsList.list_id === 'endpoint_list' || readOnly}
+                            data-test-subj="exceptionsTableDeleteButton"
                             icon={'trash'}
                             onClick={() => {
                               onClosePopover();
@@ -153,7 +157,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                     </EuiPopover>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </>
+              </React.Fragment>
             }
           </EuiPanel>
         </EuiFlexItem>

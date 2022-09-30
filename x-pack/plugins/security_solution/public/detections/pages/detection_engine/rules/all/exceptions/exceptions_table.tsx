@@ -79,7 +79,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 };
 
 export const ExceptionListsTable = React.memo(() => {
-  const [{ loading: userInfoLoading }] = useUserData();
+  const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
   const { loading: listsConfigLoading } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
@@ -456,9 +456,10 @@ export const ExceptionListsTable = React.memo(() => {
         <EuiFlexItem>
           <EuiPageHeader
             pageTitle={i18n.ALL_EXCEPTIONS}
-            description={
-              <p>{timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}</p>
-            }
+            description={timelines.getLastUpdated({
+              showUpdating: loading,
+              updatedAt: lastUpdated,
+            })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -565,14 +566,22 @@ export const ExceptionListsTable = React.memo(() => {
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
             />
-            {exceptionListsWithRuleRefs.map((excList) => (
-              <ExceptionsListCard
-                http={http}
-                exceptionsList={excList}
-                handleDelete={handleDelete}
-                handleExport={handleExport}
-              />
-            ))}
+            {exceptionListsWithRuleRefs.length > 0 && (
+              <React.Fragment data-test-subj="exceptions-table">
+                {exceptionListsWithRuleRefs.map((excList) => (
+                  <ExceptionsListCard
+                    key={excList.list_id}
+                    data-test-subj="exceptions-list-card"
+                    // @ts-expect-error canUserREAD and canUserCRUD are typed as boolean | null
+                    readOnly={canUserREAD && !canUserCRUD}
+                    http={http}
+                    exceptionsList={excList}
+                    handleDelete={handleDelete}
+                    handleExport={handleExport}
+                  />
+                ))}
+              </React.Fragment>
+            )}
           </>
         )}
         <EuiPopover

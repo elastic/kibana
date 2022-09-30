@@ -90,26 +90,25 @@ describe('ExceptionListsTable', () => {
     ]);
   });
 
-  it('does not render delete option if list is "endpoint_list"', async () => {
+  it('renders delete option as disabled if list is "endpoint_list"', async () => {
     const wrapper = mount(
       <TestProviders>
         <ExceptionListsTable />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(0).text()).toEqual(
-      'endpoint_list'
-    );
 
-    expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(1).text()).toEqual(
-      'not_endpoint_list'
-    );
+    wrapper
+      .find('[data-test-subj="exceptionsListCardOverflowActions"] button')
+      .at(0)
+      .simulate('click');
+
     expect(wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button')).toHaveLength(1);
     expect(
       wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
-    ).toBeFalsy();
+    ).toBeTruthy();
   });
 
-  it('does not render delete option if user is read only', async () => {
+  it('renders delete option as disabled if user is read only', async () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -123,10 +122,12 @@ describe('ExceptionListsTable', () => {
         <ExceptionListsTable />
       </TestProviders>
     );
-
-    expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(1).text()).toEqual(
-      'not_endpoint_list'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button')).toHaveLength(0);
+    wrapper
+      .find('[data-test-subj="exceptionsListCardOverflowActions"] button')
+      .at(0)
+      .simulate('click');
+    expect(
+      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
+    ).toBeTruthy();
   });
 });

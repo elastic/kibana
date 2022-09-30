@@ -33,11 +33,11 @@ export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]
 
 export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
 
-export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';
+export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-list-card"]';
 
 export const EXCEPTIONS_TABLE_SEARCH = '[data-test-subj="exceptionsHeaderSearchInput"]';
 
-export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="showingExceptionLists"]';
+export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="exceptions-list-card"]';
 
 export const EXCEPTIONS_TABLE_DELETE_BTN = '[data-test-subj="exceptionsTableDeleteButton"]';
 
