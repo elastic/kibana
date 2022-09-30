@@ -63,7 +63,7 @@ const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 
 
 const expectedSlackMessage = 'Slack action test message';
 
-describe('Detection rules, bulk edit', () => {
+describe('Detection rules, bulk edit actions', () => {
   before(() => {
     cleanKibana();
     login();
@@ -86,80 +86,77 @@ describe('Detection rules, bulk edit', () => {
     waitForRulesTableToBeLoaded();
   });
 
-  context('Restricted privileges', () => {});
-  context('Editing custom and prebuilt rules', () => {
-    it('Add rule actions to rules', () => {
-      const expectedActionFrequency = 'Daily';
+  it('Add rule actions to rules', () => {
+    const expectedActionFrequency = 'Daily';
 
-      loadPrebuiltDetectionRulesFromHeaderBtn();
+    loadPrebuiltDetectionRulesFromHeaderBtn();
 
-      // select both custom and prebuilt rules
-      selectNumberOfRules(expectedNumberOfRulesToBeEdited);
-      openBulkEditRuleActionsForm();
+    // select both custom and prebuilt rules
+    selectNumberOfRules(expectedNumberOfRulesToBeEdited);
+    openBulkEditRuleActionsForm();
 
-      // ensure rule actions info callout displayed on the form
-      cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
+    // ensure rule actions info callout displayed on the form
+    cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
 
-      pickActionFrequency(expectedActionFrequency);
-      addSlackRuleAction(expectedSlackMessage);
+    pickActionFrequency(expectedActionFrequency);
+    addSlackRuleAction(expectedSlackMessage);
 
-      submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfRulesToBeEdited });
+    submitBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfRulesToBeEdited });
 
-      // check if rule has been updated
-      goToEditRuleActionsSettings();
+    // check if rule has been updated
+    goToEditRuleActionsSettings();
 
-      assertSelectedActionFrequency(expectedActionFrequency);
-      assertSlackRuleAction(expectedSlackMessage);
-    });
+    assertSelectedActionFrequency(expectedActionFrequency);
+    assertSlackRuleAction(expectedSlackMessage);
+  });
 
-    it('Overwrite rule actions in rules', () => {
-      const expectedActionFrequency = 'On each rule execution';
+  it('Overwrite rule actions in rules', () => {
+    const expectedActionFrequency = 'On each rule execution';
 
-      loadPrebuiltDetectionRulesFromHeaderBtn();
+    loadPrebuiltDetectionRulesFromHeaderBtn();
 
-      // select both custom and prebuilt rules
-      selectNumberOfRules(expectedNumberOfRulesToBeEdited);
-      openBulkEditRuleActionsForm();
+    // select both custom and prebuilt rules
+    selectNumberOfRules(expectedNumberOfRulesToBeEdited);
+    openBulkEditRuleActionsForm();
 
-      pickActionFrequency(expectedActionFrequency);
-      addSlackRuleAction(expectedSlackMessage);
+    pickActionFrequency(expectedActionFrequency);
+    addSlackRuleAction(expectedSlackMessage);
 
-      // check overwrite box, ensure warning is displayed
-      checkOverwriteRuleActionsCheckbox();
-      cy.get(RULES_BULK_EDIT_ACTIONS_WARNING).contains(
-        `You're about to overwrite rule actions for ${expectedNumberOfRulesToBeEdited} selected rules`
-      );
+    // check overwrite box, ensure warning is displayed
+    checkOverwriteRuleActionsCheckbox();
+    cy.get(RULES_BULK_EDIT_ACTIONS_WARNING).contains(
+      `You're about to overwrite rule actions for ${expectedNumberOfRulesToBeEdited} selected rules`
+    );
 
-      submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfRulesToBeEdited });
+    submitBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfRulesToBeEdited });
 
-      // check if rule has been updated
-      goToEditRuleActionsSettings();
+    // check if rule has been updated
+    goToEditRuleActionsSettings();
 
-      assertSelectedActionFrequency(expectedActionFrequency);
-      assertSlackRuleAction(expectedSlackMessage);
-    });
+    assertSelectedActionFrequency(expectedActionFrequency);
+    assertSlackRuleAction(expectedSlackMessage);
+  });
 
-    it('Add rule actions to rules when creating connector', () => {
-      const expectedActionFrequency = 'Hourly';
-      const expectedEmail = 'test@example.com';
-      const expectedSubject = 'Subject';
+  it('Add rule actions to rules when creating connector', () => {
+    const expectedActionFrequency = 'Hourly';
+    const expectedEmail = 'test@example.com';
+    const expectedSubject = 'Subject';
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      openBulkEditRuleActionsForm();
+    selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+    openBulkEditRuleActionsForm();
 
-      pickActionFrequency(expectedActionFrequency);
-      addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
+    pickActionFrequency(expectedActionFrequency);
+    addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
 
-      submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    submitBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
-      // check if rule has been updated
-      goToEditRuleActionsSettings();
+    // check if rule has been updated
+    goToEditRuleActionsSettings();
 
-      assertSelectedActionFrequency(expectedActionFrequency);
-      assertEmailRuleAction(expectedEmail, expectedSubject);
-    });
+    assertSelectedActionFrequency(expectedActionFrequency);
+    assertEmailRuleAction(expectedEmail, expectedSubject);
   });
 });
