@@ -8,6 +8,7 @@
 import uuid from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import { appContextService } from '../app_context';
 import type {
   Agent,
   AgentAction,
@@ -99,6 +100,27 @@ export async function bulkCreateAgentActions(
   });
 
   return actions;
+}
+
+export async function createErrorActionResults(
+  esClient: ElasticsearchClient,
+  actionId: string,
+  errors: Record<Agent['id'], Error>
+) {
+  const errorCount = Object.keys(errors).length;
+  if (errorCount > 0) {
+    appContextService.getLogger().info(`Writing error action results of ${errorCount} agents`);
+
+    // writing out error result for those agents that have errors, so the action is not going to stay in progress forever
+    await bulkCreateAgentActionResults(
+      esClient,
+      Object.keys(errors).map((agentId) => ({
+        agentId,
+        actionId,
+        error: errors[agentId].message,
+      }))
+    );
+  }
 }
 
 export async function bulkCreateAgentActionResults(

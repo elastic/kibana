@@ -25,6 +25,7 @@ import { bulkUpdateAgents } from './crud';
 import {
   bulkCreateAgentActionResults,
   createAgentAction,
+  createErrorActionResults,
   getUnenrollAgentActions,
 } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
@@ -95,7 +96,6 @@ export async function unenrollBatch(
   );
 
   const actionId = options.actionId ?? uuid();
-  const errorCount = Object.keys(outgoingErrors).length;
   const total = options.total ?? givenAgents.length;
 
   const agentIds = agentsToUpdate.map((agent) => agent.id);
@@ -116,23 +116,7 @@ export async function unenrollBatch(
     });
   }
 
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping ${errorCount} agents, as failed validation (cannot unenroll from a hosted policy or already unenrolled)`
-      );
-
-    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(outgoingErrors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: outgoingErrors[agentId].message,
-      }))
-    );
-  }
+  await createErrorActionResults(esClient, actionId, outgoingErrors);
 
   return {
     actionId,

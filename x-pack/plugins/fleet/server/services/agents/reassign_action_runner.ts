@@ -16,7 +16,7 @@ import { appContextService } from '../app_context';
 import { ActionRunner } from './action_runner';
 
 import { bulkUpdateAgents } from './crud';
-import { bulkCreateAgentActionResults, createAgentAction } from './actions';
+import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
@@ -85,8 +85,7 @@ export async function reassignBatch(
   );
 
   const actionId = options.actionId ?? uuid();
-  const errorCount = Object.keys(errors).length;
-  const total = options.total ?? agentsToUpdate.length + errorCount;
+  const total = options.total ?? givenAgents.length;
 
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
@@ -100,23 +99,7 @@ export async function reassignBatch(
     },
   });
 
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping ${errorCount} agents, as failed validation (already assigned or assigned to hosted policy)`
-      );
-
-    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(errors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: errors[agentId].message,
-      }))
-    );
-  }
+  await createErrorActionResults(esClient, actionId, errors);
 
   return { actionId };
 }
