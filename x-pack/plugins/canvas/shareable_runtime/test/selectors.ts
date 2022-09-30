@@ -38,7 +38,6 @@ export const getSettingsPanel = (wrapper: ReactWrapper) =>
   wrapper.find('Settings > SettingsComponent');
 
 export const getSettingsTrigger = (wrapper: ReactWrapper) => {
-  console.log(wrapper.debug());
   getSettingsPanel(wrapper).find('EuiButtonIcon');
 };
 
