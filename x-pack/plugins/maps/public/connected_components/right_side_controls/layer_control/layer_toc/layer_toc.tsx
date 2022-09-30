@@ -37,7 +37,10 @@ export class LayerTOC extends Component<Props> {
     };
 
     if (combine) {
-      this.props.createLayerGroup(this.props.layerList[reverseIndex(source.index)].getId(), combine.draggableId);
+      this.props.createLayerGroup(
+        this.props.layerList[reverseIndex(source.index)].getId(),
+        combine.draggableId
+      );
       return;
     }
 
@@ -60,7 +63,11 @@ export class LayerTOC extends Component<Props> {
   _renderLayers() {
     // Reverse layer list so first layer drawn on map is at the bottom and
     // last layer drawn on map is at the top.
-    const reverseLayerList = [...this.props.layerList].reverse();
+    const reverseLayerList = this.props.layerList
+      .filter((layer) => {
+        return layer.getParent() === undefined;
+      })
+      .reverse();
 
     if (this.props.isReadOnly) {
       return reverseLayerList.map((layer) => {

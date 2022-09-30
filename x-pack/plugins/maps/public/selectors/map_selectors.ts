@@ -329,9 +329,32 @@ export const getLayerList = createSelector(
   getChartsPaletteServiceGetColor,
   getCustomIcons,
   (layerDescriptorList, chartsPaletteServiceGetColor, customIcons) => {
-    return layerDescriptorList.map((layerDescriptor) =>
+    const layers = layerDescriptorList.map((layerDescriptor) =>
       createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor)
     );
+
+    const childrenMap = new Map<string, ILayer[]>();
+    layers.forEach((layer) => {
+      const parent = layer.getParent();
+      if (!parent) {
+        return;
+      }
+
+      const children = childrenMap.has(parent) ? childrenMap.get(parent)! : [];
+      childrenMap.set(parent, [...children, layer]);
+    });
+
+    childrenMap.forEach((children, parent) => {
+      const parentLayer = layers.find((layer) => {
+        return layer.getId() === parent;
+      });
+      if (!parentLayer || !(parentLayer instanceof LayerGroup)) {
+        return;
+      }
+      (parentLayer as LayerGroup).setChildren(children);
+    });
+
+    return layers;
   }
 );
 

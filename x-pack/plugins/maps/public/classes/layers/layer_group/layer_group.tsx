@@ -31,6 +31,7 @@ import { LICENSED_FEATURES } from '../../../licensed_features';
 
 export class LayerGroup implements ILayer {
   protected readonly _descriptor: LayerGroupDescriptor;
+  private _children: ILayer[] = [];
 
   static createDescriptor(options: Partial<LayerDescriptor>): LayerGroupDescriptor {
     return {
@@ -50,6 +51,10 @@ export class LayerGroup implements ILayer {
 
   constructor({ layerDescriptor }: { layerDescriptor: LayerGroupDescriptor }) {
     this._descriptor = LayerGroup.createDescriptor(layerDescriptor);
+  }
+
+  setChildren(children: ILayer[]) {
+    this._children = children;
   }
 
   getDescriptor(): LayerGroupDescriptor {
@@ -86,13 +91,15 @@ export class LayerGroup implements ILayer {
   }
 
   async isFittable(): Promise<boolean> {
-    // TODO return childLayers.isFittable
-    return false;
+    return this._children.some((child) => {
+      return child.isFittable();
+    });
   }
 
   isIncludeInFitToBounds(): boolean {
-    // TODO return childLayers.isIncludeInFitToBounds
-    return true;
+    return this._children.some((child) => {
+      return child.isIncludeInFitToBounds();
+    });
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {
@@ -142,7 +149,7 @@ export class LayerGroup implements ILayer {
   }
 
   async hasLegendDetails(): Promise<boolean> {
-    return true;
+    return false;
   }
 
   renderLegendDetails(): ReactElement<any> | null {
@@ -228,8 +235,9 @@ export class LayerGroup implements ILayer {
   }
 
   isLayerLoading(): boolean {
-    // TODO return childLayers.some.isLayerLoading()
-    return false;
+    return this._children.some((child) => {
+      return child.isLayerLoading();
+    });
   }
 
   isLoadingBounds() {
@@ -237,8 +245,9 @@ export class LayerGroup implements ILayer {
   }
 
   hasErrors(): boolean {
-    // TODO return childLayers.some.hasErrors()
-    return false;
+    return this._children.some((child) => {
+      return child.hasErrors();
+    });
   }
 
   getErrors(): string {
@@ -335,5 +344,9 @@ export class LayerGroup implements ILayer {
 
   isBasemap(order: number): boolean {
     return false;
+  }
+
+  getParent(): string | undefined {
+    return this._descriptor.parent;
   }
 }

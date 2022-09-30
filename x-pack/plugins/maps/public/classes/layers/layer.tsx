@@ -117,6 +117,7 @@ export interface ILayer {
   getGeoFieldNames(): string[];
   getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
   isBasemap(order: number): boolean;
+  getParent(): string | undefined;
 }
 
 export type LayerIcon = {
@@ -486,6 +487,10 @@ export class AbstractLayer implements ILayer {
 
   isBasemap(order: number): boolean {
     return false;
+  }
+
+  getParent(): string | undefined {
+    return this._descriptor.parent;
   }
 
   _getMetaFromTiles(): TileMetaFeature[] {
