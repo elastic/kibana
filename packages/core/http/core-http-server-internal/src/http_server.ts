@@ -52,7 +52,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-const Brok = require('brok');
+import Brok from 'brok';
 
 /** @internal */
 export interface HttpServerSetup {
