@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const log = getService('log');
 
   describe('Export import saved objects between versions - 6.8.x -> 7.x', function () {
     before(async function () {
