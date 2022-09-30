@@ -37,7 +37,8 @@ export type AgentActionType =
   | 'POLICY_REASSIGN'
   | 'CANCEL'
   | 'FORCE_UNENROLL'
-  | 'UPDATE_TAGS';
+  | 'UPDATE_TAGS'
+  | 'REQUEST_DIAGNOSTICS';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];

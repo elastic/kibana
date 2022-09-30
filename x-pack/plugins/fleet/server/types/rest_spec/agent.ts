@@ -113,6 +113,12 @@ export const PutAgentReassignRequestSchema = {
   }),
 };
 
+export const PostRequestDiagnosticsActionRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+};
+
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),

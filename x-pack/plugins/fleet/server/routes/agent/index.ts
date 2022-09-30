@@ -23,6 +23,7 @@ import {
   PostBulkAgentUpgradeRequestSchema,
   PostCancelActionRequestSchema,
   GetActionStatusRequestSchema,
+  PostRequestDiagnosticsActionRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -54,6 +55,7 @@ import {
   postAgentUpgradeHandler,
   postBulkAgentsUpgradeHandler,
 } from './upgrade_handler';
+import { requestDiagnosticsHandler } from './request_diagnostics_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Get one
@@ -176,6 +178,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     putAgentsReassignHandler
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN,
+      validate: PostRequestDiagnosticsActionRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    requestDiagnosticsHandler
   );
 
   // Get agent status for policy
