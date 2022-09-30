@@ -359,7 +359,7 @@ export function MachineLearningTestResourcesProvider(
     },
 
     async deleteIndexPatternById(id: string, space?: string) {
-      await this.deleteSavedObjectById(id, SavedObjectType.INDEX_PATTERN);
+      await this.deleteSavedObjectById(id, SavedObjectType.INDEX_PATTERN, false, space);
     },
 
     async deleteSavedSearchByTitle(title: string) {
