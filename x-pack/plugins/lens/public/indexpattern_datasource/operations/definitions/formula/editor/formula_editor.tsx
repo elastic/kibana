@@ -48,7 +48,7 @@ import { MemoizedFormulaHelp } from './formula_help';
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
-import { filterByVisibleOperation } from '../util';
+import { filterByVisibleOperation, nonNullable } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
 function tableHasData(
@@ -363,7 +363,7 @@ export function FormulaEditor({
             }
             return newWarnings;
           })
-          .filter((marker) => marker);
+          .filter(nonNullable);
         setWarnings(markers.map(({ severity, message }) => ({ severity, message })));
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', markers);
       }

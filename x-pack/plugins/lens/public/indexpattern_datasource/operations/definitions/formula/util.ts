@@ -710,6 +710,10 @@ Example: Compare two fields average and return the highest
   },
 };
 
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
+
 export function isMathNode(node: TinymathAST | string) {
   return isObject(node) && node.type === 'function' && tinymathFunctions[node.name];
 }
@@ -719,7 +723,7 @@ export function findMathNodes(root: TinymathAST | string): TinymathFunction[] {
     if (!isObject(node) || node.type !== 'function' || !isMathNode(node)) {
       return [];
     }
-    return [node, ...node.args.flatMap(flattenMathNodes)].filter(Boolean);
+    return [node, ...node.args.flatMap(flattenMathNodes)].filter(nonNullable);
   }
 
   return flattenMathNodes(root);
