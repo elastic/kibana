@@ -23,13 +23,11 @@ export const useAdHocDataViews = ({
   savedSearch,
   dataViews,
   stateContainer,
-  onChangeDataView,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
   dataViews: DataViewsContract;
   stateContainer: DiscoverStateContainer;
-  onChangeDataView: (dataViewId: string) => Promise<void>;
 }) => {
   const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
     !dataView.isPersisted() ? [dataView] : []
@@ -83,7 +81,7 @@ export const useAdHocDataViews = ({
       const createdDataView = await openConfirmSavePrompt(currentDataView);
       if (createdDataView) {
         savedSearch.searchSource.setField('index', createdDataView);
-        await onChangeDataView(createdDataView.id!);
+        await stateContainer.actions.changeDataView(createdDataView.id!);
 
         // update saved search with saved data view
         if (savedSearch.id) {
@@ -96,7 +94,7 @@ export const useAdHocDataViews = ({
       return undefined;
     }
     return currentDataView;
-  }, [stateContainer, onChangeDataView, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
+  }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
 
   return { adHocDataViewList, persistDataView, updateAdHocDataViewId };
 };

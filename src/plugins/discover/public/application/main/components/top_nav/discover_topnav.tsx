@@ -22,7 +22,6 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'naviga
   query?: Query | AggregateQuery;
   savedQuery?: string;
   stateContainer: DiscoverStateContainer;
-  onChangeDataView: (dataView: string) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => void;
@@ -38,7 +37,6 @@ export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
   navigateTo,
-  onChangeDataView,
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
@@ -107,14 +105,14 @@ export const DiscoverTopNav = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataViewToSave) => {
                 if (dataViewToSave.id) {
-                  onChangeDataView(dataViewToSave.id);
+                  stateContainer.actions.changeDataView(dataViewToSave.id);
                 }
               },
               allowAdHocDataView: true,
             });
           }
         : undefined,
-    [canEditDataView, dataViewEditor, onChangeDataView]
+    [canEditDataView, dataViewEditor, stateContainer]
   );
 
   const topNavMenu = useMemo(
@@ -159,7 +157,7 @@ export const DiscoverTopNav = ({
     currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onChangeDataView,
+    onChangeDataView: stateContainer.actions.changeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews: adHocDataViewList,
   };

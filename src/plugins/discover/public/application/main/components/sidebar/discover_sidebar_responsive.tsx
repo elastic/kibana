@@ -26,7 +26,7 @@ import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { AppState } from '../../services/discover_state';
+import { AppState, DiscoverStateContainer } from '../../services/discover_state';
 import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -63,10 +63,6 @@ export interface DiscoverSidebarResponsiveProps {
    * Callback function when adding a filter from sidebar
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
-  /**
-   * Callback function when changing an data view
-   */
-  onChangeDataView: (id: string) => void;
   /**
    * Callback function when removing a field
    * @param fieldName
@@ -106,6 +102,7 @@ export interface DiscoverSidebarResponsiveProps {
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
+  stateContainer: DiscoverStateContainer;
 }
 
 /**

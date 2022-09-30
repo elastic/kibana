@@ -18,7 +18,6 @@ export interface DiscoverLayoutProps {
   dataViewList: DataViewListItem[];
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
-  onChangeDataView: (id: string) => void;
   expandedDoc?: DataTableRecord;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   savedSearchData$: SavedSearchData;

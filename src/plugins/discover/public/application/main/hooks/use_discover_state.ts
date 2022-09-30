@@ -5,22 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useCallback, useState } from 'react';
-import { isEqual } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
 import { History } from 'history';
 import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { addLog } from '../../../utils/addLog';
-import { updateSavedSearch } from '../utils/persist_saved_search';
+import { buildStateSubscribe } from './utiles/build_state_subscribe';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { getDiscoverStateContainer } from '../services/discover_state';
-import { useUrlTracking } from './use_url_tracking';
 import { DiscoverServices } from '../../../build_services';
-import { loadDataView } from '../utils/resolve_data_view';
-import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { useSearchSession } from './use_search_session';
-import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { FetchStatus } from '../../types';
 import { useAdHocDataViews } from './use_adhoc_data_views';
@@ -38,12 +31,10 @@ export function useDiscoverState({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   dataViewList: DataViewListItem[];
 }) {
-  const { uiSettings, dataViews } = services;
+  const { dataViews } = services;
 
   const [savedSearch, setSavedSearch] = useState(rootSavedSearch);
   const dataView = useMemo(() => savedSearch.searchSource.getField('index')!, [savedSearch]);
-
-  const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
   const stateContainer = useMemo(
     () =>
@@ -60,33 +51,9 @@ export function useDiscoverState({
    */
   useSearchSession({ services, stateContainer, savedSearch });
 
-  /**
-   * Function triggered when user changes data view in the sidebar
-   */
-  const onChangeDataView = useCallback(
-    async (id: string) => {
-      addLog('Change data view start', id);
-      const prevAppState = stateContainer.appStateContainer.getState();
-      const prevDataView = await dataViews.get(prevAppState.index!);
-      const nextDataView = await dataViews.get(id);
-      if (nextDataView && prevDataView) {
-        const nextAppState = getDataViewAppState(
-          prevDataView,
-          nextDataView,
-          prevAppState.columns || [],
-          (prevAppState.sort || []) as SortOrder[],
-          uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
-          uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
-          prevAppState.query
-        );
-        addLog('Change data view next app state', nextAppState);
-        stateContainer.setAppState(nextAppState);
-        setUrlTracking(nextDataView);
-      }
-      setExpandedDoc(undefined);
-    },
-    [stateContainer, dataViews, setExpandedDoc, uiSettings, setUrlTracking]
-  );
+  useEffect(() => {
+    setExpandedDoc(undefined);
+  }, [dataView, setExpandedDoc]);
 
   /**
    * Adhoc data views functionality
@@ -96,7 +63,6 @@ export function useDiscoverState({
     dataViews,
     stateContainer,
     savedSearch,
-    onChangeDataView,
   });
 
   /**
@@ -139,47 +105,9 @@ export function useDiscoverState({
    * Track state changes that should trigger a fetch
    */
   useEffect(() => {
-    const unsubscribe = stateContainer.appStateContainer.subscribe(async (nextState) => {
-      addLog('📦 AppStateContainer.subscribe update', nextState);
-      const { hideChart, interval, sort, index } = stateContainer.getPreviousAppState();
-      // chart was hidden, now it should be displayed, so data is needed
-      const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
-      const chartIntervalChanged = nextState.interval !== interval;
-      const docTableSortChanged = !isEqual(nextState.sort, sort);
-      const dataViewChanged = !isEqual(nextState.index, index);
-      // NOTE: this is also called when navigating from discover app to context app
-      let nextDataView = dataView;
-      if (nextState.index && dataViewChanged) {
-        /**
-         *  Without resetting the fetch state, e.g. a time column would be displayed when switching
-         *  from a data view without to a data view with time filter for a brief moment
-         *  That's because appState is updated before savedSearchData$
-         *  The following line of code catches this, but should be improved
-         */
-        nextDataView = (
-          await loadDataView(services.dataViews, services.uiSettings, nextState.index)
-        ).loaded;
-        stateContainer.dataStateContainer.reset();
-        savedSearch.searchSource.setField('index', nextDataView);
-      }
-
-      updateSavedSearch({ savedSearch, dataView: nextDataView, state: nextState, services });
-      stateContainer.savedSearchContainer.set({ ...savedSearch });
-      setSavedSearch({ ...savedSearch });
-      addLog('AppStateContainer.subscribe update', nextState);
-
-      if (
-        dataViewChanged &&
-        stateContainer.dataStateContainer.initialFetchStatus === FetchStatus.UNINITIALIZED
-      ) {
-        return;
-      }
-
-      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged || dataViewChanged) {
-        addLog('📦 AppStateContainer update triggers data fetching');
-        refetch$.next(undefined);
-      }
-    });
+    const unsubscribe = stateContainer.appStateContainer.subscribe(
+      buildStateSubscribe({ stateContainer, savedSearch, dataView, services, setSavedSearch })
+    );
     return () => unsubscribe();
   }, [dataView, refetch$, savedSearch, services, stateContainer]);
 
@@ -211,7 +139,6 @@ export function useDiscoverState({
     data$,
     dataView,
     inspectorAdapters,
-    onChangeDataView,
     stateContainer,
     adHocDataViewList,
     persistDataView,

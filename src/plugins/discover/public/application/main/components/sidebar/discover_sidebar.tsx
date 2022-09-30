@@ -27,6 +27,7 @@ import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -93,6 +94,7 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   viewMode: VIEW_MODE;
 
   showDataViewPicker?: boolean;
+  stateContainer: DiscoverStateContainer;
 }
 
 export function DiscoverSidebarComponent({
@@ -109,7 +111,6 @@ export function DiscoverSidebarComponent({
   trackUiMetric,
   useNewFieldsApi = false,
   onFieldEdited,
-  onChangeDataView,
   setFieldEditorRef,
   closeFlyout,
   editField,
@@ -117,6 +118,7 @@ export function DiscoverSidebarComponent({
   createNewDataView,
   showDataViewPicker,
   state,
+  stateContainer,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -332,7 +334,7 @@ export function DiscoverSidebarComponent({
         {Boolean(showDataViewPicker) && (
           <DataViewPicker
             currentDataViewId={selectedDataView.id}
-            onChangeDataView={onChangeDataView}
+            onChangeDataView={stateContainer.actions.changeDataView}
             onAddField={editField}
             onDataViewCreated={createNewDataView}
             trigger={{

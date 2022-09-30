@@ -60,7 +60,6 @@ export function DiscoverLayout({
   inspectorAdapters,
   expandedDoc,
   navigateTo,
-  onChangeDataView,
   setExpandedDoc,
   savedSearchData$,
   stateContainer,
@@ -169,10 +168,10 @@ export function DiscoverLayout({
   const onDataViewCreated = useCallback(
     (nextDataView: DataView) => {
       if (nextDataView.id) {
-        onChangeDataView(nextDataView.id);
+        stateContainer.actions.changeDataView(nextDataView.id);
       }
     },
-    [onChangeDataView]
+    [stateContainer]
   );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
@@ -215,7 +214,6 @@ export function DiscoverLayout({
         navigateTo={navigateTo}
         savedQuery={state.savedQuery}
         stateContainer={stateContainer}
-        onChangeDataView={onChangeDataView}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
@@ -238,7 +236,6 @@ export function DiscoverLayout({
               onAddField={onAddColumn}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
-              onChangeDataView={onChangeDataView}
               selectedDataView={dataView}
               state={state}
               isClosed={isSidebarClosed}
@@ -248,6 +245,7 @@ export function DiscoverLayout({
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
+              stateContainer={stateContainer}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

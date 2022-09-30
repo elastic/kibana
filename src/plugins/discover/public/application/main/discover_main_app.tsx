@@ -52,7 +52,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     data$,
     dataView,
     inspectorAdapters,
-    onChangeDataView,
     stateContainer,
     persistDataView,
     updateAdHocDataViewId,
@@ -98,7 +97,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         dataViewList={dataViewList}
         inspectorAdapters={inspectorAdapters}
         expandedDoc={expandedDoc}
-        onChangeDataView={onChangeDataView}
         setExpandedDoc={setExpandedDoc}
         navigateTo={navigateTo}
         savedSearchData$={data$}
