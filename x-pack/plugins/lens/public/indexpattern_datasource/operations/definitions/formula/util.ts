@@ -109,10 +109,12 @@ function getTypeI18n(type: string) {
   if (type === 'string') {
     return i18n.translate('xpack.lens.formula.string', { defaultMessage: 'string' });
   }
+  if (type === 'boolean') {
+    return i18n.translate('xpack.lens.formula.boolean', { defaultMessage: 'boolean' });
+  }
   return '';
 }
 
-// Todo: i18n everything here
 export const tinymathFunctions: Record<
   string,
   {
@@ -125,6 +127,9 @@ export const tinymathFunctions: Record<
     }>;
     // Help is in Markdown format
     help: string;
+    // When omitted defaults to "number".
+    // Used for comparison functions return type
+    outputType?: string;
   }
 > = {
   add: {
@@ -524,6 +529,155 @@ Finds the minimum value between two numbers.
 
 Example: Find the minimum between two fields averages
 \`pick_min(average(bytes), average(memory))\`
+    `,
+    }),
+  },
+  lt: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.ltFunction.markdown', {
+      defaultMessage: `
+Performs a lower than comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`<\` symbol.
+
+Example: Compare two fields average and return the lowest
+\`ifelse(average(memory) < average(bytes), average(memory), average(bytes))\`
+
+Example: \`ifelse(lt(average(bytes), 1000), 1, 0)\`
+    `,
+    }),
+  },
+  gt: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.gtFunction.markdown', {
+      defaultMessage: `
+Performs a greater than comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`>\` symbol.
+
+Example: Compare two fields average and return the highest
+\`ifelse(average(memory) > average(bytes), average(memory), average(bytes))\`
+
+Example: \`ifelse(gt(average(bytes), 1000), 1, 0)\`
+    `,
+    }),
+  },
+  eq: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.eqFunction.markdown', {
+      defaultMessage: `
+Performs an equality comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`==\` symbol.
+
+Example: Returns 1 if two sums of a field match exactly the same value
+\`ifelse(sum(revenues) == sum(costs), min(revenues), min(costs))\`
+
+Example: \`ifelse(eq(sum(revenues), sum(costs)), 0, 1)\`
+    `,
+    }),
+  },
+  lte: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.lteFunction.markdown', {
+      defaultMessage: `
+Performs a lower than or equal comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`<=\` symbol.
+
+Example: Compare two fields average and return the lowest
+\`ifelse(average(memory) <= average(bytes), average(memory), average(bytes))\`
+
+Example: \`ifelse(lte(average(bytes), 1000), 1, 0)\`
+    `,
+    }),
+  },
+  gte: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.gteFunction.markdown', {
+      defaultMessage: `
+Performs a greater than comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`>\` symbol.
+
+Example: Compare two fields average and return the highest
+\`ifelse(average(memory) >= average(bytes), average(memory), average(bytes))\`
+
+Example: \`ifelse(gte(average(bytes), 1000), 1, 0)\`
+    `,
+    }),
+  },
+  ifelse: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.condition', { defaultMessage: 'condition' }),
+        type: getTypeI18n('boolean'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    help: i18n.translate('xpack.lens.formula.ifElseFunction.markdown', {
+      defaultMessage: `
+Returns a value depending on whether the element of condition is true or false.
+
+Example: Compare two fields average and return the highest
+\`ifelse(average(memory) >= average(bytes), average(memory), average(bytes))\`
     `,
     }),
   },
