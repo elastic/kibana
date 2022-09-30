@@ -859,6 +859,29 @@ export const LensTopNavMenu = ({
         setIsOnTextBasedMode(false);
       }
     },
+    onEditDataView: async () => {
+      if (!currentIndexPattern) return;
+      if (currentIndexPattern.isPersisted()) {
+        // if the data view was persisted, reload it from cache
+        const updatedCache = {
+          ...dataViews.indexPatterns,
+        };
+        delete updatedCache[currentIndexPattern.id!];
+        const newIndexPatterns = await indexPatternService.ensureIndexPattern({
+          id: currentIndexPattern.id!,
+          cache: updatedCache,
+        });
+        dispatch(
+          changeIndexPattern({
+            dataViews: { indexPatterns: newIndexPatterns },
+            indexPatternId: currentIndexPattern.id!,
+          })
+        );
+      } else {
+        // if it was an ad-hoc data view, we need to switch to a new data view anyway
+        indexPatternService.replaceDataViewId(currentIndexPattern);
+      }
+    },
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
