@@ -119,7 +119,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
             <RiskScoreHeaderTitle
               title={i18n.HOST_RISK_SCORE}
               riskScoreEntity={RiskScoreEntity.host}
-              showTooltip={false}
             />
           ),
           description: (
@@ -135,7 +134,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
             <RiskScoreHeaderTitle
               title={i18n.HOST_RISK_CLASSIFICATION}
               riskScoreEntity={RiskScoreEntity.host}
-              showTooltip={false}
             />
           ),
           description: (
