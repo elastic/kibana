@@ -1441,6 +1441,23 @@ invalid: "
       ).toEqual(undefined);
     });
 
+    it('returns no error if the formula contains comparison operator within the ifelse operation', () => {
+      const formulas = [
+        ...['lt', 'gt', 'lte', 'gte', 'eq'].map((op) => `${op}(5, 1)`),
+        ...['<', '>', '==', '>=', '<='].map((symbol) => `5 ${symbol} 1`),
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(`ifelse(${formula}, 1, 5)`),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
+    });
+
     it('returns no error if a math operation is passed to fullReference operations', () => {
       const formulas = [
         'derivative(7+1)',
@@ -1484,6 +1501,8 @@ invalid: "
         { formula: 'last_value(dest)' },
         { formula: 'terms(dest)' },
         { formula: 'moving_average(last_value(dest), window=7)', errorFormula: 'last_value(dest)' },
+        ...['lt', 'gt', 'lte', 'gte', 'eq'].map((op) => ({ formula: `${op}(5, 1)` })),
+        ...['<', '>', '==', '>=', '<='].map((symbol) => ({ formula: `5 ${symbol} 1` })),
       ];
       for (const { formula, errorFormula } of formulas) {
         expect(
@@ -1574,19 +1593,6 @@ invalid: "
     // comparison tests
     for (const fn of mathFns.filter((name) => tinymathFunctions[name].section === 'comparison')) {
       if (tinymathFunctions[fn].outputType === 'boolean') {
-        it(`[${fn}] returns an error about unsupported return type`, () => {
-          expect(
-            formulaOperation.getErrorMessage!(
-              getNewLayerWithFormula(`${fn}(1, 2)`),
-              'col1',
-              indexPattern,
-              operationDefinitionMap
-            )
-          ).toEqual([
-            `The return value type of the operation ${fn}(1, 2) is not supported in Formula`,
-          ]);
-        });
-
         it(`[${fn}] returns an error about unsupported return type and when partial arguments are passed`, () => {
           const formulas = [`${fn}()`, `${fn}(1)`];
           formulas.forEach((formula, nArg) => {
