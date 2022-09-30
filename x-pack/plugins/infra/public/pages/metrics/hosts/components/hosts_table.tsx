@@ -294,35 +294,36 @@ export const HostsTable: React.FunctionComponent<Props> = ({
   const LensComponent = lens?.EmbeddableComponent;
   const [noData, setNoData] = useState(false);
 
-  if (noData) {
-    return (
-      <NoData
-        titleText={i18n.translate('xpack.infra.metrics.emptyViewTitle', {
-          defaultMessage: 'There is no data to display.',
-        })}
-        bodyText={i18n.translate('xpack.infra.metrics.emptyViewDescription', {
-          defaultMessage: 'Try adjusting your time or filter.',
-        })}
-        refetchText={i18n.translate('xpack.infra.metrics.refetchButtonLabel', {
-          defaultMessage: 'Check for new data',
-        })}
-        onRefetch={onRefetch}
-        testString="metricsEmptyViewState"
-      />
-    );
-  }
-
   return (
-    <LensComponent
-      id="hostsView"
-      timeRange={timeRange}
-      attributes={getLensHostsTable(dataView, query)}
-      searchSessionId={searchSessionId}
-      onLoad={(isLoading, adapters) => {
-        if (!isLoading && adapters?.tables) {
-          setNoData(adapters?.tables.tables.default?.rows.length === 0);
-        }
-      }}
-    />
+    <>
+      {noData && (
+        <NoData
+          titleText={i18n.translate('xpack.infra.metrics.emptyViewTitle', {
+            defaultMessage: 'There is no data to display.',
+          })}
+          bodyText={i18n.translate('xpack.infra.metrics.emptyViewDescription', {
+            defaultMessage: 'Try adjusting your time or filter.',
+          })}
+          refetchText={i18n.translate('xpack.infra.metrics.refetchButtonLabel', {
+            defaultMessage: 'Check for new data',
+          })}
+          onRefetch={onRefetch}
+          testString="metricsEmptyViewState"
+        />
+      )}
+      <div style={{ display: noData ? 'none' : 'block' }}>
+        <LensComponent
+          id="hostsView"
+          timeRange={timeRange}
+          attributes={getLensHostsTable(dataView, query)}
+          searchSessionId={searchSessionId}
+          onLoad={(isLoading, adapters) => {
+            if (!isLoading && adapters?.tables) {
+              setNoData(adapters?.tables.tables.default?.rows.length === 0);
+            }
+          }}
+        />
+      </div>
+    </>
   );
 };
