@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Agent } from 'http';
+import { NetworkAgent } from '@kbn/core-elasticsearch-client-server-internal';
 import { Agent as HttpsAgent } from 'https';
 import { mean } from 'lodash';
 import type {
@@ -14,7 +14,7 @@ import type {
   ElasticsearchClientsMetrics,
 } from '@kbn/core-metrics-server';
 
-export const getAgentsSocketsStats = (agents: Set<Agent>): ElasticsearchClientsMetrics => {
+export const getAgentsSocketsStats = (agents: Set<NetworkAgent>): ElasticsearchClientsMetrics => {
   const nodes = new Set<string>();
   let totalActiveSockets = 0;
   let totalIdleSockets = 0;
@@ -26,26 +26,33 @@ export const getAgentsSocketsStats = (agents: Set<Agent>): ElasticsearchClientsM
   const nodesWithIdleSockets: Record<string, number> = {};
 
   agents.forEach((agent) => {
-    if (agent instanceof HttpsAgent) https = true;
-    else http = true;
+    const agentRequests = Object.entries(agent.requests) ?? [];
+    const agentSockets = Object.entries(agent.sockets) ?? [];
+    const agentFreeSockets = Object.entries(agent.freeSockets) ?? [];
 
-    Object.values(agent.requests ?? []).forEach(
-      (queue) => (totalQueuedRequests += queue?.length ?? 0)
-    );
+    if (agentRequests.length || agentSockets.length || agentFreeSockets.length) {
+      if (agent instanceof HttpsAgent) https = true;
+      else http = true;
 
-    Object.entries(agent.sockets ?? []).forEach(([node, sockets]) => {
-      nodes.add(node);
-      const activeSockets = sockets?.length ?? 0;
-      totalActiveSockets += activeSockets;
-      nodesWithActiveSockets[node] = (nodesWithActiveSockets[node] ?? 0) + activeSockets;
-    });
+      agentRequests.forEach(([node, queue]) => {
+        nodes.add(node);
+        totalQueuedRequests += queue?.length ?? 0;
+      });
 
-    Object.entries(agent.freeSockets ?? []).forEach(([node, freeSockets]) => {
-      nodes.add(node);
-      const idleSockets = freeSockets?.length ?? 0;
-      totalIdleSockets += idleSockets;
-      nodesWithIdleSockets[node] = (nodesWithIdleSockets[node] ?? 0) + idleSockets;
-    });
+      agentSockets.forEach(([node, sockets]) => {
+        nodes.add(node);
+        const activeSockets = sockets?.length ?? 0;
+        totalActiveSockets += activeSockets;
+        nodesWithActiveSockets[node] = (nodesWithActiveSockets[node] ?? 0) + activeSockets;
+      });
+
+      agentFreeSockets.forEach(([node, freeSockets]) => {
+        nodes.add(node);
+        const idleSockets = freeSockets?.length ?? 0;
+        totalIdleSockets += idleSockets;
+        nodesWithIdleSockets[node] = (nodesWithIdleSockets[node] ?? 0) + idleSockets;
+      });
+    }
   });
 
   const activeSocketCounters = Object.values(nodesWithActiveSockets);
@@ -60,14 +67,14 @@ export const getAgentsSocketsStats = (agents: Set<Agent>): ElasticsearchClientsM
   return {
     protocol,
     connectedNodes: nodes.size,
-    nodesWithActiveSockets: activeSocketCounters.length,
-    nodesWithIdleSockets: idleSocketCounters.length,
+    nodesWithActiveSockets: activeSocketCounters.filter(Boolean).length,
+    nodesWithIdleSockets: idleSocketCounters.filter(Boolean).length,
     totalActiveSockets,
     totalIdleSockets,
     totalQueuedRequests,
-    mostActiveNodeSockets: Math.max(...activeSocketCounters),
-    averageActiveSocketsPerNode: mean(activeSocketCounters),
-    mostIdleNodeSockets: Math.max(...idleSocketCounters),
-    averageIdleSocketsPerNode: mean(idleSocketCounters),
+    mostActiveNodeSockets: activeSocketCounters.length ? Math.max(...activeSocketCounters) : 0,
+    averageActiveSocketsPerNode: activeSocketCounters.length ? mean(activeSocketCounters) : 0,
+    mostIdleNodeSockets: idleSocketCounters.length ? Math.max(...idleSocketCounters) : 0,
+    averageIdleSocketsPerNode: idleSocketCounters.length ? mean(idleSocketCounters) : 0,
   };
 };
