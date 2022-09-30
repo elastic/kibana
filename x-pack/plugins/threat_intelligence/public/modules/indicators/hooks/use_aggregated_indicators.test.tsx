@@ -28,7 +28,8 @@ const renderUseAggregatedIndicators = () =>
     wrapper: TestProvidersComponent,
   });
 
-describe('useAggregatedIndicators()', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/142312
+describe.skip('useAggregatedIndicators()', () => {
   beforeEach(jest.clearAllMocks);
 
   type MockedCreateFetchAggregatedIndicators = jest.MockedFunction<
