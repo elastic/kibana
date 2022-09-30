@@ -8,12 +8,12 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import { hostsModel, hostsSelectors } from '../../../hosts/store';
 import { usersSelectors } from '../../../users/store';
 import { RiskInformationButtonEmpty } from '../risk_information';
-import { RiskScoresDeprecated } from '../risk_score_deprecated';
 import * as i18n from './translations';
 
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -31,7 +31,6 @@ import { RiskScoreEntity, buildEntityNameFilter } from '../../../../common/searc
 import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
-import { RiskScoreDisable } from '../risk_score_disabled';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -131,12 +130,20 @@ const RiskTabBodyComponent: React.FC<
     [setOverTimeToggleStatus]
   );
 
-  if (!isModuleEnabled && !loading) {
-    return <RiskScoreDisable entityType={riskEntity} refetch={refetch} timerange={timerange} />;
-  }
+  const status = {
+    isDisabled: !isModuleEnabled && !loading,
+    isDeprecated: isDeprecated && !loading,
+  };
 
-  if (isDeprecated && !loading) {
-    return <RiskScoresDeprecated entityType={riskEntity} refetch={refetch} timerange={timerange} />;
+  if (status.isDisabled || status.isDeprecated) {
+    return (
+      <EnableRiskScore
+        {...status}
+        entityType={riskEntity}
+        refetch={refetch}
+        timerange={timerange}
+      />
+    );
   }
 
   if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {

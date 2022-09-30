@@ -8,8 +8,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
+import { EnableRiskScore } from '../../../risk_score/components/enable_risk_score';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { RiskScoresDeprecated } from '../../../risk_score/components/risk_score_deprecated';
 import type { UsersComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -24,7 +24,6 @@ import {
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../common/search_strategy';
-import { RiskScoreDisable } from '../../../risk_score/components/risk_score_disabled';
 import { RiskScoresNoDataDetected } from '../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
@@ -80,15 +79,15 @@ export const UserRiskScoreQueryTabBody = ({
     skip: querySkip,
   });
 
-  if (!isModuleEnabled && !loading) {
-    return (
-      <RiskScoreDisable entityType={RiskScoreEntity.user} refetch={refetch} timerange={timerange} />
-    );
-  }
+  const status = {
+    isDisabled: !isModuleEnabled && !loading,
+    isDeprecated: isDeprecated && !loading,
+  };
 
-  if (isDeprecated && !loading) {
+  if (status.isDisabled || status.isDeprecated) {
     return (
-      <RiskScoresDeprecated
+      <EnableRiskScore
+        {...status}
         entityType={RiskScoreEntity.user}
         refetch={refetch}
         timerange={timerange}

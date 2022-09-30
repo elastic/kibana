@@ -8,9 +8,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
+import { EnableRiskScore } from '../../../../risk_score/components/enable_risk_score';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../users/store/model';
-import { RiskScoresDeprecated } from '../../../../risk_score/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
@@ -38,7 +38,6 @@ import { hostsActions } from '../../../../hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
-import { RiskScoreDisable } from '../../../../risk_score/components/risk_score_disabled';
 import { RiskScoreHeaderTitle } from '../../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
@@ -173,13 +172,19 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     return null;
   }
 
-  if (!isModuleEnabled && !isTableLoading) {
-    return <RiskScoreDisable entityType={riskEntity} refetch={refreshPage} timerange={timerange} />;
-  }
+  const status = {
+    isDisabled: !isModuleEnabled && !isTableLoading,
+    isDeprecated: isDeprecated && !isTableLoading,
+  };
 
-  if (isDeprecated && !isTableLoading) {
+  if (status.isDisabled || status.isDeprecated) {
     return (
-      <RiskScoresDeprecated entityType={riskEntity} refetch={refreshPage} timerange={timerange} />
+      <EnableRiskScore
+        {...status}
+        entityType={riskEntity}
+        refetch={refetch}
+        timerange={timerange}
+      />
     );
   }
 
