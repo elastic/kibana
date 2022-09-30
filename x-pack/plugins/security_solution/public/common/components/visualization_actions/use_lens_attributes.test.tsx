@@ -12,7 +12,6 @@ import { useLensAttributes } from './use_lens_attributes';
 import { hostNameExistsFilter, getHostDetailsPageFilter, getIndexFilters } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
