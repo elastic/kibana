@@ -1496,7 +1496,7 @@ invalid: "
         ).toEqual([
           `The return value type of the operation ${
             errorFormula ?? formula
-          } is not supported in Formula.`,
+          } is not supported in Formula`,
         ]);
       }
     });
@@ -1507,8 +1507,14 @@ invalid: "
     // * field passed
     // * missing argument
     const errors = [
-      (operation: string) =>
-        `The first argument for ${operation} should be a operation name. Found ()`,
+      (operation: string) => {
+        const required = tinymathFunctions[operation].positionalArguments.filter(
+          ({ optional }) => !optional
+        );
+        return `The operation ${operation} in the Formula is missing ${
+          required.length
+        } arguments: ${required.map(({ name }) => name).join(', ')}`;
+      },
       (operation: string) => `The operation ${operation} has too many arguments`,
       (operation: string) => `The operation ${operation} does not accept any field as argument`,
       (operation: string) => {
@@ -1523,9 +1529,11 @@ invalid: "
           .join(', ')}`;
       },
     ];
+
+    const mathFns = Object.keys(tinymathFunctions);
     // we'll try to map all of these here in this test
-    for (const fn of Object.keys(tinymathFunctions)) {
-      it(`returns an error for the math functions available: ${fn}`, () => {
+    for (const fn of mathFns) {
+      it(`[${fn}] returns an error for the math functions available`, () => {
         const nArgs = tinymathFunctions[fn].positionalArguments;
         // start with the first 3 types
         const formulas = [
@@ -1535,14 +1543,22 @@ invalid: "
           `${fn}(${Array(nArgs.length).fill('bytes').join(', ')})`,
         ];
         // add the fourth check only for those functions with more than 1 arg required
+        // and check that this first argument is of type number
         const enableFourthCheck =
           nArgs.filter(
             ({ optional, alternativeWhenMissing }) => !optional && !alternativeWhenMissing
-          ).length > 1;
+          ).length > 1 && nArgs[0]?.type === 'number';
         if (enableFourthCheck) {
           formulas.push(`${fn}(1)`);
         }
-        formulas.forEach((formula, i) => {
+        const finalFormulas = formulas.map((text) => {
+          if (tinymathFunctions[fn].outputType !== 'boolean') {
+            return text;
+          }
+          // for comparison functions wrap the existing formula within the ifelse function
+          return `ifelse(${text}, 1, 0)`;
+        });
+        finalFormulas.forEach((formula, i) => {
           expect(
             formulaOperation.getErrorMessage!(
               getNewLayerWithFormula(formula),
@@ -1550,16 +1566,67 @@ invalid: "
               indexPattern,
               operationDefinitionMap
             )
-          ).toEqual([errors[i](fn)]);
+          ).toContain(errors[i](fn));
         });
       });
+    }
+
+    // comparison tests
+    for (const fn of mathFns.filter((name) => tinymathFunctions[name].section === 'comparison')) {
+      if (tinymathFunctions[fn].outputType === 'boolean') {
+        it(`[${fn}] returns an error about unsupported return type`, () => {
+          expect(
+            formulaOperation.getErrorMessage!(
+              getNewLayerWithFormula(`${fn}(1, 2)`),
+              'col1',
+              indexPattern,
+              operationDefinitionMap
+            )
+          ).toEqual([
+            `The return value type of the operation ${fn}(1, 2) is not supported in Formula`,
+          ]);
+        });
+
+        it(`[${fn}] returns an error about unsupported return type and when partial arguments are passed`, () => {
+          const formulas = [`${fn}()`, `${fn}(1)`];
+          formulas.forEach((formula, nArg) => {
+            const expectedCount = tinymathFunctions[fn].positionalArguments.length - nArg;
+            const expectedArgs = ['left', 'right'].slice(nArg).join(', ');
+            expect(
+              formulaOperation.getErrorMessage!(
+                getNewLayerWithFormula(formula),
+                'col1',
+                indexPattern,
+                operationDefinitionMap
+              )
+            ).toEqual([
+              `The return value type of the operation ${formula} is not supported in Formula`,
+              `The operation ${fn} in the Formula is missing ${expectedCount} arguments: ${expectedArgs}`,
+            ]);
+          });
+        });
+      } else {
+        it(`[${fn}] returns an error if the argument is of the wrong type`, () => {
+          const [firstArg] = tinymathFunctions[fn].positionalArguments;
+          expect(
+            formulaOperation.getErrorMessage!(
+              getNewLayerWithFormula(`${fn}(1, 2, 3)`),
+              'col1',
+              indexPattern,
+              operationDefinitionMap
+            )
+          ).toEqual([
+            `The ${firstArg.name} argument for the operation ${fn} in the Formula is of the wrong type: number instead of ${firstArg.type}`,
+          ]);
+        });
+      }
     }
 
     it('returns an error suggesting to use an alternative function', () => {
       const formulas = [`clamp(1)`, 'clamp(1, 5)'];
       const errorsWithSuggestions = [
-        'The operation clamp in the Formula is missing the min argument: use the pick_max operation instead.',
-        'The operation clamp in the Formula is missing the max argument: use the pick_min operation instead.',
+        'The operation clamp in the Formula is missing the min argument: use the pick_max operation instead',
+        'The operation clamp in the Formula is missing the max argument: use the pick_min operation instead',
       ];
       formulas.forEach((formula, i) => {
         expect(
@@ -1598,7 +1665,7 @@ invalid: "
             operationDefinitionMap
           )
         ).toEqual([
-          `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the ${operation} operation.`,
+          `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the ${operation} operation`,
         ]);
       }
     });
@@ -1618,8 +1685,8 @@ invalid: "
           operationDefinitionMap
         )
       ).toEqual([
-        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the count operation.`,
-        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the sum operation.`,
+        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the count operation`,
+        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the sum operation`,
       ]);
     });
 

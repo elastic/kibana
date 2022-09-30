@@ -354,21 +354,20 @@ function getMessageFromId<K extends ErrorTypes>({
       break;
     case 'wrongReturnedType':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongReturnedType', {
-        defaultMessage:
-          'The return value type of the operation {text} is not supported in Formula.',
+        defaultMessage: 'The return value type of the operation {text} is not supported in Formula',
         values: { text: out.text },
       });
       break;
     case 'filtersTypeConflict':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationFiltersTypeConflicts', {
         defaultMessage:
-          'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation.',
+          'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation',
         values: { operation: out.operation, outerType: out.outerType, innerType: out.innerType },
       });
       break;
     case 'useAlternativeFunction':
       message = i18n.translate('xpack.lens.indexPattern.formulaUseAlternative', {
-        defaultMessage: `The operation {operation} in the Formula is missing the {params} argument: use the {alternativeFn} operation instead.`,
+        defaultMessage: `The operation {operation} in the Formula is missing the {params} argument: use the {alternativeFn} operation instead`,
         values: { operation: out.operation, params: out.params, alternativeFn: out.alternativeFn },
       });
       break;
@@ -995,15 +994,16 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
   const errors: ErrorWrapper[] = [];
   mathNodes.forEach((node: TinymathFunction) => {
     const { positionalArguments } = tinymathFunctions[node.name];
+    const mandatoryArguments = positionalArguments.filter(({ optional }) => !optional);
     if (!node.args.length) {
       // we can stop here
       return errors.push(
         getMessageFromId({
-          messageId: 'wrongFirstArgument',
+          messageId: 'missingMathArgument',
           values: {
             operation: node.name,
-            type: 'operation',
-            argument: `()`,
+            count: mandatoryArguments.length,
+            params: mandatoryArguments.map(({ name }) => name).join(', '),
           },
           locations: getNodeLocation(node),
         })
@@ -1016,33 +1016,6 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
           messageId: 'tooManyArguments',
           values: {
             operation: node.name,
-          },
-          locations: getNodeLocation(node),
-        })
-      );
-    }
-
-    const wrongTypeArgumentIndex = positionalArguments.findIndex(({ type }, index) => {
-      const arg = node.args[index];
-      if (arg != null) {
-        if (!isObject(arg)) {
-          return typeof arg !== type;
-        }
-        if (arg.type === 'function' && tinymathFunctions[arg.name]) {
-          const { outputType = 'number' } = tinymathFunctions[arg.name];
-          return outputType !== type;
-        }
-      }
-    });
-    if (wrongTypeArgumentIndex > -1) {
-      errors.push(
-        getMessageFromId({
-          messageId: 'wrongTypeArgument',
-          values: {
-            operation: node.name,
-            name: positionalArguments[wrongTypeArgumentIndex].name,
-            type: typeof node.args[wrongTypeArgumentIndex],
-            expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
           },
           locations: getNodeLocation(node),
         })
@@ -1068,7 +1041,6 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
       );
     }
 
-    const mandatoryArguments = positionalArguments.filter(({ optional }) => !optional);
     // if there is only 1 mandatory arg, this is already handled by the wrongFirstArgument check
     if (mandatoryArguments.length > 1 && node.args.length < mandatoryArguments.length) {
       const missingArgs = mandatoryArguments.filter((_, i) => node.args[i] == null);
@@ -1110,6 +1082,32 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
           })
         );
       }
+    }
+    const wrongTypeArgumentIndex = positionalArguments.findIndex(({ type }, index) => {
+      const arg = node.args[index];
+      if (arg != null) {
+        if (!isObject(arg)) {
+          return typeof arg !== type;
+        }
+        if (arg.type === 'function' && tinymathFunctions[arg.name]) {
+          const { outputType = 'number' } = tinymathFunctions[arg.name];
+          return outputType !== type;
+        }
+      }
+    });
+    if (wrongTypeArgumentIndex > -1) {
+      errors.push(
+        getMessageFromId({
+          messageId: 'wrongTypeArgument',
+          values: {
+            operation: node.name,
+            name: positionalArguments[wrongTypeArgumentIndex].name,
+            type: typeof node.args[wrongTypeArgumentIndex],
+            expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
+          },
+          locations: getNodeLocation(node),
+        })
+      );
     }
   });
   return errors;
