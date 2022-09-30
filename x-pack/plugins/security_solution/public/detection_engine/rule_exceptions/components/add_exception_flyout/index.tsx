@@ -29,7 +29,12 @@ import {
   EuiComboBox,
   EuiFlexGroup,
 } from '@elastic/eui';
-import type { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  ExceptionListType,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
@@ -355,7 +360,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         shouldBulkCloseAlert && signalIndexName != null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(
         maybeRule?.rule_id ?? '',
-        enrichExceptionItems(),
+        // This is being rewritten in https://github.com/elastic/kibana/pull/140643
+        // As of now, flyout cannot yet create item of type CreateRuleExceptionListItemSchema
+        enrichExceptionItems() as Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
         alertIdToClose,
         bulkCloseIndex
       );

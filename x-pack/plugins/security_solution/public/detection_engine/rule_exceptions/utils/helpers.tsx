@@ -201,9 +201,9 @@ export const buildGetAlertByIdQuery = (id: string | undefined) => ({
  * and new comments
  */
 export const enrichExistingExceptionItemWithComments = (
-  exceptionItem: ExceptionListItemSchema | CreateExceptionListItemSchema,
+  exceptionItem: ExceptionsBuilderReturnExceptionItem,
   comments: Array<Comment | CreateComment>
-): ExceptionListItemSchema | CreateExceptionListItemSchema => {
+): ExceptionsBuilderReturnExceptionItem => {
   const formattedComments = comments.map((item) => {
     if (comment.is(item)) {
       const { id, comment: existingComment } = item;
