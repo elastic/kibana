@@ -26,7 +26,6 @@ import { LiveQueryQueryField } from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
-import { AddToCaseWrapper } from '../../cases/add_to_cases';
 
 export interface LiveQueryFormFields {
   query?: string;
@@ -207,27 +206,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const singleQueryDetails = useMemo(() => liveQueryDetails?.queries?.[0], [liveQueryDetails]);
   const liveQueryActionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails]);
-  const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
-
-  // TODO remove when pack_field_wrapper stops using it
-  const addToCaseButton = useCallback(
-    (payload) => {
-      if (liveQueryActionId) {
-        return (
-          <AddToCaseWrapper
-            queryId={payload.queryId}
-            agentIds={agentIds}
-            actionId={liveQueryActionId}
-            isIcon={payload.isIcon}
-            isDisabled={payload.isDisabled}
-          />
-        );
-      }
-
-      return <></>;
-    },
-    [agentIds, liveQueryActionId]
-  );
 
   const resultsStepContent = useMemo(
     () =>
@@ -324,7 +302,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               liveQueryDetails={liveQueryDetails}
               addToTimeline={addToTimeline}
               submitButtonContent={submitButtonContent}
-              addToCase={addToCaseButton}
               showResultsHeader
             />
           ) : (

@@ -354,7 +354,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             agentIds={agentIds}
             hideAddToCases={hideAddToCases}
           />
-          {/* {addToCase && addToCase({ actionId })}*/}
         </>
       ),
     }),

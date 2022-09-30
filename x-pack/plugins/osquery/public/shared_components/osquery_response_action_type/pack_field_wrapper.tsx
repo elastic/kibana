@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash';
 import { useWatch } from 'react-hook-form';
@@ -27,7 +26,6 @@ interface PackFieldWrapperProps {
   };
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
   submitButtonContent?: React.ReactNode;
-  addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
   showResultsHeader?: boolean;
 }
 
