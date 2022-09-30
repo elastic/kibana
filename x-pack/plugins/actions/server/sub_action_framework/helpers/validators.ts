@@ -13,7 +13,7 @@ export const urlAllowListValidator = <T>(urlKey: string) => {
   return (obj: T, validatorServices: ValidatorServices) => {
     const { configurationUtilities } = validatorServices;
     try {
-      const url = get(obj, urlKey);
+      const url = get(obj, urlKey, '');
 
       configurationUtilities.ensureUriAllowed(url);
     } catch (allowListError) {
