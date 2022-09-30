@@ -16,8 +16,6 @@ import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export type UnifiedHistogramStatus = 'loading' | 'complete' | 'partial' | 'error';
 
-export type UnifiedHistogramLayoutStyle = 'fixed' | 'resizable';
-
 export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
   theme: Theme;

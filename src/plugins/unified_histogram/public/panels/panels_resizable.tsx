@@ -34,7 +34,7 @@ export const PanelsResizable = ({
   minMainPanelHeight: number;
   topPanel: ReactElement;
   mainPanel: ReactElement;
-  onTopPanelHeightChange: (height: number) => void;
+  onTopPanelHeightChange?: (height: number) => void;
 }) => {
   const topPanelId = useGeneratedHtmlId({ prefix: 'topPanel' });
   const { height: containerHeight } = useResizeObserver(resizeRef.current);
@@ -74,7 +74,7 @@ export const PanelsResizable = ({
       const newTopPanelHeight = percentToPixels(containerHeight, topPanelSize);
 
       if (newTopPanelHeight !== topPanelHeight) {
-        onTopPanelHeightChange(newTopPanelHeight);
+        onTopPanelHeightChange?.(newTopPanelHeight);
       }
     },
     [containerHeight, onTopPanelHeightChange, topPanelHeight, topPanelId]

@@ -6,35 +6,50 @@
  * Side Public License, v 1.
  */
 
-import type { ReactElement, RefObject } from 'react';
+import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import type { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { css } from '@emotion/css';
+import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
-import type { UnifiedHistogramLayoutStyle, UnifiedHistogramServices } from '../types';
+import type {
+  UnifiedHistogramContext,
+  UnifiedHistogramServices,
+  UnifiedHistogramStatus,
+} from '../types';
 
-export interface UnifiedHistogramLayoutProps {
-  services: UnifiedHistogramServices;
+export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   className?: string;
-  layout: UnifiedHistogramLayoutStyle;
+  services: UnifiedHistogramServices;
+  status: UnifiedHistogramStatus;
+  hits: number;
+  histogram?: UnifiedHistogramContext;
   resizeRef: RefObject<HTMLDivElement>;
-  topPanelHeight: number;
-  minTopPanelHeight: number;
-  minMainPanelHeight: number;
-  topPanel: ReactElement;
-  mainPanel: ReactElement;
-  onTopPanelHeightChange: (height: number) => void;
+  topPanelHeight?: number;
+  appendHitsCounter?: ReactElement;
+  onTopPanelHeightChange?: (height: number) => void;
+  onEditVisualization?: () => void;
+  onResetChartHeight?: () => void;
+  onHideChartChange?: (hideChart: boolean) => void;
+  onIntervalChange?: (interval: string) => void;
 }
 
 export const UnifiedHistogramLayout = ({
   className,
-  layout = 'resizable',
+  services,
+  status,
+  hits,
+  histogram,
   resizeRef,
   topPanelHeight,
-  minTopPanelHeight,
-  minMainPanelHeight,
-  topPanel,
-  mainPanel,
+  appendHitsCounter,
   onTopPanelHeightChange,
+  onEditVisualization,
+  onResetChartHeight,
+  onHideChartChange,
+  onIntervalChange,
+  children,
 }: UnifiedHistogramLayoutProps) => {
   const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
@@ -46,15 +61,48 @@ export const UnifiedHistogramLayout = ({
     []
   );
 
+  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || !histogram || histogram.hidden;
+  const { euiTheme } = useEuiTheme();
+  const defaultTopPanelHeight = euiTheme.base * 12;
+  const minTopPanelHeight = euiTheme.base * 8;
+  const minMainPanelHeight = euiTheme.base * 10;
+
+  const chartClassName =
+    showFixedPanels && !histogram?.hidden
+      ? css`
+          height: ${defaultTopPanelHeight}px;
+        `
+      : 'eui-fullHeight';
+
+  const panelsMode = histogram
+    ? showFixedPanels
+      ? PANELS_MODE.FIXED
+      : PANELS_MODE.RESIZABLE
+    : PANELS_MODE.SINGLE;
+
   return (
     <>
-      <InPortal node={topPanelNode}>{topPanel}</InPortal>
-      <InPortal node={mainPanelNode}>{mainPanel}</InPortal>
+      <InPortal node={topPanelNode}>
+        <Chart
+          className={chartClassName}
+          services={services}
+          status={status}
+          hits={hits}
+          histogram={histogram}
+          appendHitsCounter={appendHitsCounter}
+          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
+          onEditVisualization={onEditVisualization}
+          onResetChartHeight={panelsMode === PANELS_MODE.RESIZABLE ? onResetChartHeight : undefined}
+          onHideChartChange={onHideChartChange}
+          onIntervalChange={onIntervalChange}
+        />
+      </InPortal>
+      <InPortal node={mainPanelNode}>{children}</InPortal>
       <Panels
         className={className}
-        mode={layout as PANELS_MODE}
+        mode={panelsMode}
         resizeRef={resizeRef}
-        topPanelHeight={topPanelHeight}
+        topPanelHeight={topPanelHeight ?? defaultTopPanelHeight}
         minTopPanelHeight={minTopPanelHeight}
         minMainPanelHeight={minMainPanelHeight}
         topPanel={<OutPortal node={topPanelNode} />}
