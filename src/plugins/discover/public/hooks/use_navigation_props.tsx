@@ -7,8 +7,9 @@
  */
 
 import { useCallback } from 'react';
-import { disableFilter, Filter } from '@kbn/es-query';
+import { disableFilter, type Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { useHistory } from 'react-router-dom';
 import { useDiscoverServices } from './use_discover_services';
 
 export interface UseNavigationProps {
@@ -16,7 +17,8 @@ export interface UseNavigationProps {
   rowIndex: string;
   rowId: string;
   columns: string[];
-  // provided for embeddable only
+  savedSearchId?: string;
+  // provided by embeddable only
   filters?: Filter[];
 }
 
@@ -25,8 +27,10 @@ export const useNavigationProps = ({
   rowIndex,
   rowId,
   columns,
+  savedSearchId,
   filters,
 }: UseNavigationProps) => {
+  const isEmbeddableView = !useHistory();
   const services = useDiscoverServices();
 
   const onOpenSingleDoc = useCallback(
@@ -45,12 +49,16 @@ export const useNavigationProps = ({
   const onOpenSurrDocs = useCallback(() => {
     event?.preventDefault?.();
 
-    let appliedFilters = filters || [];
-    if (!filters) {
+    let appliedFilters: Filter[] = [];
+    if (!isEmbeddableView) {
+      // applied from discover main
       appliedFilters = [
         ...services.filterManager.getGlobalFilters(),
         ...services.filterManager.getAppFilters(),
       ];
+    } else if (isEmbeddableView && filters?.length) {
+      // applied from embeddable
+      appliedFilters = filters;
     }
 
     services.contextLocator.navigate({
@@ -58,8 +66,18 @@ export const useNavigationProps = ({
       rowId,
       columns,
       filters: appliedFilters.map(disableFilter),
+      savedSearchId,
     });
-  }, [columns, dataView, filters, rowId, services.contextLocator, services.filterManager]);
+  }, [
+    columns,
+    dataView,
+    filters,
+    isEmbeddableView,
+    rowId,
+    savedSearchId,
+    services.contextLocator,
+    services.filterManager,
+  ]);
 
   return { onOpenSingleDoc, onOpenSurrDocs };
 };

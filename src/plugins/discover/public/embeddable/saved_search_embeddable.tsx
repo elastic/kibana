@@ -63,6 +63,7 @@ import { fetchSql } from '../application/main/utils/fetch_sql';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
+    savedSearchId?: string;
     filters?: Filter[];
     settings?: DiscoverGridSettings;
     description?: string;
@@ -303,7 +304,8 @@ export class SavedSearchEmbeddable
 
     const props: SearchProps = {
       columns: this.savedSearch.columns,
-      filters: searchSource.getField('filter') as Filter[],
+      savedSearchId: this.savedSearch.id,
+      filters: this.savedSearch.searchSource.getField('filter') as Filter[],
       dataView,
       isLoading: false,
       sort,
@@ -453,6 +455,7 @@ export class SavedSearchEmbeddable
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
     searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];
+    searchProps.savedSearchId = this.savedSearch.id;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);

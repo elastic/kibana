@@ -31,6 +31,7 @@ export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
   filters?: Filter[];
+  savedSearchId?: string;
   row: DataTableRecord;
   dataView: DataView;
   useNewFieldsApi: boolean;
@@ -43,6 +44,7 @@ export const TableRow = ({
   filters,
   columns,
   filter,
+  savedSearchId,
   row,
   dataView,
   useNewFieldsApi,
@@ -107,6 +109,7 @@ export const TableRow = ({
     rowId: row.raw._id,
     columns,
     filters,
+    savedSearchId,
   });
 
   const rowCells = [

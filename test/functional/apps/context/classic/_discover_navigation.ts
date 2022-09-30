@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('context link in discover', () => {
+  describe('context link in discover classic', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
@@ -145,7 +145,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await docTable.clickRowToggle({ rowIndex: 0 });
       const rowActions = await docTable.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
-      await testSubjects.click('confirmModalConfirmButton');
+      await PageObjects.common.sleep(250);
+
+      // close popup
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
 
       await retry.waitFor('navigate to doc view', async () => {
         const currentUrl = await browser.getCurrentUrl();

@@ -25,7 +25,7 @@ import {
   EuiHideFor,
   keys,
 } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
@@ -33,6 +33,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
 
 export interface DiscoverGridFlyoutProps {
+  savedSearchId?: string;
   filters?: Filter[];
   columns: string[];
   hit: DataTableRecord;
@@ -58,6 +59,7 @@ export function DiscoverGridFlyout({
   hits,
   dataView,
   columns,
+  savedSearchId,
   filters,
   onFilter,
   onClose,
@@ -104,6 +106,7 @@ export function DiscoverGridFlyout({
     rowId: hit.raw._id,
     columns,
     filters,
+    savedSearchId,
   });
 
   return (

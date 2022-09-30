@@ -57,6 +57,8 @@ export function Doc(props: DocProps) {
   const breadcrumb = useRootBreadcrumb({ dataViewId: dataView.id! });
 
   useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('setting breadcrumb', breadcrumb);
     chrome.setBreadcrumbs([
       ...getRootBreadcrumbs({ href: breadcrumb }),
       { text: `${props.index}#${props.id}` },

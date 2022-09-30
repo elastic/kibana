@@ -89,6 +89,7 @@ export const ContextApp = ({
     columns,
     timeRange: preservedReferrerState.timeRange,
     query: preservedReferrerState.query,
+    savedSearchId: preservedReferrerState.savedSearchId,
   });
 
   useEffect(() => {

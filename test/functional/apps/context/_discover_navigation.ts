@@ -142,8 +142,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[0].click();
-      await browser.refresh();
-      await testSubjects.click('confirmModalConfirmButton');
+      await PageObjects.common.sleep(250);
+
+      // close popup
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
 
       await retry.waitFor('navigate to doc view', async () => {
         const currentUrl = await browser.getCurrentUrl();

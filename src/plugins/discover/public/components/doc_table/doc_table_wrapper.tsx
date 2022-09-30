@@ -58,9 +58,13 @@ export interface DocTableProps {
    */
   isLoading: boolean;
   /**
-   * Applied filters
+   * Filters applied by embeddalbe
    */
   filters?: Filter[];
+  /**
+   * Saved search id
+   */
+  savedSearchId?: string;
   /**
    * Filter callback
    */
@@ -106,6 +110,7 @@ export const DocTableWrapper = forwardRef(
       render,
       columns,
       filters,
+      savedSearchId,
       rows,
       dataView,
       onSort,
@@ -168,6 +173,7 @@ export const DocTableWrapper = forwardRef(
             key={`${current.id}${current.raw._score}${current.raw._version}`}
             columns={columns}
             filters={filters}
+            savedSearchId={savedSearchId}
             filter={onFilter}
             dataView={dataView}
             row={current}
@@ -181,6 +187,7 @@ export const DocTableWrapper = forwardRef(
       [
         columns,
         filters,
+        savedSearchId,
         onFilter,
         dataView,
         useNewFieldsApi,

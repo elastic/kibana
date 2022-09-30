@@ -17,12 +17,14 @@ export const useRootBreadcrumb = ({
   columns,
   query,
   timeRange,
+  savedSearchId,
 }: {
   dataViewId: string;
   filters?: Filter[];
   columns?: string[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
+  savedSearchId?: string;
 }) => {
   const services = useDiscoverServices();
   const [breadcrumb, setBreadcrumb] = useState<string>();
@@ -35,13 +37,14 @@ export const useRootBreadcrumb = ({
         columns,
         timeRange,
         query,
+        savedSearchId,
       };
 
       const href = await services.locator.getUrl(state);
       setBreadcrumb(href);
     };
     getHref();
-  }, [columns, dataViewId, filters, query, services.locator, timeRange]);
+  }, [columns, dataViewId, filters, query, savedSearchId, services.locator, timeRange]);
 
   return breadcrumb;
 };

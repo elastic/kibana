@@ -27,6 +27,7 @@ export interface DiscoverContextAppLocatorParams extends SerializableRecord {
    */
   timeRange?: TimeRange;
   query?: Query | AggregateQuery;
+  savedSearchId?: string;
 }
 
 export type DiscoverContextAppLocator = LocatorPublic<DiscoverContextAppLocatorParams>;
@@ -39,6 +40,7 @@ export interface ContextHistoryLocationState {
   dataViewSpec?: DataViewSpec;
   timeRange?: TimeRange;
   query?: Query | AggregateQuery;
+  savedSearchId?: string;
 }
 
 export class DiscoverContextAppLocatorDefinition
@@ -50,7 +52,7 @@ export class DiscoverContextAppLocatorDefinition
 
   public readonly getLocation = async (params: DiscoverContextAppLocatorParams) => {
     const useHash = this.deps.useHash;
-    const { dataViewSpec, rowId, columns, filters, timeRange, query } = params;
+    const { dataViewSpec, rowId, columns, filters, timeRange, query, savedSearchId } = params;
 
     const appState: { filters?: Filter[]; columns?: string[] } = {};
     const queryState: GlobalQueryStateFromUrl = {};
@@ -65,6 +67,7 @@ export class DiscoverContextAppLocatorDefinition
       dataViewSpec,
       timeRange,
       query,
+      savedSearchId,
     };
 
     let path = `#/context/${dataViewSpec.id}/${rowId}`;
