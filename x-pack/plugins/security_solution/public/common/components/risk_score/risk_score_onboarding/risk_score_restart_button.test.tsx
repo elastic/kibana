@@ -43,7 +43,6 @@ describe('RiskScoreRestartButton', () => {
       await act(async () => {
         await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
       });
-      console.log(restartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity);
       expect(restartRiskScoreTransforms).toHaveBeenCalled();
       expect(restartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(riskScoreEntity);
     });
