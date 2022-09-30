@@ -12,7 +12,7 @@ import {
   mockedTimefilterService,
   TestProvidersComponent,
 } from '../../../common/mocks/test_providers';
-import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';
+import { createFetchAggregatedIndicators } from '../services';
 
 jest.mock('../services/fetch_aggregated_indicators');
 
@@ -88,6 +88,8 @@ describe('useAggregatedIndicators()', () => {
           "max": "2022-01-02T00:00:00.000Z",
           "min": "2022-01-01T00:00:00.000Z",
         },
+        "isFetching": true,
+        "isLoading": true,
         "onFieldChange": [Function],
         "selectedField": "threat.feed.name",
         "series": Array [],
