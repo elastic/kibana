@@ -392,7 +392,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             })}
           >
             {i18n.translate('indexPatternEditor.goToManagementPage', {
-              defaultMessage: 'View on data management page',
+              defaultMessage: 'View on data view management page',
             })}
           </EuiLink>
         )}
