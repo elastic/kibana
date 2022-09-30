@@ -2765,6 +2765,47 @@ describe('IndexPattern Data Source', () => {
         expect(publicAPI.getMaxPossibleNumValues('non-existant')).toEqual(null);
       });
     });
+
+    test('hasDefaultTimeField', () => {
+      const indexPatternWithDefaultTimeField = {
+        id: '1',
+        title: 'my-fake-index-pattern',
+        timeFieldName: 'timestamp',
+        hasRestrictions: false,
+        fields: fieldsOne,
+        getFieldByName: getFieldByNameFactory(fieldsOne),
+        spec: {},
+        isPersisted: true,
+      };
+
+      const indexPatternWithoutDefaultTimeField = {
+        ...indexPatternWithDefaultTimeField,
+        timeFieldName: '',
+      };
+
+      expect(
+        indexPatternDatasource
+          .getPublicAPI({
+            state: baseState,
+            layerId: 'first',
+            indexPatterns: {
+              1: indexPatternWithDefaultTimeField,
+            },
+          })
+          .hasDefaultTimeField()
+      ).toBe(true);
+      expect(
+        indexPatternDatasource
+          .getPublicAPI({
+            state: baseState,
+            layerId: 'first',
+            indexPatterns: {
+              1: indexPatternWithoutDefaultTimeField,
+            },
+          })
+          .hasDefaultTimeField()
+      ).toBe(false);
+    });
   });
 
   describe('#getErrorMessages', () => {

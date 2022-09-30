@@ -15,7 +15,7 @@ import { MetricVisualizationState } from './visualization';
 import { DimensionEditor } from './dimension_editor';
 import { HTMLAttributes, mount, ReactWrapper, shallow } from 'enzyme';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { EuiButtonGroup, EuiColorPicker } from '@elastic/eui';
+import { EuiButtonGroup, EuiColorPicker, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { LayoutDirection } from '@elastic/charts';
 import { act } from 'react-dom/test-utils';
@@ -24,6 +24,7 @@ import { createMockFramePublicAPI } from '../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
 import { DebouncedInput } from '../../shared_components/debounced_input';
+import { DatasourcePublicAPI } from '../..';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -63,6 +64,11 @@ describe('dimension editor', () => {
     maxCols: 5,
     color: 'static-color',
     palette,
+    trendlineLayerId: 'second',
+    trendlineLayerType: 'metricTrendline',
+    trendlineMetricAccessor: 'trendline-metric-col-id',
+    trendlineTimeAccessor: 'trendline-time-col-id',
+    trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   };
 
   let props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
@@ -75,6 +81,11 @@ describe('dimension editor', () => {
       groupId: 'some-group',
       accessor: 'some-accessor',
       state: fullState,
+      datasource: {
+        hasDefaultTimeField: jest.fn(),
+      } as unknown as DatasourcePublicAPI,
+      removeLayer: jest.fn(),
+      addLayer: jest.fn(),
       frame: createMockFramePublicAPI(),
       setState: jest.fn(),
       panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
@@ -128,6 +139,18 @@ describe('dimension editor', () => {
         act(() => {
           this.colorPicker.props().onChange!(color, {} as EuiColorPickerOutput);
         });
+      }
+
+      private get trendlineSwitch() {
+        return this._wrapper.find(EuiSwitch);
+      }
+
+      public get trendlineEnabled() {
+        return this.trendlineSwitch.props().checked;
+      }
+
+      public toggleTrendline() {
+        this.trendlineSwitch.props().onChange({} as EuiSwitchEvent);
       }
     }
 
@@ -198,6 +221,30 @@ describe('dimension editor', () => {
             undefined,
           ]
         `);
+      });
+    });
+
+    describe('trendline', () => {
+      const stateWOTrend = {
+        ...fullState,
+        trendlineLayerId: undefined,
+      };
+
+      it('reflects visualization state', () => {
+        expect(getHarnessWithState(fullState).trendlineEnabled).toBe(true);
+        expect(getHarnessWithState(stateWOTrend).trendlineEnabled).toBe(false);
+      });
+
+      it('adds layer when enabled', () => {
+        getHarnessWithState(stateWOTrend).toggleTrendline();
+        expect(props.addLayer).toHaveBeenCalledWith('metricTrendline');
+        expect(props.removeLayer).not.toHaveBeenCalled();
+      });
+
+      it('removes layer when disabled', () => {
+        getHarnessWithState(fullState).toggleTrendline();
+        expect(props.removeLayer).toHaveBeenCalledWith(fullState.trendlineLayerId);
+        expect(props.addLayer).not.toHaveBeenCalled();
       });
     });
   });

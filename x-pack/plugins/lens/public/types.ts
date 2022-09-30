@@ -496,6 +496,7 @@ export interface DatasourcePublicAPI {
    *       or 6 if the "Other" bucket is enabled)
    */
   getMaxPossibleNumValues: (columnId: string) => number | null;
+  hasDefaultTimeField: () => boolean;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -684,6 +685,7 @@ export interface VisualizationToolbarProps<T = unknown> {
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
   accessor: string;
+  datasource: DatasourcePublicAPI | undefined;
   setState(newState: T | ((currState: T) => T)): void;
   addLayer: (layerType: LayerType) => void;
   removeLayer: (layerId: string) => void;
@@ -1142,6 +1144,7 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   onIndexPatternChange?: (state: T, indexPatternId: string, layerId?: string) => T;
   onIndexPatternRename?: (state: T, oldIndexPatternId: string, newIndexPatternId: string) => T;
+  getLayersToRemoveOnIndexPatternChange?: (state: T) => string[];
   /**
    * Gets custom display options for showing the visualization.
    */

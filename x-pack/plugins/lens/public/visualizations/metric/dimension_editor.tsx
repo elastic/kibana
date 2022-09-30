@@ -18,6 +18,7 @@ import {
   euiPaletteColorBlind,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useState } from 'react';
@@ -300,34 +301,49 @@ function PrimaryMetricEditor(props: SubProps) {
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
 
+  const hasDefaultTimeField = props.datasource?.hasDefaultTimeField();
+  const trendlineLabel = i18n.translate('xpack.lens.metric.enableTrendline.label', {
+    defaultMessage: 'Trendline',
+  });
+
   return (
     <>
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.enableTrendline.label', {
-          defaultMessage: 'Enable trendline',
-        })}
+        label={trendlineLabel}
         css={css`
           align-items: center;
         `}
+        isDisabled={!hasDefaultTimeField}
       >
-        {/* // TODO - find a way to disable this if the dataview doesn't have a time field! */}
-        <EuiSwitch
-          label={i18n.translate('xpack.lens.metric.enableTrendline.label', {
-            defaultMessage: 'Enable trendline',
-          })}
-          showLabel={false}
-          compressed
-          checked={Boolean(state.trendlineLayerId)}
-          onChange={() => {
-            if (!state.trendlineLayerId) {
-              props.addLayer('metricTrendline');
-            } else {
-              props.removeLayer(state.trendlineLayerId);
-            }
-          }}
-        />
+        <EuiToolTip
+          content={
+            hasDefaultTimeField
+              ? i18n.translate('xpack.lens.metric.enableTrendline.explanationTooltip', {
+                  defaultMessage: 'This adds a line chart to the background of your metrics.',
+                })
+              : i18n.translate('xpack.lens.metric.enableTrendline.disabledTooltip', {
+                  defaultMessage: 'Use a data view with a default time field to show trendlines.',
+                })
+          }
+        >
+          <EuiSwitch
+            label={trendlineLabel}
+            showLabel={false}
+            data-test-subj="lnsMetric_trendline_toggle"
+            compressed
+            disabled={!hasDefaultTimeField}
+            checked={Boolean(state.trendlineLayerId)}
+            onChange={() => {
+              if (!state.trendlineLayerId) {
+                props.addLayer('metricTrendline');
+              } else {
+                props.removeLayer(state.trendlineLayerId);
+              }
+            }}
+          />
+        </EuiToolTip>
       </EuiFormRow>
       <EuiFormRow
         display="columnCompressed"

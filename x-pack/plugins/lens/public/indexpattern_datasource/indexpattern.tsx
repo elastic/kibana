@@ -642,6 +642,7 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
+        hasDefaultTimeField: () => Boolean(indexPatterns[layer.indexPatternId].timeFieldName),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {

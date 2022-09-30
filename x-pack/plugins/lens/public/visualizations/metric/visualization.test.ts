@@ -735,6 +735,13 @@ describe('metric visualization', () => {
     });
   });
 
+  it('marks trendline layer for removal on index pattern switch', () => {
+    expect(visualization.getLayersToRemoveOnIndexPatternChange!(fullStateWTrend)).toEqual([
+      fullStateWTrend.trendlineLayerId,
+    ]);
+    expect(visualization.getLayersToRemoveOnIndexPatternChange!(fullState)).toEqual([]);
+  });
+
   it('gives a description', () => {
     expect(visualization.getDescription(fullState)).toMatchInlineSnapshot(`
       Object {

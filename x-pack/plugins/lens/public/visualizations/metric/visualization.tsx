@@ -483,6 +483,10 @@ export const getMetricVisualization = ({
     return links;
   },
 
+  getLayersToRemoveOnIndexPatternChange: (state) => {
+    return state.trendlineLayerId ? [state.trendlineLayerId] : [];
+  },
+
   toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
 

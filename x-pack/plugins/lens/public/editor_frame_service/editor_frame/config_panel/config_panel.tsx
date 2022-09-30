@@ -158,6 +158,48 @@ export function LayerPanels(
     [dispatchLens]
   );
 
+  const onRemoveLayer = useCallback(
+    (layerToRemoveId: string) => {
+      const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerToRemoveId];
+      const datasourceId = datasourcePublicAPI?.datasourceId;
+
+      if (datasourceId) {
+        const layerDatasource = datasourceMap[datasourceId];
+        const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+        const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+        const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+
+        action?.execute({
+          trigger,
+          fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerToRemoveId),
+          usedDataViews: layerDatasource
+            .getLayers(layerDatasourceState)
+            .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layerToRemoveId)),
+          defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
+        } as ActionExecutionContext);
+      }
+
+      dispatchLens(
+        removeOrClearLayer({
+          visualizationId: activeVisualization.id,
+          layerId: layerToRemoveId,
+          layerIds,
+        })
+      );
+      removeLayerRef(layerToRemoveId);
+    },
+    [
+      activeVisualization.id,
+      datasourceMap,
+      datasourceStates,
+      dispatchLens,
+      layerIds,
+      props.framePublicAPI.datasourceLayers,
+      props.uiActions,
+      removeLayerRef,
+    ]
+  );
+
   const onChangeIndexPattern = useCallback(
     async ({
       indexPatternId,
@@ -184,7 +226,7 @@ export function LayerPanels(
         })
       );
     },
-    [dispatchLens, props.framePublicAPI.dataViews, props.indexPatternService]
+    [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
 
   const addLayer = (layerType: LayerType) => {
@@ -216,7 +258,14 @@ export function LayerPanels(
               updateVisualization={setVisualizationState}
               updateDatasource={updateDatasource}
               updateDatasourceAsync={updateDatasourceAsync}
-              onChangeIndexPattern={onChangeIndexPattern}
+              onChangeIndexPattern={(args) => {
+                onChangeIndexPattern(args);
+                const layersToRemove =
+                  activeVisualization.getLayersToRemoveOnIndexPatternChange?.(
+                    visualization.state
+                  ) ?? [];
+                layersToRemove.forEach((id) => onRemoveLayer(id));
+              }}
               updateAll={updateAll}
               addLayer={addLayer}
               isOnlyLayer={
@@ -249,41 +298,7 @@ export function LayerPanels(
                   })
                 );
               }}
-              onRemoveLayer={(layerToRemoveId: string) => {
-                const datasourcePublicAPI =
-                  props.framePublicAPI.datasourceLayers?.[layerToRemoveId];
-                const datasourceId = datasourcePublicAPI?.datasourceId;
-
-                if (datasourceId) {
-                  const layerDatasource = datasourceMap[datasourceId];
-                  const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
-                  const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-                  const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
-
-                  action?.execute({
-                    trigger,
-                    fromDataView: layerDatasource.getUsedDataView(
-                      layerDatasourceState,
-                      layerToRemoveId
-                    ),
-                    usedDataViews: layerDatasource
-                      .getLayers(layerDatasourceState)
-                      .map((layer) =>
-                        layerDatasource.getUsedDataView(layerDatasourceState, layerToRemoveId)
-                      ),
-                    defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
-                  } as ActionExecutionContext);
-                }
-
-                dispatchLens(
-                  removeOrClearLayer({
-                    visualizationId: activeVisualization.id,
-                    layerId: layerToRemoveId,
-                    layerIds,
-                  })
-                );
-                removeLayerRef(layerId);
-              }}
+              onRemoveLayer={onRemoveLayer}
               onRemoveDimension={(dimensionProps) => {
                 const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
                 const datasourceId = datasourcePublicAPI?.datasourceId;
