@@ -361,10 +361,10 @@ export const LensTopNavMenu = ({
       const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
         datasourceStates[activeDatasourceId].state
       );
-      const dataView = indexPatterns.find((pattern) => pattern.id === dataViewId);
+      const dataView = dataViewsList.find((pattern) => pattern.id === dataViewId);
       setCurrentIndexPattern(dataView ?? indexPatterns[0]);
     }
-  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns]);
+  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns, dataViewsList]);
 
   useEffect(() => {
     const fetchDataViews = async () => {
