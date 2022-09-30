@@ -37,7 +37,6 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   isDisabled,
   iconProps,
 }) => {
-  console.log({ actionId, agentIds, queryId, isIcon, isDisabled, iconProps });
   const { cases } = useKibana().services;
 
   const casePermissions = cases.helpers.canUseCases();
