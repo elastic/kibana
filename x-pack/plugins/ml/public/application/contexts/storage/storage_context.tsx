@@ -33,10 +33,12 @@ export const MlStorageContextProvider: FC = ({ children }) => {
     services: { storage },
   } = useMlKibana();
 
-  const initialValue = ML_STORAGE_KEYS.reduce((acc, curr) => {
-    acc[curr as MlStorageKey] = storage.get(curr);
-    return acc;
-  }, {} as Exclude<MlStorage, null>);
+  const initialValue = useMemo(() => {
+    return ML_STORAGE_KEYS.reduce((acc, curr) => {
+      acc[curr as MlStorageKey] = storage.get(curr);
+      return acc;
+    }, {} as Exclude<MlStorage, null>);
+  }, [storage]);
 
   const [state, setState] = useState<MlStorage>(initialValue);
 
@@ -44,21 +46,20 @@ export const MlStorageContextProvider: FC = ({ children }) => {
     <K extends MlStorageKey, T extends TMlStorageMapped<K>>(key: K, value: T) => {
       storage.set(key, value);
 
-      const update = {
-        ...state,
+      setState((prevState) => ({
+        ...prevState,
         [key]: value,
-      };
-      setState(update);
+      }));
     },
-    [state, storage]
+    [storage]
   );
 
   const removeStorageValue = useCallback(
     (key: MlStorageKey) => {
       storage.remove(key);
-      setState(omit(state, key));
+      setState((prevState) => omit(prevState, key));
     },
-    [state, storage]
+    [storage]
   );
 
   useEffect(function updateStorageOnExternalChange() {
