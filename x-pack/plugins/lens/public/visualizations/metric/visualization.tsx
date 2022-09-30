@@ -145,7 +145,7 @@ const getMetricLayerConfiguration = (
         enableDimensionEditor: true,
         enableFormatSelector: true,
         formatSelectorOptions: formatterOptions,
-        required: true,
+        requiredMinDimensionCount: 1,
       },
       {
         groupId: GROUP_ID.SECONDARY_METRIC,
@@ -170,7 +170,6 @@ const getMetricLayerConfiguration = (
         enableDimensionEditor: true,
         enableFormatSelector: true,
         formatSelectorOptions: formatterOptions,
-        required: false,
       },
       {
         groupId: GROUP_ID.MAX,
@@ -195,7 +194,6 @@ const getMetricLayerConfiguration = (
         formatSelectorOptions: formatterOptions,
         supportStaticValue: true,
         prioritizedOperation: 'max',
-        required: false,
         groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
           defaultMessage: 'If the maximum value is specified, the minimum value is fixed at zero.',
         }),
@@ -219,7 +217,6 @@ const getMetricLayerConfiguration = (
         enableDimensionEditor: true,
         enableFormatSelector: true,
         formatSelectorOptions: formatterOptions,
-        required: false,
       },
     ],
   };

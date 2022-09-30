@@ -174,8 +174,8 @@ export function LayerPanels(
           fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerToRemoveId),
           usedDataViews: layerDatasource
             .getLayers(layerDatasourceState)
-            .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layerToRemoveId)),
-          defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
+            .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
+          defaultDataView: layerDatasource.getUsedDataView(layerDatasourceState),
         } as ActionExecutionContext);
       }
 

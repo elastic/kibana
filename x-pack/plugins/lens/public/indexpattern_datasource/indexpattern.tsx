@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
@@ -68,7 +69,8 @@ import {
   isColumnInvalid,
   cloneLayer,
 } from './utils';
-import { normalizeOperationDataType, isDraggedField } from './pure_utils';
+import { isDraggedDataViewField } from '../utils';
+import { normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
@@ -131,6 +133,7 @@ export function getIndexPatternDatasource({
   storage,
   data,
   unifiedSearch,
+  discover,
   dataViews,
   fieldFormats,
   charts,
@@ -141,6 +144,7 @@ export function getIndexPatternDatasource({
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  discover?: DiscoverStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
@@ -306,6 +310,7 @@ export function getIndexPatternDatasource({
                 fieldFormats,
                 charts,
                 unifiedSearch,
+                discover,
               }}
             >
               <IndexPatternDataPanel
@@ -646,7 +651,7 @@ export function getIndexPatternDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {
-      return isDraggedField(draggedField)
+      return isDraggedDataViewField(draggedField)
         ? getDatasourceSuggestionsForField(
             state,
             draggedField.indexPatternId,
@@ -808,7 +813,10 @@ export function getIndexPatternDatasource({
         injectReferences(persistableState1, references1),
         injectReferences(persistableState2, references2)
       ),
-    getUsedDataView: (state: IndexPatternPrivateState, layerId: string) => {
+    getUsedDataView: (state: IndexPatternPrivateState, layerId?: string) => {
+      if (!layerId) {
+        return state.currentIndexPatternId;
+      }
       return state.layers[layerId].indexPatternId;
     },
     getUsedDataViews: (state) => {

@@ -135,5 +135,13 @@ Example: Visualize the change in bytes received over time:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.differences.documentation.quick',
+    {
+      defaultMessage: `
+      The change between the values in subsequent intervals.
+      `,
+    }
+  ),
   shiftable: true,
 };

@@ -414,7 +414,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       );
       state.stagedPreview = undefined;
       // reuse the activeDatasource current dataView id for the moment
-      const currentDataViewsId = activeDataSource.getCurrentIndexPatternId(
+      const currentDataViewsId = activeDataSource.getUsedDataView(
         state.datasourceStates[state.activeDatasourceId!].state
       );
       state.visualization.state =
@@ -995,7 +995,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const activeVisualization = visualizationMap[state.visualization.activeId];
       const activeDatasource = datasourceMap[state.activeDatasourceId];
       // reuse the active datasource dataView id for the new layer
-      const currentDataViewsId = activeDatasource.getCurrentIndexPatternId(
+      const currentDataViewsId = activeDatasource.getUsedDataView(
         state.datasourceStates[state.activeDatasourceId!].state
       );
       const visualizationState = activeVisualization.appendLayer!(

@@ -291,6 +291,7 @@ describe('lensSlice', () => {
             ...layersToLinkTo,
           ],
           getCurrentIndexPatternId: jest.fn(() => 'indexPattern1'),
+          getUsedDataView: jest.fn(() => 'indexPattern1'),
         };
       };
       const datasourceStates = {
