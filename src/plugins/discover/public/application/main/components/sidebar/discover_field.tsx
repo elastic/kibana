@@ -88,7 +88,7 @@ interface ActionButtonProps {
   field: DataViewField;
   isSelected?: boolean;
   alwaysShow: boolean;
-  toggleDisplay: (field: DataViewField) => void;
+  toggleDisplay: (field: DataViewField, isSelected?: boolean) => void;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = memo(
@@ -116,7 +116,7 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
               }
               ev.preventDefault();
               ev.stopPropagation();
-              toggleDisplay(field);
+              toggleDisplay(field, isSelected);
             }}
             data-test-subj={`fieldToggle-${field.name}`}
             aria-label={i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
@@ -144,7 +144,7 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
               }
               ev.preventDefault();
               ev.stopPropagation();
-              toggleDisplay(field);
+              toggleDisplay(field, isSelected);
             }}
             data-test-subj={`fieldToggle-${field.name}`}
             aria-label={i18n.translate(
@@ -306,17 +306,6 @@ function DiscoverFieldComponent({
     [setOpen, onAddFilter]
   );
 
-  const toggleDisplay = useCallback(
-    (f: DataViewField) => {
-      if (selected) {
-        onRemoveField(f.name);
-      } else {
-        onAddField(f.name);
-      }
-    },
-    [onAddField, onRemoveField, selected]
-  );
-
   const togglePopover = useCallback(() => {
     setOpen((value) => !value);
   }, [setOpen]);
@@ -324,6 +313,18 @@ function DiscoverFieldComponent({
   const closePopover = useCallback(() => {
     setOpen(false);
   }, [setOpen]);
+
+  const toggleDisplay: ActionButtonProps['toggleDisplay'] = useCallback(
+    (f, isCurrentlySelected) => {
+      closePopover();
+      if (isCurrentlySelected) {
+        onRemoveField(f.name);
+      } else {
+        onAddField(f.name);
+      }
+    },
+    [onAddField, onRemoveField, closePopover]
+  );
 
   const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
 
