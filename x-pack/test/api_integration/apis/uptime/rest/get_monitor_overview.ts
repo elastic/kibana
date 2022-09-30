@@ -11,7 +11,6 @@ import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS, API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { deleteMonitor, saveMonitor } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('[GET] /internal/synthetics/overview', function () {
@@ -22,26 +21,26 @@ export default function ({ getService }: FtrProviderContext) {
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
 
-    // const deleteMonitor = async (id: string) => {
-    //   try {
-    //     await supertest
-    //       .delete(`${API_URLS.SYNTHETICS_MONITORS}/${id}`)
-    //       .set('kbn-xsrf', 'true')
-    //       .expect(200);
-    //   } catch (e) {
-    //     // eslint-disable-next-line no-console
-    //     console.error(e);
-    //   }
-    // };
+    const deleteMonitor = async (id: string) => {
+      try {
+        await supertest
+          .delete(`${API_URLS.SYNTHETICS_MONITORS}/${id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
+    };
 
-    // const saveMonitor = async (monitor: MonitorFields) => {
-    //   const res = await supertest
-    //     .post(API_URLS.SYNTHETICS_MONITORS)
-    //     .set('kbn-xsrf', 'true')
-    //     .send(monitor);
+    const saveMonitor = async (monitor: MonitorFields) => {
+      const res = await supertest
+        .post(API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor);
 
-    //   return res.body as SimpleSavedObject<MonitorFields>;
-    // };
+      return res.body as SimpleSavedObject<MonitorFields>;
+    };
 
     before(async () => {
       await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
@@ -51,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await Promise.all([
         (body.monitors as Array<SimpleSavedObject<MonitorFields>>).map((monitor) => {
-          return deleteMonitor(supertest, monitor.id, API_URLS.SYNTHETICS_MONITORS);
+          return deleteMonitor(monitor.id);
         }),
       ]);
 
@@ -72,9 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns the correct response', async () => {
         let savedMonitors: SimpleSavedObject[] = [];
         try {
-          const savedResponse = await Promise.all(
-            monitors.map((monitor) => saveMonitor(supertest, monitor, API_URLS.SYNTHETICS_MONITORS))
-          );
+          const savedResponse = await Promise.all(monitors.map(saveMonitor));
           savedMonitors = savedResponse;
 
           const apiResponse = await supertest.get(
@@ -90,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         } finally {
           await Promise.all(
             savedMonitors.map((monitor) => {
-              return deleteMonitor(supertest, monitor.id, API_URLS.SYNTHETICS_MONITORS);
+              return deleteMonitor(monitor.id);
             })
           );
         }
@@ -99,9 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('adjusts pagination correctly', async () => {
         let savedMonitors: SimpleSavedObject[] = [];
         try {
-          const savedResponse = await Promise.all(
-            monitors.map((monitor) => saveMonitor(supertest, monitor, API_URLS.SYNTHETICS_MONITORS))
-          );
+          const savedResponse = await Promise.all(monitors.map(saveMonitor));
           savedMonitors = savedResponse;
 
           const apiResponse = await supertest.get(
@@ -116,9 +111,9 @@ export default function ({ getService }: FtrProviderContext) {
           expect(apiResponse.body.pages[1].length).eql(5);
         } finally {
           await Promise.all(
-            savedMonitors.map((monitor) =>
-              deleteMonitor(supertest, monitor.id, API_URLS.SYNTHETICS_MONITORS)
-            )
+            savedMonitors.map((monitor) => {
+              return deleteMonitor(monitor.id);
+            })
           );
         }
       });

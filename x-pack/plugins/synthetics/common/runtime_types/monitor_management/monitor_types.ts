@@ -405,9 +405,6 @@ export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   t.interface({
     secrets: t.string,
   }),
-  t.partial({
-    custom_heartbeat_id: t.string,
-  }),
 ]);
 
 export type Secret = typeof secretKeys[number];
