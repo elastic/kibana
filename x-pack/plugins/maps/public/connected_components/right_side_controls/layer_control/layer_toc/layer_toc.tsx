@@ -31,8 +31,13 @@ export class LayerTOC extends Component<Props> {
   _updateDebounced = _.debounce(this.forceUpdate, 100);
 
   _onDragEnd = ({ combine, destination, source }: DropResult) => {
+    // Layer list is displayed in reverse order so index needs to reversed to get back to original reference.
+    const reverseIndex = (index: number) => {
+      return this.props.layerList.length - index - 1;
+    };
+
     if (combine) {
-      this.props.createLayerGroup(this.props.layerList[source.index].getId(), combine.draggableId);
+      this.props.createLayerGroup(this.props.layerList[reverseIndex(source.index)].getId(), combine.draggableId);
       return;
     }
 
@@ -40,11 +45,6 @@ export class LayerTOC extends Component<Props> {
     if (!destination) {
       return;
     }
-
-    // Layer list is displayed in reverse order so index needs to reversed to get back to original reference.
-    const reverseIndex = (index: number) => {
-      return this.props.layerList.length - index - 1;
-    };
 
     const prevIndex = reverseIndex(source.index);
     const newIndex = reverseIndex(destination.index);
@@ -83,18 +83,19 @@ export class LayerTOC extends Component<Props> {
               >
                 {(provided, state) => {
                   if (state.combineWith) {
-                    //console.log('state.combineWith', state.combineWith);
-                    //console.log('state.combineTargetFor', state.combineTargetFor);
+                    // console.log('state.combineWith', state.combineWith);
+                    // console.log('state.combineTargetFor', state.combineTargetFor);
                   }
                   return (
-                  <TOCEntry
-                    layer={layer}
-                    dragHandleProps={provided.dragHandleProps}
-                    isDragging={state.isDragging}
-                    isCombining={!!state.combineWith}
-                    isDraggingOver={snapshot.isDraggingOver}
-                  />
-                )}}
+                    <TOCEntry
+                      layer={layer}
+                      dragHandleProps={provided.dragHandleProps}
+                      isDragging={state.isDragging}
+                      isCombining={!!state.combineWith}
+                      isDraggingOver={snapshot.isDraggingOver}
+                    />
+                  );
+                }}
               </EuiDraggable>
             ));
             return <div>{tocEntries}</div>;

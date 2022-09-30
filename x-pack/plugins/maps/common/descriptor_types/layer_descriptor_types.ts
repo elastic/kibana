@@ -72,7 +72,6 @@ export type LayerDescriptor = {
   query?: Query;
   includeInFitToBounds?: boolean;
   parent?: string;
-  order: number;
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
@@ -92,10 +91,11 @@ export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
   style: EMSVectorTileStyleDescriptor;
 };
 
-export type LayerGroup = {
+export type LayerGroupDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.LAYER_GROUP;
   id: string;
-  name: string;
-  order: number;
+  label: string;
   parent?: string;
+  sourceDescriptor: null;
   visible: boolean;
-}
+};

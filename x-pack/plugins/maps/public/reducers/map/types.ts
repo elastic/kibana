@@ -15,7 +15,6 @@ import {
   EditState,
   Goto,
   LayerDescriptor,
-  LayerGroup,
   MapCenter,
   MapExtent,
   MapSettings,
@@ -60,7 +59,6 @@ export type MapState = {
   mapState: MapContext;
   selectedLayerId: string | null;
   layerList: LayerDescriptor[];
-  layerGroups: LayerGroup[];
   waitingForMapReadyLayerList: LayerDescriptor[];
   settings: MapSettings;
   __rollbackSettings: MapSettings | null;

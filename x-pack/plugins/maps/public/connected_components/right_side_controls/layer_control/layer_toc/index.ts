@@ -23,7 +23,8 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) => dispatch(createLayerGroup(draggedLayerId, combineWithLayerId)),
+    createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) =>
+      dispatch(createLayerGroup(draggedLayerId, combineWithLayerId)),
     updateLayerOrder: (newOrder: number[]) => dispatch(updateLayerOrder(newOrder)),
   };
 }
