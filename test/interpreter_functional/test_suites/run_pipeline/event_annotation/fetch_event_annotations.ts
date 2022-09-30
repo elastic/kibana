@@ -18,8 +18,7 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
 
-  // Failing: See https://github.com/elastic/kibana/issues/140113
-  describe.skip('fetch event annotation tests', () => {
+  describe('fetch event annotation tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
@@ -48,7 +47,7 @@ export default function ({
     `;
       const result = await expectExpression('fetch_event_annotations', expression).getResponse();
 
-      expect(result.rows.length).to.equal(2); // filters out hidden annotations
+      expect(result.rows.length).to.equal(3);
       expect(result.rows).to.eql([
         {
           id: 'ann3',
@@ -70,6 +69,16 @@ export default function ({
           icon: 'bolt',
           lineWidth: 3,
           textVisibility: true,
+        },
+        {
+          id: 'ann2',
+          time: '2015-09-21T12:30:00Z',
+          timebucket: '2015-09-20T14:30:00.000Z',
+          type: 'point',
+          label: 'ManualHidden',
+          color: 'pink',
+          icon: 'triangle',
+          isHidden: true,
         },
       ]);
     });
