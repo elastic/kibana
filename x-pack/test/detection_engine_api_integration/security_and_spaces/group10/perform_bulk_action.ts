@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const fetchRuleByAlertApi = (ruleId: string) =>
     supertest.get(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
 
-  const createConnector = async <T extends Record<string, unknown>>(payload: T) =>
+  const createConnector = async (payload: Record<string, unknown>) =>
     (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
       .body;
 
