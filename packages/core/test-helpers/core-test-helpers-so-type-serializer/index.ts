@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type { SavedObjectTypeMigrationInfo } from './src/extract_migration_info';
+export { extractMigrationInfo } from './src/extract_migration_info';
+export { getMigrationHash } from './src/get_migration_hash';
