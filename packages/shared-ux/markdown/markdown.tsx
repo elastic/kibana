@@ -12,10 +12,24 @@ import React, { useState } from 'react';
 interface MarkdownProps {
   initialContent: string;
   ariaLabelContent: string;
+  /** needed for instances where markdown is used as a presentation of error messages */
+  readonly: boolean;
 }
 
-export const Markdown = ({ initialContent, ariaLabelContent }: MarkdownProps) => {
+export const Markdown = ({ initialContent, ariaLabelContent, readonly }: MarkdownProps) => {
   const [value, setValue] = useState(initialContent);
+
+  if (readonly) {
+    return (
+        <EuiMarkdownEditor
+          readOnly
+          aria-label={ariaLabelContent ?? 'markdown component'}
+          value={value}
+          onChange={setValue}
+          height='full'
+        />
+    )
+  }
 
   return (
     <EuiMarkdownEditor
@@ -24,7 +38,7 @@ export const Markdown = ({ initialContent, ariaLabelContent }: MarkdownProps) =>
       initialViewMode="viewing"
       value={value}
       onChange={setValue}
-      height={200}
+      height='full'
     />
   );
 };
