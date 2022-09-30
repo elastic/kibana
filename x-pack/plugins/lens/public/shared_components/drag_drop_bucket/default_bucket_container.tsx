@@ -84,7 +84,7 @@ export const DefaultBucketContainer = ({
           >
             <EuiButtonIcon
               iconSize="s"
-              iconType="cross"
+              iconType="trash"
               color="danger"
               onClick={onRemoveClick}
               aria-label={removeTitle}
