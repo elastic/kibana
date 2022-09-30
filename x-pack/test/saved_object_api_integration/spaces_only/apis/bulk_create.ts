@@ -116,7 +116,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('_bulk_create', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/141782
+  describe.skip('_bulk_create', () => {
     getTestScenarios([false, true]).spaces.forEach(({ spaceId, modifier: overwrite }) => {
       const suffix = overwrite ? ' with overwrite enabled' : '';
       const tests = createTests(overwrite!, spaceId);
