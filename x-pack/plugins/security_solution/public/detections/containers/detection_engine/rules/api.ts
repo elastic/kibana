@@ -434,3 +434,4 @@ export const addRuleExceptions = async ({
       signal,
     }
   );
+};

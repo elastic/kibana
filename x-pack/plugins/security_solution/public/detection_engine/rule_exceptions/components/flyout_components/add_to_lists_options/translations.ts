@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const ADD_TO_LISTS_OPTION = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.addToListsOptions.addToListsOptionLabel',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsOptions.addToListsOptionLabel',
   {
     defaultMessage: 'Add to shared exception lists',
   }
 );
 
 export const ADD_TO_LISTS_OPTION_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.addToListsOptions.addToListsTooltip',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsOptions.addToListsTooltip',
   {
     defaultMessage:
       'Shared exception list is a group of exceptions. Select this option if you’d like to add this exception to shared exception lists.',
@@ -24,7 +24,7 @@ export const ADD_TO_LISTS_OPTION_TOOLTIP = i18n.translate(
 
 export const ADD_TO_LISTS_OPTION_DISABLED_TOOLTIP = (rulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.exceptions.flyoutComponents.addToListsOptions.addToListsTooltipTitle',
+    'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsOptions.addToListsTooltipTitle',
     {
       values: { rulesCount },
       defaultMessage:

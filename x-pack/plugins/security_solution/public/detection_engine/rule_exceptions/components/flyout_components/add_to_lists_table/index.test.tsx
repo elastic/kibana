@@ -48,7 +48,7 @@ describe('ExceptionsAddToListsTable', () => {
           ],
         },
       },
-      jest.fn(),
+      mockFn,
     ]);
   });
 
@@ -110,7 +110,7 @@ describe('ExceptionsAddToListsTable', () => {
     );
   });
 
-  it('it invokes "useFindExceptionListReferences" with empty array to fetch all lists if "showAllSharedLists" is "true"', () => {
+  it('it invokes "useFindExceptionListReferences" with array of namespace types to fetch all lists if "showAllSharedLists" is "true"', () => {
     mount(
       <TestProviders>
         <ExceptionsAddToListsTable
@@ -128,7 +128,10 @@ describe('ExceptionsAddToListsTable', () => {
       </TestProviders>
     );
 
-    expect(mockFn).toHaveBeenCalledWith([]);
+    expect(mockFn).toHaveBeenCalledWith([
+      { namespaceType: 'single' },
+      { namespaceType: 'agnostic' },
+    ]);
   });
 
   it('it displays lists with rule references', async () => {

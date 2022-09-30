@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ADD_TO_SELECTED_RULES_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.addToRulesTableSelection.addToSelectedRulesDescription',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToRulesTableSelection.addToSelectedRulesDescription',
   {
     defaultMessage:
       'Select rules add to. We will make a copy of this exception if it links to multiple rules. ',

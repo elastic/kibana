@@ -8,7 +8,6 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type { FindResult } from '@kbn/alerting-plugin/server';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
@@ -75,9 +74,9 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
           return response.ok({ body: { references: [] } });
         }
 
-        const references = await Promise.all(
+        const references: RuleReferencesSchema[] = await Promise.all(
           foundExceptionLists.data.map(async (list, index) => {
-            const foundRules = await rulesClient.find({
+            const foundRules = await rulesClient.find<RuleParams>({
               options: {
                 perPage: 10000,
                 filter: enrichFilterWithRuleTypeMapping(null),
@@ -103,8 +102,6 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
             };
           })
         );
-
-        console.log({ references: JSON.stringify(references) });
 
         const [validated, errors] = validate({ references }, rulesReferencedByExceptionListsSchema);
 

@@ -8,7 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const COMMENTS_SECTION_TITLE = (comments: number) =>
-  i18n.translate('xpack.securitySolution.exceptions.flyoutComponents.itemComments.commentsTitle', {
-    values: { comments },
-    defaultMessage: 'Add comments ({comments})',
-  });
+  i18n.translate(
+    'xpack.securitySolution.rule_exceptions.flyoutComponents.itemComments.commentsTitle',
+    {
+      values: { comments },
+      defaultMessage: 'Add comments ({comments})',
+    }
+  );

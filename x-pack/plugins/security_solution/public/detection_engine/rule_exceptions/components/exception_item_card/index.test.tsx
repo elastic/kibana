@@ -33,6 +33,9 @@ describe('ExceptionItemCard', () => {
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
                 exception_lists: [
                   {
                     id: '123',
@@ -47,9 +50,6 @@ describe('ExceptionItemCard', () => {
                     type: 'detection',
                   },
                 ],
-                id: '1a2b3c',
-                name: 'Simple Rule Query',
-                rule_id: 'rule-2',
               },
             ],
           }}
@@ -82,6 +82,9 @@ describe('ExceptionItemCard', () => {
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
                 exception_lists: [
                   {
                     id: '123',
@@ -96,9 +99,6 @@ describe('ExceptionItemCard', () => {
                     type: 'detection',
                   },
                 ],
-                id: '1a2b3c',
-                name: 'Simple Rule Query',
-                rule_id: 'rule-2',
               },
             ],
           }}
@@ -130,6 +130,9 @@ describe('ExceptionItemCard', () => {
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
                 exception_lists: [
                   {
                     id: '123',
@@ -144,9 +147,6 @@ describe('ExceptionItemCard', () => {
                     type: 'detection',
                   },
                 ],
-                id: '1a2b3c',
-                name: 'Simple Rule Query',
-                rule_id: 'rule-2',
               },
             ],
           }}
@@ -174,6 +174,9 @@ describe('ExceptionItemCard', () => {
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
                 exception_lists: [
                   {
                     id: '123',
@@ -188,9 +191,6 @@ describe('ExceptionItemCard', () => {
                     type: 'detection',
                   },
                 ],
-                id: '1a2b3c',
-                name: 'Simple Rule Query',
-                rule_id: 'rule-2',
               },
             ],
           }}
@@ -290,6 +290,9 @@ describe('ExceptionItemCard', () => {
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
                 exception_lists: [
                   {
                     id: '123',
@@ -304,9 +307,6 @@ describe('ExceptionItemCard', () => {
                     type: 'detection',
                   },
                 ],
-                id: '1a2b3c',
-                name: 'Simple Rule Query',
-                rule_id: 'rule-2',
               },
             ],
           }}
@@ -413,6 +413,9 @@ describe('ExceptionItemCard', () => {
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
                 exception_lists: [
                   {
                     id: '123',
@@ -427,9 +430,6 @@ describe('ExceptionItemCard', () => {
                     type: 'detection',
                   },
                 ],
-                id: '1a2b3c',
-                name: 'Simple Rule Query',
-                rule_id: 'rule-2',
               },
             ],
           }}

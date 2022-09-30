@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const LINKED_TO_RULE_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.linkedToRule.title',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.linkedToRule.title',
   {
     defaultMessage: 'Linked to rule',
   }

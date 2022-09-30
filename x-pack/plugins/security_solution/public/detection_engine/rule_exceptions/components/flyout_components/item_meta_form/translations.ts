@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const RULE_EXCEPTION_NAME_LABEL = i18n.translate(
-  'xpack.securitySolution.exceptions.itemMeta.nameLabel',
+  'xpack.securitySolution.rule_exceptions.itemMeta.nameLabel',
   {
     defaultMessage: 'Rule exception name',
   }
 );
 
 export const RULE_EXCEPTION_NAME_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.exceptions.itemMeta.namePlaceholder',
+  'xpack.securitySolution.rule_exceptions.itemMeta.namePlaceholder',
   {
     defaultMessage: 'Name your rule exception',
   }

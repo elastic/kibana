@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ADD_TO_LISTS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.addToListsTableSelection.addToListsDescription',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsTableSelection.addToListsDescription',
   {
     defaultMessage:
       'Select shared exception list to add to. We will make a copy of this exception if multiple lists are selected.',
@@ -16,14 +16,14 @@ export const ADD_TO_LISTS_DESCRIPTION = i18n.translate(
 );
 
 export const VIEW_LIST_DETAIL_ACTION = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.addToListsTableSelection.viewListDetailActionLabel',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsTableSelection.viewListDetailActionLabel',
   {
     defaultMessage: 'View list detail',
   }
 );
 
 export const REFERENCES_FETCH_ERROR = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.addToListsTableSelection.referencesFetchError',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsTableSelection.referencesFetchError',
   {
     defaultMessage: 'Unable to load shared exception lists',
   }

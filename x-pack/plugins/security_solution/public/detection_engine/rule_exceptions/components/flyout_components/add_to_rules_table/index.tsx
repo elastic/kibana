@@ -70,7 +70,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
       },
       filters: [
         {
-          type: 'field_value_selection',
+          type: 'field_value_selection' as const,
           field: 'tags',
           name: i18n.translate(
             'xpack.securitySolution.exceptions.addToRulesTable.tagsFilterLabel',
@@ -78,7 +78,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
               defaultMessage: 'Tags',
             }
           ),
-          multiSelect: true,
+          multiSelect: 'or' as const,
           options: rules.flatMap(({ tags }) => {
             return tags.map((tag) => ({
               value: tag,

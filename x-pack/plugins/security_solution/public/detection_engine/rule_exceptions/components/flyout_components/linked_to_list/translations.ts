@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const LINKED_TO_LIST_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.linkedToListSection.title',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.linkedToListSection.title',
   {
     defaultMessage: 'Linked to shared list',
   }
 );
 
 export const LINKED_TO_LIST_ERROR = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.linkedToListSection.error',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.linkedToListSection.error',
   {
     defaultMessage: 'Unable to fetch exception list.',
   }

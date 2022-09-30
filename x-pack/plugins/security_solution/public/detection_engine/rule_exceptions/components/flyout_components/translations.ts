@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const VIEW_LIST_DETAIL_ACTION = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.viewListDetailActionLabel',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.viewListDetailActionLabel',
   {
     defaultMessage: 'View list detail',
   }
 );
 
 export const VIEW_RULE_DETAIL_ACTION = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.viewRuleDetailActionLabel',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.viewRuleDetailActionLabel',
   {
     defaultMessage: 'View rule detail',
   }

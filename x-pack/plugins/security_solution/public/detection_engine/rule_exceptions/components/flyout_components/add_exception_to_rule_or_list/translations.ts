@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ADD_TO_LISTS_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.flyoutComponents.addExceptionToRuleOrList.addToListsLabel',
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addExceptionToRuleOrList.addToListsLabel',
   {
     defaultMessage: 'Add to rule or lists',
   }

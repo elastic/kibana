@@ -32,6 +32,7 @@ import type {
 } from '@kbn/securitysolution-list-utils';
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
+
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
@@ -821,10 +822,8 @@ export const enrichRuleExceptions = (
   exceptionItems: ExceptionsBuilderReturnExceptionItem[]
 ): ExceptionsBuilderReturnExceptionItem[] => {
   return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
-    const entries = item.entries.map(({ id, ...rest }) => ({ ...rest }));
     return {
       ...item,
-      entries,
       list_id: undefined,
       namespace_type: 'single',
     };
@@ -842,11 +841,8 @@ export const enrichSharedExceptions = (
 ): ExceptionsBuilderReturnExceptionItem[] => {
   return lists.flatMap((list) => {
     return exceptionItems.map((item) => {
-      const entries = item.entries.map(({ id, ...rest }) => ({ ...rest }));
-
       return {
         ...item,
-        entries,
         list_id: list.list_id,
         namespace_type: list.namespace_type,
       };
