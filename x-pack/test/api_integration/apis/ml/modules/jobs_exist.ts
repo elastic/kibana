@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('POST ml/modules/jobs_exist/{moduleId}', function () {
+  describe('GET ml/modules/jobs_exist/{moduleId}', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await esArchiver.loadIfNeeded(sourceDataArchive);
