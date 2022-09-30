@@ -17,7 +17,7 @@ import type {
   IInterpreterRenderHandlers,
   Datatable,
 } from '@kbn/expressions-plugin/public';
-import type { NavigateToLensContext } from '@kbn/visualizations-plugin/common';
+import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
@@ -218,25 +218,18 @@ export interface InitializationOptions {
   isFullEditor?: boolean;
 }
 
-export type VisualizeEditorContext = {
+export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
-} & NavigateToLensContext;
+} & NavigateToLensContext<T>;
 
 export interface GetDropPropsArgs<T = unknown> {
   state: T;
   source?: DraggingIdentifier;
-  target: {
-    layerId: string;
-    groupId: string;
-    columnId: string;
-    filterOperations: (meta: OperationMetadata) => boolean;
-    prioritizedOperation?: string;
-    isNewColumn?: boolean;
-  };
+  target: DragDropOperation;
   indexPatterns: IndexPatternMap;
 }
 
@@ -259,7 +252,6 @@ export interface Datasource<T = unknown, P = unknown> {
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
-  getCurrentIndexPatternId: (state: T) => string;
   getUnifiedSearchErrors?: (state: T) => Error[];
 
   insertLayer: (state: T, newLayerId: string) => T;
@@ -442,7 +434,7 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * Get the used DataView value from state
    */
-  getUsedDataView: (state: T, layerId: string) => string;
+  getUsedDataView: (state: T, layerId?: string) => string;
   /**
    * Get all the used DataViews from state
    */
@@ -594,7 +586,15 @@ export interface DragDropOperation {
   groupId: string;
   columnId: string;
   filterOperations: (operation: OperationMetadata) => boolean;
+  indexPatternId?: string;
+  isNewColumn?: boolean;
+  prioritizedOperation?: string;
 }
+
+export type DraggedField = DragDropIdentifier & {
+  field: IndexPatternField;
+  indexPatternId: string;
+};
 
 export function isOperation(operationCandidate: unknown): operationCandidate is DragDropOperation {
   return (
@@ -716,7 +716,6 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportsMoreColumns: boolean;
   dimensionsTooMany?: number;
   /** If required, a warning will appear if accessors are empty */
-  required?: boolean;
   requiredMinDimensionCount?: number;
   dataTestSubj?: string;
   prioritizedOperation?: string;
@@ -905,6 +904,7 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
 
+  getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**
    * Retrieve the used DataViews in the visualization
    */
@@ -1045,6 +1045,10 @@ export interface Visualization<T = unknown, P = unknown> {
     group?: VisualizationDimensionGroupConfig;
   }) => T;
 
+  getDropProps?: (
+    dropProps: GetDropPropsArgs
+  ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
+
   /**
    * Additional editor that gets rendered inside the dimension popover.
    * This can be used to configure dimension-specific options
@@ -1151,7 +1155,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getSuggestionFromConvertToLensContext?: (
     props: VisualizationStateFromContextChangeProps
-  ) => Suggestion;
+  ) => Suggestion | undefined;
 }
 
 // Use same technique as TriggerContext
