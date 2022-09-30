@@ -5,81 +5,48 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { ListClient } from '@kbn/lists-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { Filter } from '@kbn/es-query';
 import { getFilter } from '../get_filter';
 import { BucketHistory, groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
+import type { UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { ConfigType } from '../../../../config';
 import { scheduleNotificationResponseActions } from '../../rule_response_actions/schedule_notification_response_actions';
 import type { SetupPlugins } from '../../../../plugin_contract';
+import { RunOpts } from '../../rule_types/types';
 
 export const queryExecutor = async ({
-  inputIndex,
-  runtimeMappings,
-  completeRule,
-  tuple,
-  listClient,
+  runOpts,
   experimentalFeatures,
-  ruleExecutionLogger,
   eventsTelemetry,
   services,
   version,
-  searchAfterSize,
-  bulkCreate,
-  wrapHits,
-  primaryTimestamp,
-  secondaryTimestamp,
-  aggregatableTimestampField,
   spaceId,
-  mergeStrategy,
   bucketHistory,
-  unprocessedExceptions,
-  exceptionFilter,
   osqueryCreateAction,
   licensing,
 }: {
-  inputIndex: string[];
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  completeRule: CompleteRule<UnifiedQueryRuleParams>;
-  tuple: RuleRangeTuple;
-  listClient: ListClient;
+  runOpts: RunOpts<UnifiedQueryRuleParams>;
   experimentalFeatures: ExperimentalFeatures;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   eventsTelemetry: ITelemetryEventsSender | undefined;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
-  searchAfterSize: number;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  aggregatableTimestampField: string;
   spaceId: string;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
   bucketHistory?: BucketHistory[];
-  unprocessedExceptions: ExceptionListItemSchema[];
-  exceptionFilter: Filter | undefined;
   osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
   licensing: LicensingPluginSetup;
 }) => {
+  const completeRule = runOpts.completeRule;
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('queryExecutor', async () => {
@@ -90,43 +57,38 @@ export const queryExecutor = async ({
       query: ruleParams.query,
       savedId: ruleParams.savedId,
       services,
-      index: inputIndex,
-      exceptionFilter,
+      index: runOpts.inputIndex,
+      exceptionFilter: runOpts.exceptionFilter,
     });
 
-    const searchParams = {
-      tuple,
-      exceptionsList: unprocessedExceptions,
-      services,
-      listClient,
-      ruleExecutionLogger,
-      eventsTelemetry,
-      inputIndexPattern: inputIndex,
-      pageSize: searchAfterSize,
-      filter: esFilter,
-      buildReasonMessage: buildReasonMessageForQueryAlert,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings,
-      primaryTimestamp,
-      secondaryTimestamp,
-      aggregatableTimestampField,
-      spaceId,
-      mergeStrategy,
-      bucketHistory,
-      completeRule,
-    };
-
-    if (
-      experimentalFeatures.alertGroupingEnabled &&
-      completeRule.ruleParams.alertGrouping?.groupBy != null
-    ) {
+    if (ruleParams.alertGrouping?.groupBy != null) {
       return groupAndBulkCreate({
-        ...searchParams,
-        groupByFields: completeRule.ruleParams.alertGrouping.groupBy,
+        runOpts,
+        services,
+        spaceId,
+        filter: esFilter,
+        buildReasonMessage: buildReasonMessageForQueryAlert,
+        bucketHistory,
+        groupByFields: ruleParams.alertGrouping.groupBy,
       });
     } else {
-      const result = await searchAfterAndBulkCreate(searchParams);
+      const result = await searchAfterAndBulkCreate({
+        tuple: runOpts.tuple,
+        exceptionsList: runOpts.unprocessedExceptions,
+        services,
+        listClient: runOpts.listClient,
+        ruleExecutionLogger: runOpts.ruleExecutionLogger,
+        eventsTelemetry,
+        inputIndexPattern: runOpts.inputIndex,
+        pageSize: runOpts.searchAfterSize,
+        filter: esFilter,
+        buildReasonMessage: buildReasonMessageForQueryAlert,
+        bulkCreate: runOpts.bulkCreate,
+        wrapHits: runOpts.wrapHits,
+        runtimeMappings: runOpts.runtimeMappings,
+        primaryTimestamp: runOpts.primaryTimestamp,
+        secondaryTimestamp: runOpts.secondaryTimestamp,
+      });
 
       const license = await firstValueFrom(licensing.license$);
       const hasGoldLicense = license.hasAtLeast('gold');

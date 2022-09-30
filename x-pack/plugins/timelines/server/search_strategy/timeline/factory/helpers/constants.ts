@@ -59,6 +59,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   ALERT_RISK_SCORE,
   'kibana.alert.threshold_result',
   'kibana.alert.building_block_type',
+  'kibana.alert.throttle.count',
   'event.code',
   'event.module',
   'event.action',

@@ -19,6 +19,7 @@ import {
 import {
   isEqlRule,
   isNewTermsRule,
+  isQueryRule,
   isThreatMatchRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
@@ -552,6 +553,43 @@ export const schema: FormSchema<DefineStepRule> = {
               };
             }
           }
+        },
+      },
+    ],
+  },
+  groupByFields: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
+      {
+        defaultMessage: 'Group Alerts By',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
+      {
+        defaultMessage: 'Select field(s) to group alerts by',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isQueryRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+          return fieldValidators.maxLengthField({
+            length: 3,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.groupByFieldsMax',
+              {
+                defaultMessage: 'Number of grouping fields must be at most 3',
+              }
+            ),
+          })(...args);
         },
       },
     ],

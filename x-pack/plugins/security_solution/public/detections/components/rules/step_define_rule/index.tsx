@@ -76,6 +76,7 @@ import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
+import { GroupByFields } from '../group_by_fields';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -751,6 +752,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     euiFieldProps: {
                       disabled: isLoading,
                     },
+                  }}
+                />
+              </RuleTypeEuiFormRow>
+              <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)} fullWidth>
+                <UseField
+                  path="groupByFields"
+                  component={GroupByFields}
+                  componentProps={{
+                    browserFields: aggFields,
                   }}
                 />
               </RuleTypeEuiFormRow>

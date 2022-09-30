@@ -325,6 +325,7 @@ const savedQueryRuleParams = {
     data_view_id,
     query,
     filters,
+    alert_grouping: alertGrouping,
     response_actions: ResponseActionArray,
   },
   defaultable: {

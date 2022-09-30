@@ -7,7 +7,6 @@
 
 /* eslint-disable complexity */
 
-import { identity } from 'lodash';
 import moment from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
@@ -16,14 +15,12 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildTimeRangeFilter } from '../build_events_query';
 import type {
   EventGroupingMultiBucketAggregationResult,
+  GroupAndBulkCreateParams,
   GroupAndBulkCreateReturnType,
-  SearchAfterAndBulkCreateParams,
 } from '../types';
 import { addToSearchAfterReturn, getUnprocessedExceptionsWarnings } from '../utils';
-import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import type { ThrottleBuckets } from '../../rule_types/factories/utils/wrap_throttled_alerts';
 import { wrapThrottledAlerts } from '../../rule_types/factories/utils/wrap_throttled_alerts';
-import { ConfigType } from '../../../../config';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../single_search_after';
 
@@ -73,34 +70,17 @@ export const buildBucketHistoryFilter = ({
 
 // search_after through grouped documents and re-index using bulk endpoint.
 export const groupAndBulkCreate = async ({
-  buildReasonMessage,
-  bulkCreate,
-  completeRule,
-  enrichment = identity,
-  eventsTelemetry,
-  exceptionsList,
-  filter,
-  inputIndexPattern,
-  ruleExecutionLogger,
+  runOpts,
   services,
-  tuple,
-  runtimeMappings,
-  primaryTimestamp,
-  secondaryTimestamp,
-  bucketHistory,
-  aggregatableTimestampField,
   spaceId,
-  mergeStrategy,
+  filter,
+  buildReasonMessage,
+  bucketHistory,
   groupByFields,
-}: SearchAfterAndBulkCreateParams & {
-  bucketHistory?: BucketHistory[];
-  aggregatableTimestampField: string;
-  spaceId: string;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  completeRule: CompleteRule<UnifiedQueryRuleParams>;
-  groupByFields: string[];
-}): Promise<GroupAndBulkCreateReturnType> => {
+}: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
+    const tuple = runOpts.tuple;
+
     const filteredBucketHistory =
       bucketHistory?.filter((bucket) => {
         bucket.endDate > tuple.from.toDate();
@@ -121,7 +101,7 @@ export const groupAndBulkCreate = async ({
       },
     };
 
-    const exceptionsWarning = getUnprocessedExceptionsWarnings(exceptionsList);
+    const exceptionsWarning = getUnprocessedExceptionsWarnings(runOpts.unprocessedExceptions);
     if (exceptionsWarning) {
       toReturn.warningMessages.push(exceptionsWarning);
     }
@@ -133,30 +113,30 @@ export const groupAndBulkCreate = async ({
 
       const bucketHistoryFilter = buildBucketHistoryFilter({
         buckets: filteredBucketHistory,
-        primaryTimestamp,
-        secondaryTimestamp,
+        primaryTimestamp: runOpts.primaryTimestamp,
+        secondaryTimestamp: runOpts.secondaryTimestamp,
         from: tuple.from,
       });
 
       const groupingAggregation = buildGroupByFieldAggregation({
         groupByFields,
         maxSignals: tuple.maxSignals,
-        aggregatableTimestampField,
+        aggregatableTimestampField: runOpts.aggregatableTimestampField,
       });
 
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
         aggregations: groupingAggregation,
         searchAfterSortIds: undefined,
-        index: inputIndexPattern,
+        index: runOpts.inputIndex,
         from: tuple.from.toISOString(),
         to: tuple.to.toISOString(),
         services,
-        ruleExecutionLogger,
+        ruleExecutionLogger: runOpts.ruleExecutionLogger,
         filter,
         pageSize: 0,
-        primaryTimestamp,
-        secondaryTimestamp,
-        runtimeMappings,
+        primaryTimestamp: runOpts.primaryTimestamp,
+        secondaryTimestamp: runOpts.secondaryTimestamp,
+        runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
       });
       toReturn.searchAfterTimes.push(searchDuration);
@@ -189,19 +169,19 @@ export const groupAndBulkCreate = async ({
       const wrappedAlerts = wrapThrottledAlerts({
         throttleBuckets,
         spaceId,
-        completeRule,
-        mergeStrategy,
-        indicesToQuery: inputIndexPattern,
+        completeRule: runOpts.completeRule,
+        mergeStrategy: runOpts.mergeStrategy,
+        indicesToQuery: runOpts.inputIndex,
         buildReasonMessage,
       });
 
       // const enrichedEvents = await enrichment(wrappedAlerts);
 
-      const bulkCreateResult = await bulkCreate(wrappedAlerts);
+      const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
 
       addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 
-      ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+      runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
 
       const newBucketHistory: BucketHistory[] = buckets
         .filter((bucket) => {

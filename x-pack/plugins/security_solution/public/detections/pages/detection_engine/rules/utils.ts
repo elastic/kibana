@@ -140,6 +140,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
   newTermsFields: [],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
+  groupByFields: [],
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {

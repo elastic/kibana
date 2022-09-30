@@ -221,6 +221,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
+  groupByFields: [],
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

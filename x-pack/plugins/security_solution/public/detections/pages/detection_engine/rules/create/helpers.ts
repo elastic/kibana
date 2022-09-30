@@ -435,6 +435,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         history_window_start: `now-${ruleFields.historyWindowSize}`,
       }
     : {
+        ...(ruleFields.groupByFields.length > 0
+          ? { alert_grouping: { groupBy: ruleFields.groupByFields } }
+          : {}),
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,

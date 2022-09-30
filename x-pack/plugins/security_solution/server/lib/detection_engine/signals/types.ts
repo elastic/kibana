@@ -27,7 +27,7 @@ import type {
   EqlSequence,
 } from '../../../../common/detection_engine/types';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
-import type { RuleParams } from '../schemas/rule_schemas';
+import type { RuleParams, UnifiedQueryRuleParams } from '../schemas/rule_schemas';
 import type { GenericBulkCreateResponse } from '../rule_types/factories';
 import type { BuildReasonMessage } from './reason_formatters';
 import type {
@@ -39,8 +39,8 @@ import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import type { buildGroupByFieldAggregation } from './alert_grouping/build_group_by_field_aggregation';
 import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 import type { EnrichEvents } from './enrichments/types';
-import { QueryRuleState } from '../rule_types/query/create_query_alert_type';
 import { BucketHistory } from './alert_grouping/group_and_bulk_create';
+import { RunOpts } from '../rule_types/types';
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -284,6 +284,16 @@ export interface SearchAfterAndBulkCreateParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+}
+
+export interface GroupAndBulkCreateParams {
+  runOpts: RunOpts<UnifiedQueryRuleParams>;
+  services: RuleServices;
+  spaceId: string;
+  filter: estypes.QueryDslQueryContainer;
+  buildReasonMessage: BuildReasonMessage;
+  bucketHistory?: BucketHistory[];
+  groupByFields: string[];
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
