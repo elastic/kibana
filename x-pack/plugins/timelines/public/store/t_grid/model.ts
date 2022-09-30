@@ -154,5 +154,6 @@ export type SubsetTGridModel = Readonly<
     | 'graphEventId'
     | 'kqlMode'
     | 'sessionViewConfig'
+    | 'filterManager'
   >
 >;

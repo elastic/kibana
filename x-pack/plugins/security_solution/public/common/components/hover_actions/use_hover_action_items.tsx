@@ -13,6 +13,7 @@ import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
+import { tableDefaults, timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { dataTableSelectors } from '../../../timelines/store/data_table';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
@@ -106,9 +107,9 @@ export const useHoverActionItems = ({
   }, [scopeId]);
 
   const isInTimeline = isTimelineScope(scopeId ?? '');
-
-  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
-    getScope ? getScope(state, scopeId ?? '') : { filterManager: undefined }
+  const defaults = isInTableScope(scopeId ?? '') ? tableDefaults : timelineDefaults;
+  const { filterManager: activeFilterManager } = useDeepEqualSelector(
+    (state) => (getScope && getScope(state, scopeId ?? '')) ?? defaults
   );
   const filterManager = useMemo(
     () =>

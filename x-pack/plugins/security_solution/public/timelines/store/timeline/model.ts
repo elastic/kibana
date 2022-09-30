@@ -183,6 +183,7 @@ export type SubsetTimelineModel = Readonly<
     | 'version'
     | 'status'
     | 'filters'
+    | 'filterManager'
   >
 >;
 
