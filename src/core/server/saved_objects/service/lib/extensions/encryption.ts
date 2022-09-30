@@ -11,7 +11,7 @@ import type { SavedObject } from '../../../types';
 /**
  * The ISavedObjectsEncryptionExtension interface defines the functions of a saved objects
  * repository encryption extension. It contains functions for determining if a type is
- * encryptable, encrypting object attributes, and decrypting or stripping object attrtibutes.
+ * encryptable, encrypting object attributes, and decrypting or stripping object attributes.
  */
 export interface ISavedObjectsEncryptionExtension {
   /**
@@ -23,7 +23,7 @@ export interface ISavedObjectsEncryptionExtension {
 
   /**
    * Given a saved object, will return a decrypted saved object or will strip
-   * attributes from the returned object if decrpytion fails.
+   * attributes from the returned object if decryption fails.
    * @param response - any object R that extends SavedObject with attributes T
    * @param originalAttributes - optional, original attributes T from when the object was created (NOT encrypted).
    * These are used to avoid decryption execution cost if they are supplied.
@@ -39,7 +39,6 @@ export interface ISavedObjectsEncryptionExtension {
    * of supplied attributes.
    * @param descriptor - an object containing a saved object id, type, and optional namespace.
    * @param attributes - T, attributes of the specified object, some of which to be encrypted.
-   * These are used to avoid decryption execution cost if they are supplied.
    * @returns T, encrypted attributes
    */
   encryptAttributes: <T extends Record<string, unknown>>(

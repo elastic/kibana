@@ -33,39 +33,39 @@ interface Params {
 }
 
 export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExtension {
-  readonly _actions: Actions;
-  readonly _auditLogger: AuditLogger;
-  readonly _errors: SavedObjectsClientContract['errors'];
-  readonly _checkPrivileges: CheckSavedObjectsPrivileges;
+  private readonly actions: Actions;
+  private readonly auditLogger: AuditLogger;
+  private readonly errors: SavedObjectsClientContract['errors'];
+  private readonly checkPrivilegesFunc: CheckSavedObjectsPrivileges;
 
   constructor({ actions, auditLogger, errors, checkPrivileges }: Params) {
-    this._actions = actions;
-    this._auditLogger = auditLogger;
-    this._errors = errors;
-    this._checkPrivileges = checkPrivileges;
+    this.actions = actions;
+    this.auditLogger = auditLogger;
+    this.errors = errors;
+    this.checkPrivilegesFunc = checkPrivileges;
   }
 
   async checkAuthorization<A extends string>(
     params: CheckAuthorizationParams<A>
   ): Promise<CheckAuthorizationResult<A>> {
-    const { types, spaces, actions, options = {} } = params;
+    const { types, spaces, actions, options = { allowGlobalResource: false } } = params;
     const { allowGlobalResource } = options;
     if (types.size === 0) {
-      throw new Error('Failed to check authorization for 0 object types');
+      throw new Error('No types specified for authorization check');
     }
     if (spaces.size === 0) {
-      throw new Error('Failed to check authorization for 0 spaces');
+      throw new Error('No spaces specified for authorization check');
     }
     if (actions.length === 0) {
-      throw new Error('Failed to check authorization for 0 actions');
+      throw new Error('No actions specified for authorization check');
     }
     const typesArray = [...types];
     const privilegeActionsMap = new Map(
       typesArray.flatMap((type) =>
-        actions.map((action) => [this._actions.savedObject.get(type, action), { type, action }])
+        actions.map((action) => [this.actions.savedObject.get(type, action), { type, action }])
       )
     );
-    const privilegeActions = [...privilegeActionsMap.keys(), this._actions.login]; // Always check login action, we will need it later for redacting namespaces
+    const privilegeActions = [...privilegeActionsMap.keys(), this.actions.login]; // Always check login action, we will need it later for redacting namespaces
     const { hasAllRequested, privileges } = await this.checkPrivileges(
       privilegeActions,
       getAuthorizableSpaces(spaces, allowGlobalResource)
@@ -84,12 +84,12 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
         let objTypes: string[];
         let action: A;
-        if (privilege === this._actions.login) {
+        if (privilege === this.actions.login) {
           // Technically, 'login:' is not a saved object action, it is a Kibana privilege -- however, we include it in the `typeMap` results
           // for ease of use with the `redactNamespaces` function. The user is never actually authorized to "login" for a given object type,
           // they are authorized to log in on a per-space basis, and this is applied to each object type in the typeMap result accordingly.
           objTypes = typesArray;
-          action = this._actions.login as A;
+          action = this.actions.login as A;
         } else {
           const entry = privilegeActionsMap.get(privilege)!; // always defined
           objTypes = [entry.type];
@@ -140,7 +140,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   enforceAuthorization<A extends string>(params: EnforceAuthorizationParams<A>): void {
     const { typesAndSpaces, action, typeMap, auditCallback } = params;
     const unauthorizedTypes = new Set<string>();
-    for (const [type, spaces] of typesAndSpaces.entries()) {
+    for (const [type, spaces] of typesAndSpaces) {
       const spacesArray = [...spaces];
       if (!isAuthorizedInAllSpaces(type, action, spacesArray, typeMap)) {
         unauthorizedTypes.add(type);
@@ -150,23 +150,23 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     if (unauthorizedTypes.size > 0) {
       const targetTypes = Array.from(unauthorizedTypes).sort().join(',');
       const msg = `Unable to ${action} ${targetTypes}`;
-      const error = this._errors.decorateForbiddenError(new Error(msg));
+      const error = this.errors.decorateForbiddenError(new Error(msg));
       auditCallback?.(error);
       throw error;
     }
-    auditCallback?.(undefined);
+    auditCallback?.();
   }
 
   addAuditEvent(params: AddAuditEventParams): void {
-    if (this._auditLogger.enabled) {
+    if (this.auditLogger.enabled) {
       const auditEvent = savedObjectEvent(params);
-      this._auditLogger.log(auditEvent);
+      this.auditLogger.log(auditEvent);
     }
   }
 
   redactNamespaces<T, A extends string>(params: RedactNamespacesParams<T, A>): SavedObject<T> {
     const { savedObject, typeMap } = params;
-    const loginAction = this._actions.login as A; // This typeMap came from the `checkAuthorization` function, which always checks privileges for the "login" action (in addition to what the consumer requested)
+    const loginAction = this.actions.login as A; // This typeMap came from the `checkAuthorization` function, which always checks privileges for the "login" action (in addition to what the consumer requested)
     const actionRecord = typeMap.get(savedObject.type);
     const entry: AuthorizationTypeEntry = actionRecord?.[loginAction] ?? { authorizedSpaces: [] }; // fail-secure if attribute is not defined
     const { authorizedSpaces, isGloballyAuthorized } = entry;
@@ -186,9 +186,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     namespaceOrNamespaces?: string | Array<undefined | string>
   ) {
     try {
-      return await this._checkPrivileges(actions, namespaceOrNamespaces);
+      return await this.checkPrivilegesFunc(actions, namespaceOrNamespaces);
     } catch (error) {
-      throw this._errors.decorateGeneralError(error, error.body && error.body.reason);
+      throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
     }
   }
 }
@@ -226,12 +226,12 @@ function getMissingPrivileges(privileges: CheckPrivilegesResponse['privileges'])
  * Sorts in a case-insensitive manner, and ensures that redacted namespaces ('?') always show up at the end of the array.
  */
 function namespaceComparator(a: string, b: string) {
-  const A = a.toUpperCase();
-  const B = b.toUpperCase();
-  if (A === UNKNOWN_SPACE && B !== UNKNOWN_SPACE) {
+  if (a === UNKNOWN_SPACE && b !== UNKNOWN_SPACE) {
     return 1;
-  } else if (A !== UNKNOWN_SPACE && B === UNKNOWN_SPACE) {
+  } else if (a !== UNKNOWN_SPACE && b === UNKNOWN_SPACE) {
     return -1;
   }
+  const A = a.toUpperCase();
+  const B = b.toUpperCase();
   return A > B ? 1 : A < B ? -1 : 0;
 }

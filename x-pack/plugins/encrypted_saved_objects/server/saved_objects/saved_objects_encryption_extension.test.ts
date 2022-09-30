@@ -88,7 +88,7 @@ describe('#decryptOrStripResponseAttributes', () => {
   test('does not alter response if type is not registered', async () => {
     const { extension, service } = setup();
 
-    expect(extension.decryptOrStripResponseAttributes(unregisteredSO)).resolves.toEqual({
+    await expect(extension.decryptOrStripResponseAttributes(unregisteredSO)).resolves.toEqual({
       ...unregisteredSO,
       attributes: {
         attrOne: 'one',
@@ -98,18 +98,18 @@ describe('#decryptOrStripResponseAttributes', () => {
       },
     });
 
-    expect(service.decryptAttributes).not.toHaveBeenCalled();
+    await expect(service.decryptAttributes).not.toHaveBeenCalled();
   });
 
   test('strips encrypted attributes except for ones with `dangerouslyExposeValue` set to `true` if type is registered', async () => {
     const { extension, service } = setup();
 
-    expect(extension.decryptOrStripResponseAttributes(registeredSO)).resolves.toEqual({
+    await expect(extension.decryptOrStripResponseAttributes(registeredSO)).resolves.toEqual({
       ...registeredSO,
       attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
     });
 
-    expect(service.stripOrDecryptAttributes).toHaveBeenCalledTimes(1);
+    await expect(service.stripOrDecryptAttributes).toHaveBeenCalledTimes(1);
   });
 
   test('includes both attributes and error if decryption fails.', async () => {
@@ -125,7 +125,7 @@ describe('#decryptOrStripResponseAttributes', () => {
       error: decryptionError,
     });
 
-    expect(extension.decryptOrStripResponseAttributes(unregisteredSO)).resolves.toEqual({
+    await expect(extension.decryptOrStripResponseAttributes(unregisteredSO)).resolves.toEqual({
       ...unregisteredSO,
       attributes: {
         attrOne: 'one',
@@ -135,23 +135,23 @@ describe('#decryptOrStripResponseAttributes', () => {
       },
     });
 
-    expect(service.stripOrDecryptAttributes).not.toHaveBeenCalled();
+    await expect(service.stripOrDecryptAttributes).not.toHaveBeenCalled();
 
-    expect(extension.decryptOrStripResponseAttributes(registeredSO)).resolves.toEqual({
+    await expect(extension.decryptOrStripResponseAttributes(registeredSO)).resolves.toEqual({
       ...registeredSO,
       attributes: { attrOne: 'one', attrThree: 'three' },
       error: decryptionError,
     });
 
-    expect(service.stripOrDecryptAttributes).toHaveBeenCalledTimes(1);
+    await expect(service.stripOrDecryptAttributes).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('#encryptAttributes', () => {
-  test('does not encrpyt attributes if type is not registered', async () => {
+  test('does not encrypt attributes if type is not registered', async () => {
     const { extension, service } = setup();
 
-    expect(
+    await expect(
       extension.encryptAttributes(
         {
           type: 'unknown-type',
@@ -172,13 +172,13 @@ describe('#encryptAttributes', () => {
       attrThree: 'three',
     });
 
-    expect(service.encryptAttributes).toBeCalledTimes(1); // ToDo: should the extension even bother calling encrypt if the type is not encryptable? See Decrypt as example.
+    await expect(service.encryptAttributes).toBeCalledTimes(1); // ToDo: should the extension even bother calling encrypt if the type is not encryptable? See Decrypt as example.
   });
 
   test('encrypts attributes if the type is registered', async () => {
     const { extension, service } = setup();
 
-    expect(
+    await expect(
       extension.encryptAttributes(
         {
           type: KNOWN_TYPE,
@@ -199,6 +199,6 @@ describe('#encryptAttributes', () => {
       attrThree: 'three',
     });
 
-    expect(service.encryptAttributes).toBeCalledTimes(1);
+    await expect(service.encryptAttributes).toBeCalledTimes(1);
   });
 });

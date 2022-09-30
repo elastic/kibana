@@ -91,7 +91,6 @@ describe('#updateObjectsSpaces', () => {
     );
     client = elasticsearchClientMock.createElasticsearchClient();
     const serializer = new SavedObjectsSerializer(registry);
-    // const securityExtension = extensionsMock.createSecurityExtension();
     return {
       mappings: { properties: {} }, // doesn't matter, only used as an argument to deleteLegacyUrlAliases which is mocked
       registry,
@@ -666,7 +665,7 @@ describe('#updateObjectsSpaces', () => {
         mockBulkResults({ error: false }); // result for obj1
       });
 
-      test(`propogates error from es client bulk get`, async () => {
+      test(`propagates error from es client bulk get`, async () => {
         setupCheckAuthorized(mockSecurityExt);
         setupEnforceSuccess(mockSecurityExt);
         setupRedactPassthrough(mockSecurityExt);
@@ -682,7 +681,7 @@ describe('#updateObjectsSpaces', () => {
         await expect(updateObjectsSpaces(params)).rejects.toThrow(error);
       });
 
-      test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+      test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
         mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
 
         await expect(updateObjectsSpaces(params)).rejects.toThrow(checkAuthError);
@@ -690,7 +689,7 @@ describe('#updateObjectsSpaces', () => {
         expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
       });
 
-      test(`propogates decorated error when unauthorized`, async () => {
+      test(`propagates decorated error when unauthorized`, async () => {
         setupCheckUnauthorized(mockSecurityExt);
         setupEnforceFailure(mockSecurityExt);
 

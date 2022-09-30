@@ -78,7 +78,7 @@ describe('internalBulkResolve', () => {
     serializer = new SavedObjectsSerializer(registry);
     incrementCounterInternal = jest.fn().mockRejectedValue(new Error('increment error')); // mock error to implicitly test that it is caught and swallowed
     return {
-      registry, // : typeRegistryMock.create(), // doesn't need additional mocks for this test suite
+      registry,
       allowedTypes: [OBJ_TYPE, ENCRYPTED_TYPE],
       client,
       serializer,
@@ -460,7 +460,7 @@ describe('internalBulkResolve', () => {
       );
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 

@@ -276,7 +276,8 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
 
     // Fetch saved objects to be removed for audit logging
     // If RBAC is enabled, the securityExtension should definitely be defined, but we check just in case
-    if (this.auditLogger.enabled && this.securityExtension !== undefined) {
+    const securityExtension = this.securityExtension;
+    if (this.auditLogger.enabled && securityExtension !== undefined) {
       const finder = this.spacesClient.createSavedObjectFinder(id);
       try {
         for await (const response of finder.find()) {
@@ -287,7 +288,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
               // This object exists in All Spaces and its `namespaces` field isn't going to change; there's nothing to audit
               return;
             }
-            this.securityExtension!.addAuditEvent({
+            securityExtension.addAuditEvent({
               action: isOnlySpace
                 ? SavedObjectAction.DELETE
                 : SavedObjectAction.UPDATE_OBJECTS_SPACES,

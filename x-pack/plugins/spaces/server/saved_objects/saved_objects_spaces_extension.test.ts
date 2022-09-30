@@ -52,13 +52,13 @@ describe('#getSearchableNamespaces', () => {
         { id: 'ns-4', name: '', disabledFeatures: [] },
       ])
     );
-    expect(spacesExtension.getSearchableNamespaces(['some-namespace'])).resolves.toEqual([]);
+    await expect(spacesExtension.getSearchableNamespaces(['some-namespace'])).resolves.toEqual([]);
   });
 
   test(`throws an error if user is unauthorized in any space`, async () => {
     const { spacesClient, spacesExtension } = setup();
     spacesClient.getAll.mockRejectedValue(Boom.forbidden());
-    expect(spacesExtension.getSearchableNamespaces(['some-namespace'])).rejects.toThrow(
+    await expect(spacesExtension.getSearchableNamespaces(['some-namespace'])).rejects.toThrow(
       'Forbidden'
     );
   });
@@ -73,7 +73,9 @@ describe('#getSearchableNamespaces', () => {
         { id: 'ns-4', name: '', disabledFeatures: [] },
       ])
     );
-    expect(spacesExtension.getSearchableNamespaces(undefined)).resolves.toEqual([ACTIVE_SPACE_ID]);
+    await expect(spacesExtension.getSearchableNamespaces(undefined)).resolves.toEqual([
+      ACTIVE_SPACE_ID,
+    ]);
   });
 
   test(`filters results based on requested namespaces`, async () => {
@@ -87,7 +89,7 @@ describe('#getSearchableNamespaces', () => {
       ])
     );
 
-    expect(spacesExtension.getSearchableNamespaces(['ns-1', 'ns-3'])).resolves.toEqual([
+    await expect(spacesExtension.getSearchableNamespaces(['ns-1', 'ns-3'])).resolves.toEqual([
       'ns-1',
       'ns-3',
     ]);
@@ -102,7 +104,9 @@ describe('#getSearchableNamespaces', () => {
       ])
     );
 
-    expect(spacesExtension.getSearchableNamespaces(['ns-1', 'ns-3'])).resolves.toEqual(['ns-1']);
+    await expect(spacesExtension.getSearchableNamespaces(['ns-1', 'ns-3'])).resolves.toEqual([
+      'ns-1',
+    ]);
   });
 
   test(`handles namespaces argument ['*']`, async () => {
@@ -116,7 +120,7 @@ describe('#getSearchableNamespaces', () => {
       ])
     );
 
-    expect(spacesExtension.getSearchableNamespaces(['*'])).resolves.toEqual([
+    await expect(spacesExtension.getSearchableNamespaces(['*'])).resolves.toEqual([
       'ns-1',
       'ns-2',
       'ns-3',

@@ -602,7 +602,7 @@ export class SavedObjectsRepository {
       actions: ['bulk_create'],
       // If a user tries to create an object with `initialNamespaces: ['*']`, they need to have 'bulk_create' privileges for the Global
       // Resource (e.g., All privileges for All Spaces).
-      // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to 'create' privileges for the Global
+      // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to have 'bulk_create' privileges for the Global
       // Resource, so in that case we have to filter out that string from spacesToAuthorize (because `allowGlobalResource: true` is used
       // below.)
       options: { allowGlobalResource: true },
@@ -1201,7 +1201,7 @@ export class SavedObjectsRepository {
     let typeToNamespacesMap: Map<string, string[]> | undefined;
     let preAuthorizationResult: CheckAuthorizationResult<'find'> | undefined;
     if (!disableExtensions && this._securityExtension) {
-      preAuthorizationResult = await this._securityExtension?.checkAuthorization({
+      preAuthorizationResult = await this._securityExtension.checkAuthorization({
         types: new Set(types),
         spaces: spacesToPreauthorize,
         actions: ['find'],
@@ -1217,7 +1217,7 @@ export class SavedObjectsRepository {
       }
       if (preAuthorizationResult.status === 'partially_authorized') {
         typeToNamespacesMap = new Map<string, string[]>();
-        for (const [objType, entry] of preAuthorizationResult.typeMap.entries()) {
+        for (const [objType, entry] of preAuthorizationResult.typeMap) {
           if (!entry.find) continue;
           // This ensures that the query DSL can filter only for object types that the user is authorized to access for a given space
           const { authorizedSpaces, isGloballyAuthorized } = entry.find;

@@ -27,10 +27,10 @@ export interface CheckAuthorizationParams<A extends string> {
    */
   actions: A[];
   /**
-   * Authorization options - whether or not to allow global resources
+   * Authorization options - whether or not to allow global resources, false if options are undefined
    */
   options?: {
-    allowGlobalResource?: boolean;
+    allowGlobalResource: boolean;
   };
 }
 
@@ -84,7 +84,7 @@ export interface EnforceAuthorizationParams<A extends string> {
    */
   typesAndSpaces: Map<string, Set<string>>;
   /**
-   * The relevent action (create, update, etc.)
+   * The relevant action (create, update, etc.)
    */
   action: A;
   /**
@@ -98,7 +98,7 @@ export interface EnforceAuthorizationParams<A extends string> {
    * both error (unauthorized), or success (authorized)
    * cases
    */
-  auditCallback?: (error: Error | undefined) => void;
+  auditCallback?: (error?: Error) => void;
 }
 
 /**
@@ -125,7 +125,7 @@ export enum AuditAction {
  */
 export interface AddAuditEventParams {
   /**
-   * The relevent action
+   * The relevant action
    */
   action: AuditAction;
   /**
@@ -134,7 +134,7 @@ export interface AddAuditEventParams {
    */
   outcome?: EcsEventOutcome;
   /**
-   * Relevent saved object information
+   * relevant saved object information
    * object containing type & id strings
    */
   savedObject?: { type: string; id: string };
@@ -149,7 +149,7 @@ export interface AddAuditEventParams {
    */
   deleteFromSpaces?: readonly string[];
   /**
-   * Relevent error information to add to
+   * relevant error information to add to
    * the audit event
    */
   error?: Error;
@@ -161,7 +161,7 @@ export interface AddAuditEventParams {
  */
 export interface RedactNamespacesParams<T, A extends string> {
   /**
-   * Relevent saved object
+   * relevant saved object
    */
   savedObject: SavedObject<T>;
   /**
@@ -173,13 +173,13 @@ export interface RedactNamespacesParams<T, A extends string> {
 }
 
 /**
- * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository securtity extension.
+ * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
  * It contains functions for checking & enforcing authorization, adding audit events, and redacting namespaces.
  */
 export interface ISavedObjectsSecurityExtension {
   /**
    * Checks authorization of actions on specified types in specified spaces.
-   * @param CheckAuthorizationParams Authorization parameters - types, spaces, and actions to check
+   * @param params - types, spaces, and actions to check
    * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
    */
   checkAuthorization: <T extends string>(
@@ -188,20 +188,20 @@ export interface ISavedObjectsSecurityExtension {
 
   /**
    * Enforces authorization of a single action on specified types in specified spaces.
-   * Throws error if authoriztion map does not cover specified parameters.
-   * @param EnforceAuthorizationParams Enforce parameters - map of types/spaces, action to check, and authz map (from CheckAuthorizationResult)
+   * Throws error if authorization map does not cover specified parameters.
+   * @param params - map of types/spaces, action to check, and authz map (from CheckAuthorizationResult)
    */
   enforceAuthorization: <T extends string>(params: EnforceAuthorizationParams<T>) => void;
 
   /**
-   * Adds an audit event for the specified action with relevent information
-   * @param AddAuditEventParams - the action, outcome, error, and relevent object/space information
+   * Adds an audit event for the specified action with relevant information
+   * @param params - the action, outcome, error, and relevant object/space information
    */
   addAuditEvent: (params: AddAuditEventParams) => void;
 
   /**
    * Filters a saved object's spaces based on an authorization map (from CheckAuthorizationResult)
-   * @param RedactNamespacesParams - the saved object and an authorization map
+   * @param params - the saved object and an authorization map
    * @returns SavedObject - saved object with filtered spaces
    */
   redactNamespaces: <T, A extends string>(params: RedactNamespacesParams<T, A>) => SavedObject<T>;

@@ -27,7 +27,9 @@ export class SavedObjectsSpacesExtension implements ISavedObjectsSpacesExtension
 
   getCurrentNamespace(namespace: string | undefined): string | undefined {
     if (namespace) {
-      throw new Error('Spaces currently determines the namespaces');
+      throw new Error(
+        'Namespace cannot be specified by the caller when the spaces extension is enabled. Spaces currently determines the namespace.'
+      );
     }
     return spaceIdToNamespace(this.activeSpaceId);
   }

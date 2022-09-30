@@ -5,19 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AuthorizationTypeEntry,
-  AuthorizationTypeMap,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
-
-import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-
-export interface CheckAuthorizationDeps {
-  actions: Actions;
-  errors: SavedObjectsClientContract['errors'];
-  checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
-}
+import type { AuthorizationTypeEntry, AuthorizationTypeMap } from '@kbn/core/server';
 
 /**
  * Helper function that, given an `CheckAuthorizationResult`, checks to see what spaces the user is authorized to perform a given action for
@@ -42,10 +30,10 @@ export function getEnsureAuthorizedActionResult<A extends string>(
  * Helper function that, given an `CheckAuthorizationResult`, ensures that the user is authorized to perform a given action for the given
  * object type in the given spaces.
  *
- * @param {string} objectType the object type to check.
- * @param {T} action the action to check.
- * @param {string[]} spaces the spaces to check.
- * @param {AuthorizationTypeMap<A>} typeMap the typeMap from an CheckAuthorizationResult.
+ * @param objectType The object type to check.
+ * @param action The action to check.
+ * @param spaces The spaces to check.
+ * @param typeMap The typeMap from a CheckAuthorizationResult.
  */
 export function isAuthorizedInAllSpaces<T extends string>(
   objectType: string,

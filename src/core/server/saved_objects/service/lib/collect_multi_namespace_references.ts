@@ -284,9 +284,10 @@ async function getObjectsAndReferences({
 }
 
 /**
- * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the bulkResolve response. In other
- * SavedObjectsRepository functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding
- * between the exact match or alias match, it's cleaner to do authorization, auditing, filtering, and redaction all afterwards.
+ * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the share_to_space/bulk_get
+ * response. In other SavedObjectsRepository functions we do this before decrypting attributes. However, because of the
+ * share_to_space/bulk_get response logic involved in deciding between the exact match or alias match, it's cleaner to do authorization,
+ * auditing, filtering, and redaction all afterwards.
  */
 async function optionallyUseSecurity(
   objectsWithContext: SavedObjectReferenceWithContext[],
