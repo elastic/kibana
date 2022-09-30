@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import useDebounce from 'react-use/lib/useDebounce';
+import useThrottle from 'react-use/lib/useThrottle';
 import { useSelector } from 'react-redux';
 import useIntersection from 'react-use/lib/useIntersection';
 import {
@@ -29,8 +29,9 @@ export const OverviewGrid = () => {
   const {
     data: { monitors },
     loaded,
-    pageState: { perPage, sortField },
+    pageState,
   } = useSelector(selectOverviewState);
+  const { perPage, sortField } = pageState;
   const [loadNextPage, setLoadNextPage] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -48,26 +49,23 @@ export const OverviewGrid = () => {
   const intersectionRef = useRef(null);
   const intersection = useIntersection(intersectionRef, {
     root: null,
-    rootMargin: '400px',
+    rootMargin: '640px', // Height of 4 rows of monitors, minus the gutters
     threshold: 1,
   });
   const hasIntersected = intersection && intersection.intersectionRatio === 1;
 
-  useDebounce(
-    () => {
-      if (hasIntersected) {
-        setLoadNextPage(true);
-      } else {
-        setLoadNextPage(false);
-      }
-    },
-    500,
-    [hasIntersected]
-  );
+  useThrottle(() => {
+    if (hasIntersected) {
+      setLoadNextPage(true);
+    } else {
+      setLoadNextPage(false);
+    }
+  }, 1000);
 
   useEffect(() => {
     if (loadNextPage) {
       setPage((p) => p + 1);
+      setLoadNextPage(false);
     }
   }, [loadNextPage]);
 
@@ -78,7 +76,7 @@ export const OverviewGrid = () => {
           <OverviewPaginationInfo page={page} loading={!loaded} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SortFields />
+          <SortFields onSortChange={() => setPage(1)} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

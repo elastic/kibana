@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
@@ -13,19 +14,26 @@ import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { selectOverviewState, setOverviewPageStateAction } from '../../../../state/overview';
 import { SortMenu } from './sort_menu';
 
-export const SortFields = () => {
+export const SortFields = ({ onSortChange }: { onSortChange?: () => void }) => {
   const {
     pageState: { sortOrder, sortField },
   } = useSelector(selectOverviewState);
   const dispatch = useDispatch();
   const { asc, desc, label } = getOrderContent(sortField);
+  const handleSortChange = (payloadAction: PayloadAction<unknown>) => {
+    if (onSortChange) {
+      onSortChange();
+    }
+    dispatch(payloadAction);
+  };
+
   const orderByOptions = [
     {
       label: asc,
       value: 'asc',
       checked: sortOrder === 'asc',
       onClick: () => {
-        dispatch(
+        handleSortChange(
           setOverviewPageStateAction({
             sortOrder: 'asc',
           })
@@ -37,7 +45,7 @@ export const SortFields = () => {
       value: 'desc',
       checked: sortOrder === 'desc',
       onClick: () => {
-        dispatch(
+        handleSortChange(
           setOverviewPageStateAction({
             sortOrder: 'desc',
           })
@@ -52,7 +60,7 @@ export const SortFields = () => {
       checked: sortField === 'status',
       defaultSortOrder: 'asc',
       onClick: () => {
-        dispatch(
+        handleSortChange(
           setOverviewPageStateAction({
             sortField: 'status',
             sortOrder: 'asc',
@@ -66,7 +74,7 @@ export const SortFields = () => {
       checked: sortField === `${ConfigKey.NAME}.keyword`,
       defaultSortOrder: 'asc',
       onClick: () => {
-        dispatch(
+        handleSortChange(
           setOverviewPageStateAction({
             sortField: `${ConfigKey.NAME}.keyword`,
             sortOrder: 'asc',
@@ -80,7 +88,7 @@ export const SortFields = () => {
       checked: sortField === 'updated_at',
       defaultSortOrder: 'desc',
       onClick: () => {
-        dispatch(
+        handleSortChange(
           setOverviewPageStateAction({
             sortField: 'updated_at',
             sortOrder: 'desc',
