@@ -726,30 +726,13 @@ interface OsqueryColumn {
   index: boolean;
 }
 
-const prepareEcsFieldsToValidate = (ecsMapping: Array<{ id: string }>): string[] =>
-  ecsMapping
-    ?.map((_: unknown, index: number) => [
-      `ecs_mapping[${index}].result.value`,
-      `ecs_mapping[${index}].key`,
-    ])
-    .join(',')
-    .split(',');
-
 export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
   const {
-    setError,
-    clearErrors,
     watch: watchRoot,
     register: registerRoot,
     setValue: setValueRoot,
     formState: { errors: errorsRoot },
   } = useFormContext<{ query: string; ecs_mapping: ECSMapping }>();
-
-  useEffect(() => {
-    registerRoot('ecs_mapping', {
-      validate: () => isEmpty(errorsRoot.ecs_mapping),
-    });
-  }, [errorsRoot, registerRoot]);
 
   const [query, ecsMapping] = watchRoot(['query', 'ecs_mapping']);
   const { control, trigger, watch, formState, resetField, getFieldState } = useForm<{
@@ -768,18 +751,19 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     name: 'ecsMappingArray',
   });
 
-  useEffect(() => {
-    // Additional 'suspended' validation of osquery ecs fields. fieldsToValidateOnChange doesn't work because it happens before the osquerySchema gets updated.
-    const fieldsToValidate = prepareEcsFieldsToValidate(fields);
-    // it is always at least 2 - empty fields
-    if (fieldsToValidate.length > 2) {
-      setTimeout(() => trigger('ecsMappingArray'), 0);
-    }
-  }, [query, fields, trigger]);
-
   const formValue = watch();
   const ecsMappingArrayState = getFieldState('ecsMappingArray', formState);
   const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
+
+  useEffect(() => {
+    registerRoot('ecs_mapping', {
+      validate: () => {
+        const nonEmptyErrors = reject(ecsMappingArrayState.error, isEmpty) as InternalFieldErrors[];
+
+        return !nonEmptyErrors.length;
+      },
+    });
+  }, [ecsMappingArrayState.error, errorsRoot, registerRoot]);
 
   useEffect(() => {
     const subscription = watchRoot((data, payload) => {
@@ -1039,10 +1023,16 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
       orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
       'label'
     );
-    setOsquerySchemaOptions((prevValue) =>
-      !deepEqual(prevValue, newOptions) ? newOptions : prevValue
-    );
-  }, [query]);
+    setOsquerySchemaOptions((prevValue) => {
+      if (!deepEqual(prevValue, newOptions)) {
+        trigger();
+
+        return newOptions;
+      }
+
+      return prevValue;
+    });
+  }, [query, trigger]);
 
   useEffect(() => {
     const parsedMapping = convertECSMappingToObject(formValue.ecsMappingArray);
@@ -1052,27 +1042,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
       });
     }
   }, [setValueRoot, formValue, ecsMappingArrayState.isDirty, ecsMapping]);
-
-  useEffect(() => {
-    if (!formState.isValid) {
-      const nonEmptyErrors = reject(ecsMappingArrayState.error, isEmpty) as InternalFieldErrors[];
-      if (nonEmptyErrors.length) {
-        setError('ecs_mapping', {
-          type: nonEmptyErrors[0].key?.type ?? 'custom',
-          message: nonEmptyErrors[0].key?.message ?? '',
-        });
-      }
-    } else {
-      clearErrors('ecs_mapping');
-    }
-  }, [
-    errorsRoot,
-    clearErrors,
-    formState.isValid,
-    formState.errors,
-    setError,
-    ecsMappingArrayState.error,
-  ]);
 
   return (
     <>
