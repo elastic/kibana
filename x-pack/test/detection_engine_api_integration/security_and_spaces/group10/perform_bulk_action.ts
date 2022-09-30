@@ -64,23 +64,12 @@ export default ({ getService }: FtrProviderContext): void => {
   const fetchRuleByAlertApi = (ruleId: string) =>
     supertest.get(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
 
-  const createWebHookAction = async () =>
-    (
-      await supertest
-        .post('/api/actions/action')
-        .set('kbn-xsrf', 'true')
-        .send(getWebHookAction())
-        .expect(200)
-    ).body;
+  const createConnector = async <T extends Record<string, unknown>>(payload: T) =>
+    (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
+      .body;
 
-  const createSlackAction = async () =>
-    (
-      await supertest
-        .post('/api/actions/action')
-        .set('kbn-xsrf', 'true')
-        .send(getSlackAction())
-        .expect(200)
-    ).body;
+  const createWebHookConnector = () => createConnector(getWebHookAction());
+  const createSlackConnector = () => createConnector(getSlackAction());
 
   describe('perform_bulk_action', () => {
     beforeEach(async () => {
@@ -1111,8 +1100,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const ruleId = 'ruleId';
             const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
 
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const { body } = await postBulkAction()
               .send({
@@ -1126,7 +1115,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: hookAction.id,
+                          id: webHookConnector.id,
                         },
                       ],
                     },
@@ -1138,7 +1127,7 @@ export default ({ getService }: FtrProviderContext): void => {
             const expectedRuleActions = [
               {
                 ...webHookActionMock,
-                id: hookAction.id,
+                id: webHookConnector.id,
                 action_type_id: '.webhook',
               },
             ];
@@ -1153,10 +1142,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('should set action correctly to existing non empty actions list', async () => {
-            const hookAction = await createWebHookAction();
+            const webHookConnector = await createWebHookConnector();
 
             const existingRuleAction = {
-              id: hookAction.id,
+              id: webHookConnector.id,
               action_type_id: '.webhook',
               group: 'default',
               params: {
@@ -1182,7 +1171,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: hookAction.id,
+                          id: webHookConnector.id,
                         },
                       ],
                     },
@@ -1194,7 +1183,7 @@ export default ({ getService }: FtrProviderContext): void => {
             const expectedRuleActions = [
               {
                 ...webHookActionMock,
-                id: hookAction.id,
+                id: webHookConnector.id,
                 action_type_id: '.webhook',
               },
             ];
@@ -1209,11 +1198,11 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('should set actions to empty list, actions payload is empty list', async () => {
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const defaultRuleAction = {
-              id: hookAction.id,
+              id: webHookConnector.id,
               action_type_id: '.webhook',
               group: 'default',
               params: {
@@ -1259,8 +1248,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const ruleId = 'ruleId';
             const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
 
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const { body } = await postBulkAction()
               .send({
@@ -1274,7 +1263,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: hookAction.id,
+                          id: webHookConnector.id,
                         },
                       ],
                     },
@@ -1286,7 +1275,7 @@ export default ({ getService }: FtrProviderContext): void => {
             const expectedRuleActions = [
               {
                 ...webHookActionMock,
-                id: hookAction.id,
+                id: webHookConnector.id,
                 action_type_id: '.webhook',
               },
             ];
@@ -1301,11 +1290,11 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('should add action correctly to non empty actions list of the same type', async () => {
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const defaultRuleAction = {
-              id: hookAction.id,
+              id: webHookConnector.id,
               action_type_id: '.webhook',
               group: 'default',
               params: {
@@ -1332,7 +1321,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: hookAction.id,
+                          id: webHookConnector.id,
                         },
                       ],
                     },
@@ -1345,7 +1334,7 @@ export default ({ getService }: FtrProviderContext): void => {
               defaultRuleAction,
               {
                 ...webHookActionMock,
-                id: hookAction.id,
+                id: webHookConnector.id,
                 action_type_id: '.webhook',
               },
             ];
@@ -1361,8 +1350,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           it('should add action correctly to non empty actions list of a different type', async () => {
             // create new actions
-            const webHookAction = await createWebHookAction();
-            const slackAction = await createSlackAction();
+            const webHookAction = await createWebHookConnector();
+            const slackConnector = await createSlackConnector();
 
             const defaultRuleAction = {
               id: webHookAction.id,
@@ -1373,7 +1362,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             };
 
-            const slackActionMockProps = {
+            const slackConnectorMockProps = {
               group: 'default',
               params: {
                 message: 'test slack message',
@@ -1398,8 +1387,8 @@ export default ({ getService }: FtrProviderContext): void => {
                       throttle: '1h',
                       actions: [
                         {
-                          ...slackActionMockProps,
-                          id: slackAction.id,
+                          ...slackConnectorMockProps,
+                          id: slackConnector.id,
                         },
                       ],
                     },
@@ -1411,8 +1400,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const expectedRuleActions = [
               defaultRuleAction,
               {
-                ...slackActionMockProps,
-                id: slackAction.id,
+                ...slackConnectorMockProps,
+                id: slackConnector.id,
                 action_type_id: '.slack',
               },
             ];
@@ -1427,11 +1416,11 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('should not change actions of rule if empty list of actions added', async () => {
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const defaultRuleAction = {
-              id: hookAction.id,
+              id: webHookConnector.id,
               action_type_id: '.webhook',
               group: 'default',
               params: {
@@ -1472,11 +1461,11 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('should change throttle if actions list in payload is empty', async () => {
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const defaultRuleAction = {
-              id: hookAction.id,
+              id: webHookConnector.id,
               action_type_id: '.webhook',
               group: 'default',
               params: {
@@ -1530,7 +1519,7 @@ export default ({ getService }: FtrProviderContext): void => {
             it(`should apply "${type}" rule action to prebuilt rule`, async () => {
               await installPrePackagedRules(supertest, log);
               const prebuiltRule = await fetchPrebuiltRule();
-              const hookAction = await createWebHookAction();
+              const webHookConnector = await createWebHookConnector();
 
               const { body } = await postBulkAction()
                 .send({
@@ -1544,7 +1533,7 @@ export default ({ getService }: FtrProviderContext): void => {
                         actions: [
                           {
                             ...webHookActionMock,
-                            id: hookAction.id,
+                            id: webHookConnector.id,
                           },
                         ],
                       },
@@ -1558,7 +1547,7 @@ export default ({ getService }: FtrProviderContext): void => {
               expect(editedRule.actions).to.eql([
                 {
                   ...webHookActionMock,
-                  id: hookAction.id,
+                  id: webHookConnector.id,
                   action_type_id: '.webhook',
                 },
               ]);
@@ -1571,7 +1560,7 @@ export default ({ getService }: FtrProviderContext): void => {
               expect(readRule.actions).to.eql([
                 {
                   ...webHookActionMock,
-                  id: hookAction.id,
+                  id: webHookConnector.id,
                   action_type_id: '.webhook',
                 },
               ]);
@@ -1584,7 +1573,7 @@ export default ({ getService }: FtrProviderContext): void => {
           it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
             await installPrePackagedRules(supertest, log);
             const prebuiltRule = await fetchPrebuiltRule();
-            const hookAction = await createWebHookAction();
+            const webHookConnector = await createWebHookConnector();
 
             const { body } = await postBulkAction()
               .send({
@@ -1598,7 +1587,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: hookAction.id,
+                          id: webHookConnector.id,
                         },
                       ],
                     },
@@ -1688,46 +1677,58 @@ export default ({ getService }: FtrProviderContext): void => {
               payloadThrottle: '1h',
               expectedThrottle: '1h',
             },
+            {
+              payloadThrottle: '1d',
+              expectedThrottle: '1d',
+            },
+            {
+              payloadThrottle: '7d',
+              expectedThrottle: '7d',
+            },
           ];
-          casesForNonEmptyActions.forEach(({ payloadThrottle, expectedThrottle }) => {
-            it(`throttle is set correctly, if payload throttle="${payloadThrottle}" and actions non empty`, async () => {
-              // create a new action
-              const hookAction = await createWebHookAction();
+          [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].forEach(
+            (ruleAction) => {
+              casesForNonEmptyActions.forEach(({ payloadThrottle, expectedThrottle }) => {
+                it(`throttle is updated correctly for rule action "${ruleAction}", if payload throttle="${payloadThrottle}" and actions non empty`, async () => {
+                  // create a new connector
+                  const webHookConnector = await createWebHookConnector();
 
-              const ruleId = 'ruleId';
-              const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+                  const ruleId = 'ruleId';
+                  const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
 
-              const { body } = await postBulkAction()
-                .send({
-                  ids: [createdRule.id],
-                  action: BulkAction.edit,
-                  [BulkAction.edit]: [
-                    {
-                      type: BulkActionEditType.set_rule_actions,
-                      value: {
-                        throttle: payloadThrottle,
-                        actions: [
-                          {
-                            id: hookAction.id,
-                            group: 'default',
-                            params: { body: '{}' },
+                  const { body } = await postBulkAction()
+                    .send({
+                      ids: [createdRule.id],
+                      action: BulkAction.edit,
+                      [BulkAction.edit]: [
+                        {
+                          type: BulkActionEditType.set_rule_actions,
+                          value: {
+                            throttle: payloadThrottle,
+                            actions: [
+                              {
+                                id: webHookConnector.id,
+                                group: 'default',
+                                params: { body: '{}' },
+                              },
+                            ],
                           },
-                        ],
-                      },
-                    },
-                  ],
-                })
-                .expect(200);
+                        },
+                      ],
+                    })
+                    .expect(200);
 
-              // Check that the updated rule is returned with the response
-              expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
+                  // Check that the updated rule is returned with the response
+                  expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
 
-              // Check that the updates have been persisted
-              const { body: rule } = await fetchRule(ruleId).expect(200);
+                  // Check that the updates have been persisted
+                  const { body: rule } = await fetchRule(ruleId).expect(200);
 
-              expect(rule.throttle).to.eql(expectedThrottle);
-            });
-          });
+                  expect(rule.throttle).to.eql(expectedThrottle);
+                });
+              });
+            }
+          );
         });
 
         describe('notifyWhen', () => {
