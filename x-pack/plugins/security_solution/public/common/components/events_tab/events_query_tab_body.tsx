@@ -42,6 +42,11 @@ import { useLicense } from '../../hooks/use_license';
 import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
 
+import {
+  useInitialUrlParamValue,
+  useReplaceUrlParams,
+} from '../../utils/global_query_string/helpers';
+
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
@@ -54,6 +59,8 @@ export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
   setQuery: GlobalTimeArgs['setQuery'];
   timelineId: TimelineId;
 };
+
+const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
 
 const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = ({
   deleteQuery,
@@ -70,13 +77,41 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const { globalFullScreen } = useGlobalFullScreen();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const [showExternalAlerts, setShowExternalAlerts] = useState(false);
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]
   );
+  const replaceUrlParams = useReplaceUrlParams();
+
+  const { decodedParam: showExternalAlertsInitialUrlState } =
+    useInitialUrlParamValue<boolean>(EXTERNAL_ALERTS_URL_PARAM);
+
+  const [showExternalAlerts, setShowExternalAlerts] = useState(
+    showExternalAlertsInitialUrlState ?? false
+  );
+
+  useEffect(() => {
+    replaceUrlParams([
+      {
+        key: EXTERNAL_ALERTS_URL_PARAM,
+        value: showExternalAlerts ? 'true' : null,
+      },
+    ]);
+  }, [showExternalAlerts, replaceUrlParams]);
+
+  useEffect(() => {
+    // Only called on component unmount
+    return () => {
+      replaceUrlParams([
+        {
+          key: EXTERNAL_ALERTS_URL_PARAM,
+          value: null,
+        },
+      ]);
+    };
+  }, [replaceUrlParams]);
 
   const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);
   const getHistogramSubtitle = useMemo(
