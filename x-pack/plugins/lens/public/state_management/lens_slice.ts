@@ -136,7 +136,6 @@ export const switchAndCleanDatasource = createAction<{
   newDatasourceId: string;
   visualizationId: string | null;
   currentIndexPatternId?: string;
-  isFromContext?: boolean;
 }>('lens/switchAndCleanDatasource');
 export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
@@ -683,7 +682,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           newDatasourceId: string;
           visualizationId?: string;
           currentIndexPatternId?: string;
-          isFromContext?: boolean;
         };
       }
     ) => {
@@ -692,7 +690,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const visualization = state.visualization;
       let newVizState = visualization.state;
       const ids: string[] = [];
-      if (activeVisualization && activeVisualization.getLayerIds && !payload.isFromContext) {
+      if (activeVisualization && activeVisualization.getLayerIds) {
         const layerIds = activeVisualization.getLayerIds(visualization.state);
         ids.push(...Object.values(layerIds));
         newVizState = activeVisualization.initialize(() => ids[0]);
@@ -713,7 +711,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...state,
         datasourceStates: {
           [payload.newDatasourceId]: {
-            state: payload.isFromContext ? datasourceState : updatedState,
+            state: updatedState,
             isLoading: false,
           },
         },
