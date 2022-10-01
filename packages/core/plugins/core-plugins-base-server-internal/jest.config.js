@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { PluginsService } from './plugins_service';
-export type {
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  DiscoveredPlugins,
-} from './plugins_service';
-export { config } from './plugins_config';
-/** @internal */
-export { isNewPlatformPlugin } from './discovery';
-export * from './types';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/plugins/core-plugins-base-server-internal'],
+};

@@ -13,8 +13,10 @@ import type { RouteConfig } from '@kbn/core-http-server';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '../mocks';
-import { renderingMock } from '../rendering/rendering_service.mock';
-import { HttpResourcesService, type PrebootDeps, type SetupDeps } from './http_resources_service';
+
+import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
+import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
+
 import { httpResourcesMock } from './http_resources_service.mock';
 import type { HttpResources } from '@kbn/core-http-resources-server';
 
@@ -37,11 +39,11 @@ describe('HttpResources service', () => {
     beforeEach(() => {
       prebootDeps = {
         http: httpServiceMock.createInternalPrebootContract(),
-        rendering: renderingMock.createPrebootContract(),
+        rendering: renderingServiceMock.createPrebootContract(),
       };
       setupDeps = {
         http: httpServiceMock.createInternalSetupContract(),
-        rendering: renderingMock.createSetupContract(),
+        rendering: renderingServiceMock.createSetupContract(),
       };
       service = new HttpResourcesService(coreContext);
       router = httpServiceMock.createRouter();

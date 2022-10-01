@@ -230,7 +230,6 @@ export type {
   HttpResourcesRequestHandler,
 } from '@kbn/core-http-resources-server';
 
-export type { IRenderOptions } from './rendering';
 export type {
   LoggingServiceSetup,
   LoggerContextConfigInput,
