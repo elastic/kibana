@@ -250,12 +250,19 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    // if the current-state is invisible, we also want to sync data
-    // e.g. if a layer was invisible at start-up, it won't have any data loaded
     const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    if (layer instanceof LayerGroup) {
+      layer.getChildren().forEach(childLayer => {
+        dispatch(setLayerVisibility(childLayer.getId(), makeVisible));
+      });
+    }
 
     // If the layer visibility is already what we want it to be, do nothing
-    if (!layer || layer.isVisible() === makeVisible) {
+    if (layer.isVisible() === makeVisible) {
       return;
     }
 
@@ -264,6 +271,9 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       layerId,
       visibility: makeVisible,
     });
+
+    // if the current-state is invisible, we also want to sync data
+    // e.g. if a layer was invisible at start-up, it won't have any data loaded
     if (makeVisible) {
       dispatch(syncDataForLayerId(layerId, false));
     }

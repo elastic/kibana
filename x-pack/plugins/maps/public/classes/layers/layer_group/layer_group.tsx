@@ -57,6 +57,10 @@ export class LayerGroup implements ILayer {
     this._children = children;
   }
 
+  getChildren(): ILayer[] {
+    return [...this._children];
+  }
+
   getDescriptor(): LayerGroupDescriptor {
     return this._descriptor;
   }
