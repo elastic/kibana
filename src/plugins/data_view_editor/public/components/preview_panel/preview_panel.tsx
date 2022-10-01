@@ -8,8 +8,11 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject } from 'rxjs';
 import { StatusMessage } from './status_message';
 import { IndicesList } from './indices_list';
+import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
 
 import { INDEX_PATTERN_TYPE, MatchedIndicesSet } from '../../types';
 
@@ -17,10 +20,11 @@ interface Props {
   type: INDEX_PATTERN_TYPE;
   allowHidden: boolean;
   title: string;
-  matched: MatchedIndicesSet;
+  matchedIndices$: BehaviorSubject<MatchedIndicesSet>;
 }
 
-export const PreviewPanel = ({ type, allowHidden, title = '', matched }: Props) => {
+export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }: Props) => {
+  const matched = useObservable(matchedIndices$, matchedIndiciesDefault);
   const indicesListContent =
     matched.visibleIndices.length || matched.allIndices.length ? (
       <>

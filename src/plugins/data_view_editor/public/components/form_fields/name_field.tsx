@@ -9,6 +9,8 @@
 import React, { ChangeEvent, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import {
   DataView,
   UseField,
@@ -21,7 +23,7 @@ import { schema } from '../form_schema';
 
 interface NameFieldProps {
   editData?: DataView;
-  existingDataViewNames: string[];
+  existingDataViewNames$: BehaviorSubject<string[]>;
 }
 
 interface GetNameConfigArgs {
@@ -53,13 +55,15 @@ const getNameConfig = ({ namesNotAllowed }: GetNameConfigArgs): FieldConfig<stri
   };
 };
 
-export const NameField = ({ editData, existingDataViewNames }: NameFieldProps) => {
+// todo look at editData
+export const NameField = ({ editData, existingDataViewNames$ }: NameFieldProps) => {
+  const namesNotAllowed = useObservable(existingDataViewNames$, []);
   const config = useMemo(
     () =>
       getNameConfig({
-        namesNotAllowed: existingDataViewNames,
+        namesNotAllowed,
       }),
-    [existingDataViewNames]
+    [namesNotAllowed]
   );
 
   return (

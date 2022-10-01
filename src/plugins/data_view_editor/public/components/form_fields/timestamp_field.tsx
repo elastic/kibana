@@ -8,8 +8,10 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject } from 'rxjs';
 import { EuiFormRow, EuiComboBox, EuiFormHelpText, EuiComboBoxOptionOption } from '@elastic/eui';
+import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
 
 import {
   UseField,
@@ -18,17 +20,17 @@ import {
   getFieldValidityAndErrorMessage,
 } from '../../shared_imports';
 
-import { TimestampOption } from '../../types';
+import { TimestampOption, MatchedIndicesSet } from '../../types';
 import { schema } from '../form_schema';
 
 interface Props {
-  options: TimestampOption[];
-  isLoadingOptions: boolean;
-  isLoadingMatchedIndices: boolean;
-  hasMatchedIndices: boolean;
+  options$: BehaviorSubject<TimestampOption[]>;
+  isLoadingOptions$: BehaviorSubject<boolean>;
+  isLoadingMatchedIndices$: BehaviorSubject<boolean>;
+  matchedIndices$: BehaviorSubject<MatchedIndicesSet>;
 }
 
-const requireTimestampOptionValidator = (options: Props['options']): ValidationConfig => ({
+const requireTimestampOptionValidator = (options: TimestampOption[]): ValidationConfig => ({
   validator: async ({ value }) => {
     const isValueRequired = !!options.length;
     if (isValueRequired && !value) {
@@ -45,7 +47,7 @@ const requireTimestampOptionValidator = (options: Props['options']): ValidationC
 });
 
 const getTimestampConfig = (
-  options: Props['options']
+  options: TimestampOption[]
 ): FieldConfig<EuiComboBoxOptionOption<string>> => {
   const timestampFieldConfig = schema.timestampField;
 
@@ -70,15 +72,22 @@ const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFi
 });
 
 export const TimestampField = ({
-  options = [],
-  isLoadingOptions = false,
-  isLoadingMatchedIndices,
-  hasMatchedIndices,
+  options$,
+  isLoadingOptions$,
+  isLoadingMatchedIndices$,
+  matchedIndices$,
 }: Props) => {
+  const options = useObservable<TimestampOption[]>(options$, []);
+  const isLoadingOptions = useObservable<boolean>(isLoadingOptions$, false);
+  const isLoadingMatchedIndices = useObservable<boolean>(isLoadingMatchedIndices$, false);
+  const hasMatchedIndices = !!useObservable(matchedIndices$, matchedIndiciesDefault)
+    .exactMatchedIndices.length;
+
   const optionsAsComboBoxOptions = options.map(({ display, fieldName }) => ({
     label: display,
     value: fieldName,
   }));
+
   const timestampConfig = useMemo(() => getTimestampConfig(options), [options]);
   const selectTimestampHelp = options.length ? timestampFieldHelp : '';
 

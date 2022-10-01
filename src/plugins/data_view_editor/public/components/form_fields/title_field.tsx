@@ -9,6 +9,8 @@
 import React, { ChangeEvent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import {
   UseField,
   getFieldValidityAndErrorMessage,
@@ -23,6 +25,7 @@ import {
   IndexPatternConfig,
   MatchedIndicesSet,
 } from '../../types';
+import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
 
 interface RefreshMatchedIndicesResult {
   matchedIndicesResult: MatchedIndicesSet;
@@ -31,8 +34,8 @@ interface RefreshMatchedIndicesResult {
 
 interface TitleFieldProps {
   isRollup: boolean;
-  matchedIndices: MatchedItem[];
-  rollupIndicesCapabilities: RollupIndicesCapsResponse;
+  matchedIndices$: BehaviorSubject<MatchedIndicesSet>;
+  rollupIndicesCapabilities$: BehaviorSubject<RollupIndicesCapsResponse>;
   refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
 }
 
@@ -138,11 +141,13 @@ const getTitleConfig = ({
 
 export const TitleField = ({
   isRollup,
-  matchedIndices,
-  rollupIndicesCapabilities,
+  matchedIndices$,
+  rollupIndicesCapabilities$,
   refreshMatchedIndices,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
+  const rollupIndicesCapabilities = useObservable(rollupIndicesCapabilities$, {});
+  const matchedIndices = useObservable(matchedIndices$, matchedIndiciesDefault).exactMatchedIndices;
 
   const fieldConfig = useMemo(
     () =>

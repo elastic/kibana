@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 
 import {
   DataView,
@@ -67,6 +69,13 @@ export interface Props {
   allowAdHoc: boolean;
 }
 
+export const matchedIndiciesDefault = {
+  allIndices: [],
+  exactMatchedIndices: [],
+  partialMatchedIndices: [],
+  visibleIndices: [],
+};
+
 const editorTitle = i18n.translate('indexPatternEditor.title', {
   defaultMessage: 'Create data view',
 });
@@ -117,6 +126,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         id: formData.id,
         name: formData.name,
       };
+      const rollupIndex = rollupIndex$.current.getValue();
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
         indexPatternStub.type = INDEX_PATTERN_TYPE.ROLLUP;
@@ -124,7 +134,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           params: {
             rollup_index: rollupIndex,
           },
-          aggs: rollupIndicesCapabilities[rollupIndex].aggs,
+          aggs: rollupIndicesCapabilities$.current.getValue()[rollupIndex].aggs,
         };
       }
 
@@ -142,7 +152,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
   });
 
-  const { getFields } = form;
+  // const { getFields } = form;
 
   // `useFormData` initially returns `undefined`,
   // we override `undefined` with real default values from `schema`
@@ -154,63 +164,143 @@ const IndexPatternEditorFlyoutContentComponent = ({
       type = schema.type.defaultValue,
     },
   ] = useFormData<FormInternal>({ form });
-  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
 
-  const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
-  const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
   const currentLoadingTimestampFieldsRef = useRef(0);
-  const [isLoadingMatchedIndices, setIsLoadingMatchedIndices] = useState<boolean>(false);
   const currentLoadingMatchedIndicesRef = useRef(0);
-  const [allSources, setAllSources] = useState<MatchedItem[]>([]);
-  const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
-  const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
-  const [rollupIndex, setRollupIndex] = useState<string | undefined>();
-  const [rollupIndicesCapabilities, setRollupIndicesCapabilities] =
-    useState<RollupIndicesCapsResponse>({});
-  const [matchedIndices, setMatchedIndices] = useState<MatchedIndicesSet>({
-    allIndices: [],
-    exactMatchedIndices: [],
-    partialMatchedIndices: [],
-    visibleIndices: [],
-  });
-
-  // load all data sources and set initial matchedIndices
-  const loadSources = useCallback(() => {
+  /*
+  const allSources = useRef(
     getIndices({
       http,
       isRollupIndex: () => false,
-      pattern: '*',
+      pattern: '',
       showAllIndices: allowHidden,
-    }).then((dataSources) => {
-      setAllSources(dataSources);
-      const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
-      setMatchedIndices(matchedSet);
-      setIsLoadingSources(false);
-    });
-  }, [http, allowHidden]);
+    })
+  );
+  */
 
-  // loading list of index patterns
+  const isLoadingSources$ = useRef(new BehaviorSubject<boolean>(true));
+  const timestampFieldOptions$ = useRef(new BehaviorSubject<TimestampOption[]>([]));
+  const loadingTimestampFields$ = useRef(new BehaviorSubject<boolean>(false));
+  const loadingMatchedIndices$ = useRef(new BehaviorSubject<boolean>(false));
+  const dataSources$ = useRef(new BehaviorSubject<MatchedItem[]>([]));
+  const isLoadingIndexPatterns$ = useRef(new BehaviorSubject<boolean>(true));
+  const existingIndexPatterns$ = useRef(new BehaviorSubject<string[]>([]));
+  const rollupIndex$ = useRef(new BehaviorSubject<string | undefined>(undefined));
+  const rollupIndicesCapabilities$ = useRef(new BehaviorSubject<RollupIndicesCapsResponse>({}));
+
+  const matchedIndices$ = useRef(new BehaviorSubject<MatchedIndicesSet>(matchedIndiciesDefault));
+
+  const isLoadingSources = useObservable(isLoadingSources$.current, true);
+  const isLoadingIndexPatterns = useObservable(isLoadingIndexPatterns$.current, true);
+
+  // load all data sources and set initial matchedIndices
+  const loadSources = useCallback(
+    (pattern: string = '') => {
+      return getIndices({
+        http,
+        isRollupIndex: () => false,
+        pattern,
+        showAllIndices: allowHidden,
+      });
+    },
+    [http, allowHidden]
+  );
+
+  const newLoadTimestampFields = useCallback(
+    async (index: string) => {
+      const currentLoadingTimestampFieldsIdx = ++currentLoadingTimestampFieldsRef.current;
+      loadingTimestampFields$.current.next(true);
+      const getFieldsOptions: GetFieldsOptions = {
+        pattern: index,
+      };
+      if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+        getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
+        getFieldsOptions.rollupIndex = rollupIndex$.current.getValue();
+      }
+
+      const fields = await ensureMinimumTime(dataViews.getFieldsForWildcard(getFieldsOptions));
+      const timestampOptions = extractTimeFields(fields as DataViewField[], requireTimestampField);
+      if (currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current) {
+        timestampFieldOptions$.current.next(timestampOptions);
+        loadingTimestampFields$.current.next(false);
+      }
+    },
+    [
+      dataViews,
+      requireTimestampField,
+      type,
+      rollupIndex$,
+      loadingTimestampFields$,
+      timestampFieldOptions$,
+    ]
+  );
+
+  const load = useCallback(async () => {
+    const allSrcs = await loadSources('*');
+    loadMatchedIndices(title, allowHidden, allSrcs, {
+      // todo
+      isRollupIndex: () => false,
+      http,
+    }).then((matchedSet) => {
+      isLoadingSources$.current.next(false);
+      // matchedIndices$.current.next(matchedSet.matchedIndicesResult);
+      matchedIndices$.current.next(
+        getMatchedIndices(allSrcs, matchedSet.partialMatched, matchedSet.exactMatched, allowHidden)
+      );
+    });
+  }, [http, allowHidden, isLoadingSources$, matchedIndices$, title, loadSources]);
+
   useEffect(() => {
-    loadSources();
+    const sub2 = matchedIndices$.current.subscribe((matchedIndices) => {
+      if (matchedIndices.exactMatchedIndices.length && !loadingMatchedIndices$.current.getValue()) {
+        loadingTimestampFields$.current.next(true);
+        const timeFieldQuery = editData ? editData.title : title;
+        newLoadTimestampFields(removeSpaces(timeFieldQuery));
+      }
+    });
+
+    load();
+
+    return () => {
+      sub2.unsubscribe();
+    };
+  }, [
+    allowHidden,
+    editData,
+    title,
+    http,
+    load,
+    newLoadTimestampFields,
+    dataSources$,
+    isLoadingSources$,
+    matchedIndices$,
+    loadingMatchedIndices$,
+    loadingTimestampFields$,
+  ]);
+
+  // kicks off loading of data sources, data view names
+  // todo review
+  useEffect(() => {
     const getTitles = async () => {
       const dataViewListItems = await dataViews.getIdsWithTitle(editData ? true : false);
-      const indexPatternNames = dataViewListItems.map((item) => item.name || item.title);
+      const dataViewNames = dataViewListItems.map((item) => item.name || item.title);
 
-      setExistingIndexPatterns(
-        editData ? indexPatternNames.filter((v) => v !== editData.name) : indexPatternNames
+      existingIndexPatterns$.current.next(
+        editData ? dataViewNames.filter((v) => v !== editData.name) : dataViewNames
       );
-      setIsLoadingIndexPatterns(false);
+      isLoadingIndexPatterns$.current.next(false);
     };
     getTitles();
-  }, [http, dataViews, editData, loadSources]);
+  }, [http, dataViews, editData, isLoadingIndexPatterns$, existingIndexPatterns$]);
 
   // loading rollup info
+  // todo review
   useEffect(() => {
     const getRollups = async () => {
       try {
         const response = await http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
         if (response) {
-          setRollupIndicesCapabilities(response);
+          rollupIndicesCapabilities$.current.next(response);
         }
       } catch (e) {
         // Silently swallow failure responses such as expired trials
@@ -218,58 +308,65 @@ const IndexPatternEditorFlyoutContentComponent = ({
     };
 
     getRollups();
-  }, [http, type]);
+  }, [http, type, rollupIndicesCapabilities$]);
 
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
+  // depends upon matchedIndices$, loadingMatchedIndices$
+  // then start loading timestampFieldOptions
+  // todo - unused?
   const loadTimestampFieldOptions = useCallback(
     async (query: string) => {
       const currentLoadingTimestampFieldsIdx = ++currentLoadingTimestampFieldsRef.current;
       let timestampOptions: TimestampOption[] = [];
+      // console.log('isValidResult', matchedIndices, isLoadingMatchedIndices);
       const isValidResult =
-        matchedIndices.exactMatchedIndices.length > 0 && !isLoadingMatchedIndices;
+        matchedIndices$.current.getValue().exactMatchedIndices.length > 0 &&
+        !loadingMatchedIndices$.current.getValue();
       if (isValidResult) {
-        setIsLoadingTimestampFields(true);
+        loadingTimestampFields$.current.next(true);
         const getFieldsOptions: GetFieldsOptions = {
           pattern: query,
         };
         if (type === INDEX_PATTERN_TYPE.ROLLUP) {
           getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
-          getFieldsOptions.rollupIndex = rollupIndex;
+          getFieldsOptions.rollupIndex = rollupIndex$.current.getValue();
         }
 
         const fields = await ensureMinimumTime(dataViews.getFieldsForWildcard(getFieldsOptions));
         timestampOptions = extractTimeFields(fields as DataViewField[], requireTimestampField);
       }
       if (currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current) {
-        setIsLoadingTimestampFields(false);
-        setTimestampFieldOptions(timestampOptions);
+        loadingTimestampFields$.current.next(false);
+        timestampFieldOptions$.current.next(timestampOptions);
       }
       return timestampOptions;
     },
     [
       dataViews,
       requireTimestampField,
-      rollupIndex,
+      rollupIndex$,
       type,
-      matchedIndices.exactMatchedIndices,
-      isLoadingMatchedIndices,
+      timestampFieldOptions$,
+      loadingTimestampFields$,
+      matchedIndices$,
+      loadingMatchedIndices$,
     ]
   );
 
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
       const isRollupIndex = (indexName: string) =>
-        getRollupIndices(rollupIndicesCapabilities).includes(indexName);
+        getRollupIndices(rollupIndicesCapabilities$.current.getValue()).includes(indexName);
       let newRollupIndexName: string | undefined;
 
       const fetchIndices = async (query: string = '') => {
         const currentLoadingMatchedIndicesIdx = ++currentLoadingMatchedIndicesRef.current;
 
-        setIsLoadingMatchedIndices(true);
+        loadingMatchedIndices$.current.next(true);
 
         const { matchedIndicesResult, exactMatched } = !isLoadingSources
-          ? await loadMatchedIndices(query, allowHidden, allSources, {
+          ? await loadMatchedIndices(query, allowHidden, dataSources$.current.getValue(), {
               isRollupIndex,
               http,
             })
@@ -288,13 +385,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
           if (type === INDEX_PATTERN_TYPE.ROLLUP) {
             const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
             newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : undefined;
-            setRollupIndex(newRollupIndexName);
+            rollupIndex$.current.next(newRollupIndexName);
           } else {
-            setRollupIndex(undefined);
+            rollupIndex$.current.next(undefined);
           }
 
-          setMatchedIndices(matchedIndicesResult);
-          setIsLoadingMatchedIndices(false);
+          matchedIndices$.current.next(matchedIndicesResult);
+          loadingMatchedIndices$.current.next(false);
         }
 
         return { matchedIndicesResult, newRollupIndexName };
@@ -302,26 +399,18 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
       return fetchIndices(newTitle);
     },
-    [http, allowHidden, allSources, type, rollupIndicesCapabilities, isLoadingSources]
+    [
+      http,
+      allowHidden,
+      type,
+      rollupIndicesCapabilities$,
+      rollupIndex$,
+      dataSources$,
+      isLoadingSources,
+      matchedIndices$,
+      loadingMatchedIndices$,
+    ]
   );
-
-  // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
-  useEffect(() => {
-    if (editData) {
-      loadSources();
-      reloadMatchedIndices(removeSpaces(editData.title));
-    }
-    // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editData]);
-
-  useEffect(() => {
-    const timeFieldQuery = editData ? editData.title : title;
-    loadTimestampFieldOptions(removeSpaces(timeFieldQuery));
-    if (!editData) getFields().timestampField?.setValue('');
-    // We use the below eslint-disable as adding editData as a dependency create an infinite loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadTimestampFieldOptions, title, getFields]);
 
   const onTypeChange = useCallback(
     (newType) => {
@@ -342,7 +431,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const showIndexPatternTypeSelect = () =>
     uiSettings.isDeclared('rollups:enableIndexPatterns') &&
     uiSettings.get('rollups:enableIndexPatterns') &&
-    getRollupIndices(rollupIndicesCapabilities).length;
+    getRollupIndices(rollupIndicesCapabilities$.current.getValue()).length;
 
   const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
     <>
@@ -378,7 +467,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <EuiSpacer size="l" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <NameField editData={editData} existingDataViewNames={existingIndexPatterns} />
+              <NameField
+                editData={editData}
+                existingDataViewNames$={existingIndexPatterns$.current}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
@@ -387,8 +479,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
               <TitleField
                 isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
                 refreshMatchedIndices={reloadMatchedIndices}
-                matchedIndices={matchedIndices.exactMatchedIndices}
-                rollupIndicesCapabilities={rollupIndicesCapabilities}
+                matchedIndices$={matchedIndices$.current}
+                rollupIndicesCapabilities$={rollupIndicesCapabilities$.current}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -396,10 +488,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <TimestampField
-                options={timestampFieldOptions}
-                isLoadingOptions={isLoadingTimestampFields}
-                isLoadingMatchedIndices={isLoadingMatchedIndices}
-                hasMatchedIndices={!!matchedIndices.exactMatchedIndices.length}
+                options$={timestampFieldOptions$.current}
+                isLoadingOptions$={loadingTimestampFields$.current}
+                isLoadingMatchedIndices$={loadingMatchedIndices$.current}
+                matchedIndices$={matchedIndices$.current}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -432,7 +524,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             type={type}
             allowHidden={allowHidden}
             title={title}
-            matched={matchedIndices}
+            matchedIndices$={matchedIndices$.current}
           />
         )}
       </FlyoutPanels.Item>
