@@ -16,7 +16,6 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
-import { coreMock } from '../mocks';
 
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
