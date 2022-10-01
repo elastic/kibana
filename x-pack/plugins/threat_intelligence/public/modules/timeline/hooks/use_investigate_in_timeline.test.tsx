@@ -13,6 +13,7 @@ import {
 import {
   generateMockIndicator,
   generateMockUrlIndicator,
+  Indicator,
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
 
@@ -20,7 +21,7 @@ describe('useInvestigateInTimeline()', () => {
   let hookResult: RenderHookResult<{}, UseInvestigateInTimelineValue, Renderer<unknown>>;
 
   it('should return empty object if Indicator is incorrect', () => {
-    const indicator = generateMockIndicator();
+    const indicator: Indicator = generateMockIndicator();
     indicator.fields['threat.indicator.name'] = ['wrong'];
 
     hookResult = renderHook(() => useInvestigateInTimeline({ indicator }), {
@@ -29,13 +30,13 @@ describe('useInvestigateInTimeline()', () => {
     expect(hookResult.result.current).toEqual({});
   });
 
-  it('should return ', () => {
-    const indicator = generateMockUrlIndicator();
+  it('should return investigateInTimelineFn', () => {
+    const indicator: Indicator = generateMockUrlIndicator();
 
     hookResult = renderHook(() => useInvestigateInTimeline({ indicator }), {
       wrapper: TestProvidersComponent,
     });
 
-    expect(hookResult.result.current).toHaveProperty('onClick');
+    expect(hookResult.result.current).toHaveProperty('investigateInTimelineFn');
   });
 });

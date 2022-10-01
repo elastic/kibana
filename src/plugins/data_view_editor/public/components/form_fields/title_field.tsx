@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
+import { MatchedItem } from '@kbn/data-views-plugin/public';
 import {
   UseField,
   getFieldValidityAndErrorMessage,
@@ -19,12 +20,7 @@ import {
 } from '../../shared_imports';
 import { canAppendWildcard, removeSpaces } from '../../lib';
 import { schema } from '../form_schema';
-import {
-  MatchedItem,
-  RollupIndicesCapsResponse,
-  IndexPatternConfig,
-  MatchedIndicesSet,
-} from '../../types';
+import { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';
 import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
 
 interface RefreshMatchedIndicesResult {
