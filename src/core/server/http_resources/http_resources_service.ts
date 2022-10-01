@@ -26,7 +26,10 @@ import type {
   HttpResourcesRequestHandler,
   HttpResourcesServiceToolkit,
 } from '@kbn/core-http-resources-server';
-import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
+import {
+  InternalRenderingServicePreboot,
+  InternalRenderingServiceSetup,
+} from '@kbn/core-rendering-server-internal';
 import { InternalHttpResourcesSetup } from './types';
 
 import { getApmConfig } from './get_apm_config';
