@@ -26,7 +26,6 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { useHistory } from 'react-router-dom';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
@@ -58,7 +57,6 @@ export const ContextApp = ({
   locationState: preservedReferrerState = {},
 }: ContextAppProps) => {
   const services = useDiscoverServices();
-  const history = useHistory();
   const { locator, uiSettings, capabilities, dataViews, navigation, filterManager, core } =
     services;
 
@@ -69,7 +67,10 @@ export const ContextApp = ({
   /**
    * Context app state
    */
-  const { appState, globalState, setAppState } = useContextAppState({ services, dataView });
+  const { appState, globalState, stateContainer } = useContextAppState({
+    services,
+    dataView,
+  });
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
 
@@ -80,7 +81,7 @@ export const ContextApp = ({
     dataViews,
     state: appState,
     useNewFieldsApi,
-    setAppState,
+    setAppState: stateContainer.setAppState,
   });
 
   const breadcrumb = useRootBreadcrumb({
@@ -101,7 +102,7 @@ export const ContextApp = ({
         }),
       },
     ]);
-  }, [breadcrumb, history, locator, services.chrome]);
+  }, [breadcrumb, locator, services.chrome]);
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -192,51 +193,64 @@ export const ContextApp = ({
         dataViews.clearInstanceCache(dataViewToUpdate.id);
       }
 
-      const uiActions = await getUiActions();
-      const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
-      await action?.execute({
-        trigger,
-        fromDataView: dataViewToUpdate.id,
-        toDataView: updatedDataView.id,
-        usedDataViews: [],
-      } as ActionExecutionContext);
-
-      const updatedFilters = [
-        ...filterManager.getGlobalFilters(),
-        ...filterManager.getAppFilters(),
-      ];
-      return { updatedDataView, updatedFilters };
+      return updatedDataView;
     },
-    [dataViews, filterManager, initialDataViewId]
+    [dataViews, initialDataViewId]
   );
 
-  const onFieldEdited = useCallback(async () => {
-    if (!dataView.isPersisted()) {
-      const { updatedDataView } = await updateAdHocDataViewId(dataView);
+  const onAdHocDataViewChange = useCallback(async () => {
+    const updatedDataView = await updateAdHocDataViewId(dataView);
 
-      services.contextLocator.navigate({
+    const uiActions = await getUiActions();
+    const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+    const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+
+    /**
+     * Execute doesn't needs to be awaited, this is important.
+     * Since pending history push, caused by filters update should be cancelled right away.
+     */
+    action?.execute({
+      trigger,
+      fromDataView: dataView.id,
+      toDataView: updatedDataView.id,
+      usedDataViews: [],
+    } as ActionExecutionContext);
+
+    // cancel pending history push triggered by just updated filters
+    stateContainer.kbnUrlControls.cancel();
+
+    // getting just updated filters syncronously.
+    const updatedFilters = [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()];
+    services.contextLocator.navigate(
+      {
         rowId: anchorId,
         dataViewSpec: updatedDataView.toSpec(false),
         columns,
-        filters: appState.filters,
+        filters: updatedFilters,
         timeRange: preservedReferrerState.timeRange,
         query: preservedReferrerState.query,
-      });
+      },
+      { replace: true }
+    );
+  }, [
+    anchorId,
+    columns,
+    dataView,
+    filterManager,
+    preservedReferrerState.query,
+    preservedReferrerState.timeRange,
+    services.contextLocator,
+    stateContainer.kbnUrlControls,
+    updateAdHocDataViewId,
+  ]);
+
+  const onFieldEdited = useCallback(async () => {
+    if (!dataView.isPersisted()) {
+      onAdHocDataViewChange();
     } else {
       fetchAllRows();
     }
-  }, [
-    dataView,
-    updateAdHocDataViewId,
-    services.contextLocator,
-    anchorId,
-    columns,
-    appState.filters,
-    preservedReferrerState.timeRange,
-    preservedReferrerState.query,
-    fetchAllRows,
-  ]);
+  }, [dataView, fetchAllRows, onAdHocDataViewChange]);
 
   const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
   const getNavBarProps = () => {
@@ -300,7 +314,7 @@ export const ContextApp = ({
                 onSetColumns={onSetColumns}
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}
-                setAppState={setAppState}
+                setAppState={stateContainer.setAppState}
                 addFilter={addFilter as DocViewFilterFn}
                 rows={rows}
                 predecessors={fetchedState.predecessors}

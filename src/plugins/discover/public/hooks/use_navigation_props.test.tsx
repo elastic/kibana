@@ -9,7 +9,7 @@
 import React, { ReactElement } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { getContextHash, useNavigationProps, UseNavigationProps } from './use_navigation_props';
+import { useNavigationProps, UseNavigationProps } from './use_navigation_props';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,8 +20,6 @@ const defaultProps = {
   rowIndex: 'kibana_sample_data_ecommerce',
   rowId: 'QmsYdX0BQ6gV8MTfoPYE',
   columns: ['customer_first_name', 'products.manufacturer'],
-  filterManager,
-  addBasePath: jest.fn(),
 } as UseNavigationProps;
 const basePathPrefix = 'localhost:5601/xqj';
 

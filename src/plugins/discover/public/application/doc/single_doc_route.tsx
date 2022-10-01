@@ -85,7 +85,7 @@ export const SingleDocRoute = () => {
       <DiscoverError
         error={
           new Error(
-            i18n.translate('discover.discoverError.missingQueryParamsError', {
+            i18n.translate('discover.discoverError.missingIdParamError', {
               defaultMessage: 'URL query string is missing id.',
             })
           )
