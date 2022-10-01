@@ -39,6 +39,7 @@ const mockLayers = [
 const defaultProps = {
   layerList: mockLayers,
   isReadOnly: false,
+  openTOCDetails: [],
   updateLayerOrder: () => {},
   createLayerGroup: () => {},
 };

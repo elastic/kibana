@@ -84,7 +84,7 @@ export class TOCEntryButton extends Component<Props, State> {
         ),
         tooltipContent: this.props.layer.getErrors(),
         footnotes: [],
-      }
+      };
     }
 
     if (!this.props.layer.isVisible()) {
@@ -94,7 +94,7 @@ export class TOCEntryButton extends Component<Props, State> {
           defaultMessage: `Layer is hidden.`,
         }),
         footnotes: [],
-      }
+      };
     }
 
     if (this.props.layer.isLayerLoading()) {
@@ -115,11 +115,11 @@ export class TOCEntryButton extends Component<Props, State> {
           values: { minZoom, maxZoom },
         }),
         footnotes: [],
-      }
+      };
     }
 
     const { icon, tooltipContent } = this.props.layer.getLayerIcon(true);
-    
+
     if (this.props.layer instanceof LayerGroup) {
       return { icon, tooltipContent, footnotes: [] };
     }

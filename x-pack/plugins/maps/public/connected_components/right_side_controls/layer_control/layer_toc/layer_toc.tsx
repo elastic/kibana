@@ -14,6 +14,7 @@ import { ILayer } from '../../../../classes/layers/layer';
 export interface Props {
   isReadOnly: boolean;
   layerList: ILayer[];
+  openTOCDetails: string[];
   createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) => void;
   updateLayerOrder: (newOrder: number[]) => void;
 }
@@ -60,26 +61,53 @@ export class LayerTOC extends Component<Props> {
     this.props.updateLayerOrder(newOrder);
   };
 
+  _getDepth(layer: ILayer, depth: number): { depth: number; showInTOC: boolean } {
+    if (layer.getParent() === undefined) {
+      return { depth, showInTOC: true };
+    }
+
+    const parent = this.props.layerList.find((nextLayer) => {
+      return layer.getParent() === nextLayer.getId();
+    });
+    if (!parent) {
+      return { depth, showInTOC: false };
+    }
+
+    return this.props.openTOCDetails.includes(parent.getId())
+      ? this._getDepth(parent, depth + 1)
+      : { depth, showInTOC: false };
+  }
+
   _renderLayers() {
-    // Reverse layer list so first layer drawn on map is at the bottom and
-    // last layer drawn on map is at the top.
-    const reverseLayerList = this.props.layerList
-      .filter((layer) => {
-        return layer.getParent() === undefined;
+    const tocEntryList = this.props.layerList
+      .map((layer) => {
+        return {
+          ...this._getDepth(layer, 0),
+          layer,
+        };
       })
+      .filter(({ showInTOC }) => {
+        return showInTOC;
+      })
+      // Reverse layer list so first layer drawn on map is at the bottom and
+      // last layer drawn on map is at the top.
       .reverse();
 
     if (this.props.isReadOnly) {
-      return reverseLayerList.map((layer) => {
-        return <TOCEntry key={layer.getId()} layer={layer} />;
+      return tocEntryList.map(({ depth, layer }) => {
+        return <TOCEntry key={layer.getId()} depth={depth} layer={layer} />;
       });
     }
 
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
-        <EuiDroppable droppableId="mapLayerTOC" spacing="none" isCombineEnabled={true}>
+        <EuiDroppable
+          droppableId="mapLayerTOC"
+          spacing="none"
+          isCombineEnabled={!this.props.isReadOnly}
+        >
           {(droppableProvided, snapshot) => {
-            const tocEntries = reverseLayerList.map((layer, idx: number) => (
+            const tocEntries = tocEntryList.map(({ depth, layer }, idx: number) => (
               <EuiDraggable
                 spacing="none"
                 key={layer.getId()}
@@ -89,12 +117,9 @@ export class LayerTOC extends Component<Props> {
                 disableInteractiveElementBlocking // Allows button to be drag handle
               >
                 {(provided, state) => {
-                  if (state.combineWith) {
-                    // console.log('state.combineWith', state.combineWith);
-                    // console.log('state.combineTargetFor', state.combineTargetFor);
-                  }
                   return (
                     <TOCEntry
+                      depth={depth}
                       layer={layer}
                       dragHandleProps={provided.dragHandleProps}
                       isDragging={state.isDragging}

@@ -827,6 +827,7 @@ export function createLayerGroup(draggedLayerId: string, combineLayerId: string)
       type: ADD_LAYER,
       layer: group,
     });
+    dispatch(showTOCDetails(group.id));
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: draggedLayerId,

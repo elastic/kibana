@@ -150,7 +150,7 @@ export class LayerGroup implements ILayer {
   }
 
   async hasLegendDetails(): Promise<boolean> {
-    return false;
+    return this._children.length > 0;
   }
 
   renderLegendDetails(): ReactElement<any> | null {
@@ -183,7 +183,7 @@ export class LayerGroup implements ILayer {
 
   getMinZoom(): number {
     let min = MIN_ZOOM;
-    this._children.forEach(child => {
+    this._children.forEach((child) => {
       min = Math.max(min, child.getMinZoom());
     });
     return min;
@@ -191,7 +191,7 @@ export class LayerGroup implements ILayer {
 
   getMaxZoom(): number {
     let max = MAX_ZOOM;
-    this._children.forEach(child => {
+    this._children.forEach((child) => {
       max = Math.min(max, child.getMaxZoom());
     });
     return max;

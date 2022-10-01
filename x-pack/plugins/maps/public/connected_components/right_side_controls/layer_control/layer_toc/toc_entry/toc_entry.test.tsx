@@ -52,6 +52,7 @@ const mockLayer = {
 } as unknown as ILayer;
 
 const defaultProps = {
+  depth: 0,
   layer: mockLayer,
   selectedLayer: undefined,
   openLayerPanel: async () => {},

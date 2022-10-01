@@ -44,6 +44,7 @@ export interface ReduxDispatchProps {
 }
 
 export interface OwnProps {
+  depth: number;
   layer: ILayer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
   isDragging?: boolean;
@@ -321,8 +322,12 @@ export class TOCEntry extends Component<Props, State> {
       'mapTocEntry-isInEditingMode': this.props.isFeatureEditorOpenForLayer,
     });
 
+    const depthStyle =
+      this.props.depth > 0 ? { paddingLeft: `${8 + this.props.depth * 24}px` } : {};
+
     return (
       <div
+        style={depthStyle}
         className={classes}
         id={this.props.layer.getId()}
         data-layerid={this.props.layer.getId()}

@@ -11,13 +11,14 @@ import { connect } from 'react-redux';
 import { LayerTOC } from './layer_toc';
 import { createLayerGroup, updateLayerOrder } from '../../../../actions';
 import { getLayerList } from '../../../../selectors/map_selectors';
-import { getIsReadOnly } from '../../../../selectors/ui_selectors';
+import { getIsReadOnly, getOpenTOCDetails } from '../../../../selectors/ui_selectors';
 import { MapStoreState } from '../../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     isReadOnly: getIsReadOnly(state),
     layerList: getLayerList(state),
+    openTOCDetails: getOpenTOCDetails(state),
   };
 }
 
