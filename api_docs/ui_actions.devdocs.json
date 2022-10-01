@@ -2191,6 +2191,21 @@
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.VisualizeFieldContext.query",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "AggregateQuery",
+              " | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
