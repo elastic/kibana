@@ -19,7 +19,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { UIM_SHOW_DETAILS_CLICK } from '../../../constants';
@@ -208,16 +208,16 @@ export class RemoteClusterTable extends Component {
         sortable: true,
         render: (mode) => {
           let modeMessage;
-          mode === PROXY_MODE
-          ? modeMessage = mode
-          : modeMessage = 'default'
+          mode === PROXY_MODE ? (modeMessage = mode) : (modeMessage = 'default');
           const modeMessageComponent = (
             <EuiFlexItem grow={false} className="remoteClustersConnectionMode__message">
-              <EuiText data-test-subj='remoteClusterConnectionModeMessage' size="s">{modeMessage}</EuiText>
+              <EuiText data-test-subj="remoteClusterConnectionModeMessage" size="s">
+                {modeMessage}
+              </EuiText>
             </EuiFlexItem>
-          )
+          );
           return modeMessageComponent;
-        }
+        },
       },
       {
         field: 'mode',
@@ -235,9 +235,11 @@ export class RemoteClusterTable extends Component {
           }
           const connectionMode = (
             <EuiFlexItem grow={false} className="remoteClustersConnectionAddress__message">
-              <EuiText data-test-subj='remoteClusterConnectionAddressMessage' size="s">{clusterAddressString}</EuiText>
+              <EuiText data-test-subj="remoteClusterConnectionAddressMessage" size="s">
+                {clusterAddressString}
+              </EuiText>
             </EuiFlexItem>
-          )
+          );
           return connectionMode;
         },
       },
@@ -260,9 +262,11 @@ export class RemoteClusterTable extends Component {
           }
           const connectionMode = (
             <EuiFlexItem grow={false} className="remoteClustersNodeCount__message">
-              <EuiText data-test-subj='remoteClusterNodeCountMessage' size="s">{remoteNodesCount}</EuiText>
+              <EuiText data-test-subj="remoteClusterNodeCountMessage" size="s">
+                {remoteNodesCount}
+              </EuiText>
             </EuiFlexItem>
-          )
+          );
           return connectionMode;
         },
       },
@@ -276,17 +280,17 @@ export class RemoteClusterTable extends Component {
             render: ({ name, isConfiguredByNode }) => {
               const label = isConfiguredByNode
                 ? i18n.translate(
-                  'xpack.remoteClusters.remoteClusterList.table.actionBlockedEditDescription',
-                  {
-                    defaultMessage: `Remote clusters defined in elasticsearch.yml can't be edited`,
-                  }
-                )
+                    'xpack.remoteClusters.remoteClusterList.table.actionBlockedEditDescription',
+                    {
+                      defaultMessage: `Remote clusters defined in elasticsearch.yml can't be edited`,
+                    }
+                  )
                 : i18n.translate(
-                  'xpack.remoteClusters.remoteClusterList.table.actionEditDescription',
-                  {
-                    defaultMessage: 'Edit remote cluster',
-                  }
-                );
+                    'xpack.remoteClusters.remoteClusterList.table.actionEditDescription',
+                    {
+                      defaultMessage: 'Edit remote cluster',
+                    }
+                  );
 
               return (
                 <EuiToolTip content={label} delay="long">
@@ -307,17 +311,17 @@ export class RemoteClusterTable extends Component {
             render: ({ name, isConfiguredByNode }) => {
               const label = isConfiguredByNode
                 ? i18n.translate(
-                  'xpack.remoteClusters.remoteClusterList.table.actionBlockedDeleteDescription',
-                  {
-                    defaultMessage: `Remote clusters defined in elasticsearch.yml can't be deleted`,
-                  }
-                )
+                    'xpack.remoteClusters.remoteClusterList.table.actionBlockedDeleteDescription',
+                    {
+                      defaultMessage: `Remote clusters defined in elasticsearch.yml can't be deleted`,
+                    }
+                  )
                 : i18n.translate(
-                  'xpack.remoteClusters.remoteClusterList.table.actionDeleteDescription',
-                  {
-                    defaultMessage: 'Delete remote cluster',
-                  }
-                );
+                    'xpack.remoteClusters.remoteClusterList.table.actionDeleteDescription',
+                    {
+                      defaultMessage: 'Delete remote cluster',
+                    }
+                  );
 
               return (
                 <EuiToolTip content={label} delay="long">

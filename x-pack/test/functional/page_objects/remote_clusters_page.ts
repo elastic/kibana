@@ -35,17 +35,27 @@ export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
       const table = await testSubjects.find('remoteClusterListTable');
       const rows = await table.findAllByCssSelector('.euiTableRow');
       return await Promise.all(
-       rows.map(async (row) => {
-          return  {
+        rows.map(async (row) => {
+          return {
             remoteLink: await row.findByTestSubject('remoteClustersTableListClusterLink'),
-            remoteName: (await row.findByTestSubject('remoteClustersTableListClusterLink')).getVisibleText(),
-            remoteStatus: (await row.findByTestSubject('remoteClusterConnectionStatusMessage')).getVisibleText(),
-            remoteMode: (await row.findByTestSubject('remoteClusterConnectionModeMessage')).getVisibleText(),
-            remoteAddress: (await row.findByTestSubject('remoteClusterConnectionAddressMessage')).getVisibleText(),
-            remoteConnectionCount: (await row.findByTestSubject('remoteClusterNodeCountMessage')).getVisibleText(),
+            remoteName: (
+              await row.findByTestSubject('remoteClustersTableListClusterLink')
+            ).getVisibleText(),
+            remoteStatus: (
+              await row.findByTestSubject('remoteClusterConnectionStatusMessage')
+            ).getVisibleText(),
+            remoteMode: (
+              await row.findByTestSubject('remoteClusterConnectionModeMessage')
+            ).getVisibleText(),
+            remoteAddress: (
+              await row.findByTestSubject('remoteClusterConnectionAddressMessage')
+            ).getVisibleText(),
+            remoteConnectionCount: (
+              await row.findByTestSubject('remoteClusterNodeCountMessage')
+            ).getVisibleText(),
           };
         })
       );
-    }
+    },
   };
 }
