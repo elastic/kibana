@@ -739,12 +739,26 @@ describe('AllCasesListGeneric', () => {
   });
 
   describe('Actions', () => {
+    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+    const deleteCasesSpy = jest.spyOn(api, 'deleteCases');
+
     describe('Bulk actions', () => {
+      it('Renders bulk action', async () => {
+        const result = appMockRenderer.render(<AllCasesList />);
+
+        act(() => {
+          userEvent.click(result.getByText('Bulk actions'));
+        });
+
+        await waitForEuiPopoverOpen();
+
+        expect(result.getByTestId('case-bulk-action-status')).toBeInTheDocument();
+        expect(result.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+      });
+
       it.each([[CaseStatuses.open], [CaseStatuses['in-progress']], [CaseStatuses.closed]])(
         'Bulk update status: %s',
         async (status) => {
-          const updateCasesSpy = jest.spyOn(api, 'updateCases');
-
           const result = appMockRenderer.render(<AllCasesList />);
           const theCase = useGetCasesMockState.data.cases[0];
 
@@ -780,7 +794,6 @@ describe('AllCasesListGeneric', () => {
       );
 
       it('Bulk delete', async () => {
-        const deleteCasesSpy = jest.spyOn(api, 'deleteCases');
         const result = appMockRenderer.render(<AllCasesList />);
 
         act(() => {
@@ -823,22 +836,15 @@ describe('AllCasesListGeneric', () => {
           );
         });
       });
-
-      it('Renders bulk action', async () => {
-        const result = appMockRenderer.render(<AllCasesList />);
-
-        act(() => {
-          userEvent.click(result.getByText('Bulk actions'));
-        });
-
-        await waitForEuiPopoverOpen();
-
-        expect(result.getByTestId('case-bulk-action-status')).toBeInTheDocument();
-        expect(result.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-      });
     });
 
     describe('Row actions', () => {
+      const statusTests = [
+        [CaseStatuses.open],
+        [CaseStatuses['in-progress']],
+        [CaseStatuses.closed],
+      ];
+
       it('should render row actions', async () => {
         const res = appMockRenderer.render(<AllCasesList />);
 
@@ -846,6 +852,79 @@ describe('AllCasesListGeneric', () => {
           for (const theCase of defaultGetCases.data.cases) {
             expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
           }
+        });
+      });
+
+      it.each(statusTests)('update the status of a case: %s', async (status) => {
+        const res = appMockRenderer.render(<AllCasesList />);
+        const theCase = defaultGetCases.data.cases[0];
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-popover-button-${theCase.id}`));
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-status-panel-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-status-panel-${theCase.id}`), undefined, {
+            skipPointerEventsCheck: true,
+          });
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId(`cases-bulk-action-status-${status}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`cases-bulk-action-status-${status}`));
+        });
+
+        await waitFor(() => {
+          expect(updateCasesSpy).toHaveBeenCalledWith(
+            [{ id: 'basic-case-id', status, version: 'WzQ3LDFd' }],
+            expect.anything()
+          );
+        });
+      });
+
+      it('should delete a case', async () => {
+        const res = appMockRenderer.render(<AllCasesList />);
+        const theCase = defaultGetCases.data.cases[0];
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-popover-button-${theCase.id}`));
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
+            skipPointerEventsCheck: true,
+          });
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId('confirmModalConfirmButton'));
+        });
+
+        await waitFor(() => {
+          expect(deleteCasesSpy).toHaveBeenCalledWith(['basic-case-id'], expect.anything());
         });
       });
     });
