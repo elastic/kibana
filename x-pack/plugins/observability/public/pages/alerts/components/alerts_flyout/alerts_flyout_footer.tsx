@@ -18,7 +18,7 @@ export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { i
   const { http } = services;
   const prepend = http?.basePath.prepend;
   const getAlertDetailsButton = () => {
-    if (!config.unsafe.alertDetails.enabled || !alert) return <></>;
+    if (!config?.unsafe?.alertDetails.enabled || !alert) return <></>;
     return (
       <EuiFlexItem grow={false}>
         <EuiButton
