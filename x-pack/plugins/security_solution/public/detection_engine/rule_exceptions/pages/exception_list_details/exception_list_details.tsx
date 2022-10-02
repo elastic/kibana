@@ -31,7 +31,16 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
   }, []);
   return (
     <>
-      <ExceptionListHeader title={listName} description={listDescription} listId={listId} />
+      <ExceptionListHeader
+        title={listName}
+        description={listDescription}
+        listId={listId}
+        isReadonly={false}
+        onEditTitle={() => {}}
+        onEditDescription={() => {}}
+        onExportList={() => {}}
+        onDeleteList={() => {}}
+      />
       <ListWithSearch list={list} />
     </>
   );
