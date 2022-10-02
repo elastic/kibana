@@ -24,14 +24,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await security.testUser.restoreDefaults();
     });
 
-    it('Add remote cluster and add be able to see data', async () => {
+    it('Verify ftr-remote in remote clusters', async () => {
       await retry.waitFor('table to be visible', async () => {
         return await testSubjects.isDisplayed('remoteClusterListTable');
       });
       const remotes = await pageObjects.remoteClusters.getRemoteClustersList();
       expect(remotes.length).to.eql(1);
-      expect(remotes[1].remoteName).to.eql('ftr-remote');
-      expect(remotes[1].remoteAddress).to.contain('localhost');
+      expect(remotes[0].remoteName).to.eql('ftr-remote');
+      expect(remotes[0].remoteAddress).to.contain('localhost');
+      expect(remotes[0].remoteStatus).to.eql('Connected');
+      expect(remotes[0].remoteConnectionCount).to.eql('1');
+      expect(remotes[0].remoteMode).to.eql('default');
     });
   });
 };
