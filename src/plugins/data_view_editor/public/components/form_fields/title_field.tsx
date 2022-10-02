@@ -31,7 +31,7 @@ interface RefreshMatchedIndicesResult {
 interface TitleFieldProps {
   isRollup: boolean;
   matchedIndices$: BehaviorSubject<MatchedIndicesSet>;
-  rollupIndicesCapabilities$: BehaviorSubject<RollupIndicesCapsResponse>;
+  rollupIndicesCapabilities: RollupIndicesCapsResponse;
   refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
 }
 
@@ -138,11 +138,10 @@ const getTitleConfig = ({
 export const TitleField = ({
   isRollup,
   matchedIndices$,
-  rollupIndicesCapabilities$,
+  rollupIndicesCapabilities,
   refreshMatchedIndices,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
-  const rollupIndicesCapabilities = useObservable(rollupIndicesCapabilities$, {});
   const matchedIndices = useObservable(matchedIndices$, matchedIndiciesDefault).exactMatchedIndices;
 
   const fieldConfig = useMemo(

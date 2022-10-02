@@ -485,6 +485,7 @@ export class DataViewsService {
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
       filter: options.filter,
+      showHidden: options.showHidden,
     });
     return fields;
   };

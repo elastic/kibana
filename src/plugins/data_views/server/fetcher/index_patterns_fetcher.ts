@@ -61,8 +61,17 @@ export class IndexPatternsFetcher {
     type?: string;
     rollupIndex?: string;
     filter?: QueryDslQueryContainer;
+    showHidden?: boolean;
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
-    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, filter } = options;
+    const {
+      pattern,
+      metaFields = [],
+      fieldCapsOptions,
+      type,
+      rollupIndex,
+      filter,
+      showHidden = false,
+    } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
     const allowNoIndices = fieldCapsOptions
       ? fieldCapsOptions.allow_no_indices
@@ -80,6 +89,7 @@ export class IndexPatternsFetcher {
         allow_no_indices: allowNoIndices,
       },
       filter,
+      showHidden,
     });
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];

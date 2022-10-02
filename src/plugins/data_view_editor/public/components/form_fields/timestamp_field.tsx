@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { EuiFormRow, EuiComboBox, EuiFormHelpText, EuiComboBoxOptionOption } from '@elastic/eui';
 import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
 
@@ -24,7 +24,7 @@ import { TimestampOption, MatchedIndicesSet } from '../../types';
 import { schema } from '../form_schema';
 
 interface Props {
-  options$: BehaviorSubject<TimestampOption[]>;
+  options$: Subject<TimestampOption[]>;
   isLoadingOptions$: BehaviorSubject<boolean>;
   isLoadingMatchedIndices$: BehaviorSubject<boolean>;
   matchedIndices$: BehaviorSubject<MatchedIndicesSet>;

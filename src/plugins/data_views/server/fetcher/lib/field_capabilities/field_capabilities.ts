@@ -21,6 +21,7 @@ interface FieldCapabilitiesParams {
   metaFields: string[];
   fieldCapsOptions?: { allow_no_indices: boolean };
   filter?: QueryDslQueryContainer;
+  showHidden?: boolean;
 }
 
 /**
@@ -34,8 +35,27 @@ interface FieldCapabilitiesParams {
  *  @return {Promise<{ fields: Array<FieldDescriptor>, indices: Array<string>>}>}
  */
 export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
-  const { callCluster, indices = [], fieldCapsOptions, filter, metaFields = [] } = params;
-  const esFieldCaps = await callFieldCapsApi({ callCluster, indices, fieldCapsOptions, filter });
+  const {
+    callCluster,
+    indices = [],
+    fieldCapsOptions,
+    filter,
+    metaFields = [],
+    showHidden,
+  } = params;
+
+  const indicesArray = Array.isArray(indices) ? indices : [indices];
+  const filteredIndices = showHidden
+    ? indicesArray
+    : indicesArray.filter((index: string) => !index.startsWith('.'));
+
+  const esFieldCaps = await callFieldCapsApi({
+    callCluster,
+    indices: filteredIndices,
+    fieldCapsOptions,
+    filter,
+    expandWildcards: showHidden ? ['open', 'hidden'] : 'open',
+  });
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
