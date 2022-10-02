@@ -11,9 +11,9 @@ import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import type { AppMockRenderer } from '../../common/mock';
 import {
   allCasesPermissions,
-  AppMockRenderer,
   createAppMockRenderer,
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,

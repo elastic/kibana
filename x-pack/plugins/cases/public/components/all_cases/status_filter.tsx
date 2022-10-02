@@ -6,9 +6,11 @@
  */
 
 import React, { memo } from 'react';
-import { EuiSuperSelect, EuiSuperSelectOption, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status, statuses } from '../status';
-import { CaseStatusWithAllStatus, StatusAll } from '../../../common/ui/types';
+import type { CaseStatusWithAllStatus } from '../../../common/ui/types';
+import { StatusAll } from '../../../common/ui/types';
 
 interface Props {
   stats: Record<CaseStatusWithAllStatus, number | null>;

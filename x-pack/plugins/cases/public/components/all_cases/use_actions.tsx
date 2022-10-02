@@ -6,16 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
+import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
-  EuiPopover,
   EuiTableComputedColumnType,
 } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useStatusAction } from '../actions/status/use_status_action';

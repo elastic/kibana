@@ -21,7 +21,8 @@ import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
-import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import type { CaseViewPageProps } from './types';
+import { CASE_VIEW_PAGE_TABS } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 
