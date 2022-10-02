@@ -21,7 +21,7 @@ export interface Pipeline {
   name: string;
   description?: string;
   version?: number;
-  processors: Processor[];
+  processors: string | Processor[];
   on_failure?: Processor[];
   isManaged?: boolean;
 }

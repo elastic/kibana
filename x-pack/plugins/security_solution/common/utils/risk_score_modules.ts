@@ -7,7 +7,7 @@
 
 import { DEFAULT_ALERTS_INDEX } from '../constants';
 import { RiskScoreEntity, RiskScoreFields } from '../search_strategy';
-import type { Pipeline } from '../types/risk_scores';
+import type { Pipeline, Processor } from '../types/risk_scores';
 
 /**
  * * Since 8.5, all the transforms, scripts,
@@ -200,12 +200,12 @@ export const getRiskUserCreateReduceScriptOptions = (
  * console_templates/enable_user_risk_score.console step 4
  * console_templates/enable_host_risk_score.console step 5
  */
-export const getRiskScoreIngestPipelineOptions = <T = false>(
+export const getRiskScoreIngestPipelineOptions = (
   riskScoreEntity: RiskScoreEntity,
   spaceId = 'default',
-  stringifyScript?: T
-): { name: string; processors: T extends true ? string : Pipeline['processors'] } => {
-  const processors = [
+  stringifyScript?: boolean
+): Pipeline => {
+  const processors: Processor[] = [
     {
       set: {
         field: 'ingest_timestamp',
@@ -302,7 +302,6 @@ export const getCreateRiskScoreIndicesOptions = ({
   };
 };
 
-/**
 /**
  * This should be aligned with
  * console_templates/enable_user_risk_score.console step 8

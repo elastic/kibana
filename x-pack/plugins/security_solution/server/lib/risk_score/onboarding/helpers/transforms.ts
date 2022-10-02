@@ -9,23 +9,40 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+export const TRANSFORM_STATE = {
+  ABORTING: 'aborting',
+  FAILED: 'failed',
+  INDEXING: 'indexing',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STOPPING: 'stopping',
+  WAITING: 'waiting',
+} as const;
+
 export const createAndStartTransform = ({
   esClient,
-  transform,
+  transformId,
+  options,
   logger,
 }: {
   esClient: ElasticsearchClient;
-  transform: TransformPutTransformRequest;
+  transformId: string;
+  options: string | Omit<TransformPutTransformRequest, 'transform_id'>;
   logger: Logger;
-}) =>
-  createTransformIfNotExists(esClient, transform, logger).then((result) => {
+}) => {
+  const transformOptions = typeof options === 'string' ? JSON.parse(options) : options;
+  const transform = {
+    transform_id: transformId,
+    ...transformOptions,
+  };
+  return createTransformIfNotExists(esClient, transform, logger).then((result) => {
     if (result[transform.transform_id].success) {
       return startTransformIfNotStarted(esClient, transform.transform_id, logger);
     } else {
       return result;
     }
   });
-
+};
 /**
  * Checks if a transform exists, And if not creates it
  *
@@ -131,9 +148,9 @@ export const startTransformIfNotStarted = async (
       };
     }
   } else if (
-    fetchedTransformStats.state === 'stopping' ||
-    fetchedTransformStats.state === 'aborting' ||
-    fetchedTransformStats.state === 'failed'
+    fetchedTransformStats.state === TRANSFORM_STATE.STOPPING ||
+    fetchedTransformStats.state === TRANSFORM_STATE.ABORTING ||
+    fetchedTransformStats.state === TRANSFORM_STATE.FAILED
   ) {
     logger.error(
       `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
@@ -159,7 +176,11 @@ const stopTransform = async (
   const fetchedTransformStats = await checkTransformState(esClient, transformId, logger);
   if (fetchedTransformStats.state) {
     try {
-      await esClient.transform.stopTransform({ transform_id: transformId });
+      await esClient.transform.stopTransform({
+        transform_id: transformId,
+        force: fetchedTransformStats.state === TRANSFORM_STATE.FAILED,
+        wait_for_completion: true,
+      });
       return { [transformId]: { success: true, error: null } };
     } catch (startErr) {
       const startError = transformError(startErr);

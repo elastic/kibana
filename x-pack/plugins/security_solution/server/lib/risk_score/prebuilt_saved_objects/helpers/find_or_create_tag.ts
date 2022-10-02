@@ -10,6 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { Tag } from './utils';
 import { RISK_SCORE_TAG_DESCRIPTION, getRiskScoreTagName } from './utils';
+import type { BulkCreateSavedObjectsResult } from '../types';
 
 export const findRiskScoreTag = async ({
   savedObjectsClient,
@@ -49,7 +50,7 @@ export const findOrCreateRiskScoreTag = async ({
   riskScoreEntity: RiskScoreEntity;
   savedObjectsClient: SavedObjectsClientContract;
   spaceId?: string;
-}) => {
+}): Promise<BulkCreateSavedObjectsResult> => {
   const tagName = getRiskScoreTagName(riskScoreEntity, spaceId);
 
   const existingRiskScoreTag = await findRiskScoreTag({
@@ -82,7 +83,13 @@ export const findOrCreateRiskScoreTag = async ({
         color: '#6edb7f',
       });
 
-      return { ...tag, id: tagId };
+      return {
+        [`${riskScoreEntity}RiskScoreDashboards`]: {
+          success: true,
+          error: null,
+          body: { ...tag, id: tagId },
+        },
+      };
     } catch (e) {
       logger.error(
         `${riskScoreEntity}RiskScoreDashboards cannot be installed as failed to create the tag`

@@ -18,8 +18,10 @@ export const createIngestPipeline = async ({
   logger: Logger;
   options: Pipeline;
 }) => {
+  const processors =
+    typeof options.processors === 'string' ? JSON.parse(options.processors) : options.processors;
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { name, description, processors, version, on_failure } = options;
+  const { name, description, version, on_failure } = options;
 
   try {
     await esClient.ingest.putPipeline({

@@ -11,7 +11,9 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 export const createEsIndexBodySchema = schema.object({
   index: schema.string({ minLength: 1 }),
-  mappings: schema.maybe(schema.recordOf(schema.string({ minLength: 1 }), schema.any())),
+  mappings: schema.maybe(
+    schema.oneOf([schema.string(), schema.recordOf(schema.string({ minLength: 1 }), schema.any())])
+  ),
 });
 
 type CreateEsIndexBodySchema = TypeOf<typeof createEsIndexBodySchema>;
@@ -26,7 +28,11 @@ export const createIndex = async ({
   options: CreateEsIndexBodySchema;
 }) => {
   try {
-    await esClient.indices.create(options);
+    await esClient.indices.create({
+      index: options.index,
+      mappings:
+        typeof options.mappings === 'string' ? JSON.parse(options.mappings) : options.mappings,
+    });
     return { [options.index]: { success: true, error: null } };
   } catch (err) {
     const error = transformError(err);

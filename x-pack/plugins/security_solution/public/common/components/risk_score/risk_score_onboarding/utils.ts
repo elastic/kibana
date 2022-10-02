@@ -16,9 +16,9 @@ import {
   deleteTransforms,
   deleteIngestPipelines,
   stopTransforms,
-  bulkCreatePrebuiltSavedObjects,
   bulkDeletePrebuiltSavedObjects,
   onboardingRiskScore,
+  bulkCreatePrebuiltSavedObjects,
 } from '../../../../risk_score/containers/onboarding/api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
@@ -64,69 +64,6 @@ const installHostRiskScoreModule = async ({
       riskScoreEntity: RiskScoreEntity.host,
     },
   });
-
-  // /**
-  //  * console_templates/enable_host_risk_score.console
-  //  * Step 7 create transform: ml_hostriskscore_pivot_transform_{spaceId}
-  //  */
-  // await createTransform({
-  //   http,
-  //   theme,
-  //   renderDocLink,
-  //   notifications,
-  //   errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
-  //   transformId: utils.getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId),
-  //   options: utils.getCreateMLHostPivotTransformOptions({ spaceId }),
-  // });
-
-  // /**
-  //  * console_templates/enable_host_risk_score.console
-  //  * Step 8 Start the pivot transform
-  //  */
-  // const pivotTransformId = [utils.getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId)];
-  // await startTransforms({
-  //   http,
-  //   theme,
-  //   renderDocLink,
-  //   notifications,
-  //   errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(
-  //     pivotTransformId.length
-  //   )}`,
-  //   transformIds: pivotTransformId,
-  // });
-
-  // /**
-  //  * console_templates/enable_host_risk_score.console
-  //  * Step 10 create transform: ml_hostriskscore_latest_transform_{spaceId}
-  //  */
-  // await createTransform({
-  //   http,
-  //   theme,
-  //   renderDocLink,
-  //   notifications,
-  //   errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
-  //   transformId: utils.getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId),
-  //   options: utils.getCreateLatestTransformOptions({
-  //     spaceId,
-  //     riskScoreEntity: RiskScoreEntity.host,
-  //   }),
-  // });
-
-  // /**
-  //  * console_templates/enable_host_risk_score.console
-  //  * Step 11 Start the latest transform
-  //  */
-  // const latestTransformId = [utils.getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId)];
-  // await startTransforms({
-  //   http,
-  //   theme,
-  //   renderDocLink,
-  //   notifications,
-  //   errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(
-  //     latestTransformId.length
-  //   )}`,
-  //   transformIds: latestTransformId,
-  // });
 
   await restartRiskScoreTransforms({
     http,
@@ -176,81 +113,6 @@ const installUserRiskScoreModule = async ({
     options: {
       riskScoreEntity: RiskScoreEntity.user,
     },
-  });
-
-  // /**
-  //  * console_templates/enable_user_risk_score.console
-  //  * Step 6 create Transform: ml_userriskscore_pivot_transform_{spaceId}
-  //  */
-  // await createTransform({
-  //   http,
-  //   theme,
-  //   renderDocLink,
-  //   notifications,
-  //   errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
-  //   transformId: utils.getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId),
-  //   options: utils.getCreateMLUserPivotTransformOptions({ spaceId }),
-  // });
-
-  // /**
-  //  * console_templates/enable_user_risk_score.console
-  //  * Step 7 Start the pivot transform
-  //  */
-  // const pivotTransformId = [utils.getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId)];
-  // await startTransforms({
-  //   errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(
-  //     pivotTransformId.length
-  //   )}`,
-  //   http,
-  //   notifications,
-  //   renderDocLink,
-  //   theme,
-  //   transformIds: pivotTransformId,
-  // });
-
-  // /**
-  //  * console_templates/enable_user_risk_score.console
-  //  * Step 9 create Transform: ml_userriskscore_latest_transform_{spaceId}
-  //  */
-  // await createTransform({
-  //   http,
-  //   theme,
-  //   renderDocLink,
-  //   notifications,
-  //   errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
-  //   transformId: utils.getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId),
-  //   options: utils.getCreateLatestTransformOptions({
-  //     spaceId,
-  //     riskScoreEntity: RiskScoreEntity.user,
-  //   }),
-  // });
-  // /**
-  //  * console_templates/enable_user_risk_score.console
-  //  * Step 10 Start the latest transform
-  //  */
-  // const latestTransformId = [utils.getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId)];
-  // await startTransforms({
-  //   errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE(
-  //     latestTransformId.length
-  //   )}`,
-  //   http,
-  //   notifications,
-  //   renderDocLink,
-  //   theme,
-  //   transformIds: latestTransformId,
-  // });
-
-  /**
-   * Restart transform immediately to force it pick up the alerts data.
-   * This can effectively reduce the chance of no data appears once installation complete.
-   * */
-  await restartRiskScoreTransforms({
-    http,
-    notifications,
-    renderDocLink,
-    riskScoreEntity: RiskScoreEntity.user,
-    spaceId,
-    theme,
   });
 
   // Install dashboards and relevant saved objects

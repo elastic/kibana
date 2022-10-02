@@ -168,10 +168,8 @@ const installHostRiskScoreModule = async ({
   const createAndStartPivotTransformResult = await createAndStartTransform({
     esClient,
     logger,
-    transform: {
-      transform_id: getRiskScorePivotTransformId(riskScoreEntity, spaceId),
-      ...getCreateMLHostPivotTransformOptions({ spaceId }),
-    },
+    transformId: getRiskScorePivotTransformId(riskScoreEntity, spaceId),
+    options: getCreateMLHostPivotTransformOptions({ spaceId }),
   });
 
   /**
@@ -182,38 +180,14 @@ const installHostRiskScoreModule = async ({
   const createAndStartLatestTransformResult = await createAndStartTransform({
     esClient,
     logger,
-    transform: {
-      transform_id: getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
-      ...getCreateLatestTransformOptions({ riskScoreEntity, spaceId }),
-    },
+    transformId: getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
+    options: getCreateLatestTransformOptions({ riskScoreEntity, spaceId }),
   });
-
-  // const restartPivotTransformResult = await restartTransform(
-  //   esClient,
-  //   getRiskScorePivotTransformId(riskScoreEntity, spaceId),
-  //   logger
-  // );
-
-  // const restartLatestTransformResult = await restartTransform(
-  //   esClient,
-  //   getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
-  //   logger
-  // );
-
-  // const createSavedObjectsResult = await bulkCreateSavedObjects({
-  //   logger,
-  //   savedObjectsClient,
-  //   spaceId,
-  //   savedObjectTemplate: `${riskScoreEntity}RiskScoreDashboards`,
-  // });
 
   return [
     ...result,
     createAndStartPivotTransformResult,
     createAndStartLatestTransformResult,
-    // restartPivotTransformResult,
-    // restartLatestTransformResult,
-    // createSavedObjectsResult,
   ].flat();
 };
 
@@ -317,10 +291,8 @@ const installUserRiskScoreModule = async ({
   const createAndStartPivotTransformResult = await createAndStartTransform({
     esClient,
     logger,
-    transform: {
-      transform_id: getRiskScorePivotTransformId(riskScoreEntity, spaceId),
-      ...getCreateMLUserPivotTransformOptions({ spaceId }),
-    },
+    transformId: getRiskScorePivotTransformId(riskScoreEntity, spaceId),
+    options: getCreateMLUserPivotTransformOptions({ spaceId }),
   });
 
   /**
@@ -331,38 +303,14 @@ const installUserRiskScoreModule = async ({
   const createAndStartLatestTransformResult = await createAndStartTransform({
     esClient,
     logger,
-    transform: {
-      transform_id: getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
-      ...getCreateLatestTransformOptions({ riskScoreEntity, spaceId }),
-    },
+    transformId: getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
+    options: getCreateLatestTransformOptions({ riskScoreEntity, spaceId }),
   });
-
-  // const restartPivotTransformResult = await restartTransform(
-  //   esClient,
-  //   getRiskScorePivotTransformId(riskScoreEntity, spaceId),
-  //   logger
-  // );
-
-  // const restartLatestTransformResult = await restartTransform(
-  //   esClient,
-  //   getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
-  //   logger
-  // );
-
-  // const createSavedObjectsResult = await bulkCreateSavedObjects({
-  //   savedObjectsClient,
-  //   logger,
-  //   spaceId,
-  //   savedObjectTemplate: `${riskScoreEntity}RiskScoreDashboards`,
-  // });
 
   return [
     ...result,
     createAndStartPivotTransformResult,
     createAndStartLatestTransformResult,
-    // restartPivotTransformResult,
-    // restartLatestTransformResult,
-    // createSavedObjectsResult,
   ].flat();
 };
 

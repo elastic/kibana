@@ -41,17 +41,18 @@ export const createPrebuiltSavedObjectsRoute = (
 
       const frameworkRequest = await buildFrameworkRequest(context, security, request);
       const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
-      const res = await bulkCreateSavedObjects({
+      const result = await bulkCreateSavedObjects({
         savedObjectsClient,
         logger,
         spaceId,
         savedObjectTemplate: templateName,
       });
-      const error = res[templateName].error;
+      const error =
+        result?.hostRiskScoreDashboards?.error || result?.userRiskScoreDashboards?.error;
       if (error != null) {
         return siemResponse.error({ statusCode: error.statusCode, body: error.message });
       } else {
-        return response.ok({ body: res });
+        return response.ok({ body: result });
       }
     }
   );

@@ -11,10 +11,10 @@ import type { Logger } from '@kbn/core/server';
 import uuid from 'uuid';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
-import type { SavedObjectTemplate } from '../types';
+import type { BulkCreateSavedObjectsResult, SavedObjectTemplate } from '../types';
 import { findOrCreateRiskScoreTag } from './find_or_create_tag';
 
-export const bulkCreateSavedObjects = async ({
+export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
   logger,
   savedObjectsClient,
   spaceId,
@@ -24,21 +24,23 @@ export const bulkCreateSavedObjects = async ({
   savedObjectsClient: SavedObjectsClientContract;
   spaceId?: string;
   savedObjectTemplate: SavedObjectTemplate;
-}) => {
+}): Promise<BulkCreateSavedObjectsResult> => {
   const regex = /<REPLACE-WITH-SPACE>/g;
 
   const riskScoreEntity =
     savedObjectTemplate === 'userRiskScoreDashboards' ? RiskScoreEntity.user : RiskScoreEntity.host;
 
-  const tagResult = await findOrCreateRiskScoreTag({
+  const tagResponse = await findOrCreateRiskScoreTag({
     riskScoreEntity,
     logger,
     savedObjectsClient,
     spaceId,
   });
 
-  if (!tagResult?.id) {
-    return tagResult;
+  const tagResult = tagResponse?.hostRiskScoreDashboards ?? tagResponse?.userRiskScoreDashboards;
+
+  if (!tagResult?.success) {
+    return tagResponse;
   }
 
   const mySavedObjects = savedObjectsToCreate[savedObjectTemplate];
@@ -69,7 +71,10 @@ export const bulkCreateSavedObjects = async ({
     return {
       ...so,
       id: idReplaceMappings[so.id] ?? so.id,
-      references: [...references, { id: tagResult.id, name: tagResult.name, type: tagResult.type }],
+      references: [
+        ...references,
+        { id: tagResult?.body?.id, name: tagResult?.body?.name, type: tagResult?.body?.type },
+      ],
     };
   });
 
@@ -79,9 +84,8 @@ export const bulkCreateSavedObjects = async ({
 
   try {
     const result = await savedObjectsClient.bulkCreate<{
-      id: string;
-      type: string;
-      attributes: { title: string; name: string };
+      title: string;
+      name: string;
     }>(JSON.parse(replacedSO), {
       overwrite: true,
     });
