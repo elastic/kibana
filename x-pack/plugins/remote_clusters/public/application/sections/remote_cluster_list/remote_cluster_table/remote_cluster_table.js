@@ -207,16 +207,27 @@ export class RemoteClusterTable extends Component {
         }),
         sortable: true,
         render: (mode) => {
-          console.log(i18n.translate('xpack.remoteClusters.remoteClusterList.table.sniffModeDescription', {
-            defaultMessage: 'default'
-          }));
+          console.log(
+            i18n.translate('xpack.remoteClusters.remoteClusterList.table.sniffModeDescription', {
+              defaultMessage: 'default',
+            })
+          );
           let modeMessage;
-          mode === PROXY_MODE ? (modeMessage = mode) : (modeMessage = i18n.translate('xpack.remoteClusters.remoteClusterList.table.sniffModeDescription', {
-            defaultMessage: 'default'
-          }))
+          mode === PROXY_MODE
+            ? (modeMessage = mode)
+            : (modeMessage = i18n.translate(
+                'xpack.remoteClusters.remoteClusterList.table.sniffModeDescription',
+                {
+                  defaultMessage: 'default',
+                }
+              ));
           const modeMessageComponent = (
             <EuiFlexItem grow={false} className="remoteClustersConnectionMode__message">
-              <EuiText id='xpack.remoteClusters.remoteClusterList.table.sniffModeDescription' data-test-subj="remoteClusterConnectionModeMessage" size="s">
+              <EuiText
+                id="xpack.remoteClusters.remoteClusterList.table.sniffModeDescription"
+                data-test-subj="remoteClusterConnectionModeMessage"
+                size="s"
+              >
                 {modeMessage}
               </EuiText>
             </EuiFlexItem>
@@ -285,17 +296,17 @@ export class RemoteClusterTable extends Component {
             render: ({ name, isConfiguredByNode }) => {
               const label = isConfiguredByNode
                 ? i18n.translate(
-                  'xpack.remoteClusters.remoteClusterList.table.actionBlockedEditDescription',
-                  {
-                    defaultMessage: `Remote clusters defined in elasticsearch.yml can't be edited`,
-                  }
-                )
+                    'xpack.remoteClusters.remoteClusterList.table.actionBlockedEditDescription',
+                    {
+                      defaultMessage: `Remote clusters defined in elasticsearch.yml can't be edited`,
+                    }
+                  )
                 : i18n.translate(
-                  'xpack.remoteClusters.remoteClusterList.table.actionEditDescription',
-                  {
-                    defaultMessage: 'Edit remote cluster',
-                  }
-                );
+                    'xpack.remoteClusters.remoteClusterList.table.actionEditDescription',
+                    {
+                      defaultMessage: 'Edit remote cluster',
+                    }
+                  );
 
               return (
                 <EuiToolTip content={label} delay="long">
@@ -316,17 +327,17 @@ export class RemoteClusterTable extends Component {
             render: ({ name, isConfiguredByNode }) => {
               const label = isConfiguredByNode
                 ? i18n.translate(
-                  'xpack.remoteClusters.remoteClusterList.table.actionBlockedDeleteDescription',
-                  {
-                    defaultMessage: `Remote clusters defined in elasticsearch.yml can't be deleted`,
-                  }
-                )
+                    'xpack.remoteClusters.remoteClusterList.table.actionBlockedDeleteDescription',
+                    {
+                      defaultMessage: `Remote clusters defined in elasticsearch.yml can't be deleted`,
+                    }
+                  )
                 : i18n.translate(
-                  'xpack.remoteClusters.remoteClusterList.table.actionDeleteDescription',
-                  {
-                    defaultMessage: 'Delete remote cluster',
-                  }
-                );
+                    'xpack.remoteClusters.remoteClusterList.table.actionDeleteDescription',
+                    {
+                      defaultMessage: 'Delete remote cluster',
+                    }
+                  );
 
               return (
                 <EuiToolTip content={label} delay="long">
