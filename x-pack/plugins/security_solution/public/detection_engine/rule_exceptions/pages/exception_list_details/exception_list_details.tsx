@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import type { FC } from 'react';
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ListHeader } from './list_header/list_header';
+import { ExceptionListHeader } from '@kbn/securitysolution-exception-list-components';
 
 import { ListWithSearch } from './list_with_search';
 import { useExceptionListDetailsContext } from './context/exception_list_details.context';
@@ -23,7 +23,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
   isReadOnly = false,
   list,
 }) => {
-  const { name: listName, description: listDescription } = list;
+  const { name: listName, description: listDescription, list_id: listId } = list;
 
   const { setIsReadOnly } = useExceptionListDetailsContext();
   useEffect(() => {
@@ -31,7 +31,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
   }, []);
   return (
     <>
-      <ListHeader title={listName} description={listDescription} />
+      <ExceptionListHeader title={listName} description={listDescription} listId={listId} />
       <ListWithSearch list={list} />
     </>
   );

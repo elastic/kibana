@@ -60,6 +60,7 @@ export enum ListTypeText {
 export interface RuleReference {
   name: string;
   id: string;
-  ruleId: string;
-  exceptionLists: ExceptionListSchema[];
+  ruleId?: string;
+  listId?: string;
+  exceptionLists: Array<Partial<ExceptionListSchema>>;
 }
