@@ -35,8 +35,8 @@ export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
       const table = await testSubjects.find('remoteClusterListTable');
       const rows = await table.findAllByCssSelector('.euiTableRow');
       return await Promise.all(
-       rows.map(async (row) => {
-          return  {
+        rows.map(async (row) => {
+          return {
             remoteLink: await row.findByTestSubject('remoteClustersTableListClusterLink'),
             remoteName: await (await row.findByTestSubject('remoteClustersTableListClusterLink')).getVisibleText(),
             remoteStatus: await (await row.findByTestSubject('remoteClusterConnectionStatusMessage')).getVisibleText(),
@@ -46,6 +46,6 @@ export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
           };
         })
       );
-    }
+    },
   };
 }
