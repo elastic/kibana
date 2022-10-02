@@ -27,7 +27,7 @@ import {
 } from '../../../../../common/utils/risk_score_modules';
 import { createIndex } from '../../indices/lib/create_index';
 import { createStoredScript } from '../../stored_scripts/lib/create_script';
-import { createAndStartTransform } from './transforms';
+import { createAndStartTransform } from '../../transform/helpers/transforms';
 import { createIngestPipeline } from './ingest_pipeline';
 
 interface InstallRiskScoreModule {

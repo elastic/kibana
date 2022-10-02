@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RISK_SCORE_RESTART_TRANSFORM } from '../../../../../common/constants';
+import { RISK_SCORE_RESTART_TRANSFORMS } from '../../../../../common/constants';
 import {
   GET_TRANSFORM_STATE_ERROR_MESSAGE,
   GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE,
@@ -22,7 +22,7 @@ import type {
   DeleteTransformsResult,
   GetTransformsState,
   GetTransformState,
-  RestartTransform,
+  RestartTransforms,
   RestartTransformResult,
   StartTransforms,
   StartTransformsResult,
@@ -330,14 +330,15 @@ export async function restartTransforms({
   signal,
   errorMessage,
   riskScoreEntity,
-}: RestartTransform) {
+}: RestartTransforms) {
   const res = await http
-    .post<RestartTransformResult>(`${RISK_SCORE_RESTART_TRANSFORM}`, {
+    .post<RestartTransformResult[]>(`${RISK_SCORE_RESTART_TRANSFORMS}`, {
       body: JSON.stringify(riskScoreEntity),
       signal,
     })
     .then((result) => {
-      const failedIds = Object.entries(result).reduce<string[]>((acc, [key, val]) => {
+      const failedIds = result.reduce<string[]>((acc, curr) => {
+        const [[key, val]] = Object.entries(curr);
         return !val.success
           ? [...acc, val?.error?.message ? `${key}: ${val?.error?.message}` : key]
           : acc;

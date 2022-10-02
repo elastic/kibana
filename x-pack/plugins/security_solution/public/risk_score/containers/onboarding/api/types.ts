@@ -73,7 +73,7 @@ export interface StartTransforms extends RiskyScoreApiBase {
   transformIds: string[];
 }
 
-export interface RestartTransform extends RiskyScoreApiBase {
+export interface RestartTransforms extends RiskyScoreApiBase {
   riskScoreEntity: RiskScoreEntity;
 }
 

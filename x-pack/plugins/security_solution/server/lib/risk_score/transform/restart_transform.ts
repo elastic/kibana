@@ -9,19 +9,19 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-import { RISK_SCORE_RESTART_TRANSFORM } from '../../../../common/constants';
+import { RISK_SCORE_RESTART_TRANSFORMS } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 
 import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { restartTransform } from '../onboarding/helpers/transforms';
+import { restartTransform } from './helpers/transforms';
 import {
   getRiskScoreLatestTransformId,
   getRiskScorePivotTransformId,
 } from '../../../../common/utils/risk_score_modules';
 
-const restartRiskScoreTransformSchema = {
+const restartRiskScoreTransformsSchema = {
   body: schema.object({
     riskScoreEntity: schema.oneOf([
       schema.literal(RiskScoreEntity.host),
@@ -33,8 +33,8 @@ const restartRiskScoreTransformSchema = {
 export const restartTransfornRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
     {
-      path: RISK_SCORE_RESTART_TRANSFORM,
-      validate: restartRiskScoreTransformSchema,
+      path: RISK_SCORE_RESTART_TRANSFORMS,
+      validate: restartRiskScoreTransformsSchema,
       options: {
         tags: ['access:securitySolution'],
       },
