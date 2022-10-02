@@ -2040,7 +2040,6 @@ export const mockTGridModel: TGridModel = {
     start: '2020-03-18T13:46:38.929Z',
   },
   deletedEventIds: [],
-  documentType: '',
   excludedRowRendererIds: [],
   expandedDetail: {},
   filters: [
@@ -2063,10 +2062,6 @@ export const mockTGridModel: TGridModel = {
   indexNames: [],
   isLoading: false,
   isSelectAllChecked: false,
-  kqlMode: 'filter',
-  kqlQuery: {
-    filterQuery: null,
-  },
   queryFields: [],
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
@@ -2083,8 +2078,6 @@ export const mockTGridModel: TGridModel = {
     },
   ],
   title: 'Test rule',
-  timelineType: TimelineType.default,
-  version: '1',
   showCheckboxes: false,
   selectAll: false,
 };

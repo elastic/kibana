@@ -26,10 +26,8 @@ export const getManageDataTableById = () =>
     selectTGridById,
     ({
       dataViewId,
-      documentType,
       defaultColumns,
       isLoading,
-      filterManager,
       footerText,
       loadingText,
       queryFields,
@@ -38,10 +36,8 @@ export const getManageDataTableById = () =>
       graphEventId,
     }) => ({
       dataViewId,
-      documentType,
       defaultColumns,
       isLoading,
-      filterManager,
       footerText,
       loadingText,
       queryFields,

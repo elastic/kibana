@@ -174,10 +174,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
               }
             : c
         ),
-        documentType: i18n.ALERTS_DOCUMENT_TYPE,
         excludedRowRendererIds: getAlertsDefaultModel(license)
           .excludedRowRendererIds as RowRendererId[],
-        filterManager,
         footerText: i18n.TOTAL_COUNT_OF_ALERTS,
         id: tableId,
         loadingText: i18n.LOADING_ALERTS,

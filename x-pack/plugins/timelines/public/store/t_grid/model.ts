@@ -7,32 +7,30 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { FilterManager } from '@kbn/data-plugin/public';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
   DataProvider,
   DataExpandedDetail,
   SortColumnTable,
-  SerializedFilterQuery,
   SessionViewConfig,
 } from '../../../common/types/timeline';
 import { RowRendererId } from '../../../common/types/timeline';
 
 export interface TGridModelSettings {
-  documentType: string;
   defaultColumns: Array<
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
       ColumnHeaderOptions
   >;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
-  filterManager?: FilterManager;
   footerText?: string | React.ReactNode;
   loadingText?: string | React.ReactNode;
   queryFields: string[];
   selectAll: boolean;
-  showCheckboxes?: boolean;
+  /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
+  showCheckboxes: boolean;
+  /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: SortColumnTable[];
   title: string;
   unit?: (n: number) => string | React.ReactNode;
@@ -59,11 +57,6 @@ export interface TGridModel extends TGridModelSettings {
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
-  /** the KQL query in the KQL bar */
-  kqlQuery: {
-    // TODO convert to nodebuilder
-    filterQuery: SerializedFilterQuery | null;
-  };
   /** Uniquely identifies the data table */
   id: string;
   indexNames: string[];
@@ -76,17 +69,10 @@ export interface TGridModel extends TGridModelSettings {
   itemsPerPageOptions: number[];
   /** Events to be rendered as loading **/
   loadingEventIds: string[];
-  /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
-  showCheckboxes: boolean;
-  /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
-  sort: SortColumnTable[];
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for bulk actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
-  timelineType: 'default' | 'template';
-  version: string | null;
   initialized?: boolean;
-  kqlMode: 'filter' | 'search';
   sessionViewConfig: SessionViewConfig | null;
   /** updated saved object timestamp */
   updated?: number;
@@ -100,14 +86,11 @@ export type TGridModelForTimeline = Pick<
   | 'dateRange'
   | 'dataViewId'
   | 'deletedEventIds'
-  | 'documentType'
   | 'excludedRowRendererIds'
   | 'expandedDetail'
   | 'filters'
-  | 'filterManager'
   | 'footerText'
   | 'graphEventId'
-  | 'kqlQuery'
   | 'queryFields'
   | 'id'
   | 'indexNames'
@@ -124,7 +107,6 @@ export type TGridModelForTimeline = Pick<
   | 'savedObjectId'
   | 'title'
   | 'unit'
-  | 'version'
 >;
 
 export type SubsetTGridModel = Readonly<
@@ -139,7 +121,6 @@ export type SubsetTGridModel = Readonly<
     | 'excludedRowRendererIds'
     | 'expandedDetail'
     | 'filters'
-    | 'kqlQuery'
     | 'indexNames'
     | 'isLoading'
     | 'isSelectAllChecked'
@@ -150,10 +131,7 @@ export type SubsetTGridModel = Readonly<
     | 'sort'
     | 'selectedEventIds'
     | 'savedObjectId'
-    | 'version'
     | 'graphEventId'
-    | 'kqlMode'
     | 'sessionViewConfig'
-    | 'filterManager'
   >
 >;

@@ -52,28 +52,6 @@ import type { ResolveTimelineConfig } from '../../components/open_timeline/types
 import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
-interface AddTimelineHistoryParams {
-  id: string;
-  historyId: string;
-  timelineById: TimelineById;
-}
-
-export const addTimelineHistory = ({
-  id,
-  historyId,
-  timelineById,
-}: AddTimelineHistoryParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      historyIds: uniq([...timeline.historyIds, historyId]),
-    },
-  };
-};
-
 interface AddTimelineNoteParams {
   id: string;
   noteId: string;
@@ -682,28 +660,6 @@ export const updateTimelineIsFavorite = ({
   };
 };
 
-interface UpdateTimelineIsLiveParams {
-  id: string;
-  isLive: boolean;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineIsLive = ({
-  id,
-  isLive,
-  timelineById,
-}: UpdateTimelineIsLiveParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      isLive,
-    },
-  };
-};
-
 interface UpdateTimelineProvidersParams {
   id: string;
   providers: DataProvider[];
@@ -1002,31 +958,6 @@ export const updateTimelineProviderProperties = ({
   };
 };
 
-interface UpdateTimelineProviderKqlQueryParams {
-  id: string;
-  providerId: string;
-  kqlQuery: string;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineProviderKqlQuery = ({
-  id,
-  providerId,
-  kqlQuery,
-  timelineById,
-}: UpdateTimelineProviderKqlQueryParams): TimelineById => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      dataProviders: timeline.dataProviders.map((provider) =>
-        provider.id === providerId ? { ...provider, ...{ kqlQuery } } : provider
-      ),
-    },
-  };
-};
-
 interface UpdateTimelineProviderTypeParams {
   andProviderId?: string;
   id: string;
@@ -1130,27 +1061,6 @@ export const updateTimelineItemsPerPage = ({
     [id]: {
       ...timeline,
       itemsPerPage,
-    },
-  };
-};
-
-interface UpdateTimelinePageIndexParams {
-  id: string;
-  activePage: number;
-  timelineById: TimelineById;
-}
-
-export const updateTimelinePageIndex = ({
-  id,
-  activePage,
-  timelineById,
-}: UpdateTimelinePageIndexParams) => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      activePage,
     },
   };
 };

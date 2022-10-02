@@ -70,9 +70,6 @@ export const tGridDefaults: SubsetTGridModel = {
   excludedRowRendererIds: [],
   expandedDetail: {},
   filters: [],
-  kqlQuery: {
-    filterQuery: null,
-  },
   indexNames: [],
   isLoading: false,
   isSelectAllChecked: false,
@@ -90,10 +87,8 @@ export const tGridDefaults: SubsetTGridModel = {
     },
   ],
   savedObjectId: null,
-  version: null,
   graphEventId: '',
   dataProviders: [],
-  kqlMode: 'filter',
   sessionViewConfig: null,
 };
 

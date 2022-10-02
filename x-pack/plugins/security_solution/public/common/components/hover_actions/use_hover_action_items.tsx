@@ -13,9 +13,6 @@ import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
-import { tableDefaults } from '../../store/data_table/defaults';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { dataTableSelectors } from '../../store/data_table';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
@@ -24,7 +21,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { isInTableScope, isTimelineScope } from '../event_details/helpers';
+import { isTimelineScope } from '../event_details/helpers';
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
@@ -99,18 +96,11 @@ export const useHoverActionItems = ({
     () => kibana.services.data.query.filterManager,
     [kibana.services.data.query.filterManager]
   );
-  const getScope = useMemo(() => {
-    if (isTimelineScope(scopeId ?? '')) {
-      return timelineSelectors.getTimelineByIdSelector();
-    } else if (isInTableScope(scopeId ?? '')) {
-      return dataTableSelectors.getTableByIdSelector();
-    }
-  }, [scopeId]);
-
   const isInTimeline = isTimelineScope(scopeId ?? '');
-  const defaults = isInTableScope(scopeId ?? '') ? tableDefaults : timelineDefaults;
-  const { filterManager: activeFilterManager } = useDeepEqualSelector(
-    (state) => (getScope && getScope(state, scopeId ?? '')) ?? defaults
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const activeFilterManager = useDeepEqualSelector((state) =>
+    isInTimeline ? getTimeline(state, scopeId ?? '').filterManager : undefined
   );
   const filterManager = useMemo(
     () =>

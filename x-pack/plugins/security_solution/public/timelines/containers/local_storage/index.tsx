@@ -91,15 +91,7 @@ export const addTableInStorage = (storage: Storage, id: TableIdLiteral, table: T
 
 const cleanStorageDataTable = (table: TGridModel) => {
   // discard unneeded fields to make sure the object serialization works
-  const {
-    documentType,
-    filterManager,
-    isLoading,
-    loadingText,
-    queryFields,
-    unit,
-    ...tableToStore
-  } = table;
+  const { isLoading, loadingText, queryFields, unit, ...tableToStore } = table;
   return tableToStore;
 };
 

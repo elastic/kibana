@@ -8,7 +8,6 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  addHistory,
   addNote,
   addNoteToEvent,
   addProvider,
@@ -31,14 +30,10 @@ import {
   updateAutoSaveMsg,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
-  updateDataProviderKqlQuery,
   updateDataProviderType,
-  updateEventType,
   updateDataView,
   updateIsFavorite,
-  updateIsLive,
   updateKqlMode,
-  updatePageIndex,
   updateProviders,
   updateRange,
   updateTimeline,
@@ -68,7 +63,6 @@ import {
 
 import {
   addNewTimeline,
-  addTimelineHistory,
   addTimelineNote,
   addTimelineNoteToEvent,
   addTimelineProviders,
@@ -79,13 +73,10 @@ import {
   unPinTimelineEvent,
   updateExcludedRowRenderersIds,
   updateTimelineIsFavorite,
-  updateTimelineIsLive,
   updateTimelineKqlMode,
-  updateTimelinePageIndex,
   updateTimelineProviderEnabled,
   updateTimelineProviderExcluded,
   updateTimelineProviderProperties,
-  updateTimelineProviderKqlQuery,
   updateTimelineProviderType,
   updateTimelineProviders,
   updateTimelineRange,
@@ -94,7 +85,6 @@ import {
   updateSavedQuery,
   updateGraphEventId,
   updateFilters,
-  updateTimelineEventType,
   updateSessionViewConfig,
   updateTimelineDetailsPanel,
   setLoadingTableEvents,
@@ -146,10 +136,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       }),
     };
   })
-  .case(addHistory, (state, { id, historyId }) => ({
-    ...state,
-    timelineById: addTimelineHistory({ id, historyId, timelineById: state.timelineById }),
-  }))
   .case(addNote, (state, { id, noteId }) => ({
     ...state,
     timelineById: addTimelineNote({ id, noteId, timelineById: state.timelineById }),
@@ -238,17 +224,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: unPinTimelineEvent({ id, eventId, timelineById: state.timelineById }),
   }))
-  .case(updateEventType, (state, { id, eventType }) => ({
-    ...state,
-    timelineById: updateTimelineEventType({ id, eventType, timelineById: state.timelineById }),
-  }))
   .case(updateIsFavorite, (state, { id, isFavorite }) => ({
     ...state,
     timelineById: updateTimelineIsFavorite({ id, isFavorite, timelineById: state.timelineById }),
-  }))
-  .case(updateIsLive, (state, { id, isLive }) => ({
-    ...state,
-    timelineById: updateTimelineIsLive({ id, isLive, timelineById: state.timelineById }),
   }))
   .case(updateKqlMode, (state, { id, kqlMode }) => ({
     ...state,
@@ -316,23 +294,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       providerId,
       timelineById: state.timelineById,
       andProviderId,
-    }),
-  }))
-  .case(updateDataProviderKqlQuery, (state, { id, kqlQuery, providerId }) => ({
-    ...state,
-    timelineById: updateTimelineProviderKqlQuery({
-      id,
-      kqlQuery,
-      providerId,
-      timelineById: state.timelineById,
-    }),
-  }))
-  .case(updatePageIndex, (state, { id, activePage }) => ({
-    ...state,
-    timelineById: updateTimelinePageIndex({
-      id,
-      activePage,
-      timelineById: state.timelineById,
     }),
   }))
   .case(updateAutoSaveMsg, (state, { timelineId, newTimelineModel }) => ({
@@ -415,14 +376,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         },
       },
     },
-  }))
-  .case(setInsertTimeline, (state, insertTimeline) => ({
-    ...state,
-    insertTimeline,
-  }))
-  .case(showTimeline, (state, { id, show }) => ({
-    ...state,
-    timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
   }))
   .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
     ...state,

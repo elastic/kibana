@@ -28,15 +28,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getExpectedColumns = (model: TGridModel) =>
   model.columns.map(migrateColumnWidthToInitialWidth).map(migrateColumnLabelToDisplayAsText);
 
-const {
-  documentType,
-  filterManager,
-  isLoading,
-  loadingText,
-  queryFields,
-  unit,
-  ...timelineToStore
-} = mockTGridModel;
+const { isLoading, loadingText, queryFields, unit, ...timelineToStore } = mockTGridModel;
 
 describe('SiemLocalStorage', () => {
   const { localStorage, storage } = createSecuritySolutionStorageMock();

@@ -21,7 +21,6 @@ import type {
   TimelineNonEcsData,
 } from '../../../../common/search_strategy/timeline';
 import type {
-  TimelineEventsType,
   RowRendererId,
   TimelineTabs,
   TimelinePersistInput,
@@ -34,8 +33,6 @@ import type { ResolveTimelineConfig } from '../../components/open_timeline/types
 import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
-
-export const addHistory = actionCreator<{ id: string; historyId: string }>('ADD_HISTORY');
 
 export const addNote = actionCreator<{ id: string; noteId: string }>('ADD_NOTE');
 
@@ -120,12 +117,6 @@ export const dataProviderEdited = actionCreator<{
   value: string | number;
 }>('DATA_PROVIDER_EDITED');
 
-export const updateDataProviderKqlQuery = actionCreator<{
-  id: string;
-  kqlQuery: string;
-  providerId: string;
-}>('PROVIDER_EDIT_KQL_QUERY');
-
 export const updateDataProviderType = actionCreator<{
   andProviderId?: string;
   id: string;
@@ -144,17 +135,11 @@ export const updateIsFavorite = actionCreator<{ id: string; isFavorite: boolean 
   'UPDATE_IS_FAVORITE'
 );
 
-export const updateIsLive = actionCreator<{ id: string; isLive: boolean }>('UPDATE_IS_LIVE');
-
 export const updateTitleAndDescription = actionCreator<{
   description: string;
   id: string;
   title: string;
 }>('UPDATE_TITLE_AND_DESCRIPTION');
-
-export const updatePageIndex = actionCreator<{ id: string; activePage: number }>(
-  'UPDATE_PAGE_INDEX'
-);
 
 export const updateProviders = actionCreator<{ id: string; providers: DataProvider[] }>(
   'UPDATE_PROVIDERS'
@@ -180,10 +165,6 @@ export const setFilters = actionCreator<{
   id: string;
   filters: Filter[];
 }>('SET_TIMELINE_FILTERS');
-
-export const updateEventType = actionCreator<{ id: string; eventType: TimelineEventsType }>(
-  'UPDATE_EVENT_TYPE'
-);
 
 export const setExcludedRowRendererIds = actionCreator<{
   id: string;

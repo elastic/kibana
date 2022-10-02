@@ -136,7 +136,6 @@ export interface TGridIntegratedProps {
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
-  kqlMode: 'filter' | 'search';
   leadingControlColumns?: ControlColumnProps[];
   onRuleChange?: () => void;
   query: Query;
@@ -179,7 +178,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   isLoadingIndexPattern,
   itemsPerPage,
   itemsPerPageOptions,
-  kqlMode,
   leadingControlColumns,
   onRuleChange,
   query,
@@ -218,11 +216,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         filters,
         from: start,
         indexPattern,
-        kqlMode,
+        kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]
+    [esQueryConfig, dataProviders, indexPattern, browserFields, filters, start, end, query]
   );
 
   const canQueryTimeline = useMemo(

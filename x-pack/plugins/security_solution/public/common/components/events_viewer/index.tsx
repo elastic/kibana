@@ -109,7 +109,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       graphEventId, // If truthy, the graph viewer (Resolver) is showing
       itemsPerPage,
       itemsPerPageOptions,
-      kqlMode,
       sessionViewConfig,
       showCheckboxes,
       sort,
@@ -255,7 +254,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             isLoadingIndexPattern,
             itemsPerPage,
             itemsPerPageOptions,
-            kqlMode,
             leadingControlColumns,
             onRuleChange,
             query,
