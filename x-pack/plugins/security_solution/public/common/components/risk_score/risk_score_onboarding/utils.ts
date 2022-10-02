@@ -11,14 +11,13 @@ import * as utils from '../../../../../common/utils/risk_score_modules';
 import type { inputsModel } from '../../../store';
 
 import {
-  startTransforms,
   deleteStoredScripts,
   deleteTransforms,
   deleteIngestPipelines,
-  stopTransforms,
   bulkDeletePrebuiltSavedObjects,
   onboardingRiskScore,
   bulkCreatePrebuiltSavedObjects,
+  restartTransforms,
 } from '../../../../risk_score/containers/onboarding/api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
@@ -329,25 +328,12 @@ export const restartRiskScoreTransforms = async ({
   spaceId?: string;
   theme?: ThemeServiceStart;
 }) => {
-  const transformIds = [
-    utils.getRiskScorePivotTransformId(riskScoreEntity, spaceId),
-    utils.getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
-  ];
-
-  await stopTransforms({
+  const res = await restartTransforms({
     http,
     notifications,
     renderDocLink,
     theme,
-    transformIds,
-  });
-
-  const res = await startTransforms({
-    http,
-    notifications,
-    renderDocLink,
-    theme,
-    transformIds,
+    riskScoreEntity,
   });
 
   if (refetch) {
