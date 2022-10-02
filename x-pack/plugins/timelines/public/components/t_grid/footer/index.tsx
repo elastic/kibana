@@ -92,7 +92,6 @@ export const footerHeight = 40; // px
 /** Displays the server-side count of events */
 export const EventsCountComponent = ({
   closePopover,
-  documentType,
   footerText,
   isOpen,
   items,
@@ -102,7 +101,6 @@ export const EventsCountComponent = ({
   serverSideEventCount,
 }: {
   closePopover: () => void;
-  documentType: string;
   isOpen: boolean;
   items: React.ReactElement[];
   itemsCount: number;
@@ -228,7 +226,7 @@ export const FooterComponent = ({
   const [paginationLoading, setPaginationLoading] = useState(false);
 
   const getManageDataTable = useMemo(() => tGridSelectors.getManageDataTableById(), []);
-  const { documentType, loadingText, footerText } = useDeepEqualSelector((state) =>
+  const { loadingText, footerText } = useDeepEqualSelector((state) =>
     getManageDataTable(state, id)
   );
 
@@ -321,7 +319,6 @@ export const FooterComponent = ({
           >
             <EventsCount
               closePopover={closePopover}
-              documentType={documentType}
               footerText={footerText}
               isOpen={isPopoverOpen}
               items={rowItems}

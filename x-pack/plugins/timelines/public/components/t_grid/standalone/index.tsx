@@ -293,10 +293,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       tGridActions.createTGrid({
         id: STANDALONE_ID,
         columns,
-        dateRange: {
-          start,
-          end,
-        },
         indexNames,
         itemsPerPage: itemsPerPage || itemsPerPageStore,
         itemsPerPageOptions,

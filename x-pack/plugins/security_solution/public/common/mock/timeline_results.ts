@@ -2033,12 +2033,7 @@ export const mockTimelineModel: TimelineModel = {
 export const mockTGridModel: TGridModel = {
   columns: mockTimelineModelColumns,
   defaultColumns: mockTimelineModelColumns,
-  dataProviders: [],
   dataViewId: null,
-  dateRange: {
-    end: '2020-03-18T13:52:38.929Z',
-    start: '2020-03-18T13:46:38.929Z',
-  },
   deletedEventIds: [],
   excludedRowRendererIds: [],
   expandedDetail: {},

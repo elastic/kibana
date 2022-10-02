@@ -9,7 +9,6 @@ import React from 'react';
 import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { TGridIntegratedProps } from '../components/t_grid/integrated';
 import { mockBrowserFields, mockRuntimeMappings } from './browser_fields';
-import { mockDataProviders } from './mock_data_providers';
 import { mockTimelineData } from './mock_timeline_data';
 import { ColumnHeaderOptions } from '../../common/types';
 import { mockIndexNames, mockIndexPattern } from './index_pattern';
@@ -92,7 +91,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   appId: '',
   browserFields: mockBrowserFields,
   columns: columnHeaders,
-  dataProviders: mockDataProviders,
   dataViewId: 'data-view-id',
   deletedEventIds: [],
   disabledCellActions: [],
@@ -110,7 +108,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   isLoadingIndexPattern: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
-  kqlMode: 'filter',
   query: {
     query: '_id: "28bf94ad5d16b5fded1b258127aa88792f119d7e018c35869121613385619e1e"',
     language: 'kuery',

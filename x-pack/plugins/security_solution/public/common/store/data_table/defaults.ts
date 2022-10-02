@@ -5,17 +5,11 @@
  * 2.0.
  */
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import { normalizeTimeRange } from '../../utils/normalize_time_range';
 import type { SubsetTGridModel } from './model';
-
-// normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
-const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
 export const tableDefaults: SubsetTGridModel = {
   defaultColumns: defaultHeaders,
-  dataProviders: [],
   dataViewId: null,
-  dateRange: { start, end },
   deletedEventIds: [],
   excludedRowRendererIds: [],
   expandedDetail: {},

@@ -102,7 +102,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     globalQueries,
     dataTable: {
       columns,
-      dataProviders,
       defaultColumns,
       deletedEventIds,
       excludedRowRendererIds,
@@ -112,7 +111,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       sessionViewConfig,
       showCheckboxes,
       sort,
-      dateRange,
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
@@ -145,7 +143,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         itemsPerPage,
         showCheckboxes,
         sort,
-        dateRange,
       })
     );
 
@@ -232,7 +229,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             browserFields,
             bulkActions,
             columns,
-            dataProviders,
             dataViewId,
             defaultCellActions,
             deletedEventIds,

@@ -374,10 +374,6 @@ export const mockGlobalState: State = {
         columns: defaultHeaders,
         defaultColumns: defaultHeaders,
         dataViewId: 'security-solution-default',
-        dateRange: {
-          start: '2022-09-20T07:00:00.000Z',
-          end: '2022-09-21T06:59:59.999Z',
-        },
         deletedEventIds: [],
         expandedDetail: {},
         filters: [],
@@ -398,7 +394,6 @@ export const mockGlobalState: State = {
         ],
         savedObjectId: null,
         graphEventId: '',
-        dataProviders: [],
         sessionViewConfig: null,
         footerText: 'events',
         selectAll: false,

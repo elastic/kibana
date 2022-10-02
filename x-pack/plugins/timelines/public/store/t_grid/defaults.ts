@@ -65,7 +65,6 @@ export const tGridDefaults: SubsetTGridModel = {
   columns: defaultHeaders,
   defaultColumns: defaultHeaders,
   dataViewId: null,
-  dateRange: { start: '', end: '' },
   deletedEventIds: [],
   excludedRowRendererIds: [],
   expandedDetail: {},
@@ -88,7 +87,6 @@ export const tGridDefaults: SubsetTGridModel = {
   ],
   savedObjectId: null,
   graphEventId: '',
-  dataProviders: [],
   sessionViewConfig: null,
 };
 

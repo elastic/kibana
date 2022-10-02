@@ -100,13 +100,11 @@ export const PreviewHistogram = ({
   const {
     dataTable: {
       columns,
-      dataProviders,
       defaultColumns,
       deletedEventIds,
       itemsPerPage,
       itemsPerPageOptions,
       sort,
-      dateRange,
       excludedRowRendererIds,
     } = getAlertsPreviewDefaultModel(license),
   } = useSelector((state: State) => eventsViewerSelector(state, TableId.rulePreview));
@@ -149,7 +147,6 @@ export const PreviewHistogram = ({
         indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
         itemsPerPage,
         sort: sort as SortColumnTable[],
-        dateRange,
         excludedRowRendererIds,
       })
     );
@@ -207,7 +204,6 @@ export const PreviewHistogram = ({
             appId: APP_UI_ID,
             browserFields,
             columns,
-            dataProviders,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
             // Fix for https://github.com/elastic/kibana/issues/135511, until we start writing proper

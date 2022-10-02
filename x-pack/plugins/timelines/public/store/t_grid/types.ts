@@ -55,10 +55,6 @@ export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {
 
 export interface TGridPersistInput extends Partial<Omit<TGridModel, keyof TGridModelSettings>> {
   id: string;
-  dateRange: {
-    start: string;
-    end: string;
-  };
   columns: ColumnHeaderOptions[];
   indexNames: string[];
   showCheckboxes?: boolean;

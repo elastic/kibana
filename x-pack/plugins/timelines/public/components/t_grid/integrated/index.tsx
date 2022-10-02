@@ -31,7 +31,6 @@ import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
-  DataProvider,
   RowRenderer,
   AlertStatus,
 } from '../../../../common/types/timeline';
@@ -106,7 +105,6 @@ export interface TGridIntegratedProps {
   bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
   data?: DataPublicPluginStart;
-  dataProviders: DataProvider[];
   dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
@@ -157,7 +155,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   bulkActions = true,
   columns,
   data,
-  dataProviders,
   dataViewId = null,
   defaultCellActions,
   deletedEventIds,
@@ -212,7 +209,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       getCombinedFilterQuery({
         config: esQueryConfig,
         browserFields,
-        dataProviders,
+        dataProviders: [],
         filters,
         from: start,
         indexPattern,
@@ -220,7 +217,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, dataProviders, indexPattern, browserFields, filters, start, end, query]
+    [esQueryConfig, indexPattern, browserFields, filters, start, end, query]
   );
 
   const canQueryTimeline = useMemo(

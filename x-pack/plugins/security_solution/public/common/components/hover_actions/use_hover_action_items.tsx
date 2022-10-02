@@ -100,7 +100,7 @@ export const useHoverActionItems = ({
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
   const activeFilterManager = useDeepEqualSelector((state) =>
-    isInTimeline ? getTimeline(state, scopeId ?? '').filterManager : undefined
+    isInTimeline ? getTimeline(state, scopeId ?? '')?.filterManager : undefined
   );
   const filterManager = useMemo(
     () =>

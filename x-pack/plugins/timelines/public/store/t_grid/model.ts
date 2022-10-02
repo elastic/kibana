@@ -10,7 +10,6 @@ import type { Filter } from '@kbn/es-query';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
-  DataProvider,
   DataExpandedDetail,
   SortColumnTable,
   SessionViewConfig,
@@ -41,13 +40,6 @@ export interface TGridModel extends TGridModelSettings {
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
       ColumnHeaderOptions
   >;
-  /** The sources of the event data shown in the data table */
-  dataProviders: DataProvider[];
-  /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
-  dateRange: {
-    start: string;
-    end: string;
-  };
   /** Kibana data view id **/
   dataViewId: string | null; // null if legacy pre-8.0 data table
   /** Events to not be rendered **/
@@ -82,8 +74,6 @@ export type TGridModelForTimeline = Pick<
   TGridModel,
   | 'columns'
   | 'defaultColumns'
-  | 'dataProviders'
-  | 'dateRange'
   | 'dataViewId'
   | 'deletedEventIds'
   | 'excludedRowRendererIds'
@@ -114,9 +104,7 @@ export type SubsetTGridModel = Readonly<
     TGridModel,
     | 'columns'
     | 'defaultColumns'
-    | 'dataProviders'
     | 'dataViewId'
-    | 'dateRange'
     | 'deletedEventIds'
     | 'excludedRowRendererIds'
     | 'expandedDetail'
