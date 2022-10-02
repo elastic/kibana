@@ -155,8 +155,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
   });
 
-  // const { getFields } = form;
-
   // `useFormData` initially returns `undefined`,
   // we override `undefined` with real default values from `schema`
   // to get a stable reference to avoid hooks re-run and reduce number of excessive requests
@@ -171,22 +169,27 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const currentLoadingTimestampFieldsRef = useRef(0);
   const currentLoadingMatchedIndicesRef = useRef(0);
 
-  // todo check if these are the correct observable types
   const isLoadingSources$ = useRef(new BehaviorSubject<boolean>(true));
-  const timestampFieldOptions$ = useRef(new Subject<TimestampOption[]>());
-  const loadingTimestampFields$ = useRef(new BehaviorSubject<boolean>(false));
-  const loadingMatchedIndices$ = useRef(new BehaviorSubject<boolean>(false));
-  const dataSources$ = useRef(new BehaviorSubject<MatchedItem[]>([]));
-  const isLoadingIndexPatterns$ = useRef(new BehaviorSubject<boolean>(true));
-  const existingDataViewNames$ = useRef(new BehaviorSubject<string[]>([]));
-  const rollupIndex$ = useRef(new BehaviorSubject<string | undefined>(undefined));
-  const rollupIndicesCapabilities$ = useRef(new BehaviorSubject<RollupIndicesCapsResponse>({}));
-
-  const matchedIndices$ = useRef(new BehaviorSubject<MatchedIndicesSet>(matchedIndiciesDefault));
-
   const isLoadingSources = useObservable(isLoadingSources$.current, true);
-  const isLoadingIndexPatterns = useObservable(isLoadingIndexPatterns$.current, true);
+
+  const loadingTimestampFields$ = useRef(new BehaviorSubject<boolean>(false));
+  const timestampFieldOptions$ = useRef(new Subject<TimestampOption[]>());
+
+  const loadingMatchedIndices$ = useRef(new BehaviorSubject<boolean>(false));
+  const matchedIndices$ = useRef(new Subject<MatchedIndicesSet>());
+
+  // probably change to subject - maybe remove?? WARNING WARNING
+  const dataSources$ = useRef(new BehaviorSubject<MatchedItem[]>([]));
+
+  const isLoadingDataViewNames$ = useRef(new BehaviorSubject<boolean>(true));
+  const existingDataViewNames$ = useRef(new BehaviorSubject<string[]>([]));
+  const isLoadingDataViewNames = useObservable(isLoadingDataViewNames$.current, true);
+
+  // review rollup observables
+  const rollupIndicesCapabilities$ = useRef(new BehaviorSubject<RollupIndicesCapsResponse>({}));
   const rollupIndicesCapabilities = useObservable(rollupIndicesCapabilities$.current, {});
+
+  const rollupIndex$ = useRef(new BehaviorSubject<string | undefined>(undefined));
 
   const loadTimestampFields = useCallback(
     async (index: string) => {
@@ -231,6 +234,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       dataViews,
     });
 
+    // todo this should probably go elsewhere. Does identify when sources are loaded - but why?
     isLoadingSources$.current.next(false);
     const matchedIndices = getMatchedIndices(
       allSrcs,
@@ -259,11 +263,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
     existingDataViewNames$.current.next(
       editData ? dataViewNames.filter((v) => v !== editData.name) : dataViewNames
     );
-    isLoadingIndexPatterns$.current.next(false);
+    isLoadingDataViewNames$.current.next(false);
   }, [dataViews, editData]);
 
   useEffect(() => {
-    const sub = matchedIndices$.current.subscribe((matchedIndices) => {
+    const matchedIndiceSub = matchedIndices$.current.subscribe((matchedIndices) => {
       if (matchedIndices.exactMatchedIndices.length && !loadingMatchedIndices$.current.getValue()) {
         const timeFieldQuery = editData ? editData.title : title;
         loadTimestampFields(removeSpaces(timeFieldQuery));
@@ -275,7 +279,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     loadRollupIndices();
 
     return () => {
-      sub.unsubscribe();
+      matchedIndiceSub.unsubscribe();
     };
   }, [editData, loadIndices, loadDataViewNames, loadRollupIndices, loadTimestampFields, title]);
 
@@ -298,12 +302,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
               dataViews,
             })
           : {
-              matchedIndicesResult: {
-                exactMatchedIndices: [],
-                allIndices: [],
-                partialMatchedIndices: [],
-                visibleIndices: [],
-              },
+              matchedIndicesResult: matchedIndiciesDefault,
               exactMatched: [],
             };
 
@@ -351,7 +350,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     [form]
   );
 
-  if (isLoadingSources || isLoadingIndexPatterns) {
+  if (isLoadingSources || isLoadingDataViewNames) {
     return <EuiLoadingSpinner size="xl" />;
   }
 

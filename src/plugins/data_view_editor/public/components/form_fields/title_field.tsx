@@ -9,7 +9,7 @@
 import React, { ChangeEvent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { MatchedItem } from '@kbn/data-views-plugin/public';
 import {
@@ -30,7 +30,7 @@ interface RefreshMatchedIndicesResult {
 
 interface TitleFieldProps {
   isRollup: boolean;
-  matchedIndices$: BehaviorSubject<MatchedIndicesSet>;
+  matchedIndices$: Subject<MatchedIndicesSet>;
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
   refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
 }

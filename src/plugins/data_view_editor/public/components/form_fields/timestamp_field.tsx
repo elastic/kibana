@@ -27,7 +27,7 @@ interface Props {
   options$: Subject<TimestampOption[]>;
   isLoadingOptions$: BehaviorSubject<boolean>;
   isLoadingMatchedIndices$: BehaviorSubject<boolean>;
-  matchedIndices$: BehaviorSubject<MatchedIndicesSet>;
+  matchedIndices$: Subject<MatchedIndicesSet>;
 }
 
 const requireTimestampOptionValidator = (options: TimestampOption[]): ValidationConfig => ({
