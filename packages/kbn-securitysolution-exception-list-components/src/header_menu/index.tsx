@@ -58,7 +58,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
     if (useCustomActions) return actions as EuiContextMenuPanelProps['items'];
     return (actions as Action[]).map((action) => (
       <EuiContextMenuItem
-        data-test-subj={`${dataTestSubj}ActionItem${action.key}`}
+        data-test-subj={`${dataTestSubj || ''}ActionItem${action.key}`}
         key={action.key}
         icon={action.icon}
         layoutAlign="center"
@@ -81,7 +81,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
               onClick={onAffectedRulesClick}
               iconType={iconType || 'boxesHorizontal'}
               iconSide={iconSide || 'left'}
-              data-test-subj={`${dataTestSubj}EmptyButton`}
+              data-test-subj={`${dataTestSubj || ''}EmptyButton`}
               aria-label="Header menu Button Empty"
             >
               {text}
@@ -91,7 +91,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
               isDisabled={disableActions}
               onClick={onAffectedRulesClick}
               iconType={iconType || 'boxesHorizontal'}
-              data-test-subj={`${dataTestSubj}ButtonIcon`}
+              data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
               aria-label="Header menu Button Icon"
             >
               {text}
@@ -102,10 +102,10 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}
         anchorPosition={anchorPosition || 'downCenter'}
-        data-test-subj={`${dataTestSubj}Items`}
+        data-test-subj={`${dataTestSubj || ''}Items`}
       >
         <EuiContextMenuPanel
-          data-test-subj={`${dataTestSubj}MenuPanel`}
+          data-test-subj={`${dataTestSubj || ''}MenuPanel`}
           size="s"
           items={itemActions}
         />

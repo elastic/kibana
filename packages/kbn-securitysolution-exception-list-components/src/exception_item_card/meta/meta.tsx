@@ -42,7 +42,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
       const SecurityLinkAnchor = securityLinkAnchorComponent;
       return references.map((reference) => (
         <EuiContextMenuItem
-          data-test-subj={`${dataTestSubj}ActionItem${reference.id}`}
+          data-test-subj={`${dataTestSubj || ''}ActionItem${reference.id}`}
           key={reference.id}
         >
           <EuiToolTip content={reference.name} anchorClassName="eui-textTruncate">
@@ -64,7 +64,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
                   <FormattedDateComponent fieldName="created_at" value={item.created_at} />
                 }
                 lastUpdateValue={item.created_by}
-                dataTestSubj={`${dataTestSubj}CreatedBy`}
+                dataTestSubj={`${dataTestSubj || ''}CreatedBy`}
               />
             </EuiFlexItem>
 
@@ -76,7 +76,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
                   <FormattedDateComponent fieldName="updated_at" value={item.updated_at} />
                 }
                 lastUpdateValue={item.updated_by}
-                dataTestSubj={`${dataTestSubj}UpdatedBy`}
+                dataTestSubj={`${dataTestSubj || ''}UpdatedBy`}
               />
             </EuiFlexItem>
           </>
@@ -89,6 +89,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             actions={itemActions}
             disableActions={false}
             text={i18n.AFFECTED_RULES(references.length)}
+            dataTestSubj={dataTestSubj}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
