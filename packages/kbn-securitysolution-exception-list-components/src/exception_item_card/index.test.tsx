@@ -13,10 +13,11 @@ import { ExceptionItemCard } from '.';
 import { getExceptionListItemSchemaMock } from '../test_helpers/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '../test_helpers/comments.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { RuleReference } from '../types';
 
-const ruleReferences: unknown[] = [
+const ruleReferences: RuleReference[] = [
   {
-    exception_lists: [
+    exceptionLists: [
       {
         id: '123',
         list_id: 'i_exist',
@@ -32,9 +33,15 @@ const ruleReferences: unknown[] = [
     ],
     id: '1a2b3c',
     name: 'Simple Rule Query',
-    rule_id: 'rule-2',
+    ruleId: 'rule-2',
   },
 ];
+const mockGetFormattedComments = () =>
+  getCommentsArrayMock().map((comment) => ({
+    username: comment.created_by,
+    children: <p>{comment.comment}</p>,
+  }));
+
 describe('ExceptionItemCard', () => {
   it('it renders header, item meta information and conditions', () => {
     const exceptionItem = { ...getExceptionListItemSchemaMock(), comments: [] };
@@ -54,12 +61,12 @@ describe('ExceptionItemCard', () => {
     );
 
     expect(wrapper.getByTestId('exceptionItemCardHeaderContainer')).toBeInTheDocument();
-    // expect(wrapper.getByTestId('exceptionItemCardMetaInfo')).toBeInTheDocument();
+    expect(wrapper.getByTestId('exceptionItemCardMetaInfo')).toBeInTheDocument();
     expect(wrapper.getByTestId('exceptionItemCardConditions')).toBeInTheDocument();
-    // expect(wrapper.queryByTestId('exceptionsViewerCommentAccordion')).not.toBeInTheDocument();
+    expect(wrapper.queryByTestId('exceptionsViewerCommentAccordion')).not.toBeInTheDocument();
   });
 
-  it('it renders header, item meta information, conditions, and comments if any exist', () => {
+  it('it should render the header, item meta information, conditions, and the comments', () => {
     const exceptionItem = { ...getExceptionListItemSchemaMock(), comments: getCommentsArrayMock() };
 
     const wrapper = render(
@@ -72,17 +79,17 @@ describe('ExceptionItemCard', () => {
         onEditException={jest.fn()}
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
-        getFormattedComments={() => []}
+        getFormattedComments={mockGetFormattedComments}
       />
     );
 
     expect(wrapper.getByTestId('exceptionItemCardHeaderContainer')).toBeInTheDocument();
-    // expect(wrapper.getByTestId('exceptionItemCardMetaInfo')).toBeInTheDocument();
+    expect(wrapper.getByTestId('exceptionItemCardMetaInfo')).toBeInTheDocument();
     expect(wrapper.getByTestId('exceptionItemCardConditions')).toBeInTheDocument();
-    // expect(wrapper.getByTestId('exceptionsViewerCommentAccordion')).toBeInTheDocument();
+    expect(wrapper.getByTestId('exceptionsItemCommentAccordion')).toBeInTheDocument();
   });
 
-  it('it does not render edit or delete action buttons when "disableActions" is "true"', () => {
+  it('it should not render edit or delete action buttons when "disableActions" is "true"', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = render(
@@ -102,7 +109,7 @@ describe('ExceptionItemCard', () => {
     expect(wrapper.queryByTestId('itemActionButton')).not.toBeInTheDocument();
   });
 
-  it('it invokes "onEditException" when edit button clicked', () => {
+  it('it should invoke the "onEditException" when edit button clicked', () => {
     const mockOnEditException = jest.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
 
@@ -120,12 +127,12 @@ describe('ExceptionItemCard', () => {
       />
     );
 
-    fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderActionButton'));
+    fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderButtonIcon'));
     fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderActionItemedit'));
     expect(mockOnEditException).toHaveBeenCalledWith(getExceptionListItemSchemaMock());
   });
 
-  it('it invokes "onDeleteException" when delete button clicked', () => {
+  it('it should invoke the "onDeleteException" when delete button clicked', () => {
     const mockOnDeleteException = jest.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
 
@@ -142,7 +149,7 @@ describe('ExceptionItemCard', () => {
         getFormattedComments={() => []}
       />
     );
-    fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderActionButton'));
+    fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderButtonIcon'));
     fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderActionItemdelete'));
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
@@ -152,21 +159,25 @@ describe('ExceptionItemCard', () => {
     });
   });
 
-  // TODO Fix this Test
-  // it('it renders comment accordion closed to begin with', () => {
-  //   const exceptionItem = getExceptionListItemSchemaMock();
-  //   exceptionItem.comments = getCommentsArrayMock();
-  //   const wrapper = render(
-  //     <ExceptionItemCard
-  //       exceptionItem={exceptionItem}
-  //       dataTestSubj="item"
-  //       listType={ExceptionListTypeEnum.DETECTION}
-  //       ruleReferences={ruleReferences}
-  //       onEditException={jest.fn()}
-  //       onDeleteException={jest.fn()}
-  //     />
-  //   );
+  it('it should render comment accordion closed to begin with', () => {
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.comments = getCommentsArrayMock();
+    const wrapper = render(
+      <ExceptionItemCard
+        exceptionItem={exceptionItem}
+        dataTestSubj="exceptionItemCardHeader"
+        listType={ExceptionListTypeEnum.DETECTION}
+        ruleReferences={ruleReferences}
+        onEditException={jest.fn()}
+        onDeleteException={jest.fn()}
+        securityLinkAnchorComponent={() => null}
+        formattedDateComponent={() => null}
+        getFormattedComments={mockGetFormattedComments}
+      />
+    );
 
-  //   expect(wrapper.queryByTestId('accordion-comment-list')).not.toBeVisible();
-  // });
+    expect(wrapper.getByTestId('exceptionsItemCommentAccordion')).toBeInTheDocument();
+    expect(wrapper.getByTestId('exceptionItemCardComments')).toBeVisible();
+    expect(wrapper.getByTestId('accordionContentPanel')).not.toBeVisible();
+  });
 });
