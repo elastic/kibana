@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import fnv from 'fnv-plus';
-
 import { CalleeTree } from './callee';
 import { createFrameGroupID } from './frame_group';
+import { fnv1a64 } from './hash';
 import { createStackFrameMetadata, getCalleeLabel } from './profiling';
 
 export enum FlameGraphComparisonMode {
@@ -107,7 +106,8 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
     graph.SourceFilename[0],
     graph.FunctionName[0]
   );
-  graph.ID[0] = fnv.fast1a64utf(`${rootFrameGroupID}`).toString();
+
+  graph.ID[0] = fnv1a64(new TextEncoder().encode(rootFrameGroupID));
 
   const queue = [0];
   while (queue.length > 0) {
@@ -120,7 +120,8 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
         graph.SourceFilename[child],
         graph.FunctionName[child]
       );
-      graph.ID[child] = fnv.fast1a64utf(`${graph.ID[parent]}${frameGroupID}`).toString();
+      const bytes = new TextEncoder().encode(graph.ID[parent] + frameGroupID);
+      graph.ID[child] = fnv1a64(bytes);
       queue.push(child);
     }
   }
