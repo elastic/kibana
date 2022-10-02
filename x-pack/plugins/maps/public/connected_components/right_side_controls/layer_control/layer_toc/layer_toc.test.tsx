@@ -41,6 +41,7 @@ const defaultProps = {
   isReadOnly: false,
   openTOCDetails: [],
   updateLayerOrder: () => {},
+  setLayerParent: () => {},
   createLayerGroup: () => {},
 };
 

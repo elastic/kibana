@@ -16,6 +16,7 @@ export interface Props {
   layerList: ILayer[];
   openTOCDetails: string[];
   createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) => void;
+  setLayerParent: (layerId: string, parent: string | undefined) => void;
   updateLayerOrder: (newOrder: number[]) => void;
 }
 
@@ -37,6 +38,11 @@ export class LayerTOC extends Component<Props> {
       return this.props.layerList.length - index - 1;
     };
 
+    /*const layerIds = this.props.layerList.map((layer, index) => {
+      return `${layer.getId()}: ${index}`;
+    }).reverse();
+    console.log(layerIds);*/
+
     if (combine) {
       this.props.createLayerGroup(
         this.props.layerList[reverseIndex(source.index)].getId(),
@@ -52,6 +58,21 @@ export class LayerTOC extends Component<Props> {
 
     const prevIndex = reverseIndex(source.index);
     const newIndex = reverseIndex(destination.index);
+
+    const sourceLayerId = this.props.layerList[prevIndex].getId();
+    const newRightSiblingIndex = prevIndex > newIndex
+      // When layer is moved to the right, new right sibling is layer to the right of destination
+      ? newIndex - 1
+      // When layer is moved to the left, new right sibling is the destination
+      : newIndex;
+    //console.log('prevIndex', prevIndex);
+    //console.log('newIndex', newIndex);
+    //console.log('newRightSiblingIndex', newRightSiblingIndex);
+    const newRightSiblingParentLayerId = newRightSiblingIndex < 0
+      ? undefined
+      : this.props.layerList[newRightSiblingIndex].getParent();
+    this.props.setLayerParent(sourceLayerId, newRightSiblingParentLayerId);
+
     const newOrder = [];
     for (let i = 0; i < this.props.layerList.length; i++) {
       newOrder.push(i);

@@ -613,6 +613,17 @@ export function setLayerQuery(id: string, query: Query) {
   };
 }
 
+export function setLayerParent(id: string, parent: string | undefined) {
+  console.log('layerId', id);
+  console.log('parent', parent);
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'parent',
+    newValue: parent,
+  };
+}
+
 export function removeSelectedLayer() {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -838,18 +849,8 @@ export function createLayerGroup(draggedLayerId: string, combineLayerId: string)
       layer: group,
     });
     dispatch(showTOCDetails(group.id));
-    dispatch({
-      type: UPDATE_LAYER_PROP,
-      id: draggedLayerId,
-      propName: 'parent',
-      newValue: group.id,
-    });
-    dispatch({
-      type: UPDATE_LAYER_PROP,
-      id: combineLayerId,
-      propName: 'parent',
-      newValue: group.id,
-    });
+    dispatch(setLayerParent(draggedLayerId, group.id));
+    dispatch(setLayerParent(combineLayerId, group.id));
 
     // Move group to be on top of combine-layer
     moveLayer(group.id, combineLayerId, dispatch, getState);
