@@ -40,6 +40,8 @@ const lowerHex = [
 // 2. Knuth, Donald E. The Art of Computer Programming, Volume 2, Third Edition: Seminumerical
 //      Algorithms. Addison-Wesley, 1998.
 // 3. Warren, Henry S. Hacker's Delight. Upper Saddle River, NJ: Addison-Wesley, 2013.
+
+/* eslint no-bitwise: ["error", { "allow": ["^=", ">>", "&"] }] */
 export function fnv1a64(bytes: Uint8Array): string {
   const n = bytes.length;
   let [h0, h1, h2, h3] = [0x2325, 0x8422, 0x9ce4, 0xcbf2];
