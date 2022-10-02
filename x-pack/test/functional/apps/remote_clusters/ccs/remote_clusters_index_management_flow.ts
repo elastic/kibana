@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
-  describe.only('CCS Remote Clusters > Index Management', function () {
+  describe('CCS Remote Clusters > Index Management', function () {
     before(async () => {
       await security.testUser.setRoles(['global_ccr_role']);
       await pageObjects.common.navigateToApp('remoteClusters');
