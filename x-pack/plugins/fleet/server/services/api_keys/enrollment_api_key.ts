@@ -270,6 +270,24 @@ export async function generateEnrollmentAPIKey(
   };
 }
 
+export async function ensureDefaultEnrollmentAPIKeyForAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentPolicyId: string
+) {
+  const hasKey = await hasEnrollementAPIKeysForPolicy(esClient, agentPolicyId);
+
+  if (hasKey) {
+    return;
+  }
+
+  return generateEnrollmentAPIKey(soClient, esClient, {
+    name: `Default`,
+    agentPolicyId,
+    forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up
+  });
+}
+
 function getQueryForExistingKeyNameOnPolicy(agentPolicyId: string, providedKeyName: string) {
   const query = {
     bool: {
