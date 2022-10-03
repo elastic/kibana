@@ -7,11 +7,11 @@
 
 import { pick } from 'lodash/fp';
 import { EuiProgress } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { isTab, TimelineContext } from '@kbn/timelines-plugin/public';
+import { isTab } from '@kbn/timelines-plugin/public';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
@@ -38,6 +38,7 @@ const TimelineTemplateBadge = styled.div`
   font-size: 0.8em;
 `;
 
+export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
 export interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];

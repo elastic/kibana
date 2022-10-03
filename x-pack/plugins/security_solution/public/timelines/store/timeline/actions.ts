@@ -16,35 +16,20 @@ import type {
 
 import type { KqlMode, TimelineModel } from './model';
 import type { InsertTimeline } from './types';
-import type { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
+import type {
+  FieldsEqlOptions,
+  TimelineNonEcsData,
+} from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
   RowRendererId,
   TimelineTabs,
   TimelinePersistInput,
   SerializedFilterQuery,
+  ToggleDetailPanel,
+  ColumnHeaderOptions,
+  SortColumnTimeline,
 } from '../../../../common/types/timeline';
-export {
-  applyDeltaToColumnWidth,
-  clearEventsDeleted,
-  clearEventsLoading,
-  clearSelected,
-  initializeTGridSettings,
-  removeColumn,
-  setEventsDeleted,
-  setEventsLoading,
-  setSelected,
-  setTGridSelectAll,
-  toggleDetailPanel,
-  updateColumnOrder,
-  updateColumns,
-  updateColumnWidth,
-  updateIsLoading,
-  updateItemsPerPage,
-  updateItemsPerPageOptions,
-  updateSort,
-  upsertColumn,
-} from '@kbn/timelines-plugin/public';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
@@ -227,3 +212,51 @@ export const updateEqlOptions = actionCreator<{
   field: FieldsEqlOptions;
   value: string | undefined;
 }>('UPDATE_EQL_OPTIONS_TIMELINE');
+
+export const updateIsLoading = actionCreator<{
+  id: string;
+  isLoading: boolean;
+}>('UPDATE_LOADING');
+
+export const toggleDetailPanel = actionCreator<ToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
+
+export const setEventsLoading = actionCreator<{
+  id: string;
+  eventIds: string[];
+  isLoading: boolean;
+}>('SET_TIMELINE_EVENTS_LOADING');
+
+export const setEventsDeleted = actionCreator<{
+  id: string;
+  eventIds: string[];
+  isDeleted: boolean;
+}>('SET_TIMELINE_EVENTS_DELETED');
+
+export const removeColumn = actionCreator<{
+  id: string;
+  columnId: string;
+}>('REMOVE_COLUMN');
+
+export const updateColumns = actionCreator<{
+  id: string;
+  columns: ColumnHeaderOptions[];
+}>('UPDATE_COLUMNS');
+
+export const updateSort = actionCreator<{ id: string; sort: SortColumnTimeline[] }>('UPDATE_SORT');
+
+export const upsertColumn = actionCreator<{
+  column: ColumnHeaderOptions;
+  id: string;
+  index: number;
+}>('UPSERT_COLUMN');
+
+export const setSelected = actionCreator<{
+  id: string;
+  eventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  isSelected: boolean;
+  isSelectAllChecked: boolean;
+}>('SET_TIMELINE_SELECTED');
+
+export const clearSelected = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_SELECTED');

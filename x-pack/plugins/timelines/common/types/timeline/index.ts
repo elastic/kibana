@@ -466,15 +466,6 @@ export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimeli
 
 export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom' | 'eql';
 
-export enum TimelineTabs {
-  query = 'query',
-  graph = 'graph',
-  notes = 'notes',
-  pinned = 'pinned',
-  session = 'session',
-  eql = 'eql',
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Partial<Record<any, never>>;
 
@@ -520,20 +511,13 @@ export type TimelineExpandedNetworkType =
     }
   | EmptyObject;
 
-export type TimelineExpandedDetailType =
+export type DataExpandedDetailType =
   | TimelineExpandedEventType
   | TimelineExpandedHostType
   | TimelineExpandedNetworkType
   | TimelineExpandedUserType;
 
-export type TimelineExpandedDetail = Partial<
-  Record<TimelineTabs | string, TimelineExpandedDetailType>
->;
-
-export type ToggleDetailPanel = TimelineExpandedDetailType & {
-  tabType?: TimelineTabs;
-  timelineId: string;
-};
+export type DataExpandedDetail = Partial<Record<string, DataExpandedDetailType>>;
 
 export const pageInfoTimeline = runtimeTypes.type({
   pageIndex: runtimeTypes.number,
@@ -563,27 +547,6 @@ export const sortTimeline = runtimeTypes.type({
   sortField: sortFieldTimeline,
   sortOrder: direction,
 });
-
-const favoriteTimelineResult = runtimeTypes.partial({
-  fullName: unionWithNullType(runtimeTypes.string),
-  userName: unionWithNullType(runtimeTypes.string),
-  favoriteDate: unionWithNullType(runtimeTypes.number),
-});
-
-export type FavoriteTimelineResult = runtimeTypes.TypeOf<typeof favoriteTimelineResult>;
-
-export const responseFavoriteTimeline = runtimeTypes.partial({
-  savedObjectId: runtimeTypes.string,
-  version: runtimeTypes.string,
-  code: unionWithNullType(runtimeTypes.number),
-  message: unionWithNullType(runtimeTypes.string),
-  templateTimelineId: unionWithNullType(runtimeTypes.string),
-  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
-  timelineType: unionWithNullType(TimelineTypeLiteralRt),
-  favorite: unionWithNullType(runtimeTypes.array(favoriteTimelineResult)),
-});
-
-export type ResponseFavoriteTimeline = runtimeTypes.TypeOf<typeof responseFavoriteTimeline>;
 
 export const getTimelinesArgs = runtimeTypes.partial({
   onlyUserFavorite: unionWithNullType(runtimeTypes.boolean),
@@ -720,7 +683,6 @@ export interface TimelineResult {
   eventIdToNoteIds?: Maybe<NoteResult[]>;
   eventType?: Maybe<string>;
   excludedRowRendererIds?: Maybe<RowRendererId[]>;
-  favorite?: Maybe<FavoriteTimelineResult[]>;
   filters?: Maybe<FilterTimelineResult[]>;
   kqlMode?: Maybe<string>;
   kqlQuery?: Maybe<SerializedFilterQueryResult>;

@@ -12,10 +12,10 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 
-import type { TimelineId } from '../../../../common/types/timeline';
+import { dataTableActions } from '../../../timelines/store/data_table';
+import type { TableId } from '../../../../common/types/timeline';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
-import { timelineActions } from '../../../timelines/store/timeline';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -52,7 +52,7 @@ export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
   pageFilters?: Filter[];
   externalAlertPageFilters?: Filter[];
   setQuery: GlobalTimeArgs['setQuery'];
-  timelineId: TimelineId;
+  tableId: TableId;
 };
 
 const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = ({
@@ -64,7 +64,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   pageFilters = [],
   setQuery,
   startDate,
-  timelineId,
+  tableId,
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -86,8 +86,8 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 
   useEffect(() => {
     dispatch(
-      timelineActions.initializeTGridSettings({
-        id: timelineId,
+      dataTableActions.initializeTGridSettings({
+        id: tableId,
         defaultColumns: eventsDefaultModel.columns.map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
@@ -99,7 +99,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : undefined,
       })
     );
-  }, [dispatch, showExternalAlerts, tGridEnabled, timelineId]);
+  }, [dispatch, showExternalAlerts, tGridEnabled, tableId]);
 
   useEffect(() => {
     return () => {
@@ -164,7 +164,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
-        id={timelineId}
+        tableId={tableId}
         unit={showExternalAlerts ? i18n.ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}
         pageFilters={composedPageFilters}

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { EuiDataGridColumn } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { ColumnHeaderOptions } from '../../../common/types';
+import type { ColumnHeaderOptions, RowRendererId, SortColumnTable } from '../../../common/types';
 import type { TGridModel, TGridModelSettings } from './model';
 
 export type { TGridModel };
@@ -17,7 +18,7 @@ export interface AutoSavedWarningMsg {
 }
 
 /** A map of id to timeline  */
-export interface TimelineById {
+export interface TableById {
   [id: string]: TGridModel;
 }
 
@@ -28,7 +29,7 @@ export interface InsertTimeline {
   timelineTitle: string;
 }
 
-export const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
+export const EMPTY_TABLE_BY_ID: TableById = {}; // stable reference
 
 export interface TGridEpicDependencies<State> {
   // kibana$: Observable<CoreStart>;
@@ -36,19 +37,18 @@ export interface TGridEpicDependencies<State> {
   tGridByIdSelector: () => (state: State, timelineId: string) => TGridModel;
 }
 
-/** The state of all timelines is stored here */
-export interface TimelineState {
-  timelineById: TimelineById;
+/** The state of all data tables is stored here */
+export interface TableState {
+  tableById: TableById;
 }
 
-export enum TimelineId {
+export enum TableIds {
   usersPageEvents = 'users-page-events',
   hostsPageEvents = 'hosts-page-events',
   networkPageEvents = 'network-page-events',
   hostsPageSessions = 'hosts-page-sessions-v2',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
-  active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
@@ -68,4 +68,10 @@ export interface TGridPersistInput extends Partial<Omit<TGridModel, keyof TGridM
   columns: ColumnHeaderOptions[];
   indexNames: string[];
   showCheckboxes?: boolean;
+  defaultColumns: Array<
+    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
+      ColumnHeaderOptions
+  >;
+  sort: SortColumnTable[];
+  excludedRowRendererIds: RowRendererId[];
 }

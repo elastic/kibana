@@ -10,8 +10,8 @@ import type { SecuritySubPluginWithStore } from '../app/types';
 import { routes } from './routes';
 import type { NetworkState } from './store';
 import { initialNetworkState, networkReducer } from './store';
-import { TimelineId } from '../../common/types/timeline';
-import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
+import { TableId } from '../../common/types/timeline';
+import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 
 export class Network {
   public setup() {}
@@ -19,8 +19,8 @@ export class Network {
   public start(storage: Storage): SecuritySubPluginWithStore<'network', NetworkState> {
     return {
       routes,
-      storageTimelines: {
-        timelineById: getTimelinesInStorageByIds(storage, [TimelineId.networkPageEvents]),
+      storageDataTables: {
+        tableById: getDataTablesInStorageByIds(storage, [TableId.networkPageEvents]),
       },
       store: {
         initialState: { network: initialNetworkState },

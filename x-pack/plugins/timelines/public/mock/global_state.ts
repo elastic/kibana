@@ -6,11 +6,11 @@
  */
 
 import { Direction } from '../../common/search_strategy';
-import { TimelineState } from '../types';
+import { TableState } from '../types';
 import { defaultHeaders } from './header';
 
-export const mockGlobalState: TimelineState = {
-  timelineById: {
+export const mockGlobalState: TableState = {
+  tableById: {
     test: {
       columns: defaultHeaders,
       dateRange: {
@@ -56,7 +56,6 @@ export const mockGlobalState: TimelineState = {
       footerText: 'total of events',
       loadingText: 'loading events',
       queryFields: [],
-      selectAll: false,
       title: 'Events',
       timelineType: 'default',
     },

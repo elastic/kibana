@@ -19,6 +19,7 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
+import { dataTableSelectors } from '../../../timelines/store/data_table';
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -54,9 +55,8 @@ import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../display';
-import { timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TableId } from '../../../../common/types/timeline';
+import { tableDefaults } from '../../../timelines/store/timeline/defaults';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
@@ -71,9 +71,9 @@ const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getDataTable = useMemo(() => dataTableSelectors.getManageDataTableById(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
+    (state) => (getDataTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

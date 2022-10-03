@@ -10,12 +10,13 @@ import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/t
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
+import type { TGridModel } from '../data_table/model';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
 export const timelineDefaults: SubsetTimelineModel &
-  Pick<TimelineModel, 'filters' | 'eqlOptions' | 'resolveTimelineConfig'> = {
+  Pick<TimelineModel, 'eqlOptions' | 'resolveTimelineConfig'> = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
@@ -24,7 +25,6 @@ export const timelineDefaults: SubsetTimelineModel &
   dataProviders: [],
   dataViewId: null,
   dateRange: { start, end },
-  deletedEventIds: [],
   description: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
@@ -39,11 +39,9 @@ export const timelineDefaults: SubsetTimelineModel &
   expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
-  filters: [],
   indexNames: [],
   isFavorite: false,
   isLive: false,
-  isSelectAllChecked: false,
   isLoading: false,
   isSaving: false,
   itemsPerPage: 25,
@@ -63,11 +61,8 @@ export const timelineDefaults: SubsetTimelineModel &
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: null,
-  selectAll: false,
-  selectedEventIds: {},
   sessionViewConfig: null,
   show: false,
-  showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
@@ -78,4 +73,48 @@ export const timelineDefaults: SubsetTimelineModel &
   ],
   status: TimelineStatus.draft,
   version: null,
+  deletedEventIds: [],
+  selectedEventIds: {},
+  isSelectAllChecked: false,
+};
+
+export const tableDefaults: TGridModel = {
+  columns: defaultHeaders,
+  defaultColumns: defaultHeaders,
+  dataProviders: [],
+  dataViewId: null,
+  dateRange: { start, end },
+  deletedEventIds: [],
+  excludedRowRendererIds: [],
+  expandedDetail: {},
+  filters: [],
+  indexNames: [],
+  isSelectAllChecked: false,
+  isLoading: false,
+  itemsPerPage: 25,
+  itemsPerPageOptions: [10, 25, 50, 100],
+  kqlQuery: {
+    filterQuery: null,
+  },
+  loadingEventIds: [],
+  queryFields: [],
+  timelineType: TimelineType.default,
+  selectedEventIds: {},
+  showCheckboxes: false,
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'date',
+      esTypes: ['date'],
+      sortDirection: 'desc',
+    },
+  ],
+  version: null,
+  title: '',
+  graphEventId: '',
+  kqlMode: 'filter',
+  sessionViewConfig: null,
+  documentType: '',
+  savedObjectId: null,
+  id: '',
 };

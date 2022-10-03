@@ -37,7 +37,7 @@ import type {
 } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
-import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { tableDefaults } from '../../../../store/timeline/defaults';
 import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { ALERTS_ACTIONS } from '../../../../../common/lib/apm/user_actions';
@@ -109,7 +109,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     [eventIdToNoteIds, eventId, isEventPinned, onPinEvent, onUnPinEvent]
   );
   const timelineType = useShallowEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
+    (state) => (getTimeline(state, timelineId) ?? tableDefaults).timelineType
   );
   const eventType = getEventType(ecsData);
 

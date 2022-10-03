@@ -21,14 +21,11 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { TimelineId } from '../../../../common/types/timeline';
-import { timelineSelectors, timelineActions } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
 import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../containers/use_timeline_data_filters';
+import type { SessionViewConfig } from '../timeline/session_tab_content/use_session_view';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
@@ -70,44 +67,45 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 `;
 
 interface GraphOverlayProps {
-  timelineId: TimelineId;
+  componentInstanceID: string;
+  isInTimeline: boolean;
   SessionView: JSX.Element | null;
   Navigation: JSX.Element | null;
+  graphEventId: string | undefined;
+  sessionViewConfig: SessionViewConfig | null;
+  updateTimelineGraphEventId: (graphEventId: string) => void;
 }
 
 const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
-  timelineId,
   SessionView,
   Navigation,
+  graphEventId,
+  sessionViewConfig,
+  updateTimelineGraphEventId,
+  componentInstanceID,
+  isInTimeline,
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
 
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { graphEventId, sessionViewConfig } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
-  );
-
   const fullScreen = useMemo(
-    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
-    [globalFullScreen, timelineId, timelineFullScreen]
+    () => isFullScreen({ globalFullScreen, isInTimeline, timelineFullScreen }),
+    [globalFullScreen, isInTimeline, timelineFullScreen]
   );
-
-  const isInTimeline = timelineId === TimelineId.active;
 
   useEffect(() => {
     return () => {
-      dispatch(timelineActions.updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
-      if (timelineId === TimelineId.active) {
+      updateTimelineGraphEventId('');
+      if (isInTimeline) {
         dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen: false }));
       } else {
         dispatch(inputsActions.setFullScreen({ id: InputsModelId.global, fullScreen: false }));
       }
     };
-  }, [dispatch, timelineId]);
+  }, [dispatch, updateTimelineGraphEventId, isInTimeline]);
 
-  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(timelineId);
+  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(isInTimeline);
 
   const sessionContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -144,7 +142,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
         {graphEventId !== undefined ? (
           <StyledResolver
             databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={timelineId}
+            resolverComponentInstanceID={componentInstanceID}
             indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}
@@ -167,7 +165,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
         {graphEventId !== undefined ? (
           <StyledResolver
             databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={timelineId}
+            resolverComponentInstanceID={componentInstanceID}
             indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}

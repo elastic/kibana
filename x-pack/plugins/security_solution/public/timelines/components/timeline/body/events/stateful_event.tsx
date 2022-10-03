@@ -39,7 +39,7 @@ import type { TimelineResultNote } from '../../../open_timeline/types';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
-import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { tableDefaults } from '../../../../store/timeline/defaults';
 import { useGetMappedNonEcsValue } from '../data_driven_columns';
 
 interface Props {
@@ -111,7 +111,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedDetail = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
+    (state) => (getTimeline(state, timelineId) ?? tableDefaults).expandedDetail ?? {}
   );
   const hostNameArr = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
 

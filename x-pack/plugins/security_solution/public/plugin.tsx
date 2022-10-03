@@ -6,11 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import reduceReducers from 'reduce-reducers';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { combineLatestWith, pluck } from 'rxjs/operators';
-import type { AnyAction, Reducer } from 'redux';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -21,7 +19,6 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TimelineState } from '@kbn/timelines-plugin/public';
 import type {
   PluginSetup,
   PluginStart,
@@ -52,7 +49,6 @@ import {
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
 import type { LinksPermissions } from './common/links';
 import { updateAppLinks } from './common/links';
-import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import type { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
@@ -169,6 +165,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
+        const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
         return renderApp({
           ...params,
           services: await startServices(params),
@@ -189,7 +186,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
-
+        const { manageOldSiemRoutes } = await this.lazyHelpersForRoutes();
         const subscription = this.appUpdater$.subscribe(() => {
           // wait for app initialization to set the links
           manageOldSiemRoutes(coreStart);
@@ -289,6 +286,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return import(
       /* webpackChunkName: "lazy_application_dependencies" */
       './lazy_application_dependencies'
+    );
+  }
+
+  private lazyHelpersForRoutes() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazyHelpersForRoutes" */
+      './helpers'
     );
   }
 
@@ -432,27 +440,28 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...subPlugins.timelines.store.initialState.timeline!,
           timelineById: {
             ...subPlugins.timelines.store.initialState.timeline.timelineById,
+          },
+        },
+      };
+
+      const dataTableInitialState = {
+        dataTable: {
+          tableById: {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.alerts.storageTimelines!.timelineById,
+            ...subPlugins.alerts.storageDataTables!.tableById,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.rules.storageTimelines!.timelineById,
+            ...subPlugins.rules.storageDataTables!.tableById,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.exceptions.storageTimelines!.timelineById,
+            ...subPlugins.exceptions.storageDataTables!.tableById,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.hosts.storageTimelines!.timelineById,
+            ...subPlugins.hosts.storageDataTables!.tableById,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.network.storageTimelines!.timelineById,
+            ...subPlugins.network.storageDataTables!.tableById,
           },
         },
       };
 
       const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
-      const timelineReducer = reduceReducers(
-        timelineInitialState.timeline,
-        tGridReducer,
-        subPlugins.timelines.store.reducer.timeline
-      ) as unknown as Reducer<TimelineState, AnyAction>;
-
       this._store = createStore(
         createInitialState(
           {
@@ -467,16 +476,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             kibanaDataViews,
             signalIndexName: signal.name,
             enableExperimental: this.experimentalFeatures,
-          }
+          },
+          dataTableInitialState
         ),
         {
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.users.store.reducer,
           ...subPlugins.network.store.reducer,
-          timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
+          ...subPlugins.timelines.store.reducer,
           ...tGridReducer,
         },
+        { dataTable: tGridReducer },
         libs$.pipe(pluck('kibana')),
         this.storage,
         [...(subPlugins.management.store.middleware ?? [])]

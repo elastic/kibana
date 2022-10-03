@@ -78,7 +78,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
 
       return getTimeline(state, timelineId)?.timelineType ?? TimelineType.default;
     });
-    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+    const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const { isLoading } = useDeepEqualSelector((state) =>
       getManageTimeline(state, timelineId ?? '')
     );

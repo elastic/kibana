@@ -8,7 +8,8 @@
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { timelineSelectors } from '../../../store/timeline';
+import { useDispatch } from 'react-redux';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import type { TimelineId } from '../../../../../common/types/timeline';
 import { GraphOverlay } from '../../graph_overlay';
@@ -30,17 +31,39 @@ const VerticalRule = styled.div`
 `;
 
 const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }) => {
+  const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => getTimeline(state, timelineId)?.graphEventId
   );
+  const sessionViewConfig = useShallowEqualSelector(
+    (state) => getTimeline(state, timelineId)?.sessionViewConfig
+  );
 
   const { Navigation } = useSessionViewNavigation({
-    timelineId,
+    isInTimeline: true,
+    graphEventId,
+    sessionViewConfig,
+    updateGraphEventId: (navGraphEventId) =>
+      dispatch(
+        timelineActions.updateTimelineGraphEventId({
+          id: timelineId,
+          graphEventId: navGraphEventId,
+        })
+      ),
+    updateSessionViewConfig: (navSessionViewConfig) =>
+      dispatch(
+        timelineActions.updateTimelineSessionViewConfig({
+          id: timelineId,
+          sessionViewConfig: navSessionViewConfig,
+        })
+      ),
   });
 
   const { shouldShowDetailsPanel, DetailsPanel, SessionView } = useSessionView({
-    timelineId,
+    scopeId: timelineId,
+    sessionViewConfig,
+    isInTimeline: true,
   });
 
   if (!graphEventId) {
@@ -49,7 +72,20 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
 
   return (
     <>
-      <GraphOverlay timelineId={timelineId} Navigation={Navigation} SessionView={SessionView} />
+      <GraphOverlay
+        componentInstanceID={timelineId}
+        isInTimeline={false}
+        Navigation={Navigation}
+        SessionView={SessionView}
+        graphEventId={graphEventId}
+        sessionViewConfig={sessionViewConfig}
+        updateTimelineGraphEventId={(timelineGraphEventId) =>
+          timelineActions.updateTimelineGraphEventId({
+            id: timelineId,
+            graphEventId: timelineGraphEventId,
+          })
+        }
+      />
       {shouldShowDetailsPanel && (
         <>
           <VerticalRule />

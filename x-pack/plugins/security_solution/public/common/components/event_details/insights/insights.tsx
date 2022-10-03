@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { find } from 'lodash/fp';
 
+import { TimelineId } from '../../../../../common/types';
 import * as i18n from './translations';
 
 import type { BrowserFields } from '../../../containers/source';
@@ -27,7 +28,7 @@ interface Props {
   browserFields: BrowserFields;
   eventId: string;
   data: TimelineEventsDetailsItem[];
-  timelineId: string;
+  scopeId: string;
   isReadOnly?: boolean;
 }
 
@@ -35,7 +36,7 @@ interface Props {
  * Displays several key insights for the associated alert.
  */
 export const Insights = React.memo<Props>(
-  ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
+  ({ browserFields, eventId, data, isReadOnly, scopeId }) => {
     const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
       'insightsRelatedAlertsByProcessAncestry'
     );
@@ -91,6 +92,7 @@ export const Insights = React.memo<Props>(
     if (isReadOnly || !canShowAtLeastOneInsight) {
       return null;
     }
+    const isInTimeline = scopeId === TimelineId.active;
 
     return (
       <div>
@@ -113,7 +115,8 @@ export const Insights = React.memo<Props>(
                 browserFields={browserFields}
                 data={sourceEventField}
                 eventId={eventId}
-                timelineId={timelineId}
+                scopeId={scopeId}
+                isInTimeline={isInTimeline}
               />
             </EuiFlexItem>
           )}
@@ -124,7 +127,8 @@ export const Insights = React.memo<Props>(
                 browserFields={browserFields}
                 data={processSessionField}
                 eventId={eventId}
-                timelineId={timelineId}
+                scopeId={scopeId}
+                isInTimeline={isInTimeline}
               />
             </EuiFlexItem>
           )}
@@ -137,7 +141,8 @@ export const Insights = React.memo<Props>(
                   originalDocumentId={originalDocumentId}
                   index={originalDocumentIndex}
                   eventId={eventId}
-                  timelineId={timelineId}
+                  scopeId={scopeId}
+                  isInTimeline={isInTimeline}
                 />
               </EuiFlexItem>
             ) : (

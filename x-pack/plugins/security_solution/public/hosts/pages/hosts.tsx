@@ -27,7 +27,7 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { TimelineId } from '../../../common/types/timeline';
+import { TableId } from '../../../common/types/timeline';
 import { LastEventIndexKey, RiskScoreEntity } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
@@ -49,8 +49,7 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../timelines/components/timeline/helpers';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import { tableDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
@@ -71,9 +70,9 @@ const StyledFullHeightContainer = styled.div`
 const HostsComponent = () => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTable = useMemo(() => dataTableSelectors.getManageDataTableById(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
+    (state) => (getTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

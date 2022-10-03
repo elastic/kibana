@@ -24,7 +24,7 @@ const heights = {
   short: 250,
 };
 
-export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
+export const TableContext = createContext<{ tableId: string | null }>({ tableId: null });
 
 export const TGridLoading: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
   return (

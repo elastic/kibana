@@ -15,12 +15,13 @@ import type { EntityType } from '@kbn/timelines-plugin/common';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import type { BrowserFields } from '../../../common/containers/source';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs, TableId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 import { UserDetailsPanel } from './user_details';
+import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -29,9 +30,14 @@ interface DetailsPanelProps {
   isFlyoutView?: boolean;
   runtimeMappings: MappingRuntimeFields;
   tabType?: TimelineTabs;
-  timelineId: string;
+  scopeId: string;
   isReadOnly?: boolean;
 }
+
+const isTimelineScope = (scopeId: string) =>
+  Object.values(TimelineId).includes(scopeId as unknown as TimelineId);
+const isInTableScope = (scopeId: string) =>
+  Object.values(TableId).includes(scopeId as unknown as TableId);
 
 /**
  * This panel is used in both the main timeline as well as the flyouts on the host, detection, cases, and network pages.
@@ -46,19 +52,30 @@ export const DetailsPanel = React.memo(
     isFlyoutView,
     runtimeMappings,
     tabType,
-    timelineId,
+    scopeId,
     isReadOnly,
   }: DetailsPanelProps) => {
     const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const expandedDetail = useDeepEqualSelector((state) => {
-      return (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail;
-    });
+    const getScope = useMemo(() => {
+      if (isTimelineScope(scopeId)) {
+        return timelineSelectors.getTimelineByIdSelector();
+      } else if (isInTableScope(scopeId)) {
+        return dataTableSelectors.getTableByIdSelector();
+      }
+    }, [scopeId]);
+
+    const expandedDetail = useDeepEqualSelector(
+      (state) => ((getScope && getScope(state, scopeId)) ?? timelineDefaults)?.expandedDetail
+    );
 
     // To be used primarily in the flyout scenario where we don't want to maintain the tabType
     const defaultOnPanelClose = useCallback(() => {
-      dispatch(timelineActions.toggleDetailPanel({ timelineId }));
-    }, [dispatch, timelineId]);
+      if (isTimelineScope(scopeId)) {
+        dispatch(timelineActions.toggleDetailPanel({ timelineId: scopeId }));
+      } else if (isInTableScope(scopeId)) {
+        dispatch(dataTableActions.toggleDetailPanel({ tableId: scopeId }));
+      }
+    }, [dispatch, scopeId]);
 
     const activeTab = tabType ?? TimelineTabs.query;
     const closePanel = useCallback(() => {
@@ -74,9 +91,9 @@ export const DetailsPanel = React.memo(
 
     let visiblePanel = null; // store in variable to make return statement more readable
     let panelSize: EuiFlyoutProps['size'] = 's';
-    let flyoutUniqueKey = timelineId;
-    const contextID = `${timelineId}-${activeTab}`;
-    const isDraggable = timelineId === TimelineId.active && activeTab === TimelineTabs.query;
+    let flyoutUniqueKey = scopeId;
+    const contextID = `${scopeId}-${activeTab}`;
+    const isDraggable = scopeId === TimelineId.active && activeTab === TimelineTabs.query;
 
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
       panelSize = 'm';
@@ -91,7 +108,7 @@ export const DetailsPanel = React.memo(
           isFlyoutView={isFlyoutView}
           runtimeMappings={runtimeMappings}
           tabType={activeTab}
-          timelineId={timelineId}
+          scopeId={scopeId}
           isReadOnly={isReadOnly}
         />
       );

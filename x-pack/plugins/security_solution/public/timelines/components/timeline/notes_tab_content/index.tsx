@@ -190,7 +190,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
           handleOnPanelClosed={handleOnPanelClosed}
           runtimeMappings={runtimeMappings}
           tabType={TimelineTabs.notes}
-          timelineId={timelineId}
+          scopeId={timelineId}
         />
       ) : null,
     [browserFields, expandedDetail, handleOnPanelClosed, runtimeMappings, timelineId]

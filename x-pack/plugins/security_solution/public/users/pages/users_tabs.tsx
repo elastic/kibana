@@ -18,7 +18,7 @@ import { AnomaliesUserTable } from '../../common/components/ml/tables/anomalies_
 
 import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
 import { EventsQueryTabBody } from '../../common/components/events_tab';
-import { TimelineId } from '../../../common/types';
+import { TableId } from '../../../common/types';
 
 export const UsersTabs = memo<UsersTabsProps>(
   ({
@@ -61,7 +61,7 @@ export const UsersTabs = memo<UsersTabsProps>(
           <EventsQueryTabBody
             {...tabProps}
             pageFilters={pageFilters}
-            timelineId={TimelineId.usersPageEvents}
+            tableId={TableId.usersPageEvents}
           />
         </Route>
       </Switch>

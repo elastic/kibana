@@ -56,7 +56,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   showSpacer?: boolean;
-  timelineId?: string;
+  scopeId?: string;
   toggleTopN?: () => void;
 }
 
@@ -89,7 +89,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   setQuery,
   showLegend,
   showSpacer = true,
-  timelineId,
+  scopeId,
   to,
   toggleTopN,
 }) => {
@@ -199,7 +199,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       showLegend={showLegend}
       skip={filterQuery === undefined}
       startDate={from}
-      timelineId={timelineId}
+      scopeId={scopeId}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}
     />
