@@ -22,6 +22,7 @@ export const DeleteIndexModal: React.FC = () => {
     deleteModalIndexName: indexName,
     deleteModalIngestionMethod: ingestionMethod,
     isDeleteModalVisible,
+    isDeleteLoading,
   } = useValues(IndicesLogic);
   return isDeleteModalVisible ? (
     <EuiConfirmModal
@@ -49,6 +50,7 @@ export const DeleteIndexModal: React.FC = () => {
       )}
       defaultFocusedButton="confirm"
       buttonColor="danger"
+      isLoading={isDeleteLoading}
     >
       <p>
         {i18n.translate(
