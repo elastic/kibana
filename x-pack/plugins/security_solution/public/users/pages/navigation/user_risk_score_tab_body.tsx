@@ -20,7 +20,7 @@ import { usersSelectors } from '../../store';
 import {
   UserRiskScoreQueryId,
   useUserRiskScore,
-  useUserRiskScoreKpi,
+  useRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../common/search_strategy';
@@ -74,8 +74,9 @@ export const UserRiskScoreQueryTabBody = ({
     timerange,
   });
 
-  const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
+  const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
     filterQuery,
+    riskEntity: RiskScoreEntity.user,
     skip: querySkip,
   });
 

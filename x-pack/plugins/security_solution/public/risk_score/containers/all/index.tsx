@@ -84,7 +84,7 @@ export const useUserRiskScore = (
     riskEntity: RiskScoreEntity.user,
   });
 
-const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
+export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
   timerange,
   onlyLatest = true,
   filterQuery,

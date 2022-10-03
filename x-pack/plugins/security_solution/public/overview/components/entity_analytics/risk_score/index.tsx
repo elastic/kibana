@@ -18,12 +18,7 @@ import { HostsTableType, HostsType } from '../../../../hosts/store/model';
 import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../../common/components/header_section';
-import {
-  useHostRiskScore,
-  useHostRiskScoreKpi,
-  useUserRiskScore,
-  useUserRiskScoreKpi,
-} from '../../../../risk_score/containers';
+import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
@@ -46,12 +41,10 @@ import { Panel } from '../../../../common/components/panel';
 import * as commonI18n from '../common/translations';
 import { usersActions } from '../../../../users/store';
 
-const TABLE_QUERY_ID = (riskEntity: RiskScoreEntity) =>
-  riskEntity === RiskScoreEntity.host ? 'hostRiskDashboardTable' : 'userRiskDashboardTable';
-const RISK_KPI_QUERY_ID = (riskEntity: RiskScoreEntity) =>
-  riskEntity === RiskScoreEntity.host
-    ? 'headerHostRiskScoreKpiQuery'
-    : 'headerUserRiskScoreKpiQuery';
+const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
+const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
+const USER_RISK_TABLE_QUERY_ID = 'userRiskDashboardTable';
+const USER_RISK_KPI_QUERY_ID = 'headerUserRiskScoreKpiQuery';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -63,8 +56,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
       riskEntity === RiskScoreEntity.host
         ? {
             docLink: RISKY_HOSTS_DOC_LINK,
-            kpiHook: useHostRiskScoreKpi,
-            riskScoreHook: useHostRiskScore,
             linkProps: {
               deepLinkId: SecurityPageName.hosts,
               path: getTabsOnHostsUrl(HostsTableType.risk),
@@ -77,11 +68,11 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
                 );
               },
             },
+            tableQueryId: HOST_RISK_TABLE_QUERY_ID,
+            kpiQueryId: HOST_RISK_KPI_QUERY_ID,
           }
         : {
             docLink: RISKY_USERS_DOC_LINK,
-            kpiHook: useUserRiskScoreKpi,
-            riskScoreHook: useUserRiskScore,
             linkProps: {
               deepLinkId: SecurityPageName.users,
               path: getTabsOnUsersUrl(UsersTableType.risk),
@@ -93,11 +84,13 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
                 );
               },
             },
+            tableQueryId: USER_RISK_TABLE_QUERY_ID,
+            kpiQueryId: USER_RISK_KPI_QUERY_ID,
           },
     [dispatch, riskEntity]
   );
 
-  const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID(riskEntity));
+  const { toggleStatus, setToggleStatus } = useQueryToggle(entity.tableQueryId);
   const columns = useMemo(() => getRiskScoreColumns(riskEntity), [riskEntity]);
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
@@ -121,14 +114,15 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     loading: isKpiLoading,
     refetch: refetchKpi,
     inspect: inspectKpi,
-  } = entity.kpiHook({
+  } = useRiskScoreKpi({
     filterQuery: severityFilter,
     skip: !toggleStatus,
     timerange,
+    riskEntity,
   });
 
   useQueryInspector({
-    queryId: RISK_KPI_QUERY_ID(riskEntity),
+    queryId: entity.kpiQueryId,
     loading: isKpiLoading,
     refetch: refetchKpi,
     setQuery,
@@ -138,7 +132,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   const [
     isTableLoading,
     { data, inspect, refetch, isDeprecated, isLicenseValid, isModuleEnabled },
-  ] = entity.riskScoreHook({
+  ] = useRiskScore({
     filterQuery: severityFilter,
     skip: !toggleStatus,
     pagination: {
@@ -146,10 +140,11 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
       querySize: 5,
     },
     timerange,
+    riskEntity,
   });
 
   useQueryInspector({
-    queryId: TABLE_QUERY_ID(riskEntity),
+    queryId: entity.tableQueryId,
     loading: isTableLoading,
     refetch,
     setQuery,
@@ -201,7 +196,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           subtitle={
             <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />
           }
-          id={TABLE_QUERY_ID(riskEntity)}
+          id={entity.tableQueryId}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
           tooltip={commonI18n.HOST_RISK_TABLE_TOOLTIP}
@@ -248,7 +243,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
                 items={data ?? []}
                 columns={columns}
                 loading={isTableLoading}
-                id={TABLE_QUERY_ID(riskEntity)}
+                id={entity.tableQueryId}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
-import { useUserRiskScore, useUserRiskScoreKpi } from '../../../risk_score/containers';
+import { useUserRiskScore, useRiskScoreKpi } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { UserRiskScoreQueryTabBody } from './user_risk_score_tab_body';
 import { UsersType } from '../../store/model';
@@ -19,7 +19,7 @@ jest.mock('../../../common/lib/kibana');
 
 describe('All users query tab body', () => {
   const mockUseUserRiskScore = useUserRiskScore as jest.Mock;
-  const mockUseUserRiskScoreKpi = useUserRiskScoreKpi as jest.Mock;
+  const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
     indexNames: [],
@@ -47,7 +47,7 @@ describe('All users query tab body', () => {
         isModuleEnabled: true,
       },
     ]);
-    mockUseUserRiskScoreKpi.mockReturnValue({
+    mockUseRiskScoreKpi.mockReturnValue({
       loading: false,
       severityCount: {
         unknown: 12,
@@ -66,7 +66,7 @@ describe('All users query tab body', () => {
       </TestProviders>
     );
     expect(mockUseUserRiskScore.mock.calls[0][0].skip).toEqual(false);
-    expect(mockUseUserRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
   });
 
   it('toggleStatus=false, skip', () => {
@@ -77,6 +77,6 @@ describe('All users query tab body', () => {
       </TestProviders>
     );
     expect(mockUseUserRiskScore.mock.calls[0][0].skip).toEqual(true);
-    expect(mockUseUserRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
   });
 });

@@ -18,7 +18,7 @@ import type { State } from '../../../common/store';
 import {
   HostRiskScoreQueryId,
   useHostRiskScore,
-  useHostRiskScoreKpi,
+  useRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../common/search_strategy';
@@ -72,9 +72,10 @@ export const HostRiskScoreQueryTabBody = ({
     timerange,
   });
 
-  const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
+  const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
     filterQuery,
     skip: querySkip,
+    riskEntity: RiskScoreEntity.host,
   });
 
   const status = {

@@ -21,12 +21,7 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { RiskScoreOverTime } from '../risk_score_over_time';
 import { TopRiskScoreContributors } from '../../../common/components/top_risk_score_contributors';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import {
-  HostRiskScoreQueryId,
-  useHostRiskScore,
-  UserRiskScoreQueryId,
-  useUserRiskScore,
-} from '../../containers';
+import { HostRiskScoreQueryId, UserRiskScoreQueryId, useRiskScore } from '../../containers';
 import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
 import { buildEntityNameFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/types';
@@ -49,17 +44,11 @@ const RiskDetailsTabBodyComponent: React.FC<
     riskEntity: RiskScoreEntity;
   }
 > = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
-  const entity = useMemo(
+  const queryId = useMemo(
     () =>
       riskEntity === RiskScoreEntity.host
-        ? {
-            queryId: HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE,
-            riskScoreHook: useHostRiskScore,
-          }
-        : {
-            queryId: UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
-            riskScoreHook: useUserRiskScore,
-          },
+        ? HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE
+        : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
     [riskEntity]
   );
 
@@ -84,22 +73,21 @@ const RiskDetailsTabBodyComponent: React.FC<
   );
 
   const { toggleStatus: overTimeToggleStatus, setToggleStatus: setOverTimeToggleStatus } =
-    useQueryToggle(`${entity.queryId} overTime`);
+    useQueryToggle(`${queryId} overTime`);
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
-    useQueryToggle(`${entity.queryId} contributors`);
+    useQueryToggle(`${queryId} contributors`);
 
   const filterQuery = useMemo(
     () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
     [entityName, riskEntity]
   );
-  const [loading, { data, refetch, inspect, isDeprecated, isModuleEnabled }] = entity.riskScoreHook(
-    {
-      filterQuery,
-      onlyLatest: false,
-      skip: !overTimeToggleStatus && !contributorsToggleStatus,
-      timerange,
-    }
-  );
+  const [loading, { data, refetch, inspect, isDeprecated, isModuleEnabled }] = useRiskScore({
+    filterQuery,
+    onlyLatest: false,
+    riskEntity,
+    skip: !overTimeToggleStatus && !contributorsToggleStatus,
+    timerange,
+  });
 
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
@@ -112,7 +100,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   }, [data, riskEntity]);
 
   useQueryInspector({
-    queryId: entity.queryId,
+    queryId,
     loading,
     refetch,
     setQuery,
@@ -163,7 +151,7 @@ const RiskDetailsTabBodyComponent: React.FC<
             to={endDate}
             loading={loading}
             riskScore={data}
-            queryId={entity.queryId}
+            queryId={queryId}
             title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
             toggleStatus={overTimeToggleStatus}
             toggleQuery={toggleOverTimeQuery}
@@ -173,7 +161,7 @@ const RiskDetailsTabBodyComponent: React.FC<
         <EuiFlexItem grow={1}>
           <TopRiskScoreContributors
             loading={loading}
-            queryId={entity.queryId}
+            queryId={queryId}
             toggleStatus={contributorsToggleStatus}
             toggleQuery={toggleContributorsQuery}
             rules={rules}

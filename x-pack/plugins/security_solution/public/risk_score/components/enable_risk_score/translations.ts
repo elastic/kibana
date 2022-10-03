@@ -9,14 +9,14 @@ import type { RiskScoreEntity } from '../../../../common/search_strategy';
 import { getRiskEntityTranslation } from '../translations';
 
 export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
-  'xpack.securitySolution.riskScoreDisabled.hostsRiskDashboard.enableRiskScorePopoverTitle',
+  'xpack.securitySolution.enableRiskScore.enableRiskScorePopoverTitle',
   {
     defaultMessage: 'Alerts need to be available before enabling module',
   }
 );
 
 export const UPGRADE_RISK_SCORE = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.riskDeprecated.hosts.upgradeHostRiskScore', {
+  i18n.translate('xpack.securitySolution.enableRiskScore.upgradeRiskScore', {
     defaultMessage: 'Upgrade {riskEntity} Risk Score',
     values: {
       riskEntity: getRiskEntityTranslation(riskEntity),
@@ -24,7 +24,7 @@ export const UPGRADE_RISK_SCORE = (riskEntity: RiskScoreEntity) =>
   });
 
 export const UPGRADE_RISK_SCORE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.riskDeprecated.entity.upgradeHostRiskScoreDescription',
+  'xpack.securitySolution.riskDeprecated.entity.upgradeRiskScoreDescription',
   {
     defaultMessage:
       'Current data is no longer supported. Please migrate your data and upgrade the module.',
@@ -32,7 +32,7 @@ export const UPGRADE_RISK_SCORE_DESCRIPTION = i18n.translate(
 );
 
 export const ENABLE_RISK_SCORE = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.riskScoreDisabled.riskDashboard.enableRiskScore', {
+  i18n.translate('xpack.securitySolution.enableRiskScore.enableRiskScore', {
     defaultMessage: 'Enable {riskEntity} Risk Score',
     values: {
       riskEntity: getRiskEntityTranslation(riskEntity),
@@ -40,13 +40,10 @@ export const ENABLE_RISK_SCORE = (riskEntity: RiskScoreEntity) =>
   });
 
 export const ENABLE_RISK_SCORE_DESCRIPTION = (riskEntity: RiskScoreEntity) =>
-  i18n.translate(
-    'xpack.securitySolution.riskScoreDisabled.riskDashboard.enableRiskScoreDescription',
-    {
-      defaultMessage:
-        'Once you have enabled this feature you can get quick access to the {riskEntity} risk scores in this section.',
-      values: {
-        riskEntity: getRiskEntityTranslation(riskEntity, true),
-      },
-    }
-  );
+  i18n.translate('xpack.securitySolution.enableRiskScore.enableRiskScoreDescription', {
+    defaultMessage:
+      'Once you have enabled this feature you can get quick access to the {riskEntity} risk scores in this section.',
+    values: {
+      riskEntity: getRiskEntityTranslation(riskEntity, true),
+    },
+  });
