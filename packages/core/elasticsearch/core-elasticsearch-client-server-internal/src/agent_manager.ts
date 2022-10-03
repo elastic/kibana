@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Agent as HttpAgent, AgentOptions } from 'http';
+import { Agent as HttpAgent, type AgentOptions } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import { ConnectionOptions } from '@elastic/elasticsearch';
+import { type ConnectionOptions } from '@elastic/elasticsearch';
 
 const HTTPS = 'https:';
 
