@@ -73,7 +73,7 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
           maxHeight: rest.style?.maxHeight,
         }}
       >
-        <Blurhash hash={hash} />
+        <Blurhash isLoaded={isLoaded} hash={hash} />
         <MyImage
           observerRef={observerRef}
           ref={ref}

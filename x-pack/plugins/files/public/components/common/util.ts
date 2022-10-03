@@ -59,7 +59,7 @@ export async function createBlurhash(file: File | Blob): Promise<undefined | str
     if (!ctx) throw new Error('Could not get 2d canvas context!');
     ctx.drawImage(image, 0, 0, width, height);
     const imgData = ctx.getImageData(0, 0, width, height);
-    return bh.encode(imgData.data, imgData.width, imgData.height, 3, 3);
+    return bh.encode(imgData.data, imgData.width, imgData.height, 4, 3);
   } finally {
     window.URL.revokeObjectURL(imgUrl);
   }
