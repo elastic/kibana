@@ -295,10 +295,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getCurrentStyle().renderLegendDetails();
   }
 
-  async getBounds(syncContext: DataRequestContext) {
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     return syncBoundsData({
       layerId: this.getId(),
-      syncContext,
+      syncContext: getDataRequestContext(this.getId()),
       source: this.getSource(),
       sourceQuery: this.getQuery(),
     });

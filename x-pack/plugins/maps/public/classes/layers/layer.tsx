@@ -41,7 +41,9 @@ import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 
 export interface ILayer {
-  getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
+  getBounds(
+    getDataRequestContext: (layerId: string) => DataRequestContext
+  ): Promise<MapExtent | null>;
   getDataRequest(id: string): DataRequest | undefined;
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
@@ -428,7 +430,9 @@ export class AbstractLayer implements ILayer {
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
-  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null> {
+  async getBounds(
+    getDataRequestContext: (layerId: string) => DataRequestContext
+  ): Promise<MapExtent | null> {
     return null;
   }
 

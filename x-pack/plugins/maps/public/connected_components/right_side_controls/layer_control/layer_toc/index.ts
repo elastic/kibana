@@ -26,7 +26,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   return {
     createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) =>
       dispatch(createLayerGroup(draggedLayerId, combineWithLayerId)),
-    setLayerParent: (layerId: string, parent: string | undefined) => dispatch(setLayerParent(layerId, parent)),
+    setLayerParent: (layerId: string, parent: string | undefined) =>
+      dispatch(setLayerParent(layerId, parent)),
     updateLayerOrder: (newOrder: number[]) => dispatch(updateLayerOrder(newOrder)),
   };
 }

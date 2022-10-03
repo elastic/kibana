@@ -24,7 +24,7 @@ import {
   StyleMetaDescriptor,
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../../sources/source';
-import { DataRequestContext } from '../../../actions';
+import { type DataRequestContext, getLayersExtent } from '../../../actions';
 import { ILayer, LayerIcon } from '../layer';
 import { IStyle } from '../../styles/style';
 import { LICENSED_FEATURES } from '../../../licensed_features';
@@ -296,9 +296,10 @@ export class LayerGroup implements ILayer {
     return true;
   }
 
-  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null> {
-    // TODO return childLayers.reduce.getBounds()
-    return null;
+  async getBounds(
+    getDataRequestContext: (layerId: string) => DataRequestContext
+  ): Promise<MapExtent | null> {
+    return getLayersExtent(this.getChildren(), getDataRequestContext);
   }
 
   renderStyleEditor(

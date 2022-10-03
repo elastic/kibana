@@ -38,7 +38,7 @@ export class LayerTOC extends Component<Props> {
       return this.props.layerList.length - index - 1;
     };
 
-    /*const layerIds = this.props.layerList.map((layer, index) => {
+    /* const layerIds = this.props.layerList.map((layer, index) => {
       return `${layer.getId()}: ${index}`;
     }).reverse();
     console.log(layerIds);*/
@@ -60,17 +60,17 @@ export class LayerTOC extends Component<Props> {
     const newIndex = reverseIndex(destination.index);
 
     const sourceLayerId = this.props.layerList[prevIndex].getId();
-    const newRightSiblingIndex = prevIndex > newIndex
-      // When layer is moved to the right, new right sibling is layer to the right of destination
-      ? newIndex - 1
-      // When layer is moved to the left, new right sibling is the destination
-      : newIndex;
-    //console.log('prevIndex', prevIndex);
-    //console.log('newIndex', newIndex);
-    //console.log('newRightSiblingIndex', newRightSiblingIndex);
-    const newRightSiblingParentLayerId = newRightSiblingIndex < 0
-      ? undefined
-      : this.props.layerList[newRightSiblingIndex].getParent();
+    const newRightSiblingIndex =
+      prevIndex > newIndex
+        ? // When layer is moved to the right, new right sibling is layer to the right of destination
+          newIndex - 1
+        : // When layer is moved to the left, new right sibling is the destination
+          newIndex;
+    // console.log('prevIndex', prevIndex);
+    // console.log('newIndex', newIndex);
+    // console.log('newRightSiblingIndex', newRightSiblingIndex);
+    const newRightSiblingParentLayerId =
+      newRightSiblingIndex < 0 ? undefined : this.props.layerList[newRightSiblingIndex].getParent();
     this.props.setLayerParent(sourceLayerId, newRightSiblingParentLayerId);
 
     const newOrder = [];

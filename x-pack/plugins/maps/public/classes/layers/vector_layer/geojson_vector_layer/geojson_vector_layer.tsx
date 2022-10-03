@@ -59,11 +59,11 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     return layerDescriptor;
   }
 
-  async getBounds(syncContext: DataRequestContext) {
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     const isStaticLayer = !this.getSource().isBoundsAware();
     return isStaticLayer || this.hasJoins()
       ? getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins())
-      : super.getBounds(syncContext);
+      : super.getBounds(getDataRequestContext);
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {

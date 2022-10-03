@@ -256,7 +256,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     }
 
     if (layer instanceof LayerGroup) {
-      layer.getChildren().forEach(childLayer => {
+      layer.getChildren().forEach((childLayer) => {
         dispatch(setLayerVisibility(childLayer.getId(), makeVisible));
       });
     }
@@ -614,8 +614,6 @@ export function setLayerQuery(id: string, query: Query) {
 }
 
 export function setLayerParent(id: string, parent: string | undefined) {
-  console.log('layerId', id);
-  console.log('parent', parent);
   return {
     type: UPDATE_LAYER_PROP,
     id,
