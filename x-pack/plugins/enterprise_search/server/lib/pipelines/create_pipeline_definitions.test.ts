@@ -76,6 +76,20 @@ describe('formatMlPipelineBody util function', () => {
             },
             model_id: modelId,
             target_field: `ml.inference.${destField}`,
+            on_failure: [
+              {
+                append: {
+                  field: '_source._ingest.inference_errors',
+                  value: [
+                    {
+                      pipeline: pipelineName,
+                      message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
+                      timestamp: '{{{ _ingest.timestamp }}}'
+                    },
+                  ],
+                },
+              },
+            ],
           },
         },
         {
@@ -137,40 +151,6 @@ describe('formatMlPipelineBody util function', () => {
 
   it('should insert a placeholder if model has no input fields', async () => {
     modelInputField = 'MODEL_INPUT_FIELD';
-    const expectedResult = {
-      description: '',
-      processors: [
-        {
-          remove: {
-            field: `ml.inference.${destField}`,
-            ignore_missing: true,
-          },
-        },
-        {
-          inference: {
-            field_map: {
-              [sourceField]: modelInputField,
-            },
-            model_id: modelId,
-            target_field: `ml.inference.${destField}`,
-          },
-        },
-        {
-          append: {
-            field: '_source._ingest.processors',
-            value: [
-              {
-                model_version: modelVersion,
-                pipeline: pipelineName,
-                processed_timestamp: '{{{ _ingest.timestamp }}}',
-                types: modelTypes,
-              },
-            ],
-          },
-        },
-      ],
-      version: 1,
-    };
     const mockResponse = {
       count: 1,
       trained_model_configs: [
@@ -193,7 +173,17 @@ describe('formatMlPipelineBody util function', () => {
       destField,
       mockClient as unknown as ElasticsearchClient
     );
-    expect(actualResult).toEqual(expectedResult);
+    expect(actualResult).toEqual(expect.objectContaining({
+      processors: expect.arrayContaining([
+        {
+          inference: expect.objectContaining({
+            field_map: {
+              [sourceField]: modelInputField,
+            }
+          })
+        }
+      ])
+    }));
     expect(mockClient.ml.getTrainedModels).toHaveBeenCalledTimes(1);
   });
 });
