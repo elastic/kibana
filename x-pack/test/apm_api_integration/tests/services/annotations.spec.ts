@@ -108,7 +108,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         expect(err.res.status).to.be(400);
       });
 
-      it('fails with a 400 bad request if data is invalid', async () => {
+      it('fails with a 400 bad request if timestamp is invalid', async () => {
         const invalidTimestampErr = await expectToReject<ApmApiError>(() =>
           // @ts-expect-error
           createAnnotation({
@@ -118,7 +118,9 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         );
 
         expect(invalidTimestampErr.res.status).to.be(400);
+      });
 
+      it('fails with a 400 bad request if data is invalid', async () => {
         const err = await expectToReject<ApmApiError>(() =>
           // @ts-expect-error
           createAnnotation({

@@ -10,7 +10,7 @@ import { PrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ApmApiError, ApmApiSupertest } from '../../../common/apm_api_supertest';
-import { expectToReject } from 'x-pack/test/apm_api_integration/common/utils/expect_to_reject';
+import { expectToReject } from '../../../common/utils/expect_to_reject';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
