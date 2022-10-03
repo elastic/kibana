@@ -11,6 +11,7 @@ import { EuiText, EuiSpacer, EuiInMemoryTable, EuiPanel, EuiLoadingContent } fro
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { FindRulesReferencedByExceptionsListProp } from '../../../../../detections/containers/detection_engine/rules';
 import * as i18n from './translations';
 import { getSharedListsTableColumns } from '../utils';
 import { useFindExceptionListReferences } from '../../../logic/use_find_references';
@@ -49,7 +50,7 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
 
   useEffect(() => {
     if (fetchReferences != null) {
-      const listsToQuery = !listsToFetch.length
+      const listsToQuery: FindRulesReferencedByExceptionsListProp[] = !listsToFetch.length
         ? [{ namespaceType: 'single' }, { namespaceType: 'agnostic' }]
         : listsToFetch.map(({ id, list_id: listId, namespace_type: namespaceType }) => ({
             id,
@@ -81,7 +82,22 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
   const selectionValue = {
     onSelectionChange: (selection: ExceptionListRuleReferencesSchema[]) => {
       if (onListSelectionChange != null) {
-        onListSelectionChange(selection.map(({ referenced_rules: _, ...rest }) => ({ ...rest })));
+        onListSelectionChange(
+          selection.map(
+            ({
+              referenced_rules: _,
+              namespace_type: namespaceType,
+              os_types: osTypes,
+              tags,
+              ...rest
+            }) => ({
+              ...rest,
+              namespace_type: namespaceType ?? 'single',
+              os_types: osTypes ?? [],
+              tags: tags ?? [],
+            })
+          )
+        );
       }
     },
     initialSelected: [],
