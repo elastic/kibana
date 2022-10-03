@@ -11,7 +11,7 @@ import { PackageInfo } from '@kbn/config';
 import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import { UiPlugins } from '../../plugins';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getThemeTag } from './get_theme_tag';

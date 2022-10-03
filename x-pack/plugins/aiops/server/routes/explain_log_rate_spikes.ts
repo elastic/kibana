@@ -52,8 +52,10 @@ import {
 
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
-const PROGRESS_STEP_P_VALUES = 0.6;
-const PROGRESS_STEP_HISTOGRAMS = 0.2;
+const PROGRESS_STEP_P_VALUES = 0.5;
+const PROGRESS_STEP_GROUPING = 0.1;
+const PROGRESS_STEP_HISTOGRAMS = 0.1;
+const PROGRESS_STEP_HISTOGRAMS_GROUPS = 0.1;
 
 export const defineExplainLogRateSpikesRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -258,7 +260,35 @@ export const defineExplainLogRateSpikesRoute = (
           // Still continue the analysis even if loading the overall histogram fails.
         }
 
+        function pushHistogramDataLoadingState() {
+          push(
+            updateLoadingStateAction({
+              ccsWarning: false,
+              loaded,
+              loadingState: i18n.translate(
+                'xpack.aiops.explainLogRateSpikes.loadingState.loadingHistogramData',
+                {
+                  defaultMessage: 'Loading histogram data.',
+                }
+              ),
+            })
+          );
+        }
+
         if (groupingEnabled) {
+          push(
+            updateLoadingStateAction({
+              ccsWarning: false,
+              loaded,
+              loadingState: i18n.translate(
+                'xpack.aiops.explainLogRateSpikes.loadingState.groupingResults',
+                {
+                  defaultMessage: 'Transforming significant field/value pairs into groups.',
+                }
+              ),
+            })
+          );
+
           // To optimize the `frequent_items` query, we identify duplicate change points by count attributes.
           // Note this is a compromise and not 100% accurate because there could be change points that
           // have the exact same counts but still don't co-occur.
@@ -425,6 +455,10 @@ export const defineExplainLogRateSpikesRoute = (
                 push(addChangePointsGroupAction(changePointGroups));
               }
 
+              loaded += PROGRESS_STEP_GROUPING;
+
+              pushHistogramDataLoadingState();
+
               await asyncForEach(changePointGroups, async (cpg) => {
                 if (overallTimeSeries !== undefined) {
                   const histogramQuery = {
@@ -500,6 +534,8 @@ export const defineExplainLogRateSpikesRoute = (
           }
         }
 
+        loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
+
         // time series filtered by fields
         if (changePoints && overallTimeSeries !== undefined) {
           await asyncForEach(changePoints, async (cp) => {
@@ -567,18 +603,7 @@ export const defineExplainLogRateSpikesRoute = (
               const { fieldName, fieldValue } = cp;
 
               loaded += (1 / changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
-              push(
-                updateLoadingStateAction({
-                  ccsWarning: false,
-                  loaded,
-                  loadingState: i18n.translate(
-                    'xpack.aiops.explainLogRateSpikes.loadingState.loadingHistogramData',
-                    {
-                      defaultMessage: 'Loading histogram data.',
-                    }
-                  ),
-                })
-              );
+              pushHistogramDataLoadingState();
               push(
                 addChangePointsHistogramAction([
                   {
