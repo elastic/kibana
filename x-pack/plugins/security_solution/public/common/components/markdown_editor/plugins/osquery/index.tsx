@@ -278,7 +278,7 @@ const RunOsqueryButtonRenderer = ({
       {showFlyout && (
         <OsqueryFlyout
           defaultValues={{
-            alertIds: [alertId],
+            ...(alertId ? { alertIds: [alertId] } : {}),
             query: configuration.query,
             ecs_mapping: configuration.ecs_mapping,
             queryField: false,
