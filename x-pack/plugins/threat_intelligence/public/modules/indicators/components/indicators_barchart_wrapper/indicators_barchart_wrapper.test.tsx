@@ -10,9 +10,12 @@ import { render } from '@testing-library/react';
 import { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
+import {
+  CHART_UPDATE_PROGRESS_TEST_ID,
+  IndicatorsBarChartWrapper,
+} from './indicators_barchart_wrapper';
 import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
-import { useFilters } from '../../../query_bar/hooks/use_filters';
+import moment from 'moment';
 
 jest.mock('../../../query_bar/hooks/use_filters');
 
@@ -31,26 +34,67 @@ const mockIndexPattern: DataView = {
 
 const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
 
-const stub = () => {};
-
 describe('<IndicatorsBarChartWrapper />', () => {
-  beforeEach(() => {
-    (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
-      filters: [],
-      filterQuery: { language: 'kuery', query: '' },
-      filterManager: {} as any,
-      handleSavedQuery: stub,
-      handleSubmitQuery: stub,
-      handleSubmitTimeRange: stub,
+  describe('when not loading or refetching', () => {
+    it('should render barchart and field selector dropdown', () => {
+      const component = render(
+        <TestProvidersComponent>
+          <IndicatorsBarChartWrapper
+            dateRange={{ max: moment(), min: moment() }}
+            series={[]}
+            field=""
+            onFieldChange={jest.fn()}
+            indexPattern={mockIndexPattern}
+            timeRange={mockTimeRange}
+            isFetching={false}
+            isLoading={false}
+          />
+        </TestProvidersComponent>
+      );
+
+      expect(component.asFragment()).toMatchSnapshot();
     });
   });
-  it('should render barchart and field selector dropdown', () => {
-    const component = render(
-      <TestProvidersComponent>
-        <IndicatorsBarChartWrapper indexPattern={mockIndexPattern} timeRange={mockTimeRange} />
-      </TestProvidersComponent>
-    );
 
-    expect(component).toMatchSnapshot();
+  describe('when loading for the first time', () => {
+    it('should render progress indicator', () => {
+      const component = render(
+        <TestProvidersComponent>
+          <IndicatorsBarChartWrapper
+            dateRange={{ max: moment(), min: moment() }}
+            series={[]}
+            field=""
+            onFieldChange={jest.fn()}
+            indexPattern={mockIndexPattern}
+            timeRange={mockTimeRange}
+            isFetching={false}
+            isLoading={true}
+          />
+        </TestProvidersComponent>
+      );
+
+      expect(component.queryByRole('progressbar')).toBeInTheDocument();
+    });
+  });
+
+  describe('when updating the data', () => {
+    it('should render progress indicator', () => {
+      const component = render(
+        <TestProvidersComponent>
+          <IndicatorsBarChartWrapper
+            dateRange={{ max: moment(), min: moment() }}
+            series={[]}
+            field=""
+            onFieldChange={jest.fn()}
+            indexPattern={mockIndexPattern}
+            timeRange={mockTimeRange}
+            isFetching={true}
+            isLoading={false}
+          />
+        </TestProvidersComponent>
+      );
+
+      expect(component.queryByTestId(CHART_UPDATE_PROGRESS_TEST_ID)).toBeInTheDocument();
+    });
   });
 });
