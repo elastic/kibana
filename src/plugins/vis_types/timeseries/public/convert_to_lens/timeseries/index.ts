@@ -101,6 +101,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
     const isReferenceLine =
       metricsColumns.length === 1 && metricsColumns[0].operationType === 'static_value';
 
+    // only static value without split is supported
+    if (isReferenceLine && bucketsColumns.length) {
+      return null;
+    }
+
     const layerId = uuid();
     extendedLayers[layerIdx] = {
       indexPatternId,
