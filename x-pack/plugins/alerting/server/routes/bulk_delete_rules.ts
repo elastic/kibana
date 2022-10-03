@@ -10,20 +10,24 @@ import { RouteOptions } from '.';
 import { BASE_ALERTING_API_PATH } from '../types';
 import { handleDisabledApiKeysError, verifyAccessAndContext } from './lib';
 
-const paramsSchema = schema.object({ ids: schema.arrayOf(schema.string(), { minSize: 1 }) });
-
 export const bulkDeleteRulesRoute = ({ router, licenseState }: RouteOptions) => {
-  router.delete(
+  router.patch(
     {
       path: `${BASE_ALERTING_API_PATH}/rules/_bulk_delete`,
-      validate: { params: paramsSchema },
+      validate: {
+        body: schema.object({
+          filter: schema.maybe(schema.string()),
+          ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+        }),
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async (context, req, res) => {
           const rulesClient = (await context.alerting).getRulesClient();
-          const { ids } = req.params;
-          return res.noContent();
+          const { filter, ids } = req.body;
+          const result = await rulesClient.bulkDeleteRules({ filter, ids });
+          return res.ok({ body: { result } });
         })
       )
     )

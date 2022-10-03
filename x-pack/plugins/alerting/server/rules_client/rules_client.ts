@@ -429,7 +429,7 @@ const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
 
-const MAX_RULES_NUMBER_FOR_BULK_EDIT = 10000;
+const MAX_RULES_NUMBER_FOR_BULK_OPERATION = 10000;
 const API_KEY_GENERATE_CONCURRENCY = 50;
 const RULE_TYPE_CHECKS_CONCURRENCY = 50;
 
@@ -1687,6 +1687,140 @@ export class RulesClient {
     );
   }
 
+  private getAuthorizationFilter = async () => {
+    try {
+      const authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Rule,
+        alertingAuthorizationFilterOpts
+      );
+      return authorizationTuple.filter;
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.BULK_EDIT,
+          error,
+        })
+      );
+      throw error;
+    }
+  };
+
+  public bulkDeleteRules = async ({ filter, ids }: { filter?: string; ids?: string[] }) => {
+    if (ids && filter) {
+      throw Boom.badRequest(
+        "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
+      );
+    }
+
+    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
+    const authorizationFilter = await this.getAuthorizationFilter();
+
+    const kueryNodeFilterWithAuth =
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode]) // think how to get rid
+        : kueryNodeFilter;
+
+    const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
+      RawRule,
+      RuleBulkEditAggregation
+    >({
+      filter: kueryNodeFilterWithAuth,
+      page: 1,
+      perPage: 0,
+      type: 'alert',
+      aggs: {
+        alertTypeId: {
+          multi_terms: {
+            terms: [
+              { field: 'alert.attributes.alertTypeId' },
+              { field: 'alert.attributes.consumer' },
+            ],
+          },
+        },
+      },
+    });
+
+    if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
+      throw Boom.badRequest(
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk edit`
+      );
+    }
+
+    const buckets = aggregations?.alertTypeId.buckets;
+
+    if (buckets === undefined) {
+      throw Error('No rules found for bulk edit');
+    }
+
+    await pMap(
+      buckets,
+      async ({ key: [ruleType, consumer] }) => {
+        this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
+
+        try {
+          await this.authorization.ensureAuthorized({
+            ruleTypeId: ruleType,
+            consumer,
+            operation: WriteOperations.BulkEdit,
+            entity: AlertingAuthorizationEntity.Rule,
+          });
+        } catch (error) {
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.BULK_EDIT,
+              error,
+            })
+          );
+          throw error;
+        }
+      },
+      { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+    );
+
+    // add retry if configs
+    const rulesFinder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+        }
+      );
+
+    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+    const apiKeysToInvalidate: string[] = [];
+    const taskIds: string[] = [];
+
+    for await (const response of rulesFinder.find()) {
+      await pMap(
+        response.saved_objects,
+        async (rule) => {
+          if (rule.attributes.apiKey) {
+            apiKeysToInvalidate.push(rule.attributes.apiKey);
+          }
+          rules.push(rule);
+
+          // populate task ids for task manager cleaning
+          if (rule.attributes.scheduledTaskId) {
+            taskIds.push(rule.attributes.scheduledTaskId);
+          }
+        },
+        { concurrency: API_KEY_GENERATE_CONCURRENCY }
+      );
+    }
+    const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules, {}); // do we need force/refresh options here?
+    // TODO: delete task from task manager
+
+    // TODO: delete api keys is it enough?
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: apiKeysToInvalidate },
+      this.logger,
+      this.unsecuredSavedObjectsClient
+    );
+    return result;
+  };
+
   public async bulkEdit<Params extends RuleTypeParams>(
     options: BulkEditOptions<Params>
   ): Promise<{
@@ -1747,9 +1881,9 @@ export class RulesClient {
       },
     });
 
-    if (total > MAX_RULES_NUMBER_FOR_BULK_EDIT) {
+    if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
       throw Boom.badRequest(
-        `More than ${MAX_RULES_NUMBER_FOR_BULK_EDIT} rules matched for bulk edit`
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk edit`
       );
     }
     const buckets = aggregations?.alertTypeId.buckets;
