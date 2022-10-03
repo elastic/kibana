@@ -238,7 +238,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should snooze the rule', async () => {
-        const snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
 
         const snoozeIndefinite = await testSubjects.find('ruleSnoozeIndefiniteApply');
@@ -247,6 +247,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
         });
+
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozedIndefinitely');
+        await snoozeBadge.click();
+
+        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
+        await snoozeCancel.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should snooze the rule for a set duration', async () => {
