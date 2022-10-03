@@ -26,8 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         .set('kbn-xsrf', 'foo')
         .send(getTestActionData())
         .expect(200);
-      await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('connectorsTab');
+      await pageObjects.common.navigateToApp('triggersActionsConnectors');
       objectRemover.add(createdAction.id, 'action', 'actions');
     });
 
@@ -285,7 +284,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         connector_type_id: '.slack',
       })
       .expect(200);
-    await testSubjects.click('connectorsTab');
     return createdAction;
   }
 
@@ -303,7 +301,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         secrets: {},
       })
       .expect(200);
-    await testSubjects.click('connectorsTab');
     return createdAction;
   }
 
