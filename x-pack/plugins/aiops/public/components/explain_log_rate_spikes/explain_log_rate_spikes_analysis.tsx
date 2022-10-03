@@ -172,7 +172,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
-      {errors.length > 0 && (
+      {errors.length > 0 ? (
         <>
           <EuiCallOut
             title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
@@ -198,7 +198,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           </EuiCallOut>
           <EuiSpacer size="xs" />
         </>
-      )}
+      ) : null}
       {showSpikeAnalysisTable && foundGroups && (
         <EuiFormRow display="columnCompressedSwitch" label={groupResultsMessage}>
           <EuiSwitch
