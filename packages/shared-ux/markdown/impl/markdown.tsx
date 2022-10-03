@@ -21,14 +21,14 @@ export const Markdown = ({ initialContent, ariaLabelContent, readonly }: Markdow
 
   if (readonly) {
     return (
-        <EuiMarkdownEditor
-          readOnly
-          aria-label={ariaLabelContent ?? 'markdown component'}
-          value={value}
-          onChange={setValue}
-          height='full'
-        />
-    )
+      <EuiMarkdownEditor
+        readOnly
+        aria-label={ariaLabelContent ?? 'markdown component'}
+        value={value}
+        onChange={setValue}
+        height="full"
+      />
+    );
   }
 
   return (
@@ -38,7 +38,7 @@ export const Markdown = ({ initialContent, ariaLabelContent, readonly }: Markdow
       initialViewMode="viewing"
       value={value}
       onChange={setValue}
-      height='full'
+      height="full"
     />
   );
 };
