@@ -6,6 +6,8 @@
  */
 
 import { defineConfig } from 'cypress';
+import { some } from 'lodash';
+import del from 'del';
 import { plugin } from './cypress/plugins';
 
 module.exports = defineConfig({
@@ -29,6 +31,17 @@ module.exports = defineConfig({
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
       plugin(on, config);
+      on('after:spec', (spec, results) => {
+        // Delete videos that have no failures or retries
+        if (results && results.video) {
+          const failures = some(results.tests, (test) => {
+            return some(test.attempts, { state: 'failed' });
+          });
+          if (!failures) {
+            return del(results.video);
+          }
+        }
+      });
     },
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',
