@@ -85,7 +85,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
 
     // / Endpoint Radio Options (NGAV and EDRs)
     const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('NGAV');
-    const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('ALL_EVENTS');
+    const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('INTERACTIVE_ONLY');
     const [selectedEnvironment, setSelectedEnvironment] = useState<Environment>('endpoint');
     const initialRender = useRef(true);
 
