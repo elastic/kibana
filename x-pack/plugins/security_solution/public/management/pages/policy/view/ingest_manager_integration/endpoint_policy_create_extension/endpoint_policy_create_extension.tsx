@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiCallOut,
   EuiLink,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -337,7 +338,11 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <HelpTextWithPadding>
                   <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeComprehensiveInfo"
-                    defaultMessage="Monitors and collects session data from all process executions. "
+                    defaultMessage="Monitors and collects process data from all executions, including those launched by daemon processes, like {nginx} or {postgres}"
+                    values={{
+                      nginx: <EuiCode>{'nginx'}</EuiCode>,
+                      postgres: <EuiCode>{'postgres'}</EuiCode>,
+                    }}
                   />
                 </HelpTextWithPadding>
               }
@@ -351,7 +356,11 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <HelpTextWithPadding>
                   <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeInteractiveOnlyInfo"
-                    defaultMessage="Monitors and collects session data from interactive sessions only. "
+                    defaultMessage="Monitors and collects session data from interactive sessions, like {ssh} or {telnet}"
+                    values={{
+                      ssh: <EuiCode>{'ssh'}</EuiCode>,
+                      telnet: <EuiCode>{'telnet'}</EuiCode>,
+                    }}
                   />
                 </HelpTextWithPadding>
               }
