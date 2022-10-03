@@ -175,9 +175,18 @@ export class TrustedAppValidator extends BaseValidator {
     return item.listId === ENDPOINT_TRUSTED_APPS_LIST_ID;
   }
 
+  protected async validateHasWritePrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canWriteTrustedApplications');
+  }
+
+  protected async validateHasReadPrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canReadTrustedApplications');
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
+    await this.validateHasWritePrivilege();
     await this.validateCanManageEndpointArtifacts();
     await this.validateTrustedAppData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
@@ -187,26 +196,32 @@ export class TrustedAppValidator extends BaseValidator {
   }
 
   async validatePreDeleteItem(): Promise<void> {
+    await this.validateHasWritePrivilege();
     await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreGetOneItem(): Promise<void> {
+    await this.validateHasReadPrivilege();
     await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreMultiListFind(): Promise<void> {
+    await this.validateHasReadPrivilege();
     await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreExport(): Promise<void> {
+    await this.validateHasReadPrivilege();
     await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreSingleListFind(): Promise<void> {
+    await this.validateHasReadPrivilege();
     await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreGetListSummary(): Promise<void> {
+    await this.validateHasReadPrivilege();
     await this.validateCanManageEndpointArtifacts();
   }
 
@@ -216,6 +231,7 @@ export class TrustedAppValidator extends BaseValidator {
   ): Promise<UpdateExceptionListItemOptions> {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
+    await this.validateHasWritePrivilege();
     await this.validateCanManageEndpointArtifacts();
     await this.validateTrustedAppData(updatedItem);
 
