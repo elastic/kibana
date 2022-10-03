@@ -20,9 +20,9 @@ export const getAdditionalScreenReaderOnlyContext = ({
 };
 
 export const convertNumericArrayToStringArray = (
-  value: string | (string | number)[]
+  value: string | Array<string | number>
 ): string | string[] => {
-  if (Array.isArray(values)) {
-    return values.map((item) => String(item));
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item));
   } else return value;
 };

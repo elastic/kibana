@@ -344,11 +344,12 @@ export const addContentToTimeline = ({
 };
 
 export const convertIsOneOfQueryStringArrayToDisplayValue = (
-  value: string | number | (string | number)[]
-): string | undefined => {
+  value: string | number | Array<string | number>
+): string | number => {
   if (isStringOrNumberArray(value)) {
-    return '(' + value.join(' OR ') + ')';
+    return `( ${value.join(' OR ')} )`;
   }
+  return value;
 };
 
 function isStringOrNumberArray(

@@ -26,8 +26,8 @@ import {
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
-import { DataProvider, DataProvidersAnd, IS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
-import type { DataProviderType } from './data_provider';
+import type { DataProvider, DataProvidersAnd } from './data_provider';
+import { DataProviderType, IS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
@@ -330,6 +330,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [
         browserFields,
         dataProvider,
+        displayValue,
         group,
         handleDataProviderEdited,
         handleDeleteProvider,
