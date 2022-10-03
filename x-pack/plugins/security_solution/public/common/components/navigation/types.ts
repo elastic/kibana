@@ -68,7 +68,7 @@ export interface NavTab {
 }
 export const securityNavKeys = [
   SecurityPageName.alerts,
-  SecurityPageName.actionHistory,
+  SecurityPageName.responseActionsHistory,
   SecurityPageName.blocklist,
   SecurityPageName.detectionAndResponse,
   SecurityPageName.case,

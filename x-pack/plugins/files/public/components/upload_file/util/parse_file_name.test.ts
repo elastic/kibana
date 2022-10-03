@@ -11,28 +11,24 @@ describe('parseFileName', () => {
   test('file.png', () => {
     expect(parseFileName('file.png')).toEqual({
       name: 'file',
-      mime: 'image/png',
     });
   });
 
   test('  Something_*  really -=- strange.abc.wav', () => {
     expect(parseFileName('  Something_*  really -=- strange.abc.wav')).toEqual({
       name: 'Something__  really ___ strange_abc',
-      mime: 'audio/wave',
     });
   });
 
   test('!@#$%^&*()', () => {
     expect(parseFileName('!@#$%^&*()')).toEqual({
       name: '__________',
-      mime: undefined,
     });
   });
 
   test('reallylong.repeat(100).dmg', () => {
     expect(parseFileName('reallylong'.repeat(100) + '.dmg')).toEqual({
       name: 'reallylong'.repeat(100).slice(0, 256),
-      mime: 'application/x-apple-diskimage',
     });
   });
 });
