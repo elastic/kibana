@@ -1550,20 +1550,18 @@ export class SavedObjectsRepository {
       objects,
       options: { ...options, namespace },
     });
-    const resolvedObjects = await Promise.all(
-      bulkResults.map<Promise<SavedObjectsResolveResponse<T>>>(async (result) => {
-        // extract payloads from saved object errors
-        if (isBulkResolveError(result)) {
-          const errorResult = result as InternalBulkResolveError;
-          const { type, id, error } = errorResult;
-          return {
-            saved_object: { type, id, error: errorContent(error) } as unknown as SavedObject<T>,
-            outcome: 'exactMatch',
-          };
-        }
-        return result;
-      })
-    );
+    const resolvedObjects = bulkResults.map<SavedObjectsResolveResponse<T>>((result) => {
+      // extract payloads from saved object errors
+      if (isBulkResolveError(result)) {
+        const errorResult = result as InternalBulkResolveError;
+        const { type, id, error } = errorResult;
+        return {
+          saved_object: { type, id, error: errorContent(error) } as unknown as SavedObject<T>,
+          outcome: 'exactMatch',
+        };
+      }
+      return result;
+    });
     return { resolved_objects: resolvedObjects };
   }
 
