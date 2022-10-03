@@ -14,13 +14,15 @@ import {
   EuiText,
   EuiButton,
   EuiTextColor,
+  EuiImage,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { useNavigation } from '../../lib/kibana';
 import * as i18n from './translations';
+import paywallPng from '../../images/entity_paywall.png';
 
 const PaywallDiv = styled.div`
-  max-width: 85%;
+  max-width: 75%;
   margin: 0 auto;
   .euiCard__betaBadgeWrapper {
     .euiCard__betaBadge {
@@ -31,8 +33,15 @@ const PaywallDiv = styled.div`
     padding: 0 15%;
   }
 `;
+const StyledEuiCard = styled(EuiCard)`
+  span.euiTitle {
+    max-width: 540px;
+    display: block;
+    margin: 0 auto;
+  }
+`;
 
-export const Paywall = memo(({ featureDescription }: { featureDescription?: string }) => {
+export const Paywall = memo(({ heading }: { heading?: string }) => {
   const { getAppUrl, navigateTo } = useNavigation();
   const subscriptionUrl = getAppUrl({
     appId: 'management',
@@ -43,25 +52,24 @@ export const Paywall = memo(({ featureDescription }: { featureDescription?: stri
   }, [navigateTo, subscriptionUrl]);
   return (
     <PaywallDiv>
-      <EuiCard
+      <StyledEuiCard
         data-test-subj="platinumCard"
         betaBadgeProps={{ label: i18n.PLATINUM }}
         icon={<EuiIcon size="xl" type="lock" />}
         display="subdued"
         title={
           <h3>
-            <strong>{i18n.UPGRADE_CTA}</strong>
+            <strong>{heading}</strong>
           </h3>
         }
         description={false}
+        paddingSize="xl"
       >
         <EuiFlexGroup className="platinumCardDescription" direction="column" gutterSize="none">
           <EuiText>
             <EuiFlexItem>
               <p>
-                <EuiTextColor color="subdued">
-                  {i18n.UPGRADE_MESSAGE(featureDescription)}
-                </EuiTextColor>
+                <EuiTextColor color="subdued">{i18n.UPGRADE_MESSAGE}</EuiTextColor>
               </p>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -73,7 +81,12 @@ export const Paywall = memo(({ featureDescription }: { featureDescription?: stri
             </EuiFlexItem>
           </EuiText>
         </EuiFlexGroup>
-      </EuiCard>
+      </StyledEuiCard>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiImage alt={i18n.UPGRADE_MESSAGE} src={paywallPng} size="fullWidth" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </PaywallDiv>
   );
 });
