@@ -138,9 +138,7 @@ describe('Policy Form Layout', () => {
     it('should display beta badge', async () => {
       await asyncActions;
       policyFormLayoutView.update();
-      const saveButton = policyFormLayoutView.find(
-        'EuiBetaBadge'
-      );
+      const saveButton = policyFormLayoutView.find('EuiBetaBadge');
       expect(saveButton).toHaveLength(1);
       expect(saveButton.text()).toEqual('beta');
     });
