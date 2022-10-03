@@ -11,14 +11,16 @@ import { difference, uniq } from 'lodash';
 
 import type { Agent } from '../../types';
 
-import { appContextService } from '../app_context';
-
 import { ActionRunner } from './action_runner';
 
 import { bulkUpdateAgents } from './crud';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
-import { bulkCreateAgentActionResults, createAgentAction } from './actions';
+import {
+  createErrorActionResults,
+  bulkCreateAgentActionResults,
+  createAgentAction,
+} from './actions';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -90,12 +92,12 @@ export async function updateTagsBatch(
       data: {
         tags: getNewTags(agent),
       },
-    }))
+    })),
+    errors
   );
 
   const actionId = options.actionId ?? uuid();
   const total = options.total ?? givenAgents.length;
-  const errorCount = Object.keys(errors).length;
 
   // creating an action doc so that update tags  shows up in activity
   await createAgentAction(esClient, {
@@ -113,23 +115,12 @@ export async function updateTagsBatch(
     }))
   );
 
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping ${errorCount} agents, as failed validation (cannot modified tags on hosted agents)`
-      );
-
-    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(errors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: errors[agentId].message,
-      }))
-    );
-  }
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'cannot modified tags on hosted agents'
+  );
 
   return { actionId };
 }
