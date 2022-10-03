@@ -73,6 +73,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -244,6 +249,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "guided-setup-state",
                       },
                     },
                     Object {
@@ -427,6 +437,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -606,6 +621,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "guided-setup-state",
                       },
                     },
                     Object {
@@ -835,6 +855,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -1017,6 +1042,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "guided-setup-state",
                       },
                     },
                     Object {

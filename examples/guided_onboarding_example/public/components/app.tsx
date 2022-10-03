@@ -23,6 +23,7 @@ import { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { StepTwo } from './step_two';
 import { StepOne } from './step_one';
+import { StepThree } from './step_three';
 import { Main } from './main';
 
 interface GuidedOnboardingExampleAppDeps {
@@ -59,6 +60,9 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
                 </Route>
                 <Route exact path="/stepTwo">
                   <StepTwo guidedOnboarding={guidedOnboarding} />
+                </Route>
+                <Route exact path="/stepThree">
+                  <StepThree guidedOnboarding={guidedOnboarding} />
                 </Route>
               </Switch>
             </Router>

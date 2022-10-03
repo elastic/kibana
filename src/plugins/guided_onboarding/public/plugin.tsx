@@ -20,7 +20,7 @@ import {
 } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   ClientConfigType,
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,

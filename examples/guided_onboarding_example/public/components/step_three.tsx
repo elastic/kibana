@@ -17,11 +17,11 @@ import {
   EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 
-interface StepTwoProps {
+interface StepThreeProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
-export const StepTwo = (props: StepTwoProps) => {
+export const StepThree = (props: StepThreeProps) => {
   const {
     guidedOnboarding: { guidedOnboardingApi },
   } = props;
@@ -30,7 +30,7 @@ export const StepTwo = (props: StepTwoProps) => {
 
   useEffect(() => {
     const subscription = guidedOnboardingApi
-      ?.isGuideStepActive$('search', 'browse_docs')
+      ?.isGuideStepActive$('search', 'search_experience')
       .subscribe((isStepActive) => {
         setIsTourStepOpen(isStepActive);
       });
@@ -43,8 +43,8 @@ export const StepTwo = (props: StepTwoProps) => {
         <EuiTitle>
           <h2>
             <FormattedMessage
-              id="guidedOnboardingExample.stepTwo.title"
-              defaultMessage="Example step 2"
+              id="guidedOnboardingExample.stepThree.title"
+              defaultMessage="Example step 3"
             />
           </h2>
         </EuiTitle>
@@ -53,9 +53,9 @@ export const StepTwo = (props: StepTwoProps) => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="guidedOnboardingExample.guidesSelection.stepTwo.explanation"
+              id="guidedOnboardingExample.guidesSelection.stepThree.explanation"
               defaultMessage="The code on this page is listening to the guided setup state using an Observable subscription. If the state is set to
-              Search guide, step Browse documents, a EUI tour will be displayed, pointing to the button below."
+              Search guide, step Search experience, a EUI tour will be displayed, pointing to the button below."
             />
           </p>
         </EuiText>
@@ -63,7 +63,7 @@ export const StepTwo = (props: StepTwoProps) => {
         <EuiTourStep
           content={
             <EuiText>
-              <p>Click this button to complete step 2.</p>
+              <p>Click this button to complete step 3.</p>
             </EuiText>
           }
           isStepOpen={isTourStepOpen}
@@ -73,15 +73,15 @@ export const StepTwo = (props: StepTwoProps) => {
           }}
           step={1}
           stepsTotal={1}
-          title="Step Browse documents"
+          title="Step Build search experience"
           anchorPosition="rightUp"
         >
           <EuiButton
             onClick={async () => {
-              await guidedOnboardingApi?.completeGuideStep('search', 'browse_docs');
+              await guidedOnboardingApi?.completeGuideStep('search', 'search_experience');
             }}
           >
-            Complete step 2
+            Complete step 3
           </EuiButton>
         </EuiTourStep>
       </EuiPageContentBody>

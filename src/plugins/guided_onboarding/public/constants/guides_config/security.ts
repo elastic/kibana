@@ -6,20 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { GuideConfig } from '../types';
+import type { GuideConfig } from '../../types';
 
-export const observabilityConfig: GuideConfig = {
-  title: 'Observe my infrastructure',
+export const securityConfig: GuideConfig = {
+  title: 'Get started with SIEM',
   description:
-    'The foundation of seeing Elastic in action, is adding you own data. Follow links to our documents below to learn more.',
-  docs: {
-    text: 'Observability 101 Documentation',
-    url: 'example.com',
-  },
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
   steps: [
     {
       id: 'add_data',
-      title: 'Add data',
+      title: 'Add and view your data',
       descriptionList: [
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
@@ -27,8 +23,8 @@ export const observabilityConfig: GuideConfig = {
       ],
     },
     {
-      id: 'view_dashboard',
-      title: 'View Kubernetes metrics',
+      id: 'rules',
+      title: 'Turn on rules',
       descriptionList: [
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
@@ -36,8 +32,17 @@ export const observabilityConfig: GuideConfig = {
       ],
     },
     {
-      id: 'tour_observability',
-      title: 'Tour Elastic Observability',
+      id: 'alerts',
+      title: 'View Alerts',
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
+    },
+    {
+      id: 'cases',
+      title: 'Cases and investigations',
       descriptionList: [
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
