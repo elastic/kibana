@@ -20,8 +20,6 @@
  * eq([1, 2], [1, 2]) // returns [true, true]
  */
 
-module.exports = { eq };
-
 function eq(a, b) {
   if (b == null) {
     throw new Error('Missing b value');
@@ -38,3 +36,4 @@ function eq(a, b) {
 
   return a === b;
 }
+module.exports = { eq };

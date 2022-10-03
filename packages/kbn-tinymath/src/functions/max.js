@@ -17,8 +17,6 @@
  * max([1, 9], 4, [3, 5]) // returns [max([1, 4, 3]), max([9, 4, 5])] = [4, 9]
  */
 
-module.exports = { max };
-
 function max(...args) {
   if (args.length === 1) {
     if (Array.isArray(args[0]))
@@ -36,3 +34,4 @@ function max(...args) {
     return Math.max(result, current);
   });
 }
+module.exports = { max };

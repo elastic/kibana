@@ -22,8 +22,6 @@ const changeOfBase = (a, b) => Math.log(a) / Math.log(b);
  * log([2, 4, 8, 16, 32], 2) // returns [1, 2, 3, 4, 5]
  */
 
-module.exports = { log };
-
 function log(a, b = Math.E) {
   if (b <= 0) throw new Error('Base out of range');
 
@@ -36,3 +34,4 @@ function log(a, b = Math.E) {
   if (a < 0) throw new Error('Must be greater than 0');
   return changeOfBase(a, b);
 }
+module.exports = { log };

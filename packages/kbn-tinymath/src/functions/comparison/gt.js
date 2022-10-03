@@ -20,8 +20,6 @@
  * gt([1, 2], [2, 1]) // returns [false, true]
  */
 
-module.exports = { gt };
-
 function gt(a, b) {
   if (b == null) {
     throw new Error('Missing b value');
@@ -38,3 +36,4 @@ function gt(a, b) {
 
   return a > b;
 }
+module.exports = { gt };

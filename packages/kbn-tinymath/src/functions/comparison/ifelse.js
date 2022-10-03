@@ -21,8 +21,6 @@
  * ifelse( 1 < 2, [1, 2, 3], [2, 3, 4]) // returns [1, 2, 3]
  */
 
-module.exports = { ifelse };
-
 function ifelse(cond, a, b) {
   if (typeof cond !== 'boolean') {
     throw Error('Condition clause is of the wrong type');
@@ -37,3 +35,4 @@ function ifelse(cond, a, b) {
 }
 
 ifelse.skipNumberValidation = true;
+module.exports = { ifelse };

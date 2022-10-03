@@ -22,8 +22,7 @@ const { gt } = require('./gt');
  * gte([1, 2], [1, 1]) // returns [true, true]
  */
 
-module.exports = { gte };
-
 function gte(a, b) {
   return eq(a, b) || gt(a, b);
 }
+module.exports = { gte };

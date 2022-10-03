@@ -22,11 +22,10 @@ const rounder = (a, b) => Math.round(a * Math.pow(10, b)) / Math.pow(10, b);
  * round([2.9234, 5.1234, 3.5234, 4.49234324], 2) // returns [2.92, 5.12, 3.52, 4.49]
  */
 
-module.exports = { round };
-
-function round(a, b = 0) {
+function round(a, b) {
   if (Array.isArray(a)) {
-    return a.map((a) => rounder(a, b));
+    return a.map((a) => rounder(a, b || 0));
   }
-  return rounder(a, b);
+  return rounder(a, b || 0);
 }
+module.exports = { round };

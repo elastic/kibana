@@ -22,8 +22,7 @@ const { lt } = require('./lt');
  * lte([1, 2], [1, 1]) // returns [true, false]
  */
 
-module.exports = { lte };
-
 function lte(a, b) {
   return eq(a, b) || lt(a, b);
 }
+module.exports = { lte };

@@ -20,8 +20,6 @@
  * lt([1, 2], [1, 2]) // returns [false, false]
  */
 
-module.exports = { lt };
-
 function lt(a, b) {
   if (b == null) {
     throw new Error('Missing b value');
@@ -38,3 +36,4 @@ function lt(a, b) {
 
   return a < b;
 }
+module.exports = { lt };
