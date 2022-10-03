@@ -119,6 +119,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'search:asyncSearchWaitForCompletionMs': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'courier:maxConcurrentShardRequests': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },

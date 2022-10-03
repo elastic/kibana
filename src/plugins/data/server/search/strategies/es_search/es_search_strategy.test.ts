@@ -16,6 +16,12 @@ import * as indexNotFoundException from '../../../../common/search/test_data/ind
 import { errors } from '@elastic/elasticsearch';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { firstValueFrom } from 'rxjs';
+import { UI_SETTINGS } from '../../..';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+
+const getMockUiSettingsClient = (config: Record<string, unknown>) => {
+  return { get: async (key: string) => config[key] } as IUiSettingsClient;
+};
 
 describe('ES search strategy', () => {
   const successBody = {
@@ -43,9 +49,9 @@ describe('ES search strategy', () => {
     }
 
     return {
-      uiSettingsClient: {
-        get: () => {},
-      },
+      uiSettingsClient: getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION]: 100,
+      }),
       esClient: { asCurrentUser: esClient },
     } as unknown as SearchStrategyDependencies;
   }

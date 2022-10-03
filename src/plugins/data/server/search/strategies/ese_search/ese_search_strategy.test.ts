@@ -14,6 +14,8 @@ import * as xContentParseException from '../../../../common/search/test_data/x_c
 import { SearchStrategyDependencies } from '../../types';
 import { enhancedEsSearchStrategyProvider } from './ese_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
+import { UI_SETTINGS } from '../../..';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 
 const mockAsyncResponse = {
   body: {
@@ -40,6 +42,10 @@ const mockRollupResponse = {
   },
 };
 
+const getMockUiSettingsClient = (config: Record<string, unknown>) => {
+  return { get: async (key: string) => config[key] } as IUiSettingsClient;
+};
+
 describe('ES search strategy', () => {
   const mockApiCaller = jest.fn();
   const mockGetCaller = jest.fn();
@@ -49,9 +55,9 @@ describe('ES search strategy', () => {
     debug: () => {},
   };
   const mockDeps = {
-    uiSettingsClient: {
-      get: jest.fn(),
-    },
+    uiSettingsClient: getMockUiSettingsClient({
+      [UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION]: 100,
+    }),
     esClient: {
       asCurrentUser: {
         asyncSearch: {

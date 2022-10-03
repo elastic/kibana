@@ -27,6 +27,7 @@ export interface UsageStats {
   'autocomplete:useTimeRange': boolean;
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
+  'search:asyncSearchWaitForCompletionMs': number;
   'visualization:visualize:legacyPieChartsLibrary': boolean;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'doc_table:legacy': boolean;

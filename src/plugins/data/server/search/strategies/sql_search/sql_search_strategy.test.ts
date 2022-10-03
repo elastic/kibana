@@ -13,7 +13,8 @@ import * as indexNotFoundException from '../../../../common/search/test_data/ind
 import { SearchStrategyDependencies } from '../../types';
 import { sqlSearchStrategyProvider } from './sql_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
-import { SqlSearchStrategyRequest } from '../../../../common';
+import { SqlSearchStrategyRequest, UI_SETTINGS } from '../../../../common';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 
 const mockSqlResponse = {
   body: {
@@ -22,6 +23,10 @@ const mockSqlResponse = {
     is_running: false,
     rows: [],
   },
+};
+
+const getMockUiSettingsClient = (config: Record<string, unknown>) => {
+  return { get: async (key: string) => config[key] } as IUiSettingsClient;
 };
 
 describe('SQL search strategy', () => {
@@ -43,9 +48,9 @@ describe('SQL search strategy', () => {
         },
       },
     },
-    uiSettingsClient: {
-      get: () => 100,
-    },
+    uiSettingsClient: getMockUiSettingsClient({
+      [UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION]: 100,
+    }),
     searchSessionsClient: createSearchSessionsClientMock(),
   } as unknown as SearchStrategyDependencies;
 
