@@ -71,7 +71,7 @@ Discover::
 Elastic Security::
 For the Elastic Security 8.4.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
-Lens & Visualizations::
+Graph::
 * Fixes the position of Add fields popover {kibana-pull}141040[#141040]
 * Fixes responsive styles of field manager {kibana-pull}140948[#140948]
 
