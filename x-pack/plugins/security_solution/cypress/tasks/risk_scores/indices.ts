@@ -22,16 +22,25 @@ export const createIndex = (options: {
 };
 
 export const deleteRiskScoreIndicies = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') => {
-  return cy.request({
-    method: 'post',
-    url: `${INDICES_URL}/delete`,
-    body: {
-      indices: [
-        getPivotTransformIndex(riskScoreEntity, spaceId),
-        getLatestTransformIndex(riskScoreEntity, spaceId),
-      ],
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    failOnStatusCode: false,
-  });
+  return cy
+    .request({
+      method: 'post',
+      url: `${INDICES_URL}/delete`,
+      body: {
+        indices: [getPivotTransformIndex(riskScoreEntity, spaceId)],
+      },
+      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      failOnStatusCode: false,
+    })
+    .then(() => {
+      return cy.request({
+        method: 'post',
+        url: `${INDICES_URL}/delete`,
+        body: {
+          indices: [getLatestTransformIndex(riskScoreEntity, spaceId)],
+        },
+        headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+        failOnStatusCode: false,
+      });
+    });
 };
