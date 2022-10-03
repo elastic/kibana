@@ -96,15 +96,15 @@ Variable
 
 // expressions
 
+// An Expression can be of 3 different types:
+// * a Comparison operation, which can contain recursive MathOperations inside
+// * a MathOperation, which can contain other MathOperations, but not Comparison types
+// * an ExpressionGroup, which is a generic Grouping that contains also Comparison operations (i.e. ( 5 > 1))
 Expression
   = Comparison 
   / MathOperation
-  
-MathOperation 
-  = AddSubtract
-  / MultiplyDivide
-  / Factor
-  
+  / ExpressionGroup
+
 Comparison
   = _ left:MathOperation op:(('>' / '<')('=')? / '=''=') right:MathOperation _ {
     return {
@@ -116,6 +116,11 @@ Comparison
     };
   }
 
+MathOperation 
+  = AddSubtract
+  / MultiplyDivide
+  / Factor
+
 AddSubtract
   = _ left:MultiplyDivide rest:(('+' / '-') MultiplyDivide)+ _ {
     return parseSymbol(left, rest, {'+': 'add', '-': 'subtract'});
@@ -125,13 +130,21 @@ MultiplyDivide
   = _ left:Factor rest:(('*' / '/') Factor)* _ {
     return parseSymbol(left, rest, {'*': 'multiply', '/': 'divide'});
   }
- 
+
 Factor
   = Group
   / Function
   / Literal
 
+// Because of the new Comparison syntax it is required a new Group type
+// the previous Group has been renamed into ExpressionGroup while
+// a new Group type has been defined to exclude the Comparison type from it
 Group
+  = _ '(' _ expr:MathOperation _ ')' _ {
+    return expr
+  }
+  
+ExpressionGroup
   = _ '(' _ expr:Expression _ ')' _ {
     return expr
   }
