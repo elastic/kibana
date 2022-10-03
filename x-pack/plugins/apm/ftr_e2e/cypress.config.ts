@@ -38,7 +38,7 @@ module.exports = defineConfig({
             return some(test.attempts, { state: 'failed' });
           });
           if (!failures) {
-            return del(results.video);
+            del(results.video);
           }
         }
       });
