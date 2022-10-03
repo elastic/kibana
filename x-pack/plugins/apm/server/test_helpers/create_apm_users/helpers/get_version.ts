@@ -13,7 +13,7 @@ export async function getKibanaVersion({
   elasticsearch,
   kibana,
 }: {
-  elasticsearch: Elasticsearch;
+  elasticsearch: Omit<Elasticsearch, 'node'>;
   kibana: Kibana;
 }) {
   try {
