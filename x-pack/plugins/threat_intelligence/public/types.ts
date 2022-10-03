@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentType, ReactElement, ReactNode } from 'react';
+import { ComponentType, ReactElement, ReactNode, VFC } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -16,7 +16,7 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { Store } from 'redux';
 import { DataProvider } from '@kbn/timelines-plugin/common';
@@ -102,4 +102,10 @@ export interface SecuritySolutionPluginContext {
     from,
     to,
   }: UseInvestigateInTimelineProps) => () => Promise<void>;
+
+  useQuery: () => Query;
+  useFilters: () => Filter[];
+  useGlobalTime: () => TimeRange;
+
+  SiemSearchBar: VFC<any>;
 }
