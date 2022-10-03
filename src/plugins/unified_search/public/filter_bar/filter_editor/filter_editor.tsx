@@ -170,6 +170,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
           <EuiPopoverFooter paddingSize="s">
             <EuiFlexGroup direction="rowReverse" alignItems="center" responsive={false}>
+              {/* Adding relative here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
