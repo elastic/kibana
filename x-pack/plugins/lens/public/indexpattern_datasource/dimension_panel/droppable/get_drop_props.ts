@@ -18,7 +18,7 @@ import {
   getOperationDisplay,
   hasOperationSupportForMultipleFields,
 } from '../../operations';
-import { isDraggedField, isOperationFromTheSameGroup } from '../../../utils';
+import { isDraggedDataViewField, isOperationFromTheSameGroup } from '../../../utils';
 import { hasField } from '../../pure_utils';
 import { DragContextState } from '../../../drag_drop/providers';
 import { OperationMetadata, DraggedField } from '../../../types';
@@ -82,7 +82,7 @@ export function getDropProps(
     dataView: indexPatterns[state.layers[target.layerId].indexPatternId],
   };
 
-  if (isDraggedField(source)) {
+  if (isDraggedDataViewField(source)) {
     return getDropPropsForField({ ...props, source, target: targetProps });
   }
 
