@@ -61,6 +61,16 @@ export class LayerGroup implements ILayer {
     return [...this._children];
   }
 
+  async _asyncSomeChildren(methodName: string) {
+    const promises = this.getChildren().map(async (child) => {
+      // @ts-ignore
+      return (child[methodName] as () => Promise<boolean>)();
+    });
+    return (await Promise.all(promises) as boolean[]).some((result) => {
+      return result;
+    });
+  }
+
   getDescriptor(): LayerGroupDescriptor {
     return this._descriptor;
   }
@@ -85,30 +95,27 @@ export class LayerGroup implements ILayer {
   }
 
   supportsElasticsearchFilters(): boolean {
-    // TODO return childLayers.supportsElasticsearchFilters
-    return false;
-  }
-
-  async supportsFitToBounds(): Promise<boolean> {
-    // TODO return childLayers.supportsFitToBounds
-    return true;
-  }
-
-  async isFittable(): Promise<boolean> {
-    return this._children.some((child) => {
-      return child.isFittable();
+    return this.getChildren().some((child) => {
+      return child.supportsElasticsearchFilters();
     });
   }
 
+  async supportsFitToBounds(): Promise<boolean> {
+    return this._asyncSomeChildren('supportsFitToBounds');
+  }
+
+  async isFittable(): Promise<boolean> {
+    return this._asyncSomeChildren('isFittable');
+  }
+
   isIncludeInFitToBounds(): boolean {
-    return this._children.some((child) => {
+    return this.getChildren().some((child) => {
       return child.isIncludeInFitToBounds();
     });
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {
-    // TODO return childLayers.isFilteredByGlobalTime
-    return true;
+    return this._asyncSomeChildren('isFilteredByGlobalTime');
   }
 
   async getDisplayName(source?: ISource): Promise<string> {
