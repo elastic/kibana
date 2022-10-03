@@ -11,6 +11,7 @@
  * @param {number|number[]} a a number or an array of numbers
  * @param {number|number[]} b a number or an array of numbers
  * @return {boolean} Returns true if `a` is lower than `b`, false otherwise.  Returns an array with the lower than comparison of each element if `a` is an array.
+ * @throws `'Missing b value'` if `b` is not provided
  * @throws `'Array length mismatch'` if `args` contains arrays of different lengths
  * @example
  * lt(1, 1) // returns false
@@ -22,6 +23,9 @@
 module.exports = { lt };
 
 function lt(a, b) {
+  if (b == null) {
+    throw new Error('Missing b value');
+  }
   if (Array.isArray(a)) {
     if (!Array.isArray(b)) {
       return a.every((v) => v < b);
