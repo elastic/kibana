@@ -15,21 +15,6 @@ With *Lens*, you can:
 * Use time shifts to compare the data in two time intervals, such as month over month.
 * Add annotations and reference lines.
 
-
-++++
-<script type="text/javascript" async 
-src="https://play.vidyard.com/embed/v4.js"></script>
-<img
-style="width: 100%; margin: auto; display: block;"
-class="vidyard-player-embed"
-src="https://play.vidyard.com/vVJ69WCgUwGNJSDqjPZbaV.jpg"
-data-uuid="vVJ69WCgUwGNJSDqjPZbaV"
-data-v="4"
-data-type="inline"
-/>
-</br>
-++++
-
 [float]
 [[create-the-visualization-panel]]
 ==== Create visualizations
@@ -50,13 +35,17 @@ Choose the data you want to visualize.
 
 . If you want to learn more about the data a field contains, click the field.
 
-. To visualize more than one {data-source}, click *Add layer > Visualization*, then select the {data-source}.
+. To visualize more than one {data-source}, click *Add layer*, select the layer type, then select the {data-source}.
 
 Edit and delete.
 
 . To change the aggregation *Quick function* and display options, click the field in the layer pane. 
 
 . To delete a field, close the configuration options, then click *X* next to the field.
+
+. To clone a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the layer pane, then select *Duplicate layer*.
+
+. To clear the layer configuration, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] in the layer pane, then select *Clear layer*.
 
 TIP: You can manually apply the changes you make, which is helpful when creating large and complex visualizations. To manually apply your changes, click *Settings* in the toolbar, then deselect *Auto-apply visualization changes*.
 
@@ -95,11 +84,15 @@ All columns that belong to the same layer pane group are sorted in the table.
 
 * *Name* &mdash; Specifies the field display name. 
 
+* *Collapse by* &mdash; Aggregates all metric values with the same value into a single number.
+
 * *Value format* &mdash; Specifies how the field value displays in the table. 
 
 * *Text alignment* &mdash; Aligns the values in the cell to the *Left*, *Center*, or *Right*.
 
 * *Hide column* &mdash; Hides the column for the field.
+
+* *Directly filter on click* &mdash; Turns column values into clickable links that allow you to filter or drill down into the data.
 
 * *Summary row* &mdash; Adds a row that displays the summary value. When specified, allows you to enter a *Summary label*.
 
@@ -169,13 +162,13 @@ TIP: For detailed information on formulas, click image:dashboard/images/formula_
 [[compare-data-with-time-offsets]]
 ==== Compare differences over time
 
-Compare your real-time data set to the results that are offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
+Compare your real-time data to the results that are offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
 
 . In the layer pane, click the field you want to offset.
 
-. From the *Add advanced options* dropdown, select *Time shift*.
+. Click *Advanced*.
 
-. Select the time offset increment. 
+. In the *Time shift* field, enter the time offset increment. 
 
 For a time shift example, refer to <<compare-time-ranges>>.
 
@@ -185,12 +178,14 @@ For a time shift example, refer to <<compare-time-ranges>>.
 
 preview::[]
 
-Annotations allow you to call out specific points in your visualizations that are important, such as a major change in the data. You can add text and icons to annotations and customize the appearance, such as the line format and color. 
+Annotations allow you to call out specific points in your visualizations that are important, such as a major change in the data. You can add annotations for any {data-source}, add text and icons, specify the line format and color, and more.
 
 [role="screenshot"]
 image::images/lens_annotations_8.2.0.png[Lens annotations]
 
 . In the layer pane, click *Add layer > Annotations*.
+
+. Select the {data-source}.
 
 . To open the annotation options, click *Event*.
 
@@ -202,7 +197,7 @@ image::images/lens_annotations_8.2.0.png[Lens annotations]
 
 . Change the *Appearance* options for how you want the annotation to display.
 
-. Click *Close*.
+. To close, click *X*.
 
 [float]
 [[add-reference-lines]]
