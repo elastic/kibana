@@ -122,6 +122,7 @@ export const convertToCumulativeSumAggColumn = (
       { agg: metric as SchemaConfig<METRIC_TYPES.SUM | METRIC_TYPES.COUNT>, dataView },
       reducedTimeRange
     );
+
     if (subMetric === null) {
       return null;
     }
@@ -134,8 +135,8 @@ export const convertToCumulativeSumAggColumn = (
     return [
       {
         operationType: op.name,
-        references: [subMetric?.columnId],
         ...createColumn(agg),
+        references: [subMetric?.columnId],
         params: {},
         timeShift: agg.aggParams?.timeShift,
       } as ParentPipelineAggColumn,
