@@ -14,5 +14,7 @@ export interface InferencePipelineConfiguration {
 
 export interface AddInferencePipelineFormErrors {
   destinationField?: string;
+  modelID?: string;
   pipelineName?: string;
+  sourceField?: string;
 }
