@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
-import { EqlSearchStrategyRequest } from '../../../../common';
+import { EqlSearchStrategyRequest, UI_SETTINGS } from '../../../../common';
 import { firstValueFrom } from 'rxjs';
 
 const getMockEqlResponse = () => ({
@@ -29,6 +29,10 @@ const getMockEqlResponse = () => ({
   meta: {},
   statusCode: 200,
 });
+
+const getMockUiSettingsClient = (config: Record<string, unknown>) => {
+  return { get: async (key: string) => config[key] } as IUiSettingsClient;
+};
 
 describe('EQL search strategy', () => {
   let mockLogger: Logger;
@@ -60,9 +64,9 @@ describe('EQL search strategy', () => {
       mockEqlSearch = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
       mockEqlGet = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
       mockDeps = {
-        uiSettingsClient: {
-          get: jest.fn(),
-        },
+        uiSettingsClient: getMockUiSettingsClient({
+          [UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION]: 100,
+        }),
         esClient: {
           asCurrentUser: {
             eql: {

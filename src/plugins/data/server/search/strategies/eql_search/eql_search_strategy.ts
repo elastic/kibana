@@ -31,7 +31,7 @@ export const eqlSearchStrategyProvider = (
   }
 
   return {
-    cancel: async (id, options, { esClient }) => {
+    cancel: async (id, options, { esClient, uiSettingsClient }) => {
       logger.debug(`_eql/delete ${id}`);
       await cancelAsyncSearch(id, esClient);
     },
@@ -46,11 +46,11 @@ export const eqlSearchStrategyProvider = (
           uiSettingsClient
         );
         const params = id
-          ? getCommonDefaultAsyncGetParams(null, options)
+          ? await getCommonDefaultAsyncGetParams(uiSettingsClient, null, options)
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...defaultParams,
-              ...getCommonDefaultAsyncGetParams(null, options),
+              ...(await getCommonDefaultAsyncGetParams(uiSettingsClient, null, options)),
               ...request.params,
             };
         const response = id
