@@ -30,6 +30,7 @@ import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { EuiButtonIconColor } from '@elastic/eui';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -493,7 +494,10 @@ export interface DatasourceDataPanelProps<T = unknown> {
   dragDropContext: DragContextState;
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
+  core: Pick<
+    CoreStart,
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application'
+  >;
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
@@ -504,6 +508,17 @@ export interface DatasourceDataPanelProps<T = unknown> {
   indexPatternService: IndexPatternServiceAPI;
   frame: FramePublicAPI;
   usedIndexPatterns?: string[];
+}
+
+/** @internal **/
+export interface LayerAction {
+  displayName: string;
+  description?: string;
+  execute: () => void | Promise<void>;
+  icon: IconType;
+  color?: EuiButtonIconColor;
+  isCompatible: boolean;
+  'data-test-subj'?: string;
 }
 
 interface SharedDimensionProps {
@@ -962,6 +977,16 @@ export interface Visualization<T = unknown, P = unknown> {
       staticValue?: unknown;
     }>;
   }>;
+  /**
+   * returns a list of custom actions supported by the visualization layer.
+   * Default actions like delete/clear are not included in this list and are managed by the editor frame
+   * */
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>
+  ) => LayerAction[];
+  /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
