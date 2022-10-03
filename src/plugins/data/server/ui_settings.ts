@@ -548,7 +548,7 @@ export function getUiSettings(
         defaultMessage: 'Async search wait for completion',
       }),
       value: 100,
-      description: i18n.translate('data.advancedSettings.asyncSearchWaitForCompletioMsnDesc', {
+      description: i18n.translate('data.advancedSettings.asyncSearchWaitForCompletionMsDesc', {
         defaultMessage:
           'Change the amount of time kibana awaits responses from Elasticsearch. If results are not returned within that time, Elasticsearch will return partial results and Kibana will poll again later.',
       }),
