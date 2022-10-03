@@ -11,18 +11,21 @@ import {
   AsyncSearchGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { SearchSessionsConfigSchema } from '../../../../config';
-import { ISearchOptions } from '../../../../common';
+import { ISearchOptions, UI_SETTINGS } from '../../../../common';
+import { IUiSettingsClient } from '@kbn/core/server';
 
 /**
  @internal
  */
-export function getCommonDefaultAsyncSubmitParams(
+export async function getCommonDefaultAsyncSubmitParams(
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Pick<
+): Promise<Pick<
   AsyncSearchSubmitRequest,
   'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'
-> {
+>> {
+  const waitForCompletion = await uiSettingsClient.get<number>(UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION);
   const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
 
   const keepAlive = useSearchSessions
@@ -31,7 +34,7 @@ export function getCommonDefaultAsyncSubmitParams(
 
   return {
     // Wait up to 100ms for the response to return
-    wait_for_completion_timeout: '100ms',
+    wait_for_completion_timeout: `${waitForCompletion}ms`,
     // If search sessions are used, store and get an async ID even for short running requests.
     keep_on_completion: useSearchSessions,
     // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
@@ -42,15 +45,17 @@ export function getCommonDefaultAsyncSubmitParams(
 /**
  @internal
  */
-export function getCommonDefaultAsyncGetParams(
+export async function getCommonDefaultAsyncGetParams(
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
+): Promise<Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'>> {
+  const waitForCompletion = await uiSettingsClient.get(UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION);
   const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
 
   return {
     // Wait up to 100ms for the response to return
-    wait_for_completion_timeout: '100ms',
+    wait_for_completion_timeout: `${waitForCompletion}ms`,
     ...(useSearchSessions
       ? // Don't change the expiration of search requests that are tracked in a search session
         undefined

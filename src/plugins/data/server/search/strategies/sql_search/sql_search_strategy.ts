@@ -37,7 +37,7 @@ export const sqlSearchStrategyProvider = (
   function asyncSearch(
     { id, ...request }: SqlSearchStrategyRequest,
     options: IAsyncSearchOptions,
-    { esClient }: SearchStrategyDependencies
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const startTime = Date.now();
@@ -56,7 +56,7 @@ export const sqlSearchStrategyProvider = (
         ({ body, headers } = await client.sql.getAsync(
           {
             format: params?.format ?? 'json',
-            ...getDefaultAsyncGetParams(sessionConfig, options),
+            ...getDefaultAsyncGetParams(uiSettingsClient, sessionConfig, options),
             id,
           },
           { ...options.transport, signal: options.abortSignal, meta: true }
@@ -65,7 +65,7 @@ export const sqlSearchStrategyProvider = (
         ({ headers, body } = await client.sql.query(
           {
             format: params.format ?? 'json',
-            ...getDefaultAsyncSubmitParams(sessionConfig, options),
+            ...getDefaultAsyncSubmitParams(uiSettingsClient, sessionConfig, options),
             ...params,
           },
           { ...options.transport, signal: options.abortSignal, meta: true }

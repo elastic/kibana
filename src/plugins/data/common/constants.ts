@@ -24,6 +24,7 @@ export const UI_SETTINGS = {
   COURIER_MAX_CONCURRENT_SHARD_REQUESTS: 'courier:maxConcurrentShardRequests',
   SEARCH_INCLUDE_FROZEN: 'search:includeFrozen',
   SEARCH_TIMEOUT: 'search:timeout',
+  SEARCH_ASYNC_WAIT_FOR_COMPLETION: 'search:asyncSearchWaitForCompletionMs',
   HISTOGRAM_BAR_TARGET: 'histogram:barTarget',
   HISTOGRAM_MAX_BARS: 'histogram:maxBars',
   HISTORY_LIMIT: 'history:limit',

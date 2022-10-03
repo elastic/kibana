@@ -41,7 +41,10 @@ describe('SQL search strategy', () => {
           deleteAsync: mockSqlDelete,
           clearCursor: mockSqlClearCursor,
         },
-      },
+      }
+    }, 
+    uiSettingsClient: {
+      get: () => 100
     },
     searchSessionsClient: createSearchSessionsClientMock(),
   } as unknown as SearchStrategyDependencies;

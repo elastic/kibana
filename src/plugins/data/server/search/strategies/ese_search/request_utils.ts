@@ -50,7 +50,7 @@ export async function getDefaultAsyncSubmitParams(
   return {
     // TODO: adjust for partial results
     batched_reduce_size: 64,
-    ...getCommonDefaultAsyncSubmitParams(searchSessionsConfig, options),
+    ...(await getCommonDefaultAsyncSubmitParams(uiSettingsClient, searchSessionsConfig, options)),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
     // If search sessions are used, set the initial expiration time.
@@ -60,11 +60,12 @@ export async function getDefaultAsyncSubmitParams(
 /**
  @internal
  */
-export function getDefaultAsyncGetParams(
+export async function getDefaultAsyncGetParams(
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
+): Promise<Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'>> {
   return {
-    ...getCommonDefaultAsyncGetParams(searchSessionsConfig, options),
+    ...(await getCommonDefaultAsyncGetParams(uiSettingsClient, searchSessionsConfig, options)),
   };
 }

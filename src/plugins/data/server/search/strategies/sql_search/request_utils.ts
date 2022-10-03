@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { IUiSettingsClient } from '@kbn/core/server';
 import { SqlGetAsyncRequest, SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions } from '../../../../common';
 import { SearchSessionsConfigSchema } from '../../../../config';
@@ -17,23 +18,25 @@ import {
 /**
  @internal
  */
-export function getDefaultAsyncSubmitParams(
+export async function getDefaultAsyncSubmitParams(
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'> {
+): Promise<Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'>> {
   return {
-    ...getCommonDefaultAsyncSubmitParams(searchSessionsConfig, options),
+    ...(await getCommonDefaultAsyncSubmitParams(uiSettingsClient, searchSessionsConfig, options)),
   };
 }
 
 /**
  @internal
  */
-export function getDefaultAsyncGetParams(
+export async function getDefaultAsyncGetParams(
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Pick<SqlGetAsyncRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
+): Promise<Pick<SqlGetAsyncRequest, 'keep_alive' | 'wait_for_completion_timeout'>> {
   return {
-    ...getCommonDefaultAsyncGetParams(searchSessionsConfig, options),
+    ...(await getCommonDefaultAsyncGetParams(uiSettingsClient, searchSessionsConfig, options)),
   };
 }

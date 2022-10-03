@@ -543,5 +543,18 @@ export function getUiSettings(
       category: ['search'],
       schema: schema.number(),
     },
+    [UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION]: {
+      name: i18n.translate('data.advancedSettings.asyncSearchWaitForCompletionMs', {
+        defaultMessage: 'Async search wait for completion',
+      }),
+      value: 100,
+      description: i18n.translate('data.advancedSettings.asyncSearchWaitForCompletioMsnDesc', {
+        defaultMessage:
+          'Change the amount of time kibana awaits responses from Elasticsearch. If results are not returned within that time, Elasticsearch will return partial results and Kibana will poll again later.',
+      }),
+      type: 'number',
+      category: ['search'],
+      schema: schema.number(),
+    },
   };
 }
