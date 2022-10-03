@@ -8,7 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -113,12 +113,12 @@ export interface PluginSetupDependencies {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
-  cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
 }
 
 export interface PluginStartDependencies {
+  cloud?: CloudStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
@@ -202,14 +202,6 @@ export class SecurityPlugin
     return this.userProfileStart;
   };
 
-  /**
-   * Indicates whether Kibana is running inside an Elastic Cloud deployment. Since circular plugin dependencies are
-   * forbidden, this flag is supposed to be set by the Cloud plugin that already depends on the Security plugin.
-   * @private
-   */
-  private isElasticCloudDeployment?: boolean;
-  private readonly getIsElasticCloudDeployment = () => this.isElasticCloudDeployment === true;
-
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
 
@@ -235,9 +227,8 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { cloud, features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
-    this.isElasticCloudDeployment = cloud?.isCloudEnabled;
     this.kibanaIndexName = core.savedObjects.getKibanaIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>
@@ -369,7 +360,7 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { features, licensing, taskManager, spaces }: PluginStartDependencies
+    { cloud, features, licensing, taskManager, spaces }: PluginStartDependencies
   ) {
     this.logger.debug('Starting plugin');
 
@@ -402,7 +393,7 @@ export class SecurityPlugin
       session,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
-      isElasticCloudDeployment: this.getIsElasticCloudDeployment,
+      isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
     });
 
     this.authorizationService.start({

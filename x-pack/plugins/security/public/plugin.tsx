@@ -162,7 +162,7 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { cloud, management, share }: PluginStartDependencies
+    { management, share }: PluginStartDependencies
   ): SecurityPluginStart {
     const { application, http, notifications, docLinks } = core;
     const { anonymousPaths } = http;
@@ -187,11 +187,9 @@ export class SecurityPlugin
 
     this.analyticsService.start({ http: core.http });
 
-    const navControlService = this.navControlService.start({ core, authc: this.authc });
-
     return {
       uiApi: getUiApi({ core }),
-      navControlService,
+      navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
       userProfiles: {
         getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
