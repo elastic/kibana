@@ -57,6 +57,7 @@ export const LogCategorizationPage: FC = () => {
             'storage',
             'uiSettings',
             'unifiedSearch',
+            'theme',
           ])}
         />
       )}
