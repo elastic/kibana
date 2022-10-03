@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export enum SYNTHETICS_API_URLS {
-  SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
-  PINGS = '/internal/synthetics/pings',
-  OVERVIEW_STATUS = `/internal/synthetics/overview/status`,
-}
+import * as t from 'io-ts';
+
+export const OverviewStatusType = t.type({
+  up: t.number,
+  down: t.number,
+  disabledCount: t.number,
+});
+
+export type OverviewStatus = t.TypeOf<typeof OverviewStatusType>;

@@ -9,11 +9,11 @@ import moment from 'moment';
 import type { ESFilter } from '@kbn/es-types';
 import { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
-import { UptimeESClient } from '../../lib';
+import { UptimeEsClient } from '../../lib';
 import { parseRelativeDate } from '../../../../../common/lib/get_histogram_interval';
 
 export class QueryContext {
-  callES: UptimeESClient;
+  callES: UptimeEsClient;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination: CursorPagination;
@@ -24,7 +24,7 @@ export class QueryContext {
   query?: string;
 
   constructor(
-    database: UptimeESClient,
+    database: UptimeEsClient,
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination,
