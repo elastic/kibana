@@ -1,13 +1,25 @@
+#??? Should we migrate
+#    x-pack/test/functional/es_archives/event_log_multiple_indicies
+#### Yes, it needs migration
+#  ### Saved Object type(s) within:
+#    config
+#    event_log_test
+#    space
+#  ### Test file(s) that use it:
+#    x-pack/test/plugin_api_integration/test_suites/event_log/public_api_integration.ts
+#  ### Config(s) that govern the test file(s):
+#    x-pack/test/plugin_api_integration/config.ts
+
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
-orig_archive="x-pack/test/functional/es_archives/banners/multispace"
-new_archive="x-pack/test/functional/fixtures/kbn_archiver/banners/multi_space"
+orig_archive="x-pack/test/functional/es_archives/event_log_multiple_indicies"
+new_archive="x-pack/test/functional/fixtures/kbn_archiver/event_log_multiple_indicies"
 
 # newArchives=("x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space")
 
 # testFiles=("x-pack/test/functional/apps/discover/preserve_url.ts")
 
-test_config="x-pack/test/banners_functional/config.ts"
+test_config="x-pack/test/plugin_api_integration/config.ts"
 
 list_stragglers() {
 
@@ -278,6 +290,46 @@ clean_up() {
     rm -f "$x"
   done
 }
+
+should_migrate_without_standard_list() {
+  local archive=${1:-$orig_archive}
+  local archiveJson="${archive}/data.json"
+  printf "\n??? Should we migrate \n    %s\n" "$archive"
+
+  local guardResults=($(_guard "$archive"))
+
+  if [ "${#guardResults[@]}" -eq 0 ]; then
+    local containedTypes=($(_types "$archive"))
+    local intersections=($(intersection "${containedTypes[@]}"))
+    local intersectionsLength="${#intersections[@]}"
+      local foundTestFiles=($(usages_list "$archive"))
+      local configs=($(find_configs "${foundTestFiles[@]}"))
+      local needsMigration=($(are_enabled "${configs[@]}"))
+      if [ "${#needsMigration[@]}" -gt 0 ]; then
+        echo "### Yes, it needs migration"
+        echo "  ### Saved Object type(s) within:"
+        print_list "${containedTypes[@]}"
+        echo "  ### Test file(s) that use it:"
+        print_list "${foundTestFiles[@]}"
+        echo "  ### Config(s) that govern the test file(s):"
+        print_list "${configs[@]}"
+      else
+        echo "!!! No, do not migrate, it's config(s) is / are not enabled."
+        echo "!!! It contains the following saved object(s)"
+        print_list "${containedTypes[@]}"
+        echo "  !!! For these files:"
+        print_list "${foundTestFiles[@]}"
+        echo "  !!! Config(s) that govern the test file(s):"
+        print_list "${configs[@]}"
+      fi
+  else
+    echo "!!! No, it failed the guard(s):"
+    echo "${guardResults[@]}"
+  fi
+
+  trap clean_up EXIT
+}
+
 
 should_migrate() {
   local archive=${1:-$orig_archive}

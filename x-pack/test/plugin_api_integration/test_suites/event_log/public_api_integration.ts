@@ -34,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await spacesService.delete('namespace-a');
     });
 
     for (const namespace of [undefined, 'namespace-a']) {
