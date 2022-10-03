@@ -103,14 +103,14 @@ describe('Parser', () => {
 
         it.each`
           expression
-          ${`1 + (1 >${symbol} 1)`}
+          ${`1 + (1 ${symbol} 1)`}
           ${`(1 ${symbol} 1) + 1`}
           ${`((1 ${symbol} 1) + 1)`}
           ${`((1 ${symbol} 1) + (1 ${symbol} 1))`}
           ${`((1 ${symbol} 1) + ( ${symbol} 1))`}
           ${` ${symbol} 1`}
           ${`1 ${symbol} `}
-          ${`a + (b >${symbol} c)`}
+          ${`a + (b ${symbol} c)`}
           ${`(a ${symbol} b) + c`}
           ${`((a ${symbol} b) + c)`}
           ${`((a ${symbol} b) + (c ${symbol} d))`}
