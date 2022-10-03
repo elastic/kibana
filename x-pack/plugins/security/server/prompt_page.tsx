@@ -20,8 +20,8 @@ import createCache from '@emotion/cache';
 import type { ReactNode } from 'react';
 import React from 'react';
 
+import { Fonts } from '@kbn/core-rendering-server-internal';
 import type { IBasePath } from '@kbn/core/server';
-import { Fonts } from '@kbn/core/server/rendering/views/fonts';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';

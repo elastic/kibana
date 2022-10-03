@@ -10,7 +10,6 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
-import { pluginServiceMock } from '../../plugins/plugins_service.mock';
 
 const context = mockCoreContext.create();
 const httpPreboot = httpServiceMock.createInternalPrebootContract();
@@ -18,14 +17,22 @@ const httpSetup = httpServiceMock.createInternalSetupContract();
 const status = statusServiceMock.createInternalSetupContract();
 const elasticsearch = elasticsearchServiceMock.createInternalSetup();
 
+function createUiPlugins() {
+  return {
+    browserConfigs: new Map(),
+    internal: new Map(),
+    public: new Map(),
+  };
+}
+
 export const mockRenderingServiceParams = context;
 export const mockRenderingPrebootDeps = {
   http: httpPreboot,
-  uiPlugins: pluginServiceMock.createUiPlugins(),
+  uiPlugins: createUiPlugins(),
 };
 export const mockRenderingSetupDeps = {
   elasticsearch,
   http: httpSetup,
-  uiPlugins: pluginServiceMock.createUiPlugins(),
+  uiPlugins: createUiPlugins(),
   status,
 };

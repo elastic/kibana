@@ -17,15 +17,10 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
 import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
+import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
-import {
-  DiscoveredPlugin,
-  InternalPluginInfo,
-  PluginConfigDescriptor,
-  PluginDependencies,
-  PluginType,
-} from './types';
+import { DiscoveredPlugin, PluginConfigDescriptor, PluginDependencies, PluginType } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
@@ -46,25 +41,6 @@ export interface PluginsServiceSetup {
   initialized: boolean;
   /** Setup contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
-}
-
-/** @internal */
-export interface UiPlugins {
-  /**
-   * Paths to all discovered ui plugin entrypoints on the filesystem, even if
-   * disabled.
-   */
-  internal: Map<PluginName, InternalPluginInfo>;
-
-  /**
-   * Information needed by client-side to load plugins and wire dependencies.
-   */
-  public: Map<PluginName, DiscoveredPlugin>;
-
-  /**
-   * Configuration for plugins to be exposed to the client-side.
-   */
-  browserConfigs: Map<PluginName, Observable<unknown>>;
 }
 
 /** @internal */

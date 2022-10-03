@@ -18,8 +18,11 @@ import type {
   InternalHttpServiceSetup,
   InternalHttpServicePreboot,
 } from '@kbn/core-http-server-internal';
+import type {
+  InternalRenderingServicePreboot,
+  InternalRenderingServiceSetup,
+} from '@kbn/core-rendering-server-internal';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
 import {
   InternalHttpResourcesSetup,
   HttpResources,

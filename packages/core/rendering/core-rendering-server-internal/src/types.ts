@@ -17,7 +17,7 @@ import type {
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import { UiPlugins } from '../plugins';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -46,7 +46,7 @@ export interface RenderingSetupDeps {
   uiPlugins: UiPlugins;
 }
 
-/** @public */
+/** @internal */
 export interface IRenderOptions {
   /**
    * Set whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata.

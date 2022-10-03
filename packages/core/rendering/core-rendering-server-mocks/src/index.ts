@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { PluginsService } from './plugins_service';
-export type {
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  DiscoveredPlugins,
-} from './plugins_service';
-export { config } from './plugins_config';
-/** @internal */
-export { isNewPlatformPlugin } from './discovery';
-export * from './types';
+export { renderingServiceMock } from './rendering_service.mock';

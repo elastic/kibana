@@ -230,7 +230,6 @@ export type {
   HttpResourcesRequestHandler,
 } from './http_resources';
 
-export type { IRenderOptions } from './rendering';
 export type {
   LoggingServiceSetup,
   LoggerContextConfigInput,

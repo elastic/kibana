@@ -255,28 +255,6 @@ export interface PluginManifest {
 }
 
 /**
- * @internal
- */
-export interface InternalPluginInfo {
-  /**
-   * Version of the plugin
-   */
-  readonly version: string;
-  /**
-   * Bundles that must be loaded for this plugin
-   */
-  readonly requiredBundles: readonly string[];
-  /**
-   * Path to the target/public directory of the plugin which should be served
-   */
-  readonly publicTargetDir: string;
-  /**
-   * Path to the plugin assets directory.
-   */
-  readonly publicAssetsDir: string;
-}
-
-/**
  * The interface that should be returned by a `PluginInitializer` for a `preboot` plugin.
  *
  * @public
