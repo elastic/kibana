@@ -129,7 +129,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           loading={loading}
           rawEventData={rawEventData}
           showAlertDetails={showAlertDetails}
-        scopeId={scopeId}
+          scopeId={scopeId}
           isReadOnly={isReadOnly}
         />
       );
@@ -166,7 +166,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             isDraggable={isDraggable}
             loading={loading}
             rawEventData={rawEventData}
-        scopeId={scopeId}
+            scopeId={scopeId}
             timelineTabType={tabType}
             handleOnEventClosed={handleOnEventClosed}
           />

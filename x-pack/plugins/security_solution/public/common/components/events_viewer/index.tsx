@@ -116,9 +116,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       dateRange,
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
-console.log(defaultModel)
-console.log('cols')
-console.log(columns)
+  console.log(defaultModel);
+  console.log('cols');
+  console.log(columns);
 
   const { timelines: timelinesUi } = useKibana().services;
   const {

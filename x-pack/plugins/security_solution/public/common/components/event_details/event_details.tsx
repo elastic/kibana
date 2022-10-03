@@ -246,7 +246,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                       browserFields={browserFields}
                       data={data}
                       eventId={id}
-                    scopeId={scopeId}
+                      scopeId={scopeId}
                       enrichments={allEnrichments}
                       isReadOnly={isReadOnly}
                     />

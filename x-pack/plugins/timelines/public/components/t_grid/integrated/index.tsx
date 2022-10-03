@@ -44,7 +44,7 @@ import {
   getDefaultViewSelection,
   resolverIsShowing,
 } from '../helpers';
-import { tGridActions, tGridSelectors } from '../../../store/t_grid';
+import { tGridActions } from '../../../store/t_grid';
 import { Ecs } from '../../../../common/ecs';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';

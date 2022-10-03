@@ -949,8 +949,8 @@ const makeMapStateToProps = () => {
       sort,
       isLoading,
     } = dataTable;
-console.log('test')
-console.log(columns)
+    console.log('test');
+    console.log(columns);
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       excludedRowRendererIds,
