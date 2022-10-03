@@ -69,14 +69,6 @@ jest.mock('react-redux', () => {
 
 describe('GraphOverlay', () => {
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    mockGlobalState,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useGlobalFullScreen as jest.Mock).mockReturnValue({
@@ -92,7 +84,7 @@ describe('GraphOverlay', () => {
   describe('when used in an events viewer (i.e. in the Detections view, or the Host > Events view)', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
-        <TestProviders store={store}>
+        <TestProviders>
           <GraphOverlay
             SessionView={<div />}
             Navigation={<div />}
@@ -117,7 +109,7 @@ describe('GraphOverlay', () => {
       });
 
       const wrapper = render(
-        <TestProviders store={store}>
+        <TestProviders>
           <GraphOverlay
             SessionView={<div />}
             Navigation={<div />}
@@ -140,8 +132,8 @@ describe('GraphOverlay', () => {
               timeline: {
                 ...mockGlobalState.timeline,
                 timelineById: {
-                  'timeline-test': {
-                    ...mockGlobalState.timeline.timelineById['timeline-test'],
+                  [TimelineId.test]: {
+                    ...mockGlobalState.timeline.timelineById[TimelineId.test],
                     graphEventId: 'definitely-not-null',
                   },
                 },
@@ -176,7 +168,7 @@ describe('GraphOverlay', () => {
 
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
-        <TestProviders store={store}>
+        <TestProviders>
           <GraphOverlay
             SessionView={<div />}
             Navigation={<div />}
@@ -201,7 +193,7 @@ describe('GraphOverlay', () => {
       });
 
       const wrapper = render(
-        <TestProviders store={store}>
+        <TestProviders>
           <GraphOverlay
             SessionView={<div />}
             Navigation={<div />}

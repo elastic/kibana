@@ -17,7 +17,6 @@ import {
   removeColumn,
   upsertColumn,
   applyDeltaToColumnWidth,
-  setExcludedRowRendererIds,
   updateColumns,
   updateColumnOrder,
   updateColumnWidth,
@@ -37,7 +36,6 @@ const tableActionTypes = [
   updateColumnWidth.type,
   updateItemsPerPage.type,
   updateSort.type,
-  setExcludedRowRendererIds.type,
 ];
 
 export const createDataTableLocalStorageEpic =

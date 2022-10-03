@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-import actionCreatorFactory from 'typescript-fsa';
-import type { RowRendererId } from '@kbn/timelines-plugin/common/types';
-
-const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
-
-export const setExcludedRowRendererIds = actionCreator<{
-  id: string;
-  excludedRowRendererIds: RowRendererId[];
-}>('SET_DATA_TABLE_EXCLUDED_ROW_RENDERER_IDS');
-
 export {
   applyDeltaToColumnWidth,
   clearEventsDeleted,

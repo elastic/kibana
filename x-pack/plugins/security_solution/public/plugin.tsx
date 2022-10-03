@@ -45,7 +45,6 @@ import {
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
 import type { LinksPermissions } from './common/links';
 import { updateAppLinks } from './common/links';
-// import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';

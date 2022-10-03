@@ -11,24 +11,14 @@ import React from 'react';
 
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
-import {
-  createSecuritySolutionStorageMock,
-  defaultHeaders,
-  kibanaObservable,
-  mockGlobalState,
-  mockTimelineData,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../../common/mock';
+import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { PreviewTableCellRenderer } from './preview_table_cell_renderer';
 import { getColumnRenderer } from '../../../../timelines/components/timeline/body/renderers/get_column_renderer';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
 import type { Ecs } from '../../../../../common/ecs';
 import { columnRenderers } from '../../../../timelines/components/timeline/body/renderers';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
+import { TimelineId } from '../../../../../common/types';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../timelines/components/timeline/body/renderers/get_column_renderer');
@@ -37,16 +27,6 @@ const getColumnRendererMock = getColumnRenderer as jest.Mock;
 const mockImplementation = {
   renderColumn: jest.fn(),
 };
-
-const myState: State = mockGlobalState;
-const { storage } = createSecuritySolutionStorageMock();
-const myStore = createStore(
-  myState,
-  SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
-  kibanaObservable,
-  storage
-);
 
 describe('PreviewTableCellRenderer', () => {
   const columnId = '@timestamp';
@@ -57,7 +37,7 @@ describe('PreviewTableCellRenderer', () => {
   const rowIndex = 3;
   const colIndex = 0;
   const setCellProps = jest.fn();
-  const scopeId = 'timeline-test';
+  const scopeId = TimelineId.test;
   const ecsData = {} as Ecs;
   const browserFields = {} as BrowserFields;
 
@@ -72,7 +52,7 @@ describe('PreviewTableCellRenderer', () => {
     const isDetails = true;
 
     mount(
-      <TestProviders store={myStore}>
+      <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
             <PreviewTableCellRenderer
@@ -107,7 +87,7 @@ describe('PreviewTableCellRenderer', () => {
     const truncate = isDetails ? false : true;
 
     mount(
-      <TestProviders store={myStore}>
+      <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
             <PreviewTableCellRenderer
@@ -155,7 +135,7 @@ describe('PreviewTableCellRenderer', () => {
     const isDetails = true;
     const id = 'event.severity';
     const wrapper = mount(
-      <TestProviders store={myStore}>
+      <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
             <PreviewTableCellRenderer
