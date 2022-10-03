@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TestProvidersComponent } from "../../../../../common/mocks/test_providers";
-import { renderHook } from "@testing-library/react-hooks";
-import { useToolbarOptions } from "./use_toolbar_options";
+import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
+import { renderHook } from '@testing-library/react-hooks';
+import { useToolbarOptions } from './use_toolbar_options';
 
 describe('useToolbarOptions()', () => {
   it('should return correct value for 0 indicators total', () => {
