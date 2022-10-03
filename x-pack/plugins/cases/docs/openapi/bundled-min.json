@@ -258,15 +258,18 @@
         "properties": {
           "email": {
             "type": "string",
+            "example": null,
             "nullable": true
           },
           "full_name": {
             "type": "string",
+            "example": null,
             "nullable": true
           },
           "username": {
             "type": "string",
-            "example": "elastic"
+            "example": "elastic",
+            "nullable": true
           },
           "profile_uid": {
             "type": "string",
@@ -310,15 +313,18 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
-                "example": "elastic"
+                "example": "elastic",
+                "nullable": true
               },
               "profile_uid": {
                 "type": "string",
@@ -348,15 +354,18 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
-                "example": "elastic"
+                "example": "elastic",
+                "nullable": true
               },
               "profile_uid": {
                 "type": "string",
@@ -397,15 +406,18 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
-                "example": "elastic"
+                "example": "elastic",
+                "nullable": true
               },
               "profile_uid": {
                 "type": "string",
@@ -425,15 +437,18 @@
         "properties": {
           "email": {
             "type": "string",
+            "example": null,
             "nullable": true
           },
           "full_name": {
             "type": "string",
+            "example": null,
             "nullable": true
           },
           "username": {
             "type": "string",
-            "example": "elastic"
+            "example": "elastic",
+            "nullable": true
           },
           "profile_uid": {
             "type": "string",
@@ -453,15 +468,18 @@
         "properties": {
           "email": {
             "type": "string",
+            "example": null,
             "nullable": true
           },
           "full_name": {
             "type": "string",
+            "example": null,
             "nullable": true
           },
           "username": {
             "type": "string",
-            "example": "elastic"
+            "example": "elastic",
+            "nullable": true
           },
           "profile_uid": {
             "type": "string",
@@ -481,15 +499,18 @@
         "properties": {
           "email": {
             "type": "string",
+            "example": null,
             "nullable": true
           },
           "full_name": {
             "type": "string",
+            "example": null,
             "nullable": true
           },
           "username": {
             "type": "string",
-            "example": "elastic"
+            "example": "elastic",
+            "nullable": true
           },
           "profile_uid": {
             "type": "string",
@@ -672,15 +693,18 @@
             "properties": {
               "email": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "full_name": {
                 "type": "string",
-                "example": null
+                "example": null,
+                "nullable": true
               },
               "username": {
                 "type": "string",
-                "example": "elastic"
+                "example": "elastic",
+                "nullable": true
               },
               "profile_uid": {
                 "type": "string",

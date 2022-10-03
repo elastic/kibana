@@ -158,13 +158,16 @@ components:
       properties:
         email:
           type: string
+          example: null
           nullable: true
         full_name:
           type: string
+          example: null
           nullable: true
         username:
           type: string
           example: elastic
+          nullable: true
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
@@ -200,12 +203,15 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
+              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
@@ -228,12 +234,15 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
+              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
@@ -264,12 +273,15 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
+              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
@@ -282,13 +294,16 @@ components:
       properties:
         email:
           type: string
+          example: null
           nullable: true
         full_name:
           type: string
+          example: null
           nullable: true
         username:
           type: string
           example: elastic
+          nullable: true
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
@@ -303,13 +318,16 @@ components:
       properties:
         email:
           type: string
+          example: null
           nullable: true
         full_name:
           type: string
+          example: null
           nullable: true
         username:
           type: string
           example: elastic
+          nullable: true
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
@@ -324,13 +342,16 @@ components:
       properties:
         email:
           type: string
+          example: null
           nullable: true
         full_name:
           type: string
+          example: null
           nullable: true
         username:
           type: string
           example: elastic
+          nullable: true
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
@@ -468,12 +489,15 @@ components:
             email:
               type: string
               example: null
+              nullable: true
             full_name:
               type: string
               example: null
+              nullable: true
             username:
               type: string
               example: elastic
+              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
