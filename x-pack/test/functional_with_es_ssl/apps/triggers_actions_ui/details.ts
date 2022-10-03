@@ -306,18 +306,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await confirmButton.click();
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
-
-      it('should unsnooze the rule', async () => {
-        const snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozedIndefinitely');
-        await snoozeBadge.click();
-
-        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
-        await snoozeCancel.click();
-
-        await retry.try(async () => {
-          await testSubjects.existOrFail('rulesListNotifyBadge-unsnoozed');
-        });
-      });
     });
 
     describe('Edit rule button', function () {
