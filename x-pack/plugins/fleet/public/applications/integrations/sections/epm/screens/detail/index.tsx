@@ -39,7 +39,7 @@ import {
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
-import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
+import { useGetPackageInfoByKey, useLink, useAgentPolicyContext, useIsGuidedOnboardingActive } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
@@ -49,7 +49,7 @@ import { WithHeaderLayout } from '../../../../layouts';
 
 import { WithGuidedOnboardingTour } from './components/with_guided_onboarding_tour';
 
-import { useIsFirstTimeAgentUser, useIsGuidedOnboardingActive } from './hooks';
+import { useIsFirstTimeAgentUser } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
   IntegrationAgentPolicyCount,

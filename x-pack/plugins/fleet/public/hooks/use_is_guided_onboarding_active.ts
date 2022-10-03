@@ -10,7 +10,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { of } from 'rxjs';
 
-import { useStartServices } from '../../../../../hooks';
+import { useStartServices } from '.';
 
 export const useIsGuidedOnboardingActive = (packageName?: string): boolean => {
   const [result, setResult] = useState<boolean>(false);

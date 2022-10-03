@@ -27,9 +27,7 @@ import type { SearchHit } from '@kbn/es-types';
 
 import styled from 'styled-components';
 
-import { useIsGuidedOnboardingActive } from '../../../../../../integrations/sections/epm/screens/detail/hooks';
-
-import { useStartServices } from '../../../../../../../hooks';
+import { useStartServices, useIsGuidedOnboardingActive } from '../../../../../../../hooks';
 
 import type { PackageInfo } from '../../../../../../../../common';
 
