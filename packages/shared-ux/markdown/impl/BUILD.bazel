@@ -51,6 +51,7 @@ RUNTIME_DEPS = [
   "@npm//react",
   "@npm//enzyme",
   "@npm//@elastic/eui",
+  "//packages/kbn-ambient-ui-types",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
