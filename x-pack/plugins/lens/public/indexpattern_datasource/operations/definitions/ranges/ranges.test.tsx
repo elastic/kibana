@@ -797,8 +797,8 @@ describe('ranges', () => {
         // This series of act closures are made to make it work properly the update flush
         act(() => {
           instance
-            .find('[data-test-subj="lns-customBucketContainer-remove"]')
-            .last()
+            .find('[data-test-subj="lns-customBucketContainer-remove-1"]')
+            .at(0)
             .simulate('click');
         });
 
