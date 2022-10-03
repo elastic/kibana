@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../common/lib/kibana';
 import { useSubAction } from './use_sub_action';
 
@@ -19,10 +19,12 @@ describe('useSubAction', () => {
     subAction: 'test',
     subActionParams: {},
   };
+  useKibanaMock().services.http.post = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve({ status: 'ok', data: {} }));
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useKibanaMock().services.http.post = jest.fn().mockResolvedValue({ status: 'ok', data: {} });
   });
 
   it('init', async () => {
@@ -30,7 +32,6 @@ describe('useSubAction', () => {
     await waitForNextUpdate();
 
     expect(result.current).toEqual({
-      isError: false,
       isLoading: false,
       response: {},
       error: null,
@@ -47,26 +48,89 @@ describe('useSubAction', () => {
     );
   });
 
+  it('executes sub action if subAction parameter changes', async () => {
+    const { rerender, waitForNextUpdate } = renderHook(useSubAction, { initialProps: params });
+    await waitForNextUpdate();
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      rerender({ ...params, subAction: 'test-2' });
+      await waitForNextUpdate();
+    });
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledTimes(2);
+  });
+
+  it('executes sub action if connectorId parameter changes', async () => {
+    const { rerender, waitForNextUpdate } = renderHook(useSubAction, { initialProps: params });
+    await waitForNextUpdate();
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      rerender({ ...params, connectorId: 'test-id-2' });
+      await waitForNextUpdate();
+    });
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns memoized response if subActionParams changes but values are equal', async () => {
+    const { result, rerender, waitForNextUpdate } = renderHook(useSubAction, {
+      initialProps: { ...params, subActionParams: { foo: 'bar' } },
+    });
+    await waitForNextUpdate();
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledTimes(1);
+    const previous = result.current;
+
+    await act(async () => {
+      rerender({ ...params, subActionParams: { foo: 'bar' } });
+      await waitForNextUpdate();
+    });
+
+    expect(result.current.response).toBe(previous.response);
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledTimes(1);
+  });
+
+  it('executes sub action if subActionParams changes and values are not equal', async () => {
+    const { result, rerender, waitForNextUpdate } = renderHook(useSubAction, {
+      initialProps: { ...params, subActionParams: { foo: 'bar' } },
+    });
+    await waitForNextUpdate();
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledTimes(1);
+    const previous = result.current;
+
+    await act(async () => {
+      rerender({ ...params, subActionParams: { foo: 'baz' } });
+      await waitForNextUpdate();
+    });
+
+    expect(result.current.response).not.toBe(previous.response);
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledTimes(2);
+  });
+
   it('returns an error correctly', async () => {
-    useKibanaMock().services.http.post = jest.fn().mockRejectedValue(new Error('error executing'));
+    const error = new Error('error executing');
+    useKibanaMock().services.http.post = jest.fn().mockRejectedValue(error);
 
     const { result, waitForNextUpdate } = renderHook(() => useSubAction(params));
     await waitForNextUpdate();
 
     expect(result.current).toEqual({
-      isError: true,
       isLoading: false,
       response: undefined,
-      error: expect.anything(),
+      error,
     });
   });
 
-  it('does not execute if params are null', async () => {
-    const { result } = renderHook(() => useSubAction(null));
+  it('does not execute if disabled', async () => {
+    const { result } = renderHook(() => useSubAction({ ...params, disabled: true }));
 
     expect(useKibanaMock().services.http.post).not.toHaveBeenCalled();
     expect(result.current).toEqual({
-      isError: false,
       isLoading: false,
       response: undefined,
       error: null,

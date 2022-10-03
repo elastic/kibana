@@ -6,33 +6,33 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { ActionTypeExecutorResult, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { ActionTypeExecutorResult, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
 
-const rewriteBodyRes: RewriteRequestCase<ActionTypeExecutorResult<unknown>> = ({
+const rewriteBodyRes = <R>({
   connector_id: actionId,
   service_message: serviceMessage,
   ...res
-}) => ({
+}: AsApiContract<ActionTypeExecutorResult<R>>): ActionTypeExecutorResult<R> => ({
   ...res,
   actionId,
   serviceMessage,
 });
 
-export async function executeAction({
+export async function executeAction<P, R>({
   id,
   params,
   http,
 }: {
   id: string;
   http: HttpSetup;
-  params: Record<string, unknown>;
-}): Promise<ActionTypeExecutorResult<unknown>> {
-  const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(
+  params: { subAction: string; subActionParams?: P };
+}): Promise<ActionTypeExecutorResult<R>> {
+  const res = await http.post<AsApiContract<ActionTypeExecutorResult<R>>>(
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}/_execute`,
     {
       body: JSON.stringify({ params }),
     }
   );
-  return rewriteBodyRes(res);
+  return rewriteBodyRes<R>(res);
 }
