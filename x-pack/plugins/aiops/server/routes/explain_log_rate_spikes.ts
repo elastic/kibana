@@ -75,7 +75,14 @@ export const defineExplainLogRateSpikesRoute = (
         return response.forbidden();
       }
 
-      logger.info('Explain Log Rate Spikes: Starting analysis.');
+      let logMessageCounter = 1;
+
+      function logInfoMessage(msg: string) {
+        logger.info(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
+        logMessageCounter++;
+      }
+
+      logInfoMessage('Starting analysis.');
 
       const groupingEnabled = !!request.body.grouping;
 
@@ -86,12 +93,12 @@ export const defineExplainLogRateSpikesRoute = (
       let loaded = 0;
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
-        logger.info('Explain Log Rate Spikes: aborted$ subscription trigger.');
+        logInfoMessage('aborted$ subscription trigger.');
         shouldStop = true;
         controller.abort();
       });
       request.events.completed$.subscribe(() => {
-        logger.info('Explain Log Rate Spikes: completed$ subscription trigger.');
+        logInfoMessage('completed$ subscription trigger.');
         shouldStop = true;
         controller.abort();
       });
@@ -109,7 +116,7 @@ export const defineExplainLogRateSpikesRoute = (
       const pingInterval = setInterval(pushPing, 1000);
 
       function end() {
-        logger.info('Explain Log Rate Spikes: Ending analysis.');
+        logInfoMessage('Ending analysis.');
         clearInterval(pingInterval);
         streamEnd();
       }
@@ -132,15 +139,15 @@ export const defineExplainLogRateSpikesRoute = (
       }
 
       function pushError(m: string) {
-        logger.info('Explain Log Rate Spikes: Push error.');
+        logInfoMessage('Push error.');
         push(addErrorAction(m));
       }
 
       // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
       (async () => {
-        logger.info('Explain Log Rate Spikes: Reset.');
+        logInfoMessage('Reset.');
         push(resetAction());
-        logger.info('Explain Log Rate Spikes: Load field candidates.');
+        logInfoMessage('Load field candidates.');
         push(
           updateLoadingStateAction({
             ccsWarning: false,
@@ -193,12 +200,15 @@ export const defineExplainLogRateSpikesRoute = (
         const changePoints: ChangePoint[] = [];
         const fieldsToSample = new Set<string>();
         const chunkSize = 10;
+        let chunkCount = 0;
 
         const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
-        logger.info('Explain Log Rate Spikes: Fetch p-values.');
+        logInfoMessage('Fetch p-values.');
 
         for (const fieldCandidatesChunk of fieldCandidatesChunks) {
+          chunkCount++;
+          logInfoMessage(`Fetch p-values. Chunk ${chunkCount} of ${fieldCandidatesChunks.length}`);
           let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
           try {
             pValues = await fetchChangePointPValues(
@@ -248,12 +258,15 @@ export const defineExplainLogRateSpikesRoute = (
           );
 
           if (shouldStop) {
+            logInfoMessage('shouldStop fetching p-values.');
+
             end();
             return;
           }
         }
 
         if (changePoints?.length === 0) {
+          logInfoMessage('Stopping analysis, did not find change points.');
           endWithUpdatedLoadingState();
           return;
         }
@@ -262,7 +275,7 @@ export const defineExplainLogRateSpikesRoute = (
           { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
         ];
 
-        logger.info('Explain Log Rate Spikes: Fetch overall histogram.');
+        logInfoMessage('Fetch overall histogram.');
 
         let overallTimeSeries: NumericChartData | undefined;
         try {
@@ -300,7 +313,7 @@ export const defineExplainLogRateSpikesRoute = (
         }
 
         if (groupingEnabled) {
-          logger.info('Explain Log Rate Spikes: Group results.');
+          logInfoMessage('Group results.');
 
           push(
             updateLoadingStateAction({
@@ -485,7 +498,7 @@ export const defineExplainLogRateSpikesRoute = (
 
               pushHistogramDataLoadingState();
 
-              logger.info('Explain Log Rate Spikes: Fetch group histograms.');
+              logInfoMessage('Fetch group histograms.');
 
               await asyncForEach(changePointGroups, async (cpg) => {
                 if (overallTimeSeries !== undefined) {
@@ -564,7 +577,7 @@ export const defineExplainLogRateSpikesRoute = (
 
         loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
 
-        logger.info('Explain Log Rate Spikes: Fetch field/value histograms.');
+        logInfoMessage('Fetch field/value histograms.');
 
         // time series filtered by fields
         if (changePoints && overallTimeSeries !== undefined) {
