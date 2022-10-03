@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import type { trustedAppsAllHttpMocks } from '../../../mocks';
-import type { ArtifactListPageRenderingSetup } from '../mocks';
-import { getArtifactListPageRenderingSetup } from '../mocks';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import type { trustedAppsAllHttpMocks } from '../../../../mocks';
+import type { ArtifactListPageRenderingSetup } from '../../mocks';
+import { getArtifactListPageRenderingSetup } from '../../mocks';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getDeferred } from '../../../mocks/utils';
+import { getDeferred } from '../../../../mocks/utils';
 
 describe('When displaying the Delete artifact modal in the Artifact List Page', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -77,14 +77,12 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
     10000
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/139527
-  it.skip('should show Cancel and Delete buttons enabled', async () => {
+  it('should show Cancel and Delete buttons enabled', async () => {
     expect(cancelButton).toBeEnabled();
     expect(submitButton).toBeEnabled();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/139528
-  it.skip('should close modal if Cancel/Close buttons are clicked', async () => {
+  it('should close modal if Cancel/Close buttons are clicked', async () => {
     userEvent.click(cancelButton);
 
     expect(renderResult.queryByTestId('testPage-deleteModal')).toBeNull();
