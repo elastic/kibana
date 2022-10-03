@@ -51,10 +51,10 @@ const getPlaceholderValue = (
   placeholder?: string,
   options?: Array<EuiComboBoxOptionOption<string>>
 ) => {
-if(!placeholder){
-  return;
-}
-return findInGroupedOptions(options, placeholder)?.label || placeholder;
+  if (!placeholder) {
+    return;
+  }
+  return findInGroupedOptions(options, placeholder)?.label || placeholder;
 };
 
 export function FieldSelect({
