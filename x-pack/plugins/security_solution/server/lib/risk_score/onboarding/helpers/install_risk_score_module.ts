@@ -5,8 +5,6 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import {
   getCreateLatestTransformOptions,
@@ -35,14 +33,6 @@ interface InstallRiskScoreModule {
   logger: Logger;
   riskScoreEntity: RiskScoreEntity;
   spaceId: string;
-}
-
-interface OnboardRiskScoreModule {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  riskScoreEntity: RiskScoreEntity;
-  spaceId: string;
-  savedObjectsClient: SavedObjectsClientContract;
 }
 
 const createHostRiskScoreIngestPipelineGrouping = ({
@@ -89,8 +79,7 @@ const installHostRiskScoreModule = async ({
   riskScoreEntity,
   logger,
   spaceId,
-  savedObjectsClient,
-}: OnboardRiskScoreModule) => {
+}: InstallRiskScoreModule) => {
   const result = await Promise.all([
     /**
      * console_templates/enable_host_risk_score.console
@@ -225,11 +214,10 @@ const createUserRiskScoreIngestPipelineGrouping = async ({
 
 const installUserRiskScoreModule = async ({
   esClient,
-  savedObjectsClient,
   logger,
   riskScoreEntity,
   spaceId,
-}: OnboardRiskScoreModule) => {
+}: InstallRiskScoreModule) => {
   const result = await Promise.all([
     /**
      * console_templates/enable_user_risk_score.console
@@ -314,7 +302,7 @@ const installUserRiskScoreModule = async ({
   ].flat();
 };
 
-export const installRiskScoreModule = async (settings: OnboardRiskScoreModule) => {
+export const installRiskScoreModule = async (settings: InstallRiskScoreModule) => {
   if (settings.riskScoreEntity === RiskScoreEntity.user) {
     const result = await installUserRiskScoreModule(settings);
     return result;

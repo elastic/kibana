@@ -15,7 +15,7 @@ import {
   deleteTransforms,
   deleteIngestPipelines,
   bulkDeletePrebuiltSavedObjects,
-  onboardingRiskScore,
+  installRiskScore,
   bulkCreatePrebuiltSavedObjects,
   restartTransforms,
 } from '../../../../risk_score/containers/onboarding/api';
@@ -54,7 +54,7 @@ const installHostRiskScoreModule = async ({
   theme,
   timerange,
 }: InstallRiskyScoreModule) => {
-  await onboardingRiskScore({
+  await installRiskScore({
     http,
     theme,
     renderDocLink,
@@ -104,7 +104,7 @@ const installUserRiskScoreModule = async ({
   theme,
   timerange,
 }: InstallRiskyScoreModule) => {
-  await onboardingRiskScore({
+  await installRiskScore({
     http,
     theme,
     renderDocLink,

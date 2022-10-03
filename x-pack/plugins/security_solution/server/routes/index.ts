@@ -82,7 +82,7 @@ import {
   deletePrebuiltSavedObjectsRoute,
   deleteStoredScriptRoute,
   getRiskScoreIndexStatusRoute,
-  onboardRiskScoresRoute,
+  installRiskScoresRoute,
   readPrebuiltDevToolContentRoute,
   restartTransfornRoute,
 } from '../lib/risk_score/routes';
@@ -195,7 +195,7 @@ export const initRoutes = (
   createPrebuiltSavedObjectsRoute(router, logger, security);
   deletePrebuiltSavedObjectsRoute(router, security);
   getRiskScoreIndexStatusRoute(router);
-  onboardRiskScoresRoute(router, logger, security);
+  installRiskScoresRoute(router, logger, security);
   restartTransfornRoute(router, logger);
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {

@@ -24,7 +24,7 @@ interface Options {
 type Response = Record<string, { success?: boolean; error?: Error }>;
 const toastLifeTimeMs = 600000;
 
-export const onboardingRiskScore = async ({
+export const installRiskScore = async ({
   errorMessage,
   http,
   notifications,

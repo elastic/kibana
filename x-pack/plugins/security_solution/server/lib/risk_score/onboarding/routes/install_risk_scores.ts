@@ -17,9 +17,8 @@ import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { installRiskScoreModule } from '../helpers/install_risk_score_module';
 import { onboardingRiskScoreSchema } from '../schema';
-import { buildFrameworkRequest } from '../../../timeline/utils/common';
 
-export const onboardRiskScoresRoute = (
+export const installRiskScoresRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
   security: SetupPlugins['security']
@@ -43,14 +42,11 @@ export const onboardRiskScoresRoute = (
 
         const { client } = (await context.core).elasticsearch;
         const esClient = client.asCurrentUser;
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
         const res = await installRiskScoreModule({
           esClient,
           logger,
           riskScoreEntity,
           spaceId,
-          savedObjectsClient,
         });
 
         return response.ok({
