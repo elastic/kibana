@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { EuiText, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 /**
  * A component to be displayed in multi step onboarding process.
@@ -92,24 +93,28 @@ const Features = () => (
   </EuiFlexGroup>
 );
 
-const Details = () => (
-  <EuiText size="m" color="subdued">
-    <p>
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.details"
-        defaultMessage="You can change this later by editing the Endpoint Security integration agent policy.
+const Details = () => {
+  const { docLinks } = useKibana().services;
+
+  return (
+    <EuiText size="m" color="subdued">
+      <p>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.details"
+          defaultMessage="You can change this later by editing the Endpoint Security integration agent policy.
       Read more about Endpoint security configuration in our {docsPage}."
-        values={{
-          docsPage: (
-            <EuiLink href="https://www.elastic.co/guide/en/security/master/configure-endpoint-integration-policy.html">
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.docsPage"
-                defaultMessage="documentation"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    </p>
-  </EuiText>
-);
+          values={{
+            docsPage: (
+              <EuiLink href={docLinks.links.securitySolution.configureEndpointIntegrationPolicy}>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.docsPage"
+                  defaultMessage="documentation"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    </EuiText>
+  );
+};
