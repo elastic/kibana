@@ -24,7 +24,7 @@ import { getDefaultQueryLanguage } from '../../../../application/components/lib/
 import { fetchIndexPattern } from '../../../../../common/index_patterns_utils';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';
-import type { Annotation, Metric, Panel } from '../../../../../common/types';
+import type { Annotation, Metric, Panel, Series } from '../../../../../common/types';
 import { getSeriesAgg } from '../../series';
 import {
   isPercentileRanksColumnWithMeta,
@@ -42,6 +42,10 @@ function getPalette(palette: PaletteOutput): PaletteOutput {
   return !palette || palette.name === 'gradient' || palette.name === 'rainbow'
     ? { name: 'default', type: 'palette' }
     : palette;
+}
+
+function getAxisMode(series: Series, model: Panel): YAxisMode {
+  return (series.separate_axis ? series.axis_position : model.axis_position) as YAxisMode;
 }
 
 function getColor(
@@ -90,7 +94,6 @@ export const getLayers = async (
     )?.columnId;
     const chartType = getChartType(series, model.type);
     const commonProps = {
-      seriesType: chartType,
       layerId: dataSourceLayer.layerId,
       accessors: metricColumns.map((metricColumn) => {
         return metricColumn.columnId;
@@ -102,19 +105,17 @@ export const getLayers = async (
         return {
           forAccessor: metricColumn.columnId,
           color: getColor(metricColumn, metric!, series.color, splitAccessor),
-          axisMode: (series.separate_axis
-            ? series.axis_position
-            : model.axis_position) as YAxisMode,
+          axisMode: isReferenceLine // reference line should be assigned to axis with real data
+            ? model.series.some((s) => s.id !== series.id && getAxisMode(s, model) === 'right')
+              ? 'right'
+              : 'left'
+            : getAxisMode(series, model),
           ...(isReferenceLine && {
-            fill: chartType === 'area' ? FillTypes.BELOW : FillTypes.NONE,
+            fill: chartType.includes('area') ? FillTypes.BELOW : FillTypes.NONE,
+            lineWidth: series.line_width,
           }),
         };
       }),
-      xAccessor: dataSourceLayer.columns.find((column) => column.isBucketed && !column.isSplit)
-        ?.columnId,
-      splitAccessor,
-      collapseFn: seriesAgg,
-      palette: getPalette(series.palette as PaletteOutput),
     };
     if (isReferenceLine) {
       return {
@@ -123,8 +124,14 @@ export const getLayers = async (
       };
     } else {
       return {
+        seriesType: chartType,
         layerType: 'data',
         ...commonProps,
+        xAccessor: dataSourceLayer.columns.find((column) => column.isBucketed && !column.isSplit)
+          ?.columnId,
+        splitAccessor,
+        collapseFn: seriesAgg,
+        palette: getPalette(series.palette as PaletteOutput),
       };
     }
   });

@@ -98,11 +98,16 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       return null;
     }
 
+    const isReferenceLine =
+      metricsColumns.length === 1 && metricsColumns[0].operationType === 'static_value';
+
     const layerId = uuid();
     extendedLayers[layerIdx] = {
       indexPatternId,
       layerId,
-      columns: [...metricsColumns, dateHistogramColumn, ...bucketsColumns],
+      columns: isReferenceLine
+        ? [...metricsColumns]
+        : [...metricsColumns, dateHistogramColumn, ...bucketsColumns],
       columnOrder: [],
     };
   }

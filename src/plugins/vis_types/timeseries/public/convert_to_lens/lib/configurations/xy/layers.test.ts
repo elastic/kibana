@@ -364,9 +364,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -423,9 +424,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -468,9 +470,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -513,9 +516,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -607,9 +611,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
