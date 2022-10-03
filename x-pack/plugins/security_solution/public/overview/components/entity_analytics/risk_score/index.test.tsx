@@ -35,6 +35,7 @@ const defaultProps = {
   refetch: () => {},
   isModuleEnabled: true,
   isLicenseValid: true,
+  loading: false,
 };
 const mockUseRiskScore = useRiskScore as jest.Mock;
 const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
@@ -49,11 +50,11 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         severityCount: mockSeverityCount,
         loading: false,
       });
-      mockUseRiskScore.mockReturnValue([false, defaultProps]);
+      mockUseRiskScore.mockReturnValue(defaultProps);
     });
 
     it('renders enable button when module is disable', () => {
-      mockUseRiskScore.mockReturnValue([false, { ...defaultProps, isModuleEnabled: false }]);
+      mockUseRiskScore.mockReturnValue({ ...defaultProps, isModuleEnabled: false });
       const { getByTestId } = render(
         <TestProviders>
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />
