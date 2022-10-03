@@ -65,7 +65,7 @@ based on different timestamps.
 
 . To specify your own {data-source} name, click *Show advanced settings*, then enter the name in the *Custom {data-source} ID* field. For example, enter your {es} index alias name.
 
-. To use this data in searches and visualizations you intend to save, click *Save {data-source} to {kib}*.
+. To use this data in the searches and visualizations you intend to save, click *Save {data-source} to {kib}*.
 +
 {kib}[[reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index,
 the {data-source} field list is updated
