@@ -20,9 +20,24 @@ export function getReferencesFilter({
   must?: boolean;
 }) {
   if (operator === 'AND') {
+    if (must) {
+      return {
+        bool: {
+          must: references.map(getNestedTermClauseForReference),
+        },
+      };
+    }
+
     return {
       bool: {
-        [must ? 'must' : 'must_not']: references.map(getNestedTermClauseForReference),
+        must_not: [
+          {
+            bool: {
+              should: references.map(getNestedTermClauseForReference),
+              minimum_should_match: references.length,
+            },
+          },
+        ],
       },
     };
   } else {
