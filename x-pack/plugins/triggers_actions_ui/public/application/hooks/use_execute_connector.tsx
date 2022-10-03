@@ -12,9 +12,9 @@ import { useKibana } from '../../common/lib/kibana';
 
 interface UseExecuteConnectorReturnValue {
   isLoading: boolean;
-  executeConnector: <P extends Record<string, unknown>>(args: {
+  executeConnector: (args: {
     connectorId: string;
-    params: P;
+    params: Record<string, unknown>;
   }) => Promise<ActionTypeExecutorResult<unknown> | undefined>;
 }
 
