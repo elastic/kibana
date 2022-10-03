@@ -20,6 +20,7 @@ import Color from 'color';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
+import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
 import { fetchIndexPattern } from '../../../../../common/index_patterns_utils';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';
@@ -62,7 +63,7 @@ function getColor(
 }
 
 function nonNullable<T>(value: T): value is NonNullable<T> {
-  return value !== null && value !== undefined;
+  return value != null;
 }
 
 export const getLayers = async (
@@ -131,16 +132,22 @@ export const getLayers = async (
     return nonAnnotationsLayers;
   }
 
-  const annotationsByIndexPattern = groupBy(
-    model.annotations,
-    (a) => typeof a.index_pattern === 'object' && 'id' in a.index_pattern && a.index_pattern.id
-  );
+  const annotationsByIndexPatternAndIgnoreFlag = groupBy(model.annotations, (a) => {
+    const id = typeof a.index_pattern === 'object' && 'id' in a.index_pattern && a.index_pattern.id;
+    return `${id}-${Boolean(a.ignore_global_filters)}`;
+  });
 
   try {
     const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
-      Object.entries(annotationsByIndexPattern).map(async ([indexPatternId, annotations]) => {
+      Object.values(annotationsByIndexPatternAndIgnoreFlag).map(async (annotations) => {
+        const [firstAnnotation] = annotations;
+        const indexPatternId =
+          typeof firstAnnotation.index_pattern === 'string'
+            ? firstAnnotation.index_pattern
+            : firstAnnotation.index_pattern?.id;
         const convertedAnnotations: EventAnnotationConfig[] = [];
-        const { indexPattern } = (await fetchIndexPattern({ id: indexPatternId }, dataViews)) || {};
+        const { indexPattern } =
+          (await fetchIndexPattern(indexPatternId && { id: indexPatternId }, dataViews)) || {};
 
         if (indexPattern) {
           annotations.forEach((a: Annotation) => {
@@ -152,9 +159,9 @@ export const getLayers = async (
           return {
             layerId: v4(),
             layerType: 'annotations',
-            ignoreGlobalFilters: true,
+            ignoreGlobalFilters: Boolean(firstAnnotation.ignore_global_filters),
             annotations: convertedAnnotations,
-            indexPatternId,
+            indexPatternId: indexPattern.id!,
           };
         }
       })
@@ -170,38 +177,36 @@ const convertAnnotation = (
   annotation: Annotation,
   dataView: DataView
 ): EventAnnotationConfig | undefined => {
-  if (annotation.query_string) {
-    const extraFields = annotation.fields
-      ? annotation.fields
-          ?.replace(/\s/g, '')
-          ?.split(',')
-          .map((field) => {
-            const dataViewField = dataView.getFieldByName(field);
-            return dataViewField && dataViewField.aggregatable ? field : undefined;
-          })
-          .filter(nonNullable)
-      : undefined;
-    return {
-      type: 'query',
-      id: annotation.id,
-      label: 'Event',
-      key: {
-        type: 'point_in_time',
-      },
-      color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
-      timeField: annotation.time_field,
-      icon:
-        annotation.icon &&
-        ICON_TYPES_MAP[annotation.icon] &&
-        typeof ICON_TYPES_MAP[annotation.icon] === 'string'
-          ? ICON_TYPES_MAP[annotation.icon]
-          : 'triangle',
-      filter: {
-        type: 'kibana_query',
-        ...annotation.query_string,
-      },
-      extraFields,
-      isHidden: annotation.hidden,
-    };
-  }
+  const extraFields = annotation.fields
+    ?.replace(/\s/g, '')
+    .split(',')
+    .map((field) => {
+      const dataViewField = dataView.getFieldByName(field);
+      return dataViewField && dataViewField.aggregatable ? field : undefined;
+    })
+    .filter(nonNullable);
+
+  return {
+    type: 'query',
+    id: annotation.id,
+    label: 'Event',
+    key: {
+      type: 'point_in_time',
+    },
+    color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
+    timeField: annotation.time_field || dataView.timeFieldName,
+    icon:
+      annotation.icon &&
+      ICON_TYPES_MAP[annotation.icon] &&
+      typeof ICON_TYPES_MAP[annotation.icon] === 'string'
+        ? ICON_TYPES_MAP[annotation.icon]
+        : 'triangle',
+    filter: {
+      type: 'kibana_query',
+      query: annotation.query_string?.query || '*',
+      language: annotation.query_string?.language || getDefaultQueryLanguage(),
+    },
+    extraFields,
+    isHidden: annotation.hidden,
+  };
 };
