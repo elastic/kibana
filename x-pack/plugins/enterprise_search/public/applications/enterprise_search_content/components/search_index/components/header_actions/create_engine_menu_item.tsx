@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiBetaBadge, EuiContextMenuItem, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -54,9 +54,6 @@ export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
             </p>
           </EuiText>
         </EuiContextMenuItem>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ paddingTop: '.125rem' }}>
-        <EuiBetaBadge label="Beta" size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
