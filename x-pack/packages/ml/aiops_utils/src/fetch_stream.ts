@@ -50,6 +50,7 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
     stream = await fetch(endpoint, {
       signal: abortCtrl.current.signal,
       method: 'POST',
+      // mode: 'no-cors',
       headers: {
         // This refers to the format of the request body,
         // not the response, which will be a uint8array Buffer.

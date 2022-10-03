@@ -43,3 +43,10 @@ export const inferTrainedModelBody = schema.object({
   docs: schema.any(),
   inference_config: schema.maybe(schema.any()),
 });
+
+export const huggingFaceImport = schema.object({
+  hubModelId: schema.string(),
+  taskType: schema.string(),
+  start: schema.boolean(),
+  clearPrevious: schema.boolean(),
+});

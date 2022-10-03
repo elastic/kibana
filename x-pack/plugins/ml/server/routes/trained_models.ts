@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { spawn } from 'child_process';
 import { schema } from '@kbn/config-schema';
+import { streamFactory } from '@kbn/aiops-utils';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
@@ -16,6 +18,7 @@ import {
   inferTrainedModelQuery,
   inferTrainedModelBody,
   threadingParamsSchema,
+  huggingFaceImport,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -393,6 +396,90 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         return response.ok({
           body,
         });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/hugging_face_import Import hugging face trained model
+   * @apiName InferTrainedModelDeployment
+   * @apiDescription Import hugging face trained model.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/hugging_face_import',
+      validate: {
+        body: huggingFaceImport,
+      },
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        function resetAction() {
+          return { type: 'reset' };
+        }
+
+        const ELASTICSEARCH_URL = 'http://elastic:mlqa_admin@localhost:9200';
+
+        const { end, push, responseWithHeaders } = streamFactory<any>(
+          request.headers,
+          {
+            error: (e: any) => {
+              // eslint-disable-next-line no-console
+              console.log(e);
+            },
+          } as any,
+          true
+        );
+
+        (async () => {
+          push(resetAction());
+          const { hubModelId, start, clearPrevious, taskType } = request.body;
+          const importCmd = `eland_import_hub_model --url ${ELASTICSEARCH_URL} --hub-model-id ${hubModelId} --task-type ${taskType} ${
+            start ? '--start' : ''
+          } ${clearPrevious ? '--clear-previous' : ''}`;
+
+          const cmd = `cd /Users/james/dev/eland && . venv/bin/activate && ${importCmd}`;
+
+          const run = async () => {
+            return new Promise<void>((resolve, reject) => {
+              const child = spawn(cmd, [], { shell: true, detached: true });
+
+              child.stderr.on('data', (data) => {
+                const line: string = data.toString().replace(/\n/g, '');
+                if (line.match(/parts\/s/)) {
+                  const percentageMatch = line.match(/^\r\s?(.*)%/);
+                  if (percentageMatch && percentageMatch.length > 1) {
+                    push({
+                      type: 'progress',
+                      payload: { progress: Number(percentageMatch[1]) },
+                    });
+                  }
+                } else {
+                  push({
+                    type: 'add_messages',
+                    payload: { messages: [line] },
+                  });
+                }
+              });
+
+              child.on('error', (error) => {});
+
+              child.on('close', (code) => {});
+            });
+          };
+
+          await run();
+          end();
+        })();
+
+        return response.ok(responseWithHeaders);
       } catch (e) {
         return response.customError(wrapError(e));
       }

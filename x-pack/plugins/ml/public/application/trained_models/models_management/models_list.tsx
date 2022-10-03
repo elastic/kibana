@@ -9,6 +9,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -57,6 +58,7 @@ import {
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { TestTrainedModelFlyout, isTestable, isTestEnabled } from './test_models';
+import { UploadTrainedModelFlyout } from './upload_model';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -90,9 +92,11 @@ export const ModelsList: FC<Props> = ({
       overlays,
       theme,
       docLinks,
+      http,
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
+  const basePath = http.basePath.get() ?? '';
 
   const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeployment;
 
@@ -133,6 +137,7 @@ export const ModelsList: FC<Props> = ({
     {}
   );
   const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
+  const [showUploadFlyout, setShowUploadFlyout] = useState<boolean>(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
@@ -735,6 +740,11 @@ export const ModelsList: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={() => setShowUploadFlyout(!showUploadFlyout)}>
+                Import trained model from Hugging Face
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           </>
         )}
       </EuiFlexGroup>
@@ -778,6 +788,14 @@ export const ModelsList: FC<Props> = ({
           onClose={setShowTestFlyout.bind(null, null)}
         />
       )}
+      {showUploadFlyout ? (
+        <UploadTrainedModelFlyout
+          onClose={() => {
+            setShowUploadFlyout(false);
+            fetchModelsData();
+          }}
+        />
+      ) : null}
     </>
   );
 };
