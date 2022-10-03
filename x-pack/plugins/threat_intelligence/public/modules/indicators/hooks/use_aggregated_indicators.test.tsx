@@ -12,7 +12,7 @@ import {
   mockedTimefilterService,
   TestProvidersComponent,
 } from '../../../common/mocks/test_providers';
-import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';
+import { createFetchAggregatedIndicators } from '../services';
 
 jest.mock('../services/fetch_aggregated_indicators');
 
@@ -28,7 +28,8 @@ const renderUseAggregatedIndicators = () =>
     wrapper: TestProvidersComponent,
   });
 
-describe('useAggregatedIndicators()', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/142312
+describe.skip('useAggregatedIndicators()', () => {
   beforeEach(jest.clearAllMocks);
 
   type MockedCreateFetchAggregatedIndicators = jest.MockedFunction<
