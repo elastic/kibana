@@ -27,6 +27,6 @@ export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
     createTelemetryPrebuiltRuleAlertsTaskConfig(telemetryConfiguration.max_detection_alerts_batch),
     createTelemetryTimelineTaskConfig(),
     createTelemetryConfigurationTaskConfig(),
-    createTelemetryFilterListArtifactTaskConfig()
+    createTelemetryFilterListArtifactTaskConfig(),
   ];
 }
