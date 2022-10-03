@@ -20,11 +20,8 @@ export default {
   },
 };
 
-
 export const Markdown = () => {
-  return (
-     <Markdown />
-  );
+  return <Markdown />;
 };
 
 // Card.argTypes = argTypes;

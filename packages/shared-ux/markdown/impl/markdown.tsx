@@ -9,29 +9,37 @@
 import { EuiMarkdownEditor, EuiMarkdownEditorProps } from '@elastic/eui';
 import React, { useState } from 'react';
 
-export type MarkdownProps = Partial<Omit<EuiMarkdownEditorProps, 'editorId' | 'uiPlugins' | 'markdownFormatProps'>> & {
+export type MarkdownProps = Partial<
+  Omit<EuiMarkdownEditorProps, 'editorId' | 'uiPlugins' | 'markdownFormatProps'>
+> & {
   initialContent: string;
   ariaLabelContent: string;
   /** needed for instances where markdown is used as a presentation of error messages */
   readonly: boolean;
-  height?: number | 'full'
+  height?: number | 'full';
   placeholder?: string | undefined;
-}
+};
 
-export const Markdown = ({ initialContent, ariaLabelContent, readonly, placeholder, height='full' }: MarkdownProps) => {
+export const Markdown = ({
+  initialContent,
+  ariaLabelContent,
+  readonly,
+  placeholder,
+  height = 'full',
+}: MarkdownProps) => {
   const [value, setValue] = useState(initialContent);
 
   if (readonly) {
     return (
-        <EuiMarkdownEditor
-          readOnly
-          placeholder={placeholder}
-          aria-label={ariaLabelContent ?? 'markdown component'}
-          value={value}
-          onChange={setValue}
-          height={height}
-        />
-    )
+      <EuiMarkdownEditor
+        readOnly
+        placeholder={placeholder}
+        aria-label={ariaLabelContent ?? 'markdown component'}
+        value={value}
+        onChange={setValue}
+        height={height}
+      />
+    );
   }
 
   return (
