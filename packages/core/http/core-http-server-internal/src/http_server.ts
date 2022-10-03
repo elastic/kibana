@@ -21,6 +21,8 @@ import type { Duration } from 'moment';
 import { firstValueFrom, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
+// @ts-expect-error no type definition
+import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
@@ -41,7 +43,6 @@ import type {
   HttpAuth,
   IAuthHeadersStorage,
 } from '@kbn/core-http-server';
-import Brok from 'brok';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -53,7 +54,6 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-// @ts-expect-error
 
 /** @internal */
 export interface HttpServerSetup {
