@@ -255,7 +255,7 @@ export const defineExplainLogRateSpikesRoute = (
         } catch (e) {
           logger.error(`Failed to fetch the overall histogram data, got: \n${e.toString()}`);
           pushError(`Failed to fetch overall histogram data.`);
-          // Still continue the analysis even if loading the overall histogram failes.
+          // Still continue the analysis even if loading the overall histogram fails.
         }
 
         if (groupingEnabled) {
@@ -496,7 +496,7 @@ export const defineExplainLogRateSpikesRoute = (
             logger.error(
               `Failed to transform field/value pairs into groups, got: \n${e.toString()}`
             );
-            pushError(`Failed to transform field/value pairs  into groups.`);
+            pushError(`Failed to transform field/value pairs into groups.`);
           }
         }
 
