@@ -7,6 +7,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { i18n } from '@kbn/i18n';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { Tag } from './utils';
 import { RISK_SCORE_TAG_DESCRIPTION, getRiskScoreTagName } from './utils';
@@ -52,7 +53,7 @@ export const findOrCreateRiskScoreTag = async ({
   spaceId?: string;
 }): Promise<BulkCreateSavedObjectsResult> => {
   const tagName = getRiskScoreTagName(riskScoreEntity, spaceId);
-
+  const savedObjectTemplate = `${riskScoreEntity}RiskScoreDashboards`;
   const existingRiskScoreTag = await findRiskScoreTag({
     savedObjectsClient,
     search: tagName,
@@ -66,12 +67,20 @@ export const findOrCreateRiskScoreTag = async ({
   };
 
   if (existingRiskScoreTag?.id != null) {
-    logger.error(`${riskScoreEntity}RiskScoreDashboards already exists`);
+    logger.error(`${savedObjectTemplate} already exists`);
     return {
-      [`${riskScoreEntity}RiskScoreDashboards`]: {
+      [savedObjectTemplate]: {
         success: false,
         error: transformError(
-          new Error(`${riskScoreEntity}RiskScoreDashboards was not created as it already exists`)
+          new Error(
+            i18n.translate(
+              'xpack.securitySolution.riskScore.savedObjects.templateAlreadyExistsTitle',
+              {
+                values: { savedObjectTemplate },
+                defaultMessage: `Failed to import saved objects: {savedObjectTemplate} were not created as already exist`,
+              }
+            )
+          )
         ),
       },
     };
@@ -84,7 +93,7 @@ export const findOrCreateRiskScoreTag = async ({
       });
 
       return {
-        [`${riskScoreEntity}RiskScoreDashboards`]: {
+        [savedObjectTemplate]: {
           success: true,
           error: null,
           body: { ...tag, id: tagId },
@@ -92,14 +101,20 @@ export const findOrCreateRiskScoreTag = async ({
       };
     } catch (e) {
       logger.error(
-        `${riskScoreEntity}RiskScoreDashboards cannot be installed as failed to create the tag`
+        `${savedObjectTemplate} cannot be installed as failed to create the tag: ${tagName}`
       );
       return {
-        [`${riskScoreEntity}RiskScoreDashboards`]: {
+        [savedObjectTemplate]: {
           success: false,
           error: transformError(
             new Error(
-              `${riskScoreEntity}RiskScoreDashboards was not created as failed to create the tag`
+              i18n.translate(
+                'xpack.securitySolution.riskScore.savedObjects.failedToCreateTagTitle',
+                {
+                  values: { savedObjectTemplate, tagName },
+                  defaultMessage: `Failed to import saved objects: {savedObjectTemplate} were not created as failed to create the tag: {tagName}`,
+                }
+              )
             )
           ),
         },

@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',
@@ -64,7 +65,14 @@ export const createTransformIfNotExists = async (
     return {
       [transform.transform_id]: {
         success: false,
-        error: transformError(new Error(`Transform ${transform.transform_id} already exists`)),
+        error: transformError(
+          new Error(
+            i18n.translate('xpack.securitySolution.riskScore.transform.transformExistsTitle', {
+              values: { transformId: transform.transform_id },
+              defaultMessage: `Failed to create Transform as {transformId} already exists`,
+            })
+          )
+        ),
       },
     };
   } catch (existErr) {
@@ -100,13 +108,18 @@ const checkTransformState = async (
       transform_id: transformId,
     });
     if (transformStats.count <= 0) {
-      logger.error(`Failed starting transform ${transformId}: couldn't find transform`);
+      logger.error(`Failed to check ${transformId} state: couldn't find transform`);
 
       return {
         [transformId]: {
           success: false,
           error: transformError(
-            new Error(`Failed starting transform ${transformId}: couldn't find transform`)
+            new Error(
+              i18n.translate('xpack.securitySolution.riskScore.transform.notFoundTitle', {
+                values: { transformId },
+                defaultMessage: `Failed to check Transform state as {transformId} not found`,
+              })
+            )
           ),
         },
       };
@@ -160,7 +173,10 @@ export const startTransformIfNotStarted = async (
         success: false,
         error: transformError(
           new Error(
-            `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
+            i18n.translate('xpack.securitySolution.riskScore.transform.start.stateConflictTitle', {
+              values: { transformId, state: fetchedTransformStats.state },
+              defaultMessage: `Not starting transform {transformId} since it's state is: {state}`,
+            })
           )
         ),
       },
@@ -202,7 +218,10 @@ const stopTransform = async (
         success: false,
         error: transformError(
           new Error(
-            `Not stopping transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
+            i18n.translate('xpack.securitySolution.riskScore.transform.stop.stateConflictTitle', {
+              values: { transformId, state: fetchedTransformStats.state },
+              defaultMessage: `Not stopping transform {transformId} since it's state is: {state}`,
+            })
           )
         ),
       },

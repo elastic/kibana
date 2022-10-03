@@ -9,6 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 
 import uuid from 'uuid';
+import { i18n } from '@kbn/i18n';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
 import type { BulkCreateSavedObjectsResult, SavedObjectTemplate } from '../types';
@@ -51,7 +52,12 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
       [savedObjectTemplate]: {
         success: false,
         error: transformError(
-          new Error(`${savedObjectTemplate} was not created as template not found`)
+          new Error(
+            i18n.translate('xpack.securitySolution.riskScore.savedObjects.templateNotFoundTitle', {
+              values: { savedObjectTemplate },
+              defaultMessage: `Failed to import saved objects: {savedObjectTemplate} were not created as template not found`,
+            })
+          )
         ),
       },
     };
