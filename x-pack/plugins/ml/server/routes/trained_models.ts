@@ -425,7 +425,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           return { type: 'reset' };
         }
 
-        const ELASTICSEARCH_URL = 'http://elastic:mlqa_admin@localhost:9200';
+        const ELASTICSEARCH_URL = 'http://user:pass@localhost:9200';
 
         const { end, push, responseWithHeaders } = streamFactory<any>(
           request.headers,
