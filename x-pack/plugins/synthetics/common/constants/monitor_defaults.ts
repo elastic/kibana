@@ -148,6 +148,7 @@ export const DEFAULT_TCP_SIMPLE_FIELDS: TCPSimpleFields = {
     is_tls_enabled: false,
   },
   [ConfigKey.HOSTS]: '',
+  [ConfigKey.URLS]: '',
   [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
   [ConfigKey.PORT]: null,
