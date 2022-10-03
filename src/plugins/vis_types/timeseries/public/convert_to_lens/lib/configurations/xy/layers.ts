@@ -69,7 +69,8 @@ function nonNullable<T>(value: T): value is NonNullable<T> {
 export const getLayers = async (
   dataSourceLayers: Record<number, Layer>,
   model: Panel,
-  dataViews: DataViewsPublicPluginStart
+  dataViews: DataViewsPublicPluginStart,
+  isVisWithReferenceLines: boolean = false
 ): Promise<XYLayerConfig[] | null> => {
   const nonAnnotationsLayers: XYLayerConfig[] = Object.keys(dataSourceLayers).map((key) => {
     const series = model.series[parseInt(key, 10)];
@@ -84,7 +85,8 @@ export const getLayers = async (
     const metricColumns = dataSourceLayer.columns.filter(
       (l) => !l.isBucketed && l.columnId !== referenceColumnId
     );
-    const isReferenceLine = metrics.length === 1 && metrics[0].type === 'static';
+    const isReferenceLine =
+      isVisWithReferenceLines && metrics.length === 1 && metrics[0].type === 'static';
     const splitAccessor = dataSourceLayer.columns.find(
       (column) => column.isBucketed && column.isSplit
     )?.columnId;
