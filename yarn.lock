@@ -3118,6 +3118,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-plugins-base-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-base-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal":
   version "0.0.0"
   uid ""
@@ -3147,6 +3151,14 @@
   uid ""
 
 "@kbn/core-rendering-browser-mocks@link:bazel-bin/packages/core/rendering/core-rendering-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-rendering-server-internal@link:bazel-bin/packages/core/rendering/core-rendering-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-rendering-server-mocks@link:bazel-bin/packages/core/rendering/core-rendering-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -7251,6 +7263,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-plugins-base-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-base-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7284,6 +7300,14 @@
   uid ""
 
 "@types/kbn__core-rendering-browser-mocks@link:bazel-bin/packages/core/rendering/core-rendering-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-rendering-server-internal@link:bazel-bin/packages/core/rendering/core-rendering-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-rendering-server-mocks@link:bazel-bin/packages/core/rendering/core-rendering-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
