@@ -5487,7 +5487,6 @@
     "visTypeTimeseries.annotationsEditor.ignorePanelFiltersLabel": "Ignorer les filtres de panneau ?",
     "visTypeTimeseries.annotationsEditor.queryStringLabel": "Chaîne de requête",
     "visTypeTimeseries.annotationsEditor.rowTemplateLabel": "Modèle de ligne (requis)",
-    "visTypeTimeseries.annotationsEditor.timeFieldLabel": "Champ temporel (requis)",
     "visTypeTimeseries.calculateLabel.bucketScriptsLabel": "Script de compartiment",
     "visTypeTimeseries.calculateLabel.countLabel": "Décompte",
     "visTypeTimeseries.calculateLabel.filterRatioLabel": "Rapport de filtre",
