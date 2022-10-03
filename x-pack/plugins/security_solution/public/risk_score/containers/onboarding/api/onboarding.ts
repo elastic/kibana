@@ -73,6 +73,8 @@ export const onboardingRiskScore = async ({
         });
       } else {
         notifications?.toasts?.addSuccess({
+          'data-test-subj': `${options.riskScoreEntity}EnableSuccessToast`,
+
           title:
             options.riskScoreEntity === RiskScoreEntity.user
               ? USER_RISK_SCORES_ENABLED_TITLE

@@ -333,7 +333,7 @@ export async function restartTransforms({
 }: RestartTransforms) {
   const res = await http
     .post<RestartTransformResult[]>(`${RISK_SCORE_RESTART_TRANSFORMS}`, {
-      body: JSON.stringify(riskScoreEntity),
+      body: JSON.stringify({ riskScoreEntity }),
       signal,
     })
     .then((result) => {

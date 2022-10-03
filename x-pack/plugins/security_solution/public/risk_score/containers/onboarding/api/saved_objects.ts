@@ -104,6 +104,7 @@ export const bulkCreatePrebuiltSavedObjects = async ({
         }
 
         notifications?.toasts?.addSuccess({
+          'data-test-subj': `${options.templateName}SuccessToast`,
           title: IMPORT_SAVED_OBJECTS_SUCCESS(response?.body?.length),
           text: toMountPoint(
             renderDashboardLink && targetUrl
