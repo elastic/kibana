@@ -953,7 +953,7 @@ export class Authenticator {
   }
 }
 
-function enrichWithUserProfileId(
+export function enrichWithUserProfileId(
   authenticationResult: AuthenticationResult,
   sessionValue: SessionValue | null
 ) {
