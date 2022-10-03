@@ -13,7 +13,7 @@ import { EmptyPage } from '../common/components/empty_page';
 import { useKibana } from '../common/lib/kibana';
 import * as i18n from './translations';
 
-interface NoPrivilegesPageProps {
+export interface NoPrivilegesPageProps {
   subPluginKey: string;
 }
 
@@ -45,3 +45,5 @@ export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(({ subPluginKe
 });
 
 NoPrivilegesPage.displayName = 'NoPrivilegePage';
+// eslint-disable-next-line import/no-default-export
+export { NoPrivilegesPage as default };

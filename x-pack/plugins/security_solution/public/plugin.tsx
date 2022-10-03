@@ -299,7 +299,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazyHelpersForRoutes" */
-      './helpers'
+      './lazy_helpers_for_routes'
     );
   }
 

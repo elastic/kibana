@@ -6,15 +6,13 @@
  */
 
 import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { has, get, isEmpty } from 'lodash/fp';
+import { has, get } from 'lodash/fp';
 import React from 'react';
-import type { RouteProps } from 'react-router-dom';
 import { matchPath, Redirect } from 'react-router-dom';
 
-import type { Capabilities, CoreStart } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import {
   ALERTS_PATH,
-  APP_UI_ID,
   EXCEPTIONS_PATH,
   RULES_PATH,
   SERVER_APP_ID,
@@ -28,125 +26,8 @@ import type {
   StrategyResponseType,
 } from '../common/search_strategy/security_solution';
 import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
-import { NoPrivilegesPage } from './app/no_privileges';
-import { SecurityPageName } from './app/types';
-import type { InspectResponse, StartedSubPlugins } from './types';
+import type { InspectResponse } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
-
-export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
-  if (!isEmpty(location.hash)) {
-    const hashPath = location.hash.split('?');
-    const search = hashPath.length >= 1 ? `?${hashPath[1]}` : '';
-    const pageRoute = hashPath.length > 0 ? hashPath[0].split('/') : [];
-    const pageName = pageRoute.length >= 1 ? pageRoute[1] : '';
-    const path = `/${pageRoute.slice(2).join('/') ?? ''}${search}`;
-
-    return {
-      pageName,
-      path,
-      search,
-    };
-  }
-
-  const search = location.search;
-  const pageRoute = location.pathname.split('/');
-  const pageName = pageRoute[3];
-  const subpluginPath = pageRoute.length > 4 ? `/${pageRoute.slice(4).join('/')}` : '';
-  const path = `${subpluginPath}${search}`;
-
-  return {
-    pageName,
-    path,
-    search,
-  };
-};
-
-export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
-  const { application } = coreStart;
-  const { pageName, path } = parseRoute(window.location);
-
-  switch (pageName) {
-    case SecurityPageName.overview:
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.overview,
-        replace: true,
-        path,
-      });
-      break;
-    case 'ml-hosts':
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.hosts,
-        replace: true,
-        path: `/ml-hosts${path}`,
-      });
-      break;
-    case SecurityPageName.hosts:
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.hosts,
-        replace: true,
-        path,
-      });
-      break;
-    case 'ml-network':
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.network,
-        replace: true,
-        path: `/ml-network${path}`,
-      });
-      break;
-    case SecurityPageName.network:
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.network,
-        replace: true,
-        path,
-      });
-      break;
-    case SecurityPageName.timelines:
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.timelines,
-        replace: true,
-        path,
-      });
-      break;
-    case SecurityPageName.case:
-    case 'case':
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.case,
-        replace: true,
-        path,
-      });
-      break;
-    case SecurityPageName.detections:
-    case SecurityPageName.alerts:
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.alerts,
-        replace: true,
-        path,
-      });
-      break;
-    case SecurityPageName.rules:
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        replace: true,
-        path,
-      });
-      break;
-    case SecurityPageName.exceptions:
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.exceptions,
-        replace: true,
-        path,
-      });
-      break;
-    default:
-      application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.landing,
-        replace: true,
-        path,
-      });
-      break;
-  }
-};
 
 export const getInspectResponse = <T extends FactoryQueryTypes>(
   response: StrategyResponseType<T> | TimelineEqlResponse | undefined,
@@ -162,30 +43,6 @@ export const isDetectionsPath = (pathname: string): boolean => {
     path: `(${ALERTS_PATH}|${RULES_PATH}|${EXCEPTIONS_PATH})`,
     strict: false,
   });
-};
-
-export const getSubPluginRoutesByCapabilities = (
-  subPlugins: StartedSubPlugins,
-  capabilities: Capabilities
-): RouteProps[] => {
-  return [
-    ...Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
-      if (isSubPluginAvailable(key, capabilities)) {
-        return [...acc, ...value.routes];
-      }
-      return [
-        ...acc,
-        ...value.routes.map((route: RouteProps) => ({
-          path: route.path,
-          component: () => <NoPrivilegesPage subPluginKey={key} />,
-        })),
-      ];
-    }, []),
-    {
-      path: '',
-      component: () => <RedirectRoute capabilities={capabilities} />,
-    },
-  ];
 };
 
 export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
