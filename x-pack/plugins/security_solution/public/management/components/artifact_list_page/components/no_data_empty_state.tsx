@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { ManagementEmptyStateWrapper } from '../../management_empty_state_wrapper';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
@@ -25,6 +25,7 @@ export const NoDataEmptyState = memo<{
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
   backComponent?: React.ReactNode;
+  secondaryAboutInfo?: React.ReactNode;
   'data-test-subj'?: string;
 }>(
   ({
@@ -35,6 +36,7 @@ export const NoDataEmptyState = memo<{
     titleLabel,
     aboutInfo,
     primaryButtonLabel,
+    secondaryAboutInfo,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -44,7 +46,17 @@ export const NoDataEmptyState = memo<{
           data-test-subj={dataTestSubj}
           iconType="plusInCircle"
           title={<h2 data-test-subj={getTestId('title')}>{titleLabel}</h2>}
-          body={<div data-test-subj={getTestId('aboutInfo')}>{aboutInfo}</div>}
+          body={
+            <div data-test-subj={getTestId('aboutInfo')}>
+              {aboutInfo}
+              {secondaryAboutInfo ? (
+                <>
+                  <EuiSpacer size="m" />
+                  {secondaryAboutInfo}
+                </>
+              ) : undefined}
+            </div>
+          }
           actions={[
             <EuiButton
               fill

@@ -265,6 +265,7 @@ export interface DocLinks {
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
+    readonly endpointArtifacts: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
       macos_system_ext: string;

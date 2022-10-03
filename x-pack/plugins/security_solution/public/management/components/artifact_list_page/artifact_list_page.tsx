@@ -74,6 +74,7 @@ export interface ArtifactListPageProps {
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
   allowCardCreateAction?: boolean;
+  secondaryPageInfo?: React.ReactNode;
 }
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
@@ -82,6 +83,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     ArtifactFormComponent,
     searchableFields = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
     labels: _labels = {},
+    secondaryPageInfo,
     onFormSubmit,
     flyoutSize,
     'data-test-subj': dataTestSubj,
@@ -240,6 +242,24 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setSelectedItemForEdit(undefined);
     }, []);
 
+    const description = useMemo(() => {
+      const subtitleText = labels.pageAboutInfo ? (
+        <span data-test-subj="header-panel-subtitle">{labels.pageAboutInfo}</span>
+      ) : undefined;
+      const detailedPageInfoElement = secondaryPageInfo ? (
+        <>
+          <EuiSpacer size="m" />
+          {secondaryPageInfo}
+        </>
+      ) : undefined;
+      return (
+        <>
+          {subtitleText}
+          {detailedPageInfoElement}
+        </>
+      );
+    }, [labels.pageAboutInfo, secondaryPageInfo]);
+
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
     }
@@ -249,7 +269,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         headerBackComponent={backButtonHeaderComponent}
         hideHeader={!doesDataExist}
         title={labels.pageTitle}
-        subtitle={labels.pageAboutInfo}
+        subtitle={description}
         actions={
           allowCardCreateAction && (
             <EuiButton
@@ -300,6 +320,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
             backComponent={backButtonEmptyComponent}
             data-test-subj={getTestId('emptyState')}
+            secondaryAboutInfo={secondaryPageInfo}
           />
         ) : (
           <>
