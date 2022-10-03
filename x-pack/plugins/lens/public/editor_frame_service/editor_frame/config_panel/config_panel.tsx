@@ -240,10 +240,11 @@ export function LayerPanels(
   return (
     <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, layerIndex) => {
-        const layerType = activeVisualization.getLayerType(layerId, visualization.state);
-        const hidden = activeVisualization
-          .getSupportedLayers(visualization.state)
-          .find((layerInfo) => layerInfo.type === layerType)?.hidden;
+        const hidden = activeVisualization.getConfiguration({
+          layerId,
+          frame: props.framePublicAPI,
+          state: visualization.state,
+        })?.hidden;
 
         return (
           !hidden && (

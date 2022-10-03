@@ -984,7 +984,6 @@ export interface Visualization<T = unknown, P = unknown> {
       autoTimeField?: boolean;
     }>;
     canAddViaMenu?: boolean;
-    hidden?: boolean;
   }>;
   /**
    * returns a list of custom actions supported by the visualization layer.
@@ -1022,6 +1021,7 @@ export interface Visualization<T = unknown, P = unknown> {
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
   getConfiguration: (props: VisualizationConfigProps<T>) => {
+    hidden?: boolean;
     groups: VisualizationDimensionGroupConfig[];
   };
 

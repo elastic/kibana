@@ -225,9 +225,11 @@ const getMetricLayerConfiguration = (
 const getTrendlineLayerConfiguration = (
   props: VisualizationConfigProps<MetricVisualizationState>
 ): {
+  hidden: boolean;
   groups: VisualizationDimensionGroupConfig[];
 } => {
   return {
+    hidden: true,
     groups: [
       {
         groupId: GROUP_ID.TREND_METRIC,
@@ -403,7 +405,6 @@ export const getMetricVisualization = ({
         ],
         disabled: Boolean(state?.trendlineLayerId),
         canAddViaMenu: true,
-        hidden: true,
       },
     ];
   },
