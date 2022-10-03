@@ -84,7 +84,7 @@ describe('formatMlPipelineBody util function', () => {
                     {
                       pipeline: pipelineName,
                       message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
-                      timestamp: '{{{ _ingest.timestamp }}}'
+                      timestamp: '{{{ _ingest.timestamp }}}',
                     },
                   ],
                 },
@@ -173,17 +173,19 @@ describe('formatMlPipelineBody util function', () => {
       destField,
       mockClient as unknown as ElasticsearchClient
     );
-    expect(actualResult).toEqual(expect.objectContaining({
-      processors: expect.arrayContaining([
-        {
-          inference: expect.objectContaining({
-            field_map: {
-              [sourceField]: modelInputField,
-            }
-          })
-        }
-      ])
-    }));
+    expect(actualResult).toEqual(
+      expect.objectContaining({
+        processors: expect.arrayContaining([
+          {
+            inference: expect.objectContaining({
+              field_map: {
+                [sourceField]: modelInputField,
+              },
+            }),
+          },
+        ]),
+      })
+    );
     expect(mockClient.ml.getTrainedModels).toHaveBeenCalledTimes(1);
   });
 });

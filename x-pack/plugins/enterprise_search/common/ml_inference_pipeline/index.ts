@@ -60,7 +60,7 @@ export const generateMlInferencePipelineBody = ({
                   {
                     pipeline: pipelineName,
                     message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
-                    timestamp: '{{{ _ingest.timestamp }}}'
+                    timestamp: '{{{ _ingest.timestamp }}}',
                   },
                 ],
               },
