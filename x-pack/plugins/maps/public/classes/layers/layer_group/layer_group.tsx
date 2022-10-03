@@ -105,7 +105,7 @@ export class LayerGroup implements ILayer {
   }
 
   isPreviewLayer(): boolean {
-    return false;
+    return !!this._descriptor.__isPreviewLayer;
   }
 
   supportsElasticsearchFilters(): boolean {
@@ -137,7 +137,6 @@ export class LayerGroup implements ILayer {
   }
 
   async getAttributions(): Promise<Attribution[]> {
-    // TODO return childLayers.getAttributions
     return [];
   }
 
@@ -276,10 +275,6 @@ export class LayerGroup implements ILayer {
     });
   }
 
-  isLoadingBounds() {
-    return false;
-  }
-
   hasErrors(): boolean {
     return this._children.some((child) => {
       return child.hasErrors();
@@ -333,12 +328,10 @@ export class LayerGroup implements ILayer {
   }
 
   getIndexPatternIds(): string[] {
-    // TODO return childLayers.reduce.getIndexPatternIds
     return [];
   }
 
   getQueryableIndexPatternIds(): string[] {
-    // TODO return childLayers.reduce.getQueryableIndexPatternIds
     return [];
   }
 
@@ -369,7 +362,6 @@ export class LayerGroup implements ILayer {
   }
 
   getGeoFieldNames(): string[] {
-    // TODO return childLayers.reduce.getGeoFieldNames
     return [];
   }
 

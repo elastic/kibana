@@ -20,7 +20,6 @@ import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
-  SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
@@ -70,7 +69,6 @@ export interface ILayer {
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
-  isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
@@ -384,11 +382,6 @@ export class AbstractLayer implements ILayer {
         ? !this._descriptor.__areTilesLoaded
         : false;
     return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
-  }
-
-  isLoadingBounds() {
-    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
-    return !!boundsDataRequest && boundsDataRequest.isLoading();
   }
 
   hasErrors(): boolean {
