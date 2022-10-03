@@ -14,38 +14,36 @@ import {
   EuiTableComputedColumnType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Case, CasesPermissions } from '../../containers/types';
+import { Case } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useStatusAction } from '../actions/status/use_status_action';
 import { useRefreshCases } from './use_on_refresh_cases';
 import * as i18n from './translations';
 import { statuses } from '../status';
-
-interface UseBulkActionsProps {
-  permissions: CasesPermissions;
-}
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface UseBulkActionsReturnValue {
   actions: EuiTableComputedColumnType<Case>;
 }
 
-const ActionColumnComponent: React.FC<{ theCase: Case; isDisabled: boolean }> = ({
-  theCase,
-  isDisabled,
-}) => {
+const ActionColumnComponent: React.FC<{ theCase: Case }> = ({ theCase }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
+  const { permissions } = useCasesContext();
+  const canDelete = permissions.delete;
+  const canUpdate = permissions.update;
+
   const deleteAction = useDeleteAction({
-    isDisabled,
+    isDisabled: !canDelete,
     onAction: closePopover,
     onActionSuccess: refreshCases,
   });
 
   const statusAction = useStatusAction({
-    isDisabled,
+    isDisabled: !canUpdate,
     onAction: closePopover,
     onActionSuccess: refreshCases,
     selectedStatus: theCase.status,
@@ -57,34 +55,51 @@ const ActionColumnComponent: React.FC<{ theCase: Case; isDisabled: boolean }> = 
         id: 0,
         title: i18n.ACTIONS,
         items: [
-          {
-            name: (
-              <FormattedMessage
-                defaultMessage="Status: {status}"
-                id="xpack.cases.allCasesView.statusWithValue"
-                values={{ status: <b>{statuses[theCase.status]?.label ?? '-'}</b> }}
-              />
-            ),
-            panel: 1,
-            disabled: isDisabled,
-            key: `case-action-status-panel-${theCase.id}`,
-            'data-test-subj': `case-action-status-panel-${theCase.id}`,
-          },
-          {
-            isSeparator: true,
-            key: `actions-separator-${theCase.id}`,
-          },
-          // TODO: permission check
-          deleteAction.getAction([theCase]),
+          ...(canUpdate
+            ? [
+                {
+                  name: (
+                    <FormattedMessage
+                      defaultMessage="Status: {status}"
+                      id="xpack.cases.allCasesView.statusWithValue"
+                      values={{ status: <b>{statuses[theCase.status]?.label ?? '-'}</b> }}
+                    />
+                  ),
+                  panel: 1,
+                  disabled: !canUpdate,
+                  key: `case-action-status-panel-${theCase.id}`,
+                  'data-test-subj': `case-action-status-panel-${theCase.id}`,
+                },
+              ]
+            : []),
+          /**
+           * A separator is added if a) there is one item above
+           * and b) there is an item below. For this to happen the
+           * user has to have delete and update permissions
+           */
+          ...(canUpdate && canDelete
+            ? [
+                {
+                  isSeparator: true as const,
+                  key: `actions-separator-${theCase.id}`,
+                  'data-test-subj': `actions-separator-${theCase.id}`,
+                },
+              ]
+            : []),
+          ...(canDelete ? [deleteAction.getAction([theCase])] : []),
         ],
       },
-      {
-        id: 1,
-        title: i18n.STATUS,
-        items: statusAction.getActions([theCase]),
-      },
+      ...(canUpdate
+        ? [
+            {
+              id: 1,
+              title: i18n.STATUS,
+              items: statusAction.getActions([theCase]),
+            },
+          ]
+        : []),
     ],
-    [deleteAction, isDisabled, statusAction, theCase]
+    [canDelete, canUpdate, deleteAction, statusAction, theCase]
   );
 
   return (
@@ -129,15 +144,13 @@ ActionColumnComponent.displayName = 'ActionColumnComponent';
 
 const ActionColumn = React.memo(ActionColumnComponent);
 
-export const useActions = ({ permissions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
-  const isDisabled = !permissions.update;
-
+export const useActions = (): UseBulkActionsReturnValue => {
   return {
     actions: {
       name: i18n.ACTIONS,
       align: 'right',
       render: (theCase: Case) => {
-        return <ActionColumn theCase={theCase} key={theCase.id} isDisabled={isDisabled} />;
+        return <ActionColumn theCase={theCase} key={theCase.id} />;
       },
     },
   };

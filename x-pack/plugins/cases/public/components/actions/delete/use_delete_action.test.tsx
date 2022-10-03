@@ -24,7 +24,7 @@ describe('useDeleteAction', () => {
     jest.clearAllMocks();
   });
 
-  it('renders an action', async () => {
+  it('renders an action with one case', async () => {
     const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
@@ -32,7 +32,35 @@ describe('useDeleteAction', () => {
       }
     );
 
-    expect(result.current.getAction([])).toMatchInlineSnapshot(`
+    expect(result.current.getAction([basicCase])).toMatchInlineSnapshot(`
+      Object {
+        "data-test-subj": "cases-bulk-action-delete",
+        "disabled": false,
+        "icon": <EuiIcon
+          color="danger"
+          size="m"
+          type="trash"
+        />,
+        "key": "cases-bulk-action-delete",
+        "name": <EuiTextColor
+          color="danger"
+        >
+          Delete case
+        </EuiTextColor>,
+        "onClick": [Function],
+      }
+    `);
+  });
+
+  it('renders an action with multiple cases', async () => {
+    const { result } = renderHook(
+      () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
+
+    expect(result.current.getAction([basicCase, basicCase])).toMatchInlineSnapshot(`
       Object {
         "data-test-subj": "cases-bulk-action-delete",
         "disabled": false,

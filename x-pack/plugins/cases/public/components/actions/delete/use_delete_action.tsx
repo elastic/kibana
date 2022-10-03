@@ -13,6 +13,9 @@ import { useDeleteCases } from '../../../containers/use_delete_cases';
 import * as i18n from './translations';
 import { UseActionProps } from '../types';
 
+const getDeleteActionTitle = (totalCases: number): string =>
+  totalCases > 1 ? i18n.BULK_ACTION_DELETE_LABEL : i18n.DELETE_ACTION_LABEL;
+
 export const useDeleteAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
   const euiTheme = useEuiTheme();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
@@ -44,7 +47,7 @@ export const useDeleteAction = ({ onAction, onActionSuccess, isDisabled }: UseAc
 
   const getAction = (selectedCases: Case[]) => {
     return {
-      name: <EuiTextColor color={color}>{i18n.BULK_ACTION_DELETE_LABEL}</EuiTextColor>,
+      name: <EuiTextColor color={color}>{getDeleteActionTitle(selectedCases.length)}</EuiTextColor>,
       onClick: () => openModal(selectedCases),
       disabled: isDisabled,
       'data-test-subj': 'cases-bulk-action-delete',

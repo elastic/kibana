@@ -122,7 +122,7 @@ export const useCasesColumns = ({
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
 
-  const { actions } = useActions({ permissions });
+  const { actions } = useActions();
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {
@@ -339,7 +339,7 @@ export const useCasesColumns = ({
           },
         ]
       : []),
-    ...(!isSelectorView && actions ? [actions] : []),
+    ...(!isSelectorView && (permissions.update || permissions.delete) && actions ? [actions] : []),
   ];
 
   return { columns };

@@ -64,7 +64,7 @@ export interface AllCasesListProps {
 
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick }) => {
-    const { owner, permissions } = useCasesContext();
+    const { owner } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
     const isLoading = useIsLoadingCases();
 
@@ -196,12 +196,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [deselectCases, hasOwner, availableSolutions, owner]
     );
 
-    /**
-     * At the time of changing this from all to delete the only bulk action we have is to delete. When we add more
-     * actions we'll need to revisit this to allow more granular checks around the bulk actions.
-     */
-    const showActions = permissions.delete && !isSelectorView;
-
     const { columns } = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
       userProfiles: userProfiles ?? new Map(),
@@ -272,7 +266,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         <CasesTable
           columns={columns}
           data={data}
-          filterOptions={filterOptions}
           goToCreateCase={onRowClick}
           isCasesLoading={isLoadingCases}
           isCommentUpdating={isLoadingCases}
@@ -282,7 +275,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           pagination={pagination}
           selectedCases={selectedCases}
           selection={euiBasicTableSelectionProps}
-          showActions={showActions}
           sorting={sorting}
           tableRef={tableRef}
           tableRowProps={tableRowProps}

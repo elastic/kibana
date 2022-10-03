@@ -11,7 +11,13 @@ import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import {
+  allCasesPermissions,
+  AppMockRenderer,
+  createAppMockRenderer,
+  noDeleteCasesPermissions,
+  onlyDeleteCasesPermission,
+} from '../../common/mock';
 import { useBulkActions } from './use_bulk_actions';
 import * as api from '../../containers/api';
 import { basicCase } from '../../containers/mock';
@@ -38,75 +44,76 @@ describe('useBulkActions', () => {
       );
 
       expect(result.current).toMatchInlineSnapshot(`
-      Object {
-        "modals": <React.Fragment />,
-        "panels": Array [
-          Object {
-            "id": 0,
-            "items": Array [
-              Object {
-                "data-test-subj": "case-bulk-action-status",
-                "disabled": false,
-                "key": "case-bulk-action-status",
-                "name": "Status",
-                "panel": 1,
-              },
-              Object {
-                "isSeparator": true,
-                "key": "actions-separator",
-              },
-              Object {
-                "data-test-subj": "cases-bulk-action-delete",
-                "disabled": false,
-                "icon": <EuiIcon
-                  color="danger"
-                  size="m"
-                  type="trash"
-                />,
-                "key": "cases-bulk-action-delete",
-                "name": <EuiTextColor
-                  color="danger"
-                >
-                  Delete cases
-                </EuiTextColor>,
-                "onClick": [Function],
-              },
-            ],
-            "title": "Actions",
-          },
-          Object {
-            "id": 1,
-            "items": Array [
-              Object {
-                "data-test-subj": "cases-bulk-action-status-open",
-                "disabled": false,
-                "icon": "empty",
-                "key": "cases-bulk-action-status-open",
-                "name": "Open",
-                "onClick": [Function],
-              },
-              Object {
-                "data-test-subj": "cases-bulk-action-status-in-progress",
-                "disabled": false,
-                "icon": "empty",
-                "key": "cases-bulk-action-status-in-progress",
-                "name": "In progress",
-                "onClick": [Function],
-              },
-              Object {
-                "data-test-subj": "cases-bulk-action-status-closed",
-                "disabled": false,
-                "icon": "empty",
-                "key": "cases-bulk-status-action",
-                "name": "Closed",
-                "onClick": [Function],
-              },
-            ],
-            "title": "Status",
-          },
-        ],
-      }
-    `);
+        Object {
+          "modals": <React.Fragment />,
+          "panels": Array [
+            Object {
+              "id": 0,
+              "items": Array [
+                Object {
+                  "data-test-subj": "case-bulk-action-status",
+                  "disabled": false,
+                  "key": "case-bulk-action-status",
+                  "name": "Status",
+                  "panel": 1,
+                },
+                Object {
+                  "data-test-subj": "bulk-actions-separator",
+                  "isSeparator": true,
+                  "key": "bulk-actions-separator",
+                },
+                Object {
+                  "data-test-subj": "cases-bulk-action-delete",
+                  "disabled": false,
+                  "icon": <EuiIcon
+                    color="danger"
+                    size="m"
+                    type="trash"
+                  />,
+                  "key": "cases-bulk-action-delete",
+                  "name": <EuiTextColor
+                    color="danger"
+                  >
+                    Delete case
+                  </EuiTextColor>,
+                  "onClick": [Function],
+                },
+              ],
+              "title": "Actions",
+            },
+            Object {
+              "id": 1,
+              "items": Array [
+                Object {
+                  "data-test-subj": "cases-bulk-action-status-open",
+                  "disabled": false,
+                  "icon": "empty",
+                  "key": "cases-bulk-action-status-open",
+                  "name": "Open",
+                  "onClick": [Function],
+                },
+                Object {
+                  "data-test-subj": "cases-bulk-action-status-in-progress",
+                  "disabled": false,
+                  "icon": "empty",
+                  "key": "cases-bulk-action-status-in-progress",
+                  "name": "In progress",
+                  "onClick": [Function],
+                },
+                Object {
+                  "data-test-subj": "cases-bulk-action-status-closed",
+                  "disabled": false,
+                  "icon": "empty",
+                  "key": "cases-bulk-status-action",
+                  "name": "Closed",
+                  "onClick": [Function],
+                },
+              ],
+              "title": "Status",
+            },
+          ],
+        }
+      `);
     });
 
     it('change the status of cases', async () => {
@@ -241,6 +248,86 @@ describe('useBulkActions', () => {
         );
 
         expect(res.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
+      });
+    });
+  });
+
+  describe('Permissions', () => {
+    it('shows the correct actions with all permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: allCasesPermissions() });
+      const { result, waitFor: waitForHook } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      const modals = result.current.modals;
+      const panels = result.current.panels;
+
+      const res = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      await waitForHook(() => {
+        expect(res.getByTestId('case-bulk-action-status')).toBeInTheDocument();
+        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+        expect(res.getByTestId('bulk-actions-separator')).toBeInTheDocument();
+      });
+    });
+
+    it('shows the correct actions with no delete permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: noDeleteCasesPermissions() });
+      const { result, waitFor: waitForHook } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      const modals = result.current.modals;
+      const panels = result.current.panels;
+
+      const res = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      await waitForHook(() => {
+        expect(res.getByTestId('case-bulk-action-status')).toBeInTheDocument();
+        expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
+        expect(res.queryByTestId('bulk-actions-separator')).toBeFalsy();
+      });
+    });
+
+    it('shows the correct actions with only delete permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
+      const { result, waitFor: waitForHook } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      const modals = result.current.modals;
+      const panels = result.current.panels;
+
+      const res = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      await waitForHook(() => {
+        expect(res.queryByTestId('case-bulk-action-status')).toBeFalsy();
+        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+        expect(res.queryByTestId('bulk-actions-separator')).toBeFalsy();
       });
     });
   });

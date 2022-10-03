@@ -12,7 +12,13 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';
 import * as api from '../../containers/api';
-import { allCasesPermissions, AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  noDeleteCasesPermissions,
+  onlyDeleteCasesPermission,
+  allCasesPermissions,
+} from '../../common/mock';
 
 jest.mock('../../containers/api');
 
@@ -25,7 +31,7 @@ describe('useActions', () => {
   });
 
   it('renders column actions', async () => {
-    const { result } = renderHook(() => useActions({ permissions: allCasesPermissions() }), {
+    const { result } = renderHook(() => useActions(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -41,7 +47,7 @@ describe('useActions', () => {
   });
 
   it('renders the popover', async () => {
-    const { result } = renderHook(() => useActions({ permissions: allCasesPermissions() }), {
+    const { result } = renderHook(() => useActions(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -52,7 +58,7 @@ describe('useActions', () => {
   });
 
   it('open the action popover', async () => {
-    const { result } = renderHook(() => useActions({ permissions: allCasesPermissions() }), {
+    const { result } = renderHook(() => useActions(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -72,7 +78,7 @@ describe('useActions', () => {
   it('change the status of the case', async () => {
     const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-    const { result } = renderHook(() => useActions({ permissions: allCasesPermissions() }), {
+    const { result } = renderHook(() => useActions(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -110,7 +116,7 @@ describe('useActions', () => {
     it('delete a case', async () => {
       const deleteSpy = jest.spyOn(api, 'deleteCases');
 
-      const { result } = renderHook(() => useActions({ permissions: allCasesPermissions() }), {
+      const { result } = renderHook(() => useActions(), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -145,7 +151,7 @@ describe('useActions', () => {
     });
 
     it('closes the modal', async () => {
-      const { result } = renderHook(() => useActions({ permissions: allCasesPermissions() }), {
+      const { result } = renderHook(() => useActions(), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -177,6 +183,68 @@ describe('useActions', () => {
       });
 
       expect(res.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
+    });
+  });
+
+  describe('Permissions', () => {
+    it('shows the correct actions with all permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: allCasesPermissions() });
+      const { result } = renderHook(() => useActions(), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      const comp = result.current.actions.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      act(() => {
+        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      });
+
+      await waitFor(() => {
+        expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+        expect(res.getByTestId(`actions-separator-${basicCase.id}`)).toBeInTheDocument();
+      });
+    });
+
+    it('shows the correct actions with no delete permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: noDeleteCasesPermissions() });
+      const { result } = renderHook(() => useActions(), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      const comp = result.current.actions.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      act(() => {
+        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      });
+
+      await waitFor(() => {
+        expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+        expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
+        expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
+      });
+    });
+
+    it('shows the correct actions with only delete permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
+      const { result } = renderHook(() => useActions(), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      const comp = result.current.actions.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      act(() => {
+        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      });
+
+      await waitFor(() => {
+        expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeFalsy();
+        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+        expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
+      });
     });
   });
 });
