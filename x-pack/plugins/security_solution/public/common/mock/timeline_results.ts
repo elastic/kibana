@@ -2035,7 +2035,6 @@ export const mockTGridModel: TGridModel = {
   defaultColumns: mockTimelineModelColumns,
   dataViewId: null,
   deletedEventIds: [],
-  excludedRowRendererIds: [],
   expandedDetail: {},
   filters: [
     {

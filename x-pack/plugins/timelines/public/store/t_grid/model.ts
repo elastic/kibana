@@ -14,15 +14,11 @@ import type {
   SortColumnTable,
   SessionViewConfig,
 } from '../../../common/types/timeline';
-import { RowRendererId } from '../../../common/types/timeline';
-
 export interface TGridModelSettings {
   defaultColumns: Array<
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
       ColumnHeaderOptions
   >;
-  /** A list of Ids of excluded Row Renderers */
-  excludedRowRendererIds: RowRendererId[];
   loadingText?: string | React.ReactNode;
   queryFields: string[];
   selectAll: boolean;
@@ -75,7 +71,6 @@ export type TGridModelForTimeline = Pick<
   | 'defaultColumns'
   | 'dataViewId'
   | 'deletedEventIds'
-  | 'excludedRowRendererIds'
   | 'expandedDetail'
   | 'filters'
   | 'graphEventId'
@@ -104,7 +99,6 @@ export type SubsetTGridModel = Readonly<
     | 'defaultColumns'
     | 'dataViewId'
     | 'deletedEventIds'
-    | 'excludedRowRendererIds'
     | 'expandedDetail'
     | 'filters'
     | 'indexNames'
@@ -119,5 +113,6 @@ export type SubsetTGridModel = Readonly<
     | 'savedObjectId'
     | 'graphEventId'
     | 'sessionViewConfig'
+    | 'queryFields'
   >
 >;

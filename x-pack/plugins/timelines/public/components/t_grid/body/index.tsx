@@ -935,7 +935,6 @@ const makeMapStateToProps = () => {
     const dataTable: TGridModel = getTGrid(state, id);
     const {
       columns,
-      excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
       selectedEventIds,
@@ -946,7 +945,6 @@ const makeMapStateToProps = () => {
 
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
-      excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
       isLoading,

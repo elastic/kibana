@@ -14,7 +14,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { RowRendererId, TableIdLiteral } from '../../../../common/types/timeline';
+import type { TableIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -174,8 +174,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
               }
             : c
         ),
-        excludedRowRendererIds: getAlertsDefaultModel(license)
-          .excludedRowRendererIds as RowRendererId[],
         id: tableId,
         loadingText: i18n.LOADING_ALERTS,
         queryFields: requiredFieldsForActions,

@@ -15,7 +15,6 @@ export const mockGlobalState: TableState = {
       columns: defaultHeaders,
       dataViewId: null,
       deletedEventIds: [],
-      excludedRowRendererIds: [],
       expandedDetail: {},
       id: 'test',
       indexNames: [

@@ -401,7 +401,6 @@ export const mockGlobalState: State = {
         initialized: true,
         updated: 1663882629000,
         isLoading: false,
-        excludedRowRendererIds: [],
         queryFields: [],
       },
     },

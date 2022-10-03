@@ -7,7 +7,7 @@
 
 import { EuiDataGridColumn } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { ColumnHeaderOptions, RowRendererId, SortColumnTable } from '../../../common/types';
+import type { ColumnHeaderOptions, SortColumnTable } from '../../../common/types';
 import type { TGridModel, TGridModelSettings } from './model';
 
 export type { TGridModel };
@@ -63,5 +63,4 @@ export interface TGridPersistInput extends Partial<Omit<TGridModel, keyof TGridM
       ColumnHeaderOptions
   >;
   sort: SortColumnTable[];
-  excludedRowRendererIds: RowRendererId[];
 }

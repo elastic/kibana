@@ -84,7 +84,6 @@ describe('Body', () => {
     data: mockTimelineData,
     defaultCellActions: [],
     disabledCellActions: ['signal.rule.risk_score', 'signal.reason'],
-    excludedRowRendererIds: [],
     id: 'timeline-test',
     isSelectAllChecked: false,
     isLoading: false,

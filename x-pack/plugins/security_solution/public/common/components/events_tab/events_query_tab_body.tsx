@@ -96,7 +96,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
               }
             : c
         ),
-        excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : undefined,
       })
     );
   }, [dispatch, showExternalAlerts, tGridEnabled, tableId]);

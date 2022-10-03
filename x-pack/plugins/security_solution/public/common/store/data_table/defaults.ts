@@ -11,7 +11,6 @@ export const tableDefaults: SubsetTGridModel = {
   defaultColumns: defaultHeaders,
   dataViewId: null,
   deletedEventIds: [],
-  excludedRowRendererIds: [],
   expandedDetail: {},
   filters: [],
   indexNames: [],
@@ -34,4 +33,5 @@ export const tableDefaults: SubsetTGridModel = {
   sessionViewConfig: null,
   savedObjectId: null,
   columns: defaultHeaders,
+  queryFields: [],
 };

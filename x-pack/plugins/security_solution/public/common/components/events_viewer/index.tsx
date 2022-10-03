@@ -104,7 +104,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       columns,
       defaultColumns,
       deletedEventIds,
-      excludedRowRendererIds,
       graphEventId, // If truthy, the graph viewer (Resolver) is showing
       itemsPerPage,
       itemsPerPageOptions,
@@ -137,7 +136,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         columns,
         dataViewId: selectedDataViewId,
         defaultColumns,
-        excludedRowRendererIds,
         id: tableId,
         indexNames: selectedPatterns,
         itemsPerPage,

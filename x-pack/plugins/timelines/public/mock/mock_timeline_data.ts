@@ -1555,7 +1555,6 @@ export const mockTgridModel: TGridModel = {
   defaultColumns: [],
   queryFields: [],
   deletedEventIds: [],
-  excludedRowRendererIds: [],
   expandedDetail: {},
   selectAll: false,
   id: 'ef579e40-jibber-jabber',

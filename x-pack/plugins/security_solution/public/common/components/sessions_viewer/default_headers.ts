@@ -8,7 +8,6 @@
 import { tableDefaults } from '../../store/data_table/defaults';
 import type { SubsetTGridModel } from '../../store/data_table/model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { RowRendererId } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import {
@@ -67,7 +66,6 @@ export const getSessionsDefaultModel = (
   ...tableDefaults,
   columns,
   defaultColumns,
-  excludedRowRendererIds: Object.values(RowRendererId),
   sort: [
     {
       columnId: 'process.entry_leader.start',

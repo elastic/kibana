@@ -66,7 +66,6 @@ export const tGridDefaults: SubsetTGridModel = {
   defaultColumns: defaultHeaders,
   dataViewId: null,
   deletedEventIds: [],
-  excludedRowRendererIds: [],
   expandedDetail: {},
   filters: [],
   indexNames: [],
@@ -88,6 +87,7 @@ export const tGridDefaults: SubsetTGridModel = {
   savedObjectId: null,
   graphEventId: '',
   sessionViewConfig: null,
+  queryFields: [],
 };
 
 export const getTGridManageDefaults = (id: string) => ({

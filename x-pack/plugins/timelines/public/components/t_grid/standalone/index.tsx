@@ -297,7 +297,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         showCheckboxes,
         defaultColumns: columns,
         sort,
-        excludedRowRendererIds: [],
       })
     );
     dispatch(
