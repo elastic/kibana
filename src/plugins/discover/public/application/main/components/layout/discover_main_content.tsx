@@ -28,7 +28,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { DataChartsMessage, DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
+import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DiscoverChart } from '../chart';
 import { FieldStatisticsTable } from '../field_stats_table';
