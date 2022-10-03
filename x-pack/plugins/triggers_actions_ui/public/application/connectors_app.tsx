@@ -35,7 +35,6 @@ import {
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
-import { ConnectorsHome } from './connectors_home';
 
 const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
@@ -81,9 +80,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
-              <ConnectorsHome>
-                <AppWithoutRouter />
-              </ConnectorsHome>
+              <AppWithoutRouter />
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>

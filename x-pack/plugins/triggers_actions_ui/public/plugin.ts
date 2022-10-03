@@ -188,6 +188,8 @@ export class Plugin
       }
     );
 
+    console.log(plugins.management);
+
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN_ID,
