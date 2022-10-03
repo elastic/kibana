@@ -10,6 +10,8 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
+import semverMajor from 'semver/functions/major';
+import semverMinor from 'semver/functions/minor';
 
 import type { PostAgentUpgradeResponse, GetCurrentUpgradesResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
@@ -34,7 +36,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
-    checkKibanaVersion(version, kibanaVersion);
+    checkKibanaVersion(version, kibanaVersion, force);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -114,9 +116,9 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
-    checkKibanaVersion(version, kibanaVersion);
+    checkKibanaVersion(version, kibanaVersion, force);
     const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
-    checkFleetServerVersion(version, fleetServerAgents);
+    checkFleetServerVersion(version, fleetServerAgents, force);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -158,7 +160,7 @@ export const getCurrentUpgradesHandler: RequestHandler = async (context, request
   }
 };
 
-export const checkKibanaVersion = (version: string, kibanaVersion: string) => {
+export const checkKibanaVersion = (version: string, kibanaVersion: string, force = false) => {
   // get version number only in case "-SNAPSHOT" is in it
   const kibanaVersionNumber = semverCoerce(kibanaVersion)?.version;
   if (!kibanaVersionNumber) throw new Error(`kibanaVersion ${kibanaVersionNumber} is not valid`);
@@ -166,14 +168,32 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string) => {
   if (!versionToUpgradeNumber)
     throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
 
-  if (semverGt(versionToUpgradeNumber, kibanaVersionNumber))
+  if (!force && semverGt(versionToUpgradeNumber, kibanaVersionNumber)) {
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
     );
+  }
+
+  if (
+    force &&
+    !(
+      semverMajor(kibanaVersionNumber) > semverMajor(versionToUpgradeNumber) ||
+      (semverMajor(kibanaVersionNumber) === semverMajor(versionToUpgradeNumber) &&
+        semverMinor(kibanaVersionNumber) >= semverMinor(versionToUpgradeNumber))
+    )
+  ) {
+    throw new Error(
+      `cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisify the major and minor of the installed kibana version ${kibanaVersionNumber}`
+    );
+  }
 };
 
 // Check the installed fleet server version
-const checkFleetServerVersion = (versionToUpgradeNumber: string, fleetServerAgents: Agent[]) => {
+const checkFleetServerVersion = (
+  versionToUpgradeNumber: string,
+  fleetServerAgents: Agent[],
+  force = false
+) => {
   const fleetServerVersions = fleetServerAgents.map(
     (agent) => agent.local_metadata.elastic.agent.version
   ) as string[];
@@ -184,9 +204,19 @@ const checkFleetServerVersion = (versionToUpgradeNumber: string, fleetServerAgen
     return;
   }
 
-  if (semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
+  if (!force && semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
+    );
+  }
+
+  if (
+    force &&
+    semverMajor(maxFleetServerVersion) !== semverMajor(versionToUpgradeNumber) &&
+    semverMinor(maxFleetServerVersion) !== semverMinor(versionToUpgradeNumber)
+  ) {
+    throw new Error(
+      `cannot force upgrade agent to ${versionToUpgradeNumber} because it is not the same major and minor version as the latest fleet server version ${maxFleetServerVersion}`
     );
   }
 };
