@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -253,7 +254,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <HelpTextWithPadding>
                   <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointNGAV"
-                    defaultMessage="Machine learning malware, ransomware, memory threat, malicious behavior, and credential theft preventions, with process telemetry"
+                    defaultMessage="Machine learning malware, ransomware, memory threat, malicious behavior, and credential theft preventions, plus process telemetry"
                   />
                 </HelpTextWithPadding>
               }
@@ -267,7 +268,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <HelpTextWithPadding>
                   <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDREssential"
-                    defaultMessage="Everything in NGAV, with file and network telemetry"
+                    defaultMessage="Everything in NGAV, plus file and network telemetry"
                   />
                 </HelpTextWithPadding>
               }
@@ -293,7 +294,26 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <EuiSpacer size="m" />
                 <EuiCallOut iconType="iInCircle">
                   <EuiText size="s">
-                    <p>{endpointPresetsMapping[endpointPreset].note}</p>
+                    <p>
+                      {endpointPresetsMapping[endpointPreset].note}{' '}
+                      <FormattedMessage
+                        id="xpack.securitySolution.createPackagePolicy.stepConfigure.seeDocumentation"
+                        defaultMessage="See {documentation} for more information."
+                        values={{
+                          documentation: (
+                            <EuiLink
+                              href="https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.seeDocumentationLink"
+                                defaultMessage="documentation"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </p>
                   </EuiText>
                 </EuiCallOut>
               </>
