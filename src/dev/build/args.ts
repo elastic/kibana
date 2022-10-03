@@ -127,7 +127,7 @@ export function readCliArgs(argv: string[]) {
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
-    createExamplePlugins: Boolean(flags['example-plugins']),
+    buildExamplePlugins: Boolean(flags['example-plugins']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:

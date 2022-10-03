@@ -75,12 +75,15 @@ export interface GetExceptionItemProps {
 interface ExceptionsViewerProps {
   rule: Rule | null;
   listType: ExceptionListTypeEnum;
+  /* Used for when displaying exceptions for a rule that has since been deleted, forcing read only view */
+  isViewReadOnly: boolean;
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
   rule,
   listType,
+  isViewReadOnly,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
@@ -346,8 +349,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(!canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {

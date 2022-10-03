@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export function asCost(value: number, precision: number = 2, unit: string = '$') {
-  return `${value.toPrecision(precision)}${unit}`;
+import { asNumber } from './as_number';
+
+export function asCost(value: number, unit: string = '$') {
+  return `${asNumber(value)}${unit}`;
 }
