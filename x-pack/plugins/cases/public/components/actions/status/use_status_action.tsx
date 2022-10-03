@@ -33,6 +33,12 @@ interface UseStatusActionProps extends UseActionProps {
   selectedStatus?: CaseStatuses;
 }
 
+const getCasesWithChanges = (cases: Case[], status: CaseStatuses): Case[] =>
+  cases.filter((theCase) => theCase.status !== status);
+
+const disableStatus = (cases: Case[], status: CaseStatuses) =>
+  getCasesWithChanges(cases, status).length === 0;
+
 export const useStatusAction = ({
   onAction,
   onActionSuccess,
@@ -70,7 +76,7 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses.open].label,
         icon: getStatusIcon(CaseStatuses.open),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.open),
-        disabled: isDisabled,
+        disabled: isDisabled || disableStatus(selectedCases, CaseStatuses.open),
         'data-test-subj': 'cases-bulk-action-status-open',
         key: 'cases-bulk-action-status-open',
       },
@@ -78,7 +84,7 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses['in-progress']].label,
         icon: getStatusIcon(CaseStatuses['in-progress']),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses['in-progress']),
-        disabled: isDisabled,
+        disabled: isDisabled || disableStatus(selectedCases, CaseStatuses['in-progress']),
         'data-test-subj': 'cases-bulk-action-status-in-progress',
         key: 'cases-bulk-action-status-in-progress',
       },
@@ -86,7 +92,7 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses.closed].label,
         icon: getStatusIcon(CaseStatuses.closed),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.closed),
-        disabled: isDisabled,
+        disabled: isDisabled || disableStatus(selectedCases, CaseStatuses.closed),
         'data-test-subj': 'cases-bulk-action-status-closed',
         key: 'cases-bulk-status-action',
       },

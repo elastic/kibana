@@ -104,7 +104,7 @@ describe('useActions', () => {
     });
 
     act(() => {
-      userEvent.click(res.getByTestId('cases-bulk-action-status-open'));
+      userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'));
     });
 
     await waitFor(() => {

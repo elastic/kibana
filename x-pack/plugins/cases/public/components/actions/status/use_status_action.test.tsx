@@ -38,11 +38,11 @@ describe('useStatusAction', () => {
       }
     );
 
-    expect(result.current.getActions([])).toMatchInlineSnapshot(`
+    expect(result.current.getActions([basicCase])).toMatchInlineSnapshot(`
       Array [
         Object {
           "data-test-subj": "cases-bulk-action-status-open",
-          "disabled": false,
+          "disabled": true,
           "icon": "empty",
           "key": "cases-bulk-action-status-open",
           "name": "Open",
@@ -132,7 +132,7 @@ describe('useStatusAction', () => {
     }
   );
 
-  const multipleCasesTests = [
+  const multipleCasesTests: Array<[CaseStatuses, number, string]> = [
     [CaseStatuses.open, 0, 'Opened 2 cases'],
     [CaseStatuses['in-progress'], 1, 'Marked 2 cases as in progress'],
     [CaseStatuses.closed, 2, 'Closed 2 cases'],
@@ -160,6 +160,39 @@ describe('useStatusAction', () => {
           expectedMessage
         );
       });
+    }
+  );
+
+  const disabledTests: Array<[CaseStatuses, number]> = [
+    [CaseStatuses.open, 0],
+    [CaseStatuses['in-progress'], 1],
+    [CaseStatuses.closed, 2],
+  ];
+
+  it.each(disabledTests)('disables the status button correctly: %s', async (status, index) => {
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
+
+    const actions = result.current.getActions([{ ...basicCase, status }]);
+    expect(actions[index].disabled).toBe(true);
+  });
+
+  it.each(disabledTests)(
+    'disables the status button correctly if isDisabled=true: %s',
+    async (status, index) => {
+      const { result } = renderHook(
+        () => useStatusAction({ onAction, onActionSuccess, isDisabled: true }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      const actions = result.current.getActions([basicCase]);
+      expect(actions[index].disabled).toBe(true);
     }
   );
 });

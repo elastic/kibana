@@ -86,7 +86,7 @@ describe('useBulkActions', () => {
               "items": Array [
                 Object {
                   "data-test-subj": "cases-bulk-action-status-open",
-                  "disabled": false,
+                  "disabled": true,
                   "icon": "empty",
                   "key": "cases-bulk-action-status-open",
                   "name": "Open",
@@ -147,7 +147,7 @@ describe('useBulkActions', () => {
       });
 
       act(() => {
-        userEvent.click(res.getByTestId('cases-bulk-action-status-open'));
+        userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'));
       });
 
       await waitForHook(() => {
