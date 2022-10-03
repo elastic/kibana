@@ -69,10 +69,16 @@ export function getImpactRows({
       value: asPercentage(percentageNoChildren),
     },
     {
-      label: i18n.translate('xpack.profiling.flameGraphInformationWindow.samplesLabel', {
+      label: i18n.translate('xpack.profiling.flameGraphInformationWindow.samplesInclusiveLabel', {
         defaultMessage: 'Samples',
       }),
       value: asNumber(countInclusive),
+    },
+    {
+      label: i18n.translate('xpack.profiling.flameGraphInformationWindow.samplesExclusiveLabel', {
+        defaultMessage: 'Samples (excl. children)',
+      }),
+      value: asNumber(countExclusive),
     },
     {
       label: i18n.translate(
