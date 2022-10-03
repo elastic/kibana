@@ -105,7 +105,6 @@ export const PreviewHistogram = ({
       itemsPerPage,
       itemsPerPageOptions,
       sort,
-      excludedRowRendererIds,
     } = getAlertsPreviewDefaultModel(license),
   } = useSelector((state: State) => eventsViewerSelector(state, TableId.rulePreview));
 
@@ -147,7 +146,6 @@ export const PreviewHistogram = ({
         indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
         itemsPerPage,
         sort: sort as SortColumnTable[],
-        excludedRowRendererIds,
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
