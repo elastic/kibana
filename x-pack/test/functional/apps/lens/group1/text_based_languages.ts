@@ -17,12 +17,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedSearch',
     'dashboard',
     'common',
+    'discover',
   ]);
   const elasticChart = getService('elasticChart');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
+  const browser = getService('browser');
 
   function assertMatchesExpectedData(state: DebugState) {
     expect(state.axes?.x![0].labels.sort()).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
@@ -134,6 +136,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchDataPanelIndexPattern('logstash-*', true);
       expect(await testSubjects.exists('addFilter')).to.be(true);
       expect(await queryBar.getQueryString()).to.be('');
+    });
+
+    it('should navigate to Discover', async () => {
+      await switchToTextBasedLanguage('SQL');
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        field: 'extension',
+      });
+
+      await PageObjects.lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        field: 'average',
+      });
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await testSubjects.click('lnsApp_openInDiscover');
+      const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const columns = await PageObjects.discover.getColumnHeaders();
+      expect(columns).to.eql(['extension', 'average']);
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(lensWindowHandler);
     });
   });
 }
