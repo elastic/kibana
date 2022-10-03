@@ -11,50 +11,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { useKibana } from '../../../../../common/lib/kibana';
 
-/**
- * A component to be displayed in multi step onboarding process.
- */
-export const EndpointPolicyCreateMultiStepExtension = memo(() => {
-  return (
-    <Container>
-      <LargeCustomSpacer />
-      <Title />
-      <MediumCustomSpacer />
-
-      <EuiFlexGroup>
-        <CenteredEuiFlexItem grow={false}>
-          <LargeSecurityLogo />
-        </CenteredEuiFlexItem>
-
-        <EuiFlexItem>
-          <div>
-            <Features />
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <MediumCustomSpacer />
-      <Details />
-      <LargeCustomSpacer />
-    </Container>
-  );
-});
-EndpointPolicyCreateMultiStepExtension.displayName = 'EndpointPolicyCreateMultiStepExtension';
-
 const Container = styled('div')`
   padding: 0 23px;
 `;
 
-const Title = () => (
-  <EuiText>
-    <h3>
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.title"
-        defaultMessage="We'll save your integration with our recommended defaults."
-      />
-    </h3>
-  </EuiText>
-);
+const CenteredEuiFlexItem = styled(EuiFlexItem)`
+  align-items: center;
+`;
+
+const LargeLogo = styled(EuiIcon)`
+  width: 128px;
+  height: 128px;
+`;
 
 const LargeCustomSpacer = () => (
   <>
@@ -70,39 +38,43 @@ const MediumCustomSpacer = () => (
   </>
 );
 
-const CenteredEuiFlexItem = styled(EuiFlexItem)`
-  align-items: center;
-`;
-
-const LargeSecurityLogo = () => <LargeLogo type="logoSecurity" />;
-
-const LargeLogo = styled(EuiIcon)`
-  width: 128px;
-  height: 128px;
-`;
-const Features = () => (
-  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiIcon type="check" />
-    </EuiFlexItem>
-
-    <EuiFlexItem>
-      <EuiText size="m">
-        <p>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.feature"
-            defaultMessage="Windows, Mac, and Linux event collection"
-          />
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-const Details = () => {
+/**
+ * A component to be displayed in multi step onboarding process.
+ */
+export const EndpointPolicyCreateMultiStepExtension = memo(() => {
   const { docLinks } = useKibana().services;
 
-  return (
+  const title = (
+    <EuiText>
+      <h3>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.title"
+          defaultMessage="We'll save your integration with our recommended defaults."
+        />
+      </h3>
+    </EuiText>
+  );
+
+  const features = (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="check" />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiText size="m">
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.feature"
+              defaultMessage="Windows, Mac, and Linux event collection"
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const details = (
     <EuiText size="m" color="subdued">
       <p>
         <FormattedMessage
@@ -123,4 +95,27 @@ const Details = () => {
       </p>
     </EuiText>
   );
-};
+
+  return (
+    <Container>
+      <LargeCustomSpacer />
+      {title}
+      <MediumCustomSpacer />
+
+      <EuiFlexGroup>
+        <CenteredEuiFlexItem grow={false}>
+          <LargeLogo type="logoSecurity" />
+        </CenteredEuiFlexItem>
+
+        <EuiFlexItem>
+          <div>{features}</div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <MediumCustomSpacer />
+      {details}
+      <LargeCustomSpacer />
+    </Container>
+  );
+});
+EndpointPolicyCreateMultiStepExtension.displayName = 'EndpointPolicyCreateMultiStepExtension';
