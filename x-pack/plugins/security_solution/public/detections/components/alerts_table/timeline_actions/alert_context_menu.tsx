@@ -268,7 +268,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       {isOsqueryFlyoutOpen && agentId && ecsRowData != null && (
         <OsqueryFlyout
           agentId={agentId}
-          defaultValues={alertId ? { alertIds: [alertId] } : { dupa: true }}
+          defaultValues={alertId ? { alertIds: [alertId] } : undefined}
           onClose={handleOnOsqueryClick}
         />
       )}
