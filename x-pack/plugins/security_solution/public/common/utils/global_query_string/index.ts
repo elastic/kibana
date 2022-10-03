@@ -12,7 +12,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import {
   encodeQueryString,
   encodeRisonUrlState,
-  useInitialUrlParamValue,
+  useGetInitialUrlParamValue,
   useReplaceUrlParams,
 } from './helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
@@ -37,10 +37,12 @@ export const useInitializeUrlParam = <State>(
   onInitialize: (state: State | null) => void
 ) => {
   const dispatch = useDispatch();
-  const { param: initialValue, decodedParam: decodedInitialValue } =
-    useInitialUrlParamValue<State>(urlParamKey);
+
+  const getInitialUrlParamValue = useGetInitialUrlParamValue<State>(urlParamKey);
 
   useEffect(() => {
+    const { param: initialValue, decodedParam: decodedInitialValue } = getInitialUrlParamValue();
+
     dispatch(
       globalUrlParamActions.registerUrlParam({
         key: urlParamKey,

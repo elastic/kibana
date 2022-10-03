@@ -43,7 +43,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
 
 import {
-  useInitialUrlParamValue,
+  useGetInitialUrlParamValue,
   useReplaceUrlParams,
 } from '../../utils/global_query_string/helpers';
 
@@ -83,35 +83,14 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]
   );
-  const replaceUrlParams = useReplaceUrlParams();
 
-  const { decodedParam: showExternalAlertsInitialUrlState } =
-    useInitialUrlParamValue<boolean>(EXTERNAL_ALERTS_URL_PARAM);
+  const showExternalAlertsInitialUrlState = useExternalAlertsInitialUrlState();
 
   const [showExternalAlerts, setShowExternalAlerts] = useState(
     showExternalAlertsInitialUrlState ?? false
   );
 
-  useEffect(() => {
-    replaceUrlParams([
-      {
-        key: EXTERNAL_ALERTS_URL_PARAM,
-        value: showExternalAlerts ? 'true' : null,
-      },
-    ]);
-  }, [showExternalAlerts, replaceUrlParams]);
-
-  useEffect(() => {
-    // Only called on component unmount
-    return () => {
-      replaceUrlParams([
-        {
-          key: EXTERNAL_ALERTS_URL_PARAM,
-          value: null,
-        },
-      ]);
-    };
-  }, [replaceUrlParams]);
+  useSyncExternalAlertsUrlState(showExternalAlerts);
 
   const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);
   const getHistogramSubtitle = useMemo(
@@ -213,3 +192,43 @@ EventsQueryTabBodyComponent.displayName = 'EventsQueryTabBodyComponent';
 export const EventsQueryTabBody = React.memo(EventsQueryTabBodyComponent);
 
 EventsQueryTabBody.displayName = 'EventsQueryTabBody';
+
+const useExternalAlertsInitialUrlState = () => {
+  const replaceUrlParams = useReplaceUrlParams();
+
+  const getInitialUrlParamValue = useGetInitialUrlParamValue<boolean>(EXTERNAL_ALERTS_URL_PARAM);
+
+  const { decodedParam: showExternalAlertsInitialUrlState } = useMemo(
+    () => getInitialUrlParamValue(),
+    [getInitialUrlParamValue]
+  );
+
+  useEffect(() => {
+    // Only called on component unmount
+    return () => {
+      replaceUrlParams([
+        {
+          key: EXTERNAL_ALERTS_URL_PARAM,
+          value: null,
+        },
+      ]);
+    };
+  }, [replaceUrlParams]);
+
+  return showExternalAlertsInitialUrlState;
+};
+
+/**
+ * Update URL state when showExternalAlerts value changes
+ */
+const useSyncExternalAlertsUrlState = (showExternalAlerts: boolean) => {
+  const replaceUrlParams = useReplaceUrlParams();
+  useEffect(() => {
+    replaceUrlParams([
+      {
+        key: EXTERNAL_ALERTS_URL_PARAM,
+        value: showExternalAlerts ? 'true' : null,
+      },
+    ]);
+  }, [showExternalAlerts, replaceUrlParams]);
+};

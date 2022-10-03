@@ -10,7 +10,7 @@ import type { ParsedQuery } from 'query-string';
 import { parse, stringify } from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { useHistory } from 'react-router-dom';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { SecurityPageName } from '../../../app/types';
 
 export const isDetectionsPages = (pageName: string) =>
@@ -51,10 +51,10 @@ export const getParamFromQueryString = (
  * It doesn't update when the URL changes.
  *
  */
-export const useInitialUrlParamValue = <State>(urlParamKey: string) => {
+export const useGetInitialUrlParamValue = <State>(urlParamKey: string) => {
   // window.location.search provides the most updated representation of the url search.
   // It also guarantees that we don't overwrite URL param managed outside react-router.
-  const result = useMemo(() => {
+  const getInitialUrlParamValue = useCallback(() => {
     const param = getParamFromQueryString(
       getQueryStringFromLocation(window.location.search),
       urlParamKey
@@ -65,7 +65,7 @@ export const useInitialUrlParamValue = <State>(urlParamKey: string) => {
     return { param, decodedParam };
   }, [urlParamKey]);
 
-  return result;
+  return getInitialUrlParamValue;
 };
 
 export const encodeQueryString = (urlParams: ParsedQuery<string>): string =>
