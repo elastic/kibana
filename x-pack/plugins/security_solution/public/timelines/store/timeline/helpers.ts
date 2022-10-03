@@ -958,7 +958,7 @@ interface UpdateTimelineProviderEditPropertiesParams {
   operator: QueryOperator;
   providerId: string;
   timelineById: TimelineById;
-  value: string | number;
+  value: string | number | Array<string | number>;
 }
 
 export const updateTimelineProviderProperties = ({

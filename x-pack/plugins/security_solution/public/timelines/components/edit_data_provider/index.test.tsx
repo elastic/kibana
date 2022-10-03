@@ -227,28 +227,6 @@ describe('StatefulEditDataProvider', () => {
     expect(screen.getByDisplayValue(value)).toBeInTheDocument();
   });
 
-  test('it renders selected values when the type of value is an array and the operator is "is one of"', () => {
-    const values = ['apple', 'banana', 'cherry'];
-    render(
-      <TestProviders>
-        <StatefulEditDataProvider
-          andProviderId={undefined}
-          browserFields={mockBrowserFields}
-          field={field}
-          isExcluded={false}
-          onDataProviderEdited={jest.fn()}
-          operator={IS_ONE_OF_OPERATOR}
-          providerId={`hosts-table-hostName-${value}`}
-          timelineId={timelineId}
-          value={values}
-        />
-      </TestProviders>
-    );
-    expect(screen.getByText(values[0])).toBeInTheDocument();
-    expect(screen.getByText(values[1])).toBeInTheDocument();
-    expect(screen.getByText(values[2])).toBeInTheDocument();
-  });
-
   test('it handles bad values when the operator is "is one of" by showing default placholder', () => {
     const reallyAnArrayOfBadValues = [undefined, null] as unknown as string[];
     render(

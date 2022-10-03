@@ -13,6 +13,7 @@ import { HoverActions } from '.';
 import type { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
+import { convertNumericArrayToStringArray } from './utils';
 
 const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
   const links = draggableElement?.querySelectorAll('.euiLink') ?? [];
@@ -118,7 +119,7 @@ export const useHoverActions = ({
         toggleTopN={toggleTopN}
         values={
           typeof dataProvider.queryMatch.value !== 'number'
-            ? dataProvider.queryMatch.value
+            ? convertNumericArrayToStringArray(dataProvider.queryMatch.value)
             : `${dataProvider.queryMatch.value}`
         }
       />

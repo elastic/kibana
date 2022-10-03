@@ -146,8 +146,8 @@ export const StatefulEditDataProvider = React.memo<Props>(
       focusInput();
     }, []);
 
-    const onValueChange = useCallback((updatedValue: string | number | string[]) => {
-      setUpdatedValue(updatedValue);
+    const onValueChange = useCallback((changedValue: string | number | string[]) => {
+      setUpdatedValue(changedValue);
     }, []);
 
     const disableScrolling = () => {
@@ -341,7 +341,7 @@ const ControlledDefaultInput = ({
   useEffect(() => {
     onChangeCallback(primitiveValue);
     disableButtonCallback(isInvalid);
-  }, [primitiveValue, isInvalid]);
+  }, [primitiveValue, isInvalid, onChangeCallback, disableButtonCallback]);
 
   const onValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setPrimitiveValue(e.target.value);
@@ -386,7 +386,7 @@ const ControlledComboboxInput = ({
   useEffect(() => {
     onChangeCallback(convertComboboxValuesToStringArray(includeValues));
     disableButtonCallback(isInvalid);
-  }, [includeValues, isInvalid]);
+  }, [includeValues, isInvalid, onChangeCallback, disableButtonCallback]);
 
   const onCreateOption = (searchValue: string, flattenedOptions = includeValues) => {
     const normalizedSearchValue = searchValue.trim().toLowerCase();

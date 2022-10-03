@@ -650,7 +650,7 @@ export interface DataProviderResult {
 export interface QueryMatchResult {
   field?: Maybe<string>;
   displayField?: Maybe<string>;
-  value?: Maybe<string>;
+  value?: Maybe<string | string[]>;
   displayValue?: Maybe<string>;
   operator?: Maybe<string>;
 }

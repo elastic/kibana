@@ -184,7 +184,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
           )}
         </>
       ),
-      [field, formattedValue, operator, prefix]
+      [displayValue, field, formattedValue, operator, prefix]
     );
 
     const ariaLabel = useMemo(

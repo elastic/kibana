@@ -154,6 +154,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       ),
       [
         deleteProvider,
+        displayValue,
         field,
         isEnabled,
         isExcluded,
