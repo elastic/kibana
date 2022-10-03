@@ -669,7 +669,7 @@ export function renderActionParameterTemplates<Params extends ActionTypeParams =
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {
-    return actionType.renderParameterTemplates(params, variables, actionId) as Params;
+    return actionType.renderParameterTemplates(params, variables, actionId);
   } else {
     return renderMustacheObject(params, variables);
   }

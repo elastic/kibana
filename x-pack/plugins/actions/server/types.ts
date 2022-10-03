@@ -91,11 +91,12 @@ export type ExecutorType<Config, Secrets, Params, ResultData> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-interface ValidatorType<Type> {
+export type CustomValidator<Type> = (value: Type, validatorServices: ValidatorServices) => void;
+export interface ValidatorType<Type> {
   schema: {
     validate(value: unknown): Type;
   };
-  customValidator?: (value: Type, validatorServices: ValidatorServices) => void;
+  customValidator?: CustomValidator<Type>;
 }
 
 export interface ValidatorServices {
@@ -106,6 +107,17 @@ export interface ActionValidationService {
   isHostnameAllowed(hostname: string): boolean;
 
   isUriAllowed(uri: string): boolean;
+}
+
+export interface ActionTypeValidators<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
+> {
+  params?: ValidatorType<Params>;
+  config?: ValidatorType<Config>;
+  secrets?: ValidatorType<Secrets>;
+  connector?: (config: Config, secrets: Secrets) => string | null;
 }
 
 export interface ActionType<
@@ -119,18 +131,13 @@ export interface ActionType<
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
-  validate?: {
-    params?: ValidatorType<Params>;
-    config?: ValidatorType<Config>;
-    secrets?: ValidatorType<Secrets>;
-    connector?: (config: Config, secrets: Secrets) => string | null;
-  };
+  validate?: ActionTypeValidators<Config, Secrets, Params>;
 
-  renderParameterTemplates?(
-    params: Params,
+  renderParameterTemplates?<P extends Params>(
+    params: P,
     variables: Record<string, unknown>,
     actionId?: string
-  ): Params;
+  ): P;
 
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }

@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeConfig, ActionTypeSecrets } from '../types';
-import { SubActionConnectorType } from './types';
+import type { ActionTypeValidators, ActionTypeConfig, ActionTypeSecrets } from '../types';
+import type { ExecutorParams, SubActionConnectorType } from './types';
 
 export const buildValidators = <
   Config extends ActionTypeConfig,
@@ -19,26 +19,19 @@ export const buildValidators = <
 }: {
   configurationUtilities: ActionsConfigurationUtilities;
   connector: SubActionConnectorType<Config, Secrets>;
-}) => {
-  return {
-    config: {
-      schema: connector.schema.config,
-    },
-    secrets: {
-      schema: connector.schema.secrets,
-    },
-    params: {
-      schema: schema.object({
-        subAction: schema.string(),
-        /**
-         * With this validation we enforce the subActionParams to be an object.
-         * Each sub action has different parameters and they are validated inside the executor
-         * (x-pack/plugins/actions/server/sub_action_framework/executor.ts). For that reason,
-         * we allow all unknowns at this level of validation as they are not known at this
-         * time of execution.
-         */
-        subActionParams: schema.object({}, { unknowns: 'allow' }),
-      }),
-    },
-  };
-};
+}): ActionTypeValidators<Config, Secrets, ExecutorParams> => ({
+  ...connector.validate,
+  params: {
+    schema: schema.object({
+      subAction: schema.string(),
+      /**
+       * With this validation we enforce the subActionParams to be an object.
+       * Each sub action has different parameters and they are validated inside the executor
+       * (x-pack/plugins/actions/server/sub_action_framework/executor.ts). For that reason,
+       * we allow all unknowns at this level of validation as they are not known at this
+       * time of execution.
+       */
+      subActionParams: schema.object({}, { unknowns: 'allow' }),
+    }),
+  },
+});

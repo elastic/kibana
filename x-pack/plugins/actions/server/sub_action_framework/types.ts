@@ -9,8 +9,9 @@ import type { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
+import type { Method, AxiosRequestConfig } from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeParams, Services } from '../types';
+import { ActionTypeParams, Services, ValidatorType } from '../types';
 import { SubActionConnector } from './sub_action_connector';
 
 export interface ServiceParams<Config, Secrets> {
@@ -26,6 +27,12 @@ export interface ServiceParams<Config, Secrets> {
   services: Services;
 }
 
+export type SubActionRequestParams<R> = {
+  url: string;
+  responseSchema: Type<R>;
+  method?: Method;
+} & AxiosRequestConfig;
+
 export type IService<Config, Secrets> = new (
   params: ServiceParams<Config, Secrets>
 ) => SubActionConnector<Config, Secrets>;
@@ -39,11 +46,16 @@ export interface SubActionConnectorType<Config, Secrets> {
   name: string;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
-  schema: {
-    config: Type<Config>;
-    secrets: Type<Secrets>;
+  validate?: {
+    config?: ValidatorType<Config>;
+    secrets?: ValidatorType<Secrets>;
   };
   Service: IService<Config, Secrets>;
+  renderParameterTemplates?<P extends ExecutorParams>(
+    params: P,
+    variables: Record<string, unknown>,
+    actionId?: string
+  ): P;
 }
 
 export interface ExecutorParams extends ActionTypeParams {
