@@ -70,7 +70,7 @@ export function MachineLearningTestResourcesProvider(
       objectType: SavedObjectType,
       space?: string
     ): Promise<boolean> {
-      const id = await this.getSavedObjectIdByTitle(title, objectType);
+      const id = await this.getSavedObjectIdByTitle(title, objectType, space);
       if (id) {
         return await this.savedObjectExistsById(id, objectType, space);
       } else {
