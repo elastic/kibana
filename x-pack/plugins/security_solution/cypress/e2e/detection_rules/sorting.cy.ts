@@ -92,9 +92,9 @@ describe('Alerts detection rules', () => {
 
     cy.get(RULES_TABLE)
       .find(FIRST_PAGE_SELECTOR)
-      .should('not.have.class', 'euiPaginationButton-isActive');
+      .should('not.contain', 'euiPaginationButton-isActive');
     cy.get(RULES_TABLE)
       .find(SECOND_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
+      .should('contain', 'euiPaginationButton-isActive');
   });
 });
