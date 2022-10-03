@@ -251,6 +251,14 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
   return (
     typeof fieldCandidate === 'object' &&
     fieldCandidate !== null &&
+    ['id', 'field'].every((prop) => prop in fieldCandidate)
+  );
+}
+
+export function isDraggedDataViewField(fieldCandidate: unknown): fieldCandidate is DraggedField {
+  return (
+    typeof fieldCandidate === 'object' &&
+    fieldCandidate !== null &&
     ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
   );
 }
