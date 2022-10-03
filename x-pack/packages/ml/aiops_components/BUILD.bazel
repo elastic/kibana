@@ -55,6 +55,8 @@ RUNTIME_DEPS = [
   "@npm//react",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
+  "@npm//@emotion/react",
+  "@npm//@emotion/css",
   "//packages/kbn-i18n-react",
   "//x-pack/packages/ml/aiops_utils",
 ]
@@ -78,6 +80,8 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
+  "@npm//@emotion/react",
+  "@npm//@emotion/css",
   "//packages/kbn-i18n-react:npm_module_types",
   "//x-pack/packages/ml/aiops_utils:npm_module_types",
 ]
