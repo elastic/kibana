@@ -36,6 +36,7 @@ export interface ConsoleDataState {
 
   dataTestSubj?: string;
 
+  /** The local storage prefix for saving/persisting data associated with the console */
   storagePrefix?: string;
 
   /** The key for the console when it is under ConsoleManager control */

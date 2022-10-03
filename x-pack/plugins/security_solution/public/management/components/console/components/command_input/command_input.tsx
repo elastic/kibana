@@ -143,13 +143,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       const keyCode = eventDetails.keyCode;
 
       // UP arrow key
-      // FIXME:PT to be addressed via OLM task #4384
-      // if (keyCode === 38) {
-      //   dispatch({ type: 'removeFocusFromKeyCapture' });
-      //   dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
-      //
-      //   return;
-      // }
+      if (keyCode === 38) {
+        dispatch({ type: 'removeFocusFromKeyCapture' });
+        dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
+
+        return;
+      }
 
       // Update the store with the updated text that was entered
       dispatch({
