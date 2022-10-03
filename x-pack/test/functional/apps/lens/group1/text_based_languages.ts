@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
   const browser = getService('browser');
+  const log = getService('log');
 
   function assertMatchesExpectedData(state: DebugState) {
     expect(state.axes?.x![0].labels.sort()).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
@@ -157,6 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('xyVisChart');
       await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
       const [_, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await log.debug(`url----${discoverWindowHandle}`);
       await browser.switchToWindow(discoverWindowHandle);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
