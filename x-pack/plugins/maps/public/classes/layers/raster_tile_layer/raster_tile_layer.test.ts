@@ -7,10 +7,12 @@
 
 import { RasterTileLayer } from './raster_tile_layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
+import { DataRequestMeta, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { AbstractSource } from '../../sources/source';
-import { ITMSSource } from '../../sources/tms_source';
 import { ILayer } from '../layer';
+import { RasterTileSource } from 'maplibre-gl';
+import { DataRequest } from '../../util/data_request';
+import { IRasterSource, RasterTileSourceData } from '../../sources/raster_source';
 
 const sourceDescriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,
@@ -18,11 +20,20 @@ const sourceDescriptor: XYZTMSSourceDescriptor = {
   id: 'foobar',
 };
 
-class MockTileSource extends AbstractSource implements ITMSSource {
+class MockTileSource extends AbstractSource implements IRasterSource {
   readonly _descriptor: XYZTMSSourceDescriptor;
   constructor(descriptor: XYZTMSSourceDescriptor) {
     super(descriptor);
     this._descriptor = descriptor;
+  }
+  async canSkipSourceUpdate(
+    dataRequest: DataRequest,
+    nextRequestMeta: DataRequestMeta
+  ): Promise<boolean> {
+    return true;
+  }
+  isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData): boolean {
+    return false;
   }
 
   async getDisplayName(): Promise<string> {

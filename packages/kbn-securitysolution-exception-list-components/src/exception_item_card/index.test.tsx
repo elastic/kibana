@@ -10,8 +10,8 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
 import { ExceptionItemCard } from '.';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
+import { getExceptionListItemSchemaMock } from '../test_helpers/exception_list_item_schema.mock';
+import { getCommentsArrayMock } from '../test_helpers/comments.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 const ruleReferences: unknown[] = [
