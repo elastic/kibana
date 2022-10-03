@@ -114,6 +114,7 @@ export const bulkCreatePrebuiltSavedObjects = async ({
               theme$: theme?.theme$,
             }
           ),
+          toastLifeTimeMs,
         });
       }
     })
