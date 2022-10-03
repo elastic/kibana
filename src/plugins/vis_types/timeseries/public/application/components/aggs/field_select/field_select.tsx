@@ -47,10 +47,19 @@ interface FieldSelectProps {
   fullWidth?: boolean;
 }
 
-const getPreselectedFields = (
+const getPlaceholderValue = (
   placeholder?: string,
   options?: Array<EuiComboBoxOptionOption<string>>
-) => placeholder && findInGroupedOptions(options, placeholder)?.label;
+) => {
+  let returnedValue = placeholder;
+  if (placeholder) {
+    const label = findInGroupedOptions(options, placeholder)?.label;
+    if (label) {
+      returnedValue = label;
+    }
+  }
+  return returnedValue;
+};
 
 export function FieldSelect({
   label,
@@ -138,7 +147,7 @@ export function FieldSelect({
           onNewItemAdd={onNewItemAdd.bind(undefined, props.index)}
           onDeleteItem={onDeleteItem.bind(undefined, props.index)}
           onChange={onFieldSelectItemChange.bind(undefined, props.index)}
-          placeholder={getPreselectedFields(placeholder, groupedOptions)}
+          placeholder={getPlaceholderValue(placeholder, groupedOptions)}
           disableAdd={!allowMultiSelect || selectedIds?.length >= MAX_MULTI_FIELDS_ITEMS}
           disableDelete={!allowMultiSelect || selectedIds?.length <= 1}
         />
