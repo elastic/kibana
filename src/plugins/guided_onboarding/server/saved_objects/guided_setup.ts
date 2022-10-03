@@ -21,22 +21,8 @@ export const guidedSetupSavedObjects: SavedObjectsType = {
       guideId: {
         type: 'keyword',
       },
-      status: {
-        type: 'keyword',
-      },
       isActive: {
         type: 'boolean',
-      },
-      steps: {
-        type: 'nested',
-        properties: {
-          id: {
-            type: 'keyword',
-          },
-          status: {
-            type: 'keyword',
-          },
-        },
       },
     },
   },

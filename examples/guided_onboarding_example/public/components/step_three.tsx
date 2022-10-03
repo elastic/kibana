@@ -54,7 +54,8 @@ export const StepThree = (props: StepThreeProps) => {
           <p>
             <FormattedMessage
               id="guidedOnboardingExample.guidesSelection.stepThree.explanation"
-              defaultMessage="The EUI tour on this page is displayed, when a url param 'showTour' is set to 'true'."
+              defaultMessage="The code on this page is listening to the guided setup state using an Observable subscription. If the state is set to
+              Search guide, step Search experience, a EUI tour will be displayed, pointing to the button below."
             />
           </p>
         </EuiText>

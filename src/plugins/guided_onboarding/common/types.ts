@@ -24,7 +24,7 @@ export type GuideStatus = 'in_progress' | 'ready_to_complete' | 'complete';
 
 /**
  * Allowed states for each step in a guide:
- *  in_active: Step has not started
+ *  inactive: Step has not started
  *  active: Step is ready to start (i.e., the guide has been started)
  *  in_progress: Step has been started and is in progress
  *  complete: Step has been completed
