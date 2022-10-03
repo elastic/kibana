@@ -6,10 +6,10 @@
  */
 
 export async function expectToReject<T extends Error>(fn: () => Promise<any>): Promise<T> {
-    try {
-      await fn();
-    } catch (e) {
-      return e;
-    }
-    throw new Error(`Expected fn to throw`);
+  try {
+    await fn();
+  } catch (e) {
+    return e;
+  }
+  throw new Error(`Expected fn to throw`);
 }

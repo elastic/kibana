@@ -12,7 +12,7 @@ import { expectToReject } from '../../../common/utils/expect_to_reject';
 
 export default function apiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const apmApiClient = getService("apmApiClient");
+  const apmApiClient = getService('apmApiClient');
 
   function getJobs() {
     return apmApiClient.noAccessUser({
@@ -21,14 +21,14 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   function createJobs(environments: string[]) {
-      return apmApiClient.noAccessUser({
-        endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
-        params: {
-          body: {
-            environments,
-          },
+    return apmApiClient.noAccessUser({
+      endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
+      params: {
+        body: {
+          environments,
         },
-      });
+      },
+    });
   }
 
   registry.when('ML jobs', { config: 'trial', archives: [] }, () => {
@@ -44,7 +44,9 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
       describe('when calling create endpoint', () => {
         it('returns an error because the user does not have access', async () => {
-          const err = await expectToReject<ApmApiError>(() => createJobs(['production', 'staging']));
+          const err = await expectToReject<ApmApiError>(() =>
+            createJobs(['production', 'staging'])
+          );
 
           expect(err.res.status).to.be(403);
           expect(err.res.body.message).eql('Forbidden');
