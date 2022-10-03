@@ -10,10 +10,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { EuiLoadingElastic, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { Redirect } from 'react-router-dom';
-import { useEnablement } from '../../../hooks';
+import { useEnablement, useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
+  setOverviewPageStateAction,
   selectOverviewState,
   selectServiceLocationsState,
 } from '../../../state';
@@ -33,6 +34,7 @@ export const OverviewPage: React.FC = () => {
   const dispatch = useDispatch();
 
   const { refreshApp } = useSyntheticsRefreshContext();
+  const { query } = useGetUrlParams();
 
   const { loading, pageState } = useSelector(selectOverviewState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
@@ -54,6 +56,10 @@ export const OverviewPage: React.FC = () => {
     dispatch(fetchMonitorOverviewAction.get(pageState));
   }, [dispatch, pageState]);
 
+  useEffect(() => {
+    dispatch(setOverviewPageStateAction({ query }));
+  }, [dispatch, query]);
+
   const {
     enablement: { isEnabled },
     loading: enablementLoading,
@@ -68,6 +74,8 @@ export const OverviewPage: React.FC = () => {
   if (!enablementLoading && !isEnabled && monitorsLoaded && syntheticsMonitors.length === 0) {
     return <Redirect to={MONITORS_ROUTE} />;
   }
+
+  console.warn('loading', loading);
 
   return !loading ? (
     <OverviewGrid />

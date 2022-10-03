@@ -68,7 +68,7 @@ const getMonitors = (
     page,
     sortField: sortField === 'schedule.keyword' ? 'schedule.number' : sortField,
     sortOrder,
-    searchFields: ['name', 'tags.text', 'locations.id.text', 'urls'],
+    searchFields: ['name', 'tags.text', 'locations.id.text', 'urls', 'hosts'],
     search: query ? `${query}*` : undefined,
     filter: filters + filter,
   });
@@ -191,13 +191,14 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     query: querySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { perPage = 5 } = request.query;
+    const { perPage = 5, query } = request.query;
     const { saved_objects: monitors } = await getMonitors(
       {
         perPage: 1000,
         sortField: 'name.keyword',
         sortOrder: 'asc',
         page: 1,
+        query,
       },
       syntheticsMonitorClient.syntheticsService,
       savedObjectsClient

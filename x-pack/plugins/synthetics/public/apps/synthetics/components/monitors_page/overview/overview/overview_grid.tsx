@@ -8,9 +8,10 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGrid, EuiSpacer, EuiTablePagination } from '@elastic/eui';
-import { selectOverviewState, setOverviewPerPageAction } from '../../../../state/overview';
+import { selectOverviewState, setOverviewPageStateAction } from '../../../../state/overview';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
+import { SearchField } from '../../common/search_field';
 
 export const OverviewGrid = () => {
   const {
@@ -27,11 +28,16 @@ export const OverviewGrid = () => {
   };
 
   const changeItemsPerPage = (itemsPerPage: number) => {
-    dispatch(setOverviewPerPageAction(itemsPerPage));
+    dispatch(
+      setOverviewPageStateAction({
+        perPage: itemsPerPage,
+      })
+    );
   };
 
   return loaded ? (
     <>
+      <SearchField />
       <OverviewPaginationInfo page={page} />
       <EuiSpacer />
       <EuiFlexGrid columns={4}>
