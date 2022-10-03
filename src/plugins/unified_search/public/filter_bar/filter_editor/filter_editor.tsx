@@ -169,15 +169,19 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
           </div>
 
           <EuiPopoverFooter paddingSize="s">
-            <EuiFlexGroup direction="rowReverse" alignItems="center" responsive={false}>
-              {/* Adding relative here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
+            {/* Adding isolation here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
+            <EuiFlexGroup
+              direction="rowReverse"
+              alignItems="center"
+              style={{ isolation: 'isolate' }}
+              responsive={false}
+            >
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
                   onClick={this.onSubmit}
                   isDisabled={!this.isFilterValid()}
                   data-test-subj="saveFilter"
-                  style={{ position: 'relative' }}
                 >
                   {this.props.mode === 'add' ? addButtonLabel : updateButtonLabel}
                 </EuiButton>
@@ -187,7 +191,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
                   flush="right"
                   onClick={this.props.onCancel}
                   data-test-subj="cancelSaveFilter"
-                  style={{ position: 'relative' }}
                 >
                   <FormattedMessage
                     id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
