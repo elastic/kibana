@@ -62,6 +62,9 @@ export const getSuggestionAggregationBuilder = ({
   if (fieldSpec?.type === 'boolean') {
     return suggestionAggSubtypes.boolean;
   }
+  if (fieldSpec?.type === 'ip') {
+    return suggestionAggSubtypes.ip;
+  }
   if (fieldSpec && getFieldSubtypeNested(fieldSpec)) {
     return suggestionAggSubtypes.subtypeNested;
   }
@@ -137,6 +140,24 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
       get(rawEsResult, 'aggregations.suggestions.buckets')?.map(
         (suggestion: { key_as_string: string }) => suggestion.key_as_string
       ),
+  },
+
+  /**
+   * The "IP" query / parser should be used when the options list is built on a field of type IP.
+   * The query is identical to that of a "boolean" field, but the parsing is different.
+   */
+  ip: {
+    buildAggregation: ({ fieldName }: OptionsListRequestBody) => ({
+      terms: {
+        field: fieldName,
+        execution_hint: 'map',
+        shard_size: 10,
+      },
+    }),
+    parse: (rawEsResult) =>
+      get(rawEsResult, 'aggregations.suggestions.buckets')?.map((suggestion: { key: string }) => {
+        return suggestion.key;
+      }),
   },
 
   /**
