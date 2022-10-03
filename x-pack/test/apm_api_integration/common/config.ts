@@ -126,21 +126,9 @@ export function createTestConfig(config: ApmFtrConfig) {
         },
         ml: MachineLearningAPIProvider,
         // legacy clients
-        legacySupertestAsNoAccessUser: getLegacySupertestClient(
-          kibanaServer,
-          ApmUsername.noAccessUser
-        ),
-        legacySupertestAsApmReadUser: getLegacySupertestClient(
-          kibanaServer,
-          ApmUsername.viewerUser
-        ),
         legacySupertestAsApmWriteUser: getLegacySupertestClient(
           kibanaServer,
           ApmUsername.editorUser
-        ),
-        legacySupertestAsApmAnnotationsWriteUser: getLegacySupertestClient(
-          kibanaServer,
-          ApmUsername.apmAnnotationsWriteUser
         ),
         legacySupertestAsApmReadUserWithoutMlAccess: getLegacySupertestClient(
           kibanaServer,
