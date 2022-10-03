@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+import * as t from 'io-ts';
+
+export const OverviewStatusType = t.type({
+  up: t.number,
+  down: t.number,
+  disabledCount: t.number,
+});
+
+export type OverviewStatus = t.TypeOf<typeof OverviewStatusType>;
