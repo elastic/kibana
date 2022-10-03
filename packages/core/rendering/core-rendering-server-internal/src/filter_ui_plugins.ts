@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UiPlugins } from '../plugins';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 
 /**
  * Gets the array of plugins that should be enabled on the page.

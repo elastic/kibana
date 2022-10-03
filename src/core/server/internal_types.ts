@@ -58,7 +58,7 @@ import type {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server-internal';
-import { InternalRenderingServiceSetup } from './rendering';
+import type { InternalRenderingServiceSetup } from '@kbn/core-rendering-server-internal';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 
 /** @internal */
