@@ -8,15 +8,15 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { firstValueFrom, of } from 'rxjs';
 import { catchError, take, timeout } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
-import { firstValueFrom, of } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { UiPlugins } from '../plugins';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { Template } from './views';
 import {
   IRenderOptions,

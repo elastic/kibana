@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UiPlugins } from '../../plugins';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { filterUiPlugins } from '../filter_ui_plugins';
 
 export interface PluginInfo {

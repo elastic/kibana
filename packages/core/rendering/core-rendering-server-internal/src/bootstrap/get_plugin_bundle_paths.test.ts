@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { InternalPluginInfo, PluginType, UiPlugins } from '../../plugins';
+import { PluginType } from '@kbn/core-base-common';
+import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 
 const createUiPlugins = (pluginDeps: Record<string, string[]>) => {

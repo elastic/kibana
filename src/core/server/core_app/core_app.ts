@@ -20,10 +20,10 @@ import type {
   KibanaRequest,
   IBasePath,
 } from '@kbn/core-http-server';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { registerBundleRoutes } from './bundle_routes';
-import { UiPlugins } from '../plugins';
 import type { InternalCoreAppRequestHandlerContext } from './internal_types';
 
 /** @internal */
