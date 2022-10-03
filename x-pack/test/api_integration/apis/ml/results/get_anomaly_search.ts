@@ -19,7 +19,6 @@ export default ({ getService }: FtrProviderContext) => {
   const adJobId = 'fq_single';
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
-  const defaultSpaceId = 'default';
 
   const jobQuery = {
     size: 1,
@@ -53,7 +52,6 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST results/anomaly_search', () => {
     before(async () => {
-      await ml.api.cleanMlIndices();
       await ml.testResources.setKibanaTimeZoneToUTC();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
 
@@ -63,11 +61,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobId),
-        ml.commonConfig.getADFqDatafeedConfig(adJobId)
+        ml.commonConfig.getADFqDatafeedConfig(adJobId),
+        idSpace1
       );
-      // reassign spaces for job
-      await ml.api.updateJobSpaces(adJobId, 'anomaly-detector', [idSpace1], []);
-      await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [defaultSpaceId, idSpace1]);
+      await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [idSpace1]);
     });
 
     after(async () => {
