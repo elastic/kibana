@@ -26,7 +26,7 @@ const propertiesToRemove = [
 
 /**
  * transforms FullResponseSchema rule to UpdateRulesSchema
- * so, returned result can be used in rule update API calls
+ * returned result can be used in rule update API calls
  */
 export const ruleToUpdateSchema = (rule: FullResponseSchema): UpdateRulesSchema => {
   const removedProperties = omit(rule, propertiesToRemove);
