@@ -4166,6 +4166,45 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublic.getIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndices",
+            "description": [],
+            "signature": [
+              "(props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; }) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.MatchedItem",
+                "text": "MatchedItem"
+              },
+              "[]>"
+            ],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsServicePublic.getIndices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "{ pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; }"
+                ],
+                "path": "src/plugins/data_views/public/data_views_service_public.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataViewsServicePublic.hasData",
             "type": "Object",
             "tags": [],
@@ -5398,6 +5437,101 @@
             "path": "src/plugins/data_views/public/data_views_service_public.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublicDeps.getIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndices",
+            "description": [],
+            "signature": [
+              "(props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; }) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.MatchedItem",
+                "text": "MatchedItem"
+              },
+              "[]>"
+            ],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsServicePublicDeps.getIndices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "path": "src/plugins/data_views/public/data_views_service_public.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.DataViewsServicePublicDeps.getIndices.$1.pattern",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pattern",
+                    "description": [],
+                    "path": "src/plugins/data_views/public/data_views_service_public.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.DataViewsServicePublicDeps.getIndices.$1.showAllIndices",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "showAllIndices",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/public/data_views_service_public.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.DataViewsServicePublicDeps.getIndices.$1.isRollupIndex",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "isRollupIndex",
+                    "description": [],
+                    "signature": [
+                      "(indexName: string) => boolean"
+                    ],
+                    "path": "src/plugins/data_views/public/data_views_service_public.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "dataViews",
+                        "id": "def-public.DataViewsServicePublicDeps.getIndices.$1.isRollupIndex.$1",
+                        "type": "string",
+                        "tags": [],
+                        "label": "indexName",
+                        "description": [],
+                        "signature": [
+                          "string"
+                        ],
+                        "path": "src/plugins/data_views/public/data_views_service_public.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      }
+                    ],
+                    "returnComment": []
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5908,6 +6042,68 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-public.MatchedItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "MatchedItem",
+        "description": [],
+        "path": "src/plugins/data_views/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.MatchedItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/data_views/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.MatchedItem.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.Tag",
+                "text": "Tag"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/data_views/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.MatchedItem.item",
+            "type": "Object",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "signature": [
+              "{ name: string; backing_indices?: string[] | undefined; timestamp_field?: string | undefined; indices?: string[] | undefined; aliases?: string[] | undefined; attributes?: ",
+              "ResolveIndexResponseItemIndexAttrs",
+              "[] | undefined; data_stream?: string | undefined; }"
+            ],
+            "path": "src/plugins/data_views/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-public.RuntimeField",
         "type": "Interface",
         "tags": [],
@@ -6339,6 +6535,53 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.Tag",
+        "type": "Interface",
+        "tags": [],
+        "label": "Tag",
+        "description": [],
+        "path": "src/plugins/data_views/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.Tag.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/data_views/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.Tag.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data_views/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.Tag.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "path": "src/plugins/data_views/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -6352,6 +6595,18 @@
           "\nData View type. Default or rollup"
         ],
         "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.INDEX_PATTERN_TYPE",
+        "type": "Enum",
+        "tags": [],
+        "label": "INDEX_PATTERN_TYPE",
+        "description": [],
+        "path": "src/plugins/data_views/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
