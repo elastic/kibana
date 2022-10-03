@@ -127,12 +127,16 @@ export async function getServiceAggregatedTransactionStats({
   );
 
   return (
-    response.aggregations?.sample.services.buckets.map((bucket) => {
+    response.aggregations?.sample.services.buckets.forEach((bucket) => {
       const topTransactionTypeBucket =
         bucket.transactionType.buckets.find(
           ({ key }) =>
             key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
         ) ?? bucket.transactionType.buckets[0];
+
+      if (!topTransactionTypeBucket) {
+        return [];
+      }
 
       return {
         serviceName: bucket.key as string,
