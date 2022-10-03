@@ -11,7 +11,7 @@ import { tGridDefaults, getTGridManageDefaults } from './defaults';
 
 const getDefaultTgrid = (id: string) => ({ ...tGridDefaults, ...getTGridManageDefaults(id) });
 
-export const selectTGridById = (state: unknown, tableId: string): TGridModel => {
+const selectTGridById = (state: unknown, tableId: string): TGridModel => {
   return getOr(
     getOr(getDefaultTgrid(tableId), ['tableById', tableId], state),
     ['dataTable', 'tableById', tableId],

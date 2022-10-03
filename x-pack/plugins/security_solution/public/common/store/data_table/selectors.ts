@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TableById, TGridModel } from '@kbn/timelines-plugin/public/types';
 import { createSelector } from 'reselect';
 import type { State } from '../types';
-
-export { getManageDataTableById, getTGridByIdSelector } from '@kbn/timelines-plugin/public';
+import type { TGridModel, TableById } from './model';
 
 const selectTableById = (state: State): TableById => state.dataTable.tableById;
 
 export const tableByIdSelector = createSelector(selectTableById, (tableById) => tableById);
 
-export const selectTable = (state: State, tableId: string): TGridModel =>
+const selectTable = (state: State, tableId: string): TGridModel =>
   state.dataTable.tableById[tableId];
 
 export const getTableByIdSelector = () => createSelector(selectTable, (table) => table);

@@ -219,17 +219,15 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, ownProps: OwnProps) => {
     const { tableId } = ownProps;
     const table = getDataTable(state, tableId) ?? tableDefaults;
-    const { deletedEventIds, isSelectAllChecked, loadingEventIds, selectedEventIds } = table;
+    const { isSelectAllChecked, loadingEventIds } = table;
 
     const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
     return {
       globalQuery: query,
       globalFilters: filters,
-      deletedEventIds,
       isSelectAllChecked,
       loadingEventIds,
-      selectedEventIds,
     };
   };
   return mapStateToProps;

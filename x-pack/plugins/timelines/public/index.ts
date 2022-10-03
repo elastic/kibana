@@ -41,15 +41,8 @@ export {
   createTGrid,
 } from './store/t_grid/actions';
 
-export { getManageDataTableById, getTGridByIdSelector } from './store/t_grid/selectors';
-
 export { tGridReducer } from './store/t_grid/reducer';
-export type {
-  TimelinesUIStart,
-  TGridModelForTimeline,
-  TableState,
-  SubsetTGridModel,
-} from './types';
+export type { TimelinesUIStart, TableState, TableById, SubsetTGridModel } from './types';
 export type { TGridType, SortDirection, State as TGridState, TGridModel } from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
 

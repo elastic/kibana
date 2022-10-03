@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { TGridModelForTimeline, TGridModel, SubsetTGridModel } from '@kbn/timelines-plugin/public';
+export type { TGridModel, SubsetTGridModel, TableById } from '@kbn/timelines-plugin/public';

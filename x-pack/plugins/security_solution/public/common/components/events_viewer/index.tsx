@@ -9,14 +9,9 @@ import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { EntityType } from '@kbn/timelines-plugin/common';
-import type {
-  ControlColumnProps,
-  RowRenderer,
-  TGridCellAction,
-} from '@kbn/timelines-plugin/common/types';
-import type { SubsetTGridModel } from '@kbn/timelines-plugin/public';
-import type { TableId } from '../../../../common/types';
+import type { EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
+import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import type { ControlColumnProps, TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
@@ -41,6 +36,7 @@ import {
   useSessionViewNavigation,
   useSessionView,
 } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+import type { SubsetTGridModel } from '../../store/data_table/model';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 

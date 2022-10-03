@@ -65,33 +65,6 @@ export interface TGridModel extends TGridModelSettings {
   updated?: number;
 }
 
-export type TGridModelForTimeline = Pick<
-  TGridModel,
-  | 'columns'
-  | 'defaultColumns'
-  | 'dataViewId'
-  | 'deletedEventIds'
-  | 'expandedDetail'
-  | 'filters'
-  | 'graphEventId'
-  | 'queryFields'
-  | 'id'
-  | 'indexNames'
-  | 'isLoading'
-  | 'isSelectAllChecked'
-  | 'itemsPerPage'
-  | 'itemsPerPageOptions'
-  | 'loadingEventIds'
-  | 'loadingText'
-  | 'selectAll'
-  | 'showCheckboxes'
-  | 'sort'
-  | 'selectedEventIds'
-  | 'savedObjectId'
-  | 'title'
-  | 'unit'
->;
-
 export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
