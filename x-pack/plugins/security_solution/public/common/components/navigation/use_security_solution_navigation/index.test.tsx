@@ -16,8 +16,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental
 import { TestProviders } from '../../../mock';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
-import { useCanSeeResponseActionsHistoryMenu } from '../../../../management/pages/response_actions/view/hooks';
 import { useTourContext } from '../../guided_onboarding';
+import { useUserPrivileges } from '../../user_privileges';
 import {
   noCasesPermissions,
   readCasesCapabilities,
@@ -38,8 +38,8 @@ jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
 jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
-jest.mock('../../../../management/pages/response_actions/view/hooks');
 jest.mock('../../guided_onboarding');
+jest.mock('../../user_privileges');
 
 describe('useSecuritySolutionNavigation', () => {
   const mockRouteSpy = [
@@ -58,7 +58,9 @@ describe('useSecuritySolutionNavigation', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
-    (useCanSeeResponseActionsHistoryMenu as jest.Mock).mockReturnValue(true);
+    (useUserPrivileges as jest.Mock).mockImplementation(() => ({
+      endpointPrivileges: { canReadActionsLogManagement: true },
+    }));
     (useTourContext as jest.Mock).mockReturnValue({ isTourShown: false });
 
     const cases = mockCasesContract();
@@ -121,7 +123,9 @@ describe('useSecuritySolutionNavigation', () => {
   });
 
   it('should omit response actions history if hook reports false', () => {
-    (useCanSeeResponseActionsHistoryMenu as jest.Mock).mockReturnValue(false);
+    (useUserPrivileges as jest.Mock).mockImplementation(() => ({
+      endpointPrivileges: { canReadActionsLogManagement: false },
+    }));
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
