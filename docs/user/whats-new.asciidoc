@@ -1,6 +1,8 @@
 [[whats-new]]
 == What's new in {minor-version}
 
+coming::[8.5.0]
+
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
@@ -13,11 +15,10 @@ Previous versions: {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8
 
 // tag::notable-highlights[]
 
-
 [discrete]
-==== Use a {data-source} without saving
+==== {Data-sources} &mdash; use without saving
 
-This new feature allows you to explore your data in *Discover*, *Lens*, and *Maps*
+You can now explore your data in *Discover*, *Lens*, and *Maps*
 without making it visible to others in your space.
 This is useful for exploring newly ingested data and for trying out your data in different formats for the same visualization.
 You can save the {data-source} later
@@ -37,14 +38,15 @@ Your preferences are saved locally in your browser.
 image::images/highlights-histogram.gif[The histogram includes a resize handle to change its height]
 
 [discrete]
-==== Better insights to your data
+==== More insights in field list
 
-The popover in the field list now shows more and better data, similar to *Lens* and *Fields Statistics*:
+The field popover in the *Available fields* list now shows
+more and better data, making it similar to the field popovers in *Lens* and *Fields Statistics*:
 
 * Statistics are based on a sample of 5000 records per shard. Previously the sample size was 500 records.
-* The popover shows up to top 10 values instead of just 5.
-* The “exist” filter* appears at the top of the pop-over for better visibility.
-* The distribution of values is shown for aggregatable fields.
+* The popover shows up to top 10 values, instead of just 5.
+* The “exist” filter appears at the top of the pop-over for better visibility.
+* The distribution of values is available for aggregatable fields.
 
 
 [role="screenshot"]
@@ -55,24 +57,185 @@ image::images/highlights-discover-insights.gif[Statistics, top values, exist fil
 === Dashboard
 
 [discrete]
-==== Filter dashboard data with the new time slider control
+==== New time slider control
 
 Add the newest control for interacting with your dashboard data, the time slider control.
-The time slider allows any dashboard viewer to playback and scrub through the data by time,
+The time slider allows anyone viewing the dashboard to playback and scrub through the data by time,
 or quickly view the data for a specific time range, just like a song or movie.
 
 [role="screenshot"]
 image::images/highlights-dashboard-time-slider.png[Time slider control in a dashboard]
 
 [discrete]
-==== View panel-level filters right from the dashboard
+==== Filters for panels
 
-When panel-level filters are applied to the visualizations on your dashboard,
-you can now easily view them without leaving the dashboard.
+When filters are applied to the individual visualization panels on your dashboard,
+you can now easily view them without opening the visualization editor and leaving the dashboard.
 Simply click *Panel filters* in the header.
 
 [role="screenshot"]
 image::images/highlights-dashboard-pan-filters.png[Pan filters applied to the visualizations on a dashboard]
 
+[discrete]
+[[highlights-8.5-vis-editors]]
+=== Lens visualization editor
 
-// end::notable-highlights[]
+[discrete]
+==== Add query-based annotations
+
+A key method of troubleshooting metric performance is to analyze the events
+that take place at the same time. Now you can add query-based annotations from multiple
+data sources to your *Lens* visualizations. This makes it easy to layer time series events
+and view the relationships between the annotations and other metrics.
+Query-based annotations also come with improved overflow support, additional style options, and a customizable tooltip.
+
+
+[role="screenshot"]
+image::images/highlights-vis-query-annotations.png[Query annotations from separate data views in Lens]
+
+[discrete]
+==== Turn table values into links
+
+Visual cues are important to dashboard users, especially when it comes to clickable values.
+With the Table visualization in *Lens*, you can now enable *Directly filter on click* to turn
+any column value into a link that filters the data, or drills down into the data.
+
+[role="screenshot"]
+image::images/highlights-vis-lens-table.png[Table visualization showing links in the top 5 values column]
+
+[discrete]
+==== Clone visualization layers
+
+When you create visualization layers in *Lens*, you don’t have to start from a blank slate.
+You can now duplicate layers, making it easy to adjust the filters and data options
+from a common starting point.
+
+[role="screenshot"]
+image::images/highlights-vis-duplicate-layer.png[Actions menu for visualizations open to shoe the Duplicate layer item]
+
+[discrete]
+==== Normalize by unit
+
+Need to use *Normalize by unit* for more than just date histogram visualizations in *Lens*?
+Now you can! Suppose you have a metric visualization that displays the count of the
+records field. With *Normalize by unit*, you can view a per minute calculation of the field.
+
+[role="screenshot"]
+image::images/highlights-vis-normalize.png[Menu item for viewing a per minute calculation of a field]
+
+[discrete]
+==== Display the current time
+
+Markers make it easy for anyone viewing your dashboard to quickly understand important
+events on visualizations. With the new *Show current time marker* axis option,
+you can add a red line to signify where “now” is on time series visualizations.
+
+[role="screenshot"]
+image::images/highlights-vis-time.png[Visualization showing a red line that indicates the current time]
+
+[discrete]
+==== Collapse by option
+
+Let’s say you’re creating a partition chart with sampled data, such as metrics,
+and want to break down the last values from each reporting dimension, such as hosts.
+You can now use the new *Collapse by* option to break down and summarize the
+result of each last value from hosts without displaying the detailed reporting dimension.
+
+[role="screenshot"]
+image::images/highlights-vis-time.png[Visualization showing a red line that indicates the current time]
+
+[discrete]
+[[highlights-8.5-machine-learning]]
+=== Machine Learning
+
+[discrete]
+==== Anomaly detection jobs from Lens
+
+You can now create anomaly detection jobs from the flyout of a Lens visualization.
+Enter a job ID before creating the job so it starts automatically after saving.
+For a more advanced configuration, follow the link that takes you to the ML job wizard.
+
+[role="screenshot"]
+image::images/highlights-ml-lens.png[Flyout for creating an anomaly detection job from Lens]
+
+[discrete]
+==== Log pattern analysis
+
+You can now select a data view and message field,
+apply optional filters, and then run on-demand categorization analysis.
+Messages that are similar are grouped using the same underlying algorithms
+as a machine learning categorization job. The distribution of the documents in each category
+are highlighted on the main chart. You can then open *Discover*,
+use one or more of these categories as a filter to view the matching documents,
+and continue your investigation.
+
+[role="screenshot"]
+image::images/highlights-ml-log-analysis.png[Chart showing the distribution of documents in each cateogry]
+
+[discrete]
+==== Locations of anomalous results in Maps
+
+In 8.5, we added a link to *Maps* in the *Anomaly Explorer* and *Single Metric Viewer*
+for any anomalies where the source data contains geo fields,
+even if the analysis does not use the location field directly.
+You can view the anomaly on the map by following the link.
+For example, you can view the location of a client making an unusually high number of
+requests that failed with a ‘page not found’ 404 error.
+
+[role="screenshot"]
+image::images/highlights-ml-maps.gif[Viewing anomalies on a map]
+
+[discrete]
+[[highlights-8.5-security]]
+=== Access agreement enhanced
+
+The {kibana-ref}/access-agreement.html[access agreement]
+now allows admins to set a default access
+agreement message that applies to all authentication providers.
+If you set the new `xpack.security.accessAgreement.message` setting, it will apply to all providers
+for which you do not specify an access agreement.
+
+[discrete]
+[[highlights-8.5-collaboration]]
+=== Cases collaboration
+
+[discrete]
+==== Case assignment
+
+This release adds the ability to assign a {kibana-ref}/cases.html[Case] to users.
+You can do so either while creating a new Case or in an existing by using
+the “assignees” UI in Observability, Elastic Security, and Stack Management.
+
+[role="screenshot"]
+image::images/highlights-cases-assignees.png[Collaborate with Cases UI]
+
+You can assign one or more users (and unassign as needed).
+The UI builds on previous releases, which introduced the ability for users
+to customize their avatars, by selecting an image or color.
+Avatars add visual help in easily identifying and disambiguating users.
+
+The assignees and their avatars show up in each Case.
+They also now appear in the central Cases view that lists all existing
+Cases in Observability, Elastic Security, and Stack Management.
+On this view, you can easily filter through the Cases assigned to you and all other users.
+
+[role="screenshot"]
+image::images/highlights-cases-view.png[Cases view listing that lists all assigned users]
+
+[discrete]
+==== User search
+
+You can now search for users by their full name,
+username, or email as part of the Case assignment flow.
+
+{kib} users from all authentication realms are now searchable, if
+they have accessed {kib} at least once. On first access,
+{kib} creates a user profile and surfaces it in the user search results.
+
+The user search UI includes auto-complete and search highlights.
+
+[role="screenshot"]
+image::images/highlights-cases-user-search.png[User search view with auto-complete, highlights, user avatars, user email]
+
+User search adheres to {kib} RBAC. Users who do not have access to Cases within the
+Space will not surface in the results.   
