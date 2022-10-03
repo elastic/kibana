@@ -12,8 +12,7 @@ import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { useInspector } from '../../../hooks/use_inspector';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
-import { useSourcererDataView } from './use_sourcerer_data_view';
+import { useSourcererDataView } from '.';
 import {
   ChartSeries,
   createFetchAggregatedIndicators,
@@ -22,11 +21,14 @@ import {
 
 export interface UseAggregatedIndicatorsParam {
   /**
-   * From and To values passed to the {@link }useAggregatedIndicators} hook
+   * From and To values passed to the {@link useAggregatedIndicators} hook
    * to query indicators for the Indicators barchart.
    */
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
   filters: Filter[];
+  /**
+   * Query data passed to the {@link useAggregatedIndicators} hook to query indicators.
+   */
   filterQuery: Query;
 }
 
@@ -49,12 +51,18 @@ export interface UseAggregatedIndicatorsValue {
    * Indicator field used to query the aggregated Indicators.
    */
   selectedField: string;
+
+  /** Is initial load in progress? */
+  isLoading?: boolean;
+
+  /** Is data update in progress? */
+  isFetching?: boolean;
 }
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
 
 export const useAggregatedIndicators = ({
-  timeRange = DEFAULT_TIME_RANGE,
+  timeRange,
   filters,
   filterQuery,
 }: UseAggregatedIndicatorsParam): UseAggregatedIndicatorsValue => {
@@ -80,7 +88,7 @@ export const useAggregatedIndicators = ({
     [inspectorAdapters, queryService, searchService]
   );
 
-  const { data } = useQuery(
+  const { data, isLoading, isFetching } = useQuery(
     [
       'indicatorsBarchart',
       {
@@ -97,7 +105,8 @@ export const useAggregatedIndicators = ({
     }: {
       signal?: AbortSignal;
       queryKey: [string, FetchAggregatedIndicatorsParams];
-    }) => aggregatedIndicatorsQuery(queryParams, signal)
+    }) => aggregatedIndicatorsQuery(queryParams, signal),
+    { keepPreviousData: true }
   );
 
   const dateRange = useMemo(
@@ -110,5 +119,7 @@ export const useAggregatedIndicators = ({
     series: data || [],
     onFieldChange: setField,
     selectedField: field,
+    isLoading,
+    isFetching,
   };
 };
