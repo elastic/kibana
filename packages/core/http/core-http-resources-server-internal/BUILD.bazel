@@ -46,6 +46,9 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//elastic-apm-node",
+  "//packages/kbn-logging",
+  "//packages/kbn-apm-config-loader",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -60,6 +63,13 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//elastic-apm-node",
+  "//packages/kbn-apm-config-loader:npm_module_types",
+  "//packages/kbn-logging:npm_module_types",
+  "//packages/core/http/core-http-server:npm_module_types",
+  "//packages/core/http/core-http-resources-server:npm_module_types",
+  "//packages/core/rendering/core-rendering-server-internal:npm_module_types",
+  "//packages/core/http/core-http-request-handler-context-server:npm_module_types",
 ]
 
 jsts_transpiler(

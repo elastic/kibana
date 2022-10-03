@@ -16,16 +16,32 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
 
-import { httpResourcesMock } from './http_resources_service.mock';
-import type { HttpResources } from '@kbn/core-http-resources-server';
+// import { httpResourcesMock } from './http_resources_service.mock';
+import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 
 const coreContext = mockCoreContext.create();
 
+// partial duplicate of coreMock
 function createCoreRequestHandlerContextMock() {
   return {
     core: {
       uiSettings: { client: uiSettingsServiceMock.createClient() },
     },
+  };
+}
+
+// duplicate of public mock for internal testing only
+function createHttpResourcesResponseFactory() {
+  const mocked: jest.Mocked<HttpResourcesServiceToolkit> = {
+    renderCoreApp: jest.fn(),
+    renderAnonymousCoreApp: jest.fn(),
+    renderHtml: jest.fn(),
+    renderJs: jest.fn(),
+  };
+
+  return {
+    ...httpServerMock.createResponseFactory(),
+    ...mocked,
   };
 }
 
@@ -75,7 +91,8 @@ describe('HttpResources service', () => {
             });
             const [[, routeHandler]] = router.get.mock.calls;
 
-            const responseFactory = httpResourcesMock.createResponseFactory();
+            // const responseFactory = httpResourcesMock.createResponseFactory();
+            const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
@@ -101,7 +118,8 @@ describe('HttpResources service', () => {
 
             const [[, routeHandler]] = router.get.mock.calls;
 
-            const responseFactory = httpResourcesMock.createResponseFactory();
+            // const responseFactory = httpResourcesMock.createResponseFactory();
+            const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
 
             expect(responseFactory.ok).toHaveBeenCalledWith({
@@ -121,7 +139,8 @@ describe('HttpResources service', () => {
             });
             const [[, routeHandler]] = router.get.mock.calls;
 
-            const responseFactory = httpResourcesMock.createResponseFactory();
+            // const responseFactory = httpResourcesMock.createResponseFactory();
+            const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
@@ -147,7 +166,8 @@ describe('HttpResources service', () => {
 
             const [[, routeHandler]] = router.get.mock.calls;
 
-            const responseFactory = httpResourcesMock.createResponseFactory();
+            // const responseFactory = httpResourcesMock.createResponseFactory();
+            const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
 
             expect(responseFactory.ok).toHaveBeenCalledWith({
@@ -168,7 +188,8 @@ describe('HttpResources service', () => {
             });
             const [[, routeHandler]] = router.get.mock.calls;
 
-            const responseFactory = httpResourcesMock.createResponseFactory();
+            // const responseFactory = httpResourcesMock.createResponseFactory();
+            const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(responseFactory.ok).toHaveBeenCalledWith({
               body: htmlBody,
@@ -195,7 +216,8 @@ describe('HttpResources service', () => {
 
             const [[, routeHandler]] = router.get.mock.calls;
 
-            const responseFactory = httpResourcesMock.createResponseFactory();
+            // const responseFactory = httpResourcesMock.createResponseFactory();
+            const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
 
             expect(responseFactory.ok).toHaveBeenCalledWith({
@@ -217,7 +239,8 @@ describe('HttpResources service', () => {
             });
             const [[, routeHandler]] = router.get.mock.calls;
 
-            const responseFactory = httpResourcesMock.createResponseFactory();
+            // const responseFactory = httpResourcesMock.createResponseFactory();
+            const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(responseFactory.ok).toHaveBeenCalledWith({
               body: jsBody,
@@ -244,7 +267,8 @@ describe('HttpResources service', () => {
 
             const [[, routeHandler]] = router.get.mock.calls;
 
-            const responseFactory = httpResourcesMock.createResponseFactory();
+            // const responseFactory = httpResourcesMock.createResponseFactory();
+            const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
 
             expect(responseFactory.ok).toHaveBeenCalledWith({
