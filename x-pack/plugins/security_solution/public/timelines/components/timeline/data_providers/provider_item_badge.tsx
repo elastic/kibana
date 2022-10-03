@@ -43,7 +43,7 @@ interface ProviderItemBadgeProps {
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
   displayValue?: string;
-  val: string | number | (string | number)[];
+  val: string | number | Array<string | number>;
   type?: DataProviderType;
   wrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
