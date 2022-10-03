@@ -64,6 +64,8 @@ export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capab
   return <Redirect to={LANDING_PATH} />;
 });
 RedirectRoute.displayName = 'RedirectRoute';
+// eslint-disable-next-line import/no-default-export
+export { RedirectRoute as default };
 
 const siemSignalsFieldMappings: Record<string, string> = {
   [ALERT_RULE_UUID]: 'signal.rule.id',
