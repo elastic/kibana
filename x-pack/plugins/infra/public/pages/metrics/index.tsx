@@ -15,7 +15,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
 import { useLinkProps } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
-import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import {
@@ -73,12 +72,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
             <WaffleTimeProvider>
               <WaffleFiltersProvider>
                 <InfraMLCapabilitiesProvider>
-                  <DocumentTitle
-                    title={i18n.translate('xpack.infra.homePage.documentTitle', {
-                      defaultMessage: 'Metrics',
-                    })}
-                  />
-
                   <HelpCenterContent
                     feedbackLink="https://discuss.elastic.co/c/metrics"
                     appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
