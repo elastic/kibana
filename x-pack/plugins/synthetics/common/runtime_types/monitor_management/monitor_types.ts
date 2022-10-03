@@ -99,6 +99,9 @@ export const TCPSimpleFieldsCodec = t.intersection([
     [ConfigKey.HOSTS]: t.string,
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
+  t.partial({
+    [ConfigKey.URLS]: t.string,
+  }),
   CommonFieldsCodec,
 ]);
 

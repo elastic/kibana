@@ -15,6 +15,7 @@
     "is_zip_url_tls_enabled": false
   },
   "hosts": "example-host:40",
+  "urls": "example-host:40",
   "url.port": null,
   "proxy_url": "",
   "proxy_use_local_resolver": false,
