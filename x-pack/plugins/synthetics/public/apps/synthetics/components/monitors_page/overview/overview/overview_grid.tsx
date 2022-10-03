@@ -7,10 +7,17 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiFlexGrid, EuiSpacer, EuiTablePagination } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiTablePagination,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { selectOverviewState, setOverviewPageStateAction } from '../../../../state/overview';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
+import { OverviewStatus } from './overview_status';
 import { SearchField } from '../../common/search_field';
 
 export const OverviewGrid = () => {
@@ -37,6 +44,12 @@ export const OverviewGrid = () => {
 
   return loaded ? (
     <>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <OverviewStatus />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
       <SearchField />
       <OverviewPaginationInfo page={page} />
       <EuiSpacer />

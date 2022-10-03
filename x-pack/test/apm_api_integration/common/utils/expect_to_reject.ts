@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { asNumber } from './as_number';
-
-export function asPercentage(value: number) {
-  return `${asNumber(value * 100)}%`;
+export async function expectToReject<T extends Error>(fn: () => Promise<any>): Promise<T> {
+  try {
+    await fn();
+  } catch (e) {
+    return e;
+  }
+  throw new Error(`Expected fn to throw`);
 }

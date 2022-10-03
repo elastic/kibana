@@ -11,7 +11,9 @@ import { serializeHttpFetchError } from '../utils/http_error';
 
 import { MonitorOverviewState } from './models';
 import {
+  clearOverviewStatusErrorAction,
   fetchMonitorOverviewAction,
+  fetchOverviewStatusAction,
   quietFetchOverviewAction,
   setOverviewPageStateAction,
 } from './actions';
@@ -28,6 +30,8 @@ const initialState: MonitorOverviewState = {
   loading: false,
   loaded: false,
   error: null,
+  status: null,
+  statusError: null,
 };
 
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
@@ -58,6 +62,15 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         ...action.payload,
       };
       state.loaded = false;
+    })
+    .addCase(fetchOverviewStatusAction.success, (state, action) => {
+      state.status = action.payload;
+    })
+    .addCase(fetchOverviewStatusAction.fail, (state, action) => {
+      state.statusError = serializeHttpFetchError(action.payload);
+    })
+    .addCase(clearOverviewStatusErrorAction, (state) => {
+      state.statusError = null;
     });
 });
 

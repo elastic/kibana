@@ -10,6 +10,8 @@ import {
   MonitorOverviewResult,
   MonitorOverviewResultCodec,
   FetchMonitorOverviewQueryArgs,
+  OverviewStatus,
+  OverviewStatusType,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
@@ -37,3 +39,6 @@ export const fetchMonitorOverview = async (
     MonitorOverviewResultCodec
   );
 };
+
+export const fetchOverviewStatus = async (): Promise<OverviewStatus> =>
+  apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, {}, OverviewStatusType);

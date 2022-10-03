@@ -15,6 +15,7 @@ import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refres
 import {
   fetchMonitorOverviewAction,
   setOverviewPageStateAction,
+  fetchOverviewStatusAction,
   selectOverviewState,
   selectServiceLocationsState,
 } from '../../../state';
@@ -54,6 +55,7 @@ export const OverviewPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchMonitorOverviewAction.get(pageState));
+    dispatch(fetchOverviewStatusAction.get());
   }, [dispatch, pageState]);
 
   useEffect(() => {
@@ -74,8 +76,6 @@ export const OverviewPage: React.FC = () => {
   if (!enablementLoading && !isEnabled && monitorsLoaded && syntheticsMonitors.length === 0) {
     return <Redirect to={MONITORS_ROUTE} />;
   }
-
-  console.warn('loading', loading);
 
   return !loading ? (
     <OverviewGrid />
