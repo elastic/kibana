@@ -16,11 +16,12 @@ Previous versions: {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8
 // tag::notable-highlights[]
 
 [discrete]
-==== {Data-sources} &mdash; use without saving
+==== Data views &mdash; use before saving
 
-You can now explore your data in *Discover*, *Lens*, and *Maps*
-without making it visible to others in your space.
-This is useful for exploring newly ingested data and for trying out your data in different formats for the same visualization.
+What if you could use explore your data or create a visualization without first creating a {data-source}?
+Now you can do just that with by selecting *Use without saving* in the *Create {data-source}* form.
+This enables you to quickly explore your data in *Discover*, *Lens*, and *Maps*
+right after ingesting it.
 You can save the {data-source} later
 if you create a search or visualization that you want to share.
 
@@ -227,9 +228,8 @@ image::images/highlights-cases-view.png[Cases view listing that lists all assign
 
 You can now search for users by their full name,
 username, or email as part of the Case assignment flow.
-
-{kib} users from all authentication realms are now searchable, if
-they have accessed {kib} at least once. On first access,
+{kib} users from all authentication realms are searchable, if
+they accessed {kib} at least once. On first access,
 {kib} creates a user profile and surfaces it in the user search results.
 
 The user search UI includes auto-complete and search highlights.
@@ -238,4 +238,6 @@ The user search UI includes auto-complete and search highlights.
 image::images/highlights-cases-user-search.png[User search view with auto-complete, highlights, user avatars, user email]
 
 User search adheres to {kib} RBAC. Users who do not have access to Cases within the
-Space will not surface in the results.   
+Space will not surface in the results.
+
+// end::notable-highlights[]
