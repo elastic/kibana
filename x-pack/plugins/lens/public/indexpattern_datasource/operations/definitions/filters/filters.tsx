@@ -158,6 +158,14 @@ export const filtersOperation: OperationDefinition<
   },
 
   getMaxPossibleNumValues: (column) => column.params.filters.length,
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.filters.documentation.quick',
+    {
+      defaultMessage: `
+    Divides values into predefined subsets.
+      `,
+    }
+  ),
 };
 
 export const FilterList = ({
@@ -227,13 +235,14 @@ export const FilterList = ({
         droppableId="FILTERS_DROPPABLE_AREA"
         items={localFilters}
       >
-        {localFilters?.map((filter: FilterValue, idx: number) => {
+        {localFilters?.map((filter, idx, arrayRef) => {
           const isInvalid = !isQueryValid(filter.input, indexPattern);
+          const id = filter.id;
 
           return (
             <DraggableBucketContainer
-              id={filter.id}
-              key={filter.id}
+              id={id}
+              key={id}
               idx={idx}
               isInvalid={isInvalid}
               invalidMessage={i18n.translate('xpack.lens.indexPattern.filters.isInvalid', {
@@ -243,7 +252,8 @@ export const FilterList = ({
               removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeFilter', {
                 defaultMessage: 'Remove a filter',
               })}
-              isNotRemovable={localFilters.length === 1}
+              isNotRemovable={arrayRef.length === 1}
+              isNotDraggable={arrayRef.length === 1}
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
