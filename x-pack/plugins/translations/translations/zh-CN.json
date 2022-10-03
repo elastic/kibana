@@ -5488,7 +5488,6 @@
     "visTypeTimeseries.annotationsEditor.ignorePanelFiltersLabel": "忽略面板筛选？",
     "visTypeTimeseries.annotationsEditor.queryStringLabel": "查询字符串",
     "visTypeTimeseries.annotationsEditor.rowTemplateLabel": "行模板（必需）",
-    "visTypeTimeseries.annotationsEditor.timeFieldLabel": "时间字段（必需）",
     "visTypeTimeseries.calculateLabel.bucketScriptsLabel": "存储桶脚本",
     "visTypeTimeseries.calculateLabel.countLabel": "计数",
     "visTypeTimeseries.calculateLabel.filterRatioLabel": "筛选比",

@@ -5481,7 +5481,6 @@
     "visTypeTimeseries.annotationsEditor.ignorePanelFiltersLabel": "パネルフィルターを無視しますか？",
     "visTypeTimeseries.annotationsEditor.queryStringLabel": "クエリ文字列",
     "visTypeTimeseries.annotationsEditor.rowTemplateLabel": "行テンプレート（必須）",
-    "visTypeTimeseries.annotationsEditor.timeFieldLabel": "時間フィールド（必須）",
     "visTypeTimeseries.calculateLabel.bucketScriptsLabel": "バケットスクリプト",
     "visTypeTimeseries.calculateLabel.countLabel": "カウント",
     "visTypeTimeseries.calculateLabel.filterRatioLabel": "フィルターレート",
