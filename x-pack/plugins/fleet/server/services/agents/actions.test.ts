@@ -92,10 +92,14 @@ describe('Agent actions', () => {
       await cancelAgentAction(esClient, 'action1');
 
       expect(mockedBulkUpdateAgents).toBeCalled();
-      expect(mockedBulkUpdateAgents).toBeCalledWith(expect.anything(), [
-        expect.objectContaining({ agentId: 'agent1' }),
-        expect.objectContaining({ agentId: 'agent2' }),
-      ]);
+      expect(mockedBulkUpdateAgents).toBeCalledWith(
+        expect.anything(),
+        [
+          expect.objectContaining({ agentId: 'agent1' }),
+          expect.objectContaining({ agentId: 'agent2' }),
+        ],
+        {}
+      );
     });
   });
 });

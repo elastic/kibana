@@ -50,7 +50,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -64,7 +64,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     }
 
     // hosted policy is updated in action results with error
-    const calledWithActionResults = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
+    const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
     // bulk write two line per create
     expect(calledWithActionResults.body?.length).toBe(2);
     const expectedObject = expect.objectContaining({

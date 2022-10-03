@@ -22,7 +22,7 @@ import { ActionRunner } from './action_runner';
 
 import type { GetAgentsOptions } from './crud';
 import { bulkUpdateAgents } from './crud';
-import { bulkCreateAgentActionResults, createAgentAction } from './actions';
+import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
@@ -108,9 +108,20 @@ export async function upgradeBatch(
     options.upgradeDurationSeconds
   );
 
+  await bulkUpdateAgents(
+    esClient,
+    agentsToUpdate.map((agent) => ({
+      agentId: agent.id,
+      data: {
+        upgraded_at: null,
+        upgrade_started_at: now,
+      },
+    })),
+    errors
+  );
+
   const actionId = options.actionId ?? uuid();
-  const errorCount = Object.keys(errors).length;
-  const total = options.total ?? agentsToUpdate.length + errorCount;
+  const total = options.total ?? givenAgents.length;
 
   await createAgentAction(esClient, {
     id: actionId,
@@ -123,33 +134,11 @@ export async function upgradeBatch(
     ...rollingUpgradeOptions,
   });
 
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping ${errorCount} agents, as failed validation (cannot upgrade hosted agent or agent not upgradeable)`
-      );
-
-    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(errors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: errors[agentId].message,
-      }))
-    );
-  }
-
-  await bulkUpdateAgents(
+  await createErrorActionResults(
     esClient,
-    agentsToUpdate.map((agent) => ({
-      agentId: agent.id,
-      data: {
-        upgraded_at: null,
-        upgrade_started_at: now,
-      },
-    }))
+    actionId,
+    errors,
+    'cannot upgrade hosted agent or agent not upgradeable'
   );
 
   return {
