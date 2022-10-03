@@ -160,9 +160,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await queryBar.getQueryString()).to.be(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
-      );
       await retry.tryForTime(5000, async () => {
         const columns = await PageObjects.discover.getColumnHeaders();
         expect(columns).to.eql(['extension', 'average']);
