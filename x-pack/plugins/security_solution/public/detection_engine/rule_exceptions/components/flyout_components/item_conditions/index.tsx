@@ -16,6 +16,7 @@ import type {
   ExceptionListType,
   OsType,
   OsTypeArray,
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
@@ -136,7 +137,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   // 'agnostic'. For all others, we'll fill in the appropriate list_id when
   // enriching items before creating when we know if they'll be added to the rule_default
   // list or a shared list.
-  const listNamespaceType = useMemo(() => {
+  const listNamespaceType = useMemo((): NamespaceType | undefined => {
     const defaultValue = isEndpointException ? 'agnostic' : undefined;
 
     return isEdit ? exceptionListItems[0].namespace_type : defaultValue;
@@ -265,7 +266,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         idAria: 'alertExceptionBuilder',
         onChange: handleBuilderOnChange,
         isDisabled: isExceptionBuilderFormDisabled,
-        allowCustomFieldOptions: !isEndpointException,
       })}
     </>
   );

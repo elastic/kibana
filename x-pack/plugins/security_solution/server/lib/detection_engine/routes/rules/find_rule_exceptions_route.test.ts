@@ -50,7 +50,7 @@ describe('findRuleExceptionReferencesRoute', () => {
       ],
     });
 
-    clients.lists.exceptionListClient.findExceptionList.mockResolvedValue({
+    (clients.lists.exceptionListClient.findExceptionList as jest.Mock).mockResolvedValue({
       data: [mockList],
     });
 

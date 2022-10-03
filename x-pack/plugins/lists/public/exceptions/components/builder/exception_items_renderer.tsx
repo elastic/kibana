@@ -84,15 +84,16 @@ export interface ExceptionBuilderProps {
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
   isOrHidden?: boolean;
-  listId: string;
-  listNamespaceType: NamespaceType;
+  listId: string | undefined;
+  listNamespaceType: NamespaceType | undefined;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
     pattern: DataViewBase,
     type: ExceptionListType
   ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
-  ruleName: string;
+  exceptionItemName?: string;
+  ruleName?: string;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
 }
@@ -113,6 +114,7 @@ export const ExceptionBuilderComponent = ({
   listTypeSpecificIndexPatternFilter,
   onChange,
   ruleName,
+  exceptionItemName,
   isDisabled = false,
   osTypes,
   operatorsList,
@@ -289,10 +291,10 @@ export const ExceptionBuilderComponent = ({
     const newException = getNewExceptionItem({
       listId,
       namespaceType: listNamespaceType,
-      ruleName,
+      ruleName: exceptionItemName ?? `${ruleName ?? 'Rule'} - Exception item`,
     });
     setUpdateExceptions([...exceptions, { ...newException }]);
-  }, [setUpdateExceptions, exceptions, listId, listNamespaceType, ruleName]);
+  }, [listId, listNamespaceType, exceptionItemName, ruleName, setUpdateExceptions, exceptions]);
 
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
