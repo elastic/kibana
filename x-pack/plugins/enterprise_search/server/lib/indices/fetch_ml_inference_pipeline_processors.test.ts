@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 
 import { InferencePipeline, TrainedModelState } from '../../../common/types/pipelines';
 
 import {
   fetchAndAddTrainedModelData,
-  getMlModelTypesForModelConfig,
   getMlModelConfigsForModelIds,
   fetchMlInferencePipelineProcessorNames,
   fetchMlInferencePipelineProcessors,
@@ -317,43 +314,6 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
       id: 'ml-inference-pipeline-1,ml-inference-pipeline-2,non-ml-inference-pipeline',
     });
     expect(response).toEqual(expected);
-  });
-});
-
-describe('getMlModelTypesForModelConfig lib function', () => {
-  const mockModel: MlTrainedModelConfig = {
-    inference_config: {
-      ner: {},
-    },
-    input: {
-      field_names: [],
-    },
-    model_id: 'test_id',
-    model_type: 'pytorch',
-    tags: ['test_tag'],
-  };
-  const builtInMockModel: MlTrainedModelConfig = {
-    inference_config: {
-      text_classification: {},
-    },
-    input: {
-      field_names: [],
-    },
-    model_id: 'test_id',
-    model_type: 'lang_ident',
-    tags: [BUILT_IN_MODEL_TAG],
-  };
-
-  it('should return the model type and inference config type', () => {
-    const expected = ['pytorch', 'ner'];
-    const response = getMlModelTypesForModelConfig(mockModel);
-    expect(response.sort()).toEqual(expected.sort());
-  });
-
-  it('should include the built in type', () => {
-    const expected = ['lang_ident', 'text_classification', BUILT_IN_MODEL_TAG];
-    const response = getMlModelTypesForModelConfig(builtInMockModel);
-    expect(response.sort()).toEqual(expected.sort());
   });
 });
 
