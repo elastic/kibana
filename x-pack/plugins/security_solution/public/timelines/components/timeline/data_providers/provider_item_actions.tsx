@@ -48,7 +48,7 @@ interface OwnProps {
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
-  value: string | number;
+  value: string | number | (string | number)[];
   type: DataProviderType;
 }
 
@@ -80,7 +80,7 @@ interface GetProviderActionsProps {
   toggleEnabled: () => void;
   toggleExcluded: () => void;
   toggleType: () => void;
-  value: string | number;
+  value: string | number | (string | number)[];
   type: DataProviderType;
 }
 

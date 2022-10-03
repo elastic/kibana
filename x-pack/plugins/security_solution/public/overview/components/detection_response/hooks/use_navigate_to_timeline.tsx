@@ -7,12 +7,13 @@
 
 import { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import uuid from 'uuid';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
-import type { DataProvider } from '../../../../../common/types/timeline';
+import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
@@ -20,7 +21,8 @@ import { sourcererSelectors } from '../../../../common/store';
 
 export interface Filter {
   field: string;
-  value: string;
+  value: string | string[];
+  operator?: QueryOperator;
 }
 
 export const useNavigateToTimeline = () => {
@@ -63,10 +65,17 @@ export const useNavigateToTimeline = () => {
     const mainFilter = entityFilters.shift();
 
     if (mainFilter) {
-      const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+      const dataProvider = getDataProvider(
+        mainFilter.field,
+        uuid.v4(),
+        mainFilter.value,
+        mainFilter.operator
+      );
 
       for (const filter of entityFilters) {
-        dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+        dataProvider.and.push(
+          getDataProvider(filter.field, uuid.v4(), filter.value, filter.operator)
+        );
       }
 
       navigateToTimeline(dataProvider);

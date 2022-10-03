@@ -96,6 +96,24 @@ describe('Build KQL Query', () => {
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 2"');
   });
 
+  test('Build KQL query with "includes" operator', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = true;
+    dataProviders[0].queryMatch.operator = 'includes';
+    dataProviders[0].queryMatch.value = ['a', 'b', 'c'];
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : ("a" OR "b" OR "c")');
+  });
+
+  test('Handles bad inputs to buildKQLQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = true;
+    dataProviders[0].queryMatch.operator = 'includes';
+    dataProviders[0].queryMatch.value = [undefined] as unknown as string[];
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('');
+  });
+
   test('Build KQL query with two data provider and second is disabled', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[1].enabled = false;

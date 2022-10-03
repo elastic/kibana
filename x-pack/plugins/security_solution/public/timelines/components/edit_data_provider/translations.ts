@@ -33,9 +33,26 @@ export const IS = i18n.translate('xpack.securitySolution.editDataProvider.isLabe
   defaultMessage: 'is',
 });
 
+export const IS_ONE_OF = i18n.translate('xpack.securitySolution.editDataProvider.isOneOfLabel', {
+  defaultMessage: 'is one of',
+});
+
 export const IS_NOT = i18n.translate('xpack.securitySolution.editDataProvider.isNotLabel', {
   defaultMessage: 'is not',
 });
+export const IS_NOT_ONE_OF = i18n.translate(
+  'xpack.securitySolution.editDataProvider.isNotOneOfLabel',
+  {
+    defaultMessage: 'is not one of',
+  }
+);
+
+export const ENTER_ONE_OR_MORE_VALUES = i18n.translate(
+  'xpack.securitySolution.editDataProvider.includesPlaceholder',
+  {
+    defaultMessage: 'enter one or more values',
+  }
+);
 
 export const OPERATOR = i18n.translate('xpack.securitySolution.editDataProvider.operatorLabel', {
   defaultMessage: 'Operator',

@@ -9,7 +9,7 @@ import { noop } from 'lodash/fp';
 import React, { useState } from 'react';
 
 import type { DataProvider } from './data_provider';
-import { DataProviderType, IS_OPERATOR } from './data_provider';
+import { DataProviderType, IS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
 import { ProviderItemBadge } from './provider_item_badge';
 
 interface OwnProps {
@@ -18,6 +18,11 @@ interface OwnProps {
 
 export const Provider = React.memo<OwnProps>(({ dataProvider }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const value =
+    dataProvider.queryMatch.operator === IS_ONE_OF_OPERATOR
+      ? dataProvider.queryMatch.value
+      : dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value;
 
   return (
     <ProviderItemBadge
@@ -32,7 +37,8 @@ export const Provider = React.memo<OwnProps>(({ dataProvider }) => {
       toggleExcludedProvider={noop}
       toggleEnabledProvider={noop}
       toggleTypeProvider={noop}
-      val={dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}
+      displayValue={String(dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value)}
+      val={value}
       operator={dataProvider.queryMatch.operator || IS_OPERATOR}
       type={dataProvider.type || DataProviderType.default}
     />

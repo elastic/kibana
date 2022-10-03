@@ -55,7 +55,7 @@ interface Props {
   operator: QueryOperator;
   providerId: string;
   timelineId: string;
-  value: string | number;
+  value: string | number | (string | number)[];
   type?: DataProviderType;
 }
 
@@ -68,6 +68,8 @@ export const getInitialOperatorLabel = (
 ): EuiComboBoxOptionOption[] => {
   if (operator === ':') {
     return isExcluded ? [{ label: i18n.IS_NOT }] : [{ label: i18n.IS }];
+  } else if (operator === 'includes') {
+    return isExcluded ? [{ label: i18n.IS_NOT_ONE_OF }] : [{ label: i18n.IS_ONE_OF }];
   } else {
     return isExcluded ? [{ label: i18n.DOES_NOT_EXIST }] : [{ label: i18n.EXISTS }];
   }
@@ -90,7 +92,25 @@ export const StatefulEditDataProvider = React.memo<Props>(
     const [updatedOperator, setUpdatedOperator] = useState<EuiComboBoxOptionOption[]>(
       getInitialOperatorLabel(isExcluded, operator)
     );
-    const [updatedValue, setUpdatedValue] = useState<string | number>(value);
+
+    const [disableButton, setDisableButton] = useState<boolean>(true);
+    const [updatedValue, setUpdatedValue] = useState<string | number | (string | number)[]>(value);
+
+    const disableButtonCallback = useCallback(
+      (shouldDisable) => setDisableButton(shouldDisable),
+      []
+    );
+
+    const showComboBoxInput =
+      updatedOperator[0].label === i18n.IS_ONE_OF ||
+      updatedOperator[0].label === i18n.IS_NOT_ONE_OF;
+
+    const showValueInput =
+      type !== DataProviderType.template &&
+      updatedOperator.length > 0 &&
+      updatedOperator[0].label !== i18n.EXISTS &&
+      updatedOperator[0].label !== i18n.DOES_NOT_EXIST &&
+      !showComboBoxInput;
 
     /** Focuses the Value input if it is visible, falling back to the Save button if it's not */
     const focusInput = () => {
@@ -126,8 +146,8 @@ export const StatefulEditDataProvider = React.memo<Props>(
       focusInput();
     }, []);
 
-    const onValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      setUpdatedValue(e.target.value);
+    const onValueChange = useCallback((updatedValue: string | number | string[]) => {
+      setUpdatedValue(updatedValue);
     }, []);
 
     const disableScrolling = () => {
@@ -169,14 +189,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
       updatedValue,
       type,
     ]);
-
-    const isValueFieldInvalid = useMemo(
-      () =>
-        type !== DataProviderType.template &&
-        (startsWith('{', sanatizeValue(updatedValue)) ||
-          endsWith('}', sanatizeValue(updatedValue))),
-      [type, updatedValue]
-    );
 
     useEffect(() => {
       disableScrolling();
@@ -224,23 +236,35 @@ export const StatefulEditDataProvider = React.memo<Props>(
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              {type !== DataProviderType.template &&
-              updatedOperator.length > 0 &&
-              updatedOperator[0].label !== i18n.EXISTS &&
-              updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label={i18n.VALUE_LABEL}>
-                    <EuiFieldText
-                      className={VALUE_INPUT_CLASS_NAME}
-                      onChange={onValueChange}
-                      placeholder={i18n.VALUE}
-                      value={sanatizeValue(updatedValue)}
-                      isInvalid={isValueFieldInvalid}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              ) : null}
             </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            {showValueInput && (
+              <EuiFormRow label={i18n.VALUE_LABEL}>
+                <ControlledDefaultInput
+                  disableButtonCallback={disableButtonCallback}
+                  onChangeCallback={onValueChange}
+                  type={type}
+                  value={value}
+                />
+              </EuiFormRow>
+            )}
+
+            {showComboBoxInput && (
+              <EuiFormRow label={i18n.VALUE_LABEL}>
+                <ControlledComboboxInput
+                  disableButtonCallback={disableButtonCallback}
+                  onChangeCallback={onValueChange}
+                  type={type}
+                  value={value}
+                />
+              </EuiFormRow>
+            )}
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -260,7 +284,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                       browserFields,
                       selectedField: updatedField,
                       selectedOperator: updatedOperator,
-                    }) || isValueFieldInvalid
+                    }) || disableButton
                   }
                   onClick={handleSave}
                   size="m"
@@ -277,3 +301,127 @@ export const StatefulEditDataProvider = React.memo<Props>(
 );
 
 StatefulEditDataProvider.displayName = 'StatefulEditDataProvider';
+
+function isStringOrNumberArray(
+  val: string | number | Array<string | number>
+): val is Array<string | number> {
+  return Array.isArray(val) && (typeof val[0] === 'string' || typeof val[0] === 'number');
+}
+
+const isValueFieldInvalid = (type: DataProviderType, value: string | number) =>
+  type !== DataProviderType.template &&
+  (startsWith('{', sanatizeValue(value)) || endsWith('}', sanatizeValue(value)));
+
+interface ControlledDataProviderInput {
+  disableButtonCallback: (disableButton: boolean) => void;
+  onChangeCallback: (value: string | number | string[]) => void;
+  type: DataProviderType;
+  value: string | number | (string | number)[];
+}
+
+const getDefaultValue = (value: string | number | (string | number)[]): string | number => {
+  if (isStringOrNumberArray(value)) {
+    return value[0];
+  } else return value;
+};
+
+const ControlledDefaultInput = ({
+  value,
+  type,
+  disableButtonCallback,
+  onChangeCallback,
+}: ControlledDataProviderInput) => {
+  const [primitiveValue, setPrimitiveValue] = useState<string | number>(getDefaultValue(value));
+
+  const isInvalid = useMemo(
+    () => isValueFieldInvalid(type, primitiveValue),
+    [type, primitiveValue]
+  );
+
+  useEffect(() => {
+    onChangeCallback(primitiveValue);
+    disableButtonCallback(isInvalid);
+  }, [primitiveValue, isInvalid]);
+
+  const onValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPrimitiveValue(e.target.value);
+  }, []);
+
+  return (
+    <EuiFieldText
+      className={VALUE_INPUT_CLASS_NAME}
+      onChange={onValueChange}
+      placeholder={i18n.VALUE}
+      value={sanatizeValue(primitiveValue)}
+      isInvalid={isInvalid}
+    />
+  );
+};
+
+const convertValuesToComboboxValueArray = (
+  values: string | number | (string | number)[]
+): EuiComboBoxOptionOption[] => {
+  if (isStringOrNumberArray(values)) {
+    return values.map((item) => ({ label: String(item) }));
+  } else return [];
+};
+
+const convertComboboxValuesToStringArray = (values: EuiComboBoxOptionOption[]): string[] => {
+  return values.map((item) => item.label);
+};
+
+const ControlledComboboxInput = ({
+  value,
+  onChangeCallback,
+  type,
+  disableButtonCallback,
+}: ControlledDataProviderInput) => {
+  const [includeValues, setIncludeValues] = useState(convertValuesToComboboxValueArray(value));
+
+  const isInvalid = useMemo(
+    () => includeValues.every((item) => isValueFieldInvalid(type, item.label)),
+    [type, includeValues]
+  );
+
+  useEffect(() => {
+    onChangeCallback(convertComboboxValuesToStringArray(includeValues));
+    disableButtonCallback(isInvalid);
+  }, [includeValues, isInvalid]);
+
+  const onCreateOption = (searchValue: string, flattenedOptions = includeValues) => {
+    const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+    if (!normalizedSearchValue) {
+      return;
+    }
+
+    if (
+      flattenedOptions.findIndex(
+        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
+      ) === -1
+    ) {
+      setIncludeValues([
+        ...includeValues,
+        {
+          label: searchValue,
+        },
+      ]);
+    }
+  };
+
+  const onIncludeValueChanged = useCallback((updatedIncludesValues: EuiComboBoxOptionOption[]) => {
+    setIncludeValues(updatedIncludesValues);
+  }, []);
+
+  return (
+    <EuiComboBox
+      noSuggestions
+      isClearable={true}
+      data-test-subj="operator"
+      selectedOptions={includeValues}
+      placeholder={i18n.ENTER_ONE_OR_MORE_VALUES}
+      onCreateOption={onCreateOption}
+      onChange={onIncludeValueChanged}
+    />
+  );
+};

@@ -11,7 +11,11 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { BrowserField, BrowserFields } from '../../../common/containers/source';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import type { QueryOperator } from '../timeline/data_providers/data_provider';
-import { EXISTS_OPERATOR, IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import {
+  EXISTS_OPERATOR,
+  IS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
+} from '../timeline/data_providers/data_provider';
 
 import * as i18n from './translations';
 
@@ -22,6 +26,12 @@ export const operatorLabels: EuiComboBoxOptionOption[] = [
   },
   {
     label: i18n.IS_NOT,
+  },
+  {
+    label: i18n.IS_ONE_OF,
+  },
+  {
+    label: i18n.IS_NOT_ONE_OF,
   },
   {
     label: i18n.EXISTS,
@@ -81,6 +91,9 @@ export const getQueryOperatorFromSelection = (
     case i18n.IS: // fall through
     case i18n.IS_NOT:
       return IS_OPERATOR;
+    case i18n.IS_ONE_OF: // fall through
+    case i18n.IS_NOT_ONE_OF:
+      return IS_ONE_OF_OPERATOR;
     case i18n.EXISTS: // fall through
     case i18n.DOES_NOT_EXIST:
       return EXISTS_OPERATOR;
@@ -97,6 +110,7 @@ export const getExcludedFromSelection = (selectedOperator: EuiComboBoxOptionOpti
 
   switch (selection) {
     case i18n.IS_NOT: // fall through
+    case i18n.IS_NOT_ONE_OF:
     case i18n.DOES_NOT_EXIST:
       return true;
     default:

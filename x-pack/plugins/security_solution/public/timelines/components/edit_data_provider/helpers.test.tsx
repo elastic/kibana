@@ -6,7 +6,11 @@
  */
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { EXISTS_OPERATOR, IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import {
+  EXISTS_OPERATOR,
+  IS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
+} from '../timeline/data_providers/data_provider';
 
 import {
   getCategorizedFieldNames,
@@ -220,6 +224,14 @@ describe('helpers', () => {
         expected: IS_OPERATOR,
       },
       {
+        operator: i18n.IS_ONE_OF,
+        expected: IS_ONE_OF_OPERATOR,
+      },
+      {
+        operator: i18n.IS_NOT_ONE_OF,
+        expected: IS_ONE_OF_OPERATOR,
+      },
+      {
         operator: i18n.EXISTS,
         expected: EXISTS_OPERATOR,
       },
@@ -230,7 +242,7 @@ describe('helpers', () => {
     ];
 
     validSelections.forEach(({ operator, expected }) => {
-      test(`it should the expected operator given "${operator}", a valid selection`, () => {
+      test(`it should use the expected operator given "${operator}", a valid selection`, () => {
         expect(
           getQueryOperatorFromSelection([
             {
@@ -282,6 +294,15 @@ describe('helpers', () => {
         ])
       ).toBe(false);
     });
+    test('it returns false when the "is one of" operator is selected', () => {
+      expect(
+        getExcludedFromSelection([
+          {
+            label: i18n.IS_ONE_OF,
+          },
+        ])
+      ).toBe(false);
+    });
 
     test('it returns false when the "exists" operator is selected', () => {
       expect(
@@ -308,6 +329,16 @@ describe('helpers', () => {
         getExcludedFromSelection([
           {
             label: i18n.IS_NOT,
+          },
+        ])
+      ).toBe(true);
+    });
+
+    test('it returns true when "is not one of" is selected', () => {
+      expect(
+        getExcludedFromSelection([
+          {
+            label: i18n.IS_NOT_ONE_OF,
           },
         ])
       ).toBe(true);

@@ -26,7 +26,7 @@ import {
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
-import type { DataProvider, DataProvidersAnd } from './data_provider';
+import { DataProvider, DataProvidersAnd, IS_ONE_OF_OPERATOR } from './data_provider';
 import { DataProviderType, IS_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
@@ -111,7 +111,9 @@ const ParensContainer = styled(EuiFlexItem)`
 `;
 
 const getDataProviderValue = (dataProvider: DataProvidersAnd) =>
-  dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value;
+  dataProvider.queryMatch.operator === IS_ONE_OF_OPERATOR
+    ? dataProvider.queryMatch.value
+    : dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value;
 
 /**
  * Renders an interactive card representation of the data providers. It also
@@ -264,6 +266,10 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [onKeyDown]
     );
 
+    const displayValue = String(
+      dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
+    );
+
     const DraggableContent = useCallback(
       (provided, snapshot) => (
         <div
@@ -302,6 +308,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 toggleEnabledProvider={handleToggleEnabledProvider}
                 toggleExcludedProvider={handleToggleExcludedProvider}
                 toggleTypeProvider={handleToggleTypeProvider}
+                displayValue={displayValue}
                 val={getDataProviderValue(dataProvider)}
                 type={dataProvider.type}
                 wrapperRef={keyboardHandlerRef}

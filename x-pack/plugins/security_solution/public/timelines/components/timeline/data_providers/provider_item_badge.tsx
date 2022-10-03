@@ -42,7 +42,8 @@ interface ProviderItemBadgeProps {
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
-  val: string | number;
+  displayValue?: string;
+  val: string | number | (string | number)[];
   type?: DataProviderType;
   wrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
@@ -66,6 +67,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     toggleEnabledProvider,
     toggleExcludedProvider,
     toggleTypeProvider,
+    displayValue,
     val,
     type = DataProviderType.default,
     wrapperRef,
@@ -143,6 +145,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
           providerId={providerId}
           togglePopover={togglePopover}
           toggleType={onToggleTypeProvider}
+          displayValue={displayValue || String(val)}
           val={val}
           operator={operator}
           type={type}

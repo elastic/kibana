@@ -23,6 +23,7 @@ import {
   reorder,
   sourceAndDestinationAreSameDroppable,
   unFlattenGroups,
+  convertIsOneOfQueryStringArrayToDisplayValue,
 } from './helpers';
 import {
   providerA,
@@ -1101,6 +1102,20 @@ describe('helpers', () => {
 
         expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
       });
+    });
+  });
+
+  describe('convertIsOneOfQueryStringArrayToDisplayValue', () => {
+    it('only operates upon arrays', () => {
+      const testValues = ['string', 1, undefined, null, false, {}];
+      for (const value of testValues) {
+        // @ts-ignore typing a guarded function
+        expect(convertIsOneOfQueryStringArrayToDisplayValue(value)).toBe(undefined);
+      }
+    });
+
+    it('converts a "is one of" query to correct format for a string array', () => {
+      expect(convertIsOneOfQueryStringArrayToDisplayValue(['a', 'b', 'c'])).toBe('(a OR b OR c)');
     });
   });
 });

@@ -342,3 +342,17 @@ export const addContentToTimeline = ({
     });
   }
 };
+
+export const convertIsOneOfQueryStringArrayToDisplayValue = (
+  value: string | number | (string | number)[]
+): string | undefined => {
+  if (isStringOrNumberArray(value)) {
+    return '(' + value.join(' OR ') + ')';
+  }
+};
+
+function isStringOrNumberArray(
+  val: string | number | Array<string | number>
+): val is Array<string | number> {
+  return Array.isArray(val) && (typeof val[0] === 'string' || typeof val[0] === 'number');
+}

@@ -17,14 +17,20 @@ import {
   stopPropagationAndPreventDefault,
 } from '../../../common/utils/accessibility';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
-import { DataProviderType, EXISTS_OPERATOR, TimelineId } from '../../../common/types/timeline';
+import {
+  DataProviderType,
+  EXISTS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
+  IS_OPERATOR,
+  TimelineId,
+} from '../../../common/types/timeline';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
 import type { ViewSelection } from './event_rendered_view/selector';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
-const isNumber = (value: string | number) => !isNaN(Number(value));
+const isNumber = (value: string | number): value is number => !isNaN(Number(value));
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
@@ -87,27 +93,39 @@ const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) =
 const buildQueryMatch = (
   dataProvider: DataProvider | DataProvidersAnd,
   browserFields: BrowserFields
-) =>
-  `${dataProvider.excluded ? 'NOT ' : ''}${
-    dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
-    dataProvider.type !== DataProviderType.template
-      ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-        ? convertNestedFieldToQuery(
-            dataProvider.queryMatch.field,
-            dataProvider.queryMatch.value,
-            browserFields
-          )
-        : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
-        ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
-        : `${dataProvider.queryMatch.field} : ${
-            isNumber(dataProvider.queryMatch.value)
-              ? dataProvider.queryMatch.value
-              : escapeQueryValue(dataProvider.queryMatch.value)
-          }`
-      : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-      ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
-      : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
-  }`.trim();
+) => {
+  const {
+    excluded,
+    type,
+    queryMatch: { field, operator, value },
+  } = dataProvider;
+
+  const isFieldTypeNested = checkIfFieldTypeIsNested(field, browserFields);
+  let queryString = excluded ? 'NOT ' : '';
+
+  switch (operator) {
+    case EXISTS_OPERATOR:
+      queryString =
+        queryString + buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+      break;
+    case IS_OPERATOR:
+      if (!isStringOrNumberArray(value)) {
+        queryString =
+          queryString + type !== DataProviderType.template
+            ? buildISQueryMatch({ browserFields, field, isFieldTypeNested, value })
+            : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+      }
+      break;
+    case IS_ONE_OF_OPERATOR:
+      if (isStringOrNumberArray(value)) {
+        queryString =
+          queryString + buildISONEOFQueryMatch({ browserFields, field, isFieldTypeNested, value });
+      }
+      break;
+  }
+
+  return queryString.trim();
+};
 
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
@@ -388,3 +406,66 @@ export const getDefaultViewSelection = ({
 
 /** This local storage key stores the `Grid / Event rendered view` selection */
 export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';
+
+const buildISQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+  value,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+  value: string | number;
+}): string => {
+  if (isFieldTypeNested) {
+    return convertNestedFieldToQuery(field, value, browserFields);
+  } else if (checkIfFieldTypeIsDate(field, browserFields)) {
+    return convertDateFieldToQuery(field, value);
+  } else {
+    return `${field} : ${isNumber(value) ? value : escapeQueryValue(value)}`;
+  }
+};
+
+const buildEXISTSQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+}): string => {
+  return isFieldTypeNested
+    ? convertNestedFieldToExistQuery(field, browserFields)
+    : `${field} ${EXISTS_OPERATOR}`;
+};
+
+const buildISONEOFQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+  value,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+  value: Array<string | number>;
+}): string => {
+  const formattedValues = value.map((item) => (isNumber(item) ? Number(item) : item));
+
+  return `${field} : ${JSON.stringify(formattedValues)
+    .replace(/^\[/, '(')
+    .replace(/\]$/g, ')')
+    .replace(/,/g, ' OR ')}`;
+};
+
+function isStringOrNumberArray(
+  val: string | number | Array<string | number>
+): val is Array<string | number> {
+  return (
+    typeof val !== 'string' &&
+    typeof val !== 'number' &&
+    (typeof val[0] === 'string' || typeof val[0] === 'number')
+  );
+}

@@ -114,7 +114,8 @@ interface ProviderBadgeProps {
   providerId: string;
   togglePopover: () => void;
   toggleType: () => void;
-  val: string | number;
+  displayValue: string;
+  val: string | number | (string | number)[];
   operator: QueryOperator;
   type: DataProviderType;
   timelineType: TimelineType;
@@ -136,6 +137,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
     providerId,
     togglePopover,
     toggleType,
+    displayValue,
     val,
     type,
     timelineType,
@@ -172,7 +174,9 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
         <>
           {prefix}
           {operator !== EXISTS_OPERATOR ? (
-            <span className="field-value">{`${field}: "${formattedValue}"`}</span>
+            <span className="field-value">{`${field}: "${
+              operator === 'includes' ? displayValue : formattedValue
+            }"`}</span>
           ) : (
             <span className="field-value">
               {field} {i18n.EXISTS_LABEL}

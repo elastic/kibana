@@ -54,7 +54,11 @@ const SavedColumnHeaderRuntimeType = runtimeTypes.partial({
 const SavedDataProviderQueryMatchBasicRuntimeType = runtimeTypes.partial({
   field: unionWithNullType(runtimeTypes.string),
   displayField: unionWithNullType(runtimeTypes.string),
-  value: unionWithNullType(runtimeTypes.string),
+  value: runtimeTypes.union([
+    runtimeTypes.null,
+    runtimeTypes.string,
+    runtimeTypes.array(runtimeTypes.string),
+  ]),
   displayValue: unionWithNullType(runtimeTypes.string),
   operator: unionWithNullType(runtimeTypes.string),
 });

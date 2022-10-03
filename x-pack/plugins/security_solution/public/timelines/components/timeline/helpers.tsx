@@ -18,7 +18,12 @@ import {
 import { escapeQueryValue } from '../../../common/lib/kuery';
 
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
-import { DataProviderType, EXISTS_OPERATOR } from './data_providers/data_provider';
+import {
+  DataProviderType,
+  EXISTS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
+  IS_OPERATOR,
+} from './data_providers/data_provider';
 import type { BrowserFields } from '../../../common/containers/source';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
@@ -86,27 +91,40 @@ const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) =
 const buildQueryMatch = (
   dataProvider: DataProvider | DataProvidersAnd,
   browserFields: BrowserFields
-) =>
-  `${dataProvider.excluded ? 'NOT ' : ''}${
-    dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
-    dataProvider.type !== DataProviderType.template
-      ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-        ? convertNestedFieldToQuery(
-            dataProvider.queryMatch.field,
-            dataProvider.queryMatch.value,
-            browserFields
-          )
-        : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
-        ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
-        : `${dataProvider.queryMatch.field} : ${
-            isNumber(dataProvider.queryMatch.value)
-              ? dataProvider.queryMatch.value
-              : escapeQueryValue(dataProvider.queryMatch.value)
-          }`
-      : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-      ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
-      : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
-  }`.trim();
+) => {
+  const {
+    excluded,
+    type,
+    queryMatch: { field, operator, value },
+  } = dataProvider;
+
+  const isFieldTypeNested = checkIfFieldTypeIsNested(field, browserFields);
+  let queryString = excluded ? 'NOT ' : '';
+
+  switch (operator) {
+    case IS_OPERATOR:
+      if (!isStringOrNumberArray(value)) {
+        queryString =
+          queryString + type !== DataProviderType.template
+            ? buildISQueryMatch({ browserFields, field, isFieldTypeNested, value })
+            : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+      }
+
+      break;
+    case EXISTS_OPERATOR:
+      queryString =
+        queryString + buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+      break;
+    case IS_ONE_OF_OPERATOR:
+      if (isStringOrNumberArray(value)) {
+        queryString =
+          queryString + buildISONEOFQueryMatch({ browserFields, field, isFieldTypeNested, value });
+      }
+      break;
+  }
+
+  return queryString.trim();
+};
 
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
@@ -253,3 +271,71 @@ export const focusUtilityBarAction = (containerElement: HTMLElement | null) => {
 export const resetKeyboardFocus = () => {
   document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
 };
+
+const buildISQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+  value,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+  value: string | number;
+}): string => {
+  if (isFieldTypeNested) {
+    return convertNestedFieldToQuery(field, value, browserFields);
+  } else if (checkIfFieldTypeIsDate(field, browserFields)) {
+    return convertDateFieldToQuery(field, value);
+  } else {
+    return `${field} : ${isNumber(value) ? value : escapeQueryValue(value)}`;
+  }
+};
+
+const buildEXISTSQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+}): string => {
+  return isFieldTypeNested
+    ? convertNestedFieldToExistQuery(field, browserFields)
+    : `${field} ${EXISTS_OPERATOR}`;
+};
+
+const buildISONEOFQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+  value,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+  value: Array<string | number>;
+}): string => {
+  if (isFieldTypeNested) {
+    // some kind of nested handler implementation if needed, I assume with BrowserFields?
+    return '';
+  } else {
+    // "['open', 'closed']"
+
+    return `${field} : ${JSON.stringify(value)
+      .replace(/\[/g, '(')
+      .replace(/\]/g, ')')
+      .replace(/,/g, ' OR ')}`;
+  }
+};
+
+function isStringOrNumberArray(
+  val: string | number | Array<string | number>
+): val is Array<string | number> {
+  return (
+    typeof val !== 'string' &&
+    typeof val !== 'number' &&
+    (typeof val[0] === 'string' || typeof val[0] === 'number')
+  );
+}

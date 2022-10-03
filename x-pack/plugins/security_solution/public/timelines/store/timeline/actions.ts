@@ -132,7 +132,7 @@ export const dataProviderEdited = actionCreator<{
   id: string;
   operator: QueryOperator;
   providerId: string;
-  value: string | number;
+  value: string | number | Array<string | number>;
 }>('DATA_PROVIDER_EDITED');
 
 export const updateDataProviderKqlQuery = actionCreator<{
