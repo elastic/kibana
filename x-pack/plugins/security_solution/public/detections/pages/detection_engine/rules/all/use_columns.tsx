@@ -9,7 +9,7 @@ import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eu
 import { EuiBadge, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import moment from 'moment';
+import { DurationFormat } from '@kbn/field-formats-plugin/common';
 import { IntegrationsPopover } from '../../../../components/rules/related_integrations/integrations_popover';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
@@ -50,6 +50,11 @@ export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<
 interface ColumnsProps {
   hasPermissions: boolean;
 }
+
+const durationFormat = new DurationFormat({
+  outputFormat: 'humanizePrecise',
+  outputPrecision: 0,
+});
 
 const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
@@ -388,7 +393,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         ),
         render: (value: DurationMetric | undefined) => (
           <EuiText data-test-subj="gap" size="s">
-            {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
+            {value != null ? durationFormat.convert(value) : getEmptyTagValue()}
           </EuiText>
         ),
         sortable: !!isInMemorySorting,
