@@ -56,7 +56,7 @@ describe('useToolbarOptions()', () => {
           />,
         },
         "showDisplaySelector": false,
-        "showFullScreenSelector": false,
+        "showFullScreenSelector": true,
       }
     `);
   });
@@ -95,12 +95,12 @@ describe('useToolbarOptions()', () => {
               }
             >
               <React.Fragment>
-                Showing 
+                Showing
                 1
                 -
                 25
                  of
-                 
+
                 25
                  indicators
               </React.Fragment>
@@ -114,7 +114,7 @@ describe('useToolbarOptions()', () => {
           />,
         },
         "showDisplaySelector": false,
-        "showFullScreenSelector": false,
+        "showFullScreenSelector": true,
       }
     `);
   });
@@ -153,12 +153,12 @@ describe('useToolbarOptions()', () => {
               }
             >
               <React.Fragment>
-                Showing 
+                Showing
                 26
                 -
                 50
                  of
-                 
+
                 50
                  indicators
               </React.Fragment>
@@ -172,7 +172,7 @@ describe('useToolbarOptions()', () => {
           />,
         },
         "showDisplaySelector": false,
-        "showFullScreenSelector": false,
+        "showFullScreenSelector": true,
       }
     `);
   });
