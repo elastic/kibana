@@ -438,6 +438,23 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       }
     });
 
+    it('runs correctly: filters by Kuery', async () => {
+      await createRule({
+        name: 'always fire',
+        aggType: 'count',
+        groupBy: 'all',
+        thresholdComparator: '>',
+        threshold: [-1],
+        filterKuery: 'group: group-0',
+      });
+
+      const docs = await waitForDocs(1);
+      const doc = docs[0];
+      const { message } = doc._source.params;
+
+      expect(message).to.contain('Value: 3');
+    });
+
     async function createEsDocumentsInGroups(
       groups: number,
       indexName: string = ES_TEST_INDEX_NAME
@@ -474,6 +491,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       threshold: number[];
       notifyWhen?: string;
       indexName?: string;
+      filterKuery?: string;
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -545,6 +563,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             timeWindowUnit: 's',
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
+            filterKuery: params.filterKuery,
           },
         });
 
