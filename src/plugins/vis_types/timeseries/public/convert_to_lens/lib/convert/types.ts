@@ -85,7 +85,7 @@ export type MovingAverageColumn = GenericColumnWithMeta<BaseMovingAverageColumn,
 export type FormulaColumn = GenericColumnWithMeta<BaseFormulaColumn, Meta>;
 export type StaticValueColumn = GenericColumnWithMeta<BaseStaticValueColumn, Meta>;
 
-type ColumnsWithoutMeta = FiltersColumn | TermsColumn | DateHistogramColumn;
+export type ColumnsWithoutMeta = FiltersColumn | TermsColumn | DateHistogramColumn;
 export type AnyColumnWithReferences = GenericColumnWithMeta<BaseAnyColumnWithReferences, Meta>;
 
 type CommonColumns = Exclude<BaseColumn, ColumnsWithoutMeta>;
