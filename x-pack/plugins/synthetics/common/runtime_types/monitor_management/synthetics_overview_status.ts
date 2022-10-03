@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export * from './query_bar';
+import * as t from 'io-ts';
 
-// eslint-disable-next-line import/no-default-export
-export { QueryBar as default } from './query_bar';
+export const OverviewStatusType = t.type({
+  up: t.number,
+  down: t.number,
+  disabledCount: t.number,
+});
+
+export type OverviewStatus = t.TypeOf<typeof OverviewStatusType>;
