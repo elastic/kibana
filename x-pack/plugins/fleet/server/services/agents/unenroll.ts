@@ -55,13 +55,13 @@ export async function unenrollAgent(
     return forceUnenrollAgent(soClient, esClient, agentId);
   }
   const now = new Date().toISOString();
+  await updateAgent(esClient, agentId, {
+    unenrollment_started_at: now,
+  });
   await createAgentAction(esClient, {
     agents: [agentId],
     created_at: now,
     type: 'UNENROLL',
-  });
-  await updateAgent(esClient, agentId, {
-    unenrollment_started_at: now,
   });
 }
 
@@ -128,6 +128,17 @@ async function unenrollBatch(
       }, []);
 
   const now = new Date().toISOString();
+
+  // Update the necessary agents
+  const updateData = options.revoke
+    ? { unenrolled_at: now, active: false }
+    : { unenrollment_started_at: now };
+
+  await bulkUpdateAgents(
+    esClient,
+    agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData }))
+  );
+
   if (options.revoke) {
     // Get all API keys that need to be invalidated
     await invalidateAPIKeysForAgents(agentsToUpdate);
@@ -139,16 +150,6 @@ async function unenrollBatch(
       type: 'UNENROLL',
     });
   }
-
-  // Update the necessary agents
-  const updateData = options.revoke
-    ? { unenrolled_at: now, active: false }
-    : { unenrollment_started_at: now };
-
-  await bulkUpdateAgents(
-    esClient,
-    agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData }))
-  );
 
   return {
     items: errorsToResults(givenAgents, outgoingErrors, undefined, skipSuccess),

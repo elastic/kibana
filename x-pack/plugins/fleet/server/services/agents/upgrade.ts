@@ -58,6 +58,10 @@ export async function sendUpgradeAgentAction({
       `Cannot upgrade agent ${agentId} in hosted agent policy ${agentPolicy.id}`
     );
   }
+  await updateAgent(esClient, agentId, {
+    upgraded_at: null,
+    upgrade_started_at: now,
+  });
 
   await createAgentAction(esClient, {
     agents: [agentId],
@@ -65,10 +69,6 @@ export async function sendUpgradeAgentAction({
     data,
     ack_data: data,
     type: 'UPGRADE',
-  });
-  await updateAgent(esClient, agentId, {
-    upgraded_at: null,
-    upgrade_started_at: now,
   });
 }
 
@@ -192,16 +192,6 @@ async function upgradeBatch(
     options.upgradeDurationSeconds
   );
 
-  await createAgentAction(esClient, {
-    id: options.actionId,
-    created_at: now,
-    data,
-    ack_data: data,
-    type: 'UPGRADE',
-    agents: agentsToUpdate.map((agent) => agent.id),
-    ...rollingUpgradeOptions,
-  });
-
   await bulkUpdateAgents(
     esClient,
     agentsToUpdate.map((agent) => ({
@@ -212,6 +202,16 @@ async function upgradeBatch(
       },
     }))
   );
+
+  await createAgentAction(esClient, {
+    id: options.actionId,
+    created_at: now,
+    data,
+    ack_data: data,
+    type: 'UPGRADE',
+    agents: agentsToUpdate.map((agent) => agent.id),
+    ...rollingUpgradeOptions,
+  });
 
   return {
     items: errorsToResults(
