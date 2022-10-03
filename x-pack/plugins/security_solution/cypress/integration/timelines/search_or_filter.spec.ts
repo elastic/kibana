@@ -42,7 +42,7 @@ describe('timeline search or filter KQL bar', () => {
   it('executes a Lucene query', () => {
     const messageProcessQuery = 'message:Process\\ zsh*';
     openTimelineUsingToggle();
-    changeTimelineQueryLanguage('lucene');
+    changeTimelineQueryLanguage();
     executeTimelineSearch(messageProcessQuery);
 
     cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));

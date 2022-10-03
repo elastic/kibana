@@ -224,7 +224,7 @@ export const TIMELINE_KQLMODE_FILTER = '[data-test-subj="kqlModePopoverFilter"]'
 
 export const TIMELINE_SWITCHQUERYLANGUAGE_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="switchQueryLanguageButton"]`;
 
-export const TIMELINE_KQLORLUCENELANGUAGE_TOGGLE = `${TIMELINE_FLYOUT} [data-test-subj="languageToggle"]`;
+export const KQLORLUCENELANGUAGE_TOGGLE = `[data-test-subj="languageToggle"]`;
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 

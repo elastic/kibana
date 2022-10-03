@@ -71,7 +71,7 @@ import {
   PINNED_TAB_BUTTON,
   TIMELINE_DATA_PROVIDER_FIELD_INPUT,
   TIMELINE_SWITCHQUERYLANGUAGE_BUTTON,
-  TIMELINE_KQLORLUCENELANGUAGE_TOGGLE,
+  KQLORLUCENELANGUAGE_TOGGLE,
   TIMELINE_QUERY,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
@@ -177,16 +177,9 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
   return cy.get(SAVE_FILTER_BTN).click();
 };
 
-export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
+export const changeTimelineQueryLanguage = () => {
   cy.get(TIMELINE_SWITCHQUERYLANGUAGE_BUTTON).click();
-  cy.get(TIMELINE_KQLORLUCENELANGUAGE_TOGGLE).then((toggle) => {
-    const status = toggle.attr('aria-checked');
-    if (status === 'true' && language === 'lucene') {
-      cy.get(TIMELINE_KQLORLUCENELANGUAGE_TOGGLE).click();
-    } else if (status === 'false' && language === 'kuery') {
-      cy.get(TIMELINE_KQLORLUCENELANGUAGE_TOGGLE).click();
-    }
-  });
+  cy.get(KQLORLUCENELANGUAGE_TOGGLE).click({ force: true });
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
