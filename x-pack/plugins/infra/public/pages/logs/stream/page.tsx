@@ -10,7 +10,6 @@ import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { StreamPageContent } from './page_content';
-import { StreamPageHeader } from './page_header';
 import { LogsPageProviders } from './page_providers';
 import { streamTitle } from '../../../translations';
 
@@ -26,7 +25,6 @@ export const StreamPage = () => {
   return (
     <EuiErrorBoundary>
       <LogsPageProviders>
-        <StreamPageHeader />
         <StreamPageContent />
       </LogsPageProviders>
     </EuiErrorBoundary>

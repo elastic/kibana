@@ -12,7 +12,8 @@
       "@types/d3-transition",
       "jest",
       "node",
-      "react"
+      "react",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
