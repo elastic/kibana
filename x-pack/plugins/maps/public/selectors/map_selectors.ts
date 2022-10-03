@@ -20,7 +20,7 @@ import {
   GeoJsonVectorLayer,
 } from '../classes/layers/vector_layer';
 import { VectorStyle } from '../classes/styles/vector/vector_style';
-import { LayerGroup } from '../classes/layers/layer_group';
+import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { HeatmapLayer } from '../classes/layers/heatmap_layer';
 import { getTimeFilter } from '../kibana_services';
 import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
@@ -348,7 +348,7 @@ export const getLayerList = createSelector(
       const parentLayer = layers.find((layer) => {
         return layer.getId() === parent;
       });
-      if (!parentLayer || !(parentLayer instanceof LayerGroup)) {
+      if (!parentLayer || !isLayerGroup(parentLayer)) {
         return;
       }
       (parentLayer as LayerGroup).setChildren(children);

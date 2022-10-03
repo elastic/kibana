@@ -75,7 +75,7 @@ import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
 import type { IESSource } from '../classes/sources/es_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
-import { LayerGroup } from '../classes/layers/layer_group';
+import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -255,8 +255,8 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       return;
     }
 
-    if (layer instanceof LayerGroup) {
-      layer.getChildren().forEach((childLayer) => {
+    if (isLayerGroup(layer)) {
+      (layer as LayerGroup).getChildren().forEach((childLayer) => {
         dispatch(setLayerVisibility(childLayer.getId(), makeVisible));
       });
     }

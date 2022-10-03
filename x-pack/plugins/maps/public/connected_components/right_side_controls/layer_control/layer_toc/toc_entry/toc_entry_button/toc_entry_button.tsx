@@ -11,7 +11,7 @@ import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
 import { IVectorSource } from '../../../../../../classes/sources/vector_source';
-import { LayerGroup } from '../../../../../../classes/layers/layer_group';
+import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
 
 interface Footnote {
   icon: ReactNode;
@@ -120,7 +120,7 @@ export class TOCEntryButton extends Component<Props, State> {
 
     const { icon, tooltipContent } = this.props.layer.getLayerIcon(true);
 
-    if (this.props.layer instanceof LayerGroup) {
+    if (isLayerGroup(this.props.layer)) {
       return { icon, tooltipContent, footnotes: [] };
     }
 

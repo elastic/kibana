@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { LayerGroup } from './layer_group';
+export { isLayerGroup, LayerGroup } from './layer_group';

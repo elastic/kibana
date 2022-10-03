@@ -29,6 +29,10 @@ import { ILayer, LayerIcon } from '../layer';
 import { IStyle } from '../../styles/style';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
+export function isLayerGroup(layer: ILayer) {
+  return layer instanceof LayerGroup;
+}
+
 export class LayerGroup implements ILayer {
   protected readonly _descriptor: LayerGroupDescriptor;
   private _children: ILayer[] = [];
@@ -66,7 +70,7 @@ export class LayerGroup implements ILayer {
       // @ts-ignore
       return (child[methodName] as () => Promise<boolean>)();
     });
-    return (await Promise.all(promises) as boolean[]).some((result) => {
+    return ((await Promise.all(promises)) as boolean[]).some((result) => {
       return result;
     });
   }
@@ -209,9 +213,11 @@ export class LayerGroup implements ILayer {
   }
 
   getMinSourceZoom(): number {
-    throw new Error(
-      'getMinSourceZoom should not be called on LayerGroup, LayerGroup does not render to map'
-    );
+    let min = MIN_ZOOM;
+    this._children.forEach((child) => {
+      min = Math.max(min, child.getMinSourceZoom());
+    });
+    return min;
   }
 
   getMbSourceId(): string {
