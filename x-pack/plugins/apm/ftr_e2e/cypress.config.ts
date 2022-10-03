@@ -6,9 +6,7 @@
  */
 
 import { defineConfig } from 'cypress';
-import { some } from 'lodash';
-import del from 'del';
-import { plugin } from './cypress/plugins';
+import { setupNodeEvents } from './setup_cypress_node_events';
 
 module.exports = defineConfig({
   projectId: 'omwh6f',
@@ -27,29 +25,7 @@ module.exports = defineConfig({
   videoUploadOnPasses: false,
   screenshotOnRunFailure: true,
   e2e: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
-    setupNodeEvents(on, config) {
-      plugin(on, config);
-      on('after:spec', (spec, results) => {
-        // Delete videos that have no failures or retries
-        if (results && results.video) {
-          const failures = some(results.tests, (test) => {
-            return some(test.attempts, { state: 'failed' });
-          });
-          if (!failures) {
-            del(results.video);
-          }
-        }
-      });
-      on('before:browser:launch', (browser, launchOptions) => {
-        if (browser.name === 'electron' && browser.isHeadless) {
-          launchOptions.preferences.width = 1440;
-          launchOptions.preferences.height = 1600;
-        }
-        return launchOptions;
-      });
-    },
+    setupNodeEvents,
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',
     specPattern: './cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',

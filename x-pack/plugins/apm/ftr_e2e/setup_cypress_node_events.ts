@@ -11,28 +11,13 @@ import {
   LogLevel,
 } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
+import { some } from 'lodash';
+import del from 'del';
 
-// ***********************************************************
-// This example plugins/index.ts can be used to load plugins
-//
-// You can change the location of this file or turn off loading
-// the plugins file with the 'pluginsFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/plugins-guide
-// ***********************************************************
-
-// This function is called when a project is opened or re-opened (e.g. due to
-// the project's config changing)
-
-/**
- * @type {Cypress.PluginConfig}
- */
-
-export const plugin: Cypress.PluginConfig = (on, config) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
-
+export function setupNodeEvents(
+  on: Cypress.PluginEvents,
+  config: Cypress.PluginConfigOptions
+) {
   const client = createEsClientForTesting({
     esUrl: config.env.ES_NODE,
     requestTimeout: config.env.ES_REQUEST_TIMEOUT,
@@ -65,4 +50,24 @@ export const plugin: Cypress.PluginConfig = (on, config) => {
       return null;
     },
   });
-};
+
+  on('after:spec', (spec, results) => {
+    // Delete videos that have no failures or retries
+    if (results && results.video) {
+      const failures = some(results.tests, (test) => {
+        return some(test.attempts, { state: 'failed' });
+      });
+      if (!failures) {
+        del(results.video);
+      }
+    }
+  });
+
+  on('before:browser:launch', (browser, launchOptions) => {
+    if (browser.name === 'electron' && browser.isHeadless) {
+      launchOptions.preferences.width = 1440;
+      launchOptions.preferences.height = 1600;
+    }
+    return launchOptions;
+  });
+}
