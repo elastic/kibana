@@ -81,11 +81,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const config = {
       firstTransaction: {
         name: 'GET /apple 🍎 ',
-        successRate: 75,
-        failureRate: 25,
-      },
-      secondTransaction: {
-        name: 'GET /banana 🍌',
         successRate: 50,
         failureRate: 50,
       },
@@ -95,43 +90,37 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .service({ name: 'opbeans-go', environment: 'production', agentName: 'go' })
         .instance('instance-a');
 
-      const interval = '1m';
+      const { firstTransaction } = config;
 
-      const { firstTransaction, secondTransaction } = config;
-
-      const documents = [firstTransaction, secondTransaction].map((transaction) => {
-        return timerange(start, end)
-          .interval(interval)
-          .rate(transaction.successRate)
-          .generator((timestamp) =>
-            serviceGoProdInstance
-              .transaction({ transactionName: transaction.name })
-              .timestamp(timestamp)
-              .duration(1000)
-              .success()
-          )
-          .merge(
-            timerange(start, end)
-              .interval(interval)
-              .rate(transaction.failureRate)
-              .generator((timestamp) =>
-                serviceGoProdInstance
-                  .transaction({ transactionName: transaction.name })
-                  .errors(
-                    serviceGoProdInstance
-                      .error({
-                        message: 'Error 1',
-                        type: transaction.name,
-                        groupingName: 'Error test',
-                      })
-                      .timestamp(timestamp)
-                  )
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .failure()
-              )
-          );
-      });
+      const documents = timerange(start, end)
+        .ratePerMinute(firstTransaction.successRate)
+        .generator((timestamp) =>
+          serviceGoProdInstance
+            .transaction({ transactionName: firstTransaction.name })
+            .timestamp(timestamp)
+            .duration(1000)
+            .success()
+        )
+        .merge(
+          timerange(start, end)
+            .ratePerMinute(firstTransaction.failureRate)
+            .generator((timestamp) =>
+              serviceGoProdInstance
+                .transaction({ transactionName: firstTransaction.name })
+                .errors(
+                  serviceGoProdInstance
+                    .error({
+                      message: 'Error 1',
+                      type: firstTransaction.name,
+                      groupingName: 'Error test',
+                    })
+                    .timestamp(timestamp)
+                )
+                .duration(1000)
+                .timestamp(timestamp)
+                .failure()
+            )
+        );
 
       await synthtraceEsClient.index(documents);
     });
@@ -152,30 +141,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(errorRateResponse.currentPeriod.average).to.be.greaterThan(0);
         expect(errorRateResponse.previousPeriod.average).to.be(null);
 
-        expect(errorRateResponse.currentPeriod.timeseries.length).to.be.greaterThan(0);
+        expect(errorRateResponse.currentPeriod.timeseries).not.to.be.empty();
         expect(errorRateResponse.previousPeriod.timeseries).to.empty();
 
         const nonNullDataPoints = errorRateResponse.currentPeriod.timeseries.filter(
           ({ y }) => y !== null
         );
 
-        expect(nonNullDataPoints.length).to.be.greaterThan(0);
+        expect(nonNullDataPoints).not.to.be.empty();
       });
 
       it('has the correct start date', () => {
-        expectSnapshot(
+        expect(
           new Date(first(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-01-01T00:00:00.000Z"`);
+        ).to.eql('2021-01-01T00:00:00.000Z');
       });
 
       it('has the correct end date', () => {
-        expectSnapshot(
+        expect(
           new Date(last(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-01-01T00:14:00.000Z"`);
+        ).to.eql('2021-01-01T00:14:00.000Z');
       });
 
       it('has the correct number of buckets', () => {
-        expectSnapshot(errorRateResponse.currentPeriod.timeseries.length).toMatchInline(`15`);
+        expect(errorRateResponse.currentPeriod.timeseries.length).to.be.eql(15);
       });
 
       it('has the correct calculation for average', () => {
@@ -204,8 +193,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(errorRateResponse.currentPeriod.average).to.be.greaterThan(0);
         expect(errorRateResponse.previousPeriod.average).to.be.greaterThan(0);
 
-        expect(errorRateResponse.currentPeriod.timeseries.length).to.be.greaterThan(0);
-        expect(errorRateResponse.previousPeriod.timeseries.length).to.be.greaterThan(0);
+        expect(errorRateResponse.currentPeriod.timeseries).not.to.be.empty();
+        expect(errorRateResponse.previousPeriod.timeseries).not.to.be.empty();
 
         const currentPeriodNonNullDataPoints = errorRateResponse.currentPeriod.timeseries.filter(
           ({ y }) => y !== null
@@ -215,31 +204,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ({ y }) => y !== null
         );
 
-        expect(currentPeriodNonNullDataPoints.length).to.be.greaterThan(0);
-        expect(previousPeriodNonNullDataPoints.length).to.be.greaterThan(0);
+        expect(currentPeriodNonNullDataPoints).not.to.be.empty();
+        expect(previousPeriodNonNullDataPoints).not.to.be.empty();
       });
 
       it('has the correct start date', () => {
-        expectSnapshot(
+        expect(
           new Date(first(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-01-01T00:07:00.000Z"`);
-        expectSnapshot(
+        ).to.eql('2021-01-01T00:07:00.000Z');
+        expect(
           new Date(first(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-01-01T00:07:00.000Z"`);
+        ).to.eql('2021-01-01T00:07:00.000Z');
       });
 
       it('has the correct end date', () => {
-        expectSnapshot(
+        expect(
           new Date(last(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-01-01T00:14:00.000Z"`);
-        expectSnapshot(
+        ).to.eql('2021-01-01T00:14:00.000Z');
+        expect(
           new Date(last(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-01-01T00:14:00.000Z"`);
+        ).to.eql('2021-01-01T00:14:00.000Z');
       });
 
       it('has the correct number of buckets', () => {
-        expectSnapshot(errorRateResponse.currentPeriod.timeseries.length).toMatchInline(`8`);
-        expectSnapshot(errorRateResponse.previousPeriod.timeseries.length).toMatchInline(`8`);
+        expect(errorRateResponse.currentPeriod.timeseries.length).to.eql(8);
+        expect(errorRateResponse.previousPeriod.timeseries.length).to.eql(8);
       });
 
       it('has the correct calculation for average', () => {
