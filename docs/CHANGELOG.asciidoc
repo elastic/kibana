@@ -64,6 +64,9 @@ Logs a hash of the Saved Objects encryption key (`xpack.encryptedSavedObjects.en
 [float]
 [[fixes-v8.4.2]]
 === Bug Fixes
+APM:: 
+Fix Logs in APM Traces {kibana-pull}139694[#139694]
+
 Connectors::
 The connectors table now uses "compatibility" rather than "availability" {kibana-pull}139024[#139024]
 
