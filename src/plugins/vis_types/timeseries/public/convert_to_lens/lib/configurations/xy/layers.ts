@@ -73,7 +73,8 @@ function nonNullable<T>(value: T): value is NonNullable<T> {
 export const getLayers = async (
   dataSourceLayers: Record<number, Layer>,
   model: Panel,
-  dataViews: DataViewsPublicPluginStart
+  dataViews: DataViewsPublicPluginStart,
+  isSingleAxis: boolean = false
 ): Promise<XYLayerConfig[] | null> => {
   const nonAnnotationsLayers: XYLayerConfig[] = Object.keys(dataSourceLayers).map((key) => {
     const series = model.series[parseInt(key, 10)];
@@ -110,6 +111,8 @@ export const getLayers = async (
             ? model.series.some((s) => s.id !== series.id && getAxisMode(s, model) === 'right')
               ? 'right'
               : 'left'
+            : isSingleAxis
+            ? 'left'
             : getAxisMode(series, model),
           ...(isReferenceLine && {
             fill: chartType.includes('area') ? FillTypes.BELOW : FillTypes.NONE,
