@@ -121,7 +121,7 @@ export const getDocumentCountStats = async (
     },
   });
 
-  const getSearchParams = (aggregations: unknown) => ({
+  const getSearchParams = (aggregations: unknown, trackTotalHits = false) => ({
     index,
     body: {
       query,
@@ -133,13 +133,17 @@ export const getDocumentCountStats = async (
         : {}),
       ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
     },
-    track_total_hits: false,
+    track_total_hits: trackTotalHits,
     size: 0,
   });
   const firstResp = await search
     .search(
       {
-        params: getSearchParams(getAggsWithRandomSampling(initialDefaultProbability)),
+        params: getSearchParams(
+          getAggsWithRandomSampling(initialDefaultProbability),
+          // Track total hits if time field is not defined
+          timeFieldName === undefined
+        ),
       },
       searchOptions
     )
@@ -152,6 +156,22 @@ export const getDocumentCountStats = async (
       )}`
     );
   }
+
+  // If time field is not defined, no need to show the document count chart
+  // Just need to return the tracked total hits
+  if (timeFieldName === undefined) {
+    const trackedTotalHits =
+      typeof firstResp.rawResponse.hits.total === 'number'
+        ? firstResp.rawResponse.hits.total
+        : firstResp.rawResponse.hits.total?.value;
+    return {
+      ...result,
+      randomlySampled: false,
+      took: firstResp.rawResponse.took,
+      totalCount: trackedTotalHits ?? 0,
+    };
+  }
+
   if (isDefined(probability)) {
     return {
       ...result,
