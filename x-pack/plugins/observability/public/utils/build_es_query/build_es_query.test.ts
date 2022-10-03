@@ -34,6 +34,13 @@ describe('buildEsQuery', () => {
       timeRange: defaultTimeRange,
       kuery: 'kibana.alert.status: "recovered" and kibana.alert.duration.us >= 120',
     },
+    {
+      timeRange: {
+        from: 'now-15min',
+        to: 'now',
+      },
+      kuery: 'kibana.alert.status: "recovered"',
+    },
   ];
 
   test.each(testData)('should generate correct es query for %j', ({ kuery, timeRange }) => {

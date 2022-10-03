@@ -7,15 +7,15 @@
 
 import { buildEsQuery as kbnBuildEsQuery, TimeRange } from '@kbn/es-query';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { getTime } from '@kbn/data-plugin/common';
+import { getRelativeTime } from '@kbn/data-plugin/common';
 
 export function buildEsQuery(timeRange: TimeRange, kuery?: string) {
   const timeFilter =
     timeRange &&
-    getTime(undefined, timeRange, {
+    getRelativeTime(undefined, timeRange, {
       fieldName: TIMESTAMP,
     });
-  const filtersToUse = [...(timeFilter ? [timeFilter] : [])];
+  const filtersToUse = timeFilter ? [timeFilter] : [];
   const queryToUse = kuery ? { query: kuery, language: 'kuery' } : [];
 
   return kbnBuildEsQuery(undefined, queryToUse, filtersToUse);
