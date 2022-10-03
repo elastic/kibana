@@ -12,7 +12,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { RuleDetails } from './rule_details';
 import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
-import { EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
 import {
   ActionGroup,
   RuleExecutionStatusErrorReasons,
@@ -184,112 +184,6 @@ describe('rule_details', () => {
       });
 
       expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalled();
-    });
-
-    describe('actions', () => {
-      it('renders an rule action', () => {
-        const rule = mockRule({
-          actions: [
-            {
-              group: 'default',
-              id: uuid.v4(),
-              params: {},
-              actionTypeId: '.server-log',
-            },
-          ],
-        });
-
-        const actionTypes: ActionType[] = [
-          {
-            id: '.server-log',
-            name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-          },
-        ];
-
-        expect(
-          mountWithIntl(
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={actionTypes}
-              {...mockRuleApis}
-            />
-          ).containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
-            </EuiFlexItem>
-          )
-        ).toBeTruthy();
-      });
-
-      it('renders a counter for multiple rule action', () => {
-        const rule = mockRule({
-          actions: [
-            {
-              group: 'default',
-              id: uuid.v4(),
-              params: {},
-              actionTypeId: '.server-log',
-            },
-            {
-              group: 'default',
-              id: uuid.v4(),
-              params: {},
-              actionTypeId: '.email',
-            },
-          ],
-        });
-        const actionTypes: ActionType[] = [
-          {
-            id: '.server-log',
-            name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-          },
-          {
-            id: '.email',
-            name: 'Send email',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-          },
-        ];
-
-        const details = mountWithIntl(
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={actionTypes}
-            {...mockRuleApis}
-          />
-        );
-
-        expect(
-          details.containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
-            </EuiFlexItem>
-          )
-        ).toBeTruthy();
-
-        expect(
-          details.containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[1].name}</EuiBadge>
-            </EuiFlexItem>
-          )
-        ).toBeTruthy();
-      });
     });
 
     describe('links', () => {
@@ -579,16 +473,12 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const brokenConnectorIndicator = wrapper
-        .find('[data-test-subj="actionWithBrokenConnector"]')
-        .first();
       const brokenConnectorWarningBanner = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
         .first();
       const brokenConnectorWarningBannerAction = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
         .first();
-      expect(brokenConnectorIndicator.exists()).toBeTruthy();
       expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
       expect(brokenConnectorWarningBannerAction.exists()).toBeTruthy();
     });
@@ -627,16 +517,12 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const brokenConnectorIndicator = wrapper
-        .find('[data-test-subj="actionWithBrokenConnector"]')
-        .first();
       const brokenConnectorWarningBanner = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
         .first();
       const brokenConnectorWarningBannerAction = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
         .first();
-      expect(brokenConnectorIndicator.exists()).toBeTruthy();
       expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
       expect(brokenConnectorWarningBannerAction.exists()).toBeFalsy();
     });

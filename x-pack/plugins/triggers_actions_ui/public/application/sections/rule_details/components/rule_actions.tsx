@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -27,7 +27,15 @@ export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProp
     ruleActions,
   });
 
-  if (!actionConnectors || actionConnectors.length <= 0)
+  const hasConnectors = useMemo(() => {
+    return actionConnectors && actionConnectors.length > 0;
+  }, [actionConnectors]);
+
+  const hasActions = useMemo(() => {
+    return ruleActions && ruleActions.length > 0;
+  }, [ruleActions]);
+
+  if (!hasConnectors || !hasActions) {
     return (
       <EuiFlexItem>
         <EuiText size="s">
@@ -37,31 +45,44 @@ export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProp
         </EuiText>
       </EuiFlexItem>
     );
+  }
 
-  function getActionIconClass(actionGroupId?: string): IconType | undefined {
+  const getActionIconClass = (actionGroupId?: string): IconType | undefined => {
     const actionGroup = actionTypeRegistry.list().find((group) => group.id === actionGroupId);
     return typeof actionGroup?.iconClass === 'string'
       ? actionGroup?.iconClass
       : suspendedComponentWithProps(actionGroup?.iconClass as React.ComponentType);
-  }
+  };
+
+  const getActionName = (actionTypeId?: string) => {
+    const actionConnector = actionConnectors.find((connector) => connector.id === actionTypeId);
+    return actionConnector && actionConnector.name;
+  };
+
   if (isLoadingActionConnectors) return <EuiLoadingSpinner size="s" />;
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      {actionConnectors.map(({ actionTypeId, name }) => (
-        <EuiFlexItem key={actionTypeId}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
-            <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText data-test-subj={`actionConnectorName-${name}`} size="s">
-                {name}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
-      ))}
+      {ruleActions.map(({ actionTypeId, id }, index) => {
+        const actionName = getActionName(id);
+        return (
+          <EuiFlexItem key={index}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  data-test-subj={`actionConnectorName-${index}-${actionName || actionTypeId}`}
+                  size="s"
+                >
+                  {actionName}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 }
