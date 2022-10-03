@@ -155,11 +155,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'average',
       });
       await PageObjects.lens.waitForVisualization('xyVisChart');
-      await testSubjects.click('lnsApp_openInDiscover');
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
+
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('discover-sidebar');
+      await PageObjects.common.sleep(15000);
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['extension', 'average']);
       await browser.closeCurrentWindow();
