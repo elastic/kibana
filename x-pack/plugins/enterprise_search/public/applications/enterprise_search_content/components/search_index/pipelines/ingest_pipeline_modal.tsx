@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../../../../common/constants';
 
@@ -91,21 +92,43 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
                 <EuiText color="subdued" size="s">
-                  {displayOnly
-                    ? i18n.translate(
-                        'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalBodyAPIText',
-                        {
-                          defaultMessage:
-                            'This pipeline runs automatically on all Crawler and Connector indices created through Enterprise Search. To use this configuration on API-based indices you can use the sample cURL request below.',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalBodyConnectorText',
-                        {
-                          defaultMessage:
-                            'This pipeline runs automatically on all Crawler and Connector indices created through Enterprise Search.',
-                        }
-                      )}
+                  {displayOnly ? (
+                    <>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalBodyAPIText"
+                          defaultMessage="{apiIndex} Changes made to the settings below are for reference only. These settings will not be persisted to your index or pipeline."
+                          values={{
+                            apiIndex: (
+                              <strong>
+                                {i18n.translate(
+                                  'xpack.enterpriseSearch.content.index.pipelines.ingestModal.apiIndex',
+                                  { defaultMessage: 'This is an API-based index.' }
+                                )}
+                              </strong>
+                            ),
+                          }}
+                        />
+                      </p>
+                      <p>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalBodyAPITextCont',
+                          {
+                            defaultMessage:
+                              "In order to use this pipeline on your API-based indices you'll need to explicitly reference it in your API requests.",
+                          }
+                        )}
+                      </p>
+                    </>
+                  ) : (
+                    i18n.translate(
+                      'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalBodyConnectorText',
+                      {
+                        defaultMessage:
+                          'This pipeline runs automatically on all Crawler and Connector indices created through Enterprise Search.',
+                      }
+                    )
+                  )}
                 </EuiText>
               </EuiFlexItem>
               <EuiSpacer />
