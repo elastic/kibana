@@ -93,7 +93,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   }),
   emptyStateInfo: i18n.translate('xpack.securitySolution.trustedApps.emptyStateInfo', {
     defaultMessage:
-      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts.',
+      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications may still generate alerts in some cases.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.trustedApps.emptyStatePrimaryButtonLabel',
