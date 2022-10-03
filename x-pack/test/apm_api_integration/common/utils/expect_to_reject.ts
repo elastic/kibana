@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export enum SYNTHETICS_API_URLS {
-  SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
-  PINGS = '/internal/synthetics/pings',
-  OVERVIEW_STATUS = `/internal/synthetics/overview/status`,
+export async function expectToReject<T extends Error>(fn: () => Promise<any>): Promise<T> {
+  try {
+    await fn();
+  } catch (e) {
+    return e;
+  }
+  throw new Error(`Expected fn to throw`);
 }
