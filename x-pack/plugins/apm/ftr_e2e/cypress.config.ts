@@ -21,7 +21,7 @@ module.exports = defineConfig({
   defaultCommandTimeout: 30000,
   execTimeout: 120000,
   pageLoadTimeout: 120000,
-  viewportHeight: 900,
+  viewportHeight: 1800,
   viewportWidth: 1440,
   video: true,
   videoUploadOnPasses: false,
@@ -41,6 +41,13 @@ module.exports = defineConfig({
             return del(results.video);
           }
         }
+      });
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.name === 'electron' && browser.isHeadless) {
+          launchOptions.preferences.width = 1440;
+          launchOptions.preferences.height = 1600;
+        }
+        return launchOptions;
       });
     },
     baseUrl: 'http://localhost:5601',
