@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core/public';
 import React, { createContext, useContext, type FunctionComponent } from 'react';
 import { FileKindsRegistry, getFileKindsRegistry } from '../../common/file_kinds_registry';
 
 export interface FilesContextValue {
+  http: HttpSetup;
   registry: FileKindsRegistry;
 }
 
@@ -21,11 +23,14 @@ export const useFilesContext = () => {
   }
   return ctx;
 };
-
-export const FilesContext: FunctionComponent = ({ children }) => {
+interface Props {
+  http: HttpSetup;
+}
+export const FilesContext: FunctionComponent<Props> = ({ children, http }) => {
   return (
     <FilesContextObject.Provider
       value={{
+        http,
         registry: getFileKindsRegistry(),
       }}
     >

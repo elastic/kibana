@@ -5,34 +5,47 @@
  * 2.0.
  */
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
-import * as bh from 'blurhash';
 
+import { HttpSetup } from '@kbn/core-http-browser';
+import { CUSTOM_BLURHASH_HEADER } from '../../../common/constants';
+import { FilesContext } from '../context';
+import { createBlurhash } from '../common';
 import { Image, Props } from './image';
-import { base64dLogo } from './image.constants.stories';
+import { getImageData as getBlob } from './image.constants.stories';
 
-const defaultSrc = `data:image/png;base64,${base64dLogo}`;
-const blurhash = (function encodeImageToBlurhash() {
-  const image = new window.Image(900, 500);
-  image.src = defaultSrc;
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d')!;
-  context.drawImage(image, 0, 0);
-  const imageData = context.getImageData(0, 0, image.width, image.height);
-  return bh.encode(imageData.data, imageData.width, imageData.height, 4, 4);
-})();
-const defaultArgs: Props = { alt: 'test', src: defaultSrc };
+const defaultArgs: Props = { alt: 'test', src: 'test' };
+
+const myClient = {
+  get: async () => {
+    const blurhash = await createBlurhash(getBlob());
+    return {
+      response: {
+        headers: new Map<string, undefined | string>([[CUSTOM_BLURHASH_HEADER, blurhash]]),
+        blob: () => getBlob(),
+      },
+    };
+  },
+} as unknown as HttpSetup;
 
 export default {
   title: 'components/Image',
   component: Image,
   args: defaultArgs,
-};
+  decorators: [
+    (Story) => (
+      <FilesContext http={myClient}>
+        <Story />
+      </FilesContext>
+    ),
+  ],
+} as ComponentMeta<typeof Image>;
 
 const baseStyle = css`
   width: 400px;
+  height: 200px;
 `;
 
 const Template: ComponentStory<typeof Image> = (props: Props) => (
@@ -41,10 +54,26 @@ const Template: ComponentStory<typeof Image> = (props: Props) => (
 
 export const Basic = Template.bind({});
 
+export const WithBlurhash = Template.bind({});
+
 export const BrokenSrc = Template.bind({});
-BrokenSrc.args = {
-  src: 'broken',
-};
+BrokenSrc.decorators = [
+  (Story) => {
+    return (
+      <FilesContext
+        http={
+          {
+            get: () => {
+              throw new Error('Nope!');
+            },
+          } as unknown as HttpSetup
+        }
+      >
+        <Story />
+      </FilesContext>
+    );
+  },
+];
 
 export const OffScreen = Template.bind({});
 OffScreen.args = { ...defaultArgs, onFirstVisible: action('visible') };

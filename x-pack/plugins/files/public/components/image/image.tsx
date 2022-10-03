@@ -5,9 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import type { ImgHTMLAttributes } from 'react';
+import { type ImgHTMLAttributes, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
+import { CUSTOM_BLURHASH_HEADER } from '../../../common/constants';
+import { useFilesContext } from '../context';
 import { useViewportObserver } from './use_viewport_observer';
-import { MyImage } from './components/my_img';
+import { MyImage, Blurhash } from './components';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -29,15 +32,56 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
  * ```
  */
 export const Image = React.forwardRef<HTMLImageElement, Props>(
-  ({ src, alt, onFirstVisible, ...rest }, ref) => {
+  ({ src, alt, onFirstVisible, onLoad, ...rest }, ref) => {
+    const [hash, setHash] = useState<undefined | string>(undefined);
+    const [imgSrc, setImageSrc] = useState<undefined | string>(undefined);
+    const [isLoaded, setIsLoaded] = useState<boolean>(false);
+    const { http } = useFilesContext();
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
+
+    useEffect(() => {
+      if (!isVisible || imgSrc) return;
+      let imgUrl: undefined | string;
+      (async () => {
+        try {
+          const { response } = await http.get(src, { asResponse: true });
+          setHash(response?.headers.get(CUSTOM_BLURHASH_HEADER) ?? undefined);
+          const blob = await response!.blob();
+          imgUrl = URL.createObjectURL(blob);
+          setImageSrc(imgUrl);
+        } catch (e) {
+          setImageSrc(src);
+        }
+      })();
+      return () => {
+        if (imgUrl) URL.revokeObjectURL(imgUrl);
+      };
+    }, [src, http, isVisible, imgSrc]);
+
     return (
-      <div>
+      <div
+        css={css`
+          display: inline-block;
+          position: relative;
+        `}
+        style={{
+          width: rest.width ?? rest.style?.width,
+          maxWidth: rest.style?.maxWidth,
+          height: rest.height ?? rest.style?.height,
+          maxHeight: rest.style?.maxHeight,
+        }}
+      >
+        <Blurhash hash={hash} />
         <MyImage
           observerRef={observerRef}
           ref={ref}
-          src={isVisible ? src : undefined}
+          src={imgSrc}
           alt={alt}
+          isLoaded={isLoaded}
+          onLoad={(ev) => {
+            setIsLoaded(true);
+            onLoad?.(ev);
+          }}
           {...rest}
         />
       </div>

@@ -6,3 +6,4 @@
  */
 
 export { MyImage } from './my_img';
+export { Blurhash } from './blurhash';
