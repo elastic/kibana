@@ -96,4 +96,5 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.PROJECT_ID]: getCommonNormalizer(ConfigKey.PROJECT_ID),
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCommonNormalizer(ConfigKey.CUSTOM_HEARTBEAT_ID),
   [ConfigKey.ORIGINAL_SPACE]: getCommonNormalizer(ConfigKey.ORIGINAL_SPACE),
+  [ConfigKey.ID]: getCommonNormalizer(ConfigKey.ID),
 };
