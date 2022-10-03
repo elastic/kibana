@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DiscoveredPlugin, PluginName, UiPlugins } from '../plugins';
+import type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { filterUiPlugins } from './filter_ui_plugins';
 
 function createMockPlugin(params: Partial<DiscoveredPlugin>) {
