@@ -35,6 +35,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
         query,
         ignore_unavailable: ignoreUnavailable,
         refresh: true,
+        conflicts: 'proceed',
       });
     },
   });
