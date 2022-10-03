@@ -1,7 +1,7 @@
 title: Case response properties for user comments
 type: object
 required:
-  - type 
+  - type
 properties:
   comment:
     type: string

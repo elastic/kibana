@@ -1,5 +1,27 @@
 title: Case response properties
 type: object
+required:
+  - closed_at
+  - closed_by
+  - comments
+  - connector
+  - created_at
+  - created_by
+  - description
+  - duration
+  - external_service
+  - id
+  - owner
+  - settings
+  - severity
+  - status
+  - tags
+  - title
+  - totalAlerts
+  - totalComment
+  - updated_at
+  - updated_by
+  - version
 properties: 
   closed_at:
     type: string

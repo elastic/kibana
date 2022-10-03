@@ -13,3 +13,7 @@ properties:
   profile_uid:
     type: string
     example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+required:
+  - email
+  - full_name
+  - username

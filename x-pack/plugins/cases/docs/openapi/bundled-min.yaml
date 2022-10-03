@@ -168,6 +168,10 @@ components:
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+      required:
+        - email
+        - full_name
+        - username
     owners:
       type: string
       description: |
@@ -288,6 +292,10 @@ components:
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+      required:
+        - email
+        - full_name
+        - username
     case_response_pushed_by_properties:
       title: Case response properties for pushed_by
       type: object
@@ -305,6 +313,10 @@ components:
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+      required:
+        - email
+        - full_name
+        - username
     case_response_updated_by_properties:
       title: Case response properties for updated_by
       type: object
@@ -322,6 +334,10 @@ components:
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+      required:
+        - email
+        - full_name
+        - username
     user_comment_response_properties:
       title: Case response properties for user comments
       type: object
@@ -431,6 +447,7 @@ components:
       example: .none
     external_service:
       type: object
+      nullable: true
       properties:
         connector_id:
           type: string
@@ -488,6 +505,28 @@ components:
     case_response_properties:
       title: Case response properties
       type: object
+      required:
+        - closed_at
+        - closed_by
+        - comments
+        - connector
+        - created_at
+        - created_by
+        - description
+        - duration
+        - external_service
+        - id
+        - owner
+        - settings
+        - severity
+        - status
+        - tags
+        - title
+        - totalAlerts
+        - totalComment
+        - updated_at
+        - updated_by
+        - version
       properties:
         closed_at:
           type: string
@@ -576,7 +615,7 @@ components:
     alert_identifiers:
       title: Alert identifiers
       description: |
-        The alert identifier. It is required only when `type` is `alert`. If it is an array, `index` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        The alert identifier. It is required only when `type` is `alert`. If it is an array, `index` must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       oneOf:
         - type: string
         - type: array
@@ -587,7 +626,7 @@ components:
     alert_indices:
       title: Alert indices
       description: |
-        The alert index. It is required only when `type` is `alert`. If it is an array, `alertId` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        The alert index. It is required only when `type` is `alert`. If it is an array, `alertId` must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       oneOf:
         - type: string
         - type: array
@@ -760,6 +799,8 @@ components:
             created_at: '2022-06-02T00:49:47.716Z'
             created_by:
               username: elastic
+              email: null
+              full_name: null
         totalAlerts: 0
         id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
         version: WzIzMzgsMV0=
@@ -771,18 +812,27 @@ components:
         settings:
           syncAlerts: false
         owner: cases
+        duration: null
         severity: low
+        closed_at: null
+        closed_by: null
         created_at: '2022-03-24T00:37:03.906Z'
         created_by:
           username: elastic
+          full_name: null
+          email: null
         status: open
         updated_at: '2022-06-03T00:49:47.716Z'
         updated_by:
           username: elastic
+          email: null
+          full_name: null
         connector:
           id: none
           name: none
           type: .none
+          fields: null
+        external_service: null
     update_comment_request:
       summary: Updates a comment of a case.
       value:
@@ -803,9 +853,15 @@ components:
             created_at: '2022-03-24T00:37:10.832Z'
             created_by:
               username: elastic
+              full_name: null
+              email: null
+            pushed_at: null
+            pushed_by: null
             updated_at: '2022-03-24T01:27:06.210Z'
             updated_by:
               username: elastic
+              full_name: null
+              email: null
         totalAlerts: 0
         id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
         version: WzIwNjM2LDFd
@@ -817,18 +873,27 @@ components:
         settings:
           syncAlerts: false
         owner: cases
+        duration: null
         severity: low
+        closed_at: null
+        closed_by: null
         created_at: '2022-03-24T00:37:03.906Z'
         created_by:
           username: elastic
+          full_name: null
+          email: null
         status: open
         updated_at: '2022-03-24T01:27:06.210Z'
         updated_by:
           username: elastic
+          full_name: null
+          email: null
         connector:
           id: none
           name: none
           type: .none
+          fields: null
+        external_service: null
 security:
   - basicAuth: []
   - apiKeyAuth: []

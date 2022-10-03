@@ -82,6 +82,125 @@
           }
         ]
       },
+      "delete": {
+        "summary": "Deletes all comments and alerts from a case.",
+        "operationId": "deleteCaseComments",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Updates a comment or alert in a case.",
+        "operationId": "updateCaseComment",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/update_case_comment_request"
+              },
+              "examples": {
+                "updateCaseCommentRequest": {
+                  "$ref": "#/components/examples/update_comment_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/case_response_properties"
+                },
+                "examples": {
+                  "updateCaseCommentResponse": {
+                    "$ref": "#/components/examples/update_comment_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieves all the comments from a case.",
+        "operationId": "getAllCaseComments",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.\n",
+        "deprecated": true,
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/case_response_properties"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
       "servers": [
         {
           "url": "https://localhost:5601"
@@ -102,14 +221,6 @@
       }
     },
     "parameters": {
-      "kbn_xsrf": {
-        "schema": {
-          "type": "string"
-        },
-        "in": "header",
-        "name": "kbn-xsrf",
-        "required": true
-      },
       "case_id": {
         "in": "path",
         "name": "caseId",
@@ -129,141 +240,17 @@
           "type": "string",
           "example": "default"
         }
+      },
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "required": true
       }
     },
     "schemas": {
-      "owners": {
-        "type": "string",
-        "description": "The application that owns the cases: Stack Management, Observability, or Elastic Security.\n",
-        "enum": [
-          "cases",
-          "observability",
-          "securitySolution"
-        ],
-        "example": "cases"
-      },
-      "rule": {
-        "title": "Alerting rule",
-        "description": "The rule that is associated with the alert. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "type": "object",
-        "x-technical-preview": true,
-        "properties": {
-          "id": {
-            "description": "The rule identifier.",
-            "type": "string",
-            "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
-          },
-          "name": {
-            "description": "The rule name.",
-            "type": "string",
-            "example": "security_rule"
-          }
-        }
-      },
-      "add_alert_comment_request_properties": {
-        "title": "Add case comment request properties for alerts",
-        "required": [
-          "alertId",
-          "index",
-          "owner",
-          "rule",
-          "type"
-        ],
-        "description": "Defines properties for case comment requests when type is alert.",
-        "type": "object",
-        "properties": {
-          "alertId": {
-            "title": "Alert identifiers",
-            "description": "The alert identifier. It is required only when `type` is `alert`. If it is an array, `index` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            ],
-            "x-technical-preview": true,
-            "example": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
-          },
-          "index": {
-            "title": "Alert indices",
-            "description": "The alert index. It is required only when `type` is `alert`. If it is an array, `alertId` must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            ],
-            "x-technical-preview": true
-          },
-          "owner": {
-            "$ref": "#/components/schemas/owners"
-          },
-          "rule": {
-            "$ref": "#/components/schemas/rule"
-          },
-          "type": {
-            "description": "The type of comment.",
-            "type": "string",
-            "example": "alert",
-            "enum": [
-              "alert"
-            ]
-          }
-        }
-      },
-      "add_user_comment_request_properties": {
-        "title": "Add case comment request properties for user comments",
-        "description": "Defines properties for case comment requests when type is user.",
-        "type": "object",
-        "properties": {
-          "comment": {
-            "description": "The new comment. It is required only when `type` is `user`.",
-            "type": "string",
-            "example": "A new comment."
-          },
-          "owner": {
-            "$ref": "#/components/schemas/owners"
-          },
-          "type": {
-            "type": "string",
-            "description": "The type of comment.",
-            "example": "user",
-            "enum": [
-              "user"
-            ]
-          }
-        },
-        "required": [
-          "comment",
-          "owner",
-          "type"
-        ]
-      },
-      "add_case_comment_request": {
-        "title": "Add case comment request",
-        "description": "The add comment to case API request body varies depending on whether you are adding an alert or a comment.",
-        "discriminator": {
-          "propertyName": "type"
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/add_alert_comment_request_properties"
-          },
-          {
-            "$ref": "#/components/schemas/add_user_comment_request_properties"
-          }
-        ]
-      },
       "case_response_closed_by_properties": {
         "title": "Case response properties for closed_by",
         "type": "object",
@@ -285,7 +272,22 @@
             "type": "string",
             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
           }
-        }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
+      },
+      "owners": {
+        "type": "string",
+        "description": "The application that owns the cases: Stack Management, Observability, or Elastic Security.\n",
+        "enum": [
+          "cases",
+          "observability",
+          "securitySolution"
+        ],
+        "example": "cases"
       },
       "alert_comment_response_properties": {
         "title": "Add case comment response properties for alerts",
@@ -437,7 +439,12 @@
             "type": "string",
             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
           }
-        }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
       },
       "case_response_pushed_by_properties": {
         "title": "Case response properties for pushed_by",
@@ -460,7 +467,12 @@
             "type": "string",
             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
           }
-        }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
       },
       "case_response_updated_by_properties": {
         "title": "Case response properties for updated_by",
@@ -483,7 +495,12 @@
             "type": "string",
             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
           }
-        }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
       },
       "user_comment_response_properties": {
         "title": "Case response properties for user comments",
@@ -629,6 +646,7 @@
       },
       "external_service": {
         "type": "object",
+        "nullable": true,
         "properties": {
           "connector_id": {
             "type": "string"
@@ -707,6 +725,29 @@
       "case_response_properties": {
         "title": "Case response properties",
         "type": "object",
+        "required": [
+          "closed_at",
+          "closed_by",
+          "comments",
+          "connector",
+          "created_at",
+          "created_by",
+          "description",
+          "duration",
+          "external_service",
+          "id",
+          "owner",
+          "settings",
+          "severity",
+          "status",
+          "tags",
+          "title",
+          "totalAlerts",
+          "totalComment",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
         "properties": {
           "closed_at": {
             "type": "string",
@@ -827,6 +868,235 @@
             "example": "WzUzMiwxXQ=="
           }
         }
+      },
+      "alert_identifiers": {
+        "title": "Alert identifiers",
+        "description": "The alert identifier. It is required only when `type` is `alert`. If it is an array, `index` must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-technical-preview": true,
+        "example": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
+      },
+      "alert_indices": {
+        "title": "Alert indices",
+        "description": "The alert index. It is required only when `type` is `alert`. If it is an array, `alertId` must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-technical-preview": true
+      },
+      "rule": {
+        "title": "Alerting rule",
+        "description": "The rule that is associated with the alert. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "type": "object",
+        "x-technical-preview": true,
+        "properties": {
+          "id": {
+            "description": "The rule identifier.",
+            "type": "string",
+            "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
+          },
+          "name": {
+            "description": "The rule name.",
+            "type": "string",
+            "example": "security_rule"
+          }
+        }
+      },
+      "add_alert_comment_request_properties": {
+        "title": "Add case comment request properties for alerts",
+        "required": [
+          "alertId",
+          "index",
+          "owner",
+          "rule",
+          "type"
+        ],
+        "description": "Defines properties for case comment requests when type is alert.",
+        "type": "object",
+        "properties": {
+          "alertId": {
+            "$ref": "#/components/schemas/alert_identifiers"
+          },
+          "index": {
+            "$ref": "#/components/schemas/alert_indices"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/rule"
+          },
+          "type": {
+            "description": "The type of comment.",
+            "type": "string",
+            "example": "alert",
+            "enum": [
+              "alert"
+            ]
+          }
+        }
+      },
+      "add_user_comment_request_properties": {
+        "title": "Add case comment request properties for user comments",
+        "description": "Defines properties for case comment requests when type is user.",
+        "type": "object",
+        "properties": {
+          "comment": {
+            "description": "The new comment. It is required only when `type` is `user`.",
+            "type": "string",
+            "example": "A new comment."
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of comment.",
+            "example": "user",
+            "enum": [
+              "user"
+            ]
+          }
+        },
+        "required": [
+          "comment",
+          "owner",
+          "type"
+        ]
+      },
+      "add_case_comment_request": {
+        "title": "Add case comment request",
+        "description": "The add comment to case API request body varies depending on whether you are adding an alert or a comment.",
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/add_alert_comment_request_properties"
+          },
+          {
+            "$ref": "#/components/schemas/add_user_comment_request_properties"
+          }
+        ]
+      },
+      "update_alert_comment_request_properties": {
+        "title": "Update case comment request properties for alerts",
+        "description": "Defines properties for case comment requests when type is alert.",
+        "required": [
+          "alertId",
+          "id",
+          "index",
+          "owner",
+          "rule",
+          "type",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "alertId": {
+            "$ref": "#/components/schemas/alert_identifiers"
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the comment. To retrieve comment IDs, use the get comments API.\n",
+            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+          },
+          "index": {
+            "$ref": "#/components/schemas/alert_indices"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/rule"
+          },
+          "type": {
+            "description": "The type of comment.",
+            "type": "string",
+            "enum": [
+              "alert"
+            ],
+            "example": "alert"
+          },
+          "version": {
+            "description": "The current comment version. To retrieve version values, use the get comments API.\n",
+            "type": "string",
+            "example": "Wzk1LDFd"
+          }
+        }
+      },
+      "update_user_comment_request_properties": {
+        "title": "Update case comment request properties for user comments",
+        "description": "Defines properties for case comment requests when type is user.",
+        "type": "object",
+        "properties": {
+          "comment": {
+            "description": "The new comment. It is required only when `type` is `user`.",
+            "type": "string",
+            "example": "A new comment."
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the comment. To retrieve comment IDs, use the get comments API.\n",
+            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of comment.",
+            "enum": [
+              "user"
+            ],
+            "example": "user"
+          },
+          "version": {
+            "description": "The current comment version. To retrieve version values, use the get comments API.\n",
+            "type": "string",
+            "example": "Wzk1LDFd"
+          }
+        },
+        "required": [
+          "comment",
+          "id",
+          "owner",
+          "type",
+          "version"
+        ]
+      },
+      "update_case_comment_request": {
+        "title": "Update case comment request",
+        "description": "The update case comment API request body varies depending on whether you are updating an alert or a comment.",
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/update_alert_comment_request_properties"
+          },
+          {
+            "$ref": "#/components/schemas/update_user_comment_request_properties"
+          }
+        ]
       }
     },
     "examples": {
@@ -850,7 +1120,9 @@
               "comment": "A new comment.",
               "created_at": "2022-06-02T00:49:47.716Z",
               "created_by": {
-                "username": "elastic"
+                "username": "elastic",
+                "email": null,
+                "full_name": null
               }
             }
           ],
@@ -867,21 +1139,105 @@
             "syncAlerts": false
           },
           "owner": "cases",
+          "duration": null,
           "severity": "low",
+          "closed_at": null,
+          "closed_by": null,
           "created_at": "2022-03-24T00:37:03.906Z",
           "created_by": {
-            "username": "elastic"
+            "username": "elastic",
+            "full_name": null,
+            "email": null
           },
           "status": "open",
           "updated_at": "2022-06-03T00:49:47.716Z",
           "updated_by": {
-            "username": "elastic"
+            "username": "elastic",
+            "email": null,
+            "full_name": null
           },
           "connector": {
             "id": "none",
             "name": "none",
-            "type": ".none"
-          }
+            "type": ".none",
+            "fields": null
+          },
+          "external_service": null
+        }
+      },
+      "update_comment_request": {
+        "summary": "Updates a comment of a case.",
+        "value": {
+          "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
+          "version": "Wzk1LDFd",
+          "type": "user",
+          "comment": "An updated comment.",
+          "owner": "cases"
+        }
+      },
+      "update_comment_response": {
+        "summary": "The add comment to case API returns a JSON object that contains details about the case and its comments.",
+        "value": {
+          "comments": [
+            {
+              "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
+              "version": "WzIwNjM3LDFd",
+              "comment": "An updated comment.",
+              "type": "user",
+              "owner": "cases",
+              "created_at": "2022-03-24T00:37:10.832Z",
+              "created_by": {
+                "username": "elastic",
+                "full_name": null,
+                "email": null
+              },
+              "pushed_at": null,
+              "pushed_by": null,
+              "updated_at": "2022-03-24T01:27:06.210Z",
+              "updated_by": {
+                "username": "elastic",
+                "full_name": null,
+                "email": null
+              }
+            }
+          ],
+          "totalAlerts": 0,
+          "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
+          "version": "WzIwNjM2LDFd",
+          "totalComment": 1,
+          "title": "Case title 1",
+          "tags": [
+            "tag 1"
+          ],
+          "description": "A case description.",
+          "settings": {
+            "syncAlerts": false
+          },
+          "owner": "cases",
+          "duration": null,
+          "severity": "low",
+          "closed_at": null,
+          "closed_by": null,
+          "created_at": "2022-03-24T00:37:03.906Z",
+          "created_by": {
+            "username": "elastic",
+            "full_name": null,
+            "email": null
+          },
+          "status": "open",
+          "updated_at": "2022-03-24T01:27:06.210Z",
+          "updated_by": {
+            "username": "elastic",
+            "full_name": null,
+            "email": null
+          },
+          "connector": {
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+            "fields": null
+          },
+          "external_service": null
         }
       }
     }
