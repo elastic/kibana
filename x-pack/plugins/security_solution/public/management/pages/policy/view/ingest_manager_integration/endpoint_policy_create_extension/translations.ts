@@ -17,7 +17,7 @@ export const NGAV = i18n.translate(
 export const NGAV_NOTE = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionNGAVNote',
   {
-    defaultMessage: 'Note: advanced protections require a platinum license level',
+    defaultMessage: 'Note: advanced protections require a platinum license level.',
   }
 );
 
@@ -38,7 +38,7 @@ export const EDR_NOTE = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionEDRNote',
   {
     defaultMessage:
-      'Note: advanced protections require a platinum license level, or enterprise license for full response capability',
+      'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.',
   }
 );
 
