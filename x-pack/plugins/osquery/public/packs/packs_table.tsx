@@ -128,9 +128,9 @@ const PacksTableComponent = () => {
   const renderPlayAction = useCallback(
     (item, enabled) => {
       const playText = i18n.translate('xpack.osquery.packs.table.runActionAriaLabel', {
-        defaultMessage: 'Run {savedQueryName}',
+        defaultMessage: 'Run {packName}',
         values: {
-          savedQueryName: item.attributes.name,
+          packName: item.attributes.name,
         },
       });
 
