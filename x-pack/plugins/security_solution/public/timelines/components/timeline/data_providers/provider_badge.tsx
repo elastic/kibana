@@ -16,7 +16,7 @@ import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 
 import type { QueryOperator } from './data_provider';
-import { DataProviderType, EXISTS_OPERATOR } from './data_provider';
+import { DataProviderType, EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
 
 import * as i18n from './translations';
 
@@ -212,7 +212,10 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             {content}
           </ProviderBadgeStyled>
 
-          {timelineType === TimelineType.template && (
+          {/* Add a UI feature to let users know the is one of operator doesnt work with timeline templates: 
+          https://github.com/elastic/kibana/issues/142437 */}
+
+          {timelineType === TimelineType.template && operator !== IS_ONE_OF_OPERATOR && (
             <TemplateFieldBadge toggleType={toggleType} type={type} />
           )}
         </>
