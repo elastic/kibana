@@ -143,21 +143,53 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
   },
 
   /**
-   * The "IP" query / parser should be used when the options list is built on a field of type IP.
-   * The query is identical to that of a "boolean" field, but the parsing is different.
+   * the "IP" query / parser should be used when the options list is built on a field of type IP.
    */
   ip: {
-    buildAggregation: ({ fieldName }: OptionsListRequestBody) => ({
-      terms: {
-        field: fieldName,
-        execution_hint: 'map',
-        shard_size: 10,
-      },
-    }),
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.buckets')?.map((suggestion: { key: string }) => {
-        return suggestion.key;
-      }),
+    buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
+      const findSuggestions = {
+        terms: {
+          field: fieldName,
+          execution_hint: 'map',
+          shard_size: 10,
+        },
+      };
+
+      if (!searchString || !Boolean(searchString)) {
+        return {
+          ...findSuggestions,
+        };
+      }
+
+      return {
+        filter: {
+          term: { [fieldName]: searchString },
+        },
+        // field: fieldName,
+        // ranges: [
+        //   { key: 'searchResult_max', to: searchString },
+        //   { key: 'searchResult_min', from: searchString },
+        // ],
+
+        aggs: {
+          filteredResults: { ...findSuggestions },
+        },
+      };
+    },
+    parse: (rawEsResult) => {
+      const buckets: [{ key: string; filteredResults?: { buckets: [{ key: string }] } }] = get(
+        rawEsResult,
+        'aggregations.suggestions.buckets'
+      );
+      if (!Boolean(buckets)) {
+        // this means that the ip is being filtered by a search string
+        return get(rawEsResult, 'aggregations.suggestions.filteredResults.buckets')?.map(
+          (suggestion: { key: string }) => suggestion.key
+        );
+      }
+      // this means that no search string has been provided
+      return buckets.map((suggestion) => suggestion.key);
+    },
   },
 
   /**
