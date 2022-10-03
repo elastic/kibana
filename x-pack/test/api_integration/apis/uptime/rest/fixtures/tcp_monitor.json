@@ -32,5 +32,6 @@
   "name": "Test HTTP Monitor 04",
   "namespace": "testnamespace",
   "origin": "ui",
-  "form_monitor_type": "tcp"
+  "form_monitor_type": "tcp",
+  "id": ""
 }
