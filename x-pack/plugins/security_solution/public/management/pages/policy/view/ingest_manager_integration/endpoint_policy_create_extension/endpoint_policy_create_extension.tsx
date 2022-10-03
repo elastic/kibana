@@ -282,7 +282,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 <HelpTextWithPadding>
                   <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDRComplete"
-                    defaultMessage="Everything in EDR Essential, plus full telemetry"
+                    defaultMessage="Everything in Essential EDR, plus full telemetry"
                   />
                 </HelpTextWithPadding>
               }
