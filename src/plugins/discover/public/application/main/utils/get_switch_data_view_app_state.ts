@@ -15,7 +15,7 @@ import { getSortArray } from '../../../utils/sorting';
  * data view, returns a new state object
  */
 export function getDataViewAppState(
-  currentDataView: DataView,
+  currentDataView: DataView | undefined,
   nextDataView: DataView,
   currentColumns: string[],
   currentSort: SortOrder[],
@@ -26,7 +26,7 @@ export function getDataViewAppState(
   const nextColumns = modifyColumns
     ? currentColumns.filter(
         (column) =>
-          nextDataView.fields.getByName(column) || !currentDataView.fields.getByName(column)
+          nextDataView.fields.getByName(column) || !currentDataView?.fields.getByName(column)
       )
     : currentColumns;
 
@@ -40,7 +40,7 @@ export function getDataViewAppState(
   // prepend this field in the table, so in legacy grid you would need to add this column to
   // remove sorting
   let nextSort = getSortArray(currentSort, nextDataView).filter((value) => {
-    return nextDataView.timeFieldName || value[0] !== currentDataView.timeFieldName;
+    return nextDataView.timeFieldName || value[0] !== currentDataView?.timeFieldName;
   });
 
   if (nextDataView.isTimeBased() && !nextSort.length) {
@@ -48,7 +48,7 @@ export function getDataViewAppState(
     nextSort = [[nextDataView.timeFieldName, sortDirection]];
   } else if (
     nextDataView.isTimeBased() &&
-    currentDataView.isTimeBased() &&
+    currentDataView?.isTimeBased() &&
     nextDataView.timeFieldName !== currentDataView.timeFieldName
   ) {
     // switch time fields

@@ -12,7 +12,6 @@ import { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll } from './fetch_all';
 import {
@@ -30,6 +29,7 @@ import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { dataViewMock } from '../../../__mocks__/data_view';
+import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),

@@ -22,17 +22,18 @@ import {
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
-import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { AppState, DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
+import {useAppStateSelector} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -47,10 +48,6 @@ export interface DiscoverSidebarResponsiveProps {
    * hits fetched from ES, displayed in the doc table
    */
   documents$: DataDocuments$;
-  /**
-   * List of available data views
-   */
-  dataViewList: DataViewListItem[];
   /**
    * Has been toggled closed
    */
@@ -72,10 +69,6 @@ export interface DiscoverSidebarResponsiveProps {
    * Currently selected data view
    */
   selectedDataView?: DataView;
-  /**
-   * Discover App state
-   */
-  state: AppState;
   /**
    * Metric tracking function
    * @param metricType
@@ -112,10 +105,9 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const isPlainRecord = useMemo(
-    () => getRawRecordType(props.state.query) === RecordRawType.PLAIN,
-    [props.state.query]
-  );
+  const query = useAppStateSelector((state) => state.query);
+
+  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);

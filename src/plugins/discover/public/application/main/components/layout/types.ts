@@ -7,7 +7,6 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataViewListItem } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataTableRecord } from '../../../../types';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -15,7 +14,6 @@ import { SavedSearchData } from '../../hooks/use_saved_search';
 
 export interface DiscoverLayoutProps {
   dataView: DataView;
-  dataViewList: DataViewListItem[];
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
   expandedDoc?: DataTableRecord;

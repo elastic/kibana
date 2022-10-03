@@ -7,7 +7,8 @@
  */
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
-import { AppState, AppStateUrl } from '../services/discover_state';
+import { AppStateUrl } from '../services/discover_state';
+import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 /**
  * Takes care of the given url state, migrates legacy props and cleans up empty props

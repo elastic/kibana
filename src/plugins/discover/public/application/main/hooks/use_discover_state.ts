@@ -5,46 +5,39 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useMemo, useState } from 'react';
-import { History } from 'history';
-import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
+import { useEffect, useMemo } from 'react';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { buildStateSubscribe } from './utiles/build_state_subscribe';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
-import { getDiscoverStateContainer } from '../services/discover_state';
+import { DiscoverStateContainer } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
 import { useSearchSession } from './use_search_session';
 import { DataTableRecord } from '../../../types';
 import { FetchStatus } from '../../types';
 import { useAdHocDataViews } from './use_adhoc_data_views';
+import {
+  InternalState,
+  useInternalStateSelector,
+} from '../services/discover_internal_state_container';
 
 export function useDiscoverState({
   services,
-  history,
-  savedSearch: rootSavedSearch,
   setExpandedDoc,
-  dataViewList,
+  stateContainer,
 }: {
   services: DiscoverServices;
-  savedSearch: SavedSearch;
-  history: History;
   setExpandedDoc: (doc?: DataTableRecord) => void;
-  dataViewList: DataViewListItem[];
+  stateContainer: DiscoverStateContainer;
 }) {
   const { dataViews } = services;
-
-  const [savedSearch, setSavedSearch] = useState(rootSavedSearch);
-  const dataView = useMemo(() => savedSearch.searchSource.getField('index')!, [savedSearch]);
-
-  const stateContainer = useMemo(
-    () =>
-      getDiscoverStateContainer({
-        history,
-        savedSearch: rootSavedSearch,
-        services,
-      }),
-    [history, rootSavedSearch, services]
+  const dataViewList = useInternalStateSelector((state: InternalState) => state.dataViews);
+  const savedSearch = useObservable<SavedSearch>(
+    stateContainer.savedSearchContainer.savedSearch$,
+    stateContainer.savedSearchContainer.savedSearch$.getValue()
   );
+  const dataView = useMemo(() => savedSearch.searchSource.getField('index')!, [savedSearch]);
 
   /**
    * Search session logic
@@ -62,7 +55,6 @@ export function useDiscoverState({
     dataView,
     dataViews,
     stateContainer,
-    savedSearch,
   });
 
   /**
@@ -106,7 +98,7 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const unsubscribe = stateContainer.appStateContainer.subscribe(
-      buildStateSubscribe({ stateContainer, savedSearch, dataView, services, setSavedSearch })
+      buildStateSubscribe({ stateContainer, dataView, services })
     );
     return () => unsubscribe();
   }, [dataView, refetch$, savedSearch, services, stateContainer]);

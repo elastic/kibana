@@ -7,7 +7,8 @@
  */
 import { useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
-import { AppState, DiscoverStateContainer } from '../services/discover_state';
+import { AppState } from '../services/discover_app_state_container';
+import { DiscoverStateContainer } from '../services/discover_state';
 
 export function useStateContainer(stateContainer: DiscoverStateContainer, filterProps?: string[]) {
   const [state, setState] = useState<AppState>(stateContainer.appStateContainer.getState());

@@ -15,7 +15,6 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
@@ -46,22 +45,12 @@ async function saveDataSource({
         }),
         'data-test-subj': 'saveSearchSuccess',
       });
-      debugger;
       if (navigateOrReloadSavedSearch) {
         if (id !== prevSavedSearchId) {
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
           stateContainer.actions.resetSavedSearch(savedSearch.id || '');
-          services.chrome.docTitle.change(savedSearch.title!);
-
-          setBreadcrumbsTitle(
-            {
-              ...savedSearch,
-              id: prevSavedSearchId ?? id,
-            },
-            services.chrome
-          );
         }
       }
     }
@@ -146,7 +135,6 @@ export async function onSaveSearch({
       !dataView.isPersisted() && newCopyOnSave ? await updateAdHocDataViewId(dataView) : dataView;
 
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
-    debugger;
     const response = await saveDataSource({
       dataView: updatedDataView,
       saveOptions,
@@ -156,7 +144,6 @@ export async function onSaveSearch({
       stateContainer,
       navigateOrReloadSavedSearch,
     });
-    debugger;
     // If the save wasn't successful, put the original values back.
     if (!response.id || response.error) {
       savedSearch.title = currentTitle;
@@ -166,8 +153,6 @@ export async function onSaveSearch({
       if (savedObjectsTagging) {
         savedSearch.tags = currentTags;
       }
-    } else {
-      stateContainer.resetInitialAppState();
     }
     onSaveCb?.();
     return response;

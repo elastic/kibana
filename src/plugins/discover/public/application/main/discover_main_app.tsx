@@ -8,12 +8,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './hooks/use_discover_state';
-import { Provider } from './services/discover_state';
+import { DiscoverStateContainer } from './services/discover_state';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
@@ -22,18 +22,15 @@ import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
-  /**
-   * List of available data views
-   */
-  dataViewList: DataViewListItem[];
-  /**
-   * Current instance of SavedSearch
-   */
-  savedSearch: SavedSearch;
+  stateContainer: DiscoverStateContainer;
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { savedSearch, dataViewList } = props;
+  const { stateContainer } = props;
+  const savedSearch = useObservable<SavedSearch>(
+    stateContainer.savedSearchContainer.savedSearchPersisted$,
+    stateContainer.savedSearchContainer.savedSearchPersisted$.getValue()
+  );
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
   const usedHistory = useHistory();
@@ -52,16 +49,13 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     data$,
     dataView,
     inspectorAdapters,
-    stateContainer,
     persistDataView,
     updateAdHocDataViewId,
     adHocDataViewList,
   } = useDiscoverState({
     services,
-    history: usedHistory,
-    savedSearch,
     setExpandedDoc,
-    dataViewList,
+    stateContainer,
   });
 
   /**
@@ -70,16 +64,16 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useUrl({ history: usedHistory, stateContainer });
 
   /**
-   * SavedSearch depended initializing
+   * SavedSearch dependend initializing
    */
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-    setBreadcrumbsTitle(savedSearch, chrome);
+    setBreadcrumbsTitle(savedSearch.title, chrome);
     return () => {
       data.search.session.clear();
     };
-  }, [savedSearch, chrome, data]);
+  }, [savedSearch.id, savedSearch.title, chrome, data]);
 
   /**
    * Initializing syncing with state and help menu
@@ -91,20 +85,17 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <Provider value={stateContainer.appStateContainer}>
-      <DiscoverLayoutMemoized
-        dataView={dataView}
-        dataViewList={dataViewList}
-        inspectorAdapters={inspectorAdapters}
-        expandedDoc={expandedDoc}
-        setExpandedDoc={setExpandedDoc}
-        navigateTo={navigateTo}
-        savedSearchData$={data$}
-        stateContainer={stateContainer}
-        persistDataView={persistDataView}
-        updateAdHocDataViewId={updateAdHocDataViewId}
-        adHocDataViewList={adHocDataViewList}
-      />
-    </Provider>
+    <DiscoverLayoutMemoized
+      dataView={dataView}
+      inspectorAdapters={inspectorAdapters}
+      expandedDoc={expandedDoc}
+      setExpandedDoc={setExpandedDoc}
+      navigateTo={navigateTo}
+      savedSearchData$={data$}
+      stateContainer={stateContainer}
+      persistDataView={persistDataView}
+      updateAdHocDataViewId={updateAdHocDataViewId}
+      adHocDataViewList={adHocDataViewList}
+    />
   );
 }

@@ -22,6 +22,7 @@ import {
   useResizeObserver,
   EuiButton,
 } from '@elastic/eui';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,6 +41,8 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import type { DataTableRecord } from '../../../../types';
+import { triggerVisualizeActionsTextBasedLanguages } from './lib/visualize_trigger_utils';
+import {useAppStateSelector} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -117,10 +120,11 @@ export function DiscoverSidebarComponent({
   viewMode,
   createNewDataView,
   showDataViewPicker,
-  state,
   stateContainer,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
+  const query = useAppStateSelector((state) => state.query);
+
   const [fields, setFields] = useState<DataViewField[] | null>(null);
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
@@ -311,6 +315,11 @@ export function DiscoverSidebarComponent({
 
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
 
+  const visualizeAggregateQuery = useCallback(() => {
+    const aggregateQuery = query && isOfAggregateQueryType(query) ? query : undefined;
+    triggerVisualizeActionsTextBasedLanguages(columns, selectedDataView, aggregateQuery);
+  }, [columns, selectedDataView, query]);
+
   if (!selectedDataView) {
     return null;
   }
@@ -415,7 +424,6 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
-                                state={state}
                                 contextualFields={columns}
                               />
                             </li>
@@ -477,7 +485,6 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
-                                state={state}
                                 contextualFields={columns}
                               />
                             </li>
@@ -508,7 +515,6 @@ export function DiscoverSidebarComponent({
                             onEditField={editField}
                             onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
-                            state={state}
                             contextualFields={columns}
                           />
                         </li>
@@ -530,6 +536,20 @@ export function DiscoverSidebarComponent({
             >
               {i18n.translate('discover.fieldChooser.addField.label', {
                 defaultMessage: 'Add a field',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        {isPlainRecord && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="lensApp"
+              data-test-subj="textBased-visualize"
+              onClick={visualizeAggregateQuery}
+              size="s"
+            >
+              {i18n.translate('discover.textBasedLanguages.visualize.label', {
+                defaultMessage: 'Visualize in Lens',
               })}
             </EuiButton>
           </EuiFlexItem>

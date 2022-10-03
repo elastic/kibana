@@ -115,9 +115,10 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     config: uiSettings,
     dataView,
     dataViews,
-    state: appState,
     useNewFieldsApi,
     setAppState,
+    sort: appState.sort,
+    columns: appState.columns,
   });
   const rows = useMemo(
     () => [

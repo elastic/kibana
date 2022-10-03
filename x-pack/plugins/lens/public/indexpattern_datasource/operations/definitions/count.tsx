@@ -26,6 +26,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -206,6 +207,14 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       }).toAst();
     }
   },
+  getGroupByKey: (agg) => {
+    return getGroupByKey(
+      agg,
+      ['aggCount', 'aggValueCount'],
+      [{ name: 'field' }, { name: 'emptyAsNull', transformer: (val) => String(Boolean(val)) }]
+    );
+  },
+
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
@@ -239,5 +248,10 @@ To calculate the number of documents that match a specific filter, use \`count(k
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.count.documentation.quick', {
+    defaultMessage: `
+The total number of documents. When you provide a field, the total number of field values is counted. Use the count function for fields that have multiple values in a single document.
+      `,
+  }),
   shiftable: true,
 };

@@ -14,8 +14,8 @@ import { withDiscoverServices } from '../../../../../__mocks__/__storybook_mocks
 import { getDocumentsLayoutProps, getPlainRecordLayoutProps } from './get_layout_props';
 import { DiscoverLayout } from '../discover_layout';
 import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
-import { AppState } from '../../../services/discover_state';
 import { DiscoverLayoutProps } from '../types';
+import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 setHeaderActionMenuMounter(() => void 0);
 

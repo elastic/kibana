@@ -21,7 +21,8 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import { AppState, isEqualFilters } from '../application/main/services/discover_state';
+import { isEqualFilters } from '../application/main/services/discover_state';
+import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 /**
  * Preparing data to share the current state as link or CSV/Report

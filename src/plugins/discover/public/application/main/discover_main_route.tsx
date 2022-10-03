@@ -5,31 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo, useCallback } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import { DataViewListItem } from '@kbn/data-plugin/public';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
-  AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
+  AnalyticsNoDataPageKibanaProvider,
 } from '@kbn/shared-ux-page-analytics-no-data';
-import {
-  SavedSearch,
-  getSavedSearch,
-  getSavedSearchFullPathUrl,
-} from '@kbn/saved-search-plugin/public';
-import { getDiscoverStateContainer } from './services/discover_state';
-import { loadDataView, resolveDataView } from './utils/resolve_data_view';
+import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
+import { loadSavedSearch } from './utils/load_saved_search';
+import { useSingleton } from './hooks/use_singleton';
+import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
-import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
 import { HistoryLocationState } from '../../locator';
+import { InternalStateProvider } from './services/discover_internal_state_container';
+import { AppStateProvider } from './services/discover_app_state_container';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -49,22 +45,25 @@ export function DiscoverMainRoute(props: Props) {
   const {
     core,
     chrome,
-    uiSettings: config,
     data,
     toastNotifications,
     http: { basePath },
     dataViewEditor,
   } = services;
+  const stateContainer = useSingleton<DiscoverStateContainer>(() =>
+    getDiscoverStateContainer({
+      history,
+      services,
+    })
+  );
   const [error, setError] = useState<Error>();
-  const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const dataView = savedSearch?.searchSource?.getField('index');
-  const [dataViewList, setDataViewList] = useState<DataViewListItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
   useEffect(() => {
-    setSavedSearch(undefined);
+    setLoading(true);
   }, [id]);
 
   useExecutionContext(core.executionContext, {
@@ -73,89 +72,44 @@ export function DiscoverMainRoute(props: Props) {
     id: id || 'new',
   });
 
-  const loadDefaultOrCurrentDataView = useCallback(
-    async (nextSavedSearch: SavedSearch) => {
-      try {
-        const hasUserDataViewValue = await data.dataViews.hasData
-          .hasUserDataView()
-          .catch(() => false);
-        const hasESDataValue =
-          isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
-        setHasUserDataView(hasUserDataViewValue);
-        setHasESData(hasESDataValue);
+  useEffect(() => {
+    const checkData = async () => {
+      const hasUserDataViewValue = await data.dataViews.hasData
+        .hasUserDataView()
+        .catch(() => false);
+      const hasESDataValue = isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
+      setHasUserDataView(hasUserDataViewValue);
+      setHasESData(hasESDataValue);
 
-        if (!hasUserDataViewValue) {
-          setShowNoDataPage(true);
-          return;
-        }
-
-        const defaultDataView = await data.dataViews.getDefaultDataView();
-
-        if (!defaultDataView) {
-          setShowNoDataPage(true);
-          return;
-        }
-        const { appStateContainer } = getDiscoverStateContainer({
-          history,
-          savedSearch: nextSavedSearch,
-          services,
-        });
-        const { index } = appStateContainer.getState();
-        const ip = await loadDataView(
-          data.dataViews,
-          config,
-          index,
-          props.historyLocationState?.dataViewSpec
-        );
-
-        const ipList = ip.list;
-        const dataViewData = resolveDataView(ip, nextSavedSearch.searchSource, toastNotifications);
-        await data.dataViews.refreshFields(dataViewData);
-        setDataViewList(ipList);
-
-        return dataViewData;
-      } catch (e) {
-        setError(e);
-      }
-    },
-    [
-      data.dataViews,
-      isDev,
-      history,
-      services,
-      config,
-      props.historyLocationState?.dataViewSpec,
-      toastNotifications,
-    ]
-  );
-
-  const loadSavedSearch = useCallback(async () => {
-    try {
-      const currentSavedSearch = await getSavedSearch(id, {
-        search: services.data.search,
-        savedObjectsClient: core.savedObjects.client,
-        spaces: services.spaces,
-        savedObjectsTagging: services.savedObjectsTagging,
-      });
-
-      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch);
-
-      if (!currentDataView) {
+      if (!hasUserDataViewValue) {
+        setShowNoDataPage(true);
         return;
       }
 
-      if (!currentSavedSearch.searchSource.getField('index')) {
-        currentSavedSearch.searchSource.setField('index', currentDataView);
+      const defaultDataView = await data.dataViews.getDefaultDataView();
+
+      if (!defaultDataView) {
+        setShowNoDataPage(true);
+        return;
       }
+    };
+    checkData();
+  }, [data.dataViews, isDev]);
 
-      restoreStateFromSavedSearch({
-        savedSearch: currentSavedSearch,
-        timefilter: services.timefilter,
+  const checkDataAndLoadSavedSearch = useCallback(async () => {
+    try {
+      const currentSavedSearch = await loadSavedSearch(id, {
+        services,
+        stateContainer,
+        setError,
+        dataViewSpec: props.historyLocationState?.dataViewSpec,
       });
+      if (currentSavedSearch) {
+        stateContainer.savedSearchContainer.set(currentSavedSearch);
+      }
+      setLoading(false);
 
-      setSavedSearch(currentSavedSearch);
-
-      if (currentSavedSearch.id) {
+      if (currentSavedSearch?.id) {
         chrome.recentlyAccessed.add(
           getSavedSearchFullPathUrl(currentSavedSearch.id),
           currentSavedSearch.title ?? '',
@@ -186,18 +140,15 @@ export function DiscoverMainRoute(props: Props) {
       }
     }
   }, [
-    id,
-    services.data,
-    services.spaces,
-    services.timefilter,
-    services.savedObjectsTagging,
-    core.savedObjects.client,
+    basePath,
+    chrome.recentlyAccessed,
     core.application.navigateToApp,
     core.theme,
-    loadDefaultOrCurrentDataView,
-    chrome.recentlyAccessed,
     history,
-    basePath,
+    id,
+    props.historyLocationState?.dataViewSpec,
+    services,
+    stateContainer,
     toastNotifications,
   ]);
 
@@ -206,23 +157,15 @@ export function DiscoverMainRoute(props: Props) {
       if (nextDataView) {
         setShowNoDataPage(false);
         setError(undefined);
-        await loadSavedSearch();
+        await checkDataAndLoadSavedSearch();
       }
     },
-    [loadSavedSearch]
+    [checkDataAndLoadSavedSearch]
   );
 
   useEffect(() => {
-    loadSavedSearch();
-  }, [loadSavedSearch]);
-
-  useEffect(() => {
-    chrome.setBreadcrumbs(
-      savedSearch && savedSearch.title
-        ? getSavedSearchBreadcrumbs(savedSearch.title)
-        : getRootBreadcrumbs()
-    );
-  }, [chrome, savedSearch]);
+    checkDataAndLoadSavedSearch();
+  }, [checkDataAndLoadSavedSearch]);
 
   if (showNoDataPage) {
     const analyticsServices = {
@@ -252,9 +195,15 @@ export function DiscoverMainRoute(props: Props) {
     return <DiscoverError error={error} />;
   }
 
-  if (!dataView || !savedSearch) {
+  if (loading) {
     return <LoadingIndicator type="elastic" />;
   }
 
-  return <DiscoverMainAppMemoized dataViewList={dataViewList} savedSearch={savedSearch} />;
+  return (
+    <AppStateProvider value={stateContainer.appStateContainer}>
+      <InternalStateProvider value={stateContainer.internalStateContainer}>
+        <DiscoverMainAppMemoized stateContainer={stateContainer} />
+      </InternalStateProvider>
+    </AppStateProvider>
+  );
 }

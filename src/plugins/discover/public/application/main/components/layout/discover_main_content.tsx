@@ -25,12 +25,13 @@ import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { SavedSearchData } from '../../hooks/use_saved_search';
-import { AppState, DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverChart } from '../chart';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { DiscoverPanels, DISCOVER_PANELS_MODE } from './discover_panels';
+import {useAppStateSelector} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
@@ -45,7 +46,6 @@ export interface DiscoverMainContentProps {
   setExpandedDoc: (doc?: DataTableRecord) => void;
   savedSearch: SavedSearch;
   savedSearchData$: SavedSearchData;
-  state: AppState;
   stateContainer: DiscoverStateContainer;
   isTimeBased: boolean;
   viewMode: VIEW_MODE;
@@ -63,7 +63,6 @@ export const DiscoverMainContent = ({
   setExpandedDoc,
   savedSearch,
   savedSearchData$,
-  state,
   stateContainer,
   isTimeBased,
   viewMode,
@@ -73,6 +72,8 @@ export const DiscoverMainContent = ({
   resizeRef,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric, storage } = useDiscoverServices();
+  const hideChart = useAppStateSelector((state) => state.hideChart);
+  const interval = useAppStateSelector((state) => state.interval);
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -99,7 +100,7 @@ export const DiscoverMainContent = ({
     []
   );
 
-  const hideChart = state.hideChart || !isTimeBased;
+  const actualHideChart = hideChart || !isTimeBased;
   const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || hideChart;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
@@ -151,8 +152,8 @@ export const DiscoverMainContent = ({
           savedSearchDataTotalHits$={savedSearchData$.totalHits$}
           stateContainer={stateContainer}
           dataView={dataView}
-          hideChart={state.hideChart}
-          interval={state.interval}
+          hideChart={actualHideChart}
+          interval={interval}
           isTimeBased={isTimeBased}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
           onResetChartHeight={
@@ -186,7 +187,6 @@ export const DiscoverMainContent = ({
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               savedSearch={savedSearch}
               setExpandedDoc={setExpandedDoc}
-              state={state}
               stateContainer={stateContainer}
               onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
             />
@@ -195,8 +195,6 @@ export const DiscoverMainContent = ({
               availableFields$={savedSearchData$.availableFields$}
               savedSearch={savedSearch}
               dataView={dataView}
-              query={state.query}
-              filters={state.filters}
               columns={columns}
               stateContainer={stateContainer}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}

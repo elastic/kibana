@@ -66,11 +66,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.selectIndexPattern('ecommerce');
       await filterBar.addFilter('category', 'is', `Men's Shoes`);
       await queryBar.setQuery('customer_gender:MALE');
-
-      await PageObjects.discover.saveSearch('test-unselect-saved-search');
-
       await queryBar.submitQuery();
-
+      await PageObjects.discover.saveSearch('test-unselect-saved-search');
       expect(await filterBar.hasFilter('category', `Men's Shoes`)).to.be(true);
       expect(await queryBar.getQueryString()).to.eql('customer_gender:MALE');
 

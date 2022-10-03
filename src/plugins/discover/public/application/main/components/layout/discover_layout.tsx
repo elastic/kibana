@@ -20,11 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { isOfQueryType } from '@kbn/es-query';
+import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useInspector } from '../../hooks/use_inspector';
-import { useStateContainer } from '../../hooks/use_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -45,6 +46,7 @@ import { hasActiveFilter } from './utils';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverMainContent } from './discover_main_content';
+import {useAppStateSelector} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 /**
  * Local storage key for sidebar persistence state
@@ -56,7 +58,6 @@ const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function DiscoverLayout({
   dataView,
-  dataViewList,
   inspectorAdapters,
   expandedDoc,
   navigateTo,
@@ -79,15 +80,25 @@ export function DiscoverLayout({
     spaces,
     inspector,
   } = useDiscoverServices();
-  const { main$ } = savedSearchData$;
-  const state = useStateContainer(stateContainer);
-  const savedSearch = stateContainer.savedSearchContainer.savedSearch$.getValue();
-  const dataState: DataMainMsg = useDataState(main$);
+  const [viewMode, query, savedQuery, filters, columns, sort] = useAppStateSelector((state) => [
+    state.viewMode,
+    state.query,
+    state.savedQuery,
+    state.filters,
+    state.columns,
+    state.sort,
+  ]);
 
-  const viewMode = useMemo(() => {
+  const savedSearch = useObservable<SavedSearch>(
+    stateContainer.savedSearchContainer.savedSearchPersisted$,
+    stateContainer.savedSearchContainer.savedSearchPersisted$.getValue()
+  );
+  const dataState: DataMainMsg = useDataState(savedSearchData$.main$);
+
+  const currentViewMode = useMemo(() => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
-    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
-  }, [uiSettings, state.viewMode]);
+    return viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
+  }, [uiSettings, viewMode]);
 
   const fetchCounter = useRef<number>(0);
 
@@ -109,10 +120,7 @@ export function DiscoverLayout({
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isPlainRecord = useMemo(
-    () => getRawRecordType(state.query) === RecordRawType.PLAIN,
-    [state.query]
-  );
+  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, isPlainRecord),
     [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
@@ -125,14 +133,19 @@ export function DiscoverLayout({
     savedSearch,
   });
 
-  const { columns, onAddColumn, onRemoveColumn } = useColumns({
+  const {
+    columns: currentColumns,
+    onAddColumn,
+    onRemoveColumn,
+  } = useColumns({
     capabilities,
     config: uiSettings,
     dataView,
     dataViews,
     setAppState: stateContainer.setAppState,
-    state,
     useNewFieldsApi,
+    columns,
+    sort,
   });
 
   const onAddFilter = useCallback(
@@ -210,9 +223,9 @@ export function DiscoverLayout({
       <TopNavMemoized
         dataView={dataView}
         onOpenInspector={onOpenInspector}
-        query={state.query}
+        query={query}
         navigateTo={navigateTo}
-        savedQuery={state.savedQuery}
+        savedQuery={savedQuery}
         stateContainer={stateContainer}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
@@ -230,19 +243,17 @@ export function DiscoverLayout({
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
           <EuiFlexItem grow={false}>
             <SidebarMemoized
-              columns={columns}
+              columns={currentColumns}
               documents$={savedSearchData$.documents$}
-              dataViewList={dataViewList}
               onAddField={onAddColumn}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
               selectedDataView={dataView}
-              state={state}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
-              viewMode={viewMode}
+              viewMode={currentViewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
               stateContainer={stateContainer}
@@ -284,8 +295,8 @@ export function DiscoverLayout({
                   isTimeBased={isTimeBased}
                   data={data}
                   error={dataState.error}
-                  hasQuery={isOfQueryType(state.query) && !!state.query?.query}
-                  hasFilters={hasActiveFilter(state.filters)}
+                  hasQuery={isOfQueryType(query) && !!query?.query}
+                  hasFilters={hasActiveFilter(filters)}
                   onDisableFilters={onDisableFilters}
                 />
               )}
@@ -304,13 +315,12 @@ export function DiscoverLayout({
                   setExpandedDoc={setExpandedDoc}
                   savedSearch={savedSearch}
                   savedSearchData$={savedSearchData$}
-                  state={state}
                   stateContainer={stateContainer}
                   isTimeBased={isTimeBased}
-                  viewMode={viewMode}
+                  viewMode={currentViewMode}
                   onAddFilter={onAddFilter as DocViewFilterFn}
                   onFieldEdited={onFieldEdited}
-                  columns={columns}
+                  columns={currentColumns}
                   resizeRef={resizeRef}
                 />
               )}

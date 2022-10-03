@@ -7,12 +7,25 @@
  */
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
+import { SavedSearchContainer } from '../../services/discover_saved_search_container';
 import { getUrlTracker } from '../../../../kibana_services';
-import { AppState, SavedSearchContainer } from '../../services/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 import { addLog } from '../../../../utils/addLog';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
+
+async function getPreviousDataView(index: string | undefined, services: DiscoverServices) {
+  const { dataViews } = services;
+  if (!index) {
+    return undefined;
+  }
+  try {
+    return dataViews.get(index);
+  } catch (e) {
+    return undefined;
+  }
+}
 
 export async function changeDataView(
   id: string,
@@ -31,9 +44,9 @@ export async function changeDataView(
   addLog('Change data view start', id);
   const { dataViews, uiSettings } = services;
   const prevAppState = appStateContainer.getState();
-  const prevDataView = await dataViews.get(prevAppState.index!);
   const nextDataView = await dataViews.get(id);
-  if (nextDataView && prevDataView) {
+  const prevDataView = await getPreviousDataView(prevAppState.index, services);
+  if (nextDataView) {
     const nextAppState = getDataViewAppState(
       prevDataView,
       nextDataView,

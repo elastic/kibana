@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
@@ -19,11 +18,8 @@ import {
 } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
-  createStateContainer,
-  createStateContainerReactHelpers,
   ReduxLikeStateContainer,
   StateContainer,
-  syncState,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -33,79 +29,28 @@ import {
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { TimeRange } from '@kbn/data-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import { getDataStateContainer } from './get_data_state_container';
-import { getSavedSearchContainer, SavedSearchContainer } from './get_saved_search_container';
+import {
+  DiscoverInternalState,
+  getInternalStateContainer,
+} from './discover_internal_state_container';
+import {
+  APP_STATE_URL_KEY,
+  AppState,
+  AppStateContainer,
+  getEnhancedAppStateContainer,
+} from './discover_app_state_container';
+import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
+import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_search_container';
 import { changeDataView } from '../hooks/utils/change_data_view';
-import { FetchStatus } from '../../types';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
-import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
-import { VIEW_MODE } from '../../../components/view_mode_toggle';
-import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { DataRefetch$, SavedSearchData } from '../hooks/use_saved_search';
-
-export interface AppState {
-  /**
-   * Columns displayed in the table
-   */
-  columns?: string[];
-  /**
-   * Array of applied filters
-   */
-  filters?: Filter[];
-  /**
-   * Data Grid related state
-   */
-  grid?: DiscoverGridSettings;
-  /**
-   * Hide chart
-   */
-  hideChart?: boolean;
-  /**
-   * id of the used data view
-   */
-  index?: string;
-  /**
-   * Used interval of the histogram
-   */
-  interval?: string;
-  /**
-   * Lucence or KQL query
-   */
-  query?: Query | AggregateQuery;
-  /**
-   * Array of the used sorting [[field,direction],...]
-   */
-  sort?: string[][];
-  /**
-   * id of the used saved query
-   */
-  savedQuery?: string;
-  /**
-   * Table view: Documents vs Field Statistics
-   */
-  viewMode?: VIEW_MODE;
-  /**
-   * Hide mini distribution/preview charts when in Field Statistics mode
-   */
-  hideAggregatedPreview?: boolean;
-  /**
-   * Document explorer row height option
-   */
-  rowHeight?: number;
-  /**
-   * Number of rows in the grid per page
-   */
-  rowsPerPage?: number;
-}
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
   /**
@@ -122,7 +67,7 @@ interface GetStateParams {
   /**
    * The current savedSearch
    */
-  savedSearch: SavedSearch;
+  savedSearch?: SavedSearch;
   /**
    * core ui settings service
    */
@@ -133,56 +78,35 @@ export interface DiscoverStateContainer {
   /**
    * App state, the _a part of the URL
    */
-  appStateContainer: ReduxLikeStateContainer<AppState>;
+  appStateContainer: AppStateContainer;
+
+  internalStateContainer: DiscoverInternalState;
 
   savedSearchContainer: SavedSearchContainer;
 
-  dataStateContainer: {
-    fetch: () => void;
-    data$: SavedSearchData;
-    refetch$: DataRefetch$;
-    subscribe: () => () => void;
-    reset: () => void;
-    inspectorAdapters: { requests: RequestAdapter };
-    initialFetchStatus: FetchStatus;
-  };
+  dataStateContainer: DataStateContainer;
   /**
    * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: () => () => void;
   /**
-   * Start sync between state and URL -- only used for testing
-   */
-  startSync: () => () => void;
-  /**
    * Set app state to with a partial new app state
    */
-  setAppState: (newState: Partial<AppState>) => void;
-  /**
-   * Set state in Url using history.replace
-   */
-  replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>;
+  setAppState: (newState: Partial<AppState>, replace?: boolean) => void;
   /**
    * Sync state to URL, used for testing
    */
   flushToUrl: () => void;
-  /**
-   * Reset initial state to the current app state
-   */
-  resetInitialAppState: () => void;
-  /**
-   * Return the Appstate before the current app state, useful for diffing changes
-   */
-  getPreviousAppState: () => AppState;
-  /**
-   * Returns whether the current app state is different to the initial state
-   */
-  isAppStateDirty: () => boolean;
 
   actions: {
     resetSavedSearch: (id: string) => void;
+    undoSavedSearchChanges: () => void;
     onOpenSavedSearch: (newSavedSearchId: string) => void;
     onUpdateQuery: (
+      payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
+      isUpdate?: boolean
+    ) => void;
+    onSubmitQuery: (
       payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
       isUpdate?: boolean
     ) => void;
@@ -201,21 +125,10 @@ export interface DiscoverStateContainer {
       }
     ) => Promise<any>;
     changeDataView: (id: string) => void;
+    changeDataViewId: (id: string) => void;
   };
 }
 
-export const {
-  Provider,
-  Consumer,
-  context,
-  useContainer,
-  useState,
-  useTransitions,
-  useSelector,
-  connect,
-} = createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
-
-const APP_STATE_URL_KEY = '_a';
 const GLOBAL_STATE_URL_KEY = '_g';
 
 /**
@@ -227,18 +140,16 @@ export function getDiscoverStateContainer({
   savedSearch,
   services,
 }: GetStateParams): DiscoverStateContainer {
+  const initialSavedSearch = savedSearch ?? getEmptySavedSearch(services.data);
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
-  const toasts = services.core.notifications.toasts;
-  const defaultAppState = getStateDefaults({
-    savedSearch,
+  const savedSearchContainer = getSavedSearchContainer({
+    savedSearch: initialSavedSearch,
     services,
   });
-  const savedSearchContainer = getSavedSearchContainer({ savedSearch, services });
-  const savedSearch$ = savedSearchContainer.savedSearch$;
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
-    ...(toasts && withNotifyOnErrors(toasts)),
+    ...withNotifyOnErrors(services.core.notifications.toasts),
   });
 
   /**
@@ -249,43 +160,11 @@ export function getDiscoverStateContainer({
     session: services.data.search.session,
   });
 
-  const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
-
-  let initialAppState = handleSourceColumnState(
-    savedSearch.id
-      ? { ...defaultAppState }
-      : {
-          ...defaultAppState,
-          ...appStateFromUrl,
-        },
-    services.uiSettings
+  const appStateContainer = getEnhancedAppStateContainer(
+    stateStorage,
+    initialSavedSearch,
+    services
   );
-  // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
-  let previousAppState: AppState = {};
-  const appStateContainer = createStateContainer<AppState>(initialAppState);
-
-  const appStateContainerModified = {
-    ...appStateContainer,
-    set: (value: AppState | null) => {
-      if (value) {
-        previousAppState = appStateContainer.getState();
-        appStateContainer.set(value);
-      }
-    },
-  };
-
-  // Calling syncState from within initializeAndSync causes state syncing issues.
-  // syncState takes a snapshot of the initial state when it's called to compare
-  // against before syncing state updates. When syncState is called from outside
-  // of initializeAndSync, the snapshot doesn't get reset when the data view is
-  // changed. Then when the user presses the back button, the new state appears
-  // to be the same as the initial state, so syncState ignores the update.
-  const syncAppState = () =>
-    syncState({
-      storageKey: APP_STATE_URL_KEY,
-      stateContainer: appStateContainerModified,
-      stateStorage,
-    });
 
   const replaceUrlAppState = async (newPartial: AppState = {}) => {
     const state = { ...appStateContainer.getState(), ...newPartial };
@@ -304,11 +183,11 @@ export function getDiscoverStateContainer({
   };
 
   const initializeAndSync = () => {
-    const dataView = savedSearchContainer.savedSearch$.getValue().searchSource.getField('index');
+    const dataView = savedSearchContainer.get().searchSource.getField('index');
     const { filterManager, data } = services;
     if (appStateContainer.getState().index !== dataView?.id) {
       // used data view is different than the given by url/state which is invalid
-      setState(appStateContainerModified, { index: dataView?.id });
+      setState(appStateContainer, { index: dataView?.id });
     }
     // sync initial app filters from state to filterManager
     const filters = appStateContainer.getState().filters;
@@ -340,7 +219,7 @@ export function getDiscoverStateContainer({
       filterManager.setFilters(validFilters);
     }
 
-    const { start, stop } = syncAppState();
+    const { start, stop } = appStateContainer.syncState();
 
     replaceUrlAppState({}).then(() => {
       start();
@@ -356,51 +235,56 @@ export function getDiscoverStateContainer({
     services,
     searchSessionManager,
     appStateContainer,
-    savedSearch$,
+    savedSearchContainer,
   });
-  const setAppState = (newPartial: AppState) => setState(appStateContainerModified, newPartial);
+  const setAppState = (newPartial: AppState, replace = false) => {
+    if (replace) {
+      replaceUrlAppState(newPartial);
+    } else {
+      setState(appStateContainer, newPartial);
+    }
+  };
+
+  const resetSavedSearch = async (id: string) => {
+    const nextSavedSearch = await savedSearchContainer.reset(id);
+    const newAppState = handleSourceColumnState(
+      getStateDefaults({
+        savedSearch: nextSavedSearch,
+        services,
+      }),
+      services.uiSettings
+    );
+    setAppState(newAppState);
+    await replaceUrlAppState(newAppState);
+  };
+  const internalStateContainer = getInternalStateContainer();
 
   return {
-    appStateContainer: appStateContainerModified,
+    appStateContainer,
+    internalStateContainer,
     dataStateContainer,
     savedSearchContainer,
-    startSync: () => {
-      const { start, stop } = syncAppState();
-      start();
-      return stop;
-    },
     setAppState,
-    replaceUrlAppState,
-    resetInitialAppState: () => {
-      initialAppState = appStateContainer.getState();
-    },
-    getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
-    isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     initializeAndSync,
     actions: {
-      resetSavedSearch: async (id) => {
-        const nextSavedSearch = await savedSearchContainer.reset(id);
-        const newAppState = handleSourceColumnState(
-          getStateDefaults({
-            savedSearch: nextSavedSearch,
-            services,
-          }),
-          services.uiSettings
-        );
-        await replaceUrlAppState(newAppState);
+      resetSavedSearch,
+      undoSavedSearchChanges: () => {
+        resetSavedSearch(savedSearchContainer.get().id || '');
       },
-      onOpenSavedSearch: (newSavedSearchId: string) => {
-        if (savedSearch.id && savedSearch.id === newSavedSearchId) {
-          savedSearchContainer.reset(savedSearch.id);
+      onOpenSavedSearch: async (newSavedSearchId: string) => {
+        const currentSavedSearch = savedSearchContainer.savedSearch$.getValue();
+        if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
+          await savedSearchContainer.reset(currentSavedSearch.id);
         } else {
+          await resetSavedSearch(newSavedSearchId);
           history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
         }
       },
       pauseAutoRefreshInterval,
       updateSavedQueryId: (newSavedQueryId: string | undefined) => {
         if (newSavedQueryId) {
-          setState(appStateContainerModified, { savedQuery: newSavedQueryId });
+          setState(appStateContainer, { savedQuery: newSavedQueryId });
         } else {
           // remove savedQueryId from state
           const newState = {
@@ -413,12 +297,16 @@ export function getDiscoverStateContainer({
       /**
        * Function triggered when the user changes the query in the search bar
        */
-      onUpdateQuery: (_, isUpdate?: boolean) => {
+      onSubmitQuery: (_, isUpdate?: boolean) => {
         if (isUpdate === false) {
           searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
           dataStateContainer.refetch$.next(undefined);
         }
       },
+      /**
+       * Function triggered when the user changes the query in the search bar
+       */
+      onUpdateQuery: (args) => {},
       fetch: (reset?: boolean) => {
         const msg = reset ? 'reset' : undefined;
         dataStateContainer.refetch$.next(msg);
@@ -438,6 +326,9 @@ export function getDiscoverStateContainer({
           services,
           setAppState,
         });
+      },
+      changeDataViewId: (id: string) => {
+        setAppState({ index: id }, true);
       },
     },
   };

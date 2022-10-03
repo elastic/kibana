@@ -10,14 +10,8 @@ import { useMemo } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
-import {
-  AppState as DiscoverState,
-  DiscoverStateContainer as DiscoverGetStateReturn,
-} from '../application/main/services/discover_state';
-import {
-  AppState as ContextState,
-  GetStateReturn as ContextGetStateReturn,
-} from '../application/context/services/context_state';
+import { DiscoverStateContainer as DiscoverGetStateReturn } from '../application/main/services/discover_state';
+import { GetStateReturn as ContextGetStateReturn } from '../application/context/services/context_state';
 import { getStateColumnActions } from '../components/doc_table/actions/columns';
 
 interface UseColumnsProps {
@@ -27,7 +21,8 @@ interface UseColumnsProps {
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
-  state: DiscoverState | ContextState;
+  columns?: string[];
+  sort?: string[][];
 }
 
 export const useColumns = ({
@@ -36,8 +31,9 @@ export const useColumns = ({
   dataView,
   dataViews,
   setAppState,
-  state,
   useNewFieldsApi,
+  columns,
+  sort,
 }: UseColumnsProps) => {
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
@@ -47,21 +43,22 @@ export const useColumns = ({
         dataView,
         dataViews,
         setAppState,
-        state,
         useNewFieldsApi,
+        columns,
+        sort,
       }),
-    [capabilities, config, dataView, dataViews, setAppState, state, useNewFieldsApi]
+    [capabilities, columns, config, dataView, dataViews, setAppState, sort, useNewFieldsApi]
   );
 
-  const columns = useMemo(() => {
-    if (!state.columns) {
+  const usedColumns = useMemo(() => {
+    if (!columns) {
       return [];
     }
-    return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
-  }, [state, useNewFieldsApi]);
+    return useNewFieldsApi ? columns.filter((col) => col !== '_source') : columns;
+  }, [columns, useNewFieldsApi]);
 
   return {
-    columns,
+    columns: usedColumns,
     onAddColumn,
     onRemoveColumn,
     onMoveColumn,

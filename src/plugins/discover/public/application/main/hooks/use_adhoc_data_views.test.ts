@@ -76,7 +76,6 @@ describe('useAdHocDataViews', () => {
       useAdHocDataViews({
         dataView: mockDataView,
         dataViews: mockDiscoverServices.dataViews,
-        savedSearch: savedSearchMock,
         stateContainer: {
           appStateContainer: { getState: jest.fn().mockReturnValue({}) },
         } as unknown as GetStateReturn,
@@ -102,7 +101,6 @@ describe('useAdHocDataViews', () => {
       useAdHocDataViews({
         dataView: mockDataView,
         dataViews: mockDiscoverServices.dataViews,
-        savedSearch: savedSearchMock,
         stateContainer: {
           appStateContainer: { getState: jest.fn().mockReturnValue({}) },
         } as unknown as GetStateReturn,

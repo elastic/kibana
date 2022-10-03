@@ -32,7 +32,7 @@ describe('Test discover state', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
+    await state.setAppState({}, true);
     stopSync = state.startSync();
   });
   afterEach(() => {
@@ -63,13 +63,6 @@ describe('Test discover state', () => {
     });
   });
 
-  test('isAppStateDirty returns  whether the current state has changed', async () => {
-    state.setAppState({ index: 'modified' });
-    expect(state.isAppStateDirty()).toBeTruthy();
-    state.resetInitialAppState();
-    expect(state.isAppStateDirty()).toBeFalsy();
-  });
-
   test('getPreviousAppState returns the state before the current', async () => {
     state.setAppState({ index: 'first' });
     const stateA = state.appStateContainer.getState();
@@ -80,7 +73,7 @@ describe('Test discover state', () => {
   test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
     history.push('/#?_g=(refreshInterval:(pause:!f,value:5000))');
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!f,value:5000))');
-    await state.pauseAutoRefreshInterval();
+    await state.actions.pauseAutoRefreshInterval();
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
   });
 });
@@ -94,7 +87,7 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
+    await state.setAppState({}, true);
     const stopSync = state.startSync();
     expect(state.appStateContainer.getState().sort).toEqual([['order_date', 'desc']]);
     stopSync();
@@ -108,7 +101,7 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
+    await state.setAppState({}, true);
     const stopSync = state.startSync();
     expect(state.appStateContainer.getState().sort).toEqual([['bytes', 'desc']]);
     stopSync();

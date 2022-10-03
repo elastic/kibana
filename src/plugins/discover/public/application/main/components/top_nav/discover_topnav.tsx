@@ -16,6 +16,8 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
+import useObservable from "react-use/lib/useObservable";
+import {SavedSearch} from "@kbn/saved-search-plugin/public";
 
 export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'navigateTo'> & {
   onOpenInspector: () => void;
@@ -44,14 +46,17 @@ export const DiscoverTopNav = ({
   updateAdHocDataViewId,
   adHocDataViewList,
 }: DiscoverTopNavProps) => {
-  const savedSearch = stateContainer.savedSearchContainer.savedSearch$.getValue();
+  const savedSearch = useObservable<SavedSearch>(
+    stateContainer.savedSearchContainer.savedSearch$,
+    stateContainer.savedSearchContainer.savedSearch$.getValue()
+  );
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
     [dataView]
   );
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
 
   const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
 
@@ -115,6 +120,19 @@ export const DiscoverTopNav = ({
     [canEditDataView, dataViewEditor, stateContainer]
   );
 
+  const onCreateDefaultAdHocDataView = useCallback(
+    async (pattern: string) => {
+      const newDataView = await dataViews.create({
+        title: pattern,
+      });
+      if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
+        newDataView.timeFieldName = '@timestamp';
+      }
+      stateContainer.actions.changeDataView(newDataView.id!);
+    },
+    [dataViews, stateContainer]
+  );
+
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -157,6 +175,7 @@ export const DiscoverTopNav = ({
     currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
+    onCreateDefaultAdHocDataView,
     onChangeDataView: stateContainer.actions.changeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews: adHocDataViewList,
@@ -183,7 +202,8 @@ export const DiscoverTopNav = ({
       appName="discover"
       config={topNavMenu}
       indexPatterns={[dataView]}
-      onQuerySubmit={stateContainer.actions.onUpdateQuery}
+      onQueryChange={stateContainer.actions.onUpdateQuery}
+      onQuerySubmit={stateContainer.actions.onSubmitQuery}
       onSavedQueryIdChange={stateContainer.actions.updateSavedQueryId}
       query={query}
       setMenuMountPoint={setMenuMountPoint}

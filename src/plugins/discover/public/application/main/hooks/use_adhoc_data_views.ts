@@ -8,7 +8,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { DataViewsContract, type DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
@@ -20,12 +19,10 @@ import { DiscoverStateContainer } from '../services/discover_state';
 
 export const useAdHocDataViews = ({
   dataView,
-  savedSearch,
   dataViews,
   stateContainer,
 }: {
   dataView: DataView;
-  savedSearch: SavedSearch;
   dataViews: DataViewsContract;
   stateContainer: DiscoverStateContainer;
 }) => {
@@ -49,6 +46,7 @@ export const useAdHocDataViews = ({
   const updateAdHocDataViewId = useCallback(
     async (dataViewToUpdate: DataView) => {
       const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
+      const savedSearch = stateContainer.savedSearchContainer.savedSearch$.getValue();
 
       dataViews.clearInstanceCache(dataViewToUpdate.id);
       setAdHocDataViewList((prev) =>
@@ -70,18 +68,19 @@ export const useAdHocDataViews = ({
 
       return newDataView;
     },
-    [dataViews, savedSearch.searchSource]
+    [dataViews, stateContainer]
   );
 
   const { openConfirmSavePrompt, updateSavedSearch } =
     useConfirmPersistencePrompt(updateAdHocDataViewId);
   const persistDataView = useCallback(async () => {
+    const savedSearch = stateContainer.savedSearchContainer.savedSearch$.getValue();
     const currentDataView = savedSearch.searchSource.getField('index')!;
     if (currentDataView && !currentDataView.isPersisted()) {
       const createdDataView = await openConfirmSavePrompt(currentDataView);
       if (createdDataView) {
         savedSearch.searchSource.setField('index', createdDataView);
-        await stateContainer.actions.changeDataView(createdDataView.id!);
+        await stateContainer.actions.changeDataViewId(createdDataView.id!);
 
         // update saved search with saved data view
         if (savedSearch.id) {
@@ -94,7 +93,7 @@ export const useAdHocDataViews = ({
       return undefined;
     }
     return currentDataView;
-  }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
+  }, [stateContainer, openConfirmSavePrompt, updateSavedSearch]);
 
   return { adHocDataViewList, persistDataView, updateAdHocDataViewId };
 };

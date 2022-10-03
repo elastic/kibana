@@ -21,6 +21,7 @@ import { DiscoverStateContainer } from '../../services/discover_state';
 import { DataTotalHits$, DataTotalHitsMsg } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
+import useObservable from 'react-use/lib/useObservable';
 
 export interface HitsCounterProps {
   /**
@@ -41,6 +42,7 @@ export function HitsCounter({
   savedSearchData$,
 }: HitsCounterProps) {
   const data: DataTotalHitsMsg = useDataState(savedSearchData$);
+  const hasChanged = useObservable(stateContainer.savedSearchContainer.hasChanged$, false);
 
   const hits = data.result || 0;
   if (!hits && data.fetchStatus === FetchStatus.LOADING) {
@@ -93,16 +95,12 @@ export function HitsCounter({
           />
         </EuiFlexItem>
       )}
-      {showResetButton && (
+      {showResetButton && hasChanged && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="refresh"
             data-test-subj="resetSavedSearch"
-            onClick={() =>
-              stateContainer.actions.resetSavedSearch(
-                stateContainer.savedSearchContainer.savedSearch$.getValue().id || ''
-              )
-            }
+            onClick={() => stateContainer.actions.undoSavedSearchChanges()}
             size="s"
             aria-label={i18n.translate('discover.reloadSavedSearchButton', {
               defaultMessage: 'Reset search',
