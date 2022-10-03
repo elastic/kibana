@@ -12,7 +12,6 @@ export class SharePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
-  private readonly retry = this.ctx.getService('retry');
 
   async isShareMenuOpen() {
     return await this.testSubjects.exists('shareContextMenu');
