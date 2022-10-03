@@ -76,8 +76,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const hooksForm = useHookForm<LiveQueryFormFields>();
-  const { handleSubmit, watch, setValue, resetField, clearErrors, getFieldState, register } =
-    hooksForm;
+  const {
+    handleSubmit,
+    watch,
+    setValue,
+    resetField,
+    clearErrors,
+    getFieldState,
+    register,
+    formState: { isSubmitting },
+  } = hooksForm;
 
   const canRunSingleQuery = useMemo(
     () =>
@@ -130,7 +138,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const onSubmit = useCallback(
-    (values: LiveQueryFormFields) => {
+    async (values: LiveQueryFormFields) => {
       const serializedData = pickBy(
         {
           agentSelection: values.agentSelection,
@@ -143,7 +151,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         (value) => !isEmpty(value)
       ) as unknown as LiveQueryFormFields;
 
-      mutateAsync(serializedData);
+      await mutateAsync(serializedData);
     },
     [mutateAsync]
   );
@@ -173,7 +181,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiButton id="submit-button" isLoading={isLoading} onClick={handleSubmit(onSubmit)}>
+            <EuiButton
+              id="submit-button"
+              disabled={!enabled}
+              isLoading={isSubmitting}
+              onClick={handleSubmit(onSubmit)}
+            >
               <FormattedMessage
                 id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
                 defaultMessage="Submit"
@@ -189,7 +202,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       permissions.writeSavedQueries,
       resultsStatus,
       handleShowSaveQueryFlyout,
-      isLoading,
+      enabled,
+      isSubmitting,
       handleSubmit,
       onSubmit,
     ]
