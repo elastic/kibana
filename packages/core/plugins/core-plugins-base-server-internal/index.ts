@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { RenderingService } from './rendering_service';
-export type {
-  InternalRenderingServicePreboot,
-  InternalRenderingServiceSetup,
-  IRenderOptions,
-  RenderingMetadata,
-  RenderingPrebootDeps,
-  RenderingSetupDeps,
-} from './types';
+export type { UiPlugins, InternalPluginInfo } from './src';
