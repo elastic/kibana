@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { HttpResourcesService } from './src';
+
+export type { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './src';
