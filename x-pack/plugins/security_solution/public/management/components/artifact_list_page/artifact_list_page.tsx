@@ -298,7 +298,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             policies={policiesRequest.data?.items || []}
             policiesIsLoading={policiesRequest.isLoading}
             data-test-subj={getTestId('flyout')}
-            secondaryFlyoutInfo={secondaryPageInfo}
           />
         )}
 

@@ -25,7 +25,7 @@ export const NoDataEmptyState = memo<{
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
   backComponent?: React.ReactNode;
-  secondaryAboutInfo: React.ReactNode;
+  secondaryAboutInfo?: React.ReactNode;
   'data-test-subj'?: string;
 }>(
   ({
