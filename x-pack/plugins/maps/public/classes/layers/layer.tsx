@@ -94,7 +94,7 @@ export interface ILayer {
   getQueryableIndexPatternIds(): string[];
   getType(): LAYER_TYPE;
   isVisible(): boolean;
-  cloneDescriptor(): Promise<LayerDescriptor>;
+  cloneDescriptor(): Promise<LayerDescriptor[]>;
   renderStyleEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
     onCustomIconsChange: (customIcons: CustomIcon[]) => void
@@ -177,14 +177,14 @@ export class AbstractLayer implements ILayer {
     return this._descriptor;
   }
 
-  async cloneDescriptor(): Promise<LayerDescriptor> {
+  async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
     clonedDescriptor.id = uuid();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
   makeMbLayerId(layerNameSuffix: string): string {

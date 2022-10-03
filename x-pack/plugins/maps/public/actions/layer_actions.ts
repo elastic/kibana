@@ -161,8 +161,9 @@ export function cloneLayer(layerId: string) {
       return;
     }
 
-    const clonedDescriptor = await layer.cloneDescriptor();
-    dispatch(addLayer(clonedDescriptor));
+    (await layer.cloneDescriptor()).forEach((layerDescriptor) => {
+      dispatch(addLayer(layerDescriptor));
+    });
   };
 }
 

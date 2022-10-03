@@ -162,8 +162,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     );
   }
 
-  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
-    const clonedDescriptor = (await super.cloneDescriptor()) as VectorLayerDescriptor;
+  async cloneDescriptor(): Promise<VectorLayerDescriptor[]> {
+    const clones = await super.cloneDescriptor();
+    if (clones.length === 0) {
+      return [];
+    }
+
+    const clonedDescriptor = clones[0] as VectorLayerDescriptor;
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
         if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
@@ -215,7 +220,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         }
       });
     }
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
   getSource(): IVectorSource {

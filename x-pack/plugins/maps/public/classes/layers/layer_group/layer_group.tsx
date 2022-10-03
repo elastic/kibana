@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
+import { asyncForEach } from '@kbn/std';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
@@ -79,13 +80,22 @@ export class LayerGroup implements ILayer {
     return this._descriptor;
   }
 
-  async cloneDescriptor(): Promise<LayerGroupDescriptor> {
+  async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
-    // layer id is uuid used to track styles/layers in mapbox
     clonedDescriptor.id = uuid();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
-    return clonedDescriptor;
+
+    const clonedChildrenDescriptors: LayerDescriptor[] = [];
+    await asyncForEach(this.getChildren(), async (childLayer) => {
+      (await childLayer.cloneDescriptor()).forEach((childLayerDescriptor) => {
+        if (childLayerDescriptor.parent === this.getId()) {
+          childLayerDescriptor.parent = clonedDescriptor.id;
+        }
+        clonedChildrenDescriptors.push(childLayerDescriptor);
+      });
+    });
+    return [...clonedChildrenDescriptors, clonedDescriptor];
   }
 
   makeMbLayerId(layerNameSuffix: string): string {
