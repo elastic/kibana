@@ -37,9 +37,8 @@ export const getAutoplaySubmit = (wrapper: ReactWrapper) =>
 export const getSettingsPanel = (wrapper: ReactWrapper) =>
   wrapper.find('Settings > SettingsComponent');
 
-export const getSettingsTrigger = (wrapper: ReactWrapper) => {
-  getSettingsPanel(wrapper).find('EuiButtonIcon');
-};
+export const getSettingsTrigger = (wrapper: ReactWrapper) =>
+  getSettingsPanel(wrapper).find('EuiButtonIcon button');
 
 export const getPopover = (wrapper: ReactWrapper) => wrapper.find('EuiPopover');
 
