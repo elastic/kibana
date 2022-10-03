@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-import { useHostRiskScore, useUserRiskScore } from '../../containers';
+import { useRiskScore } from '../../containers';
 import { RiskDetailsTabBody } from '.';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { HostsType } from '../../../hosts/store/model';
@@ -23,7 +23,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'Risk Tab Body entityType: %s',
   (riskEntity) => {
     const defaultProps = {
-      entityName: 'testUser',
+      entityName: 'testEntity',
       indexNames: [],
       setQuery: jest.fn(),
       skip: false,
@@ -33,27 +33,45 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       riskEntity,
     };
 
-    const mockUseRiskScore = (
-      riskEntity === RiskScoreEntity.host ? useHostRiskScore : useUserRiskScore
-    ) as jest.Mock;
+    const mockUseRiskScore = useRiskScore as jest.Mock;
     const mockUseQueryToggle = useQueryToggle as jest.Mock;
     beforeEach(() => {
       jest.clearAllMocks();
 
-      mockUseRiskScore.mockReturnValue([
-        false,
-        {
-          inspect: {
-            dsl: [],
-            response: [],
-          },
-          isInspected: false,
-          totalCount: 0,
-          refetch: jest.fn(),
-          isModuleEnabled: true,
+      mockUseRiskScore.mockReturnValue({
+        loading: false,
+        inspect: {
+          dsl: [],
+          response: [],
         },
-      ]);
+        isInspected: false,
+        totalCount: 0,
+        refetch: jest.fn(),
+        isModuleEnabled: true,
+      });
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    });
+
+    it('calls with correct arguments for each entity', () => {
+      render(
+        <TestProviders>
+          <RiskDetailsTabBody {...defaultProps} />
+        </TestProviders>
+      );
+      expect(mockUseRiskScore).toBeCalledWith({
+        filterQuery: {
+          terms: {
+            [`${riskEntity}.name`]: ['testEntity'],
+          },
+        },
+        onlyLatest: false,
+        riskEntity,
+        skip: false,
+        timerange: {
+          from: '2019-06-25T04:31:59.345Z',
+          to: '2019-06-25T06:31:59.345Z',
+        },
+      });
     });
 
     it("doesn't skip when both toggleStatus are true", () => {

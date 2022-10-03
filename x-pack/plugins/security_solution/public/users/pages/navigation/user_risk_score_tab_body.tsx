@@ -19,7 +19,7 @@ import { UserRiskScoreTable } from '../../components/user_risk_score_table';
 import { usersSelectors } from '../../store';
 import {
   UserRiskScoreQueryId,
-  useUserRiskScore,
+  useRiskScore,
   useRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -63,13 +63,20 @@ export const UserRiskScoreQueryTabBody = ({
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
-  const [
+  const {
+    data,
+    inspect,
+    isDeprecated,
+    isInspected,
+    isModuleEnabled,
     loading,
-    { data, totalCount, inspect, isInspected, isDeprecated, refetch, isModuleEnabled },
-  ] = useUserRiskScore({
+    refetch,
+    totalCount,
+  } = useRiskScore({
     filterQuery,
-    skip: querySkip,
     pagination,
+    riskEntity: RiskScoreEntity.user,
+    skip: querySkip,
     sort,
     timerange,
   });

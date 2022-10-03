@@ -7,9 +7,12 @@
 import { useMemo } from 'react';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../common/search_strategy';
-import type { HostRisk, UserRisk } from '../../../risk_score/containers';
-import { useUserRiskScore, useHostRiskScore } from '../../../risk_score/containers';
+import {
+  buildHostNamesFilter,
+  buildUserNamesFilter,
+  RiskScoreEntity,
+} from '../../../../common/search_strategy';
+import { useRiskScore } from '../../../risk_score/containers';
 
 export const ONLY_FIRST_ITEM_PAGINATION = {
   cursorStart: 0,
@@ -24,20 +27,19 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     [hostName]
   );
 
-  const [
-    hostRiskLoading,
-    {
-      data: hostRiskData,
-      isLicenseValid: isHostLicenseValid,
-      isModuleEnabled: isHostRiskModuleEnabled,
-    },
-  ] = useHostRiskScore({
+  const {
+    data: hostRiskData,
+    loading: hostRiskLoading,
+    isLicenseValid: isHostLicenseValid,
+    isModuleEnabled: isHostRiskModuleEnabled,
+  } = useRiskScore({
     filterQuery: hostNameFilterQuery,
     pagination: ONLY_FIRST_ITEM_PAGINATION,
+    riskEntity: RiskScoreEntity.host,
     skip: !hostNameFilterQuery,
   });
 
-  const hostRisk: HostRisk = useMemo(
+  const hostRisk = useMemo(
     () => ({
       loading: hostRiskLoading,
       isModuleEnabled: isHostRiskModuleEnabled,
@@ -51,20 +53,19 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     [userName]
   );
 
-  const [
-    userRiskLoading,
-    {
-      data: userRiskData,
-      isLicenseValid: isUserLicenseValid,
-      isModuleEnabled: isUserRiskModuleEnabled,
-    },
-  ] = useUserRiskScore({
+  const {
+    data: userRiskData,
+    loading: userRiskLoading,
+    isLicenseValid: isUserLicenseValid,
+    isModuleEnabled: isUserRiskModuleEnabled,
+  } = useRiskScore({
     filterQuery: userNameFilterQuery,
     pagination: ONLY_FIRST_ITEM_PAGINATION,
+    riskEntity: RiskScoreEntity.user,
     skip: !userNameFilterQuery,
   });
 
-  const userRisk: UserRisk = useMemo(
+  const userRisk = useMemo(
     () => ({
       loading: userRiskLoading,
       isModuleEnabled: isUserRiskModuleEnabled,

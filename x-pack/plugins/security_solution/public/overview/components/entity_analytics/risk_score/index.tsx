@@ -129,10 +129,15 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     deleteQuery,
     inspect: inspectKpi,
   });
-  const [
-    isTableLoading,
-    { data, inspect, refetch, isDeprecated, isLicenseValid, isModuleEnabled },
-  ] = useRiskScore({
+  const {
+    data,
+    loading: isTableLoading,
+    inspect,
+    refetch,
+    isDeprecated,
+    isLicenseValid,
+    isModuleEnabled,
+  } = useRiskScore({
     filterQuery: severityFilter,
     skip: !toggleStatus,
     pagination: {

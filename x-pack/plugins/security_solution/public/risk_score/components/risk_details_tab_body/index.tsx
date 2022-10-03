@@ -81,7 +81,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
     [entityName, riskEntity]
   );
-  const [loading, { data, refetch, inspect, isDeprecated, isModuleEnabled }] = useRiskScore({
+  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
     filterQuery,
     onlyLatest: false,
     riskEntity,

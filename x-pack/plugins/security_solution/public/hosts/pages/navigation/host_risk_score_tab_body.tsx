@@ -17,7 +17,7 @@ import { hostsModel, hostsSelectors } from '../../store';
 import type { State } from '../../../common/store';
 import {
   HostRiskScoreQueryId,
-  useHostRiskScore,
+  useRiskScore,
   useRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -61,13 +61,20 @@ export const HostRiskScoreQueryTabBody = ({
   const { from, to } = useGlobalTime();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
-  const [
+  const {
+    data,
+    inspect,
+    isDeprecated,
+    isInspected,
+    isModuleEnabled,
     loading,
-    { data, totalCount, inspect, isInspected, isDeprecated, refetch, isModuleEnabled },
-  ] = useHostRiskScore({
+    refetch,
+    totalCount,
+  } = useRiskScore({
     filterQuery,
-    skip: querySkip,
     pagination,
+    riskEntity: RiskScoreEntity.host,
+    skip: querySkip,
     sort,
     timerange,
   });
