@@ -177,68 +177,67 @@ export const uninstallLegacyRiskScoreModule = async ({
 
   const legacyIngestPipelineNames = [utils.getLegacyIngestPipelineName(riskScoreEntity)];
 
-  /**
-   * Intended not to pass notification to bulkDeletePrebuiltSavedObjects.
-   * As the only error it can happen is saved object not found, and
-   * that is what bulkDeletePrebuiltSavedObjects wants.
-   * (Before 8.5 once an saved object was created, it was shared across different spaces.
-   * If it has been upgrade in one space, "saved object not found" will happen when upgrading other spaces.
-   * Or it could be users manually deleted the saved object.)
-   */
-  await bulkDeletePrebuiltSavedObjects({
-    http,
-    options: {
-      templateName: `${riskScoreEntity}RiskScoreDashboards`,
-    },
-  });
-
-  await deleteTransforms({
-    http,
-    theme,
-    renderDocLink,
-    notifications,
-    errorMessage: `${UNINSTALLATION_ERROR} - ${TRANSFORM_DELETION_ERROR_MESSAGE(
-      legacyTransformIds.length
-    )}`,
-    transformIds: legacyTransformIds,
-    options: {
-      deleteDestIndex: true,
-      deleteDestDataView: true,
-      forceDelete: false,
-    },
-  });
-
-  /**
-   * Intended not to pass notification to deleteIngestPipelines.
-   * As the only error it can happen is ingest pipeline not found, and
-   * that is what deleteIngestPipelines wants.
-   * (Before 8.5 once an ingest pipeline was created, it was shared across different spaces.
-   * If it has been upgrade in one space, "ingest pipeline not found" will happen when upgrading other spaces.
-   * Or it could be users manually deleted the ingest pipeline.)
-   */
-  await deleteIngestPipelines({
-    http,
-    errorMessage: `${UNINSTALLATION_ERROR} - ${INGEST_PIPELINE_DELETION_ERROR_MESSAGE(
-      legacyIngestPipelineNames.length
-    )}`,
-    names: legacyIngestPipelineNames.join(','),
-  });
-
-  /**
-   * Intended not to pass notification to deleteStoredScripts.
-   * As the only error it can happen is script not found, and
-   * that is what deleteStoredScripts wants.
-   * (Before 8.5 once a script was created, it was shared across different spaces.
-   * If it has been upgrade in one space, "script not found" will happen when upgrading other spaces.
-   * Or it could be users manually deleted the script.)
-   */
-  await deleteStoredScripts({
-    http,
-    ids:
-      riskScoreEntity === RiskScoreEntity.user
-        ? legacyRiskScoreUsersScriptIds
-        : legacyRiskScoreHostsScriptIds,
-  });
+  await Promise.all([
+    /**
+     * Intended not to pass notification to bulkDeletePrebuiltSavedObjects.
+     * As the only error it can happen is saved object not found, and
+     * that is what bulkDeletePrebuiltSavedObjects wants.
+     * (Before 8.5 once an saved object was created, it was shared across different spaces.
+     * If it has been upgrade in one space, "saved object not found" will happen when upgrading other spaces.
+     * Or it could be users manually deleted the saved object.)
+     */
+    bulkDeletePrebuiltSavedObjects({
+      http,
+      options: {
+        templateName: `${riskScoreEntity}RiskScoreDashboards`,
+      },
+    }),
+    deleteTransforms({
+      http,
+      theme,
+      renderDocLink,
+      notifications,
+      errorMessage: `${UNINSTALLATION_ERROR} - ${TRANSFORM_DELETION_ERROR_MESSAGE(
+        legacyTransformIds.length
+      )}`,
+      transformIds: legacyTransformIds,
+      options: {
+        deleteDestIndex: true,
+        deleteDestDataView: true,
+        forceDelete: false,
+      },
+    }),
+    /**
+     * Intended not to pass notification to deleteIngestPipelines.
+     * As the only error it can happen is ingest pipeline not found, and
+     * that is what deleteIngestPipelines wants.
+     * (Before 8.5 once an ingest pipeline was created, it was shared across different spaces.
+     * If it has been upgrade in one space, "ingest pipeline not found" will happen when upgrading other spaces.
+     * Or it could be users manually deleted the ingest pipeline.)
+     */
+    deleteIngestPipelines({
+      http,
+      errorMessage: `${UNINSTALLATION_ERROR} - ${INGEST_PIPELINE_DELETION_ERROR_MESSAGE(
+        legacyIngestPipelineNames.length
+      )}`,
+      names: legacyIngestPipelineNames.join(','),
+    }),
+    /**
+     * Intended not to pass notification to deleteStoredScripts.
+     * As the only error it can happen is script not found, and
+     * that is what deleteStoredScripts wants.
+     * (Before 8.5 once a script was created, it was shared across different spaces.
+     * If it has been upgrade in one space, "script not found" will happen when upgrading other spaces.
+     * Or it could be users manually deleted the script.)
+     */
+    deleteStoredScripts({
+      http,
+      ids:
+        riskScoreEntity === RiskScoreEntity.user
+          ? legacyRiskScoreUsersScriptIds
+          : legacyRiskScoreHostsScriptIds,
+    }),
+  ]);
 
   if (refetch) {
     refetch();

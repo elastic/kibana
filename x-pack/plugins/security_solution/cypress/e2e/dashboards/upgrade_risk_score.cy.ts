@@ -21,7 +21,12 @@ import {
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
-import { deleteRiskScore, installLegacyRiskScoreModule } from '../../tasks/risk_scores';
+import {
+  deleteRiskScore,
+  installLegacyRiskScoreModule,
+  interceptUpgradeRiskScoreModule,
+  waitForUpgradeRiskScoreModule,
+} from '../../tasks/risk_scores';
 import { findSavedObjects } from '../../tasks/risk_scores/saved_objects';
 import { getTransformState } from '../../tasks/risk_scores/transforms';
 import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
@@ -65,7 +70,11 @@ describe('Upgrade risk scores', () => {
   });
 
   it('starts upgrading host risk score', () => {
+    interceptUpgradeRiskScoreModule(RiskScoreEntity.host);
+
     cy.get(UPGRADE_CONFIRMATION_BUTTON).click();
+    waitForUpgradeRiskScoreModule();
+
     cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.disabled');
   });
 
@@ -114,7 +123,9 @@ describe('Upgrade risk scores', () => {
   });
 
   it('starts upgrading user risk score', () => {
+    interceptUpgradeRiskScoreModule(RiskScoreEntity.user);
     cy.get(UPGRADE_CONFIRMATION_BUTTON).click();
+    waitForUpgradeRiskScoreModule();
     cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.disabled');
   });
 

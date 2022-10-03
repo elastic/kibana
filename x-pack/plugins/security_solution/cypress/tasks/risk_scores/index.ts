@@ -24,6 +24,13 @@ import {
   RiskScoreEntity,
 } from '../../screens/entity_analytics';
 import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
+import {
+  INGEST_PIPELINES_URL,
+  RISK_SCORE_SAVED_OBJECTS_URL,
+  RISK_SCORE_URL,
+  STORED_SCRIPTS_URL,
+  TRANSFORMS_URL,
+} from '../../urls/risk_score';
 import { visit } from '../login';
 import { createIndex, deleteRiskScoreIndicies } from './indices';
 import { createIngestPipeline, deleteRiskScoreIngestPipelines } from './ingest_pipelines';
@@ -35,7 +42,7 @@ import { createTransform, deleteTransforms, startTransforms } from './transforms
  * @deleteAll: If set to true, it deletes both old and new version.
  * If set to false, it deletes legacy version only.
  */
-export const deleteRiskScore = async ({
+export const deleteRiskScore = ({
   riskScoreEntity,
   spaceId,
   deleteAll,
@@ -653,4 +660,41 @@ export const installLegacyRiskScoreModule = (
   } else {
     installLegacyHostRiskScoreModule(spaceId);
   }
+};
+
+export const intercepInstallRiskScoreModule = () => {
+  cy.intercept(`POST`, RISK_SCORE_URL).as('install');
+};
+
+export const waitForInstallRiskScoreModule = () => {
+  cy.wait(['@install'], { requestTimeout: 50000 });
+};
+
+export const interceptUpgradeRiskScoreModule = (riskScoreEntity: RiskScoreEntity) => {
+  cy.intercept(
+    `POST`,
+    `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_delete/${riskScoreEntity}RiskScoreDashboards`
+  ).as('deleteDashboards');
+  cy.intercept(`POST`, `${TRANSFORMS_URL}/stop_transforms`).as('stopTransforms');
+  cy.intercept(`POST`, `${TRANSFORMS_URL}/delete_transforms`).as('deleteTransforms');
+  cy.intercept(
+    `DELETE`,
+    `${INGEST_PIPELINES_URL}/${getLegacyIngestPipelineName(riskScoreEntity)}`
+  ).as('deleteIngestPipelines');
+  cy.intercept(`DELETE`, `${STORED_SCRIPTS_URL}/delete`).as('deleteScripts');
+  intercepInstallRiskScoreModule();
+};
+
+export const waitForUpgradeRiskScoreModule = () => {
+  cy.wait(
+    [
+      '@deleteDashboards',
+      '@stopTransforms',
+      '@deleteTransforms',
+      '@deleteIngestPipelines',
+      '@deleteScripts',
+      '@install',
+    ],
+    { requestTimeout: 50000 }
+  );
 };

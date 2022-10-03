@@ -18,7 +18,11 @@ import {
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
-import { deleteRiskScore } from '../../tasks/risk_scores';
+import {
+  deleteRiskScore,
+  intercepInstallRiskScoreModule,
+  waitForInstallRiskScoreModule,
+} from '../../tasks/risk_scores';
 import { findSavedObjects } from '../../tasks/risk_scores/saved_objects';
 import { getTransformState } from '../../tasks/risk_scores/transforms';
 import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
@@ -43,7 +47,9 @@ describe('Enable risk scores', () => {
 
   it('shows enable host risk button', () => {
     cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('exist');
+    intercepInstallRiskScoreModule();
     cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).click();
+    waitForInstallRiskScoreModule();
   });
 
   it('starts installing host risk score', () => {
@@ -76,7 +82,9 @@ describe('Enable risk scores', () => {
 
   it('shows enable user risk button', () => {
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('exist');
+    intercepInstallRiskScoreModule();
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).click();
+    waitForInstallRiskScoreModule();
   });
 
   it('starts installing user risk score', () => {

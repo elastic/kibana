@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export const RISK_SCORE_URL = `/internal/risk_score` as const;
 export const INDICES_URL = `/internal/risk_score/indices` as const;
 export const INGEST_PIPELINES_URL = `/api/ingest_pipelines` as const;
 export const TRANSFORMS_URL = `/api/transform` as const;
