@@ -118,7 +118,7 @@ export function WorkspacePanelWrapper({
     warningMessages.push(...requestWarnings);
   }
   return (
-    <EuiPageTemplate direction="row" grow={true} offset={0} minHeight={0}>
+    <EuiPageTemplate direction="row" grow={true} offset={0} minHeight={0} responsive={[]}>
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
         <EuiPageSection grow={false} paddingSize="none" color="transparent">
           <EuiFlexGroup
