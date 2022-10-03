@@ -20,7 +20,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
-  const retry = getService('retry');
   const browser = getService('browser');
 
   describe('cases list', () => {
@@ -68,16 +67,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         after(async () => {
           await cases.api.deleteAllCases();
           await cases.casesTable.waitForCasesToBeDeleted();
-        });
-
-        it('deletes a case correctly from the list', async () => {
-          await cases.casesTable.deleteCase(0);
-          await cases.casesTable.waitForTableToFinishLoading();
-
-          await retry.tryForTime(2000, async () => {
-            const firstRow = await testSubjects.find('case-details-link');
-            expect(await firstRow.getVisibleText()).not.to.be('delete me');
-          });
         });
 
         it('bulk delete cases from the list', async () => {
@@ -325,6 +314,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('to open', async () => {
           await cases.casesTable.changeStatus(CaseStatuses.open, 0);
           await testSubjects.existOrFail(`status-badge-${CaseStatuses.open}`);
+        });
+      });
+
+      describe('Delete', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(1);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('deletes a case correctly', async () => {
+          await cases.casesTable.deleteCase(0);
+          await cases.casesTable.waitForTableToFinishLoading();
+          await cases.casesTable.validateCasesTableHasNthRows(0);
         });
       });
     });

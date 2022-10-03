@@ -47,14 +47,7 @@ export function CasesTableServiceProvider(
     },
 
     async deleteCase(index: number = 0) {
-      const rows = await find.allByCssSelector(
-        '[data-test-subj*="case-action-popover-button-"',
-        100
-      );
-
-      assertCaseExists(index, rows.length);
-
-      await rows[index].click();
+      this.openRowActions(index);
       await testSubjects.existOrFail('cases-bulk-action-delete');
       await testSubjects.click('cases-bulk-action-delete');
       await testSubjects.existOrFail('confirmModalConfirmButton', {
@@ -67,9 +60,7 @@ export function CasesTableServiceProvider(
     },
 
     async bulkDeleteAllCases() {
-      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
-      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
-      await button.click();
+      await this.selectAllCasesAndOpenBulkActions();
 
       await testSubjects.existOrFail('cases-bulk-action-delete');
       await testSubjects.click('cases-bulk-action-delete');
@@ -171,7 +162,7 @@ export function CasesTableServiceProvider(
       await testSubjects.click('all-cases-refresh');
     },
 
-    async changeStatus(status: CaseStatuses, index: number) {
+    async openRowActions(index: number) {
       const rows = await find.allByCssSelector(
         '[data-test-subj*="case-action-popover-button-"',
         100
@@ -181,8 +172,21 @@ export function CasesTableServiceProvider(
 
       const row = rows[index];
       await row.click();
+      await find.existsByCssSelector('[data-test-subj*="case-action-popover-"');
+    },
+
+    async selectAllCasesAndOpenBulkActions() {
+      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
+      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
+      await button.click();
+    },
+
+    async changeStatus(status: CaseStatuses, index: number) {
+      await this.openRowActions(index);
 
       await testSubjects.existOrFail('cases-bulk-action-delete');
+
+      await find.existsByCssSelector('[data-test-subj*="case-action-status-panel-"');
       const statusButton = await find.byCssSelector('[data-test-subj*="case-action-status-panel-"');
 
       statusButton.click();
@@ -192,9 +196,7 @@ export function CasesTableServiceProvider(
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
-      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
-      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
-      await button.click();
+      await this.selectAllCasesAndOpenBulkActions();
 
       await testSubjects.existOrFail('case-bulk-action-status');
       await testSubjects.click('case-bulk-action-status');
