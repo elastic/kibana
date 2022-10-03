@@ -14,17 +14,16 @@ import { css } from '@emotion/css';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
-  UnifiedHistogramContext,
+  UnifiedHistogramChartContext,
   UnifiedHistogramServices,
-  UnifiedHistogramStatus,
+  UnifiedHistogramHitsContext,
 } from '../types';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   className?: string;
   services: UnifiedHistogramServices;
-  status: UnifiedHistogramStatus;
-  hits?: number;
-  histogram?: UnifiedHistogramContext;
+  hits: UnifiedHistogramHitsContext;
+  chart?: UnifiedHistogramChartContext;
   resizeRef: RefObject<HTMLDivElement>;
   topPanelHeight?: number;
   appendHitsCounter?: ReactElement;
@@ -38,9 +37,8 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
 export const UnifiedHistogramLayout = ({
   className,
   services,
-  status,
   hits,
-  histogram,
+  chart,
   resizeRef,
   topPanelHeight,
   appendHitsCounter,
@@ -61,20 +59,20 @@ export const UnifiedHistogramLayout = ({
     []
   );
 
-  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || !histogram || histogram.hidden;
+  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || !chart || chart.hidden;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minTopPanelHeight = euiTheme.base * 8;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartClassName =
-    showFixedPanels && !histogram?.hidden
+    showFixedPanels && !chart?.hidden
       ? css`
           height: ${defaultTopPanelHeight}px;
         `
       : 'eui-fullHeight';
 
-  const panelsMode = histogram
+  const panelsMode = chart
     ? showFixedPanels
       ? PANELS_MODE.FIXED
       : PANELS_MODE.RESIZABLE
@@ -86,13 +84,16 @@ export const UnifiedHistogramLayout = ({
         <Chart
           className={chartClassName}
           services={services}
-          status={status}
-          hits={hits ?? 0}
-          histogram={histogram}
+          hits={hits}
+          chart={chart}
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
           onEditVisualization={onEditVisualization}
-          onResetChartHeight={panelsMode === PANELS_MODE.RESIZABLE ? onResetChartHeight : undefined}
+          onResetChartHeight={
+            topPanelHeight !== defaultTopPanelHeight && panelsMode === PANELS_MODE.RESIZABLE
+              ? onResetChartHeight
+              : undefined
+          }
           onHideChartChange={onHideChartChange}
           onIntervalChange={onIntervalChange}
         />

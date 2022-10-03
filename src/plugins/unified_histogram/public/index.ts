@@ -11,9 +11,9 @@ import { UnifiedHistogramPublicPlugin } from './plugin';
 export type { UnifiedHistogramLayoutProps } from './layout';
 export { UnifiedHistogramLayout } from './layout';
 export type {
-  UnifiedHistogramStatus,
+  UnifiedHistogramFetchStatus,
   UnifiedHistogramServices,
-  UnifiedHistogramContext,
+  UnifiedHistogramChartContext,
 } from './types';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();

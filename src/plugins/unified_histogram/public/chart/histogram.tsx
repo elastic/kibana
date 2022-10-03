@@ -46,16 +46,11 @@ import {
 } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import { css } from '@emotion/react';
-import type {
-  UnifiedHistogramContext,
-  UnifiedHistogramServices,
-  UnifiedHistogramStatus,
-} from '../types';
+import type { UnifiedHistogramChartContext, UnifiedHistogramServices } from '../types';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
-  status: UnifiedHistogramStatus;
-  histogram: UnifiedHistogramContext;
+  chart: UnifiedHistogramChartContext;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
 }
 
@@ -71,8 +66,7 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 
 export function Histogram({
   services: { data, theme, uiSettings, fieldFormats },
-  status,
-  histogram: { timeInterval, bucketInterval, chart, error },
+  chart: { status, timeInterval, bucketInterval, data: chartData, error },
   timefilterUpdateHandler,
 }: HistogramProps) {
   const chartTheme = theme.useChartsTheme();
@@ -144,7 +138,7 @@ export function Histogram({
 
   const { euiTheme } = useEuiTheme();
 
-  if (!chart && status === 'loading') {
+  if (!chartData && status === 'loading') {
     const chartLoadingCss = css`
       display: flex;
       flex-direction: column;
@@ -207,12 +201,12 @@ export function Histogram({
     );
   }
 
-  if (!chart) {
+  if (!chartData) {
     return null;
   }
 
   const formatXValue = (val: string) => {
-    const xAxisFormat = chart.xAxisFormat.params!.pattern;
+    const xAxisFormat = chartData.xAxisFormat.params!.pattern;
     return moment(val).format(xAxisFormat);
   };
 
@@ -223,17 +217,17 @@ export function Histogram({
    * see https://github.com/elastic/kibana/issues/27410
    * TODO: Once the Discover query has been update, we should change the below to use the new field
    */
-  const { intervalESValue, intervalESUnit, interval } = chart.ordered;
+  const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
   const xInterval = interval.asMilliseconds();
 
-  const xValues = chart.xAxisOrderedValues;
+  const xValues = chartData.xAxisOrderedValues;
   const lastXValue = xValues[xValues.length - 1];
 
-  const domain = chart.ordered;
+  const domain = chartData.ordered;
   const domainStart = domain.min.valueOf();
   const domainEnd = domain.max.valueOf();
 
-  const domainMin = Math.min(chart.values[0]?.x, domainStart);
+  const domainMin = Math.min(chartData.values[0]?.x, domainStart);
   const domainMax = Math.max(domainEnd - xInterval, lastXValue);
 
   const xDomain = {
@@ -251,7 +245,7 @@ export function Histogram({
     type: TooltipType.VerticalCursor,
   };
 
-  const xAxisFormatter = fieldFormats.deserialize(chart.yAxisFormat);
+  const xAxisFormatter = fieldFormats.deserialize(chartData.yAxisFormat);
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 
@@ -343,10 +337,10 @@ export function Histogram({
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
-            data={chart.values}
+            data={chartData.values}
             yNice
             timeZone={timeZone}
-            name={chart.yAxisLabel}
+            name={chartData.yAxisLabel}
           />
         </Chart>
       </div>

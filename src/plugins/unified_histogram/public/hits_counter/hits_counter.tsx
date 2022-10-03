@@ -12,16 +12,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { UnifiedHistogramStatus } from '../types';
+import type { UnifiedHistogramHitsContext } from '../types';
 
 export interface HitsCounterProps {
-  hits: number;
-  status: UnifiedHistogramStatus;
+  hits: UnifiedHistogramHitsContext;
   append?: ReactElement;
 }
 
-export function HitsCounter({ hits, status, append }: HitsCounterProps) {
-  if (!hits && status === 'loading') {
+export function HitsCounter({ hits, append }: HitsCounterProps) {
+  if (!hits.number && hits.status === 'loading') {
     return null;
   }
 
@@ -31,7 +30,7 @@ export function HitsCounter({ hits, status, append }: HitsCounterProps) {
         status === 'partial' ? 'unifiedHistogramQueryHitsPartial' : 'unifiedHistogramQueryHits'
       }
     >
-      <FormattedNumber value={hits} />
+      <FormattedNumber value={hits.number ?? 0} />
     </strong>
   );
 
@@ -53,14 +52,14 @@ export function HitsCounter({ hits, status, append }: HitsCounterProps) {
             <FormattedMessage
               id="unifiedHistogram.partialHits"
               defaultMessage="≥{formattedHits} {hits, plural, one {hit} other {hits}}"
-              values={{ hits, formattedHits }}
+              values={{ hits: hits.number, formattedHits }}
             />
           )}
           {status !== 'partial' && (
             <FormattedMessage
               id="unifiedHistogram.hitsPluralTitle"
               defaultMessage="{formattedHits} {hits, plural, one {hit} other {hits}}"
-              values={{ hits, formattedHits }}
+              values={{ hits: hits.number, formattedHits }}
             />
           )}
         </EuiText>

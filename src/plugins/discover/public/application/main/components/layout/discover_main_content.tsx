@@ -12,16 +12,13 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
-  useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import React, { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { css } from '@emotion/css';
-import { Panels, PANELS_MODE, UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -30,7 +27,6 @@ import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_m
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { DiscoverChart } from '../chart';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
@@ -40,9 +36,9 @@ import {
 } from '../sidebar/lib/visualize_trigger_utils';
 import { useDataState } from '../../hooks/use_data_state';
 
-const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
+export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
 
 export interface DiscoverMainContentProps {
@@ -101,59 +97,6 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
-  const topPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
-  );
-
-  const mainPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
-  );
-
-  const hideChart = state.hideChart || !isTimeBased;
-  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || hideChart;
-  const { euiTheme } = useEuiTheme();
-  const defaultTopPanelHeight = euiTheme.base * 12;
-  const minTopPanelHeight = euiTheme.base * 8;
-  const minMainPanelHeight = euiTheme.base * 10;
-
-  const [topPanelHeight, setTopPanelHeight] = useState(() => {
-    const storedHeight = storage.get(HISTOGRAM_HEIGHT_KEY);
-    return storedHeight ? Number(storedHeight) : undefined;
-  });
-
-  const storeTopPanelHeight = useCallback(
-    (newTopPanelHeight: number) => {
-      storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
-      setTopPanelHeight(newTopPanelHeight);
-    },
-    [storage]
-  );
-
-  const resetTopPanelHeight = useCallback(
-    () => storeTopPanelHeight(defaultTopPanelHeight),
-    [storeTopPanelHeight, defaultTopPanelHeight]
-  );
-
-  const onTopPanelHeightChange = useCallback(
-    (newTopPanelHeight: number) => storeTopPanelHeight(newTopPanelHeight),
-    [storeTopPanelHeight]
-  );
-
-  const chartClassName =
-    showFixedPanels && !hideChart
-      ? css`
-          height: ${defaultTopPanelHeight}px;
-        `
-      : 'eui-fullHeight';
-
-  const panelsMode = isPlainRecord
-    ? PANELS_MODE.SINGLE
-    : showFixedPanels
-    ? PANELS_MODE.FIXED
-    : PANELS_MODE.RESIZABLE;
-
   const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
   const [canVisualize, setCanVisualize] = useState(false);
 
@@ -171,6 +114,51 @@ export const DiscoverMainContent = ({
     triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
   }, [dataView, savedSearch.columns, timeField]);
 
+  const hideChart = state.hideChart || !isTimeBased;
+  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || hideChart;
+
+  const [topPanelHeight, setTopPanelHeight] = useState(() => {
+    const storedHeight = storage.get(HISTOGRAM_HEIGHT_KEY);
+    return storedHeight ? Number(storedHeight) : undefined;
+  });
+
+  const storeTopPanelHeight = useCallback(
+    (newTopPanelHeight: number | undefined) => {
+      storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
+      setTopPanelHeight(newTopPanelHeight);
+    },
+    [storage]
+  );
+
+  const resetTopPanelHeight = useCallback(
+    () => storeTopPanelHeight(undefined),
+    [storeTopPanelHeight]
+  );
+
+  const onTopPanelHeightChange = useCallback(
+    (newTopPanelHeight: number) => storeTopPanelHeight(newTopPanelHeight),
+    [storeTopPanelHeight]
+  );
+
+  const onHideChartChange = useCallback(
+    (newHideChart: boolean) => {
+      storage.set(CHART_HIDDEN_KEY, newHideChart);
+      stateContainer.setAppState({ hideChart: newHideChart });
+    },
+    [stateContainer, storage]
+  );
+
+  const onIntervalChange = useCallback(
+    (newInterval: string) => {
+      stateContainer.setAppState({ interval: newInterval });
+    },
+    [stateContainer]
+  );
+
+  const { result: hitsNumber, fetchStatus: hitsFetchStatus } = useDataState(
+    savedSearchData$.totalHits$
+  );
+
   const {
     chartData,
     bucketInterval,
@@ -178,23 +166,32 @@ export const DiscoverMainContent = ({
     error,
   } = useDataState(savedSearchData$.charts$);
 
-  const { result: hits, fetchStatus: hitsFetchStatus } = useDataState(savedSearchData$.totalHits$);
+  const hits = useMemo(
+    () => ({
+      status: hitsFetchStatus,
+      number: hitsNumber,
+    }),
+    [hitsFetchStatus, hitsNumber]
+  );
 
-  const histogram = {
-    hidden: hideChart,
-    timeInterval: state.interval,
-    bucketInterval,
-    chart: chartData,
-    error,
-  };
+  const chart = useMemo(
+    () => ({
+      status: chartFetchStatus,
+      hidden: hideChart,
+      timeInterval: state.interval,
+      bucketInterval,
+      data: chartData,
+      error,
+    }),
+    [bucketInterval, chartData, chartFetchStatus, error, hideChart, state.interval]
+  );
 
   return (
     <UnifiedHistogramLayout
       className="dscPageContent__inner"
       services={{ data, theme, uiSettings, fieldFormats }}
-      status={}
       hits={hits}
-      histogram={histogram}
+      chart={chart}
       resizeRef={resizeRef}
       topPanelHeight={topPanelHeight}
       appendHitsCounter={
@@ -220,8 +217,8 @@ export const DiscoverMainContent = ({
       onTopPanelHeightChange={onTopPanelHeightChange}
       onEditVisualization={canVisualize ? onEditVisualization : undefined}
       onResetChartHeight={resetTopPanelHeight}
-      onHideChartChange={(newHideChart) => stateContainer.setAppState({ hideChart: newHideChart })}
-      onIntervalChange={(newInterval) => stateContainer.setAppState({ interval: newInterval })}
+      onHideChartChange={onHideChartChange}
+      onIntervalChange={onIntervalChange}
     >
       <EuiFlexGroup
         className="eui-fullHeight"
@@ -266,89 +263,5 @@ export const DiscoverMainContent = ({
         )}
       </EuiFlexGroup>
     </UnifiedHistogramLayout>
-  );
-
-  return (
-    <>
-      <InPortal node={topPanelNode}>
-        <DiscoverChartMemoized
-          className={chartClassName}
-          resetSavedSearch={resetSavedSearch}
-          savedSearch={savedSearch}
-          savedSearchDataChart$={savedSearchData$.charts$}
-          savedSearchDataTotalHits$={savedSearchData$.totalHits$}
-          stateContainer={stateContainer}
-          dataView={dataView}
-          hideChart={state.hideChart}
-          interval={state.interval}
-          isTimeBased={isTimeBased}
-          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
-          onResetChartHeight={
-            topPanelHeight !== defaultTopPanelHeight &&
-            panelsMode === PANELS_MODE.RESIZABLE
-              ? resetTopPanelHeight
-              : undefined
-          }
-        />
-      </InPortal>
-      <InPortal node={mainPanelNode}>
-        <EuiFlexGroup
-          className="eui-fullHeight"
-          direction="column"
-          gutterSize="none"
-          responsive={false}
-        >
-          {!isPlainRecord && (
-            <EuiFlexItem grow={false}>
-              {!showFixedPanels && <EuiSpacer size="s" />}
-              <EuiHorizontalRule margin="none" />
-              <DocumentViewModeToggle
-                viewMode={viewMode}
-                setDiscoverViewMode={setDiscoverViewMode}
-              />
-            </EuiFlexItem>
-          )}
-          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-            <DiscoverDocuments
-              documents$={savedSearchData$.documents$}
-              expandedDoc={expandedDoc}
-              dataView={dataView}
-              navigateTo={navigateTo}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              savedSearch={savedSearch}
-              setExpandedDoc={setExpandedDoc}
-              state={state}
-              stateContainer={stateContainer}
-              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
-            />
-          ) : (
-            <FieldStatisticsTableMemoized
-              availableFields$={savedSearchData$.availableFields$}
-              savedSearch={savedSearch}
-              dataView={dataView}
-              query={state.query}
-              filters={state.filters}
-              columns={columns}
-              stateContainer={stateContainer}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              trackUiMetric={trackUiMetric}
-              savedSearchRefetch$={savedSearchRefetch$}
-              savedSearchDataTotalHits$={savedSearchData$.totalHits$}
-            />
-          )}
-        </EuiFlexGroup>
-      </InPortal>
-      <Panels
-        className="dscPageContent__inner"
-        mode={panelsMode}
-        resizeRef={resizeRef}
-        topPanelHeight={topPanelHeight}
-        minTopPanelHeight={minTopPanelHeight}
-        minMainPanelHeight={minMainPanelHeight}
-        topPanel={<OutPortal node={topPanelNode} />}
-        mainPanel={<OutPortal node={mainPanelNode} />}
-        onTopPanelHeightChange={onTopPanelHeightChange}
-      />
-    </>
   );
 };

@@ -10,5 +10,6 @@
   "server": false,
   "ui": true,
   "requiredPlugins": [],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "requiredBundles": ["charts", "data"]
 }

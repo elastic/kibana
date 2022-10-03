@@ -14,7 +14,12 @@ import type { Duration, Moment } from 'moment';
 import type { Unit } from '@kbn/datemath';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
-export type UnifiedHistogramStatus = 'loading' | 'complete' | 'partial' | 'error';
+export type UnifiedHistogramFetchStatus =
+  | 'uninitialized'
+  | 'loading'
+  | 'partial'
+  | 'complete'
+  | 'error';
 
 export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
@@ -90,10 +95,16 @@ export interface TimechartBucketInterval {
   scale?: number;
 }
 
-export interface UnifiedHistogramContext {
+export interface UnifiedHistogramHitsContext {
+  status: UnifiedHistogramFetchStatus;
+  number?: number;
+}
+
+export interface UnifiedHistogramChartContext {
+  status: UnifiedHistogramFetchStatus;
   hidden?: boolean;
   timeInterval?: string;
-  bucketInterval: TimechartBucketInterval;
-  chart?: ChartData;
+  bucketInterval?: TimechartBucketInterval;
+  data?: ChartData;
   error?: Error;
 }
