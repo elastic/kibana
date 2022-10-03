@@ -104,7 +104,7 @@ export const SortFields = ({ onSortChange }: { onSortChange?: () => void }) => {
         <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxxs">
-              <h3>{SORT_TITLE}</h3>
+              <span>{SORT_TITLE}</span>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
