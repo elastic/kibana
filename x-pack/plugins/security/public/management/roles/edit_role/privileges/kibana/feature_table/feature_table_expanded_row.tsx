@@ -87,9 +87,7 @@ export const FeatureTableExpandedRow = ({
               !privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id, privilegeIndex)
             }
           />
-          {licenseAllowsSubFeatPrivCustomization ? (
-            <></>
-          ) : (
+          {licenseAllowsSubFeatPrivCustomization ? undefined : (
             <EuiIconTip
               data-test-subj="subFeaturesTip"
               position="right"
