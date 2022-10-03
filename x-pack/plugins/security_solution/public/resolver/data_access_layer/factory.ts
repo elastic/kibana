@@ -17,6 +17,17 @@ import type {
   ResolverSchema,
 } from '../../../common/endpoint/types';
 
+function getRangeFilter(timeRange: TimeRange | undefined) {
+  return timeRange
+    ? {
+        timeRange: {
+          from: timeRange.from,
+          to: timeRange.to,
+        },
+      }
+    : [];
+}
+
 /**
  * The data access layer for resolver. All communication with the Kibana server is done through this object. This object is provided to Resolver. In tests, a mock data access layer can be used instead.
  */
@@ -43,10 +54,7 @@ export function dataAccessLayerFactory(
           query: {},
           body: JSON.stringify({
             indexPatterns,
-            timeRange: {
-              from: timeRange.from,
-              to: timeRange.to,
-            },
+            ...getRangeFilter(timeRange),
             filter: JSON.stringify({
               bool: {
                 filter: [
@@ -82,10 +90,7 @@ export function dataAccessLayerFactory(
       const commonFields = {
         query: { afterEvent: after, limit: 25 },
         body: {
-          timeRange: {
-            from: timeRange.from,
-            to: timeRange.to,
-          },
+          ...getRangeFilter(timeRange),
           indexPatterns,
         },
       };
@@ -135,6 +140,7 @@ export function dataAccessLayerFactory(
         query: { limit },
         body: JSON.stringify({
           indexPatterns,
+          ...getRangeFilter(timeRange),
           filter: JSON.stringify({
             bool: {
               filter: [
@@ -145,9 +151,6 @@ export function dataAccessLayerFactory(
           }),
         }),
       };
-      if (timeRange !== undefined) {
-        query.timeRange = timeRange;
-      }
       const response: ResolverPaginatedEvents = await context.services.http.post(
         '/api/endpoint/resolver/events',
         query
@@ -200,10 +203,7 @@ export function dataAccessLayerFactory(
             query: { limit: 1 },
             body: JSON.stringify({
               indexPatterns,
-              timeRange: {
-                from: timeRange.from,
-                to: timeRange.to,
-              },
+              ...getRangeFilter(timeRange),
               filter: JSON.stringify(filter),
             }),
           }
@@ -217,10 +217,7 @@ export function dataAccessLayerFactory(
             query: { limit: 1 },
             body: JSON.stringify({
               indexPatterns,
-              timeRange: {
-                from: timeRange.from,
-                to: timeRange.to,
-              },
+              ...getRangeFilter(timeRange),
               entityType: 'alertDetail',
               eventID,
             }),

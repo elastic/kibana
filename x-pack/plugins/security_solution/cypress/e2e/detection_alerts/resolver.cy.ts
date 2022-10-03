@@ -42,6 +42,4 @@ describe('Analyze events view for alerts', () => {
     cy.get(TOASTER).should('be.visible');
     cy.get(ANALYZER_NODE).first().should('be.visible');
   });
-
-  it(`should contain the same number of nodes in the unbounded view and the range suggestion`)
 });

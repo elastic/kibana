@@ -20,13 +20,12 @@ import type { ResolverQueryParams } from '../tree/queries/base';
 export class EventsQuery extends BaseResolverQuery {
   readonly pagination: PaginationBuilder;
   constructor({
-    schema,
     indexPatterns,
     timeRange,
     isInternalRequest,
     pagination,
   }: ResolverQueryParams & { pagination: PaginationBuilder }) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest });
+    super({ indexPatterns, timeRange, isInternalRequest });
     this.pagination = pagination;
   }
 

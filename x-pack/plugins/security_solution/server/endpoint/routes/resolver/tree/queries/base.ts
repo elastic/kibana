@@ -11,7 +11,7 @@ import type { TimeRange } from '../utils';
 import { resolverFields } from '../utils';
 
 export interface ResolverQueryParams {
-  readonly schema: ResolverSchema | undefined;
+  readonly schema?: ResolverSchema;
   readonly indexPatterns: string | string[];
   readonly timeRange: TimeRange | undefined;
   readonly isInternalRequest?: boolean;
@@ -22,17 +22,21 @@ export interface ResolverQueryParams {
 }
 
 export class BaseResolverQuery implements ResolverQueryParams {
-  readonly schema: ResolverSchema | undefined;
+  readonly schema: ResolverSchema;
   readonly indexPatterns: string | string[];
   readonly timeRange: TimeRange | undefined;
   readonly isInternalRequest?: boolean;
   readonly resolverFields?: JsonValue[];
 
   constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
-    if (schema) {
-      this.resolverFields = resolverFields(schema);
-    }
-    this.schema = schema;
+    const schemaOrDefault = schema
+      ? schema
+      : {
+          id: 'process.entity_id',
+          parent: 'process.parent.entity_id',
+        };
+    this.resolverFields = resolverFields(schemaOrDefault);
+    this.schema = schemaOrDefault;
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
     this.isInternalRequest = isInternalRequest;
