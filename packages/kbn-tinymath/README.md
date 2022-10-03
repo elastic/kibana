@@ -68,5 +68,5 @@ This package is rebuilt when running `yarn kbn bootstrap`, but can also be build
 using `yarn build` from the `packages/kbn-tinymath` directory.
 ### Running tests
 
-To test `@kbn/tinymath` from Kibana, run `yarn run jest --watch packages/kbn-tinymath` from
+To test `@kbn/tinymath` from Kibana, run `node scripts/jest --config packages/kbn-tinymath/jest.config.js` from
 the top level of Kibana.
