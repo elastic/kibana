@@ -169,6 +169,24 @@ describe('options list queries', () => {
       `);
     });
 
+    test('create IP aggregation for IP field', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        fieldName: 'clientip',
+        fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+      };
+      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+      expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        .toMatchInlineSnapshot(`
+        Object {
+          "terms": Object {
+            "execution_hint": "map",
+            "field": "clientip",
+            "shard_size": 10,
+          },
+        }
+      `);
+    });
+
     test('creates nested aggregation for nested field', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         fieldName: 'coolNestedField',
@@ -262,6 +280,32 @@ describe('options list queries', () => {
         Array [
           "false",
           "true",
+        ]
+      `);
+    });
+
+    test('parses IP result', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        fieldName: 'clientip',
+        fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+      };
+      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+      rawSearchResponseMock.aggregations = {
+        suggestions: {
+          buckets: [
+            { doc_count: 5, key: '56.73.58.63' },
+            { doc_count: 20, key: '111.52.174.2' },
+            { doc_count: 10, key: '23.216.241.120' },
+            { doc_count: 15, key: '196.162.13.39' },
+          ],
+        },
+      };
+      expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
+        Array [
+          "56.73.58.63",
+          "111.52.174.2",
+          "23.216.241.120",
+          "196.162.13.39",
         ]
       `);
     });
