@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-
-export const decorators = [EuiThemeProviderDecorator];
+export const getActionTypeRegistry = () => {
+  return {
+    has: () => true,
+    register: () => {},
+    get: () => {},
+    list: () => [],
+  };
+};

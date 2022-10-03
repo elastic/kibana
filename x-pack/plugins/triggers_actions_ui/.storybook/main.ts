@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+import { defaultConfig } from '@kbn/storybook';
+
+module.exports = defaultConfig;
