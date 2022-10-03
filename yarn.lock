@@ -3678,7 +3678,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown":
+"@kbn/shared-ux-markdown-types@link:bazel-bin/packages/shared-ux/markdown/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/impl":
   version "0.0.0"
   uid ""
 
@@ -7803,7 +7807,11 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/npm_module_types":
+"@types/kbn__shared-ux-markdown-types@link:bazel-bin/packages/shared-ux/markdown/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
