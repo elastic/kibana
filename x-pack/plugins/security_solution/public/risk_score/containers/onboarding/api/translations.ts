@@ -141,7 +141,7 @@ export const USER_RISK_SCORES_ENABLED_TITLE = i18n.translate(
 );
 
 export const RISK_SCORES_ENABLED_TEXT = (items: string) =>
-  i18n.translate('xpack.securitySolution.riskScore.savedObjects.bulkCreateSuccessTitle', {
+  i18n.translate('xpack.securitySolution.riskScore.savedObjects.enableRiskScoreSuccessTitle', {
     values: { items },
     defaultMessage: `{items} imported successfully`,
   });
