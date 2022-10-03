@@ -154,10 +154,10 @@ const getMockErrorLog = () => {
 };
 
 const baseRulesListGetResponse = (path: string) => {
-  if (path === '/api/triggers_actions_ui/_config') {
+  if (path === '/internal/triggers_actions_ui/_config') {
     return mockConfig;
   }
-  if (path === '/api/triggers_actions_ui/_health') {
+  if (path === '/internal/triggers_actions_ui/_health') {
     return mockHealth;
   }
   if (path === '/api/actions/connectors') {
@@ -229,6 +229,18 @@ const baseEventLogListGetResponse = (path: string) => {
     return {
       errors: Array.from(Array(4), () => getMockErrorLog()),
       totalErrors: 4,
+    };
+  }
+  if (path.endsWith('/_execution_kpi')) {
+    return {
+      activeAlerts: 49,
+      erroredActions: 36,
+      failure: 30,
+      newAlerts: 1,
+      recoveredAlerts: 20,
+      success: 49,
+      triggeredActions: 49,
+      unknown: 10,
     };
   }
 };
