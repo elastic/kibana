@@ -11,19 +11,20 @@ import type { Field, Fields } from '../../fields/field';
 const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text', 'match_only_text', 'wildcard'];
 const QUERY_DEFAULT_FIELD_LIMIT = 1024;
 
-const flattenFieldsToNameAndType = (
+const flattenAndExtractFields = (
   fields: Fields,
   path: string = ''
-): Array<Pick<Field, 'name' | 'type'>> => {
-  let newFields: Array<Pick<Field, 'name' | 'type'>> = [];
+): Array<Pick<Field, 'name' | 'type' | 'default_field'>> => {
+  let newFields: Array<Pick<Field, 'name' | 'type' | 'default_field'>> = [];
   fields.forEach((field) => {
     const fieldName = path ? `${path}.${field.name}` : field.name;
     newFields.push({
       name: fieldName,
       type: field.type,
+      default_field: field.default_field,
     });
     if (field.fields && field.fields.length) {
-      newFields = newFields.concat(flattenFieldsToNameAndType(field.fields, fieldName));
+      newFields = newFields.concat(flattenAndExtractFields(field.fields, fieldName));
     }
   });
   return newFields;
@@ -45,8 +46,9 @@ export function buildDefaultSettings({
   const logger = appContextService.getLogger();
   // Find all field names to set `index.query.default_field` to, which will be
   // the first 1024 keyword or text fields
-  const defaultFields = flattenFieldsToNameAndType(fields).filter(
-    (field) => field.type && QUERY_DEFAULT_FIELD_TYPES.includes(field.type)
+  const defaultFields = flattenAndExtractFields(fields).filter(
+    (field) =>
+      field.type && QUERY_DEFAULT_FIELD_TYPES.includes(field.type) && field.default_field !== false
   );
   if (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT) {
     logger.warn(
