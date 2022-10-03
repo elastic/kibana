@@ -5,7 +5,7 @@
 <titleabbrev>ServiceNow</titleabbrev>
 ++++
 
-The ServiceNow connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create ServiceNow incidents.
+The {sn} connector uses the https://docs.servicenow.com/bundle/sandiego-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create ServiceNow incidents. The {sn-itsm} connector can be used for rule actions and cases. The {sn-sir} connector can only be used for cases.
 
 [float]
 [[servicenow-connector-prerequisites]]
