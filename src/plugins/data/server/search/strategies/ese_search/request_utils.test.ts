@@ -140,7 +140,9 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = await getDefaultAsyncGetParams(mockUiSettingsClient, mockConfig, { sessionId: 'foo' });
+      const params = await getDefaultAsyncGetParams(mockUiSettingsClient, mockConfig, {
+        sessionId: 'foo',
+      });
       expect(params).not.toHaveProperty('keep_alive');
     });
 
@@ -149,7 +151,9 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = await getDefaultAsyncGetParams(mockUiSettingsClient, mockConfig, { sessionId: 'foo' });
+      const params = await getDefaultAsyncGetParams(mockUiSettingsClient, mockConfig, {
+        sessionId: 'foo',
+      });
       expect(params).toHaveProperty('keep_alive', '1m');
     });
   });

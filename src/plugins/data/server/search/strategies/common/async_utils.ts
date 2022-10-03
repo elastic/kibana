@@ -10,9 +10,9 @@ import {
   AsyncSearchSubmitRequest,
   AsyncSearchGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { IUiSettingsClient } from '@kbn/core/server';
 import { SearchSessionsConfigSchema } from '../../../../config';
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';
-import { IUiSettingsClient } from '@kbn/core/server';
 
 /**
  @internal
@@ -21,11 +21,15 @@ export async function getCommonDefaultAsyncSubmitParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Promise<Pick<
-  AsyncSearchSubmitRequest,
-  'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'
->> {
-  const waitForCompletion = await uiSettingsClient.get<number>(UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION);
+): Promise<
+  Pick<
+    AsyncSearchSubmitRequest,
+    'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'
+  >
+> {
+  const waitForCompletion = await uiSettingsClient.get<number>(
+    UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION
+  );
   const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
 
   const keepAlive = useSearchSessions
@@ -50,7 +54,9 @@ export async function getCommonDefaultAsyncGetParams(
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Promise<Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'>> {
-  const waitForCompletion = await uiSettingsClient.get(UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION);
+  const waitForCompletion = await uiSettingsClient.get(
+    UI_SETTINGS.SEARCH_ASYNC_WAIT_FOR_COMPLETION
+  );
   const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
 
   return {
