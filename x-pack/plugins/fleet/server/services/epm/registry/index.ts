@@ -257,7 +257,7 @@ async function getPackageInfoFromArchiveOrCache(
   version: string,
   archiveBuffer: Buffer,
   archivePath: string
-): Promise<ArchivePackage | RegistryPackage> {
+): Promise<ArchivePackage> {
   const cachedInfo = getPackageInfo({ name, version });
 
   if (!cachedInfo) {
@@ -278,7 +278,7 @@ export async function getRegistryPackage(
   options?: { ignoreUnverified?: boolean }
 ): Promise<{
   paths: string[];
-  packageInfo: ArchivePackage | RegistryPackage;
+  packageInfo: ArchivePackage;
   verificationResult?: PackageVerificationResult;
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
