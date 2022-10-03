@@ -194,7 +194,7 @@ export const SubChart: React.FC<SubChartProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{asPercentage(percentage / 100, 2)}</EuiText>
+            <EuiText size="s">{asPercentage(percentage / 100)}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

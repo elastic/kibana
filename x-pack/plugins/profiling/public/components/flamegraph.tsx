@@ -31,11 +31,9 @@ function TooltipRow({
   formatAsPercentage: boolean;
   showChange: boolean;
 }) {
-  const valueLabel = formatAsPercentage ? asPercentage(value, 2) : value.toString();
+  const valueLabel = formatAsPercentage ? asPercentage(value) : value.toString();
   const comparisonLabel =
-    formatAsPercentage && isNumber(comparison)
-      ? asPercentage(comparison, 2)
-      : comparison?.toString();
+    formatAsPercentage && isNumber(comparison) ? asPercentage(comparison) : comparison?.toString();
 
   const diff = showChange && isNumber(comparison) ? comparison - value : undefined;
 
@@ -46,7 +44,7 @@ function TooltipRow({
       defaultMessage: 'no change',
     });
   } else if (formatAsPercentage && diff !== undefined) {
-    diffLabel = asPercentage(diff, 2);
+    diffLabel = asPercentage(diff);
   }
 
   return (
@@ -226,10 +224,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
           exeFileName: highlightedFrame.ExeFileName,
           sourceFileName: highlightedFrame.SourceFilename,
           functionName: highlightedFrame.FunctionName,
-          samples: primaryFlamegraph.Samples[highlightedVmIndex],
-          childSamples:
-            primaryFlamegraph.Samples[highlightedVmIndex] -
-            primaryFlamegraph.CountExclusive[highlightedVmIndex],
+          countInclusive: primaryFlamegraph.Samples[highlightedVmIndex],
+          countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
         }
       : undefined;
 
@@ -315,8 +311,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                 frame={selected}
                 status={highlightedFrameStatus}
                 totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
-                totalTraces={primaryFlamegraph?.TotalTraces ?? 0}
-                sampledTraces={primaryFlamegraph?.SampledTraces ?? 0}
+                totalSamples={totalSamples}
                 onClose={() => {
                   setShowInformationWindow(false);
                 }}
