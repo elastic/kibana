@@ -20,7 +20,7 @@ const resizeTo = {
  * Calculate the size of an image, fitting to our limits see {@link resizeTo},
  * while preserving the aspect ratio.
  */
-function fitToBox(width: number, height: number): { width: number; height: number } {
+export function fitToBox(width: number, height: number): { width: number; height: number } {
   const offsetRatio = Math.abs(
     Math.min(
       // Find the aspect at which our box is smallest, if less than 1, it means we exceed the limits

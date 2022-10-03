@@ -33,10 +33,12 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
  */
 export const Image = React.forwardRef<HTMLImageElement, Props>(
   ({ src, alt, onFirstVisible, onLoad, ...rest }, ref) => {
+    const { http } = useFilesContext();
+
     const [hash, setHash] = useState<undefined | string>(undefined);
     const [imgSrc, setImageSrc] = useState<undefined | string>(undefined);
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
-    const { http } = useFilesContext();
+
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
 
     useEffect(() => {
