@@ -2981,6 +2981,13 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
+    // Check that the rule is enabled
+    if (!attributes.enabled) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.getTaskError', {
+        defaultMessage: 'Error running rule: rule is disabled',
+      });
+    }
+
     let taskDoc: ConcreteTaskInstance | null = null;
     try {
       taskDoc = attributes.scheduledTaskId

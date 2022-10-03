@@ -59,7 +59,7 @@ describe('runSoon()', () => {
       consumer: 'myApp',
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
-      enabled: false,
+      enabled: true,
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'elastic',
       actions: [
@@ -194,6 +194,20 @@ describe('runSoon()', () => {
     });
     const message = await rulesClient.runSoon({ id: '1' });
     expect(message).toBe('Rule is already running');
+    expect(taskManager.runSoon).not.toHaveBeenCalled();
+  });
+
+  test('does not run a rule if that rule is disabled', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      ...existingRule,
+      attributes: {
+        ...existingRule.attributes,
+        enabled: false,
+      },
+    });
+    const message = await rulesClient.runSoon({ id: '1' });
+    expect(message).toBe('Error running rule: rule is disabled');
+    expect(taskManager.get).not.toHaveBeenCalled();
     expect(taskManager.runSoon).not.toHaveBeenCalled();
   });
 

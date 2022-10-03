@@ -14,6 +14,7 @@ const LOADED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
 // eslint-disable-next-line import/no-default-export
 export default function createRunSoonTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
@@ -33,10 +34,13 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
     });
 
     it('should successfully run rule where scheduled task id is different than rule id', async () => {
-      await supertest
-        .post(`${getUrlPrefix(``)}/internal/alerting/rule/${LOADED_RULE_ID}/_run_soon`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await retry.try(async () => {
+        // Sometimes the rule may already be running. Try until it isn't
+        const response = await supertest
+          .post(`${getUrlPrefix(``)}/internal/alerting/rule/${LOADED_RULE_ID}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(response.status).to.eql(204);
+      });
     });
 
     it('should successfully run rule where scheduled task id is same as rule id', async () => {
@@ -75,6 +79,26 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
       expect(runSoonResponse.text).to.eql(
         `Error running rule: Saved object [task/${response.body.id}] not found`
       );
+    });
+
+    it('should return message when rule is disabled', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix(``)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData());
+
+      expect(response.status).to.eql(200);
+      objectRemover.add('default', response.body.id, 'rule', 'alerting');
+
+      await supertest
+        .post(`${getUrlPrefix(``)}/api/alerting/rule/${response.body.id}/_disable`)
+        .set('kbn-xsrf', 'foo');
+
+      const runSoonResponse = await supertest
+        .post(`${getUrlPrefix(``)}/internal/alerting/rule/${response.body.id}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoonResponse.status).to.eql(200);
+      expect(runSoonResponse.text).to.eql(`Error running rule: rule is disabled`);
     });
   });
 }
