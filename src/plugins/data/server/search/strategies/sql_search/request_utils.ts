@@ -22,7 +22,9 @@ export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Promise<Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'>> {
+): Promise<
+  Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'>
+> {
   return {
     ...(await getCommonDefaultAsyncSubmitParams(uiSettingsClient, searchSessionsConfig, options)),
   };
