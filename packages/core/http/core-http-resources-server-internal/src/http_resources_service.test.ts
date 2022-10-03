@@ -16,7 +16,6 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
 
-// import { httpResourcesMock } from './http_resources_service.mock';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 
 const coreContext = mockCoreContext.create();
