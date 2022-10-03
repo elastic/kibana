@@ -96,7 +96,7 @@ export const useSubAction = <P, R>({
       try {
         dispatch({ type: SubActionsActionsList.START });
 
-        const res = await executeAction<P, R>({
+        const res = await executeAction<R>({
           id: connectorId,
           http,
           params: {

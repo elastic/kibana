@@ -19,14 +19,14 @@ const rewriteBodyRes = <R>({
   serviceMessage,
 });
 
-export async function executeAction<P, R>({
+export async function executeAction<R>({
   id,
   params,
   http,
 }: {
   id: string;
   http: HttpSetup;
-  params: { subAction: string; subActionParams?: P };
+  params: Record<string, unknown>;
 }): Promise<ActionTypeExecutorResult<R>> {
   const res = await http.post<AsApiContract<ActionTypeExecutorResult<R>>>(
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}/_execute`,

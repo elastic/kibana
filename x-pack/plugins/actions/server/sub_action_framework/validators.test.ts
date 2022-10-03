@@ -26,9 +26,9 @@ describe('Validators', () => {
       name: 'Test',
       minimumLicenseRequired: 'basic' as const,
       supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: TestConfigSchema },
-        secrets: { schema: TestSecretsSchema },
+      schema: {
+        config: TestConfigSchema,
+        secrets: TestSecretsSchema,
       },
       Service,
     };
@@ -54,14 +54,14 @@ describe('Validators', () => {
   it('should validate the params correctly', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(params?.schema.validate({ subAction: 'test', subActionParams: {} }));
+    expect(params.schema.validate({ subAction: 'test', subActionParams: {} }));
   });
 
   it('should allow any field in subActionParams', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
     expect(
-      params?.schema.validate({
+      params.schema.validate({
         subAction: 'test',
         subActionParams: {
           foo: 'foo',
@@ -94,6 +94,6 @@ describe('Validators', () => {
   ])('should throw if the subAction is %p', async (subAction) => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(() => params?.schema.validate({ subAction, subActionParams: {} })).toThrow();
+    expect(() => params.schema.validate({ subAction, subActionParams: {} })).toThrow();
   });
 });

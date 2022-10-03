@@ -11,7 +11,7 @@ import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeParams, Services, ValidatorType } from '../types';
+import { ActionTypeParams, Services } from '../types';
 import { SubActionConnector } from './sub_action_connector';
 
 export interface ServiceParams<Config, Secrets> {
@@ -46,9 +46,9 @@ export interface SubActionConnectorType<Config, Secrets> {
   name: string;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
-  validate?: {
-    config?: ValidatorType<Config>;
-    secrets?: ValidatorType<Secrets>;
+  schema: {
+    config: Type<Config>;
+    secrets: Type<Secrets>;
   };
   Service: IService<Config, Secrets>;
   renderParameterTemplates?<P extends ExecutorParams>(
