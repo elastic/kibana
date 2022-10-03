@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DataTotalHits$, DataTotalHitsMsg } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import useObservable from 'react-use/lib/useObservable';
 
 export interface HitsCounterProps {
   /**

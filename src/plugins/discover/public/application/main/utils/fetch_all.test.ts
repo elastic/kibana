@@ -29,7 +29,7 @@ import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { dataViewMock } from '../../../__mocks__/data_view';
-import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
+import { AppState } from '../services/discover_app_state_container';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),

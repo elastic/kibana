@@ -28,6 +28,7 @@ import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
@@ -42,7 +43,6 @@ import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import type { DataTableRecord } from '../../../../types';
 import { triggerVisualizeActionsTextBasedLanguages } from './lib/visualize_trigger_utils';
-import {useAppStateSelector} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 /**
  * Default number of available fields displayed and added on scroll

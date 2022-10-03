@@ -15,6 +15,7 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { AppState } from '../application/main/services/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -22,7 +23,6 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
 import { isEqualFilters } from '../application/main/services/discover_state';
-import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 /**
  * Preparing data to share the current state as link or CSV/Report

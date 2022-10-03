@@ -13,7 +13,7 @@ import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { calculateBounds } from '@kbn/data-plugin/public';
 import { FetchDeps } from './fetch_all';
-import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
+import { AppState } from '../services/discover_app_state_container';
 
 function getDeps() {
   const deps = {

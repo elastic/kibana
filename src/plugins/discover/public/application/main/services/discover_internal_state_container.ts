@@ -9,7 +9,7 @@
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-  ReduxLikeStateContainer
+  ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 

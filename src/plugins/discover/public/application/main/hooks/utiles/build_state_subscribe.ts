@@ -7,12 +7,12 @@
  */
 import { DataView } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash';
+import { AppState } from '../../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 import { addLog } from '../../../../utils/addLog';
 import { loadDataView } from '../../utils/resolve_data_view';
 import { FetchStatus } from '../../../types';
-import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 export const buildStateSubscribe =
   ({

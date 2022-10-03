@@ -19,7 +19,7 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
+import { AppState } from '../services/discover_app_state_container';
 
 function getHookProps(
   replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>,

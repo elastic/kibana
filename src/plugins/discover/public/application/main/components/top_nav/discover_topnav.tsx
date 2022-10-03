@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
@@ -16,8 +18,6 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
-import useObservable from "react-use/lib/useObservable";
-import {SavedSearch} from "@kbn/saved-search-plugin/public";
 
 export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'navigateTo'> & {
   onOpenInspector: () => void;

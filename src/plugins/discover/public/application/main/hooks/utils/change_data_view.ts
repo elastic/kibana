@@ -7,13 +7,13 @@
  */
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
+import { AppState } from '../../services/discover_app_state_container';
 import { SavedSearchContainer } from '../../services/discover_saved_search_container';
 import { getUrlTracker } from '../../../../kibana_services';
 import { DiscoverServices } from '../../../../build_services';
 import { addLog } from '../../../../utils/addLog';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
-import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 async function getPreviousDataView(index: string | undefined, services: DiscoverServices) {
   const { dataViews } = services;
