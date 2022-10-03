@@ -350,6 +350,7 @@ plugins.actions.registerSubActionConnectorType({
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
   Service: TestSubActionConnector,
+  renderParameterTemplates: renderTestTemplate
 });
 ```
 

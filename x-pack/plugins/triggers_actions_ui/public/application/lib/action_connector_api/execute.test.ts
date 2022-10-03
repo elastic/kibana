@@ -16,8 +16,8 @@ describe('executeAction', () => {
   test('should call execute API', async () => {
     const id = '12/3';
     const params = {
-      subAction: 'someAction',
-      subActionParams: { numericParams: 123 },
+      stringParams: 'someString',
+      numericParams: 123,
     };
 
     http.post.mockResolvedValueOnce({
@@ -34,7 +34,7 @@ describe('executeAction', () => {
       Array [
         "/api/actions/connector/12%2F3/_execute",
         Object {
-          "body": "{\\"params\\":{\\"subAction\\":\\"someAction\\",\\"subActionParams\\":{\\"numericParams\\":123}}}",
+          "body": "{\\"params\\":{\\"stringParams\\":\\"someString\\",\\"numericParams\\":123}}",
         },
       ]
     `);
