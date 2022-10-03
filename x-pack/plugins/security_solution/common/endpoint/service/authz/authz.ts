@@ -38,6 +38,7 @@ export const calculateEndpointAuthz = (
     canSuspendProcess: hasEndpointManagementAccess && isEnterpriseLicense,
     canGetRunningProcesses: hasEndpointManagementAccess && isEnterpriseLicense,
     canAccessResponseConsole: hasEndpointManagementAccess && isEnterpriseLicense,
+    canAccessResponseActionsHistory: hasEndpointManagementAccess && isPlatinumPlusLicense,
   };
 };
 
@@ -52,5 +53,6 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canSuspendProcess: false,
     canGetRunningProcesses: false,
     canAccessResponseConsole: false,
+    canAccessResponseActionsHistory: false,
   };
 };

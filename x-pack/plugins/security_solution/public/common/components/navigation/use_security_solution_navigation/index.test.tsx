@@ -16,6 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental
 import { TestProviders } from '../../../mock';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
+import { useCanSeeResponseActionsHistoryMenu } from '../../../../management/pages/response_actions/view/hooks';
 import { useTourContext } from '../../guided_onboarding';
 import {
   noCasesPermissions,
@@ -37,6 +38,7 @@ jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
 jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
+jest.mock('../../../../management/pages/response_actions/view/hooks');
 jest.mock('../../guided_onboarding');
 
 describe('useSecuritySolutionNavigation', () => {
@@ -56,6 +58,7 @@ describe('useSecuritySolutionNavigation', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
+    (useCanSeeResponseActionsHistoryMenu as jest.Mock).mockReturnValue(true);
     (useTourContext as jest.Mock).mockReturnValue({ isTourShown: false });
 
     const cases = mockCasesContract();
@@ -114,6 +117,21 @@ describe('useSecuritySolutionNavigation', () => {
       items!
         .find((item) => item.id === 'manage')
         ?.items?.find((item) => item.id === 'host_isolation_exceptions')
+    ).toBeUndefined();
+  });
+
+  it('should omit response actions history if hook reports false', () => {
+    (useCanSeeResponseActionsHistoryMenu as jest.Mock).mockReturnValue(false);
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
+    );
+    const items = result.current?.items;
+    expect(items).toBeDefined();
+    expect(
+      items!
+        .find((item) => item.id === 'manage')
+        ?.items?.find((item) => item.id === 'response_actions_history')
     ).toBeUndefined();
   });
 

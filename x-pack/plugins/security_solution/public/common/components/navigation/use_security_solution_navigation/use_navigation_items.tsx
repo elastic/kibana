@@ -19,6 +19,7 @@ import type { NavTab } from '../types';
 import { SecurityNavGroupKey } from '../types';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
+import { useCanSeeResponseActionsHistoryMenu } from '../../../../management/pages/response_actions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useGlobalQueryString } from '../../../utils/global_query_string';
 
@@ -71,6 +72,7 @@ export const usePrimaryNavigationItems = ({
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions().read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  const canSeeResponseActionsHistory = useCanSeeResponseActionsHistoryMenu();
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
 
   const uiCapabilities = useKibana().services.application.capabilities;
@@ -138,7 +140,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                   ? [navTabs[SecurityPageName.hostIsolationExceptions]]
                   : []),
                 navTabs[SecurityPageName.blocklist],
-                navTabs[SecurityPageName.responseActionsHistory],
+                ...(canSeeResponseActionsHistory
+                  ? [navTabs[SecurityPageName.responseActionsHistory]]
+                  : []),
                 navTabs[SecurityPageName.cloudSecurityPostureBenchmarks],
               ],
             },
@@ -156,6 +160,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       navTabs,
       hasCasesReadPermissions,
       canSeeHostIsolationExceptions,
+      canSeeResponseActionsHistory,
       isPolicyListEnabled,
     ]
   );
