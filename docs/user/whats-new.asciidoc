@@ -190,7 +190,7 @@ image::images/highlights-ml-maps.gif[Viewing anomalies on a map]
 [[highlights-8.5-security]]
 === Access agreement enhanced
 
-The {kibana-ref}/access-agreement.html[access agreement]
+The {kibana-ref}/xpack-security-access-agreement.html[access agreement]
 now allows admins to set a default access
 agreement message that applies to all authentication providers.
 If you set the new `xpack.security.accessAgreement.message` setting, it will apply to all providers
