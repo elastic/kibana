@@ -8,6 +8,7 @@
 import { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { formatPipelineName } from '../../common/ml_inference_pipeline';
 import { ErrorCode } from '../../common/types/error_codes';
 
 import { formatMlPipelineBody } from '../lib/pipelines/create_pipeline_definitions';
@@ -15,7 +16,6 @@ import { formatMlPipelineBody } from '../lib/pipelines/create_pipeline_definitio
 import {
   getInferencePipelineNameFromIndexName,
   getPrefixedInferencePipelineProcessorName,
-  formatPipelineName,
 } from './ml_inference_pipeline_utils';
 
 /**
