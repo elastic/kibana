@@ -169,15 +169,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
+        const subPluginRoutes = getSubPluginRoutesByCapabilities(
+          subPlugins,
+          coreStart.application.capabilities
+        );
         return renderApp({
           ...params,
           services: await startServices(params),
           store: await this.store(coreStart, startPlugins, subPlugins),
           usageCollection: plugins.usageCollection,
-          subPluginRoutes: getSubPluginRoutesByCapabilities(
-            subPlugins,
-            coreStart.application.capabilities
-          ),
+          subPluginRoutes,
         });
       },
     });
@@ -188,11 +189,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: 'SIEM',
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const { manageOldSiemRoutes } = await this.lazyHelpersForRoutes();
+        // const [coreStart] = await core.getStartServices();
+        // const { manageOldSiemRoutes } = await this.lazyHelpersForRoutes();
         const subscription = this.appUpdater$.subscribe(() => {
           // wait for app initialization to set the links
-          manageOldSiemRoutes(coreStart);
+          // manageOldSiemRoutes(coreStart);
           subscription.unsubscribe();
         });
 

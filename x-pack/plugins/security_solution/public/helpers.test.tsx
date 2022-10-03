@@ -17,7 +17,8 @@ import {
   noCasesCapabilities,
   readCasesCapabilities,
 } from './cases_test_utils';
-import { getSubPluginRoutesByCapabilities, parseRoute } from './lazy_helpers_for_routes';
+import { getSubPluginRoutesByCapabilities } from './lazy_helpers_for_routes';
+import { parseRoute } from './lazy_old_siem_routes';
 
 describe('public helpers parseRoute', () => {
   it('should properly parse hash route', () => {
