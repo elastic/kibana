@@ -22,7 +22,7 @@ export const DEFAULT_PAGE_SIZE = PAGE_SIZES[1];
 export interface UseIndicatorsParams {
   filterQuery: Query;
   filters: Filter[];
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
   sorting: EuiDataGridSorting['columns'];
 }
 

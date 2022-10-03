@@ -16,7 +16,6 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
-import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
 import { IndicatorsBarChartWrapper } from '.';
 import { Aggregation, AGGREGATION_NAME, ChartSeries } from '../../services';
 
@@ -25,7 +24,7 @@ export default {
   title: 'IndicatorsBarChartWrapper',
 };
 
-const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
+const mockTimeRange: TimeRange = { from: '', to: '' };
 
 const mockIndexPattern: DataView = {
   fields: [
@@ -161,16 +160,6 @@ InitialLoad.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
 
 export const UpdatingData: Story<void> = () => {
   const mockIndicators: ChartSeries[] = [
-    {
-      x: '1 Jan 2022 00:00:00 GMT',
-      y: 2,
-      g: '[Filebeat] AbuseCH Malware',
-    },
-    {
-      x: '1 Jan 2022 00:00:00 GMT',
-      y: 10,
-      g: '[Filebeat] AbuseCH MalwareBazaar',
-    },
     {
       x: '1 Jan 2022 06:00:00 GMT',
       y: 0,

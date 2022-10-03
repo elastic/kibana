@@ -12,17 +12,11 @@
   "requiredPlugins": [
     "data",
     "dataViews",
-    "unifiedSearch",
     "kibanaUtils",
     "navigation",
     "kibanaReact",
     "triggersActionsUi",
     "inspector"
   ],
-  "requiredBundles": [
-    "data",
-    "unifiedSearch",
-    "kibanaUtils",
-    "kibanaReact"
-  ]
+  "requiredBundles": ["data", "kibanaUtils", "kibanaReact"]
 }

@@ -12,7 +12,6 @@ import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { useInspector } from '../../../hooks/use_inspector';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
 import { useSourcererDataView } from '.';
 import {
   ChartSeries,
@@ -25,10 +24,7 @@ export interface UseAggregatedIndicatorsParam {
    * From and To values passed to the {@link useAggregatedIndicators} hook
    * to query indicators for the Indicators barchart.
    */
-  timeRange?: TimeRange;
-  /**
-   * Filters data passed to the {@link useAggregatedIndicators} hook to query indicators.
-   */
+  timeRange: TimeRange;
   filters: Filter[];
   /**
    * Query data passed to the {@link useAggregatedIndicators} hook to query indicators.
@@ -66,7 +62,7 @@ export interface UseAggregatedIndicatorsValue {
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
 
 export const useAggregatedIndicators = ({
-  timeRange = DEFAULT_TIME_RANGE,
+  timeRange,
   filters,
   filterQuery,
 }: UseAggregatedIndicatorsParam): UseAggregatedIndicatorsValue => {

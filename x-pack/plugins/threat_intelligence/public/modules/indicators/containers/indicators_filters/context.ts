@@ -6,18 +6,14 @@
  */
 
 import { createContext } from 'react';
-import { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 
 export interface IndicatorsFiltersContextValue {
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
   filters: Filter[];
   filterQuery: Query;
-  handleSavedQuery: (savedQuery: SavedQuery | undefined) => void;
-  handleSubmitTimeRange: (timeRange?: TimeRange) => void;
-  handleSubmitQuery: (filterQuery: Query) => void;
   filterManager: FilterManager;
-  savedQuery?: SavedQuery;
 }
 
 export const IndicatorsFiltersContext = createContext<IndicatorsFiltersContextValue | undefined>(
