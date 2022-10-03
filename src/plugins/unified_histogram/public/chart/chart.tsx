@@ -16,8 +16,11 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
+  useEuiBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
@@ -101,6 +104,34 @@ export function Chart({
     onResetChartHeight,
   });
 
+  const { euiTheme } = useEuiTheme();
+  const resultCountCss = css`
+    padding: ${euiTheme.size.s};
+    min-height: ${euiTheme.base * 3}px;
+  `;
+  const resultCountTitleCss = css`
+    ${useEuiBreakpoint(['xs', 's'])} {
+      margin-bottom: 0 !important;
+    }
+  `;
+  const resultCountToggleCss = css`
+    ${useEuiBreakpoint(['xs', 's'])} {
+      align-items: flex-end;
+    }
+  `;
+  const timechartCss = css`
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    // SASSTODO: the visualizing component should have an option or a modifier
+    .series > rect {
+      fill-opacity: 0.5;
+      stroke-width: 1;
+    }
+  `;
+
   return (
     <EuiFlexGroup
       className={className}
@@ -109,16 +140,17 @@ export function Chart({
       gutterSize="none"
       responsive={false}
     >
-      <EuiFlexItem grow={false} className="unifiedHistogramResultCount">
+      <EuiFlexItem grow={false} css={resultCountCss}>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
           <EuiFlexItem
             grow={false}
-            className="unifiedHistogramResultCount__title eui-textTruncate eui-textNoWrap"
+            className="eui-textTruncate eui-textNoWrap"
+            css={resultCountTitleCss}
           >
             <HitsCounter hits={hits} append={appendHitsCounter} />
           </EuiFlexItem>
           {chart && (
-            <EuiFlexItem className="unifiedHistogramResultCount__toggle" grow={false}>
+            <EuiFlexItem grow={false} css={resultCountToggleCss}>
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                 {onEditVisualization && (
                   <EuiFlexItem grow={false}>
@@ -180,7 +212,7 @@ export function Chart({
             aria-label={i18n.translate('unifiedHistogram.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
-            className="unifiedHistogramTimechart"
+            css={timechartCss}
           >
             <HistogramMemoized
               services={services}

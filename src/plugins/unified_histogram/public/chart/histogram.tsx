@@ -137,6 +137,10 @@ export function Histogram({
   }, [from, to, timeInterval, bucketInterval?.description, toMoment]);
 
   const { euiTheme } = useEuiTheme();
+  const chartCss = css`
+    flex-grow: 1;
+    padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
+  `;
 
   if (!chartData && status === 'loading') {
     const chartLoadingCss = css`
@@ -150,7 +154,7 @@ export function Histogram({
     `;
 
     return (
-      <div className="unifiedHistogramChart" data-test-subj="unifiedHistogramChart">
+      <div data-test-subj="unifiedHistogramChart" css={chartCss}>
         <div css={chartLoadingCss} data-test-subj="unifiedHistogramChartLoading">
           <EuiText size="xs" color="subdued">
             <EuiLoadingChart mono size="l" />
@@ -269,18 +273,25 @@ export function Histogram({
     },
   });
 
+  const timeRangeCss = css`
+    padding: 0 ${euiTheme.size.s} 0 ${euiTheme.size.s};
+  `;
   let timeRange = (
-    <EuiText size="xs" className="unifiedHistogramTimeRange" textAlign="center">
+    <EuiText size="xs" textAlign="center" css={timeRangeCss}>
       {timeRangeText}
     </EuiText>
   );
   if (bucketInterval?.scaled) {
+    const timeRangeWrapperCss = css`
+      flex-grow: 0;
+    `;
     timeRange = (
       <EuiFlexGroup
         alignItems="baseline"
         justifyContent="center"
         gutterSize="none"
         responsive={false}
+        css={timeRangeWrapperCss}
       >
         <EuiFlexItem grow={false}>{timeRange}</EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -292,11 +303,7 @@ export function Histogram({
 
   return (
     <React.Fragment>
-      <div
-        className="unifiedHistogramChart"
-        data-test-subj="unifiedHistogramChart"
-        data-time-range={timeRangeText}
-      >
+      <div data-test-subj="unifiedHistogramChart" data-time-range={timeRangeText} css={chartCss}>
         <Chart size="100%">
           <Settings
             xDomain={xDomain}
