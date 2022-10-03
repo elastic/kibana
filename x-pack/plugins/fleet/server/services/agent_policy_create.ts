@@ -20,7 +20,7 @@ import type { AgentPolicy, NewAgentPolicy } from '../types';
 import { agentPolicyService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
-import { ensureDefaultEnrollmentAPIKeysExists } from './setup';
+import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
@@ -143,7 +143,7 @@ export async function createAgentPolicyWithPackages({
     });
   }
 
-  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+  await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
   await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
 
   return agentPolicy;
