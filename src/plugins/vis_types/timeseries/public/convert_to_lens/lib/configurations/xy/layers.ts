@@ -88,7 +88,8 @@ export const getLayers = async (
     const metricColumns = dataSourceLayer.columns.filter(
       (l) => !l.isBucketed && l.columnId !== referenceColumnId
     );
-    const isReferenceLine = metrics.length === 1 && metrics[0].type === 'static';
+    const isReferenceLine =
+      metricColumns.length === 1 && metricColumns[0].operationType === 'static_value';
     const splitAccessor = dataSourceLayer.columns.find(
       (column) => column.isBucketed && column.isSplit
     )?.columnId;
