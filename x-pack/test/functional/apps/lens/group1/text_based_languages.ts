@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   function assertMatchesExpectedData(state: DebugState) {
     expect(state.axes?.x![0].labels.sort()).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
@@ -159,9 +160,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const columns = await PageObjects.discover.getColumnHeaders();
-      expect(columns).to.eql(['extension', 'average']);
+      expect(await queryBar.getQueryString()).to.be(
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
+      await retry.tryForTime(5000, async () => {
+        const columns = await PageObjects.discover.getColumnHeaders();
+        expect(columns).to.eql(['extension', 'average']);
+      });
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
     });
