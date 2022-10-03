@@ -30,7 +30,12 @@ function divide(a, b) {
       return val / b[i];
     });
   }
-  if (Array.isArray(b)) return b.map((b) => a / b);
+  if (Array.isArray(b)) {
+    return b.map((bi) => {
+      if (bi === 0) throw new Error('Cannot divide by 0');
+      return a / bi;
+    });
+  }
   if (b === 0) throw new Error('Cannot divide by 0');
   if (Array.isArray(a)) return a.map((a) => a / b);
   return a / b;
