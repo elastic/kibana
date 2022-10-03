@@ -12,11 +12,7 @@ import type { RouteConfig } from '@kbn/core-http-server';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
-
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
 
@@ -27,41 +23,11 @@ const coreContext = mockCoreContext.create();
 
 function createCoreRequestHandlerContextMock() {
   return {
-    savedObjects: {
-      client: savedObjectsClientMock.create(),
-    },
-    elasticsearch: {
-      client: elasticsearchServiceMock.createScopedClusterClient(),
-    },
-    uiSettings: {
-      client: uiSettingsServiceMock.createClient(),
-    },
-    deprecations: {
-      client: deprecationsServiceMock.createClient(),
+    core: {
+      uiSettings: { client: uiSettingsServiceMock.createClient() },
     },
   };
 }
-
-export type CustomRequestHandlerMock<T> = {
-  core: Promise<ReturnType<typeof createCoreRequestHandlerContextMock>>;
-} & {
-  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
-};
-
-const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
-  const mock = Object.entries(contextParts).reduce(
-    (context, [key, value]) => {
-      // @ts-expect-error type matching from inferred types is hard
-      context[key] = isPromise(value) ? value : Promise.resolve(value);
-      return context;
-    },
-    {
-      core: Promise.resolve(createCoreRequestHandlerContextMock()),
-    } as CustomRequestHandlerMock<T>
-  );
-
-  return mock;
-};
 
 describe('HttpResources service', () => {
   let service: HttpResourcesService;
@@ -69,7 +35,7 @@ describe('HttpResources service', () => {
   let setupDeps: SetupDeps;
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   const kibanaRequest = httpServerMock.createKibanaRequest();
-  const context = createCustomRequestHandlerContextMock({});
+  const context = createCoreRequestHandlerContextMock();
   const apmConfig = { mockApmConfig: true };
 
   beforeEach(() => {
