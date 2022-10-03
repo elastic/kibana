@@ -46,31 +46,31 @@ export class FilterList {
   private _exceptionLists = exceptionListAllowlistFields;
   private _prebuiltRulesAlerts = prebuiltRuleAllowlistFields;
 
-  get endpointAlerts(): AllowlistFields {
+  public get endpointAlerts(): AllowlistFields {
     return this._endpointAlerts;
   }
 
-  set endpointAlerts(list: AllowlistFields) {
+  public set endpointAlerts(list: AllowlistFields) {
     this._endpointAlerts = list;
   }
 
-  get exceptionLists(): AllowlistFields {
+  public get exceptionLists(): AllowlistFields {
     return this._exceptionLists;
   }
 
-  set exceptionLists(list: AllowlistFields) {
+  public set exceptionLists(list: AllowlistFields) {
     this._exceptionLists = list;
   }
 
-  get prebuiltRulesAlerts(): AllowlistFields {
+  public get prebuiltRulesAlerts(): AllowlistFields {
     return this._prebuiltRulesAlerts;
   }
 
-  set prebuiltRulesAlerts(list: AllowlistFields) {
+  public set prebuiltRulesAlerts(list: AllowlistFields) {
     this._prebuiltRulesAlerts = list;
   }
 
-  resetAllToDefault() {
+  public resetAllToDefault() {
     this._endpointAlerts = endpointAllowlistFields;
     this._exceptionLists = exceptionListAllowlistFields;
     this._prebuiltRulesAlerts = prebuiltRuleAllowlistFields;
