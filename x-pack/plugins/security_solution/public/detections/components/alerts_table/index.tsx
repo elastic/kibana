@@ -176,7 +176,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         ),
         excludedRowRendererIds: getAlertsDefaultModel(license)
           .excludedRowRendererIds as RowRendererId[],
-        footerText: i18n.TOTAL_COUNT_OF_ALERTS,
         id: tableId,
         loadingText: i18n.LOADING_ALERTS,
         queryFields: requiredFieldsForActions,

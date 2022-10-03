@@ -201,7 +201,6 @@ const timeline = {
   sort: [{ columnId: '@timestamp', columnType: 'date', sortDirection: 'desc' }],
   savedObjectId: null,
   version: null,
-  footerText: 'alerts',
   title: '',
   initialized: true,
   activeTab: 'query',

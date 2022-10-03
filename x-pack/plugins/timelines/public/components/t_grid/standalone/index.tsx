@@ -86,7 +86,6 @@ export interface TGridStandaloneProps {
   entityType?: EntityType;
   loadingText: React.ReactNode;
   filters: Filter[];
-  footerText: React.ReactNode;
   filterStatus?: AlertStatus;
   getRowRenderer?: ({
     data,
@@ -135,7 +134,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   entityType = 'alerts',
   loadingText,
   filters,
-  footerText,
   filterStatus,
   getRowRenderer,
   hasAlertsCrudPermissions,
@@ -306,7 +304,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       tGridActions.initializeTGridSettings({
         id: STANDALONE_ID,
         defaultColumns: columns,
-        footerText,
         sort,
         loadingText,
         unit,

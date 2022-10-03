@@ -259,7 +259,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       itemsPerPage,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
-      footerText: translations.alertsTable.footerTextLabel,
       onStateChange,
       query: {
         query: kuery ?? '',

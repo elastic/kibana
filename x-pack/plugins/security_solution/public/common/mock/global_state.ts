@@ -395,7 +395,6 @@ export const mockGlobalState: State = {
         savedObjectId: null,
         graphEventId: '',
         sessionViewConfig: null,
-        footerText: 'events',
         selectAll: false,
         id: TableId.test,
         title: '',

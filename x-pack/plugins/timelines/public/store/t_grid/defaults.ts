@@ -93,7 +93,6 @@ export const tGridDefaults: SubsetTGridModel = {
 export const getTGridManageDefaults = (id: string) => ({
   defaultColumns: defaultHeaders,
   loadingText: i18n.LOADING_EVENTS,
-  footerText: i18n.TOTAL_COUNT_OF_EVENTS,
   documentType: '',
   selectAll: false,
   id,

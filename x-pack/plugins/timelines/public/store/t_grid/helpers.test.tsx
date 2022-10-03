@@ -28,7 +28,6 @@ describe('setInitializeTgridSettings', () => {
     ];
 
     const tGridSettingsProps: Partial<TGridModelSettings> = {
-      footerText: 'test',
       sort, // <-- override
     };
 
@@ -38,7 +37,7 @@ describe('setInitializeTgridSettings', () => {
   });
 
   test('it returns the default sort when tGridSettingsProps does NOT contain an override', () => {
-    const tGridSettingsProps = { footerText: 'test' }; // <-- no `sort` override
+    const tGridSettingsProps = {}; // <-- no `sort` override
 
     expect(
       setInitializeTgridSettings({ id, tableById: defaultTableById, tGridSettingsProps })[id].sort

@@ -23,7 +23,6 @@ export interface TGridModelSettings {
   >;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
-  footerText?: string | React.ReactNode;
   loadingText?: string | React.ReactNode;
   queryFields: string[];
   selectAll: boolean;
@@ -79,7 +78,6 @@ export type TGridModelForTimeline = Pick<
   | 'excludedRowRendererIds'
   | 'expandedDetail'
   | 'filters'
-  | 'footerText'
   | 'graphEventId'
   | 'queryFields'
   | 'id'
