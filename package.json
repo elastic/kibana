@@ -217,6 +217,7 @@
     "@kbn/core-http-request-handler-context-server-internal": "link:bazel-bin/packages/core/http/core-http-request-handler-context-server-internal",
     "@kbn/core-http-resources-server": "link:bazel-bin/packages/core/http/core-http-resources-server",
     "@kbn/core-http-resources-server-internal": "link:bazel-bin/packages/core/http/core-http-resources-server-internal",
+    "@kbn/core-http-resources-server-mocks": "link:bazel-bin/packages/core/http/core-http-resources-server-mocks",
     "@kbn/core-http-router-server-internal": "link:bazel-bin/packages/core/http/core-http-router-server-internal",
     "@kbn/core-http-router-server-mocks": "link:bazel-bin/packages/core/http/core-http-router-server-mocks",
     "@kbn/core-http-server": "link:bazel-bin/packages/core/http/core-http-server",

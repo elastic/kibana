@@ -7,7 +7,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 
