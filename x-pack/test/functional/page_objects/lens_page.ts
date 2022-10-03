@@ -1186,6 +1186,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
+        showingTrendline: Boolean(
+          await this.getMetricElementIfExists('.echSingleMetricSparkline', tile)
+        ),
       };
     },
 
@@ -1202,6 +1205,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       return metricData;
     },
+
+    // async toggleMetricTrendlines() {
+    //   if () {
+    //     this.openDimensionEditor()
+    //   }
+    // }
 
     /**
      * Creates and saves a lens visualization from a dashboard
