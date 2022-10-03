@@ -205,7 +205,7 @@ export async function ensureFleetGlobalEsAssets(
   }
 }
 
-export async function ensureDefaultEnrollmentAPIKeysExists(
+async function ensureDefaultEnrollmentAPIKeysExists(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options?: { forceRecreate?: boolean }
