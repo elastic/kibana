@@ -156,15 +156,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.waitForVisualization('xyVisChart');
       await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
-      const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
+      const [_, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(15000);
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['extension', 'average']);
-      await browser.closeCurrentWindow();
-      await browser.switchToWindow(lensWindowHandler);
+      // await browser.closeCurrentWindow();
+      // await browser.switchToWindow(lensWindowHandler);
     });
   });
 }
