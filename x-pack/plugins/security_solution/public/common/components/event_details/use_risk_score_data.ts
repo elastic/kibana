@@ -12,6 +12,7 @@ import {
   buildUserNamesFilter,
   RiskScoreEntity,
 } from '../../../../common/search_strategy';
+import type { HostRisk, UserRisk } from '../../../risk_score/containers';
 import { useRiskScore } from '../../../risk_score/containers';
 
 export const ONLY_FIRST_ITEM_PAGINATION = {
@@ -39,7 +40,7 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     skip: !hostNameFilterQuery,
   });
 
-  const hostRisk = useMemo(
+  const hostRisk: HostRisk = useMemo(
     () => ({
       loading: hostRiskLoading,
       isModuleEnabled: isHostRiskModuleEnabled,
@@ -65,7 +66,7 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     skip: !userNameFilterQuery,
   });
 
-  const userRisk = useMemo(
+  const userRisk: UserRisk = useMemo(
     () => ({
       loading: userRiskLoading,
       isModuleEnabled: isUserRiskModuleEnabled,
