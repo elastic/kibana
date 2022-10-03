@@ -22,9 +22,9 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
       <MediumCustomSpacer />
 
       <EuiFlexGroup>
-        <EuiFlexItem grow={false} style={{ alignItems: 'center' }}>
+        <CenteredEuiFlexItem grow={false}>
           <LargeSecurityLogo />
-        </EuiFlexItem>
+        </CenteredEuiFlexItem>
 
         <EuiFlexItem>
           <div>
@@ -70,10 +70,16 @@ const MediumCustomSpacer = () => (
   </>
 );
 
-const LargeSecurityLogo = () => (
-  <EuiIcon type="logoSecurity" style={{ width: '128px', height: '128px' }} />
-);
+const CenteredEuiFlexItem = styled(EuiFlexItem)`
+  align-items: center;
+`;
 
+const LargeSecurityLogo = () => <LargeLogo type="logoSecurity" />;
+
+const LargeLogo = styled(EuiIcon)`
+  width: 128px;
+  height: 128px;
+`;
 const Features = () => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
