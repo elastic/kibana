@@ -763,19 +763,19 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
 
-          await testDataLoader.before();
+          await testDataLoader.createFtrSpaces();
         });
 
         after(async () => {
-          await testDataLoader.after();
+          await testDataLoader.deleteFtrSpaces();
         });
 
         describe('single-namespace types', () => {
           beforeEach(async () => {
-            await testDataLoader.beforeEach(SPACE_DATA_TO_LOAD);
+            await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD);
           });
 
-          afterEach(async () => await testDataLoader.afterEach());
+          afterEach(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
 
@@ -916,8 +916,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           const spaces = ['space_2'];
           const includeReferences = false;
           describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-            before(async () => await testDataLoader.beforeEach(SPACE_DATA_TO_LOAD));
-            after(async () => await testDataLoader.afterEach());
+            before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
+            after(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
             const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
             testCases.forEach(({ testTitle, objects, statusCode, response }) => {

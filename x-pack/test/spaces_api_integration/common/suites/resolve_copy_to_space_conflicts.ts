@@ -502,8 +502,10 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
         });
 
         describe('single-namespace types', () => {
-          beforeEach(async () => await testDataLoader.beforeEach(SPACE_DATA_TO_LOAD));
-          afterEach(async () => await testDataLoader.afterEach());
+          beforeEach(
+            async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD)
+          );
+          afterEach(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
           const visualizationObject = { type: 'visualization', id: `cts_vis_3_${spaceId}` };
@@ -645,8 +647,8 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
         const includeReferences = false;
         const createNewCopies = false;
         describe(`multi-namespace types with "overwrite" retry`, () => {
-          before(async () => await testDataLoader.beforeEach(SPACE_DATA_TO_LOAD));
-          after(async () => await testDataLoader.afterEach());
+          before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
+          after(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const testCases = tests.multiNamespaceTestCases();
           testCases.forEach(({ testTitle, objects, retries, statusCode, response }) => {

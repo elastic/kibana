@@ -96,8 +96,8 @@ export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
 
       describeFn(description, () => {
         before(async () => {
-          await testDataLoader.before();
-          await testDataLoader.beforeEach([
+          await testDataLoader.createFtrSpaces();
+          await testDataLoader.createFtrSavedObjectsData([
             {
               spaceName: null,
               dataUrl:
@@ -117,8 +117,8 @@ export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
         });
 
         after(async () => {
-          await testDataLoader.after();
-          await testDataLoader.afterEach();
+          await testDataLoader.deleteFtrSpaces();
+          await testDataLoader.deleteFtrSavedObjectsData();
         });
 
         for (const test of tests) {

@@ -70,15 +70,17 @@ export function getTestDataLoader({ getService }) {
   const log = getService('log');
 
   return {
-    before: async () => {
+    createFtrSpaces: async () => {
       await Promise.all([await spacesService.create(SPACE_1), await spacesService.create(SPACE_2)]);
     },
 
-    after: async () => {
+    deleteFtrSpaces: async () => {
       await Promise.all([spacesService.delete(SPACE_1.id), spacesService.delete(SPACE_2.id)]);
     },
 
-    beforeEach: async (spaceData: Array<{ spaceName: string | null; dataUrl: string }>) => {
+    createFtrSavedObjectsData: async (
+      spaceData: Array<{ spaceName: string | null; dataUrl: string }>
+    ) => {
       log.debug('Loading test data for the following spaces: default, space_1 and space_2');
 
       await Promise.all(
@@ -109,7 +111,7 @@ export function getTestDataLoader({ getService }) {
       }
     },
 
-    afterEach: async () => {
+    deleteFtrSavedObjectsData: async () => {
       const allSpacesIds = [
         ...(await spacesService.getAll()).map((space: { id: string }) => space.id),
         'non_existent_space',
