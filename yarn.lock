@@ -11838,6 +11838,11 @@ commander@^9.0.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-9.0.0.tgz#86d58f24ee98126568936bd1d3574e0308a99a40"
   integrity sha512-JJfP2saEKbQqvW+FI93OYUB4ByV5cizMpFMiiJI8xDbBvQvSkIk0VvQdn1CZ8mqAO8Loq2h0gYTYtDFUZUeERw==
 
+commander@^9.4.0:
+  version "9.4.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-9.4.1.tgz#d1dd8f2ce6faf93147295c0df13c7c21141cfbdd"
+  integrity sha512-5EEkTNyHNGFPD2H+c/dXXfQZYa/scCKasxWcXJaWnNJ99pnQN9Vnmqow+p+PlFPE63Q6mThaZws1T+HxfpgtPw==
+
 common-path-prefix@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/common-path-prefix/-/common-path-prefix-3.0.0.tgz#7d007a7e07c58c4b4d5f433131a19141b29f11e0"
@@ -29176,6 +29181,16 @@ yargs@^3.15.0:
     string-width "^1.0.1"
     window-size "^0.1.4"
     y18n "^3.2.0"
+
+yarn-deduplicate@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/yarn-deduplicate/-/yarn-deduplicate-6.0.0.tgz#91bc0b7b374efe24796606df2c6b00eabb5aab62"
+  integrity sha512-HjGVvuy10hetOuXeexXXT77V+6FfgS+NiW3FsmQD88yfF2kBqTpChvMglyKUlQ0xXEcI77VJazll5qKKBl3ssw==
+  dependencies:
+    "@yarnpkg/lockfile" "^1.1.0"
+    commander "^9.4.0"
+    semver "^7.3.7"
+    tslib "^2.4.0"
 
 yauzl@^2.10.0:
   version "2.10.0"

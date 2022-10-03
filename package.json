@@ -1442,6 +1442,7 @@
     "webpack-sources": "^1.4.1",
     "xml-crypto": "^2.1.4",
     "xmlbuilder": "13.0.2",
-    "yargs": "^15.4.1"
+    "yargs": "^15.4.1",
+    "yarn-deduplicate": "^6.0.0"
   }
 }
