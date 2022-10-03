@@ -24,7 +24,6 @@ import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions';
-import { TimelineTabs } from '../common/types';
 export * from './store/t_grid';
 export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;
@@ -66,7 +65,7 @@ export type GetTGridProps<T extends TGridType> = T extends 'standalone'
 export type TGridProps = TGridStandaloneCompProps | TGridIntegratedCompProps;
 
 export interface StatefulEventContextType {
-  tabType: TimelineTabs | undefined;
+  tabType: string | undefined;
   timelineID: string;
   enableHostDetailsFlyout: boolean;
   enableIpDetailsFlyout: boolean;

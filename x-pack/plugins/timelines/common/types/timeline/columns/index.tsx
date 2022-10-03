@@ -108,3 +108,10 @@ export interface ColumnRenderer {
     linkValues?: string[] | null | undefined;
   }) => React.ReactNode;
 }
+
+export interface SessionViewConfig {
+  sessionEntityId: string;
+  jumpToEntityId?: string;
+  jumpToCursor?: string;
+  investigatedAlertId?: string;
+}

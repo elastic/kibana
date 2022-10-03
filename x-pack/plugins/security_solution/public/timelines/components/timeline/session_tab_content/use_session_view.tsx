@@ -7,14 +7,12 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { timelineSelectors } from '../../../store/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import * as i18n from './translations';
+import type { TableId } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDetailPanel } from '../../side_panel/hooks/use_detail_panel';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { isFullScreen } from '../body/column_headers';
@@ -28,13 +26,7 @@ import {
   useTimelineFullScreen,
   useGlobalFullScreen,
 } from '../../../../common/containers/use_full_screen';
-import {
-  updateTimelineGraphEventId,
-  updateTimelineSessionViewConfig,
-  setActiveTabTimeline,
-} from '../../../store/timeline/actions';
 import { detectionsTimelineIds } from '../../../containers/helpers';
-import * as i18n from './translations';
 
 export interface SessionViewConfig {
   sessionEntityId: string;
@@ -51,25 +43,25 @@ interface NavigationProps {
   fullScreen: boolean;
   globalFullScreen: boolean;
   onCloseOverlay: () => void;
-  timelineId: TimelineId;
+  isInTimeline: boolean;
   timelineFullScreen: boolean;
   toggleFullScreen: () => void;
   graphEventId?: string;
-  activeTab: TimelineTabs;
+  activeTab?: TimelineTabs;
 }
 
 const NavigationComponent: React.FC<NavigationProps> = ({
   fullScreen,
   globalFullScreen,
   onCloseOverlay,
-  timelineId,
+  isInTimeline,
   timelineFullScreen,
   toggleFullScreen,
   graphEventId,
-  activeTab,
+  activeTab = TimelineTabs.graph,
 }) => {
   const title = () => {
-    if (timelineId === TimelineId.active) {
+    if (isInTimeline) {
       return activeTab === TimelineTabs.graph ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION;
     } else {
       return graphEventId ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION;
@@ -82,12 +74,16 @@ const NavigationComponent: React.FC<NavigationProps> = ({
           {title()}
         </EuiButtonEmpty>
       </EuiFlexItem>
-      {timelineId !== TimelineId.active && (
+      {isInTimeline === false && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
             <FullScreenButtonIcon
               aria-label={
-                isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
+                isFullScreen({
+                  globalFullScreen,
+                  isInTimeline: false,
+                  timelineFullScreen,
+                })
                   ? EXIT_FULL_SCREEN
                   : FULL_SCREEN
               }
@@ -107,73 +103,91 @@ NavigationComponent.displayName = 'NavigationComponent';
 
 const Navigation = React.memo(NavigationComponent);
 
-export const useSessionViewNavigation = ({ timelineId }: { timelineId: TimelineId }) => {
-  const dispatch = useDispatch();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
+export const useSessionViewNavigation = ({
+  isInTimeline,
+  graphEventId,
+  sessionViewConfig,
+  activeTab,
+  prevActiveTab,
+  setActiveTabTimeline,
+  updateGraphEventId,
+  updateSessionViewConfig,
+}: {
+  graphEventId?: string;
+  updateGraphEventId: (graphEventId: string) => void;
+  isInTimeline: boolean;
+  updateSessionViewConfig: (sessionViewConfig: SessionViewConfig | null) => void;
+  setActiveTabTimeline?: (activeTab: TimelineTabs) => void;
+  sessionViewConfig: SessionViewConfig | null;
+  activeTab?: TimelineTabs;
+  prevActiveTab?: TimelineTabs;
+}) => {
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
-
-  const { graphEventId, sessionViewConfig, activeTab, prevActiveTab } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
-  );
 
   const onCloseOverlay = useCallback(() => {
     const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
     // Since EUI changes these values directly as a side effect, need to add them back on close.
     if (isDataGridFullScreen) {
-      if (timelineId === TimelineId.active) {
+      if (isInTimeline) {
         document.body.classList.add('euiDataGrid__restrictBody');
       } else {
         document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
       }
     } else {
-      if (timelineId === TimelineId.active) {
+      if (isInTimeline) {
         setTimelineFullScreen(false);
       } else {
         setGlobalFullScreen(false);
       }
     }
-    if (timelineId !== TimelineId.active) {
-      dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
-      dispatch(updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig: null }));
-    } else {
+    if (isInTimeline === false) {
+      updateGraphEventId('');
+      updateSessionViewConfig(null);
+    } else if (setActiveTabTimeline) {
       if (activeTab === TimelineTabs.graph) {
-        dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
+        updateGraphEventId('');
         if (prevActiveTab === TimelineTabs.session && !sessionViewConfig) {
-          dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.query }));
+          setActiveTabTimeline(TimelineTabs.query);
         }
       } else if (activeTab === TimelineTabs.session) {
-        dispatch(updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig: null }));
+        updateSessionViewConfig(null);
         if (prevActiveTab === TimelineTabs.graph && !graphEventId) {
-          dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.query }));
-        } else {
-          dispatch(setActiveTabTimeline({ id: timelineId, activeTab: prevActiveTab }));
+          setActiveTabTimeline(TimelineTabs.query);
+        } else if (prevActiveTab) {
+          setActiveTabTimeline(prevActiveTab);
         }
       }
     }
   }, [
-    dispatch,
-    timelineId,
+    isInTimeline,
+    setActiveTabTimeline,
     setTimelineFullScreen,
     setGlobalFullScreen,
+    updateGraphEventId,
+    updateSessionViewConfig,
     activeTab,
     prevActiveTab,
-    graphEventId,
     sessionViewConfig,
+    graphEventId,
   ]);
   const fullScreen = useMemo(
-    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
-    [globalFullScreen, timelineId, timelineFullScreen]
+    () =>
+      isFullScreen({
+        globalFullScreen,
+        isInTimeline,
+        timelineFullScreen,
+      }),
+    [globalFullScreen, isInTimeline, timelineFullScreen]
   );
   const toggleFullScreen = useCallback(() => {
-    if (timelineId === TimelineId.active) {
+    if (isInTimeline) {
       setTimelineFullScreen(!timelineFullScreen);
     } else {
       setGlobalFullScreen(!globalFullScreen);
     }
   }, [
-    timelineId,
+    isInTimeline,
     setTimelineFullScreen,
     timelineFullScreen,
     setGlobalFullScreen,
@@ -186,7 +200,7 @@ export const useSessionViewNavigation = ({ timelineId }: { timelineId: TimelineI
         globalFullScreen={globalFullScreen}
         activeTab={activeTab}
         onCloseOverlay={onCloseOverlay}
-        timelineId={timelineId}
+        isInTimeline={isInTimeline}
         timelineFullScreen={timelineFullScreen}
         toggleFullScreen={toggleFullScreen}
         graphEventId={graphEventId}
@@ -199,7 +213,7 @@ export const useSessionViewNavigation = ({ timelineId }: { timelineId: TimelineI
     graphEventId,
     onCloseOverlay,
     timelineFullScreen,
-    timelineId,
+    isInTimeline,
     toggleFullScreen,
   ]);
 
@@ -210,44 +224,49 @@ export const useSessionViewNavigation = ({ timelineId }: { timelineId: TimelineI
 };
 
 export const useSessionView = ({
-  timelineId,
+  scopeId,
   entityType,
   height,
+  activeTab = TimelineTabs.query,
+  sessionViewConfig,
+  isInTimeline,
 }: {
-  timelineId: TimelineId;
+  scopeId: string;
   entityType?: EntityType;
   height?: number;
+  sessionViewConfig: SessionViewConfig | null;
+  activeTab?: TimelineTabs;
+  isInTimeline: boolean;
 }) => {
   const { sessionView } = useKibana().services;
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
 
-  const { sessionViewConfig, activeTab } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
-  );
-
   const fullScreen = useMemo(
-    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
-    [globalFullScreen, timelineId, timelineFullScreen]
+    () =>
+      isFullScreen({
+        globalFullScreen,
+        isInTimeline,
+        timelineFullScreen,
+      }),
+    [globalFullScreen, isInTimeline, timelineFullScreen]
   );
 
   const sourcererScope = useMemo(() => {
-    if (timelineId === TimelineId.active) {
+    if (isInTimeline) {
       return SourcererScopeName.timeline;
-    } else if (detectionsTimelineIds.includes(timelineId)) {
+    } else if (detectionsTimelineIds.includes(scopeId as TableId)) {
       return SourcererScopeName.detections;
     } else {
       return SourcererScopeName.default;
     }
-  }, [timelineId]);
+  }, [scopeId, isInTimeline]);
   const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
-    isFlyoutView: timelineId !== TimelineId.active,
+    isFlyoutView: !isInTimeline,
     entityType,
     sourcererScope,
-    timelineId,
-    tabType: timelineId === TimelineId.active ? activeTab : TimelineTabs.query,
+    scopeId,
+    tabType: activeTab,
   });
 
   const sessionViewComponent = useMemo(() => {

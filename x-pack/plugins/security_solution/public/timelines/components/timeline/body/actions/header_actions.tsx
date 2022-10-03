@@ -86,7 +86,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const dispatch = useDispatch();
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
 
   const toggleFullScreen = useCallback(() => {
@@ -104,7 +104,12 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   ]);
 
   const fullScreen = useMemo(
-    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
+    () =>
+      isFullScreen({
+        globalFullScreen,
+        isInTimeline: timelineId === TimelineId.active,
+        timelineFullScreen,
+      }),
     [globalFullScreen, timelineId, timelineFullScreen]
   );
   const handleSelectAllChange = useCallback(
@@ -232,7 +237,11 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
           <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
             <EuiButtonIcon
               aria-label={
-                isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
+                isFullScreen({
+                  globalFullScreen,
+                  isInTimeline: timelineId === TimelineId.active,
+                  timelineFullScreen,
+                })
                   ? EXIT_FULL_SCREEN
                   : i18n.FULL_SCREEN
               }

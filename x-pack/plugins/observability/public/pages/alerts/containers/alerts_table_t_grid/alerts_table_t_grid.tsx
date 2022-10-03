@@ -220,7 +220,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   const onStateChange = useCallback(
     (state: TGridState) => {
-      const pickedState = pick(state.timelineById['standalone-t-grid'], [
+      const pickedState = pick(state.tableById['standalone-t-grid'], [
         'columns',
         'sort',
         'selectedEventIds',

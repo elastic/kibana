@@ -209,7 +209,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getManageTimeline(state, timelineId ?? '')
   );
@@ -278,14 +278,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     type: columnType,
   }));
 
-  useEffect(() => {
+  /*useEffect(() => {
     dispatch(
-      timelineActions.initializeTGridSettings({
-        filterManager,
+      timelineActions.updateTimeline({
+        timeline: { filterManager },
         id: timelineId,
       })
     );
   }, [activeFilterManager, dispatch, filterManager, timelineId, uiSettings]);
+  */
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
@@ -451,7 +452,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 handleOnPanelClosed={handleOnPanelClosed}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}
-                timelineId={timelineId}
+                scopeId={timelineId}
               />
             </ScrollableFlexItem>
           </>

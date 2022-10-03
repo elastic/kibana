@@ -9,24 +9,31 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useBulkActionItems } from '@kbn/timelines-plugin/public';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
+import { TableId, TimelineId } from '../../../../../common/types';
+import { dataTableActions } from '../../../../timelines/store/data_table';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {
   alertStatus?: Status;
   closePopover: () => void;
   eventId: string;
-  timelineId: string;
+  scopeId: string;
   indexName: string;
   refetch?: () => void;
 }
+
+const isTimelineScope = (scopeId: string) =>
+  Object.values(TimelineId).includes(scopeId as unknown as TimelineId);
+const isInTableScope = (scopeId: string) =>
+  Object.values(TableId).includes(scopeId as unknown as TableId);
 
 export const useAlertsActions = ({
   alertStatus,
   closePopover,
   eventId,
-  timelineId,
+  scopeId,
   indexName,
   refetch,
 }: Props) => {
@@ -42,16 +49,24 @@ export const useAlertsActions = ({
 
   const setEventsLoading = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
+      if (isTimelineScope(scopeId)) {
+        dispatch(timelineActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
+      } else if (isInTableScope(scopeId)) {
+        dispatch(dataTableActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
+      }
     },
-    [dispatch, timelineId]
+    [dispatch, scopeId]
   );
 
   const setEventsDeleted = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      dispatch(timelineActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
+      if (isTimelineScope(scopeId)) {
+        dispatch(timelineActions.setEventsDeleted({ id: scopeId, eventIds, isDeleted }));
+      } else if (isInTableScope(scopeId)) {
+        dispatch(dataTableActions.setEventsDeleted({ id: scopeId, eventIds, isDeleted }));
+      }
     },
-    [dispatch, timelineId]
+    [dispatch, scopeId]
   );
 
   const actionItems = useBulkActionItems({
@@ -62,7 +77,7 @@ export const useAlertsActions = ({
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,
     onUpdateFailure: onStatusUpdate,
-    timelineId,
+    scopeId,
   });
 
   return {

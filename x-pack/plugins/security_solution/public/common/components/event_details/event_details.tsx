@@ -77,7 +77,7 @@ interface Props {
   isDraggable?: boolean;
   rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
-  timelineId: string;
+  scopeId: string;
   handleOnEventClosed: () => void;
   isReadOnly?: boolean;
 }
@@ -131,7 +131,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   isAlert,
   isDraggable,
   rawEventData,
-  timelineId,
+  scopeId,
   timelineTabType,
   handleOnEventClosed,
   isReadOnly,
@@ -191,11 +191,11 @@ const EventDetailsComponent: React.FC<Props> = ({
                 <EuiSpacer size="m" />
                 <Overview
                   browserFields={browserFields}
-                  contextId={timelineId}
+                  contextId={scopeId}
                   data={data}
                   eventId={id}
                   indexName={indexName}
-                  timelineId={timelineId}
+                  scopeId={scopeId}
                   handleOnEventClosed={handleOnEventClosed}
                   isReadOnly={isReadOnly}
                 />
@@ -221,7 +221,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     eventId: id,
                     browserFields,
                     isDraggable,
-                    timelineId,
+                    scopeId,
                     title: i18n.HIGHLIGHTED_FIELDS,
                     isReadOnly,
                   }}
@@ -233,7 +233,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   browserFields={browserFields}
                   eventId={id}
                   data={data}
-                  timelineId={timelineId}
+                  scopeId={scopeId}
                   isReadOnly={isReadOnly}
                 />
 
@@ -246,7 +246,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                       browserFields={browserFields}
                       data={data}
                       eventId={id}
-                      timelineId={timelineId}
+                    scopeId={scopeId}
                       enrichments={allEnrichments}
                       isReadOnly={isReadOnly}
                     />
@@ -276,6 +276,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       indexName,
       isAlert,
       isDraggable,
+      scopeId,
       isEnrichmentsLoading,
       isLicenseValid,
       isReadOnly,
@@ -355,14 +356,14 @@ const EventDetailsComponent: React.FC<Props> = ({
             data={data}
             eventId={id}
             isDraggable={isDraggable}
-            timelineId={timelineId}
+            scopeId={scopeId}
             timelineTabType={timelineTabType}
             isReadOnly={isReadOnly}
           />
         </>
       ),
     }),
-    [browserFields, data, id, isDraggable, timelineId, timelineTabType, isReadOnly]
+    [browserFields, data, id, isDraggable, scopeId, timelineTabType, isReadOnly]
   );
 
   const jsonTab = useMemo(

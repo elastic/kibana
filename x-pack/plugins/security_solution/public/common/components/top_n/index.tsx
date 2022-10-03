@@ -22,7 +22,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import type { TimelineModel } from '../../../timelines/store/timeline/model';
 
-import { getOptions } from './helpers';
+import { getOptions, isDetectionsAlertsTable } from './helpers';
 import { TopN } from './top_n';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
@@ -77,13 +77,14 @@ export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
   indexPattern: DataViewBase;
-  timelineId?: string;
+  scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   showLegend?: boolean;
   value?: string[] | string | null;
   globalFilters?: Filter[];
+  isInTimeline: boolean;
 }
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = OwnProps & PropsFromRedux;
@@ -104,20 +105,19 @@ const StatefulTopNComponent: React.FC<Props> = ({
   onFilterAdded,
   paddingSize,
   showLegend,
-  timelineId,
+  scopeId,
   toggleTopN,
+  isInTimeline,
   value,
 }) => {
   const { uiSettings } = useKibana().services;
   const { from, deleteQuery, setQuery, to } = useGlobalTime(false);
 
-  const options = getOptions(
-    timelineId === TimelineId.active ? activeTimelineEventType : undefined
-  );
+  const options = getOptions(isInTimeline ? activeTimelineEventType : undefined);
 
   const combinedQueries = useMemo(
     () =>
-      timelineId === TimelineId.active
+      isInTimeline
         ? combineQueries({
             browserFields,
             config: getEsQueryConfig(uiSettings),
@@ -138,18 +138,14 @@ const StatefulTopNComponent: React.FC<Props> = ({
       dataProviders,
       indexPattern,
       kqlMode,
-      timelineId,
+      isInTimeline,
       uiSettings,
     ]
   );
 
   const defaultView = useMemo(
-    () =>
-      timelineId === TimelineId.detectionsPage ||
-      timelineId === TimelineId.detectionsRulesDetailsPage
-        ? 'alert'
-        : options[0].value,
-    [options, timelineId]
+    () => (isDetectionsAlertsTable(scopeId) ? 'alert' : options[0].value),
+    [options, scopeId]
   );
 
   return (
@@ -157,21 +153,21 @@ const StatefulTopNComponent: React.FC<Props> = ({
       combinedQueries={combinedQueries}
       data-test-subj="top-n"
       defaultView={defaultView}
-      deleteQuery={timelineId === TimelineId.active ? undefined : deleteQuery}
+      deleteQuery={isInTimeline ? undefined : deleteQuery}
       field={field as AlertsStackByField}
-      filters={timelineId === TimelineId.active ? EMPTY_FILTERS : globalFilters}
-      from={timelineId === TimelineId.active ? activeTimelineFrom : from}
+      filters={isInTimeline ? EMPTY_FILTERS : globalFilters}
+      from={isInTimeline ? activeTimelineFrom : from}
       indexPattern={indexPattern}
       options={options}
       paddingSize={paddingSize}
-      query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
+      query={isInTimeline ? EMPTY_QUERY : globalQuery}
       showLegend={showLegend}
       setAbsoluteRangeDatePickerTarget={
-        timelineId === TimelineId.active ? InputsModelId.timeline : InputsModelId.global
+        isInTimeline ? InputsModelId.timeline : InputsModelId.global
       }
       setQuery={setQuery}
-      timelineId={timelineId}
-      to={timelineId === TimelineId.active ? activeTimelineTo : to}
+      scopeId={scopeId}
+      to={isInTimeline ? activeTimelineTo : to}
       toggleTopN={toggleTopN}
       onFilterAdded={onFilterAdded}
       value={value}

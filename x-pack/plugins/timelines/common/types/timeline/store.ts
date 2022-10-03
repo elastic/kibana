@@ -11,7 +11,7 @@ import {
   ColumnId,
   RowRendererId,
   Sort,
-  TimelineExpandedDetail,
+  DataExpandedDetail,
   TimelineTypeLiteral,
 } from '.';
 
@@ -31,7 +31,7 @@ export interface SerializedFilterQuery {
 }
 
 export type SortDirection = 'none' | 'asc' | 'desc' | Direction;
-export interface SortColumnTimeline {
+export interface SortColumnTable {
   columnId: string;
   columnType: string;
   esTypes?: string[];
@@ -46,7 +46,7 @@ export interface TimelinePersistInput {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
-  expandedDetail?: TimelineExpandedDetail;
+  expandedDetail?: DataExpandedDetail;
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;

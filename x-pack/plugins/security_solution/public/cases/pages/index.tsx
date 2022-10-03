@@ -34,7 +34,7 @@ const TimelineDetailsPanel = () => {
       entityType="events"
       isFlyoutView
       runtimeMappings={runtimeMappings}
-      timelineId={TimelineId.casePage}
+      scopeId={TimelineId.casePage}
     />
   );
 };

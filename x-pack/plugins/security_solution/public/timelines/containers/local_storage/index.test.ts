@@ -34,7 +34,6 @@ const {
   isLoading,
   loadingText,
   queryFields,
-  selectAll,
   unit,
   ...timelineToStore
 } = mockTimelineModel;

@@ -6,11 +6,9 @@
  */
 
 import { createSelector } from 'reselect';
+import { getTableByIdSelector } from '../../../../store/data_table/selectors';
 
-import {
-  getManageTimelineById,
-  getTimelineByIdSelector,
-} from '../../../../store/timeline/selectors';
+import { getTimelineByIdSelector } from '../../../../store/timeline/selectors';
 
 /**
  * This selector combines all the selectors used by the Timeline `StatefulBody`,
@@ -23,11 +21,12 @@ import {
  * Example:
  *  `useSelector((state: State) => timelineBodySelector(state, id))`
  */
+
 export const timelineBodySelector = createSelector(
-  getManageTimelineById(),
+  getTableByIdSelector(),
   getTimelineByIdSelector(),
-  (manageTimelineById, timeline) => ({
-    manageTimelineById,
+  (tGrid, timeline) => ({
+    tGrid,
     timeline,
   })
 );

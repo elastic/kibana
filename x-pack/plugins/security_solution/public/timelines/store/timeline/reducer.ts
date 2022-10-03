@@ -48,6 +48,16 @@ import {
   toggleModalSaveTimeline,
   updateEqlOptions,
   setTimelineUpdatedAt,
+  toggleDetailPanel,
+  setEventsLoading,
+  removeColumn,
+  upsertColumn,
+  updateColumns,
+  updateIsLoading,
+  updateSort,
+  clearSelected,
+  setSelected,
+  setEventsDeleted,
 } from './actions';
 import {
   addNewTimeline,
@@ -79,6 +89,14 @@ import {
   updateFilters,
   updateTimelineEventType,
   updateSessionViewConfig,
+  updateTimelineDetailsPanel,
+  setLoadingTableEvents,
+  removeTableColumn,
+  upsertTableColumn,
+  updateTableColumns,
+  updateTableSort,
+  setSelectedTableEvents,
+  setDeletedTableEvents,
 } from './helpers';
 
 import type { TimelineState } from './types';
@@ -404,5 +422,91 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         updated,
       },
     },
+  }))
+  .case(toggleDetailPanel, (state, action) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [action.timelineId]: {
+        ...state.timelineById[action.timelineId],
+        expandedDetail: {
+          ...state.timelineById[action.timelineId].expandedDetail,
+          ...updateTimelineDetailsPanel(action),
+        },
+      },
+    },
+  }))
+  .case(setEventsLoading, (state, { id, eventIds, isLoading }) => ({
+    ...state,
+    timelineById: setLoadingTableEvents({
+      id,
+      eventIds,
+      timelineById: state.timelineById,
+      isLoading,
+    }),
+  }))
+  .case(removeColumn, (state, { id, columnId }) => ({
+    ...state,
+    timelineById: removeTableColumn({
+      id,
+      columnId,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(upsertColumn, (state, { column, id, index }) => ({
+    ...state,
+    timelineById: upsertTableColumn({ column, id, index, timelineById: state.timelineById }),
+  }))
+  .case(updateColumns, (state, { id, columns }) => ({
+    ...state,
+    timelineById: updateTableColumns({
+      id,
+      columns,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateIsLoading, (state, { id, isLoading }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isLoading,
+      },
+    },
+  }))
+  .case(updateSort, (state, { id, sort }) => ({
+    ...state,
+    timelineById: updateTableSort({ id, sort, timelineById: state.timelineById }),
+  }))
+  .case(setSelected, (state, { id, eventIds, isSelected, isSelectAllChecked }) => ({
+    ...state,
+    timelineById: setSelectedTableEvents({
+      id,
+      eventIds,
+      timelineById: state.timelineById,
+      isSelected,
+      isSelectAllChecked,
+    }),
+  }))
+  .case(clearSelected, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        selectedEventIds: {},
+        isSelectAllChecked: false,
+      },
+    },
+  }))
+  .case(setEventsDeleted, (state, { id, eventIds, isDeleted }) => ({
+    ...state,
+    timelineById: setDeletedTableEvents({
+      id,
+      eventIds,
+      timelineById: state.timelineById,
+      isDeleted,
+    }),
   }))
   .build();

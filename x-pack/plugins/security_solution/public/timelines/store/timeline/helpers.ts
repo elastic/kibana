@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep, union } from 'lodash/fp';
 
 import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
+import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Sort } from '../../components/timeline/body/sort';
 import type {
   DataProvider,
@@ -29,6 +30,9 @@ import type {
   RowRendererId,
   SerializedFilterQuery,
   TimelinePersistInput,
+  ToggleDetailPanel,
+  TimelineExpandedDetail,
+  SortColumnTimeline,
 } from '../../../../common/types/timeline';
 import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
@@ -1314,6 +1318,225 @@ export const updateExcludedRowRenderersIds = ({
     [id]: {
       ...timeline,
       excludedRowRendererIds,
+    },
+  };
+};
+
+export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
+  const { tabType, timelineId, ...expandedDetails } = action;
+
+  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
+  const expandedTabType = tabType ?? 'query';
+  const newExpandDetails = {
+    params: expandedDetails.params ? { ...expandedDetails.params } : {},
+    panelView: expandedDetails.panelView,
+  } as TimelineExpandedDetail;
+  return {
+    [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
+      ? newExpandDetails
+      : {},
+  };
+};
+
+interface SetLoadingTableEventsParams {
+  id: string;
+  eventIds: string[];
+  isLoading: boolean;
+  timelineById: TimelineById;
+}
+
+export const setLoadingTableEvents = ({
+  id,
+  eventIds,
+  isLoading,
+  timelineById,
+}: SetLoadingTableEventsParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const loadingEventIds = isLoading
+    ? union(timeline.loadingEventIds, eventIds)
+    : timeline.loadingEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      loadingEventIds,
+    },
+  };
+};
+
+interface RemoveTableColumnParams {
+  id: string;
+  columnId: string;
+  timelineById: TimelineById;
+}
+
+export const removeTableColumn = ({
+  id,
+  columnId,
+  timelineById,
+}: RemoveTableColumnParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columns = timeline.columns.filter((c) => c.id !== columnId);
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+/**
+ * Adds or updates a column. When updating a column, it will be moved to the
+ * new index
+ */
+export const upsertTableColumn = ({
+  column,
+  id,
+  index,
+  timelineById,
+}: AddTimelineColumnParams): TimelineById => {
+  const timeline = timelineById[id];
+  const alreadyExistsAtIndex = timeline.columns.findIndex((c) => c.id === column.id);
+
+  if (alreadyExistsAtIndex !== -1) {
+    // remove the existing entry and add the new one at the specified index
+    const reordered = timeline.columns.filter((c) => c.id !== column.id);
+    reordered.splice(index, 0, column); // ⚠️ mutation
+
+    return {
+      ...timelineById,
+      [id]: {
+        ...timeline,
+        columns: reordered,
+      },
+    };
+  }
+  // add the new entry at the specified index
+  const columns = [...timeline.columns];
+  columns.splice(index, 0, column); // ⚠️ mutation
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+interface UpdateTableColumnsParams {
+  id: string;
+  columns: ColumnHeaderOptions[];
+  timelineById: TimelineById;
+}
+
+export const updateTableColumns = ({
+  id,
+  columns,
+  timelineById,
+}: UpdateTableColumnsParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+interface UpdateTableSortParams {
+  id: string;
+  sort: SortColumnTimeline[];
+  timelineById: TimelineById;
+}
+
+export const updateTableSort = ({
+  id,
+  sort,
+  timelineById,
+}: UpdateTableSortParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      sort,
+    },
+  };
+};
+
+interface SetSelectedTableEventsParams {
+  id: string;
+  eventIds: Record<string, TimelineNonEcsData[]>;
+  isSelectAllChecked: boolean;
+  isSelected: boolean;
+  timelineById: TimelineById;
+}
+
+export const setSelectedTableEvents = ({
+  id,
+  eventIds,
+  isSelectAllChecked = false,
+  isSelected,
+  timelineById,
+}: SetSelectedTableEventsParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const selectedEventIds = isSelected
+    ? { ...timeline.selectedEventIds, ...eventIds }
+    : omit(Object.keys(eventIds), timeline.selectedEventIds);
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      selectedEventIds,
+      isSelectAllChecked,
+    },
+  };
+};
+
+interface SetDeletedTableEventsParams {
+  id: string;
+  eventIds: string[];
+  isDeleted: boolean;
+  timelineById: TimelineById;
+}
+
+export const setDeletedTableEvents = ({
+  id,
+  eventIds,
+  isDeleted,
+  timelineById,
+}: SetDeletedTableEventsParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const deletedEventIds = isDeleted
+    ? union(timeline.deletedEventIds, eventIds)
+    : timeline.deletedEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
+
+  const selectedEventIds = Object.fromEntries(
+    Object.entries(timeline.selectedEventIds).filter(
+      ([selectedEventId]) => !deletedEventIds.includes(selectedEventId)
+    )
+  );
+
+  const isSelectAllChecked =
+    Object.keys(selectedEventIds).length > 0 ? timeline.isSelectAllChecked : false;
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      deletedEventIds,
+      selectedEventIds,
+      isSelectAllChecked,
     },
   };
 };

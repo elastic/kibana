@@ -36,12 +36,20 @@ export {
   clearEventsDeleted,
   initializeTGridSettings,
   setTGridSelectAll,
+  updateTableGraphEventId,
+  updateTableSessionViewConfig,
+  createTGrid,
 } from './store/t_grid/actions';
 
-export { getManageTimelineById } from './store/t_grid/selectors';
+export { getManageDataTableById, getTGridByIdSelector } from './store/t_grid/selectors';
 
 export { tGridReducer } from './store/t_grid/reducer';
-export type { TimelinesUIStart, TGridModelForTimeline, TimelineState } from './types';
+export type {
+  TimelinesUIStart,
+  TGridModelForTimeline,
+  TableState,
+  SubsetTGridModel,
+} from './types';
 export type { TGridType, SortDirection, State as TGridState, TGridModel } from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
 
@@ -92,7 +100,7 @@ export function plugin() {
 }
 
 export { StatefulEventContext } from './components/stateful_event_context';
-export { TimelineContext } from './components/t_grid/shared';
+export { TableContext } from './components/t_grid/shared';
 
 export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';
 

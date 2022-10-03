@@ -10,16 +10,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import type {
+  ControlColumnProps,
+  RowRenderer,
+  TGridCellAction,
+} from '@kbn/timelines-plugin/common/types';
+import type { SubsetTGridModel } from '@kbn/timelines-plugin/public';
+import type { TableId } from '../../../../common/types';
+import { dataTableActions } from '../../../timelines/store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { ControlColumnProps, RowRenderer } from '../../../../common/types/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
 import { APP_UI_ID } from '../../../../common/constants';
-import { timelineActions } from '../../../timelines/store/timeline';
-import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -50,10 +53,10 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 
 export interface Props {
   defaultCellActions?: TGridCellAction[];
-  defaultModel: SubsetTimelineModel;
+  defaultModel: SubsetTGridModel;
   end: string;
   entityType: EntityType;
-  id: TimelineId;
+  tableId: TableId;
   leadingControlColumns: ControlColumnProps[];
   scopeId: SourcererScopeName;
   start: string;
@@ -78,7 +81,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   defaultModel,
   end,
   entityType,
-  id,
+  tableId,
   leadingControlColumns,
   pageFilters,
   currentFilter,
@@ -97,8 +100,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     input,
     query,
     globalQueries,
-    timelineQuery,
-    timeline: {
+    dataTable: {
       columns,
       dataProviders,
       defaultColumns,
@@ -111,8 +113,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       sessionViewConfig,
       showCheckboxes,
       sort,
+      dateRange,
     } = defaultModel,
-  } = useSelector((state: State) => eventsViewerSelector(state, id));
+  } = useSelector((state: State) => eventsViewerSelector(state, tableId));
+console.log(defaultModel)
+console.log('cols')
+console.log(columns)
 
   const { timelines: timelinesUi } = useKibana().services;
   const {
@@ -133,21 +139,22 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.createTimeline({
+      dataTableActions.createTGrid({
         columns,
         dataViewId: selectedDataViewId,
         defaultColumns,
         excludedRowRendererIds,
-        id,
+        id: tableId,
         indexNames: selectedPatterns,
         itemsPerPage,
         showCheckboxes,
         sort,
+        dateRange,
       })
     );
 
     return () => {
-      dispatch(inputsActions.deleteOneQuery({ id, inputId: InputsModelId.global }));
+      dispatch(inputsActions.deleteOneQuery({ id: tableId, inputId: InputsModelId.global }));
       if (editorActionsRef.current) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         editorActionsRef.current.closeEditor();
@@ -160,28 +167,64 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
 
   const { Navigation } = useSessionViewNavigation({
-    timelineId: id,
+    isInTimeline: false,
+    graphEventId,
+    sessionViewConfig,
+    updateGraphEventId: (navGraphEventId) =>
+      dispatch(
+        dataTableActions.updateTableGraphEventId({ id: tableId, graphEventId: navGraphEventId })
+      ),
+    updateSessionViewConfig: (navSessionViewConfig) =>
+      dispatch(
+        dataTableActions.updateTableSessionViewConfig({
+          id: tableId,
+          sessionViewConfig: navSessionViewConfig,
+        })
+      ),
   });
 
   const { DetailsPanel, SessionView } = useSessionView({
     entityType,
-    timelineId: id,
+    scopeId: tableId,
+    sessionViewConfig,
+    isInTimeline: false,
   });
 
   const graphOverlay = useMemo(() => {
     const shouldShowOverlay =
       (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
     return shouldShowOverlay ? (
-      <GraphOverlay timelineId={id} SessionView={SessionView} Navigation={Navigation} />
+      <GraphOverlay
+        componentInstanceID={tableId}
+        isInTimeline={false}
+        SessionView={SessionView}
+        Navigation={Navigation}
+        graphEventId={graphEventId}
+        sessionViewConfig={null}
+        updateTimelineGraphEventId={(timelineGraphEventId) =>
+          dispatch(
+            dataTableActions.updateTableGraphEventId({
+              graphEventId: timelineGraphEventId,
+              id: tableId,
+            })
+          )
+        }
+      />
     ) : null;
-  }, [graphEventId, id, sessionViewConfig, SessionView, Navigation]);
+  }, [dispatch, graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(
-        inputsActions.setQuery({ id, inputId: InputsModelId.global, inspect, loading, refetch })
+        inputsActions.setQuery({
+          id: tableId,
+          inputId: InputsModelId.global,
+          inspect,
+          loading,
+          refetch,
+        })
       );
     },
-    [dispatch, id]
+    [dispatch, tableId]
   );
 
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
@@ -192,25 +235,22 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const bulkActions = useMemo(
     () => ({
       onAlertStatusActionSuccess: () => {
-        if (id === TimelineId.active) {
-          refetchQuery([timelineQuery]);
-        } else {
-          refetchQuery(globalQueries);
-        }
+        refetchQuery(globalQueries);
       },
       customBulkActions: addToCaseBulkActions,
     }),
-    [addToCaseBulkActions, globalQueries, id, timelineQuery]
+    [addToCaseBulkActions, globalQueries]
   );
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: scopeId,
-    timelineId: id,
     editorActionsRef,
+    upsertColumn: (column, index) =>
+      dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
+    removeColumn: (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
   });
 
   const isLive = input.policy.kind === 'interval';
-
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -236,7 +276,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             graphEventId,
             graphOverlay,
             hasAlertsCrud,
-            id,
+            id: tableId,
             indexNames: selectedPatterns,
             indexPattern,
             isLive,

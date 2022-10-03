@@ -227,9 +227,9 @@ export const FooterComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
 
-  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
+  const getManageDataTable = useMemo(() => tGridSelectors.getManageDataTableById(), []);
   const { documentType, loadingText, footerText } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, id)
+    getManageDataTable(state, id)
   );
 
   const handleChangePageClick = useCallback(

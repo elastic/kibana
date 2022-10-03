@@ -91,6 +91,7 @@ export const tGridDefaults: SubsetTGridModel = {
   ],
   savedObjectId: null,
   version: null,
+  graphEventId: '',
 };
 
 export const getTGridManageDefaults = (id: string) => ({
@@ -104,4 +105,5 @@ export const getTGridManageDefaults = (id: string) => ({
   queryFields: [],
   title: '',
   unit: (n: number) => i18n.UNIT(n),
+  graphEventId: '',
 });

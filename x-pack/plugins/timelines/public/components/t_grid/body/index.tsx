@@ -47,9 +47,8 @@ import {
   ControlColumnProps,
   RowRenderer,
   AlertStatus,
-  SortColumnTimeline,
+  SortColumnTable,
   TimelineId,
-  TimelineTabs,
   SetEventsLoading,
   SetEventsDeleted,
 } from '../../../../common/types/timeline';
@@ -71,7 +70,7 @@ import type { Refetch } from '../../../store/t_grid/inputs';
 import { Ecs } from '../../../../common/ecs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../stateful_event_context';
-import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
+import { tGridActions, TGridModel, tGridSelectors, TableState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
 import * as i18n from './translations';
@@ -116,7 +115,7 @@ interface OwnProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   tableView: ViewSelection;
-  tabType: TimelineTabs;
+  tabType: string;
   totalItems: number;
   trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
@@ -189,13 +188,13 @@ const transformControlColumns = ({
   onRuleChange?: () => void;
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   showCheckboxes: boolean;
-  tabType: TimelineTabs;
+  tabType: string;
   timelineId: string;
   isSelectAllChecked: boolean;
   browserFields: BrowserFields;
   onSelectPage: OnSelectAll;
   pageSize: number;
-  sort: SortColumnTimeline[];
+  sort: SortColumnTable[];
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
@@ -285,7 +284,7 @@ const transformControlColumns = ({
             setCellProps={setCellProps}
             showCheckboxes={showCheckboxes}
             tabType={tabType}
-            timelineId={timelineId}
+            tableId={timelineId}
             width={width}
             setEventsLoading={setEventsLoading}
             setEventsDeleted={setEventsDeleted}
@@ -352,7 +351,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
     const dispatch = useDispatch();
-    const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
+    const getManageTimeline = useMemo(() => tGridSelectors.getManageDataTableById(), []);
     const { queryFields, selectAll, defaultColumns } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
@@ -938,11 +937,8 @@ const makeMapStateToProps = () => {
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
   const getTGrid = tGridSelectors.getTGridByIdSelector();
-  const mapStateToProps = (
-    state: TimelineState,
-    { browserFields, id, hasAlertsCrud }: OwnProps
-  ) => {
-    const timeline: TGridModel = getTGrid(state, id);
+  const mapStateToProps = (state: TableState, { browserFields, id, hasAlertsCrud }: OwnProps) => {
+    const dataTable: TGridModel = getTGrid(state, id);
     const {
       columns,
       excludedRowRendererIds,
@@ -952,8 +948,9 @@ const makeMapStateToProps = () => {
       showCheckboxes,
       sort,
       isLoading,
-    } = timeline;
-
+    } = dataTable;
+console.log('test')
+console.log(columns)
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       excludedRowRendererIds,

@@ -279,7 +279,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 handleOnPanelClosed={handleOnPanelClosed}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.pinned}
-                timelineId={timelineId}
+                scopeId={timelineId}
               />
             </ScrollableFlexItem>
           </>

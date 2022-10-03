@@ -15,10 +15,8 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 
@@ -43,10 +41,12 @@ export interface UseHoverActionItemsProps {
   ownFocus: boolean;
   showTopN: boolean;
   stKeyboardEvent: React.KeyboardEvent<Element> | undefined;
-  timelineId?: string | null;
+  scopeId?: string | null;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
+  activeFilterManager?: FilterManager;
+  isInTimeline: boolean;
 }
 
 export interface UseHoverActionItems {
@@ -75,10 +75,12 @@ export const useHoverActionItems = ({
   ownFocus,
   showTopN,
   stKeyboardEvent,
-  timelineId,
+  scopeId,
   toggleColumn,
   toggleTopN,
   values,
+  activeFilterManager,
+  isInTimeline,
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
   const dispatch = useDispatch();
@@ -96,16 +98,10 @@ export const useHoverActionItems = ({
     () => kibana.services.data.query.filterManager,
     [kibana.services.data.query.filterManager]
   );
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId ?? '')
-  );
   const filterManager = useMemo(
     () =>
-      timelineId === TimelineId.active
-        ? activeFilterManager ?? new FilterManager(uiSettings)
-        : filterManagerBackup,
-    [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
+      isInTimeline ? activeFilterManager ?? new FilterManager(uiSettings) : filterManagerBackup,
+    [uiSettings, isInTimeline, activeFilterManager, filterManagerBackup]
   );
 
   /*
@@ -152,8 +148,9 @@ export const useHoverActionItems = ({
         ownFocus={ownFocus}
         showTopN={showTopN}
         showTooltip={enableOverflowButton ? false : true}
-        timelineId={timelineId}
+        scopeId={scopeId}
         value={values}
+        isInTimeline={isInTimeline}
       />
     ),
     [
@@ -163,9 +160,10 @@ export const useHoverActionItems = ({
       onFilterAdded,
       ownFocus,
       showTopN,
-      timelineId,
+      scopeId,
       toggleTopN,
       values,
+      isInTimeline,
     ]
   );
 
