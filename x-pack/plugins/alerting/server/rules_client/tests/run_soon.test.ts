@@ -179,7 +179,7 @@ describe('runSoon()', () => {
   });
 
   test('does not run a rule if that rule is already running', async () => {
-    taskManager.get.mockResolvedValue({
+    taskManager.get.mockResolvedValueOnce({
       id: '1',
       scheduledAt: new Date(),
       attempts: 0,
@@ -195,5 +195,19 @@ describe('runSoon()', () => {
     const message = await rulesClient.runSoon({ id: '1' });
     expect(message).toBe('Rule is already running');
     expect(taskManager.runSoon).not.toHaveBeenCalled();
+  });
+
+  test('gracefully handles errors getting task document', async () => {
+    taskManager.get.mockRejectedValueOnce(new Error('oh no!'));
+    const message = await rulesClient.runSoon({ id: '1' });
+    expect(message).toBe('Error running rule: oh no!');
+    expect(taskManager.runSoon).not.toHaveBeenCalled();
+  });
+
+  test('gracefully handles errors calling runSoon', async () => {
+    taskManager.runSoon.mockRejectedValueOnce(new Error('fail!'));
+    const message = await rulesClient.runSoon({ id: '1' });
+    expect(message).toBe('Error running rule: fail!');
+    expect(taskManager.runSoon).toHaveBeenCalled();
   });
 });
