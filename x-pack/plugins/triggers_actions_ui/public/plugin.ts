@@ -69,7 +69,7 @@ import type {
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
-import { PLUGIN_ID } from './common/constants';
+import { PLUGIN_ID, CONNECTORS_PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
@@ -184,11 +184,21 @@ export class Plugin
     const featureDescription = i18n.translate(
       'xpack.triggersActionsUI.managementSection.displayDescription',
       {
-        defaultMessage: 'Detect conditions using rules, and take actions using connectors.',
+        defaultMessage: 'Detect conditions using rules.',
       }
     );
-
-    console.log(plugins.management);
+    const connectorsFeatureTitle = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.connectors.displayName',
+      {
+        defaultMessage: 'Connectors',
+      }
+    );
+    const connectorsFeatureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.connectors.displayDescription',
+      {
+        defaultMessage: 'Connect third-party software with your alerting data.',
+      }
+    );
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -201,9 +211,9 @@ export class Plugin
         category: 'admin',
       });
       plugins.home.featureCatalogue.register({
-        id: 'triggersActionsConnectors',
-        title: 'Connectors',
-        description: featureDescription,
+        id: CONNECTORS_PLUGIN_ID,
+        title: connectorsFeatureTitle,
+        description: connectorsFeatureDescription,
         icon: 'watchesApp',
         path: '/app/management/insightsAndAlerting/triggersActions',
         showOnHomePage: false,
@@ -259,8 +269,8 @@ export class Plugin
     });
 
     plugins.management.sections.section.insightsAndAlerting.registerApp({
-      id: 'connectors',
-      title: 'Connectors',
+      id: CONNECTORS_PLUGIN_ID,
+      title: connectorsFeatureTitle,
       order: 0,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
