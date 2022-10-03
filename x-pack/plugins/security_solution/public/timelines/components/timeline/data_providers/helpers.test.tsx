@@ -1106,16 +1106,8 @@ describe('helpers', () => {
   });
 
   describe('convertIsOneOfQueryStringArrayToDisplayValue', () => {
-    it('only operates upon arrays', () => {
-      const testValues = ['string', 1, undefined, null, false, {}];
-      for (const value of testValues) {
-        // @ts-ignore typing a guarded function
-        expect(convertIsOneOfQueryStringArrayToDisplayValue(value)).toBe(undefined);
-      }
-    });
-
     it('converts a "is one of" query to correct format for a string array', () => {
-      expect(convertIsOneOfQueryStringArrayToDisplayValue(['a', 'b', 'c'])).toBe('(a OR b OR c)');
+      expect(convertIsOneOfQueryStringArrayToDisplayValue(['a', 2, 'c'])).toBe('( a OR 2 OR c )');
     });
   });
 });
