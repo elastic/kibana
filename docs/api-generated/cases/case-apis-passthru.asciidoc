@@ -610,13 +610,13 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="alert_identifiers"><code>alert_identifiers</code> - Alert identifiers</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class='model-description'>The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="alert_indices"><code>alert_indices</code> - Alert indices</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class='model-description'>The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
   </div>
@@ -624,9 +624,9 @@ Any modifications made to this file will be overwritten.
     <h3><a name="case_response_closed_by_properties"><code>case_response_closed_by_properties</code> - Case response properties for closed_by</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">email </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">full_name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">username </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
@@ -655,9 +655,9 @@ Any modifications made to this file will be overwritten.
     <h3><a name="case_response_created_by_properties"><code>case_response_created_by_properties</code> - Case response properties for created_by</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">email </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">full_name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">username </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
@@ -665,36 +665,36 @@ Any modifications made to this file will be overwritten.
     <h3><a name="case_response_properties"><code>case_response_properties</code> - Case response properties</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">closed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">closed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_closed_by_properties">case_response_closed_by_properties</a></span>  </div>
-<div class="param">comments (optional)</div><div class="param-desc"><span class="param-type"><a href="#Case_response_properties_for_comments_inner">array[Case_response_properties_for_comments_inner]</a></span> An array of comment objects for the case. </div>
-<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#Case_response_properties_for_connectors">Case_response_properties_for_connectors</a></span>  </div>
-<div class="param">created_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_created_by_properties">case_response_created_by_properties</a></span>  </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">duration (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero. </div>
-<div class="param">external_service (optional)</div><div class="param-desc"><span class="param-type"><a href="#external_service">external_service</a></span>  </div>
-<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
-<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
-<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">totalAlerts (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
-<div class="param">totalComment (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
-<div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_updated_by_properties">case_response_updated_by_properties</a></span>  </div>
-<div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">closed_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">closed_by </div><div class="param-desc"><span class="param-type"><a href="#case_response_closed_by_properties">case_response_closed_by_properties</a></span>  </div>
+<div class="param">comments </div><div class="param-desc"><span class="param-type"><a href="#Case_response_properties_for_comments_inner">array[Case_response_properties_for_comments_inner]</a></span> An array of comment objects for the case. </div>
+<div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#Case_response_properties_for_connectors">Case_response_properties_for_connectors</a></span>  </div>
+<div class="param">created_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#case_response_created_by_properties">case_response_created_by_properties</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">duration </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero. </div>
+<div class="param">external_service </div><div class="param-desc"><span class="param-type"><a href="#external_service">external_service</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity </div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status </div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">totalAlerts </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">totalComment </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">updated_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">updated_by </div><div class="param-desc"><span class="param-type"><a href="#case_response_updated_by_properties">case_response_updated_by_properties</a></span>  </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="case_response_pushed_by_properties"><code>case_response_pushed_by_properties</code> - Case response properties for pushed_by</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">email </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">full_name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">username </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
@@ -702,9 +702,9 @@ Any modifications made to this file will be overwritten.
     <h3><a name="case_response_updated_by_properties"><code>case_response_updated_by_properties</code> - Case response properties for updated_by</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">email </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">full_name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">username </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
