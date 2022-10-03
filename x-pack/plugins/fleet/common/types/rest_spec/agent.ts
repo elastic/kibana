@@ -121,6 +121,9 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PutRequestDiagnosticsResponse {}
+
 export type PostBulkAgentReassignResponse = BulkAgentAction;
 
 export type PostBulkUpdateAgentTagsResponse = BulkAgentAction;

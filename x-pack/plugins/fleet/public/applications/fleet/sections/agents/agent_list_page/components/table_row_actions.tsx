@@ -21,6 +21,7 @@ export const TableRowActions: React.FunctionComponent<{
   onUnenrollClick: () => void;
   onUpgradeClick: () => void;
   onAddRemoveTagsClick: (button: HTMLElement) => void;
+  onRequestDiagnosticsClick: () => void;
 }> = ({
   agent,
   agentPolicy,
@@ -28,6 +29,7 @@ export const TableRowActions: React.FunctionComponent<{
   onUnenrollClick,
   onUpgradeClick,
   onAddRemoveTagsClick,
+  onRequestDiagnosticsClick,
 }) => {
   const { getHref } = useLink();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
@@ -107,7 +109,9 @@ export const TableRowActions: React.FunctionComponent<{
       <EuiContextMenuItem
         icon="download"
         disabled={!hasFleetAllPrivileges}
-        href={getHref('agent_details_diagnostics', { agentId: agent.id })}
+        onClick={() => {
+          onRequestDiagnosticsClick();
+        }}
       >
         <FormattedMessage
           id="xpack.fleet.agentList.diagnosticsOneButton"

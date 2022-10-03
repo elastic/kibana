@@ -9,6 +9,7 @@ import type {
   GetActionStatusResponse,
   GetAgentTagsResponse,
   PostBulkUpdateAgentTagsRequest,
+  PutRequestDiagnosticsResponse,
   UpdateAgentRequest,
 } from '../../../common/types';
 
@@ -167,6 +168,14 @@ export function sendPostAgentUpgrade(
     path: agentRouteService.getUpgradePath(agentId),
     method: 'post',
     body,
+    ...options,
+  });
+}
+
+export function sendPostRequestDiagnostics(agentId: string, options?: RequestOptions) {
+  return sendRequest<PutRequestDiagnosticsResponse>({
+    path: agentRouteService.getRequestDiagnosticsPath(agentId),
+    method: 'post',
     ...options,
   });
 }

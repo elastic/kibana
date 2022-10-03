@@ -51,6 +51,8 @@ import {
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
+import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
+
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
@@ -146,6 +148,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
   const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
+  const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
+    undefined
+  );
 
   // Kuery
   const kuery = useMemo(() => {
@@ -538,6 +543,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   setAgentToAddRemoveTags(agent);
                   setShowTagsAddRemove(!showTagsAddRemove);
                 }}
+                onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
               />
             );
           },
@@ -608,6 +614,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onClose={() => {
               setAgentToUpgrade(undefined);
               refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {agentToRequestDiagnostics && (
+        <EuiPortal>
+          <AgentRequestDiagnosticsModal
+            agents={[agentToRequestDiagnostics]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToRequestDiagnostics(undefined);
             }}
           />
         </EuiPortal>

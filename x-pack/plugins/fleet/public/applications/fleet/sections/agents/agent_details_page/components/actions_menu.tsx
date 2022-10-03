@@ -10,7 +10,7 @@ import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useKibanaVersion, useLink } from '../../../../hooks';
+import { useAuthz, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -19,6 +19,7 @@ import {
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
 import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
+import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
@@ -32,8 +33,8 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
   const isUnenrolling = agent.status === 'unenrolling';
-  const { getHref } = useLink();
 
   const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
 
@@ -74,6 +75,17 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             onClose={() => {
               setIsUpgradeModalOpen(false);
               refreshAgent();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isRequestDiagnosticsModalOpen && (
+        <EuiPortal>
+          <AgentRequestDiagnosticsModal
+            agents={[agent]}
+            agentCount={1}
+            onClose={() => {
+              setIsRequestDiagnosticsModalOpen(false);
             }}
           />
         </EuiPortal>
@@ -136,7 +148,9 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           <EuiContextMenuItem
             icon="download"
             disabled={!hasFleetAllPrivileges}
-            href={getHref('agent_details_diagnostics', { agentId: agent.id })}
+            onClick={() => {
+              setIsRequestDiagnosticsModalOpen(true);
+            }}
           >
             <FormattedMessage
               id="xpack.fleet.agentList.diagnosticsOneButton"

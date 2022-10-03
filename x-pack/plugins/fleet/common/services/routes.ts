@@ -205,6 +205,8 @@ export const agentRouteService = {
     AGENT_API_ROUTES.ACTIONS_PATTERN.replace('{agentId}', agentId),
   getListTagsPath: () => AGENT_API_ROUTES.LIST_TAGS_PATTERN,
   getAvailableVersionsPath: () => AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
+  getRequestDiagnosticsPath: (agentId: string) =>
+    AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN.replace('{agentId}', agentId),
 };
 
 export const outputRoutesService = {
