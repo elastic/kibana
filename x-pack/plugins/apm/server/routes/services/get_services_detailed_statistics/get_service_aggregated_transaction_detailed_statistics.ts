@@ -148,7 +148,7 @@ export async function getServiceAggregatedTransactionDetailedStats({
             key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
         ) ?? bucket.transactionType.buckets[0];
 
-      if(!topTransactionTypeBucket) {
+      if (!topTransactionTypeBucket) {
         return [];
       }
 
