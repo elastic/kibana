@@ -448,7 +448,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         filterKuery: 'group: group-0',
       });
 
-      const docs = await waitForDocs(1);
+      const docs = await waitForDocs(2);
       const doc = docs[0];
       const { message } = doc._source.params;
 

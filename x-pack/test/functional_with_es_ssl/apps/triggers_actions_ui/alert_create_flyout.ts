@@ -291,7 +291,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
-
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
       await discardNewRuleCreation();
     });
 
@@ -300,6 +302,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await defineEsQueryAlert(alertName);
 
       // Valid query
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
       await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
         clearWithKeyboard: true,
       });
