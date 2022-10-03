@@ -51,7 +51,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('When the user does not have the required cluster privileges', () => {
         it('should return an error when creating an agent key', async () => {
-          const error = await expectToReject<ApmApiError>(() => createAgentKey(apmApiClient.writeUser));
+          const error = await expectToReject<ApmApiError>(() =>
+            createAgentKey(apmApiClient.writeUser)
+          );
           expect(error.res.status).to.be(500);
           expect(error.res.body.message).contain('is missing the following requested privilege');
         });
@@ -64,7 +66,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('should return an error when getting a list of agent keys', async () => {
-          const error = await expectToReject<ApmApiError>(() => getAgentKeys(apmApiClient.writeUser));
+          const error = await expectToReject<ApmApiError>(() =>
+            getAgentKeys(apmApiClient.writeUser)
+          );
           expect(error.res.status).to.be(500);
         });
       });

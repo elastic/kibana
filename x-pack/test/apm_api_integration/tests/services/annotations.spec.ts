@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '@kbn/apm-plugin/common/environment_filter_values';
-import { APIClientRequestParamsOf, APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '@kbn/apm-plugin/common/environment_filter_values';
+import {
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import expect from '@kbn/expect';
 import { JsonObject } from '@kbn/utility-types';
@@ -19,11 +25,11 @@ const DEFAULT_INDEX_NAME = 'observability-annotations';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const apmApiClient = getService("apmApiClient");
+  const apmApiClient = getService('apmApiClient');
   const es = getService('es');
 
   function expectContainsObj(
-    source: APIReturnType<"POST /api/apm/services/{serviceName}/annotation">,
+    source: APIReturnType<'POST /api/apm/services/{serviceName}/annotation'>,
     expected: JsonObject
   ) {
     expect(source).to.eql(
@@ -38,7 +44,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
   function createAnnotation(
     body: APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation'>['params']['body']
-  ){
+  ) {
     return apmApiClient.annotationWriterUser({
       endpoint: 'POST /api/apm/services/{serviceName}/annotation',
       params: {
@@ -46,11 +52,15 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           serviceName: 'opbeans-java',
         },
         body,
-      }
+      },
     });
   }
 
-  function getAnnotation(query: RecursivePartial<APIClientRequestParamsOf<'GET /api/apm/services/{serviceName}/annotation/search'>['params']['query']>) {
+  function getAnnotation(
+    query: RecursivePartial<
+      APIClientRequestParamsOf<'GET /api/apm/services/{serviceName}/annotation/search'>['params']['query']
+    >
+  ) {
     return apmApiClient.readUser({
       endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
       params: {
@@ -63,7 +73,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           end: new Date().toISOString(),
           ...query,
         },
-      }
+      },
     });
   }
 
@@ -83,7 +93,9 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         );
 
         expect(err.res.status).to.be(403);
-        expect(err.res.body.message).eql('Annotations require at least a gold license or a trial license.');
+        expect(err.res.body.message).eql(
+          'Annotations require at least a gold license or a trial license.'
+        );
       });
     });
   });
