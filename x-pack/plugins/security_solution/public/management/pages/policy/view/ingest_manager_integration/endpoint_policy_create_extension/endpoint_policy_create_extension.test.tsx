@@ -9,31 +9,38 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 import { EndpointPolicyCreateExtension } from './endpoint_policy_create_extension';
-import type { NewPackagePolicy, NewPackagePolicyInput, NewPackagePolicyInputStream } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  NewPackagePolicyInputStream,
+} from '@kbn/fleet-plugin/common';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 
-const mockNewPackagePolicyInputStream : NewPackagePolicyInputStream = {
-  enabled: true,
-  data_stream: {
-    dataset: 'someDataset',
+const getMockNewPackage = (): NewPackagePolicy => {
+  const mockNewPackagePolicyInputStream: NewPackagePolicyInputStream = {
+    enabled: true,
+    data_stream: {
+      dataset: 'someDataset',
+      type: 'someType',
+    },
+  };
+
+  const mockNewPackagePolicyInput: NewPackagePolicyInput = {
     type: 'someType',
-  },
-}
+    enabled: true,
+    streams: [mockNewPackagePolicyInputStream],
+  };
 
-const mockNewPackagePolicyInput : NewPackagePolicyInput = {
-  type: 'someType',
-  enabled: true,
-  streams: [mockNewPackagePolicyInputStream],
-}
-
-const mockNewPackage : NewPackagePolicy = {
-  id: 'someid',
-  inputs: [mockNewPackagePolicyInput],
-  name: 'someName',
-  namespace: 'someNamespace',
-  enabled: true,
-  policy_id: 'somePolicyid',
+  const mockNewPackage: NewPackagePolicy = {
+    id: 'someid',
+    inputs: [mockNewPackagePolicyInput],
+    name: 'someName',
+    namespace: 'someNamespace',
+    enabled: true,
+    policy_id: 'somePolicyid',
+  };
+  return mockNewPackage;
 };
 
 describe('Onboarding Component new section', () => {
@@ -48,7 +55,7 @@ describe('Onboarding Component new section', () => {
   describe('When EndpointPolicyCreateExtension is mounted', () => {
     it('renders EndpointPolicyCreateExtension options correctly (Default to Endpoint)', async () => {
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={mockNewPackage} onChange={jest.fn()} />
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
       );
       expect(renderResult.getByTestId('selectIntegrationTypeId')).toBeVisible();
       expect(renderResult.queryByText('NGAV')).toBeVisible();
@@ -58,7 +65,7 @@ describe('Onboarding Component new section', () => {
 
     it('renders EndpointPolicyCreateExtension options correctly (set to Cloud)', async () => {
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={mockNewPackage} onChange={jest.fn()} />
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
       );
       userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(renderResult.getByText('Interactive only')).toBeVisible();
@@ -68,7 +75,7 @@ describe('Onboarding Component new section', () => {
     it('make sure onChange is called when user change environment', async () => {
       const mockedOnChange = jest.fn();
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={mockNewPackage} onChange={mockedOnChange} />
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={mockedOnChange} />
       );
       expect(mockedOnChange).toHaveBeenCalledTimes(1);
       userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
