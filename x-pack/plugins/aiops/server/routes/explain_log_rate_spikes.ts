@@ -27,6 +27,7 @@ import {
   addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
+  pingAction,
   resetAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
@@ -91,11 +92,22 @@ export const defineExplainLogRateSpikesRoute = (
         controller.abort();
       });
 
-      const { end, push, responseWithHeaders } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
-        request.headers,
-        logger,
-        true
-      );
+      const {
+        end: streamEnd,
+        push,
+        responseWithHeaders,
+      } = streamFactory<AiopsExplainLogRateSpikesApiAction>(request.headers, logger, true);
+
+      function pushPing() {
+        push(pingAction());
+      }
+
+      const pingInterval = setInterval(pushPing, 1000);
+
+      function end() {
+        clearInterval(pingInterval);
+        streamEnd();
+      }
 
       function endWithUpdatedLoadingState() {
         push(
