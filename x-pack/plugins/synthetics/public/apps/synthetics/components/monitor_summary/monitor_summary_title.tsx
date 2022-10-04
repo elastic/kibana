@@ -8,15 +8,15 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { MonitorSummaryLastRunInfo } from './last_run_info';
-import { getMonitorStatusAction, selectMonitorStatus } from '../../state';
-import { MonitorSelector } from './monitor_selector/monitor_selector';
-import { RunTestManually } from './run_test_manually';
+import { MonitorSelector } from '../monitor_details/monitor_selector/monitor_selector';
+import { RunTestManually } from '../monitor_details/run_test_manually';
+import { getMonitorStatusAction, selectLatestPing } from '../../state';
+import { MonitorSummaryLastRunInfo } from '../monitor_details/last_run_info';
 
 export const MonitorSummaryTitle = () => {
   const dispatch = useDispatch();
 
-  const { data } = useSelector(selectMonitorStatus);
+  const data = useSelector(selectLatestPing);
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
