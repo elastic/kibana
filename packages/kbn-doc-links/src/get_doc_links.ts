@@ -363,6 +363,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       eventFilters: `${SECURITY_SOLUTION_DOCS}event-filters.html`,
       blocklist: `${SECURITY_SOLUTION_DOCS}blocklist.html`,
       threatIntelInt: `${SECURITY_SOLUTION_DOCS}es-threat-intel-integrations.html`,
+      endpointArtifacts: `${SECURITY_SOLUTION_DOCS}endpoint-artifacts.html`,
       policyResponseTroubleshooting: {
         full_disk_access: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#enable-fda-endpoint`,
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
