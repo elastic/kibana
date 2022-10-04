@@ -10,28 +10,22 @@ import { config } from './config';
 describe('xpack.cloud config', () => {
   describe('full_story', () => {
     it('allows org_id when enabled: false', () => {
-      expect(() =>
-        config.schema.validate({ full_story: { enabled: false, org_id: 'asdf' } })
-      ).not.toThrow();
+      expect(() => config.schema.validate({ enabled: false, org_id: 'asdf' })).not.toThrow();
     });
 
     it('rejects undefined or empty org_id when enabled: true', () => {
-      expect(() =>
-        config.schema.validate({ full_story: { enabled: true } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[full_story.org_id]: expected value of type [string] but got [undefined]"`
+      expect(() => config.schema.validate({ enabled: true })).toThrowErrorMatchingInlineSnapshot(
+        `"[org_id]: expected value of type [string] but got [undefined]"`
       );
       expect(() =>
-        config.schema.validate({ full_story: { enabled: true, org_id: '' } })
+        config.schema.validate({ enabled: true, org_id: '' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[full_story.org_id]: value has length [0] but it must have a minimum length of [1]."`
+        `"[org_id]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
     it('accepts org_id when enabled: true', () => {
-      expect(() =>
-        config.schema.validate({ full_story: { enabled: true, org_id: 'asdf' } })
-      ).not.toThrow();
+      expect(() => config.schema.validate({ enabled: true, org_id: 'asdf' })).not.toThrow();
     });
   });
 });
