@@ -29387,36 +29387,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.IRenderOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "IRenderOptions",
-        "description": [],
-        "path": "src/core/server/rendering/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IRenderOptions.isAnonymousPage",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isAnonymousPage",
-            "description": [
-              "\nSet whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata.\n`false` by default."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/core/server/rendering/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.IRouter",
         "type": "Interface",
         "tags": [],
