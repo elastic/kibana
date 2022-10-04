@@ -22,7 +22,7 @@ to open the *Chart options* menu, and then click *Hide*.
 * To change the chart height, drag the resize handle
 image:images/resize-icon.png[two-line icon for increasing or decreasing the height of the chart, width=24px]
 to the size you want.
-The chart size is saved in the browser.
+The chart size is saved in your browser.
 
 * To reset the height, open the *Chart options* menu, and then select *Reset to default height*.
 
