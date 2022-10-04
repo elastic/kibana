@@ -65,6 +65,7 @@ class DocLinks {
   public crawlerGettingStarted: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
+  public deployTrainedModels: string;
   public documentLevelSecurity: string;
   public elasticsearchCreateIndex: string;
   public elasticsearchGettingStarted: string;
@@ -178,6 +179,7 @@ class DocLinks {
     this.crawlerGettingStarted = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
+    this.deployTrainedModels = '';
     this.documentLevelSecurity = '';
     this.elasticsearchCreateIndex = '';
     this.elasticsearchGettingStarted = '';
@@ -293,6 +295,7 @@ class DocLinks {
     this.crawlerGettingStarted = docLinks.links.enterpriseSearch.crawlerGettingStarted;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
+    this.deployTrainedModels = docLinks.links.enterpriseSearch.deployTrainedModels;
     this.documentLevelSecurity = docLinks.links.enterpriseSearch.documentLevelSecurity;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
