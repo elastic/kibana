@@ -474,6 +474,7 @@ describe('Cases webhook service', () => {
       expect(requestMock).not.toHaveBeenCalled();
       expect(res).toBeUndefined();
     });
+
     test('properly encodes external system id as string in request body', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
@@ -505,6 +506,7 @@ describe('Cases webhook service', () => {
         data: `{"body":"comment","id":"1"}`,
       });
     });
+
     test('properly encodes external system id as number in request body', async () => {
       const commentReq2 = {
         incidentId: 1 as unknown as string,

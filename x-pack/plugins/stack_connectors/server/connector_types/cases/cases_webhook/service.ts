@@ -190,6 +190,7 @@ export const createExternalService = (
           },
         },
       });
+
       const normalizedUrl = validateAndNormalizeUrl(
         `${updateUrl}`,
         configurationUtilities,
@@ -197,6 +198,7 @@ export const createExternalService = (
       );
 
       const { tags, title, description } = incident;
+
       const json = renderMustacheStringNoEscape(updateIncidentJson, {
         ...stringifyObjValues({
           title,
@@ -211,6 +213,7 @@ export const createExternalService = (
       });
 
       validateJson(json, 'Update case JSON body');
+
       const res = await request({
         axios: axiosInstance,
         method: updateIncidentMethod,
@@ -223,7 +226,9 @@ export const createExternalService = (
       throwDescriptiveErrorIfResponseIsNotValid({
         res,
       });
+
       const updatedIncident = await getIncident(incidentId as string);
+
       const viewUrl = renderMustacheStringNoEscape(viewIncidentUrl, {
         external: {
           system: {
@@ -232,11 +237,13 @@ export const createExternalService = (
           },
         },
       });
+
       const normalizedViewUrl = validateAndNormalizeUrl(
         `${viewUrl}`,
         configurationUtilities,
         'View case URL'
       );
+
       return {
         id: incidentId,
         title: updatedIncident.title,
@@ -253,6 +260,7 @@ export const createExternalService = (
       if (!createCommentUrl || !createCommentJson || !createCommentMethod) {
         return;
       }
+
       const commentUrl = renderMustacheStringNoEscape(createCommentUrl, {
         external: {
           system: {
@@ -260,11 +268,13 @@ export const createExternalService = (
           },
         },
       });
+
       const normalizedUrl = validateAndNormalizeUrl(
         `${commentUrl}`,
         configurationUtilities,
         'Create comment URL'
       );
+
       const json = renderMustacheStringNoEscape(createCommentJson, {
         ...stringifyObjValues({ comment: comment.comment }),
         external: {
@@ -273,7 +283,9 @@ export const createExternalService = (
           },
         },
       });
+
       validateJson(json, 'Create comment JSON body');
+
       const res = await request({
         axios: axiosInstance,
         method: createCommentMethod,
