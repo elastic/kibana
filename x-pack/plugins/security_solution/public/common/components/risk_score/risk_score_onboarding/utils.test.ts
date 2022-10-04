@@ -132,7 +132,6 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
     beforeAll(async () => {
       await restartRiskScoreTransforms({
         http: mockHttp,
-        spaceId: 'customSpace',
         refetch: mockRefetch,
         riskScoreEntity,
       });
