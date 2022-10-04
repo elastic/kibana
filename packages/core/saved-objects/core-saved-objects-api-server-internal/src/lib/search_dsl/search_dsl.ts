@@ -12,7 +12,8 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { getQueryParams, ReferenceQueryParams, SearchOperator } from './query_params';
+import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import { getQueryParams, SearchOperator } from './query_params';
 import { getPitParams } from './pit_params';
 import { getSortingParams } from './sorting_params';
 
@@ -30,9 +31,9 @@ interface GetSearchDslOptions {
   namespaces?: string[];
   pit?: SavedObjectsPitParams;
   typeToNamespacesMap?: Map<string, string[] | undefined>;
-  hasReference?: ReferenceQueryParams | ReferenceQueryParams[];
+  hasReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
   hasReferenceOperator?: SearchOperator;
-  hasNoReference?: ReferenceQueryParams | ReferenceQueryParams[];
+  hasNoReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
   hasNoReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
 }

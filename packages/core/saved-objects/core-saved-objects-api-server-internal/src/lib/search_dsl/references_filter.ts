@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ReferenceQueryParams, SearchOperator } from './query_params';
+import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+
+import type { SearchOperator } from './query_params';
 
 export function getReferencesFilter({
   references,
@@ -14,7 +16,7 @@ export function getReferencesFilter({
   maxTermsPerClause = 1000,
   must = true,
 }: {
-  references: ReferenceQueryParams[];
+  references: SavedObjectTypeIdTuple[];
   operator?: SearchOperator;
   maxTermsPerClause?: number;
   must?: boolean;
@@ -58,7 +60,7 @@ export function getReferencesFilter({
 }
 
 const getAggregatedTermsClauses = (
-  references: ReferenceQueryParams[],
+  references: SavedObjectTypeIdTuple[],
   maxTermsPerClause: number
 ) => {
   const refTypeToIds = references.reduce((map, { type, id }) => {
@@ -82,7 +84,7 @@ const createChunks = <T>(array: T[], chunkSize: number): T[][] => {
   return chunks;
 };
 
-export const getNestedTermClauseForReference = (reference: ReferenceQueryParams) => {
+export const getNestedTermClauseForReference = (reference: SavedObjectTypeIdTuple) => {
   return {
     nested: {
       path: 'references',

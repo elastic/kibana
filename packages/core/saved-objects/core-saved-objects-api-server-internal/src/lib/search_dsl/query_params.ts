@@ -7,6 +7,7 @@
  */
 
 import * as esKuery from '@kbn/es-query';
+import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 
 type KueryNode = any;
 
@@ -123,11 +124,6 @@ function getClauseForType(
   };
 }
 
-export interface ReferenceQueryParams {
-  type: string;
-  id: string;
-}
-
 export type SearchOperator = 'AND' | 'OR';
 
 interface QueryParams {
@@ -139,9 +135,9 @@ interface QueryParams {
   defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
-  hasReference?: ReferenceQueryParams | ReferenceQueryParams[];
+  hasReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
   hasReferenceOperator?: SearchOperator;
-  hasNoReference?: ReferenceQueryParams | ReferenceQueryParams[];
+  hasNoReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
   hasNoReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
 }
