@@ -74,8 +74,33 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
   agent,
   showOfflinePreviousStatus,
 }) => {
-  const { last_checkin: lastCheckIn } = agent;
+  const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
+  const lastCheckInMessageText = lastCheckInMessage ? (
+    <FormattedMessage
+      id="xpack.fleet.agentHealth.checkinMessageText"
+      defaultMessage="Last checkin message: {lastCheckinMessage}"
+      values={{
+        lastCheckinMessage: lastCheckInMessage,
+      }}
+    />
+  ) : null;
+  const lastCheckinText = msLastCheckIn ? (
+    <>
+      <FormattedMessage
+        id="xpack.fleet.agentHealth.checkInTooltipText"
+        defaultMessage="Last checked in {lastCheckIn}"
+        values={{
+          lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
+        }}
+      />
+    </>
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.agentHealth.noCheckInTooltipText"
+      defaultMessage="Never checked in"
+    />
+  );
 
   const previousToOfflineStatus = useMemo(() => {
     if (!showOfflinePreviousStatus || agent.status !== 'offline') {
@@ -89,22 +114,10 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
     <EuiToolTip
       position="top"
       content={
-        msLastCheckIn ? (
-          <>
-            <FormattedMessage
-              id="xpack.fleet.agentHealth.checkInTooltipText"
-              defaultMessage="Last checked in {lastCheckIn}"
-              values={{
-                lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
-              }}
-            />
-          </>
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.noCheckInTooltipText"
-            defaultMessage="Never checked in"
-          />
-        )
+        <>
+          <p>{lastCheckinText}</p>
+          <p>{lastCheckInMessageText}</p>
+        </>
       }
     >
       <>

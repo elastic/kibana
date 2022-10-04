@@ -13,6 +13,8 @@ import {
   LocationStatus,
   ScheduleUnit,
   SourceType,
+  VerificationMode,
+  TLSVersion,
 } from '../../../../../../common/runtime_types';
 
 /**
@@ -94,6 +96,8 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loaded: false,
     loading: false,
+    status: null,
+    statusError: null,
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
@@ -338,8 +342,8 @@ function getMonitorDetailsMockSlice() {
       'ssl.certificate': '',
       'ssl.key': '',
       'ssl.key_passphrase': '',
-      'ssl.verification_mode': 'full',
-      'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+      'ssl.verification_mode': VerificationMode.FULL,
+      'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'] as TLSVersion[],
       revision: 1,
       updated_at: '2022-07-24T17:15:46.342Z',
     },
