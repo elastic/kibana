@@ -508,7 +508,7 @@ export const getPieVisualization = ({
       : [];
   },
 
-  getLayerActions(layerId, state) {
+  getSupportedActionsForLayer(layerId, state) {
     const layerInQuestion = state.layers.find((layer) => layer.layerId === layerId);
 
     if (!layerInQuestion) {

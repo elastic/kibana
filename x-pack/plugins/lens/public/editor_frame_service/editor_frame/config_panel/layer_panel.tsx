@@ -27,6 +27,7 @@ import {
   DragDropOperation,
   DropType,
   isOperation,
+  LayerAction,
 } from '../../../types';
 import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
@@ -311,16 +312,22 @@ export function LayerPanel(
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage = Boolean(datasource?.isTextBasedLanguage());
 
-  const compatibleActions = useMemo(
+  const compatibleActions = useMemo<LayerAction[]>(
     () =>
       [
-        ...(activeVisualization.getSupportedActionsForLayer?.(
-          layerId,
-          visualizationState,
-          updateVisualization
-        ) || []),
+        ...(activeVisualization
+          .getSupportedActionsForLayer?.(layerId, visualizationState)
+          .map((action) => ({
+            ...action,
+            execute: () =>
+              updateVisualization(
+                activeVisualization.onLayerAction?.(layerId, action.id, visualizationState)
+              ),
+          })) || []),
         ...getSharedActions({
+          layerId,
           activeVisualization,
+          visualizationState,
           core,
           layerIndex,
           layerType: activeVisualization.getLayerType(layerId, visualizationState),
