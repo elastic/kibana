@@ -8,10 +8,10 @@
 import {
   mockedTriggersActionsUiService,
   TestProvidersComponent,
-} from '../../../../common/mocks/test_providers';
+} from '../../../../../../common/mocks/test_providers';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { IndicatorsFieldBrowser } from './indicators_field_browser';
+import { IndicatorsFieldBrowser } from '.';
 
 const stub = jest.fn();
 

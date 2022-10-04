@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './indicators_field_browser';
+export * from './table';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC, useState, useMemo } from 'react';
+import React, { useMemo, useState, VFC } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridColumnCellActionProps,
@@ -19,15 +19,13 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { CellActions } from './cell_actions';
+import { CellActions, cellRendererFactory } from './components';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { cellRendererFactory } from './cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
-import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
+import { IndicatorsTableContext, IndicatorsTableContextValue } from './contexts';
 import { IndicatorsFlyout } from '../flyout';
-import { useToolbarOptions } from './hooks/use_toolbar_options';
-import { ColumnSettingsValue } from './hooks/use_column_settings';
+import { ColumnSettingsValue, useToolbarOptions } from './hooks';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { getFieldSchema } from '../../utils/get_field_schema';
 import { Pagination } from '../../services/fetch_indicators';
