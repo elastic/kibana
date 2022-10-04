@@ -43,6 +43,15 @@ const defaultActionsConfig: ActionsConfig = {
 };
 
 describe('ensureUriAllowed', () => {
+  test('throws an error when the Uri is an empty string', () => {
+    const config: ActionsConfig = defaultActionsConfig;
+    expect(() =>
+      getActionsConfigurationUtilities(config).ensureUriAllowed('')
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"target url \\"\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+    );
+  });
+
   test('returns true when "any" hostnames are allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
