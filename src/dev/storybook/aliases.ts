@@ -11,7 +11,7 @@ export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   ci_composite: '.ci/.storybook',
-  cloud: 'x-pack/plugins/cloud/.storybook',
+  cloud_chat: 'x-pack/plugins/cloud_integrations/cloud_chat/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
   content_management: 'packages/content-management/.storybook',

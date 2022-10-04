@@ -6,12 +6,18 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import unified from 'unified';
+import markdown from 'remark-parse';
+import { some, filter } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 
+import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createActionHandler } from '../../handlers';
+import { parser as OsqueryParser } from './osquery_parser';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -37,7 +43,41 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       );
 
       if (isInvalid) {
-        return response.forbidden();
+        if (request.body.alert_ids?.length) {
+          try {
+            const client = await osqueryContext.service
+              .getRuleRegistryService()
+              ?.getRacClientWithRequest(request);
+
+            const alertData = await client?.get({ id: request.body.alert_ids[0] });
+
+            if (alertData?.['kibana.alert.rule.note']) {
+              const parsedAlertInvestigationGuide = unified()
+                .use([[markdown, {}], OsqueryParser])
+                .parse(alertData?.['kibana.alert.rule.note']);
+
+              const osqueryQueries = filter(parsedAlertInvestigationGuide?.children as object, [
+                'type',
+                'osquery',
+              ]);
+
+              const requestQueryExistsInTheInvestigationGuide = some(
+                osqueryQueries,
+                (payload: {
+                  configuration: { query: string; ecs_mapping: ECSMappingOrUndefined };
+                }) =>
+                  payload?.configuration?.query === request.body.query &&
+                  deepEqual(payload?.configuration?.ecs_mapping, request.body.ecs_mapping)
+              );
+
+              if (!requestQueryExistsInTheInvestigationGuide) throw new Error();
+            }
+          } catch (error) {
+            return response.forbidden();
+          }
+        } else {
+          return response.forbidden();
+        }
       }
 
       try {
