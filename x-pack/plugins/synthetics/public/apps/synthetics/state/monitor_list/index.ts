@@ -10,7 +10,7 @@ import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 
 import { ConfigKey, MonitorManagementListResult } from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import { MonitorListPageState } from './models';
 import {
@@ -58,7 +58,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchMonitorListAction.fail, (state, action) => {
       state.loading = false;
-      state.error = serializeHttpFetchError(action.payload);
+      state.error = action.payload;
     })
     .addCase(fetchUpsertMonitorAction, (state, action) => {
       state.monitorUpsertStatuses[action.payload.id] = {
