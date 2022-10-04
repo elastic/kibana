@@ -39,8 +39,8 @@ import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import type { buildGroupByFieldAggregation } from './alert_grouping/build_group_by_field_aggregation';
 import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 import type { EnrichEvents } from './enrichments/types';
-import { BucketHistory } from './alert_grouping/group_and_bulk_create';
-import { RunOpts } from '../rule_types/types';
+import type { BucketHistory } from './alert_grouping/group_and_bulk_create';
+import type { RunOpts } from '../rule_types/types';
 
 export interface ThresholdResult {
   terms?: Array<{

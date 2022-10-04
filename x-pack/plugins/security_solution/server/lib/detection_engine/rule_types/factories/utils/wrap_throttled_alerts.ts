@@ -8,14 +8,14 @@
 import objectHash from 'object-hash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import {
+import type {
   BaseFieldsLatest,
   ThrottledFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../../common/detection_engine/schemas/alerts';
-import { ConfigType } from '../../../../../config';
-import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
-import { SignalSource } from '../../../signals/types';
+import type { ConfigType } from '../../../../../config';
+import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { SignalSource } from '../../../signals/types';
 import { buildBulkBody } from './build_bulk_body';
 import {
   ALERT_ENTITY_VALUES,
@@ -23,7 +23,7 @@ import {
   ALERT_THROTTLE_END,
   ALERT_THROTTLE_START,
 } from '../../../../../../common/field_maps/field_names';
-import { BuildReasonMessage } from '../../../signals/reason_formatters';
+import type { BuildReasonMessage } from '../../../signals/reason_formatters';
 
 export interface ThrottleBuckets {
   event: estypes.SearchHit<SignalSource>;

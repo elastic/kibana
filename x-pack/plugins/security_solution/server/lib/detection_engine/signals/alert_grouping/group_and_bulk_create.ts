@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import moment from 'moment';
+import type moment from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
@@ -86,7 +86,7 @@ export const groupAndBulkCreate = async ({
         bucket.endDate > tuple.from.toDate();
       }) ?? [];
 
-    let toReturn: GroupAndBulkCreateReturnType = {
+    const toReturn: GroupAndBulkCreateReturnType = {
       success: true,
       warning: false,
       searchAfterTimes: [],

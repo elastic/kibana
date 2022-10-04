@@ -9,7 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { BucketHistory } from '../../signals/alert_grouping/group_and_bulk_create';
+import type { BucketHistory } from '../../signals/alert_grouping/group_and_bulk_create';
 import type { UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { unifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';

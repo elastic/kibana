@@ -14,7 +14,8 @@ import type {
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { getFilter } from '../get_filter';
-import { BucketHistory, groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
+import type { BucketHistory } from '../alert_grouping/group_and_bulk_create';
+import { groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
@@ -23,7 +24,7 @@ import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { scheduleNotificationResponseActions } from '../../rule_response_actions/schedule_notification_response_actions';
 import type { SetupPlugins } from '../../../../plugin_contract';
-import { RunOpts } from '../../rule_types/types';
+import type { RunOpts } from '../../rule_types/types';
 
 export const queryExecutor = async ({
   runOpts,
