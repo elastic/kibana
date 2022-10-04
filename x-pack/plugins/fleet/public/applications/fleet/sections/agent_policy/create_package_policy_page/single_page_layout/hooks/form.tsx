@@ -206,7 +206,7 @@ export function useOnSubmit({
             }
 
             if (packagesToPreinstall.length > 0) {
-              await sendBulkInstallPackages(packagesToPreinstall);
+              await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
             }
           }
 
