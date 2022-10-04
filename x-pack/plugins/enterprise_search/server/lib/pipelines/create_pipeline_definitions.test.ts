@@ -42,7 +42,7 @@ describe('createIndexPipelineDefinitions util function', () => {
 describe('formatMlPipelineBody util function', () => {
   const pipelineName = 'ml-inference-my-ml-proc';
   const modelId = 'my-model-id';
-  let modelInputField = 'my-model-input-field';
+  const modelInputField = 'my-model-input-field';
   const modelType = 'pytorch';
   const inferenceConfigKey = 'my-model-type';
   const modelTypes = ['pytorch', 'my-model-type'];
@@ -157,11 +157,11 @@ describe('formatMlPipelineBody util function', () => {
         {
           inference: {
             field_map: {
-              [sourceField]: 'MODEL_INPUT_FIELD'
-            }
-          }
-        }
-      ]
+              [sourceField]: 'MODEL_INPUT_FIELD',
+            },
+          },
+        },
+      ],
     });
 
     const mockResponse = {
