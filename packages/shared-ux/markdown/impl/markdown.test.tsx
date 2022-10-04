@@ -1,7 +1,3 @@
-import React from "react";
-import { Markdown } from "./markdown";
-import { render } from 'enzyme';
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,10 +5,16 @@ import { render } from 'enzyme';
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-describe('shared ux markdown component', () => {
-    it('renders', () => {
-        const component = render((<Markdown initialContent={""} ariaLabelContent={""} readonly={false} />));
-        expect(component).toMatchSnapshot();
-  });
-})
 
+import React from 'react';
+import { Markdown } from './markdown';
+import { render } from 'enzyme';
+
+describe('shared ux markdown component', () => {
+  it('renders', () => {
+    const component = render(
+      <Markdown initialContent={''} ariaLabelContent={''} readonly={false} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+});
