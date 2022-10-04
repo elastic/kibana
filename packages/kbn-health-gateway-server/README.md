@@ -1,4 +1,4 @@
-# @kbn/gateway
+# @kbn/health-gateway-server
 
 This package runs a small server called the Health Gateway, which exists to query
 the status APIs of multiple Kibana instances and return an aggregated result.
@@ -47,7 +47,7 @@ script included for development that uses `docker-compose` to run Elasticsearch 
 two different Kibana instances for testing:
 
 ```bash
-# From the /packages/kbn-gateway directory
+# From the /packages/kbn-health-gateway-server directory
 $ ./scripts/dev.sh 8.4.0
 ```
 
@@ -56,7 +56,7 @@ above (5605-5606). Note that you need to pass a stack version to the script so i
 knows which docker images to pull.
 
 Once you have your `gateway.yml` and have started the dev script, you can run the
-server from the `/packages/kbn-gateway` directory with `yarn start`. Then you should
+server from the `/packages/kbn-health-gateway-server` directory with `yarn start`. Then you should
 be able to make requests to the `/api/status` endpoint:
 
 ```bash

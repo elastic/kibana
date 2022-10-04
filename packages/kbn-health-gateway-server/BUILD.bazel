@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-gateway"
-PKG_REQUIRE_NAME = "@kbn/gateway"
+PKG_DIRNAME = "kbn-health-gateway-server"
+PKG_REQUIRE_NAME = "@kbn/health-gateway-server"
 
 SOURCE_FILES = glob(
   [

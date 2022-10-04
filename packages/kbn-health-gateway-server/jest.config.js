@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-gateway'],
+  roots: ['<rootDir>/packages/kbn-health-gateway-server'],
 };

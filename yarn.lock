@@ -3406,10 +3406,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/gateway@link:bazel-bin/packages/kbn-gateway":
-  version "0.0.0"
-  uid ""
-
 "@kbn/generate@link:bazel-bin/packages/kbn-generate":
   version "0.0.0"
   uid ""
@@ -3423,6 +3419,10 @@
   uid ""
 
 "@kbn/hapi-mocks@link:bazel-bin/packages/kbn-hapi-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/health-gateway-server@link:bazel-bin/packages/kbn-health-gateway-server":
   version "0.0.0"
   uid ""
 
@@ -7519,10 +7519,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__gateway@link:bazel-bin/packages/kbn-gateway/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__generate@link:bazel-bin/packages/kbn-generate/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7536,6 +7532,10 @@
   uid ""
 
 "@types/kbn__hapi-mocks@link:bazel-bin/packages/kbn-hapi-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__health-gateway-server@link:bazel-bin/packages/kbn-health-gateway-server/npm_module_types":
   version "0.0.0"
   uid ""
 

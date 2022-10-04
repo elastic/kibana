@@ -1,6 +1,6 @@
 {
   "type": "shared-server",
-  "id": "@kbn/gateway",
+  "id": "@kbn/health-gateway-server",
   "owner": "@elastic/kibana-core",
   "runtimeDeps": [],
   "typeDeps": []
