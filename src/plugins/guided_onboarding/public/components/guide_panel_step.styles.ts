@@ -23,7 +23,7 @@ export const getGuidePanelStepStyles = (euiTheme: EuiThemeComputed, stepStatus: 
     color: ${stepStatus === 'inactive' ? euiTheme.colors.subduedText : euiTheme.colors.text};
   `,
   stepTitle: css`
-    font-weight: ${euiTheme.font.weight.bold};
+    font-weight: ${euiTheme.font.weight.semiBold};
     color: ${stepStatus === 'inactive' ? euiTheme.colors.subduedText : euiTheme.colors.text};
   `,
 });
