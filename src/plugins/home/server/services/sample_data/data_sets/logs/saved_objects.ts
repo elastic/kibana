@@ -64,33 +64,184 @@ export const getSavedObjects = (): SavedObject[] => [
     references: [],
   },
   {
-    id: '4eb6e500-e1c7-11e7-b6d5-4dc382ef7f5b',
-    type: 'visualization',
-    updated_at: '2021-07-21T18:52:13.586Z',
-    version: '2',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
     attributes: {
-      title: i18n.translate('home.sampleData.logsSpec.hostVisitsBytesTableTitle', {
-        defaultMessage: '[Logs] Host, Visits and Bytes Table',
-      }),
-      visState:
-        '{"title":"[Logs] Host, Visits and Bytes Table","type":"metrics","aggs":[],"params":{"time_range_mode":"last_value","id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"table","series":[{"id":"bd09d600-e5b1-11e7-bfc2-a1f7e71965a1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1","type":"sum","field":"bytes"},{"sigma":"","id":"c9514c90-e5b1-11e7-bfc2-a1f7e71965a1","type":"sum_bucket","field":"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1"}],"seperate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1"}],"label":"Bytes (Total)","split_color_mode":"gradient"},{"id":"b7672c30-a6df-11e8-8b18-1da1dfc50975","color":"#68BC00","split_mode":"everything","metrics":[{"id":"b7672c31-a6df-11e8-8b18-1da1dfc50975","type":"sum","field":"bytes"}],"seperate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1"}],"label":"Bytes (Last Hour)","split_color_mode":"gradient","trend_arrows":1},{"id":"f2c20700-a6df-11e8-8b18-1da1dfc50975","color":"#68BC00","split_mode":"everything","metrics":[{"id":"f2c20701-a6df-11e8-8b18-1da1dfc50975","type":"cardinality","field":"clientip"},{"sigma":"","id":"f46333e0-a6df-11e8-8b18-1da1dfc50975","type":"sum_bucket","field":"f2c20701-a6df-11e8-8b18-1da1dfc50975"}],"seperate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Unique Visits (Total)","color_rules":[{"value":1000,"id":"2e963080-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(211,49,21,1)","operator":"lt"},{"value":1000,"id":"3d4fb880-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(252,196,0,1)","operator":"gte"},{"value":1500,"id":"435f8a20-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(104,188,0,1)","operator":"gte"}],"offset_time":"","value_template":"","trend_arrows":0,"split_color_mode":"gradient"},{"id":"46fd7fc0-e5b1-11e7-bfc2-a1f7e71965a1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"46fd7fc1-e5b1-11e7-bfc2-a1f7e71965a1","type":"cardinality","field":"ip"}],"seperate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Unique Visits (Last Hour)","color_rules":[{"value":10,"id":"4e90aeb0-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(211,49,21,1)","operator":"lt"},{"value":10,"id":"6d59b1c0-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(252,196,0,1)","operator":"gte"},{"value":25,"id":"77578670-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(104,188,0,1)","operator":"gte"}],"offset_time":"","value_template":"","trend_arrows":1,"split_color_mode":"gradient"}],"time_field":"timestamp","use_kibana_indexes":true,"interval":"1h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"bar_color_rules":[{"id":"e9b4e490-e1c6-11e7-b4f6-0f68c45f7387"}],"pivot_id":"extension.keyword","pivot_label":"Type","drilldown_url":"","axis_scale":"normal","hide_last_value_indicator":false,"tooltip_mode":"show_all","drop_last_bucket":0,"isModelInvalid":false,"index_pattern_ref_name":"metrics_0_index_pattern"}}',
-      uiStateJSON: '{}',
       description: '',
-      version: 1,
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      state: {
+        adHocDataViews: {},
+        datasourceStates: {
+          indexpattern: {
+            layers: {
+              '7f75da60-fb24-48b4-a8d0-e615101aaa0c': {
+                columnOrder: [
+                  'a41b1686-8716-4064-b786-048685c64783',
+                  'db58f1dd-eaaa-4c75-b063-1251eca3238d',
+                  '04cb1fff-5f4f-4724-aafe-5fd30246a624',
+                  '9f4d3399-d1fd-432b-aa45-0418a7fbc78b',
+                  'a0c3c6d5-d5d1-4fad-be42-972103fe7f2b',
+                ],
+                columns: {
+                  '04cb1fff-5f4f-4724-aafe-5fd30246a624': {
+                    customLabel: true,
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Bytes (Last hour)',
+                    operationType: 'sum',
+                    params: { emptyAsNull: true, format: { id: 'bytes', params: { decimals: 1 } } },
+                    reducedTimeRange: '1h',
+                    scale: 'ratio',
+                    sourceField: 'bytes',
+                  },
+                  '9f4d3399-d1fd-432b-aa45-0418a7fbc78b': {
+                    customLabel: true,
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Unique Visits (Total)',
+                    operationType: 'unique_count',
+                    params: { emptyAsNull: true },
+                    scale: 'ratio',
+                    sourceField: 'ip',
+                  },
+                  'a0c3c6d5-d5d1-4fad-be42-972103fe7f2b': {
+                    customLabel: true,
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Unique Visits (Last Hour)',
+                    operationType: 'unique_count',
+                    params: { emptyAsNull: true },
+                    reducedTimeRange: '1h',
+                    scale: 'ratio',
+                    sourceField: 'ip',
+                  },
+                  'a41b1686-8716-4064-b786-048685c64783': {
+                    customLabel: true,
+                    dataType: 'string',
+                    isBucketed: true,
+                    label: 'Type',
+                    operationType: 'terms',
+                    params: {
+                      exclude: [],
+                      excludeIsRegex: false,
+                      include: [],
+                      includeIsRegex: false,
+                      missingBucket: false,
+                      orderBy: { columnId: 'db58f1dd-eaaa-4c75-b063-1251eca3238d', type: 'column' },
+                      orderDirection: 'desc',
+                      otherBucket: true,
+                      parentFormat: { id: 'terms' },
+                      size: 10,
+                    },
+                    scale: 'ordinal',
+                    sourceField: 'extension.keyword',
+                  },
+                  'db58f1dd-eaaa-4c75-b063-1251eca3238d': {
+                    customLabel: true,
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Bytes (Total)',
+                    operationType: 'sum',
+                    params: { emptyAsNull: true, format: { id: 'bytes', params: { decimals: 1 } } },
+                    scale: 'ratio',
+                    sourceField: 'bytes',
+                  },
+                },
+                incompleteColumns: {},
+              },
+            },
+          },
+          textBasedLanguages: { layers: {} },
+        },
+        filters: [],
+        internalReferences: [],
+        query: { language: 'kuery', query: '' },
+        visualization: {
+          columns: [
+            {
+              columnId: 'a41b1686-8716-4064-b786-048685c64783',
+              isTransposed: false,
+              width: 150.15,
+            },
+            { columnId: 'db58f1dd-eaaa-4c75-b063-1251eca3238d', isTransposed: false, width: 155.4 },
+            {
+              columnId: '04cb1fff-5f4f-4724-aafe-5fd30246a624',
+              isTransposed: false,
+              width: 176.15,
+            },
+            {
+              colorMode: 'text',
+              columnId: '9f4d3399-d1fd-432b-aa45-0418a7fbc78b',
+              isTransposed: false,
+              palette: {
+                name: 'custom',
+                params: {
+                  colorStops: [
+                    { color: '#cd3115', stop: 0 },
+                    { color: '#fcc400', stop: 1000 },
+                    { color: '#68bc00', stop: 1500 },
+                  ],
+                  continuity: 'above',
+                  name: 'custom',
+                  rangeMax: null,
+                  rangeMin: 0,
+                  rangeType: 'number',
+                  reverse: false,
+                  steps: 5,
+                  stops: [
+                    { color: '#cd3115', stop: 1000 },
+                    { color: '#fcc400', stop: 1500 },
+                    { color: '#68bc00', stop: 1501 },
+                  ],
+                },
+                type: 'palette',
+              },
+            },
+            {
+              colorMode: 'text',
+              columnId: 'a0c3c6d5-d5d1-4fad-be42-972103fe7f2b',
+              isTransposed: false,
+              palette: {
+                name: 'custom',
+                params: {
+                  colorStops: [
+                    { color: '#cd3115', stop: 0 },
+                    { color: '#fcc400', stop: 10 },
+                    { color: '#68bc00', stop: 25 },
+                  ],
+                  continuity: 'above',
+                  name: 'custom',
+                  rangeMax: null,
+                  rangeMin: 0,
+                  rangeType: 'number',
+                  steps: 5,
+                  stops: [
+                    { color: '#cd3115', stop: 10 },
+                    { color: '#fcc400', stop: 25 },
+                    { color: '#68bc00', stop: 26 },
+                  ],
+                },
+                type: 'palette',
+              },
+            },
+          ],
+          layerId: '7f75da60-fb24-48b4-a8d0-e615101aaa0c',
+          layerType: 'data',
+        },
       },
+      title: '[Logs] Host, Visits and Bytes Table',
+      visualizationType: 'lnsDatatable',
     },
+    coreMigrationVersion: '8.6.0',
+    id: '0471e150-43e4-11ed-aeee-6586ad7a2d74',
+    migrationVersion: { lens: '8.5.0' },
     references: [
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'indexpattern-datasource-layer-7f75da60-fb24-48b4-a8d0-e615101aaa0c',
         type: 'index-pattern',
-        name: 'metrics_0_index_pattern',
       },
     ],
+    type: 'lens',
+    updated_at: '2022-10-04T12:57:30.794Z',
+    version: 'WzQyMDIsMV0=',
   },
   {
     id: '69a34b00-9ee8-11e7-8711-e7a007dcef99',
@@ -144,38 +295,161 @@ export const getSavedObjects = (): SavedObject[] => [
     references: [],
   },
   {
-    id: '314c6f60-2224-11e8-b802-5bcf64c2cfb4',
-    type: 'visualization',
-    updated_at: '2021-07-21T18:52:13.586Z',
-    version: '2',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
     attributes: {
-      title: i18n.translate('home.sampleData.logsSpec.responseCodesOverTimeTitle', {
-        defaultMessage: '[Logs] Response Codes Over Time + Annotations',
-      }),
-      visState:
-        '{"title":"[Logs] Response Codes Over Time + Annotations","type":"metrics","aggs":[],"params":{"time_range_mode":"entire_time_range","id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(115,216,255,1)","split_mode":"filters","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count","field":"ip"}],"seperate_axis":0,"axis_position":"right","formatter":"percent","chart_type":"line","line_width":"2","point_size":"0","fill":"0.5","stacked":"percent","terms_field":"response.keyword","terms_order_by":"61ca57f2-469d-11e7-af02-69e470af7417","label":"Response Code Count","split_color_mode":"gradient","split_filters":[{"filter":{"query":"response.keyword >= 200 and response.keyword < 400","language":"kuery"},"label":"HTTP 2xx and 3xx","color":"rgba(84,179,153,1)","id":"96b6ffe0-ea54-11eb-ad09-9f2ab44412fb"},{"filter":{"query":"response.keyword >= 400 and response.keyword < 500","language":"kuery"},"label":"HTTP 4xx","color":"rgba(214,191,87,1)","id":"9e41b1b0-ea54-11eb-ad09-9f2ab44412fb"},{"filter":{"query":"response.keyword >= 500","language":"kuery"},"label":"HTTP 5xx","color":"rgba(211,96,134,1)","id":"a6772270-ea54-11eb-ad09-9f2ab44412fb"}],"type":"timeseries"}],"time_field":"timestamp","use_kibana_indexes":true,"interval":">=4h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"annotations":[{"fields":"geo.src, host","template":"Security Error from {{geo.src}} on {{host}}","query_string":{"query":"tags:error AND tags:security","language":"lucene"},"id":"bd7548a0-2223-11e8-832f-d5027f3c8a47","color":"rgba(211,49,21,1)","time_field":"timestamp","icon":"fa-asterisk","ignore_global_filters":1,"ignore_panel_filters":1,"index_pattern_ref_name":"metrics_1_index_pattern"}],"legend_position":"bottom","axis_scale":"normal","drop_last_bucket":0,"tooltip_mode":"show_all","index_pattern_ref_name":"metrics_0_index_pattern"}}',
-      uiStateJSON: '{}',
       description: '',
-      version: 1,
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      state: {
+        adHocDataViews: {},
+        datasourceStates: {
+          indexpattern: {
+            layers: {
+              '34a96a18-1ddc-4878-b3a7-aa3f0757d925': {
+                columnOrder: [
+                  '21d81f59-720d-4f6f-9276-fa8b9a7a3c61',
+                  'c86c11dc-448d-4618-8b19-92474fe54116',
+                  '0d35586c-7a8a-47cb-9517-13f090552c98',
+                ],
+                columns: {
+                  '0d35586c-7a8a-47cb-9517-13f090552c98': {
+                    customLabel: true,
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Response Code Count',
+                    operationType: 'count',
+                    params: { emptyAsNull: true },
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                  },
+                  '21d81f59-720d-4f6f-9276-fa8b9a7a3c61': {
+                    dataType: 'date',
+                    isBucketed: true,
+                    label: 'timestamp',
+                    operationType: 'date_histogram',
+                    params: { dropPartials: false, includeEmptyRows: true, interval: 'auto' },
+                    scale: 'interval',
+                    sourceField: 'timestamp',
+                  },
+                  'c86c11dc-448d-4618-8b19-92474fe54116': {
+                    dataType: 'string',
+                    isBucketed: true,
+                    label: 'Filters',
+                    operationType: 'filters',
+                    params: {
+                      filters: [
+                        {
+                          input: {
+                            language: 'kuery',
+                            query: 'response.keyword >= 200 and response.keyword < 400',
+                          },
+                          label: 'HTTP 2xx and 3xx',
+                        },
+                        {
+                          input: {
+                            language: 'kuery',
+                            query: 'response.keyword >= 400 and response.keyword < 500',
+                          },
+                          label: 'HTTP 4xx',
+                        },
+                        {
+                          input: { language: 'kuery', query: 'response.keyword >= 500' },
+                          label: 'HTTP 5xx',
+                        },
+                      ],
+                    },
+                    scale: 'ordinal',
+                  },
+                },
+                incompleteColumns: {},
+              },
+            },
+          },
+          textBasedLanguages: { layers: {} },
+        },
+        filters: [],
+        internalReferences: [],
+        query: { language: 'kuery', query: '' },
+        visualization: {
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+          fillOpacity: 0.5,
+          fittingFunction: 'None',
+          gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+          labelsOrientation: { x: 0, yLeft: 0, yRight: 0 },
+          layers: [
+            {
+              accessors: ['0d35586c-7a8a-47cb-9517-13f090552c98'],
+              layerId: '34a96a18-1ddc-4878-b3a7-aa3f0757d925',
+              layerType: 'data',
+              palette: { name: 'default', type: 'palette' },
+              seriesType: 'area_percentage_stacked',
+              splitAccessor: 'c86c11dc-448d-4618-8b19-92474fe54116',
+              xAccessor: '21d81f59-720d-4f6f-9276-fa8b9a7a3c61',
+              yConfig: [
+                {
+                  axisMode: 'left',
+                  color: 'rgba(115,216,255,1)',
+                  forAccessor: '0d35586c-7a8a-47cb-9517-13f090552c98',
+                },
+              ],
+            },
+            {
+              annotations: [
+                {
+                  color: '#D33115',
+                  extraFields: ['geo.src', 'host.keyword'],
+                  filter: {
+                    language: 'lucene',
+                    query: 'tags:error AND tags:security',
+                    type: 'kibana_query',
+                  },
+                  icon: 'asterisk',
+                  id: 'bd7548a0-2223-11e8-832f-d5027f3c8a47',
+                  key: { type: 'point_in_time' },
+                  label: 'Security Error!',
+                  timeField: 'timestamp',
+                  type: 'query',
+                },
+              ],
+              ignoreGlobalFilters: true,
+              layerId: '5d4d8000-d8f4-412a-b099-35c6c284a8d6',
+              layerType: 'annotations',
+            },
+          ],
+          legend: {
+            isVisible: true,
+            maxLines: 1,
+            position: 'bottom',
+            shouldTruncate: true,
+            showSingleSeries: true,
+          },
+          preferredSeriesType: 'bar_stacked',
+          tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
+          valueLabels: 'hide',
+          yLeftExtent: { mode: 'full' },
+          yLeftScale: 'linear',
+          yRightExtent: { mode: 'full' },
+          yRightScale: 'linear',
+        },
       },
+      title: '[Logs] Response Codes Over Time + Annotations',
+      visualizationType: 'lnsXY',
     },
+    coreMigrationVersion: '8.6.0',
+    id: '5ec4bc70-43fa-11ed-b8b3-a107097ea65d',
+    migrationVersion: { lens: '8.5.0' },
     references: [
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'metrics_0_index_pattern',
+        name: 'indexpattern-datasource-layer-34a96a18-1ddc-4878-b3a7-aa3f0757d925',
         type: 'index-pattern',
       },
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'metrics_1_index_pattern',
+        name: 'xy-visualization-layer-5d4d8000-d8f4-412a-b099-35c6c284a8d6',
         type: 'index-pattern',
       },
     ],
+    type: 'lens',
+    updated_at: '2022-10-04T15:36:52.921Z',
+    version: 'WzY0NzgsMV0=',
   },
   {
     id: '16b1d7d0-ea71-11eb-8b4b-f7b600de0f7d',
@@ -424,8 +698,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         name: '9:panel_9',
-        type: 'visualization',
-        id: '4eb6e500-e1c7-11e7-b6d5-4dc382ef7f5b',
+        type: 'lens',
+        id: '0471e150-43e4-11ed-aeee-6586ad7a2d74',
       },
       {
         name: '11:panel_11',
@@ -439,8 +713,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         name: '15:panel_15',
-        type: 'visualization',
-        id: '314c6f60-2224-11e8-b802-5bcf64c2cfb4',
+        type: 'lens',
+        id: '5ec4bc70-43fa-11ed-b8b3-a107097ea65d',
       },
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',

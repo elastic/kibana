@@ -38,38 +38,280 @@ export const getSavedObjects = (): SavedObject[] => [
   {
     attributes: {
       description: '',
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      state: {
+        adHocDataViews: {},
+        datasourceStates: {
+          indexpattern: {
+            layers: {
+              '2ace192d-9bb7-4bcf-81ba-38d504133dde': {
+                columnOrder: [
+                  'a982a756-30b1-4a05-bc62-59cc61e1e9e1',
+                  '4bf7b2d8-1bc1-438f-a001-3db722ac56f7',
+                ],
+                columns: {
+                  '4bf7b2d8-1bc1-438f-a001-3db722ac56f7': {
+                    customLabel: true,
+                    dataType: 'number',
+                    filter: { language: 'lucene', query: 'products.product_name:*trouser*' },
+                    isBucketed: false,
+                    label: 'Revenue Trousers',
+                    operationType: 'sum',
+                    params: { emptyAsNull: true, format: { id: 'number' } },
+                    scale: 'ratio',
+                    sourceField: 'taxful_total_price',
+                  },
+                  'a982a756-30b1-4a05-bc62-59cc61e1e9e1': {
+                    dataType: 'date',
+                    isBucketed: true,
+                    label: 'order_date',
+                    operationType: 'date_histogram',
+                    params: { dropPartials: false, includeEmptyRows: true, interval: '12h' },
+                    scale: 'interval',
+                    sourceField: 'order_date',
+                  },
+                },
+                incompleteColumns: {},
+              },
+              '69f86b0e-395e-4668-a877-950c504329d4': {
+                columnOrder: [
+                  '8f4a73d3-e85a-4c4e-aa3b-77cda7592613',
+                  'a9ed4795-1713-41a6-a98c-7afdad5a623b',
+                ],
+                columns: {
+                  '8f4a73d3-e85a-4c4e-aa3b-77cda7592613': {
+                    dataType: 'date',
+                    isBucketed: true,
+                    label: 'order_date',
+                    operationType: 'date_histogram',
+                    params: { dropPartials: false, includeEmptyRows: true, interval: '12h' },
+                    scale: 'interval',
+                    sourceField: 'order_date',
+                  },
+                  'a9ed4795-1713-41a6-a98c-7afdad5a623b': {
+                    customLabel: true,
+                    dataType: 'number',
+                    filter: { language: 'lucene', query: 'products.product_name:*cocktail dress*' },
+                    isBucketed: false,
+                    label: 'Revenue Cocktail Dresses',
+                    operationType: 'sum',
+                    params: { emptyAsNull: true, format: { id: 'number' } },
+                    scale: 'ratio',
+                    sourceField: 'taxful_total_price',
+                  },
+                },
+                incompleteColumns: {},
+              },
+              '74917fae-586f-4029-96e0-fbbcf1e55df1': {
+                columnOrder: [
+                  'e6299400-beb1-48bc-a51c-cc3ab349ce86',
+                  '6361b34d-967d-463d-ba81-bbd425a01c64',
+                ],
+                columns: {
+                  '6361b34d-967d-463d-ba81-bbd425a01c64': {
+                    customLabel: true,
+                    dataType: 'number',
+                    filter: { language: 'lucene', query: 'products.product_name:*watch*' },
+                    isBucketed: false,
+                    label: 'Revenue Watches',
+                    operationType: 'sum',
+                    params: { emptyAsNull: true, format: { id: 'number' } },
+                    scale: 'ratio',
+                    sourceField: 'taxful_total_price',
+                  },
+                  'e6299400-beb1-48bc-a51c-cc3ab349ce86': {
+                    dataType: 'date',
+                    isBucketed: true,
+                    label: 'order_date',
+                    operationType: 'date_histogram',
+                    params: { dropPartials: false, includeEmptyRows: true, interval: '12h' },
+                    scale: 'interval',
+                    sourceField: 'order_date',
+                  },
+                },
+                incompleteColumns: {},
+              },
+              '78d660c6-45d4-45c7-a0ac-607a04f6662f': {
+                columnOrder: [
+                  'b0f7a8f0-2e39-4e60-8326-c386b1506577',
+                  '320498f1-2b6c-4131-8444-439d72c25ab1',
+                ],
+                columns: {
+                  '320498f1-2b6c-4131-8444-439d72c25ab1': {
+                    customLabel: true,
+                    dataType: 'number',
+                    filter: { language: 'lucene', query: 'products.product_name:*bag*' },
+                    isBucketed: false,
+                    label: 'Revenue Bags',
+                    operationType: 'sum',
+                    params: { emptyAsNull: true, format: { id: 'number' } },
+                    scale: 'ratio',
+                    sourceField: 'taxful_total_price',
+                  },
+                  'b0f7a8f0-2e39-4e60-8326-c386b1506577': {
+                    dataType: 'date',
+                    isBucketed: true,
+                    label: 'order_date',
+                    operationType: 'date_histogram',
+                    params: { dropPartials: false, includeEmptyRows: true, interval: '12h' },
+                    scale: 'interval',
+                    sourceField: 'order_date',
+                  },
+                },
+                incompleteColumns: {},
+              },
+            },
+          },
+          textBasedLanguages: { layers: {} },
+        },
+        filters: [],
+        internalReferences: [],
+        query: { language: 'kuery', query: '' },
+        visualization: {
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+          emphasizeFitting: true,
+          fillOpacity: 0,
+          fittingFunction: 'Lookahead',
+          gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+          labelsOrientation: { x: 0, yLeft: 0, yRight: 0 },
+          layers: [
+            {
+              accessors: ['4bf7b2d8-1bc1-438f-a001-3db722ac56f7'],
+              layerId: '2ace192d-9bb7-4bcf-81ba-38d504133dde',
+              layerType: 'data',
+              palette: { name: 'default', type: 'palette' },
+              seriesType: 'line',
+              xAccessor: 'a982a756-30b1-4a05-bc62-59cc61e1e9e1',
+              yConfig: [
+                {
+                  axisMode: 'left',
+                  color: 'rgba(211,96,134,1)',
+                  forAccessor: '4bf7b2d8-1bc1-438f-a001-3db722ac56f7',
+                },
+              ],
+            },
+            {
+              accessors: ['6361b34d-967d-463d-ba81-bbd425a01c64'],
+              layerId: '74917fae-586f-4029-96e0-fbbcf1e55df1',
+              layerType: 'data',
+              palette: { name: 'default', type: 'palette' },
+              seriesType: 'line',
+              xAccessor: 'e6299400-beb1-48bc-a51c-cc3ab349ce86',
+              yConfig: [
+                {
+                  axisMode: 'left',
+                  color: 'rgba(84,179,153,1)',
+                  forAccessor: '6361b34d-967d-463d-ba81-bbd425a01c64',
+                },
+              ],
+            },
+            {
+              accessors: ['320498f1-2b6c-4131-8444-439d72c25ab1'],
+              layerId: '78d660c6-45d4-45c7-a0ac-607a04f6662f',
+              layerType: 'data',
+              palette: { name: 'default', type: 'palette' },
+              seriesType: 'line',
+              xAccessor: 'b0f7a8f0-2e39-4e60-8326-c386b1506577',
+              yConfig: [
+                {
+                  axisMode: 'left',
+                  color: 'rgba(96,146,192,1)',
+                  forAccessor: '320498f1-2b6c-4131-8444-439d72c25ab1',
+                },
+              ],
+            },
+            {
+              accessors: ['a9ed4795-1713-41a6-a98c-7afdad5a623b'],
+              layerId: '69f86b0e-395e-4668-a877-950c504329d4',
+              layerType: 'data',
+              palette: { name: 'default', type: 'palette' },
+              seriesType: 'line',
+              xAccessor: '8f4a73d3-e85a-4c4e-aa3b-77cda7592613',
+              yConfig: [
+                {
+                  axisMode: 'left',
+                  color: 'rgba(202,142,174,1)',
+                  forAccessor: 'a9ed4795-1713-41a6-a98c-7afdad5a623b',
+                },
+              ],
+            },
+            {
+              annotations: [
+                {
+                  color: '#194D33',
+                  extraFields: ['taxful_total_price'],
+                  filter: {
+                    language: 'lucene',
+                    query: 'taxful_total_price:>250',
+                    type: 'kibana_query',
+                  },
+                  icon: 'bell',
+                  id: 'c8c30be0-b88f-11e8-a451-f37365e9f268',
+                  key: { type: 'point_in_time' },
+                  label: 'Ring the bell! ',
+                  textVisibility: false,
+                  timeField: 'order_date',
+                  type: 'query',
+                },
+              ],
+              ignoreGlobalFilters: true,
+              layerId: '9dcfaad8-adb2-44cf-a7a6-009519dab9f6',
+              layerType: 'annotations',
+            },
+          ],
+          legend: {
+            isVisible: true,
+            maxLines: 1,
+            position: 'bottom',
+            shouldTruncate: true,
+            showSingleSeries: true,
+          },
+          preferredSeriesType: 'bar_stacked',
+          tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
+          valueLabels: 'hide',
+          yLeftExtent: { mode: 'full' },
+          yLeftScale: 'linear',
+          yRightExtent: { mode: 'full' },
+          yRightScale: 'linear',
+        },
       },
-      title: i18n.translate('home.sampleData.ecommerceSpec.promotionTrackingTitle', {
-        defaultMessage: '[eCommerce] Promotion Tracking',
-      }),
-      uiStateJSON: '{}',
-      version: 1,
-      visState:
-        '{"title":"[eCommerce] Promotion Tracking","type":"metrics","aggs":[],"params":{"time_range_mode":"entire_time_range","id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"ea20ae70-b88d-11e8-a451-f37365e9f268","color":"rgba(211,96,134,1)","split_mode":"everything","metrics":[{"id":"ea20ae71-b88d-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":"2","point_size":"5","fill":"0","stacked":"none","filter":{"query":"products.product_name:*trouser*","language":"lucene"},"label":"Revenue Trousers","value_template":"${{value}}","split_color_mode":"gradient"},{"id":"062d77b0-b88e-11e8-a451-f37365e9f268","color":"rgba(84,179,153,1)","split_mode":"everything","metrics":[{"id":"062d77b1-b88e-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":"2","point_size":"05","fill":"0","stacked":"none","filter":{"query":"products.product_name:*watch*","language":"lucene"},"label":"Revenue Watches","value_template":"${{value}}","split_color_mode":"gradient"},{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(96,146,192,1)","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":"2","point_size":"5","fill":"0","stacked":"none","filter":{"query":"products.product_name:*bag*","language":"lucene"},"label":"Revenue Bags","value_template":"${{value}}","split_color_mode":"gradient"},{"id":"faa2c170-b88d-11e8-a451-f37365e9f268","color":"rgba(202,142,174,1)","split_mode":"everything","metrics":[{"id":"faa2c171-b88d-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":"2","point_size":"5","fill":"0","stacked":"none","filter":{"query":"products.product_name:*cocktail dress*","language":"lucene"},"label":"Revenue Cocktail Dresses","value_template":"${{value}}","split_color_mode":"gradient"}],"time_field":"order_date","interval":"12h","use_kibana_indexes":true,"axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"legend_position":"bottom","annotations":[{"fields":"taxful_total_price","template":"Ring the bell! ${{taxful_total_price}}","query_string":{"query":"taxful_total_price:>250","language":"lucene"},"id":"c8c30be0-b88f-11e8-a451-f37365e9f268","color":"rgba(25,77,51,1)","time_field":"order_date","icon":"fa-bell","ignore_global_filters":1,"ignore_panel_filters":1,"index_pattern_ref_name":"metrics_1_index_pattern"}],"tooltip_mode":"show_all","drop_last_bucket":0,"isModelInvalid":false,"index_pattern_ref_name":"metrics_0_index_pattern"}}',
+      title: '[eCommerce] Promotion Tracking',
+      visualizationType: 'lnsXY',
     },
-    coreMigrationVersion: '8.0.0',
-    id: '45e07720-b890-11e8-a6d9-e546fe2bba5f',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.6.0',
+    id: 'c558a780-43fa-11ed-8117-55b7c4aaefc6',
+    migrationVersion: { lens: '8.5.0' },
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'metrics_0_index_pattern',
+        name: 'indexpattern-datasource-layer-2ace192d-9bb7-4bcf-81ba-38d504133dde',
         type: 'index-pattern',
       },
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'metrics_1_index_pattern',
+        name: 'indexpattern-datasource-layer-74917fae-586f-4029-96e0-fbbcf1e55df1',
+        type: 'index-pattern',
+      },
+      {
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        name: 'indexpattern-datasource-layer-78d660c6-45d4-45c7-a0ac-607a04f6662f',
+        type: 'index-pattern',
+      },
+      {
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        name: 'indexpattern-datasource-layer-69f86b0e-395e-4668-a877-950c504329d4',
+        type: 'index-pattern',
+      },
+      {
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        name: 'xy-visualization-layer-9dcfaad8-adb2-44cf-a7a6-009519dab9f6',
         type: 'index-pattern',
       },
     ],
-    type: 'visualization',
-    updated_at: '2021-08-05T12:23:57.577Z',
-    version: 'WzIxLDFd',
+    type: 'lens',
+    updated_at: '2022-10-04T15:39:45.017Z',
+    version: 'Wzc5NDcsMV0=',
   },
+
   {
     attributes: {
       description: '',
@@ -1286,8 +1528,8 @@ export const getSavedObjects = (): SavedObject[] => [
     references: [
       {
         name: '5:panel_5',
-        type: 'visualization',
-        id: '45e07720-b890-11e8-a6d9-e546fe2bba5f',
+        type: 'lens',
+        id: 'c558a780-43fa-11ed-8117-55b7c4aaefc6',
       },
       {
         name: '7:panel_7',
