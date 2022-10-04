@@ -219,7 +219,7 @@ export const TopNFunctionsTable = ({
         : row[sortField];
     },
     [sortDirection]
-  ).slice(0, 100);
+  );
 
   return (
     <>
