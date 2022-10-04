@@ -314,8 +314,8 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     ],
     hasIndexIngestionPipeline: [
       () => [selectors.pipelineName, selectors.defaultPipelineValues],
-      (pipelineState: IngestPipelineParams, defaultPipelineValues: IngestPipelineParams) =>
-        pipelineState.name !== defaultPipelineValues.name,
+      (pipelineName: string, defaultPipelineValues: IngestPipelineParams) =>
+        pipelineName !== defaultPipelineValues.name,
     ],
     indexName: [
       () => [selectors.index],
