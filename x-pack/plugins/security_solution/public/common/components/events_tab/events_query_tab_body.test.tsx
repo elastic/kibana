@@ -15,6 +15,7 @@ import { EventsQueryTabBody, ALERTS_EVENTS_HISTOGRAM_ID } from './events_query_t
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import * as tGridActions from '@kbn/timelines-plugin/public/store/t_grid/actions';
 import { licenseService } from '../../hooks/use_license';
+import { mockHistory } from '../../mock/router';
 
 const mockGetDefaultControlColumn = jest.fn();
 jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
@@ -38,6 +39,11 @@ jest.mock('../../lib/kibana', () => {
     }),
   };
 });
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => mockHistory,
+}));
 
 const FakeStatefulEventsViewer = ({ additionalFilters }: { additionalFilters: JSX.Element }) => (
   <div>

@@ -70,15 +70,12 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
     const [cache, setCache] = useState<Partial<Cache>>({});
 
     const onToggle = useCallback((isOpen: boolean) => setShowContent(isOpen), []);
-    const isEmpty = !!cache.alertIds && cache.alertIds.length === 0;
 
     // Makes sure the component is not fetching data before the accordion
     // has been openend.
     const renderContent = useCallback(() => {
       if (!showContent) {
         return null;
-      } else if (isEmpty) {
-        return PROCESS_ANCESTRY_EMPTY;
       } else if (cache.alertIds) {
         return (
           <ActualRelatedAlertsByProcessAncestry
@@ -100,13 +97,12 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
       );
     }, [
       showContent,
-      cache,
+      cache.alertIds,
       data,
-      eventId,
-      isInTimeline,
       index,
       originalDocumentId,
-      isEmpty,
+      eventId,
+      isInTimeline,
       scopeId,
     ]);
 
@@ -153,7 +149,7 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   });
 
   useEffect(() => {
-    if (alertIds) {
+    if (alertIds && alertIds.length !== 0) {
       onCacheLoad({ alertIds });
     }
   }, [alertIds, onCacheLoad]);
@@ -162,6 +158,8 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
     return <EuiLoadingSpinner />;
   } else if (error) {
     return <>{PROCESS_ANCESTRY_ERROR}</>;
+  } else if (!alertIds || alertIds.length === 0) {
+    return <>{PROCESS_ANCESTRY_EMPTY}</>;
   }
 
   return null;

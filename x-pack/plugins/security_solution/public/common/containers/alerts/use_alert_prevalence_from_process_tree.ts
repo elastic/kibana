@@ -18,7 +18,7 @@ interface UserAlertPrevalenceFromProcessTreeResult {
 }
 
 interface ProcessTreeAlertPrevalenceResponse {
-  alertIds: string[];
+  alertIds: string[] | undefined;
 }
 
 interface EntityResponse {
