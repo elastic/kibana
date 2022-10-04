@@ -8,6 +8,7 @@ import { uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import type { Logger } from '@kbn/logging';
 import { ChangePoint } from '@kbn/ml-agg-utils';
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../common/constants';
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
@@ -92,7 +93,9 @@ interface Aggs extends estypes.AggregationsSignificantLongTermsAggregate {
 export const fetchChangePointPValues = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema,
-  fieldNames: string[]
+  fieldNames: string[],
+  logger: Logger,
+  emitError: (m: string) => void
 ): Promise<ChangePoint[]> => {
   const result: ChangePoint[] = [];
 
@@ -101,7 +104,16 @@ export const fetchChangePointPValues = async (
     const resp = await esClient.search<unknown, { change_point_p_value: Aggs }>(request);
 
     if (resp.aggregations === undefined) {
-      throw new Error('fetchChangePoint failed, did not return aggregations.');
+      logger.error(
+        `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
+          resp,
+          null,
+          2
+        )}`
+      );
+      emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+      // Still continue the analysis even if individual p-value queries fail.
+      continue;
     }
 
     const overallResult = resp.aggregations.change_point_p_value;
