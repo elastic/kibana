@@ -93,7 +93,14 @@ export const MonitorDetailsLocation: React.FC = () => {
           closePopover={closeLocationList}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel items={menuItems} title="Locations" />
+          <EuiContextMenuPanel
+            items={menuItems}
+            size="s"
+            title={i18n.translate(
+              'xpack.synthetics.monitorLocation.locationContextMenuTitleLabel',
+              { defaultMessage: 'Go to location' }
+            )}
+          />
         </EuiPopover>
       );
     } else {
