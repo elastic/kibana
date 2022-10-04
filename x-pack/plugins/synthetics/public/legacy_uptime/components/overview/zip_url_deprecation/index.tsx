@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiButton, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { getHasZipUrlMonitors } from '../../../state/api/has_zip_url_monitors';
+import { getDocLinks } from '../../../../kibana_services';
 
 export const ZIP_URL_DEPRECATION_SESSION_STORAGE_KEY =
   'SYNTHETICS_ZIP_URL_DEPRECATION_HAS_BEEN_DISMISSED';
@@ -53,7 +54,11 @@ export const ZipUrlDeprecation = () => {
                 defaultMessage="Zip URL is deprecated and will be removed in a future version. Use project monitors instead to create monitors from a remote repository and to migrate existing Zip URL monitors. {link}"
                 values={{
                   link: (
-                    <EuiLink target="_blank" href="" external>
+                    <EuiLink
+                      target="_blank"
+                      href={getDocLinks()?.links?.observability?.syntheticsProjectMonitors}
+                      external
+                    >
                       <FormattedMessage
                         id="xpack.synthetics.browser.zipUrl.deprecation.link"
                         defaultMessage="Learn more"

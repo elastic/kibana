@@ -28,6 +28,7 @@ import { CodeEditor } from '../code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ZipUrlTLSFields } from './zip_url_tls_fields';
 import { ConfigKey, MonacoEditorLangId, Validation } from '../types';
+import { getDocLinks } from '../../../../kibana_services';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
@@ -261,7 +262,11 @@ export const SourceField = ({
               defaultMessage="Zip URL is deprecated and will be removed in a future version. Use project monitors instead to create monitors from a remote repository and to migrate existing Zip URL monitors. {link}"
               values={{
                 link: (
-                  <EuiLink target="_blank" href="" external>
+                  <EuiLink
+                    target="_blank"
+                    href={getDocLinks()?.links?.observability?.syntheticsProjectMonitors}
+                    external
+                  >
                     <FormattedMessage
                       id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.zipUrl.deprecation.link"
                       defaultMessage="Learn more"
