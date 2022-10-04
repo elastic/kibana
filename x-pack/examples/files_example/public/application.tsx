@@ -16,13 +16,13 @@ import { FilesContext } from './imports';
 const queryClient = new QueryClient();
 
 export const renderApp = (
-  { notifications, http }: CoreStart,
+  { notifications }: CoreStart,
   { files }: AppPluginStartDependencies,
   { element }: AppMountParameters
 ) => {
   ReactDOM.render(
     <QueryClientProvider client={queryClient}>
-      <FilesContext http={http}>
+      <FilesContext>
         <FilesExampleApp files={files} notifications={notifications} />
       </FilesContext>
     </QueryClientProvider>,

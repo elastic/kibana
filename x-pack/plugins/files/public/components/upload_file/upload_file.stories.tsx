@@ -61,7 +61,7 @@ getFileKindsRegistry().register({
 });
 
 const Template: ComponentStory<typeof UploadFile> = (props: Props) => (
-  <FilesContext http={{} as HttpSetup}>
+  <FilesContext>
     <UploadFile {...props} />
   </FilesContext>
 );
