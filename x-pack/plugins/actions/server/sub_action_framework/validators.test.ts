@@ -52,11 +52,11 @@ describe('Validators', () => {
       validators: [
         {
           type: ValidatorType.CONFIG,
-          validate: configValidator,
+          validator: configValidator,
         },
         {
           type: ValidatorType.SECRETS,
-          validate: secretsValidator,
+          validator: secretsValidator,
         },
       ],
       Service,

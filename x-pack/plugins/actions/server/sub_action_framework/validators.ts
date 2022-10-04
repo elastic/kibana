@@ -8,13 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeConfig, ActionTypeSecrets, ValidatorServices } from '../types';
-import {
-  ConfigValidator,
-  SecretsValidator,
-  SubActionConnectorType,
-  ValidateFn,
-  ValidatorType,
-} from './types';
+import { SubActionConnectorType, ValidateFn, Validators, ValidatorType } from './types';
 
 export const buildValidators = <
   Config extends ActionTypeConfig,
@@ -53,33 +47,28 @@ export const buildValidators = <
   };
 };
 
-const buildCustomValidators = <Config, Secrets>(
-  validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>
-) => {
-  const partitionedValidators = validators?.reduce<{
+const buildCustomValidators = <Config, Secrets>(validators?: Validators<Config, Secrets>) => {
+  const partitionedValidators: {
     config: Array<ValidateFn<Config>>;
     secrets: Array<ValidateFn<Secrets>>;
-  }>(
-    (acc, validator) => {
-      if (validator.type === ValidatorType.CONFIG) {
-        acc.config.push(validator.validate);
-      } else {
-        acc.secrets.push(validator.validate);
-      }
+  } = { config: [], secrets: [] };
 
-      return acc;
-    },
-    { config: [], secrets: [] }
-  );
+  for (const validatorInfo of validators ?? []) {
+    if (validatorInfo.type === ValidatorType.CONFIG) {
+      partitionedValidators.config.push(validatorInfo.validator);
+    } else {
+      partitionedValidators.secrets.push(validatorInfo.validator);
+    }
+  }
 
   return {
-    config: createCustomValidatorFunction(partitionedValidators?.config),
-    secrets: createCustomValidatorFunction(partitionedValidators?.secrets),
+    config: createCustomValidatorFunction(partitionedValidators.config),
+    secrets: createCustomValidatorFunction(partitionedValidators.secrets),
   };
 };
 
-const createCustomValidatorFunction = <T>(validators?: Array<ValidateFn<T>>) => {
-  if (!validators || validators.length <= 0) {
+const createCustomValidatorFunction = <T>(validators: Array<ValidateFn<T>>) => {
+  if (validators.length <= 0) {
     return;
   }
 
