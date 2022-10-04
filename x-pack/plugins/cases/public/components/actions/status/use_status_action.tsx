@@ -13,6 +13,7 @@ import { Case, CaseStatuses } from '../../../../common';
 import * as i18n from './translations';
 import { UseActionProps } from '../types';
 import { statuses } from '../../status';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string => {
   const totalCases = cases.length;
@@ -33,11 +34,8 @@ interface UseStatusActionProps extends UseActionProps {
   selectedStatus?: CaseStatuses;
 }
 
-const getCasesWithChanges = (cases: Case[], status: CaseStatuses): Case[] =>
-  cases.filter((theCase) => theCase.status !== status);
-
-const disableStatus = (cases: Case[], status: CaseStatuses) =>
-  getCasesWithChanges(cases, status).length === 0;
+const shouldDisableStatus = (cases: Case[], status: CaseStatuses) =>
+  cases.every((theCase) => theCase.status === status);
 
 export const useStatusAction = ({
   onAction,
@@ -46,6 +44,9 @@ export const useStatusAction = ({
   selectedStatus,
 }: UseStatusActionProps) => {
   const { mutate: updateCases } = useUpdateCases();
+  const { permissions } = useCasesContext();
+  const canUpdateStatus = permissions.update;
+  const isActionDisabled = isDisabled || !canUpdateStatus;
 
   const handleUpdateCaseStatus = useCallback(
     (selectedCases: Case[], status: CaseStatuses) => {
@@ -76,7 +77,7 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses.open].label,
         icon: getStatusIcon(CaseStatuses.open),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.open),
-        disabled: isDisabled || disableStatus(selectedCases, CaseStatuses.open),
+        disabled: isActionDisabled || shouldDisableStatus(selectedCases, CaseStatuses.open),
         'data-test-subj': 'cases-bulk-action-status-open',
         key: 'cases-bulk-action-status-open',
       },
@@ -84,7 +85,8 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses['in-progress']].label,
         icon: getStatusIcon(CaseStatuses['in-progress']),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses['in-progress']),
-        disabled: isDisabled || disableStatus(selectedCases, CaseStatuses['in-progress']),
+        disabled:
+          isActionDisabled || shouldDisableStatus(selectedCases, CaseStatuses['in-progress']),
         'data-test-subj': 'cases-bulk-action-status-in-progress',
         key: 'cases-bulk-action-status-in-progress',
       },
@@ -92,14 +94,14 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses.closed].label,
         icon: getStatusIcon(CaseStatuses.closed),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.closed),
-        disabled: isDisabled || disableStatus(selectedCases, CaseStatuses.closed),
+        disabled: isActionDisabled || shouldDisableStatus(selectedCases, CaseStatuses.closed),
         'data-test-subj': 'cases-bulk-action-status-closed',
         key: 'cases-bulk-status-action',
       },
     ];
   };
 
-  return { getActions };
+  return { getActions, canUpdateStatus };
 };
 
 export type UseStatusAction = ReturnType<typeof useStatusAction>;

@@ -84,6 +84,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   ) : (
     <Div data-test-subj={isCasesLoading ? 'cases-table-loading' : null}>
       <CasesTableUtilityBar
+        isSelectorView={isSelectorView}
         totalCases={data.total ?? 0}
         selectedCases={selectedCases}
         deselectCases={deselectCases}

@@ -109,4 +109,11 @@ describe('Severity form field', () => {
 
     expect(result.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
   });
+
+  it('does not show the bulk actions if there are not selected cases', async () => {
+    const result = appMockRender.render(<CasesTableUtilityBar {...props} selectedCases={[]} />);
+
+    expect(result.queryByTestId('case-table-bulk-actions-link-icon')).toBeFalsy();
+    expect(result.queryByText('Showing 0 cases')).toBeFalsy();
+  });
 });

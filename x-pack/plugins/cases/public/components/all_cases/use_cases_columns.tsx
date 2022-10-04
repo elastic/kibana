@@ -38,7 +38,6 @@ import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { severities } from '../severity/config';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
@@ -120,8 +119,6 @@ export const useCasesColumns = ({
   showSolutionColumn,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-  const { permissions } = useCasesContext();
-
   const { actions } = useActions();
 
   const assignCaseAction = useCallback(
@@ -133,7 +130,7 @@ export const useCasesColumns = ({
     [onRowClick]
   );
 
-  const columns = [
+  const columns: CasesColumns[] = [
     {
       name: i18n.NAME,
       render: (theCase: Case) => {
@@ -159,129 +156,134 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    ...(caseAssignmentAuthorized
-      ? [
-          {
-            field: 'assignees',
-            name: i18n.ASSIGNEES,
-            render: (assignees: Case['assignees']) => (
-              <AssigneesColumn
-                assignees={assignees}
-                userProfiles={userProfiles}
-                currentUserProfile={currentUserProfile}
-              />
-            ),
-          },
-        ]
-      : []),
-    {
-      field: 'tags',
-      name: i18n.TAGS,
-      render: (tags: Case['tags']) => {
-        if (tags != null && tags.length > 0) {
-          const badges = (
-            <EuiBadgeGroup data-test-subj="case-table-column-tags">
-              {tags.map((tag: string, i: number) => (
-                <EuiBadge
-                  color="hollow"
-                  key={`${tag}-${i}`}
-                  data-test-subj={`case-table-column-tags-${tag}`}
-                >
-                  {tag}
-                </EuiBadge>
-              ))}
-            </EuiBadgeGroup>
-          );
+  ];
 
+  if (caseAssignmentAuthorized) {
+    columns.push({
+      field: 'assignees',
+      name: i18n.ASSIGNEES,
+      render: (assignees: Case['assignees']) => (
+        <AssigneesColumn
+          assignees={assignees}
+          userProfiles={userProfiles}
+          currentUserProfile={currentUserProfile}
+        />
+      ),
+    });
+  }
+
+  columns.push({
+    field: 'tags',
+    name: i18n.TAGS,
+    render: (tags: Case['tags']) => {
+      if (tags != null && tags.length > 0) {
+        const badges = (
+          <EuiBadgeGroup data-test-subj="case-table-column-tags">
+            {tags.map((tag: string, i: number) => (
+              <EuiBadge
+                color="hollow"
+                key={`${tag}-${i}`}
+                data-test-subj={`case-table-column-tags-${tag}`}
+              >
+                {tag}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        );
+
+        return (
+          <EuiToolTip
+            data-test-subj="case-table-column-tags-tooltip"
+            position="left"
+            content={badges}
+          >
+            {badges}
+          </EuiToolTip>
+        );
+      }
+      return getEmptyTagValue();
+    },
+    truncateText: true,
+  });
+
+  if (isAlertsEnabled) {
+    columns.push({
+      align: RIGHT_ALIGNMENT,
+      field: 'totalAlerts',
+      name: ALERTS,
+      render: (totalAlerts: Case['totalAlerts']) =>
+        totalAlerts != null
+          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+          : getEmptyTagValue(),
+    });
+  }
+
+  if (showSolutionColumn) {
+    columns.push({
+      align: RIGHT_ALIGNMENT,
+      field: 'owner',
+      name: i18n.SOLUTION,
+      render: (caseOwner: CasesOwners) => {
+        const ownerInfo = OWNER_INFO[caseOwner];
+        return ownerInfo ? (
+          <EuiIcon
+            size="m"
+            type={ownerInfo.iconType}
+            title={ownerInfo.label}
+            data-test-subj={`case-table-column-owner-icon-${caseOwner}`}
+          />
+        ) : (
+          getEmptyTagValue()
+        );
+      },
+    });
+  }
+
+  columns.push({
+    align: RIGHT_ALIGNMENT,
+    field: 'totalComment',
+    name: i18n.COMMENTS,
+    render: (totalComment: Case['totalComment']) =>
+      totalComment != null
+        ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
+        : getEmptyTagValue(),
+  });
+
+  if (filterStatus === CaseStatuses.closed) {
+    columns.push({
+      field: 'closedAt',
+      name: i18n.CLOSED_ON,
+      sortable: true,
+      render: (closedAt: Case['closedAt']) => {
+        if (closedAt != null) {
           return (
-            <EuiToolTip
-              data-test-subj="case-table-column-tags-tooltip"
-              position="left"
-              content={badges}
-            >
-              {badges}
-            </EuiToolTip>
+            <span data-test-subj={`case-table-column-closedAt`}>
+              <FormattedRelativePreferenceDate value={closedAt} />
+            </span>
           );
         }
         return getEmptyTagValue();
       },
-      truncateText: true,
-    },
-    ...(isAlertsEnabled
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            field: 'totalAlerts',
-            name: ALERTS,
-            render: (totalAlerts: Case['totalAlerts']) =>
-              totalAlerts != null
-                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-                : getEmptyTagValue(),
-          },
-        ]
-      : []),
-    ...(showSolutionColumn
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            field: 'owner',
-            name: i18n.SOLUTION,
-            render: (caseOwner: CasesOwners) => {
-              const ownerInfo = OWNER_INFO[caseOwner];
-              return ownerInfo ? (
-                <EuiIcon
-                  size="m"
-                  type={ownerInfo.iconType}
-                  title={ownerInfo.label}
-                  data-test-subj={`case-table-column-owner-icon-${caseOwner}`}
-                />
-              ) : (
-                getEmptyTagValue()
-              );
-            },
-          },
-        ]
-      : []),
-    {
-      align: RIGHT_ALIGNMENT,
-      field: 'totalComment',
-      name: i18n.COMMENTS,
-      render: (totalComment: Case['totalComment']) =>
-        totalComment != null
-          ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
-          : getEmptyTagValue(),
-    },
-    filterStatus === CaseStatuses.closed
-      ? {
-          field: 'closedAt',
-          name: i18n.CLOSED_ON,
-          sortable: true,
-          render: (closedAt: Case['closedAt']) => {
-            if (closedAt != null) {
-              return (
-                <span data-test-subj={`case-table-column-closedAt`}>
-                  <FormattedRelativePreferenceDate value={closedAt} />
-                </span>
-              );
-            }
-            return getEmptyTagValue();
-          },
+    });
+  } else {
+    columns.push({
+      field: 'createdAt',
+      name: i18n.CREATED_ON,
+      sortable: true,
+      render: (createdAt: Case['createdAt']) => {
+        if (createdAt != null) {
+          return (
+            <span data-test-subj={`case-table-column-createdAt`}>
+              <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
+            </span>
+          );
         }
-      : {
-          field: 'createdAt',
-          name: i18n.CREATED_ON,
-          sortable: true,
-          render: (createdAt: Case['createdAt']) => {
-            if (createdAt != null) {
-              return (
-                <span data-test-subj={`case-table-column-createdAt`}>
-                  <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
-                </span>
-              );
-            }
-            return getEmptyTagValue();
-          },
-        },
+        return getEmptyTagValue();
+      },
+    });
+  }
+
+  columns.push(
     {
       name: i18n.EXTERNAL_INCIDENT,
       render: (theCase: Case) => {
@@ -314,33 +316,35 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-    },
-    ...(isSelectorView
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            render: (theCase: Case) => {
-              if (theCase.id != null) {
-                return (
-                  <EuiButton
-                    data-test-subj={`cases-table-row-select-${theCase.id}`}
-                    onClick={() => {
-                      assignCaseAction(theCase);
-                    }}
-                    size="s"
-                    fill={true}
-                  >
-                    {i18n.SELECT}
-                  </EuiButton>
-                );
-              }
-              return getEmptyTagValue();
-            },
-          },
-        ]
-      : []),
-    ...(!isSelectorView && (permissions.update || permissions.delete) && actions ? [actions] : []),
-  ];
+    }
+  );
+
+  if (isSelectorView) {
+    columns.push({
+      align: RIGHT_ALIGNMENT,
+      render: (theCase: Case) => {
+        if (theCase.id != null) {
+          return (
+            <EuiButton
+              data-test-subj={`cases-table-row-select-${theCase.id}`}
+              onClick={() => {
+                assignCaseAction(theCase);
+              }}
+              size="s"
+              fill={true}
+            >
+              {i18n.SELECT}
+            </EuiButton>
+          );
+        }
+        return getEmptyTagValue();
+      },
+    });
+  }
+
+  if (!isSelectorView && actions) {
+    columns.push(actions);
+  }
 
   return { columns };
 };

@@ -23,7 +23,7 @@ import {
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseSeverity, CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
@@ -360,60 +360,21 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should call onRowClick when clicking a case with modal=true', async () => {
+    const theCase = defaultGetCases.data.cases[0];
+
     const wrapper = mount(
       <TestProviders>
         <AllCasesList isSelectorView={true} onRowClick={onRowClick} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
+    wrapper
+      .find(`[data-test-subj="cases-table-row-select-${theCase.id}"]`)
+      .first()
+      .simulate('click');
+
     await waitFor(() => {
-      expect(onRowClick).toHaveBeenCalledWith({
-        assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
-        closedAt: null,
-        closedBy: null,
-        comments: [],
-        connector: { fields: null, id: '123', name: 'My Connector', type: '.jira' },
-        createdAt: '2020-02-19T23:06:33.798Z',
-        createdBy: {
-          email: 'leslie.knope@elastic.co',
-          fullName: 'Leslie Knope',
-          username: 'lknope',
-        },
-        description: 'Security banana Issue',
-        severity: CaseSeverity.LOW,
-        duration: null,
-        externalService: {
-          connectorId: '123',
-          connectorName: 'connector name',
-          externalId: 'external_id',
-          externalTitle: 'external title',
-          externalUrl: 'basicPush.com',
-          pushedAt: '2020-02-20T15:02:57.995Z',
-          pushedBy: {
-            email: 'leslie.knope@elastic.co',
-            fullName: 'Leslie Knope',
-            username: 'lknope',
-          },
-        },
-        id: '1',
-        owner: SECURITY_SOLUTION_OWNER,
-        status: 'open',
-        tags: ['coke', 'pepsi'],
-        title: 'Another horrible breach!!',
-        totalAlerts: 0,
-        totalComment: 0,
-        updatedAt: '2020-02-20T15:02:57.995Z',
-        updatedBy: {
-          email: 'leslie.knope@elastic.co',
-          fullName: 'Leslie Knope',
-          username: 'lknope',
-        },
-        version: 'WzQ3LDFd',
-        settings: {
-          syncAlerts: true,
-        },
-      });
+      expect(onRowClick).toHaveBeenCalledWith(theCase);
     });
   });
 
@@ -747,6 +708,10 @@ describe('AllCasesListGeneric', () => {
         const result = appMockRenderer.render(<AllCasesList />);
 
         act(() => {
+          userEvent.click(result.getByTestId('checkboxSelectAll'));
+        });
+
+        act(() => {
           userEvent.click(result.getByText('Bulk actions'));
         });
 
@@ -760,10 +725,9 @@ describe('AllCasesListGeneric', () => {
         'Bulk update status: %s',
         async (status) => {
           const result = appMockRenderer.render(<AllCasesList />);
-          const theCase = useGetCasesMockState.data.cases[0];
 
           act(() => {
-            userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
+            userEvent.click(result.getByTestId('checkboxSelectAll'));
           });
 
           act(() => {
@@ -787,7 +751,11 @@ describe('AllCasesListGeneric', () => {
           await waitForComponentToUpdate();
 
           expect(updateCasesSpy).toBeCalledWith(
-            [{ id: theCase.id, version: theCase.version, status }],
+            useGetCasesMockState.data.cases.map(({ id, version }) => ({
+              id,
+              version,
+              status,
+            })),
             expect.anything()
           );
         }
@@ -857,7 +825,9 @@ describe('AllCasesListGeneric', () => {
 
       it.each(statusTests)('update the status of a case: %s', async (status) => {
         const res = appMockRenderer.render(<AllCasesList />);
-        const theCase = defaultGetCases.data.cases[0];
+        const openCase = useGetCasesMockState.data.cases[0];
+        const inProgressCase = useGetCasesMockState.data.cases[1];
+        const theCase = status === CaseStatuses.open ? inProgressCase : openCase;
 
         await waitFor(() => {
           expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
@@ -887,7 +857,7 @@ describe('AllCasesListGeneric', () => {
 
         await waitFor(() => {
           expect(updateCasesSpy).toHaveBeenCalledWith(
-            [{ id: 'basic-case-id', status, version: 'WzQ3LDFd' }],
+            [{ id: theCase.id, status, version: theCase.version }],
             expect.anything()
           );
         });

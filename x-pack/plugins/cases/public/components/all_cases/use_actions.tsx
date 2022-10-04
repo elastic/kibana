@@ -10,6 +10,7 @@ import {
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
   EuiPopover,
   EuiTableComputedColumnType,
 } from '@elastic/eui';
@@ -24,7 +25,7 @@ import { statuses } from '../status';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface UseBulkActionsReturnValue {
-  actions: EuiTableComputedColumnType<Case>;
+  actions: EuiTableComputedColumnType<Case> | null;
 }
 
 const ActionColumnComponent: React.FC<{ theCase: Case }> = ({ theCase }) => {
@@ -32,75 +33,72 @@ const ActionColumnComponent: React.FC<{ theCase: Case }> = ({ theCase }) => {
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
-  const { permissions } = useCasesContext();
-  const canDelete = permissions.delete;
-  const canUpdate = permissions.update;
 
   const deleteAction = useDeleteAction({
-    isDisabled: !canDelete,
+    isDisabled: false,
     onAction: closePopover,
     onActionSuccess: refreshCases,
   });
 
   const statusAction = useStatusAction({
-    isDisabled: !canUpdate,
+    isDisabled: false,
     onAction: closePopover,
     onActionSuccess: refreshCases,
     selectedStatus: theCase.status,
   });
 
-  const getPanels = useCallback(
-    (): EuiContextMenuPanelDescriptor[] => [
-      {
-        id: 0,
-        title: i18n.ACTIONS,
-        items: [
-          ...(canUpdate
-            ? [
-                {
-                  name: (
-                    <FormattedMessage
-                      defaultMessage="Status: {status}"
-                      id="xpack.cases.allCasesView.statusWithValue"
-                      values={{ status: <b>{statuses[theCase.status]?.label ?? '-'}</b> }}
-                    />
-                  ),
-                  panel: 1,
-                  disabled: !canUpdate,
-                  key: `case-action-status-panel-${theCase.id}`,
-                  'data-test-subj': `case-action-status-panel-${theCase.id}`,
-                },
-              ]
-            : []),
-          /**
-           * A separator is added if a) there is one item above
-           * and b) there is an item below. For this to happen the
-           * user has to have delete and update permissions
-           */
-          ...(canUpdate && canDelete
-            ? [
-                {
-                  isSeparator: true as const,
-                  key: `actions-separator-${theCase.id}`,
-                  'data-test-subj': `actions-separator-${theCase.id}`,
-                },
-              ]
-            : []),
-          ...(canDelete ? [deleteAction.getAction([theCase])] : []),
-        ],
-      },
-      ...(canUpdate
-        ? [
-            {
-              id: 1,
-              title: i18n.STATUS,
-              items: statusAction.getActions([theCase]),
-            },
-          ]
-        : []),
-    ],
-    [canDelete, canUpdate, deleteAction, statusAction, theCase]
-  );
+  const canDelete = deleteAction.canDelete;
+  const canUpdate = statusAction.canUpdateStatus;
+
+  const getPanels = useCallback((): EuiContextMenuPanelDescriptor[] => {
+    const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
+    const panels: EuiContextMenuPanelDescriptor[] = [
+      { id: 0, items: mainPanelItems, title: i18n.ACTIONS },
+    ];
+
+    if (canUpdate) {
+      mainPanelItems.push({
+        name: (
+          <FormattedMessage
+            defaultMessage="Status: {status}"
+            id="xpack.cases.allCasesView.statusWithValue"
+            values={{ status: <b>{statuses[theCase.status]?.label ?? '-'}</b> }}
+          />
+        ),
+        panel: 1,
+        disabled: !canUpdate,
+        key: `case-action-status-panel-${theCase.id}`,
+        'data-test-subj': `case-action-status-panel-${theCase.id}`,
+      });
+    }
+
+    /**
+     * A separator is added if a) there is one item above
+     * and b) there is an item below. For this to happen the
+     * user has to have delete and update permissions
+     */
+    if (canUpdate && canDelete) {
+      mainPanelItems.push({
+        isSeparator: true,
+        key: `actions-separator-${theCase.id}`,
+        'data-test-subj': `actions-separator-${theCase.id}`,
+      });
+    }
+
+    if (canDelete) {
+      mainPanelItems.push(deleteAction.getAction([theCase]));
+    }
+
+    if (canUpdate) {
+      panels.push({
+        id: 1,
+        title: i18n.STATUS,
+        items: statusAction.getActions([theCase]),
+      });
+    }
+
+    return panels;
+  }, [canDelete, canUpdate, deleteAction, statusAction, theCase]);
 
   return (
     <>
@@ -145,13 +143,18 @@ ActionColumnComponent.displayName = 'ActionColumnComponent';
 const ActionColumn = React.memo(ActionColumnComponent);
 
 export const useActions = (): UseBulkActionsReturnValue => {
+  const { permissions } = useCasesContext();
+  const shouldShowActions = permissions.update || permissions.delete;
+
   return {
-    actions: {
-      name: i18n.ACTIONS,
-      align: 'right',
-      render: (theCase: Case) => {
-        return <ActionColumn theCase={theCase} key={theCase.id} />;
-      },
-    },
+    actions: shouldShowActions
+      ? {
+          name: i18n.ACTIONS,
+          align: 'right',
+          render: (theCase: Case) => {
+            return <ActionColumn theCase={theCase} key={theCase.id} />;
+          },
+        }
+      : null,
   };
 };

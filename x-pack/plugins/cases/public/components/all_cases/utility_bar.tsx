@@ -22,13 +22,14 @@ import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface Props {
+  isSelectorView?: boolean;
   totalCases: number;
   selectedCases: Case[];
   deselectCases: () => void;
 }
 
 export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
-  ({ totalCases, selectedCases, deselectCases }) => {
+  ({ isSelectorView, totalCases, selectedCases, deselectCases }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -47,11 +48,11 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     });
 
     /**
-     * At least read permissions to show bulk actions
+     * At least update or delete permissions needed to show bulk actions.
      * Granular permission check for each action is performed
-     * in useBulkActions
+     * in the useBulkActions hook.
      */
-    const showBulkActions = permissions.update || permissions.delete;
+    const showBulkActions = (permissions.update || permissions.delete) && selectedCases.length > 0;
 
     return (
       <>
@@ -63,7 +64,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
               </UtilityBarText>
             </UtilityBarGroup>
             <UtilityBarGroup data-test-subj="case-table-utility-bar-actions">
-              {showBulkActions && (
+              {!isSelectorView && showBulkActions && (
                 <>
                   <UtilityBarText data-test-subj="case-table-selected-case-count">
                     {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}

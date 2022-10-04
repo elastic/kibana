@@ -18,6 +18,7 @@ import {
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,
   allCasesPermissions,
+  readCasesPermissions,
 } from '../../common/mock';
 
 jest.mock('../../containers/api');
@@ -51,7 +52,7 @@ describe('useActions', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    const comp = result.current.actions.render(basicCase) as React.ReactElement;
+    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
     expect(res.getByTestId(`case-action-popover-${basicCase.id}`)).toBeInTheDocument();
@@ -62,7 +63,7 @@ describe('useActions', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    const comp = result.current.actions.render(basicCase) as React.ReactElement;
+    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
     act(() => {
@@ -70,6 +71,7 @@ describe('useActions', () => {
     });
 
     await waitFor(() => {
+      expect(res.getByText('Actions')).toBeInTheDocument();
       expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
       expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
     });
@@ -82,7 +84,7 @@ describe('useActions', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    const comp = result.current.actions.render(basicCase) as React.ReactElement;
+    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
     act(() => {
@@ -120,7 +122,7 @@ describe('useActions', () => {
         wrapper: appMockRender.AppWrapper,
       });
 
-      const comp = result.current.actions.render(basicCase) as React.ReactElement;
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
       act(() => {
@@ -155,7 +157,7 @@ describe('useActions', () => {
         wrapper: appMockRender.AppWrapper,
       });
 
-      const comp = result.current.actions.render(basicCase) as React.ReactElement;
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
       act(() => {
@@ -193,7 +195,7 @@ describe('useActions', () => {
         wrapper: appMockRender.AppWrapper,
       });
 
-      const comp = result.current.actions.render(basicCase) as React.ReactElement;
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
       act(() => {
@@ -213,7 +215,7 @@ describe('useActions', () => {
         wrapper: appMockRender.AppWrapper,
       });
 
-      const comp = result.current.actions.render(basicCase) as React.ReactElement;
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
       act(() => {
@@ -233,7 +235,7 @@ describe('useActions', () => {
         wrapper: appMockRender.AppWrapper,
       });
 
-      const comp = result.current.actions.render(basicCase) as React.ReactElement;
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
       act(() => {
@@ -245,6 +247,15 @@ describe('useActions', () => {
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
       });
+    });
+
+    it('returns null if the user does not have update or delete permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
+      const { result } = renderHook(() => useActions(), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      expect(result.current.actions).toBe(null);
     });
   });
 });

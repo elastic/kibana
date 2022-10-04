@@ -12,14 +12,19 @@ import { useDeleteCases } from '../../../containers/use_delete_cases';
 
 import * as i18n from './translations';
 import { UseActionProps } from '../types';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 const getDeleteActionTitle = (totalCases: number): string =>
   totalCases > 1 ? i18n.BULK_ACTION_DELETE_LABEL : i18n.DELETE_ACTION_LABEL;
 
 export const useDeleteAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
   const euiTheme = useEuiTheme();
+  const { permissions } = useCasesContext();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [caseToBeDeleted, setCaseToBeDeleted] = useState<Case[]>([]);
+  const canDelete = permissions.delete;
+  const isActionDisabled = isDisabled || !canDelete;
+
   const onCloseModal = useCallback(() => setIsModalVisible(false), []);
   const openModal = useCallback(
     (selectedCases: Case[]) => {
@@ -43,20 +48,20 @@ export const useDeleteAction = ({ onAction, onActionSuccess, isDisabled }: UseAc
     );
   }, [deleteCases, onActionSuccess, onCloseModal, caseToBeDeleted]);
 
-  const color = isDisabled ? euiTheme.euiTheme.colors.disabled : 'danger';
+  const color = isActionDisabled ? euiTheme.euiTheme.colors.disabled : 'danger';
 
   const getAction = (selectedCases: Case[]) => {
     return {
       name: <EuiTextColor color={color}>{getDeleteActionTitle(selectedCases.length)}</EuiTextColor>,
       onClick: () => openModal(selectedCases),
-      disabled: isDisabled,
+      disabled: isActionDisabled,
       'data-test-subj': 'cases-bulk-action-delete',
       icon: <EuiIcon type="trash" size="m" color={color} />,
       key: 'cases-bulk-action-delete',
     };
   };
 
-  return { getAction, isModalVisible, onConfirmDeletion, onCloseModal };
+  return { getAction, isModalVisible, onConfirmDeletion, onCloseModal, canDelete };
 };
 
 export type UseDeleteAction = ReturnType<typeof useDeleteAction>;
