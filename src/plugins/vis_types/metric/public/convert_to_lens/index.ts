@@ -13,7 +13,6 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
-import { getConfiguration } from './configurations';
 import { ConvertMetricVisToLensVisualization } from './types';
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
@@ -69,8 +68,11 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
       return null;
     }
   }
+
   const layerId = uuid();
   const indexPatternId = dataView.id!;
+
+  const { getConfiguration } = await import('./configurations');
 
   return {
     type: 'lnsMetric',
