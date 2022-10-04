@@ -11,15 +11,25 @@ import moment, { Duration } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { FilterStateStore } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
-import { CombinedJob, CustomSettings, Datafeed, Job, JobId } from '../types/anomaly_detection_jobs';
-import { EntityField } from './anomaly_utils';
-import { MlServerLimits } from '../types/ml_server_info';
-import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
+import type {
+  CombinedJob,
+  CustomSettings,
+  Datafeed,
+  Job,
+  JobId,
+} from '../types/anomaly_detection_jobs';
+import type { EntityField } from './anomaly_utils';
+import type { MlServerLimits } from '../types/ml_server_info';
+import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
@@ -866,3 +876,32 @@ export function resolveMaxTimeInterval(timeIntervals: string[]): number | undefi
 
   return Number.isFinite(result) ? result : undefined;
 }
+
+export const getFiltersForDSLQuery = (
+  datafeedQuery: QueryDslQueryContainer,
+  dataViewId: string | undefined,
+  alias?: string,
+  store = FilterStateStore.APP_STATE
+): Filter[] => {
+  const defaultEmptyQuery = { bool: { must: [{ match_all: {} }] } };
+  if (isEqual(datafeedQuery, defaultEmptyQuery) === true) {
+    return [];
+  }
+
+  return [
+    {
+      meta: {
+        ...(dataViewId !== undefined ? { index: dataViewId } : {}),
+        ...(alias !== undefined ? { alias } : {}),
+        negate: false,
+        disabled: false,
+        type: 'custom',
+        value: JSON.stringify(datafeedQuery),
+      },
+      query: datafeedQuery as SerializableRecord,
+      $state: {
+        store,
+      },
+    },
+  ];
+};

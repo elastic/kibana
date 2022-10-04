@@ -20,12 +20,14 @@ import type { LensSavedObjectAttributes, XYDataLayerConfig } from '@kbn/lens-plu
 
 import { i18n } from '@kbn/i18n';
 
+import { FilterStateStore } from '@kbn/es-query';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
 import type { ErrorType } from '../../../../../common/util/errors';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
 import type { MlApiServices } from '../../../services/ml_api_service';
+import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
 import {
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
@@ -89,7 +91,7 @@ export class QuickJobCreator {
           jobType === JOB_TYPE.SINGLE_METRIC
             ? CREATED_BY_LABEL.SINGLE_METRIC_FROM_LENS
             : CREATED_BY_LABEL.MULTI_METRIC_FROM_LENS,
-        ...(await this.getCustomUrls(dashboard)),
+        ...(await this.getCustomUrls(dashboard, datafeedConfig)),
       },
     };
 
@@ -337,12 +339,11 @@ export class QuickJobCreator {
     return mergedQueries;
   }
 
-  private async createDashboardLink(dashboard: Dashboard) {
+  private async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
     if (dashboard === undefined) {
       return null;
     }
 
-    const _g = "&_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))";
     const params: DashboardAppLocatorParams = {
       dashboardId: dashboard.id,
       timeRange: {
@@ -350,13 +351,21 @@ export class QuickJobCreator {
         to: '$latest$',
         mode: 'absolute',
       },
+      filters: getFiltersForDSLQuery(
+        datafeedConfig.query,
+        undefined,
+        undefined,
+        FilterStateStore.GLOBAL_STATE
+      ),
     };
     const dashboardLocator = this.share.url.locators.get('DASHBOARD_APP_LOCATOR');
     const url = await dashboardLocator?.getUrl(params);
     return { url_name: 'Data dashboard', url_value: url };
   }
 
-  private async getCustomUrls(dashboard?: Dashboard) {
-    return dashboard ? { custom_urls: [await this.createDashboardLink(dashboard)] } : {};
+  private async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
+    return dashboard
+      ? { custom_urls: [await this.createDashboardLink(dashboard, datafeedConfig)] }
+      : {};
   }
 }
