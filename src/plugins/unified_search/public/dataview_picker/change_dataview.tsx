@@ -199,8 +199,8 @@ export function ChangeDataView({
               const dataView = await dataViews.get(currentDataViewId!);
               dataViewEditor.openEditor({
                 editData: dataView,
-                onSave: () => {
-                  onEditDataView(currentDataViewId!);
+                onSave: (updatedDataView) => {
+                  onEditDataView(updatedDataView);
                 },
               });
             } else {

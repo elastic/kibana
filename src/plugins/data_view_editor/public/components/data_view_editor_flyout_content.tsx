@@ -445,6 +445,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           }}
           submitDisabled={form.isSubmitted && !form.isValid}
           isEdit={!!editData}
+          isPersisted={Boolean(editData && editData.isPersisted())}
           allowAdHoc={allowAdHoc}
         />
       </FlyoutPanels.Item>

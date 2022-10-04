@@ -13,6 +13,7 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
+  OverlayStart,
 } from '@kbn/core/public';
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -31,6 +32,7 @@ export interface DataViewEditorContext {
   http: HttpSetup;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  overlays: OverlayStart;
   dataViews: DataViewsPublicPluginStart;
   searchClient: DataPublicPluginStart['search']['search'];
 }

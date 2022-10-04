@@ -35,6 +35,7 @@ export const getEditorOpener =
         notifications,
         application,
         dataViews,
+        overlays,
         searchClient,
       });
 

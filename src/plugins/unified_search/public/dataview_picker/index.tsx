@@ -41,8 +41,11 @@ export interface DataViewPickerProps {
    * Callback that is called when the user changes the currently selected dataview.
    */
   onChangeDataView: (newId: string) => void;
-  /** Callback that is called when the user edits the current data view via flyout */
-  onEditDataView?: (newId: string) => void;
+  /**
+   * Callback that is called when the user edits the current data view via flyout.
+   * The first parameter is the updated data view stub without fetched fields
+   */
+  onEditDataView?: (updatedDataViewStub: DataView) => void;
   /**
    * The id of the selected dataview.
    */
