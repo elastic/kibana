@@ -10,6 +10,11 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +24,7 @@ import {
   EuiFlyoutHeader,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiSelect,
   EuiSpacer,
   EuiTitle,
@@ -39,8 +45,9 @@ import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enab
 import { ActionsPopover } from './actions_popover';
 import { selectOverviewState } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
-import { MonitorOverviewItem } from '../types';
+import { EncryptedSyntheticsMonitor, MonitorOverviewItem } from '../types';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import { logCategorizationIndexOrSearchRouteFactory } from '@kbn/ml-plugin/public/application/routing/routes';
 
 // supplying `any` here because we're not doing anything prop-specific as it
 // relates to the `EuiBasicTable` component, and typescript requires a generic arg here
@@ -64,10 +71,6 @@ const FlyoutHeadingTable = styled<any>(EuiBasicTable)`
   }
 `;
 
-const BoldItem = styled(EuiFlexItem)`
-  font-weight: bold;
-`;
-
 interface Props {
   id: string;
   location: string;
@@ -83,6 +86,72 @@ const DEFAULT_DURATION_CHART_FROM = 'now-12h';
 const DEFAULT_CURRENT_DURATION_CHART_TO = 'now';
 const DEFAULT_PREVIOUS_DURATION_CHART_FROM = 'now-24h';
 const DEFAULT_PREVIOUS_DURATION_CHART_TO = 'now-12h';
+
+function LocationSelect({
+  locationData,
+  currentLocation,
+  id,
+  setCurrentLocation,
+  monitor,
+  onEnabledChange,
+}: {
+  locationData: Pick<ReturnType<typeof useStatusByLocation>, 'locations'>;
+  currentLocation: string;
+  id: string;
+  monitor: EncryptedSyntheticsMonitor;
+  onEnabledChange: () => void;
+  setCurrentLocation: React.Dispatch<string>;
+}) {
+  const [isOpen, setOpen] = useState(false);
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiDescriptionList>
+          <EuiDescriptionListTitle>{ENABLED_ITEM_TEXT}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <MonitorEnabled id={id} monitor={monitor} reloadPage={onEnabledChange} />
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiDescriptionList>
+          <EuiDescriptionListTitle>{LOCATION_TITLE_TEXT}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {currentLocation}
+            <EuiButtonIcon
+              onClick={() => {
+                throw Error('not implemented');
+              }}
+              color="primary"
+              iconType="arrowDown"
+            />
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiDescriptionList>
+          <EuiDescriptionListTitle>{STATUS_TITLE_TEXT}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription></EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    // <EuiFlexGroup>
+    //   <EuiFlexItem>{currentLocation}</EuiFlexItem>
+    //   <EuiFlexItem>
+    //     <EuiPopover
+    //       button={<EuiButtonIcon iconType="arrowDown" onClick={() => setOpen(!isOpen)} />}
+    //       isOpen={isOpen}
+    //       closePopover={() => setOpen(false)}
+    //     >
+    //       {/* <EuiContextMenu initialPanelId={0} panels={[]} */}
+    //       {locationData.locations.map((l) => (
+    //         <div>{l.observer?.geo?.name}</div>
+    //       ))}
+    //     </EuiPopover>
+    //   </EuiFlexItem>
+    // </EuiFlexGroup>
+  );
+}
 
 export function MonitorDetailFlyout(props: Props) {
   const {
@@ -147,7 +216,17 @@ export function MonitorDetailFlyout(props: Props) {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <FlyoutHeadingTable
+
+            <LocationSelect
+              currentLocation={location}
+              locationData={{ locations }}
+              setCurrentLocation={setLocation}
+              id={id}
+              monitor={monitorSavedObject.attributes}
+              onEnabledChange={props.onEnabledChange}
+            />
+
+            {/* <FlyoutHeadingTable
               columns={[
                 {
                   name: ENABLED_ITEM_TEXT,
@@ -165,17 +244,22 @@ export function MonitorDetailFlyout(props: Props) {
                   name: LOCATION_COLUMN_NAME,
                   field: 'observer.geo.name',
                   render: () => (
-                    <EuiSelect
-                      compressed
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      options={
-                        locations.map((l) => ({
-                          value: l.observer?.geo?.name,
-                          text: l.observer?.geo?.name,
-                        })) ?? []
-                      }
+                    <LocationSelect
+                      currentLocation={location}
+                      locationData={{ locations }}
+                      setCurrentLocation={setLocation}
                     />
+                    // <EuiSelect
+                    //   compressed
+                    //   value={location}
+                    //   onChange={(e) => setLocation(e.target.value)}
+                    //   options={
+                    //     locations.map((l) => ({
+                    //       value: l.observer?.geo?.name,
+                    //       text: l.observer?.geo?.name,
+                    //     })) ?? []
+                    //   }
+                    // />
                   ),
                 },
                 {
@@ -190,7 +274,7 @@ export function MonitorDetailFlyout(props: Props) {
               ]}
               items={monitorDetail.data ? [monitorDetail.data] : []}
               loading={monitorDetail.loading}
-            />
+            /> */}
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiTitle size="xs">
@@ -252,58 +336,61 @@ export function MonitorDetailFlyout(props: Props) {
               <h3>{MONITOR_DETAILS_HEADER_TEXT}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <BodyInfo
-              header={LAST_RUN_HEADER_TEXT}
-              content={
-                monitorDetail.data?.timestamp ? (
-                  <Time timestamp={monitorDetail.data?.timestamp} />
-                ) : (
-                  ''
-                )
-              }
-            />
-            <BodyInfo
-              header={LAST_MODIFIED_HEADER_TEXT}
-              content={
-                monitorSavedObject.updated_at ? (
-                  <Time timestamp={monitorSavedObject.updated_at} />
-                ) : (
-                  ''
-                )
-              }
-            />
-            <BodyInfo header={MONITOR_ID_ITEM_TEXT} content={props.id} />
-            <BodyInfo
-              header={MONITOR_TYPE_HEADER_TEXT}
-              content={capitalize(monitorSavedObject.type)}
-            />
-            <BodyInfo
-              header={FREQUENCY_HEADER_TEXT}
-              content={freqeuncyStr(monitorSavedObject?.attributes.schedule)}
-            />
-            <BodyInfo
-              header={TAGS_HEADER_TEXT}
-              content={
-                <>
-                  {monitorSavedObject?.attributes.tags?.map((tag) => (
-                    <EuiFlexItem key={`${tag}-tag`} grow={false}>
-                      <EuiBadge color="hollow">{tag}</EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </>
-              }
-            />
-            <BodyInfo
-              header={URL_HEADER_TEXT}
-              content={
-                monitorDetail.data?.url?.full ? (
-                  <EuiLink external href={monitorDetail.data.url.full}>
-                    {monitorDetail.data.url.full}
-                  </EuiLink>
-                ) : (
-                  ''
-                )
-              }
+            <EuiDescriptionList
+              type="column"
+              compressed={true}
+              listItems={[
+                {
+                  title: LAST_RUN_HEADER_TEXT,
+                  description: monitorDetail.data?.timestamp ? (
+                    <Time timestamp={monitorDetail.data?.timestamp} />
+                  ) : (
+                    ''
+                  ),
+                },
+                {
+                  title: LAST_MODIFIED_HEADER_TEXT,
+                  description: monitorSavedObject.updated_at ? (
+                    <Time timestamp={monitorSavedObject.updated_at} />
+                  ) : (
+                    ''
+                  ),
+                },
+                {
+                  title: MONITOR_ID_ITEM_TEXT,
+                  description: props.id,
+                },
+                {
+                  title: MONITOR_TYPE_HEADER_TEXT,
+                  description: capitalize(monitorSavedObject.type),
+                },
+                {
+                  title: FREQUENCY_HEADER_TEXT,
+                  description: freqeuncyStr(monitorSavedObject?.attributes.schedule),
+                },
+                {
+                  title: TAGS_HEADER_TEXT,
+                  description: (
+                    <>
+                      {monitorSavedObject?.attributes.tags?.map((tag) => (
+                        <EuiFlexItem key={`${tag}-tag`} grow={false}>
+                          <EuiBadge color="hollow">{tag}</EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </>
+                  ),
+                },
+                {
+                  title: URL_HEADER_TEXT,
+                  description: monitorDetail.data?.url?.full ? (
+                    <EuiLink external href={monitorDetail.data.url.full}>
+                      {monitorDetail.data.url.full}
+                    </EuiLink>
+                  ) : (
+                    ''
+                  ),
+                },
+              ]}
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
@@ -328,15 +415,6 @@ export function MonitorDetailFlyout(props: Props) {
         </>
       )}
     </EuiFlyout>
-  );
-}
-
-function BodyInfo({ header, content }: { header: string; content: JSX.Element | string }) {
-  return (
-    <EuiFlexGroup>
-      <BoldItem>{header}</BoldItem>
-      <EuiFlexItem>{content}</EuiFlexItem>
-    </EuiFlexGroup>
   );
 }
 
@@ -424,11 +502,11 @@ const LAST_RUN_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.lastRu
   defaultMessage: 'Last run',
 });
 
-const STATUS_COLUMN_NAME = i18n.translate('xpack.synthetics.monitorList.statusColumnName', {
+const STATUS_TITLE_TEXT = i18n.translate('xpack.synthetics.monitorList.statusColumnName', {
   defaultMessage: 'Status',
 });
 
-const LOCATION_COLUMN_NAME = i18n.translate('xpack.synthetics.monitorList.locationColumnName', {
+const LOCATION_TITLE_TEXT = i18n.translate('xpack.synthetics.monitorList.locationColumnName', {
   defaultMessage: 'Location',
 });
 
