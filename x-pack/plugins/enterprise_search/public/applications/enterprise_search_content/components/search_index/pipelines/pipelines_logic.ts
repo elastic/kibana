@@ -212,7 +212,10 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     createMlInferencePipelineSuccess: () => {
+      // Re-fetch processors to ensure we display newly added ml processor
       actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     deleteMlPipelineError: (error) => flashAPIErrors(error),
     deleteMlPipelineSuccess: (value) => {
@@ -229,7 +232,10 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
           )
         );
       }
+      // Re-fetch processors to ensure we display newly removed ml processor
       actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     fetchIndexApiSuccess: (index) => {
       if (!values.showModal) {
