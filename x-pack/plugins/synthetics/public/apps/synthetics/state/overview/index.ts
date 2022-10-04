@@ -9,7 +9,7 @@ import { createReducer } from '@reduxjs/toolkit';
 
 import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
 
 import { MonitorOverviewPageState } from './models';
 import {
@@ -60,13 +60,13 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchMonitorOverviewAction.fail, (state, action) => {
       state.loading = false;
-      state.error = action.payload;
+      state.error = serializeHttpFetchError(action.payload);
     })
     .addCase(quietFetchOverviewAction.success, (state, action) => {
       state.data = action.payload;
     })
     .addCase(quietFetchOverviewAction.fail, (state, action) => {
-      state.error = action.payload;
+      state.error = serializeHttpFetchError(action.payload);
     })
     .addCase(setOverviewPerPageAction, (state, action) => {
       state.pageState = {
