@@ -175,8 +175,9 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
   }
 
   const kibanaMajorGt = semverMajor(kibanaVersionNumber) > semverMajor(versionToUpgradeNumber);
-  const kibanaMajorEqMinorGte = (semverMajor(kibanaVersionNumber) === semverMajor(versionToUpgradeNumber) &&
-    semverMinor(kibanaVersionNumber) >= semverMinor(versionToUpgradeNumber));
+  const kibanaMajorEqMinorGte =
+    semverMajor(kibanaVersionNumber) === semverMajor(versionToUpgradeNumber) &&
+    semverMinor(kibanaVersionNumber) >= semverMinor(versionToUpgradeNumber);
 
   // When force is enabled, only the major and minor versions are checked
   if (force && !(kibanaMajorGt || kibanaMajorEqMinorGte)) {
@@ -208,9 +209,11 @@ const checkFleetServerVersion = (
     );
   }
 
-  const fleetServerMajorGt = semverMajor(maxFleetServerVersion) > semverMajor(versionToUpgradeNumber);
-  const fleetServerMajorEqMinorGte = (semverMajor(maxFleetServerVersion) === semverMajor(versionToUpgradeNumber) &&
-    semverMinor(maxFleetServerVersion) >= semverMinor(versionToUpgradeNumber));
+  const fleetServerMajorGt =
+    semverMajor(maxFleetServerVersion) > semverMajor(versionToUpgradeNumber);
+  const fleetServerMajorEqMinorGte =
+    semverMajor(maxFleetServerVersion) === semverMajor(versionToUpgradeNumber) &&
+    semverMinor(maxFleetServerVersion) >= semverMinor(versionToUpgradeNumber);
 
   // When force is enabled, only the major and minor versions are checked
   if (force && !(fleetServerMajorGt || fleetServerMajorEqMinorGte)) {
