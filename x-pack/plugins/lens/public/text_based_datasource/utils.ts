@@ -13,11 +13,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
-import type {
-  IndexPatternRef,
-  TextBasedPrivateState,
-  TextBasedLayerColumn,
-} from './types';
+import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
 
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart

@@ -79,10 +79,7 @@ const indexPatterns = expectedIndexPatterns;
 
 describe('IndexPattern Data Source', () => {
   let baseState: TextBasedPrivateState;
-  let TextBasedDatasource: Datasource<
-    TextBasedPrivateState,
-    TextBasedPersistedState
-  >;
+  let TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState>;
 
   beforeEach(() => {
     TextBasedDatasource = getTextBasedDatasource({
@@ -515,9 +512,7 @@ describe('IndexPattern Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = TextBasedDatasource.initialize();
-      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns)).toEqual(
-        null
-      );
+      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns)).toEqual(null);
     });
 
     it('should generate an expression for an SQL query', async () => {

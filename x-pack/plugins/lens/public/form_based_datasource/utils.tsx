@@ -19,11 +19,7 @@ import type { Query } from '@kbn/data-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { FramePublicAPI, IndexPattern, StateSetter } from '../types';
 import { renewIDs } from '../utils';
-import type {
-  FormBasedLayer,
-  FormBasedPersistedState,
-  FormBasedPrivateState,
-} from './types';
+import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {

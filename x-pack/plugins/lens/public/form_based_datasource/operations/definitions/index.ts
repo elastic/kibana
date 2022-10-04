@@ -207,9 +207,7 @@ export interface FieldInputProps<C> {
   selectedColumn?: C;
   columnId: string;
   indexPattern: IndexPattern;
-  updateLayer: (
-    setter: FormBasedLayer | ((prevLayer: FormBasedLayer) => FormBasedLayer)
-  ) => void;
+  updateLayer: (setter: FormBasedLayer | ((prevLayer: FormBasedLayer) => FormBasedLayer)) => void;
   onDeleteColumn?: () => void;
   currentFieldIsInvalid: boolean;
   incompleteField: IncompleteColumn['sourceField'] | null;

@@ -27,11 +27,7 @@ import {
   GenericOperationDefinition,
   TermsIndexPatternColumn,
 } from './definitions';
-import type {
-  DataViewDragDropOperation,
-  FormBasedLayer,
-  FormBasedPrivateState,
-} from '../types';
+import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
 import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../id_generator';
 import {

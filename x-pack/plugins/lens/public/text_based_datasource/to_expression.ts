@@ -10,10 +10,7 @@ import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import type { OriginalColumn } from '../../common/types';
 import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
 
-function getExpressionForLayer(
-  layer: TextBasedLayer,
-  refs: IndexPatternRef[]
-): Ast | null {
+function getExpressionForLayer(layer: TextBasedLayer, refs: IndexPatternRef[]): Ast | null {
   if (!layer.columns || layer.columns?.length === 0) {
     return null;
   }

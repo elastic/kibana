@@ -13,11 +13,7 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import type {
-  GenericIndexPatternColumn,
-  FormBasedLayer,
-  FormBasedPrivateState,
-} from './types';
+import type { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern } from '../types';
 
 export const timeShiftOptions = [

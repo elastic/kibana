@@ -12,8 +12,7 @@ import { DatasourceLayerPanelProps } from '../types';
 import { FormBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../shared_components/dataview_picker/dataview_picker';
 
-export interface FormBasedLayerPanelProps
-  extends DatasourceLayerPanelProps<FormBasedPrivateState> {
+export interface FormBasedLayerPanelProps extends DatasourceLayerPanelProps<FormBasedPrivateState> {
   state: FormBasedPrivateState;
   onChangeIndexPattern: (newId: string) => void;
 }

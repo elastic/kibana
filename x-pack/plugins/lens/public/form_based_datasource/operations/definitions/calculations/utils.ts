@@ -127,11 +127,7 @@ export function checkReferences(layer: FormBasedLayer, columnId: string) {
   return errors.length ? errors : undefined;
 }
 
-export function getErrorsForDateReference(
-  layer: FormBasedLayer,
-  columnId: string,
-  name: string
-) {
+export function getErrorsForDateReference(layer: FormBasedLayer, columnId: string, name: string) {
   const dateErrors = checkForDateHistogram(layer, name) ?? [];
   const referenceErrors = checkReferences(layer, columnId) ?? [];
   if (dateErrors.length || referenceErrors.length) {
