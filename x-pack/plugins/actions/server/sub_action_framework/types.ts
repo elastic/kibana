@@ -11,7 +11,7 @@ import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeParams, Services } from '../types';
+import { ActionTypeParams, RenderParameterTemplates, Services } from '../types';
 import { SubActionConnector } from './sub_action_connector';
 
 export interface ServiceParams<Config, Secrets> {
@@ -51,11 +51,7 @@ export interface SubActionConnectorType<Config, Secrets> {
     secrets: Type<Secrets>;
   };
   Service: IService<Config, Secrets>;
-  renderParameterTemplates?<P extends ExecutorParams>(
-    params: P,
-    variables: Record<string, unknown>,
-    actionId?: string
-  ): P;
+  renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
 }
 
 export interface ExecutorParams extends ActionTypeParams {
