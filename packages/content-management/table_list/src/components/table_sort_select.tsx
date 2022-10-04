@@ -12,31 +12,47 @@ import {
   EuiFilterButton,
   EuiSelectableOption,
   EuiIcon,
+  Direction,
 } from '@elastic/eui';
 
-type SortItem = EuiSelectableOption & { view: JSX.Element };
+import type { UserContentCommonSchema } from '../table_list_view';
 
-export const TableSortSelect = () => {
+type SortItem<T extends UserContentCommonSchema> = EuiSelectableOption & {
+  column: keyof T;
+  direction: Direction;
+};
+
+export type SortColumn = 'updatedAt' | 'attributes.title';
+
+interface Props<T> {
+  onChange?: (column: keyof T, direction: Direction) => void;
+}
+
+export function TableSortSelect<T extends UserContentCommonSchema>({ onChange }: Props<T>) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [options, setOptions] = useState<SortItem[]>([
+  const [options, setOptions] = useState<Array<SortItem<T>>>([
     {
       label: 'Title A-Z',
-      view: <div>Title A-Z</div>,
+      column: 'attributes.title' as keyof T,
+      direction: 'asc',
       append: <EuiIcon type="sortUp" />,
     },
     {
       label: 'Title Z-A',
-      view: <div>Title Z-A</div>,
+      column: 'attributes.title' as keyof T,
+      direction: 'desc',
       append: <EuiIcon type="sortDown" />,
     },
     {
       label: 'Recently updated',
-      view: <div>Recently updated</div>,
+      column: 'updatedAt',
+      direction: 'asc',
       append: <EuiIcon type="sortUp" />,
     },
     {
       label: 'Least recently updated',
-      view: <div>Least recently updated</div>,
+      column: 'updatedAt',
+      direction: 'desc',
       append: <EuiIcon type="sortDown" />,
     },
   ]);
@@ -55,6 +71,15 @@ export const TableSortSelect = () => {
     </EuiFilterButton>
   );
 
+  const onSelectChange = (updatedOptions: Array<SortItem<T>>) => {
+    setOptions(updatedOptions);
+
+    if (onChange) {
+      const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
+      onChange(selectedOption!.column, selectedOption!.direction);
+    }
+  };
+
   return (
     <EuiPopover
       button={button}
@@ -64,17 +89,14 @@ export const TableSortSelect = () => {
       anchorPosition="downCenter"
       panelClassName="euiFilterGroup__popoverPanel"
     >
-      <EuiSelectable<SortItem>
+      <EuiSelectable<SortItem<T>>
         singleSelection
         aria-label="some aria label"
         options={options}
-        renderOption={(option) => option.view}
-        onChange={(updatedOptions) => {
-          setOptions(updatedOptions);
-        }}
+        onChange={onSelectChange}
       >
         {(list) => list}
       </EuiSelectable>
     </EuiPopover>
   );
-};
+}

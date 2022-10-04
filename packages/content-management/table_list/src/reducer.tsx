@@ -78,6 +78,12 @@ export function getReducer<T extends UserContentCommonSchema>() {
           tableSort,
         };
       }
+      case 'onTableSortChange': {
+        return {
+          ...state,
+          tableSort: action.data,
+        };
+      }
       case 'showConfirmDeleteItemsModal': {
         return {
           ...state,

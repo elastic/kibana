@@ -17,6 +17,7 @@ import {
   Direction,
   EuiSpacer,
   EuiTableActionsColumnType,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -308,6 +309,17 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
   }, [searchQueryParser, searchQuery, findItems]);
 
+  const onSortChange = useCallback((field: keyof T, direction: Direction) => {
+    dispatch({
+      type: 'onTableSortChange',
+      data: { field, direction },
+    });
+  }, []);
+
+  const onTableChange = useCallback((criteria: CriteriaWithPagination<T>) => {
+    dispatch({ type: 'onTableChange', data: criteria });
+  }, []);
+
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {
       return;
@@ -475,6 +487,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           entityNamePlural={entityNamePlural}
           deleteItems={deleteItems}
           tableCaption={tableListTitle}
+          onTableChange={onTableChange}
+          onSortChange={onSortChange}
         />
 
         {/* Delete modal */}
