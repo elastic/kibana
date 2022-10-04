@@ -259,7 +259,7 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
-  const [dataViewsList, setDataViewsList] = useState<DataView[]>([]);
+  // const [dataViewsList, setDataViewsList] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [isOnTextBasedMode, setIsOnTextBasedMode] = useState(false);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
@@ -357,27 +357,18 @@ export const LensTopNavMenu = ({
   ]);
 
   useEffect(() => {
-    if (activeDatasourceId && datasourceStates[activeDatasourceId].state) {
-      const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
-        datasourceStates[activeDatasourceId].state
-      );
-      const dataView = dataViewsList.find((pattern) => pattern.id === dataViewId);
-      setCurrentIndexPattern(dataView ?? indexPatterns[0]);
-    }
-  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns, dataViewsList]);
-
-  useEffect(() => {
-    const fetchDataViews = async () => {
-      const totalDataViewsList = [];
-      const dataViewsIds = await data.dataViews.getIds();
-      for (let i = 0; i < dataViewsIds.length; i++) {
-        const d = await data.dataViews.get(dataViewsIds[i]);
-        totalDataViewsList.push(d);
+    const setCurrentPattern = async () => {
+      if (activeDatasourceId && datasourceStates[activeDatasourceId].state) {
+        const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
+          datasourceStates[activeDatasourceId].state
+        );
+        const dataView = await data.dataViews.get(dataViewId);
+        setCurrentIndexPattern(dataView ?? indexPatterns[0]);
       }
-      setDataViewsList(totalDataViewsList);
     };
-    fetchDataViews();
-  }, [data]);
+
+    setCurrentPattern();
+  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns, data.dataViews]);
 
   useEffect(() => {
     if (typeof query === 'object' && query !== null && isOfAggregateQueryType(query)) {
@@ -846,10 +837,8 @@ export const LensTopNavMenu = ({
     onDataViewCreated: createNewDataView,
     onCreateDefaultAdHocDataView,
     adHocDataViews: indexPatterns.filter((pattern) => !pattern.isPersisted()),
-    onChangeDataView: (newIndexPatternId: string) => {
-      const currentDataView = dataViewsList.find(
-        (indexPattern) => indexPattern.id === newIndexPatternId
-      );
+    onChangeDataView: async (newIndexPatternId: string) => {
+      const currentDataView = await data.dataViews.get(newIndexPatternId);
       setCurrentIndexPattern(currentDataView);
       dispatchChangeIndexPattern(newIndexPatternId);
       if (isOnTextBasedMode) {
