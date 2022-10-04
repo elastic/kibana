@@ -87,7 +87,7 @@ export const UnifiedHistogramLayout = ({
           hits={hits}
           chart={chart}
           appendHitsCounter={appendHitsCounter}
-          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
+          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
           onEditVisualization={onEditVisualization}
           onResetChartHeight={
             topPanelHeight !== defaultTopPanelHeight && panelsMode === PANELS_MODE.RESIZABLE

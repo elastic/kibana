@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiResizableContainer, useGeneratedHtmlId, useResizeObserver } from '@elastic/eui';
+import {
+  EuiResizableContainer,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  useResizeObserver,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
 import type { ReactElement, RefObject } from 'react';
@@ -142,6 +147,14 @@ export const PanelsResizable = ({
     disableResizeWithPortalsHack();
   };
 
+  const { euiTheme } = useEuiTheme();
+  const buttonCss = css`
+    && {
+      margin-top: -${euiTheme.size.base};
+      margin-bottom: 0;
+    }
+  `;
+
   return (
     <div
       className="eui-fullHeight"
@@ -168,7 +181,7 @@ export const PanelsResizable = ({
               {topPanel}
             </EuiResizablePanel>
             <EuiResizableButton
-              css={resizeWithPortalsHackButtonCss}
+              css={[resizeWithPortalsHackButtonCss, buttonCss]}
               data-test-subj="unifiedHistogramResizableButton"
             >
               <span

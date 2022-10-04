@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import React, { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -114,9 +107,6 @@ export const DiscoverMainContent = ({
     triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
   }, [dataView, savedSearch.columns, timeField]);
 
-  const hideChart = state.hideChart || !isTimeBased;
-  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || hideChart;
-
   const [topPanelHeight, setTopPanelHeight] = useState(() => {
     const storedHeight = storage.get(HISTOGRAM_HEIGHT_KEY);
     return storedHeight ? Number(storedHeight) : undefined;
@@ -177,13 +167,21 @@ export const DiscoverMainContent = ({
   const chart = useMemo(
     () => ({
       status: chartFetchStatus,
-      hidden: hideChart,
+      hidden: state.hideChart || !isTimeBased,
       timeInterval: state.interval,
       bucketInterval,
       data: chartData,
       error,
     }),
-    [bucketInterval, chartData, chartFetchStatus, error, hideChart, state.interval]
+    [
+      bucketInterval,
+      chartData,
+      chartFetchStatus,
+      error,
+      isTimeBased,
+      state.hideChart,
+      state.interval,
+    ]
   );
 
   return (
@@ -228,7 +226,6 @@ export const DiscoverMainContent = ({
       >
         {!isPlainRecord && (
           <EuiFlexItem grow={false}>
-            {!showFixedPanels && <EuiSpacer size="s" />}
             <EuiHorizontalRule margin="none" />
             <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
           </EuiFlexItem>
