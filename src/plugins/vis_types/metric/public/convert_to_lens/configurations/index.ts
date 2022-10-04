@@ -7,8 +7,21 @@
  */
 
 import { Column, MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
+import { PercentageModeConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { VisParams } from '../../types';
 import { getPalette } from './palette';
+
+export const getPercentageModeConfig = (params: VisParams): PercentageModeConfig => {
+  if (!params.metric.percentageMode || params.metric.metricColorMode === 'None') {
+    return { isPercentageColumn: params.metric.percentageMode };
+  }
+  const { colorsRange } = params.metric;
+  return {
+    isPercentageColumn: true,
+    min: colorsRange[0].from,
+    max: colorsRange[colorsRange.length - 1].to,
+  };
+};
 
 export const getConfiguration = (
   layerId: string,

@@ -8,7 +8,7 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SchemaConfig } from '../../..';
+import { MinMax, PercentageModeConfig, SchemaConfig } from '../../..';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
   convertToOtherParentPipelineAggColumns,
@@ -19,18 +19,64 @@ import {
   convertToLastValueColumn,
   convertToCumulativeSumAggColumn,
   AggBasedColumn,
+  ExtendedColumnConverterArgs,
+  createFormulaColumn,
 } from '../convert';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { getValidColumns } from '../utils';
+import { getFormulaForAgg } from './formula';
+
+const getPercentageFormulaOverRange = (formula: string, { min, max }: MinMax) =>
+  `((${formula}) - ${min}) / (${max} - ${min})`;
+
+// Lens is multiplying by 100, so, it is necessary to disable that operation.
+const getPercentageFormula = (formula: string) => `(${formula}) / 10000`;
+
+const convertToColumnInPercentageMode = (
+  columnConverterArgs: ExtendedColumnConverterArgs<METRIC_TYPES>,
+  minMax: MinMax | {}
+) => {
+  const formula = getFormulaForAgg(columnConverterArgs);
+  if (formula === null) {
+    return null;
+  }
+
+  const percentageModeFormula = isMinMax(minMax)
+    ? getPercentageFormulaOverRange(formula, minMax)
+    : getPercentageFormula(formula);
+  const column = createFormulaColumn(percentageModeFormula, columnConverterArgs.agg);
+  if (column === null) {
+    return null;
+  }
+  return {
+    ...column,
+    params: { ...column?.params, format: { id: 'percent' } },
+  };
+};
+
+const isMinMax = (minMax: MinMax | {}): minMax is MinMax => {
+  if ((minMax as MinMax).min !== undefined && (minMax as MinMax).max !== undefined) {
+    return true;
+  }
+  return false;
+};
 
 export const convertMetricToColumns = (
-  agg: SchemaConfig,
+  agg: SchemaConfig<METRIC_TYPES>,
   dataView: DataView,
-  aggs: Array<SchemaConfig<METRIC_TYPES>>
+  aggs: Array<SchemaConfig<METRIC_TYPES>>,
+  percentageModeConfig: PercentageModeConfig
 ): AggBasedColumn[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
   if (!supportedAgg) {
     return null;
+  }
+
+  if (percentageModeConfig.isPercentageColumn) {
+    const { isPercentageColumn, ...minMax } = percentageModeConfig;
+
+    const formulaColumn = convertToColumnInPercentageMode({ agg, dataView, aggs }, minMax);
+    return getValidColumns(formulaColumn);
   }
 
   switch (agg.aggType) {
@@ -119,8 +165,6 @@ export const convertMetricToColumns = (
       });
       return getValidColumns(columns);
     }
-    case METRIC_TYPES.SERIAL_DIFF:
-      return null;
     default:
       return null;
   }

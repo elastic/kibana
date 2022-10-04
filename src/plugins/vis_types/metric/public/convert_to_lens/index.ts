@@ -42,7 +42,11 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     return null;
   }
 
-  const { getColumnsFromVis } = await convertToLensModule;
+  const [{ getColumnsFromVis }, { getConfiguration, getPercentageModeConfig }] = await Promise.all([
+    convertToLensModule,
+    import('./configurations'),
+  ]);
+
   const result = getColumnsFromVis(
     vis,
     timefilter,
@@ -50,7 +54,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     {
       splits: ['group'],
     },
-    { dropEmptyRowsInDateHistogram: true }
+    { dropEmptyRowsInDateHistogram: true, ...getPercentageModeConfig(vis.params) }
   );
 
   if (result === null) {
@@ -71,8 +75,6 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
 
   const layerId = uuid();
   const indexPatternId = dataView.id!;
-
-  const { getConfiguration } = await import('./configurations');
 
   return {
     type: 'lnsMetric',

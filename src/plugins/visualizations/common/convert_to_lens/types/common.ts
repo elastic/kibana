@@ -45,3 +45,12 @@ export interface NumberValueFormat {
     suffix?: string;
   };
 }
+
+export interface MinMax {
+  min: number;
+  max: number;
+}
+
+export type PercentageModeConfig =
+  | ({ isPercentageColumn: true } & MinMax)
+  | { isPercentageColumn: boolean };
