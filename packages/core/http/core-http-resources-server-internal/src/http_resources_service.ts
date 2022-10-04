@@ -23,21 +23,29 @@ import type {
   InternalRenderingServiceSetup,
 } from '@kbn/core-rendering-server-internal';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import {
-  InternalHttpResourcesSetup,
+import type {
   HttpResources,
   HttpResourcesResponseOptions,
   HttpResourcesRenderOptions,
   HttpResourcesRequestHandler,
   HttpResourcesServiceToolkit,
-} from './types';
+} from '@kbn/core-http-resources-server';
+
+import type { InternalHttpResourcesSetup } from './types';
+
 import { getApmConfig } from './get_apm_config';
 
+/**
+ * @internal
+ */
 export interface PrebootDeps {
   http: InternalHttpServicePreboot;
   rendering: InternalRenderingServicePreboot;
 }
 
+/**
+ * @internal
+ */
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
   rendering: InternalRenderingServiceSetup;
