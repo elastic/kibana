@@ -25,5 +25,8 @@ export const getGuidePanelStepStyles = (euiTheme: EuiThemeComputed, stepStatus: 
   stepTitle: css`
     font-weight: ${euiTheme.font.weight.semiBold};
     color: ${stepStatus === 'inactive' ? euiTheme.colors.subduedText : euiTheme.colors.text};
+    .euiAccordion-isOpen & {
+      color: ${euiTheme.colors.title};
+    }
   `,
 });
