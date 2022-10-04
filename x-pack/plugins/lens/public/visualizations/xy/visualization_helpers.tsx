@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
-import { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
+import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
 import {
   State,
