@@ -6,7 +6,9 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { TourWrapper } from '../../../common/components/guided_onboarding/tour_wrapper';
+import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { TimelineId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -40,28 +42,42 @@ export const RenderCellValue: React.FC<
   setCellProps,
   timelineId,
   truncate,
-}) => (
-  <DefaultCellRenderer
-    browserFields={browserFields}
-    columnId={columnId}
-    data={data}
-    ecsData={ecsData}
-    eventId={eventId}
-    globalFilters={globalFilters}
-    header={header}
-    isDetails={isDetails}
-    isDraggable={isDraggable}
-    isExpandable={isExpandable}
-    isExpanded={isExpanded}
-    linkValues={linkValues}
-    rowIndex={rowIndex}
-    colIndex={colIndex}
-    rowRenderers={rowRenderers}
-    setCellProps={setCellProps}
-    timelineId={timelineId}
-    truncate={truncate}
-  />
-);
+}) => {
+  const Wrapper = useMemo(
+    () =>
+      columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
+      timelineId === TimelineId.detectionsPage &&
+      rowIndex === 0
+        ? TourWrapper
+        : React.Fragment,
+    [columnId, rowIndex, timelineId]
+  );
+
+  return (
+    <Wrapper>
+      <DefaultCellRenderer
+        browserFields={browserFields}
+        columnId={columnId}
+        data={data}
+        ecsData={ecsData}
+        eventId={eventId}
+        globalFilters={globalFilters}
+        header={header}
+        isDetails={isDetails}
+        isDraggable={isDraggable}
+        isExpandable={isExpandable}
+        isExpanded={isExpanded}
+        linkValues={linkValues}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
+        rowRenderers={rowRenderers}
+        setCellProps={setCellProps}
+        timelineId={timelineId}
+        truncate={truncate}
+      />
+    </Wrapper>
+  );
+};
 
 export const useRenderCellValue = ({
   setFlyoutAlert,
