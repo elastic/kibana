@@ -22,7 +22,11 @@ import {
   EuiBadge,
   EuiIcon,
   EuiTitle,
+  EuiPopoverFooter,
+  EuiButtonGroup,
+  useEuiBackgroundColor,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { optionsListReducers } from '../options_list_reducers';
@@ -33,6 +37,17 @@ export interface OptionsListPopoverProps {
   width: number;
   updateSearchString: (newSearchString: string) => void;
 }
+
+const aggregationToggleButtons = [
+  {
+    id: 'optionsList__includeResults',
+    label: 'Include',
+  },
+  {
+    id: 'optionsList__excludeResults',
+    label: 'Exclude',
+  },
+];
 
 export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
@@ -65,6 +80,11 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   );
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [aggregationSelected, setAggregationSelected] = useState('optionsList__includeResults');
+
+  const onChangeAggregation = (optionId: string) => {
+    setAggregationSelected(optionId);
+  };
 
   return (
     <>
@@ -106,21 +126,6 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
                     </EuiBadge>
                   </EuiToolTip>
                 )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                >
-                  <EuiButtonIcon
-                    size="s"
-                    color="danger"
-                    iconType="eraser"
-                    data-test-subj="optionsList-control-clear-all-selections"
-                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                    onClick={() => dispatch(clearSelections({}))}
-                  />
-                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
@@ -248,6 +253,44 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
           </>
         )}
       </div>
+      <EuiPopoverFooter
+        paddingSize="s"
+        css={css`
+          background-color: ${useEuiBackgroundColor('subdued')};
+        `}
+      >
+        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              name="coarsness"
+              legend="This is a basic group"
+              options={aggregationToggleButtons}
+              idSelected={aggregationSelected}
+              onChange={(id) => onChangeAggregation(id)}
+              buttonSize="compressed"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                >
+                  <EuiButtonIcon
+                    size="s"
+                    color="danger"
+                    iconType="eraser"
+                    data-test-subj="optionsList-control-clear-all-selections"
+                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                    onClick={() => dispatch(clearSelections({}))}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
     </>
   );
 };
