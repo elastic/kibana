@@ -97,6 +97,8 @@ export const mockState: SyntheticsAppState = {
     loaded: false,
     loading: false,
     flyoutConfig: null,
+    status: null,
+    statusError: null,
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),

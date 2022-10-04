@@ -12,6 +12,7 @@ import { MonitorOverviewPageState } from '../overview';
 import { quietFetchOverviewAction } from '../overview/actions';
 import { selectOverviewState } from '../overview/selectors';
 import { fetchEffectFactory } from '../utils/fetch_effect';
+import { serializeHttpFetchError } from '../utils/http_error';
 import {
   clearMonitorUpsertStatus,
   fetchMonitorListAction,
@@ -56,10 +57,7 @@ export function* upsertMonitorEffect() {
           toastLifeTimeMs: action.payload.error.lifetimeMs,
         });
         yield put(
-          fetchUpsertFailureAction({
-            id: action.payload.id,
-            error: error.message,
-          })
+          fetchUpsertFailureAction({ id: action.payload.id, error: serializeHttpFetchError(error) })
         );
       } finally {
         if (action.payload.shouldQuietFetchAfterSuccess !== false) {

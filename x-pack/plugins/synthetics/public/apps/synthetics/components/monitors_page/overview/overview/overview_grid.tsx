@@ -7,7 +7,13 @@
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiFlexGrid, EuiSpacer, EuiTablePagination } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiTablePagination,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import {
   quietFetchOverviewAction,
   selectOverviewState,
@@ -17,6 +23,7 @@ import {
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
+import { OverviewStatus } from './overview_status';
 
 export const OverviewGrid = () => {
   const {
@@ -49,6 +56,12 @@ export const OverviewGrid = () => {
 
   return loaded ? (
     <>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <OverviewStatus />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
       <OverviewPaginationInfo page={page} />
       <EuiSpacer />
       <EuiFlexGrid columns={4}>
