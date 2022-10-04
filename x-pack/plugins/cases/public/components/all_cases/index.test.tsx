@@ -44,7 +44,8 @@ const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
-describe('AllCases', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/139676
+describe.skip('AllCases', () => {
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
