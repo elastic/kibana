@@ -33,8 +33,7 @@ export function getReferencesFilter({
         must_not: [
           {
             bool: {
-              should: references.map(getNestedTermClauseForReference),
-              minimum_should_match: references.length,
+              must: references.map(getNestedTermClauseForReference),
             },
           },
         ],
