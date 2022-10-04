@@ -24,26 +24,22 @@ interface Options {
 type Response = Record<string, { success?: boolean; error?: Error }>;
 const toastLifeTimeMs = 600000;
 
-export const installRiskScore = async ({
+export const installRiskScore = ({
   errorMessage,
   http,
   notifications,
   options,
-  renderDashboardLink,
   renderDocLink,
   signal,
-  theme,
 }: {
   errorMessage?: string;
   http: HttpSetup;
   notifications?: NotificationsStart;
   options: Options;
-  renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
   renderDocLink?: (message: string) => React.ReactNode;
   signal?: AbortSignal;
-  theme?: ThemeServiceStart;
 }) => {
-return http
+  return http
     .post<Response[]>(INTERNAL_RISK_SCORE_URL, {
       body: JSON.stringify(options),
       signal,
@@ -89,6 +85,4 @@ return http
         toastLifeTimeMs,
       });
     });
-
-  return response;
 };

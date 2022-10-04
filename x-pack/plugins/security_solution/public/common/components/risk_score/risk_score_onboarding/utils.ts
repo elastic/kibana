@@ -56,7 +56,6 @@ const installHostRiskScoreModule = async ({
 }: InstallRiskyScoreModule) => {
   await installRiskScore({
     http,
-    theme,
     renderDocLink,
     notifications,
     options: {
@@ -106,7 +105,6 @@ const installUserRiskScoreModule = async ({
 }: InstallRiskyScoreModule) => {
   await installRiskScore({
     http,
-    theme,
     renderDocLink,
     notifications,
     options: {
