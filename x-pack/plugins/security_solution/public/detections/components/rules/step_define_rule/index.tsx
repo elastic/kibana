@@ -131,6 +131,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const [dataViewTitle, setDataViewTitle] = useState<string>();
 
+  //  console.log('StepDefineRuleComponent', JSON.stringify(initialState, null, 2));
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
