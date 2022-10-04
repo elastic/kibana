@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { createReducer } from '@reduxjs/toolkit';
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
 import {
   getMonitorRecentPingsAction,
   setMonitorDetailsLocationAction,
@@ -46,7 +47,7 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       state.loading = false;
     })
     .addCase(getMonitorRecentPingsAction.fail, (state, action) => {
-      state.error = action.payload;
+      state.error = serializeHttpFetchError(action.payload as IHttpFetchError<ResponseErrorBody>);
       state.loading = false;
     })
 
@@ -58,7 +59,7 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       state.syntheticsMonitorLoading = false;
     })
     .addCase(getMonitorAction.fail, (state, action) => {
-      state.error = action.payload;
+      state.error = serializeHttpFetchError(action.payload as IHttpFetchError<ResponseErrorBody>);
       state.syntheticsMonitorLoading = false;
     });
 });
