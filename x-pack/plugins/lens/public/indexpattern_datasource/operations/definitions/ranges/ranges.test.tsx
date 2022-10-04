@@ -797,8 +797,8 @@ describe('ranges', () => {
         // This series of act closures are made to make it work properly the update flush
         act(() => {
           instance
-            .find('[data-test-subj="lns-customBucketContainer-remove"]')
-            .last()
+            .find('[data-test-subj="lns-customBucketContainer-remove-1"]')
+            .at(0)
             .simulate('click');
         });
 
@@ -922,7 +922,7 @@ describe('ranges', () => {
         const updateLayerSpy = jest.fn();
         // now set a format on the range operation
         (layer.columns.col1 as RangeIndexPatternColumn).params.format = {
-          id: 'custom',
+          id: 'bytes',
           params: { decimals: 3 },
         };
 
@@ -942,7 +942,7 @@ describe('ranges', () => {
         });
 
         expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({
-          id: 'custom',
+          id: 'bytes',
           params: { decimals: 3 },
         });
       });

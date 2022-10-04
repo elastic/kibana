@@ -30,25 +30,29 @@ import { login, visit } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Enrichment', () => {
+describe('Enrichment', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risky_hosts');
-    esArchiverLoad('risky_users');
+    esArchiverLoad('risk_users');
     login();
   });
 
   after(() => {
-    esArchiverUnload('risky_hosts');
-    esArchiverUnload('risky_users');
-    esArchiverUnload('risky_hosts_updated');
+    esArchiverUnload('risk_users');
   });
+
   describe('Custom query rule', () => {
     beforeEach(() => {
+      esArchiverLoad('risk_hosts');
       deleteAlertsAndRules();
       createCustomRuleEnabled(getNewRule(), 'rule1');
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+    });
+
+    afterEach(() => {
+      esArchiverUnload('risk_hosts');
+      esArchiverUnload('risk_hosts_updated');
     });
 
     it('Should has enrichment fields', function () {
@@ -69,8 +73,8 @@ describe.skip('Enrichment', () => {
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification').should('not.exist');
 
       closeAlertFlyout();
-      esArchiverUnload('risky_hosts');
-      esArchiverLoad('risky_hosts_updated');
+      esArchiverUnload('risk_hosts');
+      esArchiverLoad('risk_hosts_updated');
       expandFirstAlert();
       cy.get(ENRICHED_DATA_ROW).contains('Critical');
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification');

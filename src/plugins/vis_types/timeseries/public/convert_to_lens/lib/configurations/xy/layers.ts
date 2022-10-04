@@ -7,13 +7,24 @@
  */
 
 import {
+  EventAnnotationConfig,
   FillTypes,
+  XYAnnotationsLayerConfig,
   XYLayerConfig,
   YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PaletteOutput } from '@kbn/coloring';
+import { v4 } from 'uuid';
+import { transparentize } from '@elastic/eui';
+import Color from 'color';
+import { euiLightVars } from '@kbn/ui-theme';
+import { groupBy } from 'lodash';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
+import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
+import { fetchIndexPattern } from '../../../../../common/index_patterns_utils';
+import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';
-import type { Metric, Panel } from '../../../../../common/types';
+import type { Annotation, Metric, Panel, Series } from '../../../../../common/types';
 import { getSeriesAgg } from '../../series';
 import {
   isPercentileRanksColumnWithMeta,
@@ -31,6 +42,10 @@ function getPalette(palette: PaletteOutput): PaletteOutput {
   return !palette || palette.name === 'gradient' || palette.name === 'rainbow'
     ? { name: 'default', type: 'palette' }
     : palette;
+}
+
+function getAxisMode(series: Series, model: Panel): YAxisMode {
+  return (series.separate_axis ? series.axis_position : model.axis_position) as YAxisMode;
 }
 
 function getColor(
@@ -51,11 +66,17 @@ function getColor(
   return seriesColor;
 }
 
-export const getLayers = (
+function nonNullable<T>(value: T): value is NonNullable<T> {
+  return value != null;
+}
+
+export const getLayers = async (
   dataSourceLayers: Record<number, Layer>,
-  model: Panel
-): XYLayerConfig[] => {
-  return Object.keys(dataSourceLayers).map((key) => {
+  model: Panel,
+  dataViews: DataViewsPublicPluginStart,
+  isSingleAxis: boolean = false
+): Promise<XYLayerConfig[] | null> => {
+  const nonAnnotationsLayers: XYLayerConfig[] = Object.keys(dataSourceLayers).map((key) => {
     const series = model.series[parseInt(key, 10)];
     const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
     const dataSourceLayer = dataSourceLayers[parseInt(key, 10)];
@@ -68,13 +89,13 @@ export const getLayers = (
     const metricColumns = dataSourceLayer.columns.filter(
       (l) => !l.isBucketed && l.columnId !== referenceColumnId
     );
-    const isReferenceLine = metrics.length === 1 && metrics[0].type === 'static';
+    const isReferenceLine =
+      metricColumns.length === 1 && metricColumns[0].operationType === 'static_value';
     const splitAccessor = dataSourceLayer.columns.find(
       (column) => column.isBucketed && column.isSplit
     )?.columnId;
     const chartType = getChartType(series, model.type);
     const commonProps = {
-      seriesType: chartType,
       layerId: dataSourceLayer.layerId,
       accessors: metricColumns.map((metricColumn) => {
         return metricColumn.columnId;
@@ -86,19 +107,19 @@ export const getLayers = (
         return {
           forAccessor: metricColumn.columnId,
           color: getColor(metricColumn, metric!, series.color, splitAccessor),
-          axisMode: (series.separate_axis
-            ? series.axis_position
-            : model.axis_position) as YAxisMode,
+          axisMode: isReferenceLine // reference line should be assigned to axis with real data
+            ? model.series.some((s) => s.id !== series.id && getAxisMode(s, model) === 'right')
+              ? 'right'
+              : 'left'
+            : isSingleAxis
+            ? 'left'
+            : getAxisMode(series, model),
           ...(isReferenceLine && {
-            fill: chartType === 'area' ? FillTypes.BELOW : FillTypes.NONE,
+            fill: chartType.includes('area') ? FillTypes.BELOW : FillTypes.NONE,
+            lineWidth: series.line_width,
           }),
         };
       }),
-      xAccessor: dataSourceLayer.columns.find((column) => column.isBucketed && !column.isSplit)
-        ?.columnId,
-      splitAccessor,
-      collapseFn: seriesAgg,
-      palette: getPalette(series.palette as PaletteOutput),
     };
     if (isReferenceLine) {
       return {
@@ -107,9 +128,96 @@ export const getLayers = (
       };
     } else {
       return {
+        seriesType: chartType,
         layerType: 'data',
         ...commonProps,
+        xAccessor: dataSourceLayer.columns.find((column) => column.isBucketed && !column.isSplit)
+          ?.columnId,
+        splitAccessor,
+        collapseFn: seriesAgg,
+        palette: getPalette(series.palette as PaletteOutput),
       };
     }
   });
+  if (!model.annotations || !model.annotations.length) {
+    return nonAnnotationsLayers;
+  }
+
+  const annotationsByIndexPatternAndIgnoreFlag = groupBy(model.annotations, (a) => {
+    const id = typeof a.index_pattern === 'object' && 'id' in a.index_pattern && a.index_pattern.id;
+    return `${id}-${Boolean(a.ignore_global_filters)}`;
+  });
+
+  try {
+    const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
+      Object.values(annotationsByIndexPatternAndIgnoreFlag).map(async (annotations) => {
+        const [firstAnnotation] = annotations;
+        const indexPatternId =
+          typeof firstAnnotation.index_pattern === 'string'
+            ? firstAnnotation.index_pattern
+            : firstAnnotation.index_pattern?.id;
+        const convertedAnnotations: EventAnnotationConfig[] = [];
+        const { indexPattern } =
+          (await fetchIndexPattern(indexPatternId && { id: indexPatternId }, dataViews)) || {};
+
+        if (indexPattern) {
+          annotations.forEach((a: Annotation) => {
+            const lensAnnotation = convertAnnotation(a, indexPattern);
+            if (lensAnnotation) {
+              convertedAnnotations.push(lensAnnotation);
+            }
+          });
+          return {
+            layerId: v4(),
+            layerType: 'annotations',
+            ignoreGlobalFilters: Boolean(firstAnnotation.ignore_global_filters),
+            annotations: convertedAnnotations,
+            indexPatternId: indexPattern.id!,
+          };
+        }
+      })
+    );
+
+    return nonAnnotationsLayers.concat(...annotationsLayers.filter(nonNullable));
+  } catch (e) {
+    return null;
+  }
+};
+
+const convertAnnotation = (
+  annotation: Annotation,
+  dataView: DataView
+): EventAnnotationConfig | undefined => {
+  const extraFields = annotation.fields
+    ?.replace(/\s/g, '')
+    .split(',')
+    .map((field) => {
+      const dataViewField = dataView.getFieldByName(field);
+      return dataViewField && dataViewField.aggregatable ? field : undefined;
+    })
+    .filter(nonNullable);
+
+  return {
+    type: 'query',
+    id: annotation.id,
+    label: 'Event',
+    key: {
+      type: 'point_in_time',
+    },
+    color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
+    timeField: annotation.time_field || dataView.timeFieldName,
+    icon:
+      annotation.icon &&
+      ICON_TYPES_MAP[annotation.icon] &&
+      typeof ICON_TYPES_MAP[annotation.icon] === 'string'
+        ? ICON_TYPES_MAP[annotation.icon]
+        : 'triangle',
+    filter: {
+      type: 'kibana_query',
+      query: annotation.query_string?.query || '*',
+      language: annotation.query_string?.language || getDefaultQueryLanguage(),
+    },
+    extraFields,
+    isHidden: annotation.hidden,
+  };
 };

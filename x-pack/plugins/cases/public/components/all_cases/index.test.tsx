@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { AllCases } from '.';
@@ -14,11 +13,9 @@ import {
   AppMockRenderer,
   createAppMockRenderer,
   noCreateCasesPermissions,
-  TestProviders,
 } from '../../common/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
-import { useGetCasesStatus } from '../../containers/use_get_cases_status';
+import { connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -35,24 +32,21 @@ jest.mock('../../containers/use_get_action_license', () => {
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_cases');
-jest.mock('../../containers/use_get_cases_status');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../api');
 
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
-const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
-// FLAKY: https://github.com/elastic/kibana/issues/139677
-describe.skip('AllCases', () => {
+describe('AllCases', () => {
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
   const setSelectedCases = jest.fn();
-  const fetchCasesStatus = jest.fn();
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -60,13 +54,6 @@ describe.skip('AllCases', () => {
     setFilters,
     setQueryParams,
     setSelectedCases,
-  };
-
-  const defaultCasesStatus = {
-    ...casesStatus,
-    fetchCasesStatus,
-    isError: false,
-    isLoading: false,
   };
 
   const defaultActionLicense = {
@@ -78,7 +65,6 @@ describe.skip('AllCases', () => {
   beforeAll(() => {
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
-    useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);
 
@@ -126,58 +112,31 @@ describe.skip('AllCases', () => {
       ...defaultGetCases,
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="openStatsHeader"]').exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="openStatsHeader"] .euiDescriptionList__description')
-          .first()
-          .text()
-      ).toBe('20');
+      expect(result.getByTestId('openStatsHeader')).toBeInTheDocument();
+      expect(result.getByText('20')).toBeInTheDocument();
+    });
 
-      expect(wrapper.find('[data-test-subj="inProgressStatsHeader"]').exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="inProgressStatsHeader"] .euiDescriptionList__description')
-          .first()
-          .text()
-      ).toBe('40');
+    await waitFor(() => {
+      expect(result.getByTestId('inProgressStatsHeader')).toBeInTheDocument();
+      expect(result.getByText('40')).toBeInTheDocument();
+    });
 
-      expect(wrapper.find('[data-test-subj="closedStatsHeader"]').exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="closedStatsHeader"] .euiDescriptionList__description')
-          .first()
-          .text()
-      ).toBe('130');
+    await waitFor(() => {
+      expect(result.getByTestId('closedStatsHeader')).toBeInTheDocument();
+      expect(result.getByText('130')).toBeInTheDocument();
     });
   });
 
   it('should render the loading spinner when loading stats', async () => {
-    useGetCasesStatusMock.mockReturnValue({ ...defaultCasesStatus, isLoading: true });
-
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="openStatsHeader-loading-spinner"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper.find('[data-test-subj="inProgressStatsHeader-loading-spinner"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper.find('[data-test-subj="closedStatsHeader-loading-spinner"]').exists()
-      ).toBeTruthy();
+      expect(result.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
+      expect(result.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
+      expect(result.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
     });
   });
 
@@ -194,16 +153,10 @@ describe.skip('AllCases', () => {
       },
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
-      ).toBeTruthy();
+      expect(result.getByTestId('configure-case-button')).toBeDisabled();
     });
   });
 
@@ -220,16 +173,10 @@ describe.skip('AllCases', () => {
       },
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
-      ).toBeFalsy();
+      expect(result.getByTestId('configure-case-button')).not.toBeDisabled();
     });
   });
 

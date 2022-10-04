@@ -5,7 +5,15 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButton } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButton,
+  EuiBetaBadge,
+} from '@elastic/eui';
+import useResizeObserver from 'use-resize-observer';
 import { throttle } from 'lodash';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYSearchBar } from '../tty_search_bar';
@@ -18,7 +26,7 @@ import {
 } from '../../../common/constants';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
-import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
+import { BETA, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
   show: boolean;
@@ -38,9 +46,10 @@ export const TTYPlayer = ({
   autoSeekToEntityId,
 }: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});
 
-  const { data, fetchNextPage, hasNextPage, isFetching } = useFetchIOEvents(sessionEntityId);
+  const { data, fetchNextPage, hasNextPage, isFetching, refetch } =
+    useFetchIOEvents(sessionEntityId);
   const { lines, processStartMarkers } = useIOLines(data?.pages);
   const [fontSize, setFontSize] = useState(DEFAULT_TTY_FONT_SIZE);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -59,6 +68,13 @@ export const TTYPlayer = ({
 
   const currentProcessEvent = lines[Math.min(lines.length - 1, currentLine)]?.event;
   const tty = currentProcessEvent?.process?.tty;
+
+  useEffect(() => {
+    if (show) {
+      // refetch the most recent page when tty player is loaded
+      refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+    }
+  }, [refetch, show]);
 
   useEffect(() => {
     if (
@@ -115,8 +131,16 @@ export const TTYPlayer = ({
     <div css={styles.container}>
       <EuiPanel hasShadow={false} borderRadius="none" hasBorder={false} css={styles.header}>
         <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
+          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
-            <TTYSearchBar lines={lines} seekToLine={seekToLine} xTermSearchFn={search} />
+            <TTYSearchBar
+              lines={lines}
+              seekToLine={seekToLine}
+              xTermSearchFn={search}
+              setIsPlaying={setIsPlaying}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -165,7 +189,7 @@ export const TTYPlayer = ({
         textSizer={
           <TTYTextSizer
             tty={tty}
-            containerHeight={scrollRef?.current?.offsetHeight || 0}
+            containerHeight={containerHeight}
             fontSize={fontSize}
             onFontSizeChanged={setFontSize}
             isFullscreen={isFullscreen}

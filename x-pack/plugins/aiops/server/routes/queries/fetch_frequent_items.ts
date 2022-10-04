@@ -10,7 +10,8 @@ import { uniq, uniqWith, pick, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { Logger } from '@kbn/logging';
+import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
 
 interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
@@ -18,8 +19,32 @@ interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregatio
   };
 }
 
-function dropDuplicates(cp: ChangePoint[], uniqueFields: string[]) {
-  return uniqWith(cp, (a, b) => isEqual(pick(a, uniqueFields), pick(b, uniqueFields)));
+export function dropDuplicates(cps: ChangePoint[], uniqueFields: Array<keyof ChangePoint>) {
+  return uniqWith(cps, (a, b) => isEqual(pick(a, uniqueFields), pick(b, uniqueFields)));
+}
+
+interface ChangePointDuplicateGroup {
+  keys: Pick<ChangePoint, keyof ChangePoint>;
+  group: ChangePoint[];
+}
+export function groupDuplicates(cps: ChangePoint[], uniqueFields: Array<keyof ChangePoint>) {
+  const groups: ChangePointDuplicateGroup[] = [];
+
+  for (const cp of cps) {
+    const compareAttributes = pick(cp, uniqueFields);
+
+    const groupIndex = groups.findIndex((g) => isEqual(g.keys, compareAttributes));
+    if (groupIndex === -1) {
+      groups.push({
+        keys: compareAttributes,
+        group: [cp],
+      });
+    } else {
+      groups[groupIndex].group.push(cp);
+    }
+  }
+
+  return groups;
 }
 
 export async function fetchFrequentItems(
@@ -29,19 +54,12 @@ export async function fetchFrequentItems(
   changePoints: ChangePoint[],
   timeFieldName: string,
   deviationMin: number,
-  deviationMax: number
+  deviationMax: number,
+  logger: Logger,
+  emitError: (m: string) => void
 ) {
-  // first remove duplicates in sig terms - note this is not strictly perfect as there could
-  // be conincidentally equal counts, but in general is ok...
-  const terms = dropDuplicates(changePoints, [
-    'doc_count',
-    'bg_count',
-    'total_doc_count',
-    'total_bg_count',
-  ]);
-
-  // get unique fields that are left
-  const fields = [...new Set(terms.map((t) => t.fieldName))];
+  // get unique fields from change points
+  const fields = [...new Set(changePoints.map((t) => t.fieldName))];
 
   // TODO add query params
   const query = {
@@ -58,7 +76,7 @@ export async function fetchFrequentItems(
           },
         },
       ],
-      should: terms.map((t) => {
+      should: changePoints.map((t) => {
         return { term: { [t.fieldName]: t.fieldValue } };
       }),
     },
@@ -68,13 +86,15 @@ export async function fetchFrequentItems(
     field,
   }));
 
-  const totalDocCount = terms[0].total_doc_count;
+  const totalDocCount = changePoints[0].total_doc_count;
   const minDocCount = 50000;
   let sampleProbability = 1;
 
   if (totalDocCount > minDocCount) {
     sampleProbability = Math.min(0.5, minDocCount / totalDocCount);
   }
+
+  logger.debug(`frequent_items sample probability: ${sampleProbability}`);
 
   // frequent items can be slow, so sample and use 10% min_support
   const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
@@ -110,11 +130,17 @@ export async function fetchFrequentItems(
     { maxRetries: 0 }
   );
 
-  const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
-
   if (body.aggregations === undefined) {
-    throw new Error('fetchFrequentItems failed, did not return aggregations.');
+    logger.error(`Failed to fetch frequent_items, got: \n${JSON.stringify(body, null, 2)}`);
+    emitError(`Failed to fetch frequent_items.`);
+    return {
+      fields: [],
+      df: [],
+      totalDocCount: 0,
+    };
   }
+
+  const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
 
   const shape = body.aggregations.sample.fi.buckets.length;
   let maximum = shape;
@@ -153,7 +179,7 @@ export async function fetchFrequentItems(
       return;
     }
 
-    result.size = Object.keys(result).length;
+    result.size = Object.keys(result.set).length;
     result.maxPValue = maxPValue;
     result.doc_count = fis.doc_count;
     result.support = fis.support;
@@ -162,15 +188,21 @@ export async function fetchFrequentItems(
     results.push(result);
   });
 
+  results.sort((a, b) => {
+    return b.doc_count - a.doc_count;
+  });
+
+  const uniqueFields = uniq(results.flatMap((r) => Object.keys(r.set)));
+
   return {
-    fields: uniq(results.flatMap((r) => Object.keys(r.set))),
+    fields: uniqueFields,
     df: results,
     totalDocCount: totalDocCountFi,
   };
 }
 
 export interface ItemsetResult {
-  set: Record<string, string>;
+  set: Record<FieldValuePair['fieldName'], FieldValuePair['fieldValue']>;
   size: number;
   maxPValue: number;
   doc_count: number;

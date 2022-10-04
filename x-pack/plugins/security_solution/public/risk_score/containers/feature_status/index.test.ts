@@ -8,10 +8,10 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
 
 import { useRiskScoreFeatureStatus } from '.';
-import { RiskQueries } from '../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useFetch } from '../../../common/hooks/use_fetch';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-import { RiskEntity } from './api';
+
 jest.mock('../../../common/hooks/use_fetch');
 jest.mock('../../../common/components/ml/hooks/use_ml_capabilities');
 
@@ -38,13 +38,13 @@ describe(`risk score feature status`, () => {
     isDeprecated: true,
     isLicenseValid: true,
     isEnabled: true,
-    isLoading: false,
+    isLoading: true,
   };
 
   test('does not search if license is not valid, and initial isDeprecated state is false', () => {
     mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
     const { result } = renderHook(
-      () => useRiskScoreFeatureStatus(RiskQueries.hostsRiskScore, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(RiskScoreEntity.host, 'the_right_one'),
       {
         wrapper: TestProviders,
       }
@@ -61,13 +61,13 @@ describe(`risk score feature status`, () => {
 
   test('runs search if feature is enabled, and initial isDeprecated state is true', () => {
     const { result } = renderHook(
-      () => useRiskScoreFeatureStatus(RiskQueries.hostsRiskScore, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(RiskScoreEntity.host, 'the_right_one'),
       {
         wrapper: TestProviders,
       }
     );
     expect(mockFetch).toHaveBeenCalledWith({
-      query: { entity: RiskEntity.host, indexName: 'the_right_one' },
+      query: { entity: RiskScoreEntity.host, indexName: 'the_right_one' },
     });
     expect(result.current).toEqual({
       ...defaultResult,
@@ -77,7 +77,7 @@ describe(`risk score feature status`, () => {
 
   test('updates state after search returns isDeprecated = false', () => {
     const { result, rerender } = renderHook(
-      () => useRiskScoreFeatureStatus(RiskQueries.hostsRiskScore, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(RiskScoreEntity.host, 'the_right_one'),
       {
         wrapper: TestProviders,
       }

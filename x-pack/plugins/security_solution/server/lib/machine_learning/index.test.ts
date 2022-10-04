@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import type { AnomaliesSearchParams } from '.';
 import { getAnomalies } from '.';
 

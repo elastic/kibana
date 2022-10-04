@@ -49,8 +49,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       expect(durationColumnExists).to.be(false);
     });
 
-    // TODO Enable this test after fixing: https://github.com/elastic/kibana/issues/137988
-    it.skip('remembers sorting changes', async () => {
+    it('remembers sorting changes', async () => {
       const timestampColumnButton = await testSubjects.find(
         'dataGridHeaderCellActionButton-@timestamp'
       );

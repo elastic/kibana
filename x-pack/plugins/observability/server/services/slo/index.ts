@@ -7,5 +7,7 @@
 
 export * from './resource_installer';
 export * from './slo_repository';
-export * from './transform_installer';
+export * from './transform_manager';
 export * from './create_slo';
+export * from './delete_slo';
+export * from './get_slo';

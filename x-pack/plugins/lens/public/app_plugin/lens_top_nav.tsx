@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
@@ -15,6 +16,8 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { ENABLE_SQL } from '../../common';
 import {
   LensAppServices,
   LensTopNavActions,
@@ -28,6 +31,7 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  switchAndCleanDatasource,
 } from '../state_management';
 import {
   getIndexPatternsObjects,
@@ -220,6 +224,7 @@ export const LensTopNavMenu = ({
   theme$,
   indexPatternService,
   currentDoc,
+  onTextBasedSavedAndExit,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -254,7 +259,9 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
+  const [dataViewsList, setDataViewsList] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
+  const [isOnTextBasedMode, setIsOnTextBasedMode] = useState(false);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const dispatchChangeIndexPattern = React.useCallback(
@@ -350,10 +357,33 @@ export const LensTopNavMenu = ({
   ]);
 
   useEffect(() => {
-    if (indexPatterns.length > 0) {
-      setCurrentIndexPattern(indexPatterns[0]);
+    if (activeDatasourceId && datasourceStates[activeDatasourceId].state) {
+      const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
+        datasourceStates[activeDatasourceId].state
+      );
+      const dataView = dataViewsList.find((pattern) => pattern.id === dataViewId);
+      setCurrentIndexPattern(dataView ?? indexPatterns[0]);
     }
-  }, [indexPatterns]);
+  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns, dataViewsList]);
+
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const totalDataViewsList = [];
+      const dataViewsIds = await data.dataViews.getIds();
+      for (let i = 0; i < dataViewsIds.length; i++) {
+        const d = await data.dataViews.get(dataViewsIds[i]);
+        totalDataViewsList.push(d);
+      }
+      setDataViewsList(totalDataViewsList);
+    };
+    fetchDataViews();
+  }, [data]);
+
+  useEffect(() => {
+    if (typeof query === 'object' && query !== null && isOfAggregateQueryType(query)) {
+      setIsOnTextBasedMode(true);
+    }
+  }, [query]);
 
   useEffect(() => {
     return () => {
@@ -363,7 +393,7 @@ export const LensTopNavMenu = ({
     };
   }, []);
 
-  const { TopNavMenu } = navigation.ui;
+  const { AggregateQueryTopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
@@ -550,7 +580,7 @@ export const LensTopNavMenu = ({
           );
 
           return discover.locator!.getRedirectUrl({
-            indexPatternId: meta.id,
+            dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
             query: newQuery,
@@ -594,6 +624,7 @@ export const LensTopNavMenu = ({
     query,
     filters,
     indexPatterns,
+    dataViews.indexPatterns,
     data.query.timefilter.timefilter,
     lensStore,
     theme$,
@@ -616,10 +647,30 @@ export const LensTopNavMenu = ({
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
           dispatchSetState({ query: newQuery });
+          // check if query is text-based (sql, essql etc) and switchAndCleanDatasource
+          if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
+            setIsOnTextBasedMode(true);
+            dispatch(
+              switchAndCleanDatasource({
+                newDatasourceId: 'textBasedLanguages',
+                visualizationId: visualization?.activeId,
+                currentIndexPatternId: currentIndexPattern?.id,
+              })
+            );
+          }
         }
       }
     },
-    [data.query.timefilter.timefilter, data.search.session, dispatchSetState, query]
+    [
+      currentIndexPattern?.id,
+      data.query.timefilter.timefilter,
+      data.search.session,
+      dispatch,
+      dispatchSetState,
+      isOnTextBasedMode,
+      query,
+      visualization?.activeId,
+    ]
   );
 
   const onSavedWrapped = useCallback(
@@ -721,6 +772,15 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
+                  if (isOnTextBasedMode) {
+                    dispatch(
+                      switchAndCleanDatasource({
+                        newDatasourceId: 'indexpattern',
+                        visualizationId: visualization?.activeId,
+                        currentIndexPatternId: dataView?.id,
+                      })
+                    );
+                  }
                   dispatchChangeIndexPattern(dataView);
                   setCurrentIndexPattern(dataView);
                 }
@@ -729,10 +789,53 @@ export const LensTopNavMenu = ({
             });
           }
         : undefined,
-    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern]
+    [
+      canEditDataView,
+      dataViewEditor,
+      dispatch,
+      dispatchChangeIndexPattern,
+      isOnTextBasedMode,
+      visualization?.activeId,
+    ]
   );
 
-  const dataViewPickerProps = {
+  const onCreateDefaultAdHocDataView = useCallback(
+    async (pattern: string) => {
+      const dataView = await dataViewsService.create({
+        title: pattern,
+      });
+      if (dataView.fields.getByName('@timestamp')?.type === 'date') {
+        dataView.timeFieldName = '@timestamp';
+      }
+      if (isOnTextBasedMode) {
+        dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'indexpattern',
+            visualizationId: visualization?.activeId,
+            currentIndexPatternId: dataView?.id,
+          })
+        );
+      }
+      dispatchChangeIndexPattern(dataView);
+      setCurrentIndexPattern(dataView);
+    },
+    [
+      dataViewsService,
+      dispatch,
+      dispatchChangeIndexPattern,
+      isOnTextBasedMode,
+      visualization?.activeId,
+    ]
+  );
+
+  // setting that enables/disables SQL
+  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
+  const supportedTextBasedLanguages = [];
+  if (isSQLModeEnabled) {
+    supportedTextBasedLanguages.push('SQL');
+  }
+
+  const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
       label: currentIndexPattern?.getName?.() || '',
       'data-test-subj': 'lns-dataView-switch-link',
@@ -741,18 +844,45 @@ export const LensTopNavMenu = ({
     currentDataViewId: currentIndexPattern?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
+    onCreateDefaultAdHocDataView,
     adHocDataViews: indexPatterns.filter((pattern) => !pattern.isPersisted()),
     onChangeDataView: (newIndexPatternId: string) => {
-      const currentDataView = indexPatterns.find(
+      const currentDataView = dataViewsList.find(
         (indexPattern) => indexPattern.id === newIndexPatternId
       );
       setCurrentIndexPattern(currentDataView);
       dispatchChangeIndexPattern(newIndexPatternId);
+      if (isOnTextBasedMode) {
+        dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'indexpattern',
+            visualizationId: visualization?.activeId,
+            currentIndexPatternId: newIndexPatternId,
+          })
+        );
+        setIsOnTextBasedMode(false);
+      }
     },
+    textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
+  // text based languages errors should also appear to the unified search bar
+  const textBasedLanguageModeErrors: Error[] = [];
+  if (activeDatasourceId && allLoaded) {
+    if (
+      datasourceMap[activeDatasourceId] &&
+      datasourceMap[activeDatasourceId].getUnifiedSearchErrors
+    ) {
+      const errors = datasourceMap[activeDatasourceId].getUnifiedSearchErrors?.(
+        datasourceStates[activeDatasourceId].state
+      );
+      if (errors) {
+        textBasedLanguageModeErrors.push(...errors);
+      }
+    }
+  }
   return (
-    <TopNavMenu
+    <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
       config={topNavConfig}
       showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
@@ -779,6 +909,8 @@ export const LensTopNavMenu = ({
             )
         )
       }
+      textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"

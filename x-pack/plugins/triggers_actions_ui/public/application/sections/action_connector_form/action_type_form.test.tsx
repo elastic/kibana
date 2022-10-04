@@ -11,7 +11,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionConnector, ActionType, RuleAction, GenericValidationResult } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
-import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -43,6 +42,10 @@ describe('action_type_form', () => {
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
@@ -89,6 +92,10 @@ describe('action_type_form', () => {
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
@@ -134,6 +141,10 @@ describe('action_type_form', () => {
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
@@ -188,7 +199,6 @@ function getActionTypeForm(
   defaultActionGroupId?: string,
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>,
   actionTypeIndex?: Record<string, ActionType>,
-  defaultParams?: DefaultActionParams,
   onAddConnector?: () => void,
   onDeleteAction?: () => void,
   onConnectorSelected?: (id: string) => void
@@ -259,10 +269,6 @@ function getActionTypeForm(
     },
   };
 
-  const defaultParamsDefault = {
-    dedupKey: `test`,
-    eventAction: 'resolve',
-  };
   return (
     <ActionTypeForm
       actionConnector={actionConnector ?? actionConnectorDefault}
@@ -275,7 +281,6 @@ function getActionTypeForm(
       setActionParamsProperty={jest.fn()}
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
-      defaultParams={defaultParams ?? defaultParamsDefault}
       actionTypeRegistry={actionTypeRegistry}
     />
   );

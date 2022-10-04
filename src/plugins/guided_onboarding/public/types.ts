@@ -7,6 +7,7 @@
  */
 
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { GuideId, GuideStepIds, StepStatus } from '../common/types';
 import { ApiService } from './services/api';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -20,20 +21,20 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
 
-export type UseCase = 'observability' | 'security' | 'search';
-export type StepStatus = 'incomplete' | 'complete' | 'in_progress';
+export interface ClientConfigType {
+  ui: boolean;
+}
 
 export interface StepConfig {
-  id: string;
+  id: GuideStepIds;
   title: string;
-  description: string;
+  descriptionList: string[];
   location?: {
     appID: string;
     path: string;
   };
   status?: StepStatus;
 }
-
 export interface GuideConfig {
   title: string;
   description: string;
@@ -44,11 +45,6 @@ export interface GuideConfig {
   steps: StepConfig[];
 }
 
-export interface GuidedOnboardingState {
-  activeGuide: UseCase | 'unset';
-  activeStep: string | 'unset';
-}
-
-export interface ClientConfigType {
-  ui: boolean;
-}
+export type GuidesConfig = {
+  [key in GuideId]: GuideConfig;
+};

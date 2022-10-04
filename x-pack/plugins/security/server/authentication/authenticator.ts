@@ -335,11 +335,14 @@ export class Authenticator {
           existingSessionValue,
         });
 
-        return this.handlePreAccessRedirects(
-          request,
-          authenticationResult,
-          sessionUpdateResult,
-          attempt.redirectURL
+        return enrichWithUserProfileId(
+          this.handlePreAccessRedirects(
+            request,
+            authenticationResult,
+            sessionUpdateResult,
+            attempt.redirectURL
+          ),
+          sessionUpdateResult ? sessionUpdateResult.value : null
         );
       }
     }
@@ -351,7 +354,7 @@ export class Authenticator {
    * Performs request authentication using configured chain of authentication providers.
    * @param request Request instance.
    */
-  async authenticate(request: KibanaRequest) {
+  async authenticate(request: KibanaRequest): Promise<AuthenticationResult> {
     assertRequest(request);
 
     const existingSessionValue = await this.getSessionValue(request);
@@ -399,10 +402,12 @@ export class Authenticator {
           authenticationResult,
           existingSessionValue,
         });
-
-        return canRedirectRequest(request)
-          ? this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult)
-          : authenticationResult;
+        return enrichWithUserProfileId(
+          canRedirectRequest(request)
+            ? this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult)
+            : authenticationResult,
+          sessionUpdateResult ? sessionUpdateResult.value : null
+        );
       }
     }
 
@@ -427,11 +432,15 @@ export class Authenticator {
     const provider = this.providers.get(existingSessionValue.provider.name)!;
     const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
     if (!authenticationResult.notHandled()) {
-      await this.updateSessionValue(request, {
+      const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
         authenticationResult,
         existingSessionValue,
       });
+
+      if (sessionUpdateResult) {
+        return enrichWithUserProfileId(authenticationResult, sessionUpdateResult.value);
+      }
     }
 
     return authenticationResult;
@@ -631,6 +640,7 @@ export class Authenticator {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(
         userLoginEvent({
+          userProfileId: existingSessionValue?.userProfileId,
           sessionId: existingSessionValue?.sid,
           authenticationResult,
           authenticationProvider: provider.name,
@@ -737,7 +747,7 @@ export class Authenticator {
       }
     }
 
-    let newSessionValue;
+    let newSessionValue: Readonly<SessionValue> | null;
     if (!existingSessionValue) {
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
@@ -756,6 +766,7 @@ export class Authenticator {
         const auditLogger = this.options.audit.asScoped(request);
         auditLogger.log(
           userLoginEvent({
+            userProfileId, // We must explicitly specify the `userProfileId` here since we just created the session and it can't be inferred from the request context.
             sessionId: newSessionValue?.sid, // We must explicitly specify the `sessionId` here since we just created the session and it can't be inferred from the request context.
             authenticationResult,
             authenticationProvider: provider.name,
@@ -796,12 +807,7 @@ export class Authenticator {
   }: InvalidateSessionValueParams) {
     if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
-      auditLogger.log(
-        userLogoutEvent({
-          username: sessionValue.username,
-          provider: sessionValue.provider,
-        })
-      );
+      auditLogger.log(userLogoutEvent(sessionValue));
     }
 
     await this.session.invalidate(request, { match: 'current' });
@@ -945,4 +951,38 @@ export class Authenticator {
       ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
       : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }
+}
+
+export function enrichWithUserProfileId(
+  authenticationResult: AuthenticationResult,
+  sessionValue: SessionValue | null
+) {
+  if (
+    !authenticationResult.user ||
+    !sessionValue?.userProfileId ||
+    authenticationResult.user.profile_uid === sessionValue.userProfileId
+  ) {
+    return authenticationResult;
+  }
+
+  const enrichedUser: AuthenticatedUser = {
+    ...authenticationResult.user,
+    profile_uid: sessionValue.userProfileId,
+  };
+
+  if (authenticationResult.redirected()) {
+    return AuthenticationResult.redirectTo(authenticationResult.redirectURL!, {
+      user: enrichedUser,
+      userProfileGrant: authenticationResult.userProfileGrant,
+      authResponseHeaders: authenticationResult.authResponseHeaders,
+      state: authenticationResult.state,
+    });
+  }
+
+  return AuthenticationResult.succeeded(enrichedUser, {
+    userProfileGrant: authenticationResult.userProfileGrant,
+    authHeaders: authenticationResult.authHeaders,
+    authResponseHeaders: authenticationResult.authResponseHeaders,
+    state: authenticationResult.state,
+  });
 }

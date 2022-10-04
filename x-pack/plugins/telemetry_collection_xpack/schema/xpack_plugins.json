@@ -265,6 +265,23 @@
               "type": "long"
             }
           }
+        },
+        "count_connector_types_by_action_run_outcome_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "success": {
+                  "type": "long"
+                },
+                "failure": {
+                  "type": "long"
+                },
+                "unknown": {
+                  "type": "long"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -1690,6 +1707,19 @@
                   "type": "long"
                 }
               }
+            }
+          }
+        },
+        "count_rules_by_execution_status_per_day": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "failure": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
             }
           }
         },
@@ -4626,6 +4656,19 @@
                 "daily": {
                   "type": "long"
                 },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "status": {
                   "properties": {
                     "open": {
@@ -4688,6 +4731,19 @@
                 },
                 "daily": {
                   "type": "long"
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -4704,6 +4760,19 @@
                 },
                 "daily": {
                   "type": "long"
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -4720,6 +4789,19 @@
                 },
                 "daily": {
                   "type": "long"
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -4885,6 +4967,91 @@
       "properties": {
         "isCloudEnabled": {
           "type": "boolean"
+        }
+      }
+    },
+    "cloudExperiments": {
+      "properties": {
+        "initialized": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the A/B testing client is correctly initialized (identify has been called)"
+          }
+        },
+        "flags": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Flags received by the client"
+              }
+            }
+          }
+        },
+        "flagNames": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Names of the flags received by the client"
+            }
+          }
+        }
+      }
+    },
+    "cloud_security_posture": {
+      "properties": {
+        "indices": {
+          "properties": {
+            "findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latest_findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "score": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -9862,6 +10029,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -9973,6 +10162,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -10126,6 +10337,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -10237,6 +10470,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -10390,6 +10645,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -10501,6 +10778,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -10680,6 +10979,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -10791,6 +11112,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -10944,6 +11287,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -11055,6 +11420,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -11208,6 +11595,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -11319,6 +11728,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -11498,6 +11929,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -11609,6 +12062,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -11762,6 +12237,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -11873,6 +12370,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -12026,6 +12545,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -12137,6 +12678,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",

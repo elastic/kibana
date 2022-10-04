@@ -22,13 +22,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<{}, { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
@@ -51,13 +45,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<{}, { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
                   {
                     "pluginId": "urlForwarding",
@@ -85,13 +73,7 @@
             "description": [],
             "signature": [
               "({ application, http: { basePath } }: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ") => { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
@@ -114,13 +96,7 @@
                 "label": "{ application, http: { basePath } }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
                 "deprecated": false,

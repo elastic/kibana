@@ -194,11 +194,13 @@ export const getFileHandler: FleetRequestHandler<
 };
 
 export const getInfoHandler: FleetRequestHandler<
-  TypeOf<typeof GetInfoRequestSchema.params>
+  TypeOf<typeof GetInfoRequestSchema.params>,
+  TypeOf<typeof GetInfoRequestSchema.query>
 > = async (context, request, response) => {
   try {
     const savedObjectsClient = (await context.fleet).epm.internalSoClient;
     const { pkgName, pkgVersion } = request.params;
+    const { ignoreUnverified = false } = request.query;
     if (pkgVersion && !semverValid(pkgVersion)) {
       throw new FleetError('Package version is not a valid semver');
     }
@@ -207,6 +209,7 @@ export const getInfoHandler: FleetRequestHandler<
       pkgName,
       pkgVersion: pkgVersion || '',
       skipArchive: true,
+      ignoreUnverified,
     });
     const body: GetInfoResponse = {
       item: res,

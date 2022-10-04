@@ -21,6 +21,10 @@ const getConvertFnByType = (type: PANEL_TYPES) => {
       const { convertToLens } = await import('./top_n');
       return convertToLens;
     },
+    [PANEL_TYPES.METRIC]: async () => {
+      const { convertToLens } = await import('./metric');
+      return convertToLens;
+    },
   };
 
   return convertionFns[type]?.();
@@ -33,7 +37,7 @@ const getConvertFnByType = (type: PANEL_TYPES) => {
  */
 export const convertTSVBtoLensConfiguration = async (model: Panel, timeRange?: TimeRange) => {
   // Disables the option for not supported charts, for the string mode and for series with annotations
-  if (!model.use_kibana_indexes || (model.annotations && model.annotations.length > 0)) {
+  if (!model.use_kibana_indexes) {
     return null;
   }
   // Disables if model is invalid

@@ -24,6 +24,7 @@ import type {
   IRuleDataClient,
   IRuleDataReader,
 } from '@kbn/rule-registry-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import type { Filter } from '@kbn/es-query';
 import type { ConfigType } from '../../../config';
@@ -41,6 +42,7 @@ import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '..
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
+  enrichmentTimes: string[];
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
@@ -125,3 +127,12 @@ export interface CreateRuleOptions {
   eventsTelemetry?: ITelemetryEventsSender | undefined;
   version: string;
 }
+
+export interface CreateQueryRuleAdditionalOptions {
+  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  licensing: LicensingPluginSetup;
+}
+
+export interface CreateQueryRuleOptions
+  extends CreateRuleOptions,
+    CreateQueryRuleAdditionalOptions {}

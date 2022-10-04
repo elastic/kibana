@@ -48,6 +48,11 @@ describe('buildDefaultSettings', () => {
           name: 'field5Wildcard',
           type: 'wildcard',
         },
+        {
+          name: 'field6NotDefault',
+          type: 'keyword',
+          default_field: false,
+        },
       ],
     });
 

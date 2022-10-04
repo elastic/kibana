@@ -20,6 +20,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import type { AlertRawEventData } from './osquery_tab';
+import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
@@ -54,12 +56,15 @@ export type EventViewId =
   | EventsViewType.tableView
   | EventsViewType.jsonView
   | EventsViewType.summaryView
-  | EventsViewType.threatIntelView;
+  | EventsViewType.threatIntelView
+  | EventsViewType.osqueryView;
+
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
+  osqueryView = 'osquery-results-view',
 }
 
 interface Props {
@@ -89,10 +94,12 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
     flex-direction: column;
     overflow: hidden;
     overflow-y: auto;
+
     ::-webkit-scrollbar {
       -webkit-appearance: none;
       width: 7px;
     }
+
     ::-webkit-scrollbar-thumb {
       border-radius: 4px;
       background-color: rgba(0, 0, 0, 0.5);
@@ -109,6 +116,7 @@ const TabContentWrapper = styled.div`
 const RendererContainer = styled.div`
   overflow-x: auto;
   padding-right: ${(props) => props.theme.eui.euiSizeXS};
+
   & .${DETAILS_CLASS_NAME} .euiFlexGroup {
     justify-content: flex-start;
   }
@@ -374,11 +382,15 @@ const EventDetailsComponent: React.FC<Props> = ({
     [rawEventData]
   );
 
+  const osqueryTab = useOsqueryTab({
+    rawEventData: rawEventData as AlertRawEventData,
+  });
+
   const tabs = useMemo(() => {
-    return [summaryTab, threatIntelTab, tableTab, jsonTab].filter(
+    return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
       (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
     );
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab]);
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
@@ -395,7 +407,6 @@ const EventDetailsComponent: React.FC<Props> = ({
     />
   );
 };
-
 EventDetailsComponent.displayName = 'EventDetailsComponent';
 
 export const EventDetails = React.memo(EventDetailsComponent);
