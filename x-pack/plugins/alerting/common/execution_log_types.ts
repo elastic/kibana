@@ -30,6 +30,7 @@ export const EMPTY_EXECUTION_KPI_RESULT = {
   success: 0,
   unknown: 0,
   failure: 0,
+  warning: 0,
   activeAlerts: 0,
   newAlerts: 0,
   recoveredAlerts: 0,

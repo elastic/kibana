@@ -21,7 +21,7 @@ const RULE_NAME_FIELD = 'rule.name';
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
-const OUTCOME_FIELD = 'event.outcome';
+const OUTCOME_FIELD = 'kibana.alerting.outcome';
 const DURATION_FIELD = 'event.duration';
 const MESSAGE_FIELD = 'message';
 const VERSION_FIELD = 'kibana.version';
@@ -167,8 +167,8 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
               aggs: {
                 actionOutcomes: {
                   terms: {
-                    field: 'event.outcome',
-                    size: 2,
+                    field: OUTCOME_FIELD,
+                    size: 3,
                   },
                 },
               },
@@ -213,8 +213,8 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
                 },
                 ruleExecutionOutcomes: {
                   terms: {
-                    field: 'event.outcome',
-                    size: 2,
+                    field: OUTCOME_FIELD,
+                    size: 3,
                   },
                 },
               },
@@ -467,7 +467,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
   const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source;
-  const status = outcomeAndMessage ? outcomeAndMessage?.event?.outcome ?? '' : '';
+  const status = outcomeAndMessage ? outcomeAndMessage?.kibana?.alerting?.outcome ?? '' : '';
   const message =
     status === 'failure'
       ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
@@ -504,6 +504,7 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
     success: 0,
     unknown: 0,
     failure: 0,
+    warning: 0,
     activeAlerts: 0,
     newAlerts: 0,
     recoveredAlerts: 0,
@@ -520,10 +521,14 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
       ruleExecutionOutcomes.find((subBucket) => subBucket?.key === 'success')?.doc_count ?? 0;
     const failureRuleExecution =
       ruleExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
+    const warningRuleExecution =
+      ruleExecutionOutcomes.find((subBucket) => subBucket?.key === 'warning')?.doc_count ?? 0;
 
     objToReturn.success += successRuleExecution;
-    objToReturn.unknown += ruleExecutionCount - (successRuleExecution + failureRuleExecution);
+    objToReturn.unknown +=
+      ruleExecutionCount - (successRuleExecution + failureRuleExecution + warningRuleExecution);
     objToReturn.failure += failureRuleExecution;
+    objToReturn.warning += warningRuleExecution;
     objToReturn.activeAlerts += bucket?.ruleExecution?.numActiveAlerts.value ?? 0;
     objToReturn.newAlerts += bucket?.ruleExecution?.numNewAlerts.value ?? 0;
     objToReturn.recoveredAlerts += bucket?.ruleExecution?.numRecoveredAlerts.value ?? 0;
