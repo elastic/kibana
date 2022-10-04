@@ -1,0 +1,161 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { DataView } from '@kbn/data-views-plugin/common';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDataState } from '../../hooks/use_data_state';
+import { SavedSearchData } from '../../hooks/use_saved_search';
+import { AppState, GetStateReturn } from '../../services/discover_state';
+import {
+  getVisualizeInformation,
+  triggerVisualizeActions,
+} from '../sidebar/lib/visualize_trigger_utils';
+
+export const CHART_HIDDEN_KEY = 'discover:chartHidden';
+export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
+
+export const useDiscoverHistogram = ({
+  storage,
+  stateContainer,
+  state,
+  savedSearchData$,
+  dataView,
+  savedSearch,
+  isTimeBased,
+}: {
+  storage: Storage;
+  stateContainer: GetStateReturn;
+  state: AppState;
+  savedSearchData$: SavedSearchData;
+  dataView: DataView;
+  savedSearch: SavedSearch;
+  isTimeBased: boolean;
+}) => {
+  /**
+   * Visualize
+   */
+
+  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
+  const [canVisualize, setCanVisualize] = useState(false);
+
+  useEffect(() => {
+    if (!timeField) return;
+    getVisualizeInformation(timeField, dataView, savedSearch.columns || []).then((info) => {
+      setCanVisualize(Boolean(info));
+    });
+  }, [dataView, savedSearch.columns, timeField]);
+
+  const onEditVisualization = useCallback(() => {
+    if (!timeField) {
+      return;
+    }
+    triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
+  }, [dataView, savedSearch.columns, timeField]);
+
+  /**
+   * Height
+   */
+
+  const [topPanelHeight, setTopPanelHeight] = useState(() => {
+    const storedHeight = storage.get(HISTOGRAM_HEIGHT_KEY);
+    return storedHeight ? Number(storedHeight) : undefined;
+  });
+
+  const storeTopPanelHeight = useCallback(
+    (newTopPanelHeight: number | undefined) => {
+      storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
+      setTopPanelHeight(newTopPanelHeight);
+    },
+    [storage]
+  );
+
+  const resetTopPanelHeight = useCallback(
+    () => storeTopPanelHeight(undefined),
+    [storeTopPanelHeight]
+  );
+
+  const onTopPanelHeightChange = useCallback(
+    (newTopPanelHeight: number) => storeTopPanelHeight(newTopPanelHeight),
+    [storeTopPanelHeight]
+  );
+
+  /**
+   * Other actions
+   */
+
+  const onHideChartChange = useCallback(
+    (newHideChart: boolean) => {
+      storage.set(CHART_HIDDEN_KEY, newHideChart);
+      stateContainer.setAppState({ hideChart: newHideChart });
+    },
+    [stateContainer, storage]
+  );
+
+  const onIntervalChange = useCallback(
+    (newInterval: string) => {
+      stateContainer.setAppState({ interval: newInterval });
+    },
+    [stateContainer]
+  );
+
+  /**
+   * Data
+   */
+
+  const { result: hitsNumber, fetchStatus: hitsFetchStatus } = useDataState(
+    savedSearchData$.totalHits$
+  );
+
+  const {
+    chartData,
+    bucketInterval,
+    fetchStatus: chartFetchStatus,
+    error,
+  } = useDataState(savedSearchData$.charts$);
+
+  const hits = useMemo(
+    () => ({
+      status: hitsFetchStatus,
+      number: hitsNumber,
+    }),
+    [hitsFetchStatus, hitsNumber]
+  );
+
+  const chart = useMemo(
+    () => ({
+      status: chartFetchStatus,
+      hidden: state.hideChart || !isTimeBased,
+      timeInterval: state.interval,
+      bucketInterval,
+      data: chartData,
+      error,
+    }),
+    [
+      bucketInterval,
+      chartData,
+      chartFetchStatus,
+      error,
+      isTimeBased,
+      state.hideChart,
+      state.interval,
+    ]
+  );
+
+  return {
+    topPanelHeight,
+    hits,
+    chart,
+    onEditVisualization: canVisualize ? onEditVisualization : undefined,
+    resetTopPanelHeight,
+    onTopPanelHeightChange,
+    onHideChartChange,
+    onIntervalChange,
+  };
+};

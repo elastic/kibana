@@ -8,7 +8,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import React, { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { RefObject, useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
@@ -23,16 +23,9 @@ import { AppState, GetStateReturn } from '../../services/discover_state';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import {
-  getVisualizeInformation,
-  triggerVisualizeActions,
-} from '../sidebar/lib/visualize_trigger_utils';
-import { useDataState } from '../../hooks/use_data_state';
+import { useDiscoverHistogram } from './use_discover_histogram';
 
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
-
-export const CHART_HIDDEN_KEY = 'discover:chartHidden';
-export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
 
 export interface DiscoverMainContentProps {
   isPlainRecord: boolean;
@@ -73,7 +66,8 @@ export const DiscoverMainContent = ({
   columns,
   resizeRef,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric, storage, data, theme, uiSettings, fieldFormats } = useDiscoverServices();
+  const services = useDiscoverServices();
+  const { trackUiMetric, storage } = services;
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -90,104 +84,29 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
-  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
-  const [canVisualize, setCanVisualize] = useState(false);
-
-  useEffect(() => {
-    if (!timeField) return;
-    getVisualizeInformation(timeField, dataView, savedSearch.columns || []).then((info) => {
-      setCanVisualize(Boolean(info));
-    });
-  }, [dataView, savedSearch.columns, timeField]);
-
-  const onEditVisualization = useCallback(() => {
-    if (!timeField) {
-      return;
-    }
-    triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
-  }, [dataView, savedSearch.columns, timeField]);
-
-  const [topPanelHeight, setTopPanelHeight] = useState(() => {
-    const storedHeight = storage.get(HISTOGRAM_HEIGHT_KEY);
-    return storedHeight ? Number(storedHeight) : undefined;
-  });
-
-  const storeTopPanelHeight = useCallback(
-    (newTopPanelHeight: number | undefined) => {
-      storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
-      setTopPanelHeight(newTopPanelHeight);
-    },
-    [storage]
-  );
-
-  const resetTopPanelHeight = useCallback(
-    () => storeTopPanelHeight(undefined),
-    [storeTopPanelHeight]
-  );
-
-  const onTopPanelHeightChange = useCallback(
-    (newTopPanelHeight: number) => storeTopPanelHeight(newTopPanelHeight),
-    [storeTopPanelHeight]
-  );
-
-  const onHideChartChange = useCallback(
-    (newHideChart: boolean) => {
-      storage.set(CHART_HIDDEN_KEY, newHideChart);
-      stateContainer.setAppState({ hideChart: newHideChart });
-    },
-    [stateContainer, storage]
-  );
-
-  const onIntervalChange = useCallback(
-    (newInterval: string) => {
-      stateContainer.setAppState({ interval: newInterval });
-    },
-    [stateContainer]
-  );
-
-  const { result: hitsNumber, fetchStatus: hitsFetchStatus } = useDataState(
-    savedSearchData$.totalHits$
-  );
-
   const {
-    chartData,
-    bucketInterval,
-    fetchStatus: chartFetchStatus,
-    error,
-  } = useDataState(savedSearchData$.charts$);
-
-  const hits = useMemo(
-    () => ({
-      status: hitsFetchStatus,
-      number: hitsNumber,
-    }),
-    [hitsFetchStatus, hitsNumber]
-  );
-
-  const chart = useMemo(
-    () => ({
-      status: chartFetchStatus,
-      hidden: state.hideChart || !isTimeBased,
-      timeInterval: state.interval,
-      bucketInterval,
-      data: chartData,
-      error,
-    }),
-    [
-      bucketInterval,
-      chartData,
-      chartFetchStatus,
-      error,
-      isTimeBased,
-      state.hideChart,
-      state.interval,
-    ]
-  );
+    topPanelHeight,
+    hits,
+    chart,
+    onEditVisualization,
+    onTopPanelHeightChange,
+    resetTopPanelHeight,
+    onHideChartChange,
+    onIntervalChange,
+  } = useDiscoverHistogram({
+    storage,
+    stateContainer,
+    state,
+    savedSearchData$,
+    dataView,
+    savedSearch,
+    isTimeBased,
+  });
 
   return (
     <UnifiedHistogramLayout
       className="dscPageContent__inner"
-      services={{ data, theme, uiSettings, fieldFormats }}
+      services={services}
       hits={hits}
       chart={chart}
       resizeRef={resizeRef}
@@ -213,7 +132,7 @@ export const DiscoverMainContent = ({
         ) : undefined
       }
       onTopPanelHeightChange={onTopPanelHeightChange}
-      onEditVisualization={canVisualize ? onEditVisualization : undefined}
+      onEditVisualization={onEditVisualization}
       onResetChartHeight={resetTopPanelHeight}
       onHideChartChange={onHideChartChange}
       onIntervalChange={onIntervalChange}
