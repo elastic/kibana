@@ -468,6 +468,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
+        // Wait to ensure the table is finished loading
+        await pageObjects.triggersActionsUI.tableFinishedLoading();
+
         // click on first rule
         await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);

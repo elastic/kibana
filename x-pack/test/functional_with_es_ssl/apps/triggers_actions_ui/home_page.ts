@@ -43,10 +43,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await security.testUser.restoreDefaults();
       });
 
-      it('Loads the Alerts page but with error', async () => {
+      it('Does not load the Alerts page', async () => {
         await pageObjects.common.navigateToApp('triggersActions');
-        const headingText = await pageObjects.triggersActionsUI.getRulesListTitle();
-        expect(headingText).to.be('No permissions to create rules');
+        const exists = await testSubjects.exists('rulesList');
+        expect(exists).to.be(false);
       });
     });
 
