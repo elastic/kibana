@@ -20,7 +20,7 @@ import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
 } from './transform_generators';
-import { SLO, SLITypes } from '../../types/models';
+import { SLO, IndicatorTypes } from '../../types/models';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 
 describe('TransformManager', () => {
@@ -36,7 +36,7 @@ describe('TransformManager', () => {
     describe('Unhappy path', () => {
       it('throws when no generator exists for the slo indicator type', async () => {
         // @ts-ignore defining only a subset of the possible SLI
-        const generators: Record<SLITypes, TransformGenerator> = {
+        const generators: Record<IndicatorTypes, TransformGenerator> = {
           'slo.apm.transaction_duration': new DummyTransformGenerator(),
         };
         const service = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -58,7 +58,7 @@ describe('TransformManager', () => {
 
       it('throws when transform generator fails', async () => {
         // @ts-ignore defining only a subset of the possible SLI
-        const generators: Record<SLITypes, TransformGenerator> = {
+        const generators: Record<IndicatorTypes, TransformGenerator> = {
           'slo.apm.transaction_duration': new FailTransformGenerator(),
         };
         const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -82,7 +82,7 @@ describe('TransformManager', () => {
 
     it('installs the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<SLITypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -91,14 +91,14 @@ describe('TransformManager', () => {
       const transformId = await transformManager.install(slo);
 
       expect(esClientMock.transform.putTransform).toHaveBeenCalledTimes(1);
-      expect(transformId).toBe(`slo-${slo.id}`);
+      expect(transformId).toBe(`slo-${slo.id}-${slo.revision}`);
     });
   });
 
   describe('Start', () => {
     it('starts the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<SLITypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -112,7 +112,7 @@ describe('TransformManager', () => {
   describe('Stop', () => {
     it('stops the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<SLITypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -126,7 +126,7 @@ describe('TransformManager', () => {
   describe('Uninstall', () => {
     it('uninstalls the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<SLITypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
@@ -141,7 +141,7 @@ describe('TransformManager', () => {
         new EsErrors.ConnectionError('irrelevant')
       );
       // @ts-ignore defining only a subset of the possible SLI
-      const generators: Record<SLITypes, TransformGenerator> = {
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
