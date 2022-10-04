@@ -23,40 +23,40 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
   name: EXPRESSION_METRIC_TRENDLINE_NAME,
   inputTypes: ['datatable'],
   type: EXPRESSION_METRIC_TRENDLINE_NAME,
-  help: i18n.translate('expressionMetricTrendline.function.help', {
+  help: i18n.translate('expressionMetricVis.trendline.function.help', {
     defaultMessage: 'Metric visualization',
   }),
   args: {
     metric: {
       types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionMetricTrendline.function.metric.help', {
+      help: i18n.translate('expressionMetricVis.trendline.function.metric.help', {
         defaultMessage: 'The primary metric.',
       }),
       required: true,
     },
     timeField: {
       types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionMetricTrendline.function.metric.help', {
+      help: i18n.translate('expressionMetricVis.trendline.function.timeField.help', {
         defaultMessage: 'The time field for the trend line',
       }),
       required: true,
     },
     breakdownBy: {
       types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionMetricTrendline.function.breakdownBy.help', {
+      help: i18n.translate('expressionMetricVis.trendline.function.breakdownBy.help', {
         defaultMessage: 'The dimension containing the labels for sub-categories.',
       }),
     },
     table: {
       types: ['datatable'],
-      help: i18n.translate('expressionMetricTrendline.function.table.help', {
+      help: i18n.translate('expressionMetricVis.trendline.function.table.help', {
         defaultMessage: 'A data table',
       }),
       multi: false,
     },
     inspectorTableId: {
       types: ['string'],
-      help: i18n.translate('expressionMetricTrendline.function.inspectorTableId.help', {
+      help: i18n.translate('expressionMetricVis.trendline.function.inspectorTableId.help', {
         defaultMessage: 'An ID for the inspector table',
       }),
       multi: false,
