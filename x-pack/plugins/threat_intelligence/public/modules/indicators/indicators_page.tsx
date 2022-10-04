@@ -20,6 +20,7 @@ import { useColumnSettings } from './components/indicators_table/hooks/use_colum
 import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
 import { IndicatorsFilters } from './containers/indicators_filters';
 import { useSecurityContext } from '../../hooks/use_security_context';
+import { UpdateStatus } from '../../components/update_status';
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const IndicatorsPageContent: VFC = () => {
     pagination,
     isLoading: isLoadingIndicators,
     isFetching: isFetchingIndicators,
+    dataUpdatedAt,
   } = useIndicators({
     filters,
     filterQuery,
@@ -72,10 +74,14 @@ const IndicatorsPageContent: VFC = () => {
 
   return (
     <FieldTypesProvider>
-      <DefaultPageLayout pageTitle="Indicators">
+      <DefaultPageLayout
+        pageTitle="Indicators"
+        subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
+      >
         <FiltersGlobal>
           <SiemSearchBar indexPattern={indexPattern} id="global" />
         </FiltersGlobal>
+
         <IndicatorsBarChartWrapper
           dateRange={dateRange}
           series={series}

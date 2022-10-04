@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import {
   useInitializeUrlParam,
   useGlobalQueryString,
@@ -295,6 +295,34 @@ describe('global query string', () => {
       renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
 
       expect(mockHistory.replace).not.toHaveBeenCalledWith();
+    });
+
+    it('deletes unregistered URL params', async () => {
+      const urlParamKey = 'testKey';
+      const value = '123';
+      window.location.search = `?${urlParamKey}=${value}`;
+      const globalUrlParam = {
+        [urlParamKey]: value,
+      };
+      const store = makeStore(globalUrlParam);
+
+      const { waitForNextUpdate } = renderHook(() => useSyncGlobalQueryString(), {
+        wrapper: ({ children }: { children: React.ReactElement }) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
+      });
+
+      mockHistory.replace.mockClear();
+
+      act(() => {
+        store.dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
+      });
+
+      waitForNextUpdate();
+
+      expect(mockHistory.replace).toHaveBeenCalledWith({
+        search: ``,
+      });
     });
   });
 });
