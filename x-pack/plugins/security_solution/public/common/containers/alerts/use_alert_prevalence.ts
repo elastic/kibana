@@ -23,6 +23,7 @@ interface UseAlertPrevalenceOptions {
   isInTimeline: boolean;
   signalIndexName: string | null;
   includeAlertIds?: boolean;
+  ignoreTimerange?: boolean;
 }
 
 interface UserAlertPrevalenceResult {
@@ -38,13 +39,17 @@ export const useAlertPrevalence = ({
   isInTimeline,
   signalIndexName,
   includeAlertIds = false,
+  ignoreTimerange = false,
 }: UseAlertPrevalenceOptions): UserAlertPrevalenceResult => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
   );
   const globalTime = useGlobalTime(false);
-
-  const { to, from } = isInTimeline ? timelineTime : globalTime;
+  let to: string | undefined;
+  let from: string | undefined;
+  if (ignoreTimerange === false) {
+    ({ to, from } = isInTimeline ? timelineTime : globalTime);
+  }
   const [initialQuery] = useState(() =>
     generateAlertPrevalenceQuery(field, value, from, to, includeAlertIds)
   );
@@ -87,8 +92,8 @@ export const useAlertPrevalence = ({
 const generateAlertPrevalenceQuery = (
   field: string,
   value: string | string[] | undefined | null,
-  from: string,
-  to: string,
+  from: string | undefined,
+  to: string | undefined,
   includeAlertIds: boolean
 ) => {
   // if we don't want the alert ids included, we set size to 0 to reduce the response payload
@@ -105,25 +110,15 @@ const generateAlertPrevalenceQuery = (
           [field]: actualValue,
         },
       },
-      filter: [
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-            },
-          },
-        },
-      ],
     },
   };
 
-  if (Array.isArray(value) && value.length > 1) {
-    const shouldValues = value.map((val) => ({ match: { [field]: val } }));
+  if (from !== undefined && to !== undefined) {
     query = {
+      ...query,
       bool: {
-        minimum_should_match: 1,
-        must: [
+        ...query.bool,
+        filter: [
           {
             range: {
               '@timestamp': {
@@ -133,9 +128,36 @@ const generateAlertPrevalenceQuery = (
             },
           },
         ],
+      },
+    };
+  }
+
+  if (Array.isArray(value) && value.length > 1) {
+    const shouldValues = value.map((val) => ({ match: { [field]: val } }));
+    query = {
+      bool: {
+        minimum_should_match: 1,
         should: shouldValues,
       },
     };
+    if (from !== undefined && to !== undefined) {
+      query = {
+        ...query,
+        bool: {
+          ...query.bool,
+          must: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: to,
+                },
+              },
+            },
+          ],
+        },
+      };
+    }
   }
 
   return {

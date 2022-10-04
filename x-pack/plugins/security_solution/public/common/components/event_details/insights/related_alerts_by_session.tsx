@@ -44,6 +44,7 @@ export const RelatedAlertsBySession = React.memo<Props>(
       isInTimeline,
       signalIndexName: null,
       includeAlertIds: true,
+      ignoreTimerange: true,
     });
 
     const { fieldFromBrowserField } = getEnrichedFieldInfo({
