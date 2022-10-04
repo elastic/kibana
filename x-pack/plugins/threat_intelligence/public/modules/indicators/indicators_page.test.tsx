@@ -42,6 +42,7 @@ describe('<IndicatorsPage />', () => {
       onChangeItemsPerPage: stub,
       onChangePage: stub,
       handleRefresh: stub,
+      dataUpdatedAt: Date.now(),
     });
 
     (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({

@@ -31,7 +31,7 @@ export const FILTERS_GLOBAL_CONTAINER = '[data-test-subj="filters-global-contain
 
 export const TIME_RANGE_PICKER = `[data-test-subj="superDatePickerToggleQuickMenuButton"]`;
 
-export const QUERY_INPUT = `[data-test-subj="iocListPageQueryInput"]`;
+export const QUERY_INPUT = `[data-test-subj="queryInput"]`;
 
 export const EMPTY_STATE = '[data-test-subj="indicatorsTableEmptyState"]';
 
