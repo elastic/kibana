@@ -16,6 +16,22 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { licenseService } from '../../../../../../common/hooks/use_license';
+
+jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+    isGoldPlus: jest.fn(),
+    isEnterprise: jest.fn(() => true),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 const getMockNewPackage = (): NewPackagePolicy => {
   const mockNewPackagePolicyInputStream: NewPackagePolicyInputStream = {
@@ -58,9 +74,13 @@ describe('Onboarding Component new section', () => {
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
       );
       expect(renderResult.getByTestId('selectIntegrationTypeId')).toBeVisible();
-      expect(renderResult.queryByText('NGAV')).toBeVisible();
-      expect(renderResult.queryByText('EDR Essential')).toBeVisible();
-      expect(renderResult.queryByText('EDR Complete')).toBeVisible();
+      expect(renderResult.queryByText('Next-Generation Antivirus (NGAV)')).toBeVisible();
+      expect(
+        renderResult.queryByText('Essential EDR (Endpoint Detection & Response)')
+      ).toBeVisible();
+      expect(
+        renderResult.queryByText('Complete EDR (Endpoint Detection & Response)')
+      ).toBeVisible();
     });
 
     it('renders EndpointPolicyCreateExtension options correctly (set to Cloud)', async () => {
@@ -80,6 +100,69 @@ describe('Onboarding Component new section', () => {
       expect(mockedOnChange).toHaveBeenCalledTimes(1);
       userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(mockedOnChange).toHaveBeenCalledTimes(2);
+    });
+
+    it('make sure NGAV is the default value for endpoint environment', async () => {
+      renderResult = mockedContext.render(
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+      );
+      expect(renderResult.getByDisplayValue('NGAV')).toBeChecked();
+      expect(renderResult.getByDisplayValue('EDREssential')).not.toBeChecked();
+      expect(renderResult.getByDisplayValue('EDRComplete')).not.toBeChecked();
+    });
+
+    it('make sure interactive only is the default value for cloud environment', async () => {
+      renderResult = mockedContext.render(
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+      );
+      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      expect(renderResult.getByDisplayValue('ALL_EVENTS')).not.toBeChecked();
+      expect(renderResult.getByDisplayValue('INTERACTIVE_ONLY')).toBeChecked();
+    });
+
+    it('all license should be able to see EDR Licese', async () => {
+      const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+      licenseServiceMock.isEnterprise.mockReturnValue(false);
+      renderResult = mockedContext.render(
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+      );
+      userEvent.click(screen.getByDisplayValue('EDREssential'));
+      expect(renderResult.getByDisplayValue('EDREssential')).toBeChecked();
+      expect(
+        renderResult.getByText(
+          'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.',
+          { exact: false }
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('gold license below users will be able to see NGAV notes', async () => {
+      const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+      licenseServiceMock.isGoldPlus.mockReturnValue(true);
+      renderResult = mockedContext.render(
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+      );
+      expect(
+        renderResult.getByText('Note: advanced protections require a platinum license level.', {
+          exact: false,
+        })
+      ).toBeInTheDocument();
+    });
+
+    it('platinum license users will not be able to see NGAV notes', async () => {
+      const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+      renderResult = mockedContext.render(
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+      );
+      expect(
+        renderResult.queryByText('Note: advanced protections require a platinum license level.', {
+          exact: false,
+        })
+      ).not.toBeInTheDocument();
     });
   });
 });
