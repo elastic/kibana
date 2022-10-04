@@ -161,16 +161,28 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         };
       }
 
-      return {
-        filter: {
-          term: { [fieldName]: searchString },
-        },
-        // field: fieldName,
-        // ranges: [
-        //   { key: 'searchResult_max', to: searchString },
-        //   { key: 'searchResult_min', from: searchString },
-        // ],
+      // if a search string is provided that already is of the form `a.b.c.d` then simply search for that IP directly
+      const ipSegments = searchString.replace(/^\.+|\.+$/g, '').split('.');
+      if (ipSegments.length === 4) {
+        return {
+          filter: {
+            term: { [fieldName]: searchString },
+          },
+          aggs: {
+            filteredResults: { ...findSuggestions },
+          },
+        };
+      }
 
+      // otherwise, find IPs that **start** with the given partial IP - for example, if the search string is `a.b`
+      // then do a search for IPs in the range `a.b.0.0` to `a.b.255.255`
+      const minIp = ipSegments.concat(Array(4 - ipSegments.length).fill('0')).join('.');
+      const maxIp = ipSegments.concat(Array(4 - ipSegments.length).fill('255')).join('.');
+      return {
+        ip_range: {
+          field: fieldName,
+          ranges: [{ key: 'searchResult_max', from: minIp, to: maxIp }],
+        },
         aggs: {
           filteredResults: { ...findSuggestions },
         },
@@ -182,10 +194,14 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         'aggregations.suggestions.buckets'
       );
       if (!Boolean(buckets)) {
-        // this means that the ip is being filtered by a search string
+        // this means that the results are being filtered by a full IP search string
         return get(rawEsResult, 'aggregations.suggestions.filteredResults.buckets')?.map(
           (suggestion: { key: string }) => suggestion.key
         );
+      }
+      if (buckets[0].filteredResults) {
+        // this means that a partial IP was provided as a search string
+        return buckets[0].filteredResults.buckets.map((suggestion) => suggestion.key);
       }
       // this means that no search string has been provided
       return buckets.map((suggestion) => suggestion.key);
