@@ -31,6 +31,7 @@ import {
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
+  commonMigrateIndexPatternDatasource,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -150,6 +151,17 @@ export const makeLensEmbeddableFactory =
                     layers: Array<{ groups?: string[] }>;
                   }>
                 );
+                return {
+                  ...lensState,
+                  attributes: migratedLensState,
+                } as unknown as SerializableRecord;
+              },
+              '8.6.0': (state) => {
+                const lensState = state as unknown as {
+                  attributes: LensDocShape850<VisState850>;
+                };
+
+                const migratedLensState = commonMigrateIndexPatternDatasource(lensState.attributes);
                 return {
                   ...lensState,
                   attributes: migratedLensState,
