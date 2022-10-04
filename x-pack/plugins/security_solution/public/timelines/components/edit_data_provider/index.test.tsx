@@ -326,7 +326,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    //EuiCombobox does not render placeholder text with placeholder tag
+    // EuiCombobox does not render placeholder text with placeholder tag
     expect(screen.getByText('enter one or more values')).toBeInTheDocument();
   });
 

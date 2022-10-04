@@ -55,7 +55,7 @@ interface Props {
   operator: QueryOperator;
   providerId: string;
   timelineId: string;
-  value: string | number | (string | number)[];
+  value: string | number | Array<string | number>;
   type?: DataProviderType;
 }
 
@@ -94,7 +94,9 @@ export const StatefulEditDataProvider = React.memo<Props>(
     );
 
     const [disableButton, setDisableButton] = useState<boolean>(true);
-    const [updatedValue, setUpdatedValue] = useState<string | number | (string | number)[]>(value);
+    const [updatedValue, setUpdatedValue] = useState<string | number | Array<string | number>>(
+      value
+    );
 
     const disableButtonCallback = useCallback(
       (shouldDisable) => setDisableButton(shouldDisable),
@@ -316,10 +318,10 @@ interface ControlledDataProviderInput {
   disableButtonCallback: (disableButton: boolean) => void;
   onChangeCallback: (value: string | number | string[]) => void;
   type: DataProviderType;
-  value: string | number | (string | number)[];
+  value: string | number | Array<string | number>;
 }
 
-const getDefaultValue = (value: string | number | (string | number)[]): string | number => {
+const getDefaultValue = (value: string | number | Array<string | number>): string | number => {
   if (isStringOrNumberArray(value)) {
     return value[0];
   } else return value;
@@ -359,7 +361,7 @@ const ControlledDefaultInput = ({
 };
 
 const convertValuesToComboboxValueArray = (
-  values: string | number | (string | number)[]
+  values: string | number | Array<string | number>
 ): EuiComboBoxOptionOption[] => {
   if (isStringOrNumberArray(values)) {
     return values.map((item) => ({ label: String(item) }));

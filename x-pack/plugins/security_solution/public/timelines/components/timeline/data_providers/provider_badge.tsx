@@ -115,7 +115,7 @@ interface ProviderBadgeProps {
   togglePopover: () => void;
   toggleType: () => void;
   displayValue: string;
-  val: string | number | (string | number)[];
+  val: string | number | Array<string | number>;
   operator: QueryOperator;
   type: DataProviderType;
   timelineType: TimelineType;
