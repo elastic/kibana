@@ -27,15 +27,18 @@ export class WMSSource extends AbstractSource {
       styles,
     };
   }
+
   isSourceStale(mbSource, sourceData) {
     if (!sourceData.url) {
       return false;
     }
     return mbSource.tiles?.[0] !== sourceData.url;
   }
+
   async canSkipSourceUpdate() {
     return false;
   }
+
   async getImmutableProperties() {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
