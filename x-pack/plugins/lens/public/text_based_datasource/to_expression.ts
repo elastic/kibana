@@ -8,10 +8,10 @@
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import type { OriginalColumn } from '../../common/types';
-import { TextBasedLanguagesPrivateState, TextBasedLanguagesLayer, IndexPatternRef } from './types';
+import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
 
 function getExpressionForLayer(
-  layer: TextBasedLanguagesLayer,
+  layer: TextBasedLayer,
   refs: IndexPatternRef[]
 ): Ast | null {
   if (!layer.columns || layer.columns?.length === 0) {
@@ -53,7 +53,7 @@ function getExpressionForLayer(
   return textBasedQueryToAst;
 }
 
-export function toExpression(state: TextBasedLanguagesPrivateState, layerId: string) {
+export function toExpression(state: TextBasedPrivateState, layerId: string) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(state.layers[layerId], state.indexPatternRefs);
   }

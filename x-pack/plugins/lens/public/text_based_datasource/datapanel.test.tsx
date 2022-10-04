@@ -19,10 +19,10 @@ import {
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { FieldButton } from '@kbn/react-field';
 
-import { type TextBasedLanguagesDataPanelProps, TextBasedLanguagesDataPanel } from './datapanel';
+import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import type { TextBasedLanguagesPrivateState } from './types';
+import type { TextBasedPrivateState } from './types';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -113,7 +113,7 @@ function getExistingFields(indexPatterns: Record<string, IndexPattern>) {
   return existingFields;
 }
 
-const initialState: TextBasedLanguagesPrivateState = {
+const initialState: TextBasedPrivateState = {
   layers: {
     first: {
       index: '1',
@@ -163,7 +163,7 @@ describe('TextBased Query Languages Data Panel', () => {
   let core: ReturnType<typeof coreMock['createStart']>;
   let dataViews: DataViewPublicStart;
 
-  let defaultProps: TextBasedLanguagesDataPanelProps;
+  let defaultProps: TextBasedDataPanelProps;
   const dataViewsMock = dataViewPluginMocks.createStartContract();
   beforeEach(() => {
     core = coreMock.createStart();
@@ -202,12 +202,12 @@ describe('TextBased Query Languages Data Panel', () => {
   });
 
   it('should render a search box', async () => {
-    const wrapper = mountWithIntl(<TextBasedLanguagesDataPanel {...defaultProps} />);
+    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
     expect(wrapper.find('[data-test-subj="lnsTextBasedLangugesFieldSearch"]').length).toEqual(1);
   });
 
   it('should list all supported fields in the pattern', async () => {
-    const wrapper = mountWithIntl(<TextBasedLanguagesDataPanel {...defaultProps} />);
+    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
     expect(
       wrapper
         .find('[data-test-subj="lnsTextBasedLanguagesPanelFields"]')
@@ -217,7 +217,7 @@ describe('TextBased Query Languages Data Panel', () => {
   });
 
   it('should list all supported fields in the pattern that match the search input', async () => {
-    const wrapper = mountWithIntl(<TextBasedLanguagesDataPanel {...defaultProps} />);
+    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
     const searchBox = wrapper.find('[data-test-subj="lnsTextBasedLangugesFieldSearch"]');
 
     act(() => {

@@ -15,8 +15,8 @@ import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type {
   IndexPatternRef,
-  TextBasedLanguagesPrivateState,
-  TextBasedLanguagesLayerColumn,
+  TextBasedPrivateState,
+  TextBasedLayerColumn,
 } from './types';
 
 export async function loadIndexPatternRefs(
@@ -36,7 +36,7 @@ export async function loadIndexPatternRefs(
 }
 
 export async function getStateFromAggregateQuery(
-  state: TextBasedLanguagesPrivateState,
+  state: TextBasedPrivateState,
   query: AggregateQuery,
   dataViews: DataViewsPublicPluginStart,
   data: DataPublicPluginStart,
@@ -52,7 +52,7 @@ export async function getStateFromAggregateQuery(
   // get the id of the dataview
   const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
-  let allColumns: TextBasedLanguagesLayerColumn[] = [];
+  let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
     const table = await fetchDataFromAggregateQuery(query, dataViews, data, expressions);

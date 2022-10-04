@@ -28,12 +28,12 @@ import {
 } from '../types';
 import { generateId } from '../id_generator';
 import { toExpression } from './to_expression';
-import { TextBasedLanguagesDataPanel } from './datapanel';
+import { TextBasedDataPanel } from './datapanel';
 import type {
-  TextBasedLanguagesPrivateState,
-  TextBasedLanguagesPersistedState,
-  TextBasedLanguagesLayerColumn,
-  TextBasedLanguageField,
+  TextBasedPrivateState,
+  TextBasedPersistedState,
+  TextBasedLayerColumn,
+  TextBasedField,
 } from './types';
 import { FieldSelect } from './field_select';
 import type { Datasource, IndexPatternMap } from '../types';
@@ -43,7 +43,7 @@ function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
 }
 
-export function getTextBasedLanguagesDatasource({
+export function getTextBasedDatasource({
   core,
   storage,
   data,
@@ -56,7 +56,7 @@ export function getTextBasedLanguagesDatasource({
   expressions: ExpressionsStart;
   dataViews: DataViewsPublicPluginStart;
 }) {
-  const getSuggestionsForState = (state: TextBasedLanguagesPrivateState) => {
+  const getSuggestionsForState = (state: TextBasedPrivateState) => {
     return Object.entries(state.layers)?.map(([id, layer]) => {
       return {
         state: {
@@ -83,7 +83,7 @@ export function getTextBasedLanguagesDatasource({
     });
   };
   const getSuggestionsForVisualizeField = (
-    state: TextBasedLanguagesPrivateState,
+    state: TextBasedPrivateState,
     indexPatternId: string,
     fieldName: string,
     indexPatterns: IndexPatternMap
@@ -153,10 +153,7 @@ export function getTextBasedLanguagesDatasource({
 
     return [];
   };
-  const TextBasedLanguagesDatasource: Datasource<
-    TextBasedLanguagesPrivateState,
-    TextBasedLanguagesPersistedState
-  > = {
+  const TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState> = {
     id: 'textBased',
 
     checkIntegrity: () => {
@@ -188,7 +185,7 @@ export function getTextBasedLanguagesDatasource({
       return errors;
     },
     initialize(
-      state?: TextBasedLanguagesPersistedState,
+      state?: TextBasedPersistedState,
       savedObjectReferences?,
       context?,
       indexPatternRefs?,
@@ -217,7 +214,7 @@ export function getTextBasedLanguagesDatasource({
       return Object.values(state.layers).map(({ index }) => index);
     },
 
-    getPersistableState({ layers }: TextBasedLanguagesPrivateState) {
+    getPersistableState({ layers }: TextBasedPrivateState) {
       const savedObjectReferences: SavedObjectReference[] = [];
       Object.entries(layers).forEach(([layerId, { index, ...persistableLayer }]) => {
         if (index) {
@@ -237,7 +234,7 @@ export function getTextBasedLanguagesDatasource({
       if (!column || !indexPattern) return false;
       return true;
     },
-    insertLayer(state: TextBasedLanguagesPrivateState, newLayerId: string) {
+    insertLayer(state: TextBasedPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;
       const columns = layer?.allColumns ?? [];
@@ -267,7 +264,7 @@ export function getTextBasedLanguagesDatasource({
       };
     },
 
-    removeLayer(state: TextBasedLanguagesPrivateState, layerId: string) {
+    removeLayer(state: TextBasedPrivateState, layerId: string) {
       const newLayers = {
         ...state.layers,
         [layerId]: {
@@ -283,7 +280,7 @@ export function getTextBasedLanguagesDatasource({
       };
     },
 
-    clearLayer(state: TextBasedLanguagesPrivateState, layerId: string) {
+    clearLayer(state: TextBasedPrivateState, layerId: string) {
       return {
         ...state,
         layers: {
@@ -293,7 +290,7 @@ export function getTextBasedLanguagesDatasource({
       };
     },
 
-    getLayers(state: TextBasedLanguagesPrivateState) {
+    getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
     isTimeBased: (state, indexPatterns) => {
@@ -306,7 +303,7 @@ export function getTextBasedLanguagesDatasource({
         })
       );
     },
-    getUsedDataView: (state: TextBasedLanguagesPrivateState, layerId?: string) => {
+    getUsedDataView: (state: TextBasedPrivateState, layerId?: string) => {
       if (!layerId) {
         const layers = Object.values(state.layers);
         return layers?.[0]?.index;
@@ -331,13 +328,10 @@ export function getTextBasedLanguagesDatasource({
       return toExpression(state, layerId);
     },
 
-    renderDataPanel(
-      domElement: Element,
-      props: DatasourceDataPanelProps<TextBasedLanguagesPrivateState>
-    ) {
+    renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<TextBasedPrivateState>) {
       render(
         <I18nProvider>
-          <TextBasedLanguagesDataPanel
+          <TextBasedDataPanel
             data={data}
             dataViews={dataViews}
             expressions={expressions}
@@ -350,9 +344,9 @@ export function getTextBasedLanguagesDatasource({
 
     renderDimensionTrigger: (
       domElement: Element,
-      props: DatasourceDimensionTriggerProps<TextBasedLanguagesPrivateState>
+      props: DatasourceDimensionTriggerProps<TextBasedPrivateState>
     ) => {
-      const columnLabelMap = TextBasedLanguagesDatasource.uniqueLabels(props.state);
+      const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state);
       const layer = props.state.layers[props.layerId];
       const selectedField = layer?.allColumns?.find((column) => column.columnId === props.columnId);
       let customLabel: string | undefined = columnLabelMap[props.columnId];
@@ -377,13 +371,13 @@ export function getTextBasedLanguagesDatasource({
       );
     },
 
-    getRenderEventCounters(state: TextBasedLanguagesPrivateState): string[] {
+    getRenderEventCounters(state: TextBasedPrivateState): string[] {
       return [];
     },
 
     renderDimensionEditor: (
       domElement: Element,
-      props: DatasourceDimensionEditorProps<TextBasedLanguagesPrivateState>
+      props: DatasourceDimensionEditorProps<TextBasedPrivateState>
     ) => {
       const fields = props.state.fieldList;
       const selectedField = props.state.layers[props.layerId]?.allColumns?.find(
@@ -450,7 +444,7 @@ export function getTextBasedLanguagesDatasource({
 
     renderLayerPanel: (
       domElement: Element,
-      props: DatasourceLayerPanelProps<TextBasedLanguagesPrivateState>
+      props: DatasourceLayerPanelProps<TextBasedPrivateState>
     ) => {
       render(
         <I18nProvider>
@@ -460,7 +454,7 @@ export function getTextBasedLanguagesDatasource({
       );
     },
 
-    uniqueLabels(state: TextBasedLanguagesPrivateState) {
+    uniqueLabels(state: TextBasedPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
       const counts = {} as Record<string, number>;
@@ -536,7 +530,7 @@ export function getTextBasedLanguagesDatasource({
       return false;
     },
 
-    getPublicAPI({ state, layerId }: PublicAPIProps<TextBasedLanguagesPrivateState>) {
+    getPublicAPI({ state, layerId }: PublicAPIProps<TextBasedPrivateState>) {
       return {
         datasourceId: 'textBased',
 
@@ -551,7 +545,7 @@ export function getTextBasedLanguagesDatasource({
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
           const column = layer?.allColumns?.find((c) => c.columnId === columnId);
-          const columnLabelMap = TextBasedLanguagesDatasource.uniqueLabels(state);
+          const columnLabelMap = TextBasedDatasource.uniqueLabels(state);
 
           if (column) {
             return {
@@ -587,9 +581,7 @@ export function getTextBasedLanguagesDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
-      const field = state.fieldList.find(
-        (f) => f.id === (draggedField as TextBasedLanguageField).id
-      );
+      const field = state.fieldList.find((f) => f.id === (draggedField as TextBasedField).id);
       if (!field) return [];
       return Object.entries(state.layers)?.map(([id, layer]) => {
         const newId = generateId();
@@ -646,14 +638,10 @@ export function getTextBasedLanguagesDatasource({
     isEqual: () => true,
   };
 
-  return TextBasedLanguagesDatasource;
+  return TextBasedDatasource;
 }
 
-function blankLayer(
-  index: string,
-  query?: AggregateQuery,
-  columns?: TextBasedLanguagesLayerColumn[]
-) {
+function blankLayer(index: string, query?: AggregateQuery, columns?: TextBasedLayerColumn[]) {
   return {
     index,
     query,

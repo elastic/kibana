@@ -775,7 +775,7 @@ export const LensTopNavMenu = ({
                   if (isOnTextBasedMode) {
                     dispatch(
                       switchAndCleanDatasource({
-                        newDatasourceId: 'indexpattern',
+                        newDatasourceId: 'formBased',
                         visualizationId: visualization?.activeId,
                         currentIndexPatternId: dataView?.id,
                       })
@@ -810,7 +810,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -855,7 +855,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })

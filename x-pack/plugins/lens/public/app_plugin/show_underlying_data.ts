@@ -111,7 +111,7 @@ export function getLayerMetaInfo(
     };
   }
   // maybe add also datasourceId validation here?
-  if (datasourceAPI.datasourceId !== 'indexpattern') {
+  if (datasourceAPI.datasourceId !== 'formBased') {
     return {
       meta: undefined,
       error: i18n.translate('xpack.lens.app.showUnderlyingDataUnsupportedDatasource', {

@@ -9,31 +9,31 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../types';
 
-export interface TextBasedLanguagesLayerColumn {
+export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
   meta?: DatatableColumn['meta'];
 }
 
-export interface TextBasedLanguageField {
+export interface TextBasedField {
   id: string;
   field: string;
 }
 
-export interface TextBasedLanguagesLayer {
+export interface TextBasedLayer {
   index: string;
   query: AggregateQuery | undefined;
-  columns: TextBasedLanguagesLayerColumn[];
-  allColumns: TextBasedLanguagesLayerColumn[];
+  columns: TextBasedLayerColumn[];
+  allColumns: TextBasedLayerColumn[];
   timeField?: string;
   errors?: Error[];
 }
 
-export interface TextBasedLanguagesPersistedState {
-  layers: Record<string, TextBasedLanguagesLayer>;
+export interface TextBasedPersistedState {
+  layers: Record<string, TextBasedLayer>;
 }
 
-export type TextBasedLanguagesPrivateState = TextBasedLanguagesPersistedState & {
+export type TextBasedPrivateState = TextBasedPersistedState & {
   indexPatternRefs: IndexPatternRef[];
   fieldList: DatatableColumn[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;

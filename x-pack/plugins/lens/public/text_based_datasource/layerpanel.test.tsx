@@ -7,10 +7,10 @@
 
 import React from 'react';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { TextBasedLanguagesPrivateState } from './types';
+import { TextBasedPrivateState } from './types';
 import type { DataViewsState } from '../state_management/types';
 
-import { TextBasedLanguageLayerPanelProps, LayerPanel } from './layerpanel';
+import { TextBasedLayerPanelProps, LayerPanel } from './layerpanel';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ChangeIndexPattern } from '../shared_components/dataview_picker/dataview_picker';
 
@@ -38,7 +38,7 @@ const fields = [
   },
 ] as DatatableColumn[];
 
-const initialState: TextBasedLanguagesPrivateState = {
+const initialState: TextBasedPrivateState = {
   layers: {
     first: {
       index: '1',
@@ -55,7 +55,7 @@ const initialState: TextBasedLanguagesPrivateState = {
   fieldList: fields,
 };
 describe('Layer Data Panel', () => {
-  let defaultProps: TextBasedLanguageLayerPanelProps;
+  let defaultProps: TextBasedLayerPanelProps;
 
   beforeEach(() => {
     defaultProps = {

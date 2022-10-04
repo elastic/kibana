@@ -18,22 +18,21 @@ import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { FieldButton } from '@kbn/react-field';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DatasourceDataPanelProps, DataType } from '../types';
-import type { TextBasedLanguagesPrivateState } from './types';
+import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
 import { DragDrop } from '../drag_drop';
 import { LensFieldIcon } from '../shared_components';
 import { ChildDragDropProvider } from '../drag_drop';
 
-export type TextBasedLanguagesDataPanelProps =
-  DatasourceDataPanelProps<TextBasedLanguagesPrivateState> & {
-    data: DataPublicPluginStart;
-    expressions: ExpressionsStart;
-    dataViews: DataViewsPublicPluginStart;
-  };
+export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateState> & {
+  data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
+  dataViews: DataViewsPublicPluginStart;
+};
 const htmlId = htmlIdGenerator('datapanel-text-based-languages');
 const fieldSearchDescriptionId = htmlId();
 
-export function TextBasedLanguagesDataPanel({
+export function TextBasedDataPanel({
   setState,
   state,
   dragDropContext,
@@ -44,7 +43,7 @@ export function TextBasedLanguagesDataPanel({
   dateRange,
   expressions,
   dataViews,
-}: TextBasedLanguagesDataPanelProps) {
+}: TextBasedDataPanelProps) {
   const prevQuery = usePrevious(query);
   const [localState, setLocalState] = useState({ nameFilter: '' });
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '' }));

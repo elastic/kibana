@@ -12,29 +12,26 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/p
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EditorFrameSetup } from '../types';
 
-export interface TextBasedLanguageSetupPlugins {
+export interface TextBasedSetupPlugins {
   data: DataPublicPluginSetup;
   editorFrame: EditorFrameSetup;
 }
 
-export interface TextBasedLanguageStartPlugins {
+export interface TextBasedStartPlugins {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
 }
 
-export class TextBasedLanguagesDatasource {
+export class TextBasedDatasource {
   constructor() {}
 
-  setup(
-    core: CoreSetup<TextBasedLanguageStartPlugins>,
-    { editorFrame }: TextBasedLanguageSetupPlugins
-  ) {
+  setup(core: CoreSetup<TextBasedStartPlugins>, { editorFrame }: TextBasedSetupPlugins) {
     editorFrame.registerDatasource(async () => {
-      const { getTextBasedLanguagesDatasource } = await import('../async_services');
+      const { getTextBasedDatasource } = await import('../async_services');
       const [coreStart, { data, dataViews, expressions }] = await core.getStartServices();
 
-      return getTextBasedLanguagesDatasource({
+      return getTextBasedDatasource({
         core: coreStart,
         storage: new Storage(localStorage),
         data,

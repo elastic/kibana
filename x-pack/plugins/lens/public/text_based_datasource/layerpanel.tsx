@@ -9,15 +9,14 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DatasourceLayerPanelProps } from '../types';
-import { TextBasedLanguagesPrivateState } from './types';
+import { TextBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../shared_components/dataview_picker/dataview_picker';
 
-export interface TextBasedLanguageLayerPanelProps
-  extends DatasourceLayerPanelProps<TextBasedLanguagesPrivateState> {
-  state: TextBasedLanguagesPrivateState;
+export interface TextBasedLayerPanelProps extends DatasourceLayerPanelProps<TextBasedPrivateState> {
+  state: TextBasedPrivateState;
 }
 
-export function LayerPanel({ state, layerId, dataViews }: TextBasedLanguageLayerPanelProps) {
+export function LayerPanel({ state, layerId, dataViews }: TextBasedLayerPanelProps) {
   const layer = state.layers[layerId];
   const dataView = dataViews.indexPatternRefs.find((ref) => ref.id === layer.index);
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {

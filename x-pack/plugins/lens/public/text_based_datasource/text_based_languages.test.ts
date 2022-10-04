@@ -8,10 +8,10 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { TextBasedLanguagesPersistedState, TextBasedLanguagesPrivateState } from './types';
+import { TextBasedPersistedState, TextBasedPrivateState } from './types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { getTextBasedLanguagesDatasource } from './text_based_languages';
+import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, Datasource } from '../types';
 
@@ -78,14 +78,14 @@ const expectedIndexPatterns = {
 const indexPatterns = expectedIndexPatterns;
 
 describe('IndexPattern Data Source', () => {
-  let baseState: TextBasedLanguagesPrivateState;
-  let textBasedLanguagesDatasource: Datasource<
-    TextBasedLanguagesPrivateState,
-    TextBasedLanguagesPersistedState
+  let baseState: TextBasedPrivateState;
+  let TextBasedDatasource: Datasource<
+    TextBasedPrivateState,
+    TextBasedPersistedState
   >;
 
   beforeEach(() => {
-    textBasedLanguagesDatasource = getTextBasedLanguagesDatasource({
+    TextBasedDatasource = getTextBasedDatasource({
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
@@ -118,12 +118,12 @@ describe('IndexPattern Data Source', () => {
           query: { sql: 'SELECT * FROM foo' },
         },
       },
-    } as unknown as TextBasedLanguagesPrivateState;
+    } as unknown as TextBasedPrivateState;
   });
 
   describe('uniqueLabels', () => {
     it('appends a suffix to duplicates', () => {
-      const map = textBasedLanguagesDatasource.uniqueLabels({
+      const map = TextBasedDatasource.uniqueLabels({
         layers: {
           a: {
             columns: [
@@ -145,7 +145,7 @@ describe('IndexPattern Data Source', () => {
             index: 'foo',
           },
         },
-      } as unknown as TextBasedLanguagesPrivateState);
+      } as unknown as TextBasedPrivateState);
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -158,7 +158,7 @@ describe('IndexPattern Data Source', () => {
 
   describe('#getPersistedState', () => {
     it('should persist from saved state', async () => {
-      expect(textBasedLanguagesDatasource.getPersistableState(baseState)).toEqual({
+      expect(TextBasedDatasource.getPersistableState(baseState)).toEqual({
         state: baseState,
         savedObjectReferences: [
           { name: 'textBasedLanguages-datasource-layer-a', type: 'index-pattern', id: 'foo' },
@@ -169,7 +169,7 @@ describe('IndexPattern Data Source', () => {
 
   describe('#insertLayer', () => {
     it('should insert an empty layer into the previous state', () => {
-      expect(textBasedLanguagesDatasource.insertLayer(baseState, 'newLayer')).toEqual({
+      expect(TextBasedDatasource.insertLayer(baseState, 'newLayer')).toEqual({
         ...baseState,
         layers: {
           ...baseState.layers,
@@ -194,7 +194,7 @@ describe('IndexPattern Data Source', () => {
 
   describe('#removeLayer', () => {
     it('should remove a layer', () => {
-      expect(textBasedLanguagesDatasource.removeLayer(baseState, 'a')).toEqual({
+      expect(TextBasedDatasource.removeLayer(baseState, 'a')).toEqual({
         ...baseState,
         layers: {
           a: {
@@ -218,7 +218,7 @@ describe('IndexPattern Data Source', () => {
 
   describe('#createEmptyLayer', () => {
     it('creates state with empty layers', () => {
-      expect(textBasedLanguagesDatasource.createEmptyLayer('index-pattern-id')).toEqual({
+      expect(TextBasedDatasource.createEmptyLayer('index-pattern-id')).toEqual({
         fieldList: [],
         layers: {},
         indexPatternRefs: [],
@@ -229,7 +229,7 @@ describe('IndexPattern Data Source', () => {
   describe('#getLayers', () => {
     it('should list the current layers', () => {
       expect(
-        textBasedLanguagesDatasource.getLayers({
+        TextBasedDatasource.getLayers({
           layers: {
             a: {
               columns: [
@@ -268,7 +268,7 @@ describe('IndexPattern Data Source', () => {
               index: 'foo',
             },
           },
-        } as unknown as TextBasedLanguagesPrivateState)
+        } as unknown as TextBasedPrivateState)
       ).toEqual(['a']);
     });
   });
@@ -287,8 +287,8 @@ describe('IndexPattern Data Source', () => {
             name: 'Foo',
           },
         },
-      } as unknown as TextBasedLanguagesPrivateState;
-      const suggestions = textBasedLanguagesDatasource.getDatasourceSuggestionsForVisualizeField(
+      } as unknown as TextBasedPrivateState;
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsForVisualizeField(
         state,
         '1',
         '',
@@ -406,8 +406,8 @@ describe('IndexPattern Data Source', () => {
             index: 'foo',
           },
         },
-      } as unknown as TextBasedLanguagesPrivateState;
-      expect(textBasedLanguagesDatasource.getErrorMessages(state, indexPatterns)).toEqual([
+      } as unknown as TextBasedPrivateState;
+      expect(TextBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
         { longMessage: 'error 1', shortMessage: 'error 1' },
         { longMessage: 'error 2', shortMessage: 'error 2' },
       ]);
@@ -455,9 +455,9 @@ describe('IndexPattern Data Source', () => {
             index: '1',
           },
         },
-      } as unknown as TextBasedLanguagesPrivateState;
+      } as unknown as TextBasedPrivateState;
       expect(
-        textBasedLanguagesDatasource.isTimeBased(state, {
+        TextBasedDatasource.isTimeBased(state, {
           ...indexPatterns,
         })
       ).toEqual(true);
@@ -502,9 +502,9 @@ describe('IndexPattern Data Source', () => {
             index: '1',
           },
         },
-      } as unknown as TextBasedLanguagesPrivateState;
+      } as unknown as TextBasedPrivateState;
       expect(
-        textBasedLanguagesDatasource.isTimeBased(state, {
+        TextBasedDatasource.isTimeBased(state, {
           ...indexPatterns,
           '1': { ...indexPatterns['1'], timeFieldName: undefined },
         })
@@ -514,8 +514,8 @@ describe('IndexPattern Data Source', () => {
 
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
-      const state = textBasedLanguagesDatasource.initialize();
-      expect(textBasedLanguagesDatasource.toExpression(state, 'first', indexPatterns)).toEqual(
+      const state = TextBasedDatasource.initialize();
+      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns)).toEqual(
         null
       );
     });
@@ -565,9 +565,9 @@ describe('IndexPattern Data Source', () => {
           { id: '2', title: 'my-fake-restricted-pattern' },
           { id: '3', title: 'my-compatible-pattern' },
         ],
-      } as unknown as TextBasedLanguagesPrivateState;
+      } as unknown as TextBasedPrivateState;
 
-      expect(textBasedLanguagesDatasource.toExpression(queryBaseState, 'a', indexPatterns))
+      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns))
         .toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -610,7 +610,7 @@ describe('IndexPattern Data Source', () => {
     let publicAPI: DatasourcePublicAPI;
 
     beforeEach(async () => {
-      publicAPI = textBasedLanguagesDatasource.getPublicAPI({
+      publicAPI = TextBasedDatasource.getPublicAPI({
         state: baseState,
         layerId: 'a',
         indexPatterns,
@@ -649,9 +649,9 @@ describe('IndexPattern Data Source', () => {
               index: 'foo',
             },
           },
-        } as unknown as TextBasedLanguagesPrivateState;
+        } as unknown as TextBasedPrivateState;
 
-        publicAPI = textBasedLanguagesDatasource.getPublicAPI({
+        publicAPI = TextBasedDatasource.getPublicAPI({
           state,
           layerId: 'a',
           indexPatterns,
