@@ -8,6 +8,10 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
+import { useCurrentUser } from '../../../../common/lib/kibana/hooks';
+
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
@@ -37,6 +41,11 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/lib/kibana/hooks');
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
+);
+
 jest.mock('../../../../common/components/user_privileges', () => {
   return {
     useUserPrivileges: () => ({
@@ -139,8 +148,13 @@ describe('Body', () => {
   const mount = useMountAppended();
   const mockRefetch = jest.fn();
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let authenticatedUser: AuthenticatedUser;
 
   beforeEach(() => {
+    (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
+    authenticatedUser = securityMock.createMockAuthenticatedUser({
+      roles: ['superuser'],
+    });
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
