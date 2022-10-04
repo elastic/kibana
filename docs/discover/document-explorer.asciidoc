@@ -114,7 +114,7 @@ image::images/document-explorer-compare-data.png[Compare data in the document ta
 [[document-explorer-configure-table]]
 ==== Set the number of rows displayed per page
 
-By default, the document table displays 100 rows per page. To change this number,
+To change the numbers of rows you want to display on each page, use the *Rows per page* menu. By default, the document table displays 100 rows per page.
 use the *Rows per page* menu.
 
 [role="screenshot"]
