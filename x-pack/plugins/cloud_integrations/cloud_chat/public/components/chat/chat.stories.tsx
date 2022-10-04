@@ -68,7 +68,6 @@ export const Component = ({ id, email, chatURL, jwt }: Params) => {
   return (
     <ServicesProvider
       chat={{
-        enabled: true,
         chatURL,
         user: {
           jwt,
