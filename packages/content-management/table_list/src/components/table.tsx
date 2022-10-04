@@ -14,6 +14,7 @@ import {
   EuiInMemoryTable,
   CriteriaWithPagination,
   PropertySort,
+  SearchFilterConfig,
 } from '@elastic/eui';
 
 import { useServices } from '../services';
@@ -23,6 +24,7 @@ import type {
   Props as TableListViewProps,
   UserContentCommonSchema,
 } from '../table_list_view';
+import { TableSortSelect } from './table_sort_select';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
@@ -87,7 +89,14 @@ export function Table<T extends UserContentCommonSchema>({
       }
     : undefined;
 
-  const searchFilters = getSearchBarFilters ? getSearchBarFilters() : [];
+  const tableSortSelectFilter: SearchFilterConfig = {
+    type: 'custom_component',
+    component: TableSortSelect,
+  };
+
+  const searchFilters = getSearchBarFilters
+    ? [tableSortSelectFilter, ...getSearchBarFilters()]
+    : [tableSortSelectFilter];
 
   const search = {
     onChange: ({ queryText }: { queryText: string }) =>
