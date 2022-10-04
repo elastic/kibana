@@ -1206,12 +1206,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return metricData;
     },
 
-    // async toggleMetricTrendlines() {
-    //   if () {
-    //     this.openDimensionEditor()
-    //   }
-    // }
-
     /**
      * Creates and saves a lens visualization from a dashboard
      *
