@@ -78,7 +78,7 @@ export const getEditorOpener =
                 defaultTypeIsRollup={defaultTypeIsRollup}
                 requireTimestampField={requireTimestampField}
                 allowAdHocDataView={allowAdHocDataView}
-                showManagementLink={true}
+                showManagementLink={Boolean(editData && editData.isPersisted())}
               />
             </I18nProvider>
           </KibanaReactContextProvider>,
