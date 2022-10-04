@@ -10,9 +10,9 @@ import { registerBundleRoutesMock } from './core_app.test.mocks';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { coreMock, httpServerMock } from '../mocks';
-import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
-import type { UiPlugins } from '../plugins';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { PluginType } from '../plugins';
 import { CoreApp } from './core_app';
 import { RequestHandlerContext } from '..';
