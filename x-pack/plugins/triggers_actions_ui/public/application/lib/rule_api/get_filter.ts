@@ -23,7 +23,7 @@ export const getFilter = ({
   }
 
   if (outcomeFilter && outcomeFilter.length) {
-    filter.push(`event.outcome: ${outcomeFilter.join(' or ')}`);
+    filter.push(`kibana.alerting.outcome: ${outcomeFilter.join(' or ')}`);
   }
 
   if (runId) {

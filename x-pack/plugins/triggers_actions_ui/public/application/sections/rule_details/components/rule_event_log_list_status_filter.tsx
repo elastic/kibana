@@ -8,10 +8,9 @@
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
-import type { EcsEventOutcome } from '@kbn/core/server';
-import { RuleEventLogListStatus } from './rule_event_log_list_status';
+import { KibanaAlertingOutcome, RuleEventLogListStatus } from './rule_event_log_list_status';
 
-const statusFilters: EcsEventOutcome[] = ['success', 'failure', 'unknown'];
+const statusFilters: KibanaAlertingOutcome[] = ['success', 'failure', 'warning'];
 
 interface RuleEventLogListStatusFilterProps {
   selectedOptions: string[];

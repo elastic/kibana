@@ -253,6 +253,8 @@ export class ActionExecutor {
         };
 
         event.event = event.event || {};
+        event.kibana = event.kibana || {};
+        event.kibana.alerting = event.kibana.alerting || {};
 
         if (result.status === 'ok') {
           span?.setOutcome('success');

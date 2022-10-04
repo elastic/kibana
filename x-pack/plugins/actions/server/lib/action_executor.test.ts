@@ -159,6 +159,9 @@ test('successfully executes', async () => {
                 },
               },
             },
+            "alerting": Object {
+              "outcome": "success",
+            },
             "saved_objects": Array [
               Object {
                 "id": "1",
@@ -648,6 +651,9 @@ test('writes to event log for execute and execute start', async () => {
           },
         },
       },
+      alerting: {
+        outcome: 'success',
+      },
       saved_objects: [
         {
           rel: 'primary',
@@ -730,6 +736,9 @@ test('writes to event log for execute and execute start when consumer and relate
           },
           rule_type_id: '.rule-type',
         },
+      },
+      alerting: {
+        outcome: 'success',
       },
       saved_objects: [
         {

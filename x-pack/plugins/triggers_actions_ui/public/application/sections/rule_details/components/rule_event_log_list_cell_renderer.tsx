@@ -7,12 +7,11 @@
 
 import React, { useCallback } from 'react';
 import moment from 'moment';
-import type { EcsEventOutcome } from '@kbn/core/server';
 import { EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { routeToRuleDetails } from '../../../constants';
 import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
-import { RuleEventLogListStatus } from './rule_event_log_list_status';
+import { KibanaAlertingOutcome, RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
 import {
   RULE_EXECUTION_LOG_COLUMN_IDS,
@@ -46,7 +45,7 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   }
 
   if (columnId === 'status') {
-    return <RuleEventLogListStatus status={value as EcsEventOutcome} />;
+    return <RuleEventLogListStatus status={value as KibanaAlertingOutcome} />;
   }
 
   if (columnId === 'timestamp') {

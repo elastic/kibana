@@ -204,7 +204,7 @@ describe('getExecutionLogAggregation', () => {
                     ],
                   },
                 },
-                aggs: { actionOutcomes: { terms: { field: 'event.outcome', size: 2 } } },
+                aggs: { actionOutcomes: { terms: { field: 'kibana.alerting.outcome', size: 2 } } },
               },
               minExecutionUuidBucket: {
                 bucket_selector: {
@@ -275,7 +275,7 @@ describe('getExecutionLogAggregation', () => {
                       size: 1,
                       _source: {
                         includes: [
-                          'event.outcome',
+                          'kibana.alerting.outcome',
                           'message',
                           'error.message',
                           'kibana.version',
@@ -397,7 +397,7 @@ describe('getExecutionLogAggregation', () => {
                     ],
                   },
                 },
-                aggs: { actionOutcomes: { terms: { field: 'event.outcome', size: 2 } } },
+                aggs: { actionOutcomes: { terms: { field: 'kibana.alerting.outcome', size: 2 } } },
               },
               minExecutionUuidBucket: {
                 bucket_selector: {
@@ -480,7 +480,7 @@ describe('getExecutionLogAggregation', () => {
                       size: 1,
                       _source: {
                         includes: [
-                          'event.outcome',
+                          'kibana.alerting.outcome',
                           'message',
                           'error.message',
                           'kibana.version',
@@ -602,7 +602,7 @@ describe('getExecutionLogAggregation', () => {
                     ],
                   },
                 },
-                aggs: { actionOutcomes: { terms: { field: 'event.outcome', size: 2 } } },
+                aggs: { actionOutcomes: { terms: { field: 'kibana.alerting.outcome', size: 2 } } },
               },
               minExecutionUuidBucket: {
                 bucket_selector: {
@@ -685,7 +685,7 @@ describe('getExecutionLogAggregation', () => {
                       size: 1,
                       _source: {
                         includes: [
-                          'event.outcome',
+                          'kibana.alerting.outcome',
                           'message',
                           'error.message',
                           'kibana.version',
@@ -787,6 +787,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alerting: {
+                                outcome: 'success',
+                              },
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -872,6 +875,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alerting: {
+                                outcome: 'success',
+                              },
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1028,6 +1034,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alerting: {
+                                outcome: 'failure',
+                              },
                             },
                             message:
                               "rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1115,6 +1124,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alerting: {
+                                outcome: 'success',
+                              },
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1271,6 +1283,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alerting: {
+                                outcome: 'success',
+                              },
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1350,6 +1365,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alerting: {
+                                outcome: 'success',
+                              },
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1506,6 +1524,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alerting: {
+                                outcome: 'success',
+                              },
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1590,6 +1611,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alerting: {
+                                outcome: 'success',
+                              },
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1747,8 +1771,8 @@ describe('getExecutionKPIAggregation', () => {
                 aggs: {
                   actionOutcomes: {
                     terms: {
-                      field: 'event.outcome',
-                      size: 2,
+                      field: 'kibana.alerting.outcome',
+                      size: 3,
                     },
                   },
                 },
@@ -1809,8 +1833,8 @@ describe('getExecutionKPIAggregation', () => {
                   },
                   ruleExecutionOutcomes: {
                     terms: {
-                      field: 'event.outcome',
-                      size: 2,
+                      field: 'kibana.alerting.outcome',
+                      size: 3,
                     },
                   },
                 },
@@ -1886,8 +1910,8 @@ describe('getExecutionKPIAggregation', () => {
                 aggs: {
                   actionOutcomes: {
                     terms: {
-                      field: 'event.outcome',
-                      size: 2,
+                      field: 'kibana.alerting.outcome',
+                      size: 3,
                     },
                   },
                 },
@@ -1960,8 +1984,8 @@ describe('getExecutionKPIAggregation', () => {
                   },
                   ruleExecutionOutcomes: {
                     terms: {
-                      field: 'event.outcome',
-                      size: 2,
+                      field: 'kibana.alerting.outcome',
+                      size: 3,
                     },
                   },
                 },
@@ -2037,8 +2061,8 @@ describe('getExecutionKPIAggregation', () => {
                 aggs: {
                   actionOutcomes: {
                     terms: {
-                      field: 'event.outcome',
-                      size: 2,
+                      field: 'kibana.alerting.outcome',
+                      size: 3,
                     },
                   },
                 },
@@ -2111,8 +2135,8 @@ describe('getExecutionKPIAggregation', () => {
                   },
                   ruleExecutionOutcomes: {
                     terms: {
-                      field: 'event.outcome',
-                      size: 2,
+                      field: 'kibana.alerting.outcome',
+                      size: 3,
                     },
                   },
                 },
@@ -2150,6 +2174,7 @@ describe('formatExecutionKPIAggBuckets', () => {
       success: 0,
       triggeredActions: 0,
       unknown: 0,
+      warning: 0,
     });
   });
 
@@ -2264,6 +2289,7 @@ describe('formatExecutionKPIAggBuckets', () => {
       success: 5,
       unknown: 0,
       failure: 0,
+      warning: 0,
       activeAlerts: 10,
       newAlerts: 10,
       recoveredAlerts: 0,

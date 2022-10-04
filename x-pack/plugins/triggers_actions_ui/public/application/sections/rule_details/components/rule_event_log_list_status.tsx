@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 
-type KibanaAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
+export type KibanaAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
 
 interface RuleEventLogListStatusProps {
   status: KibanaAlertingOutcome;
