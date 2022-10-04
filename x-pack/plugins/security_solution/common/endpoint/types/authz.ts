@@ -28,6 +28,8 @@ export interface EndpointAuthz {
   canGetRunningProcesses: boolean;
   /** If user has permissions to use the Response Actions Console */
   canAccessResponseConsole: boolean;
+  /** If user has permissions to access the Response Actions History page */
+  canAccessResponseActionsHistory: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;
