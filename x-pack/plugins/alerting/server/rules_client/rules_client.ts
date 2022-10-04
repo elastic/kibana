@@ -2983,7 +2983,7 @@ export class RulesClient {
 
     // Check that the rule is enabled
     if (!attributes.enabled) {
-      return i18n.translate('xpack.alerting.rulesClient.runSoon.getTaskError', {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.disabledRuleError', {
         defaultMessage: 'Error running rule: rule is disabled',
       });
     }
