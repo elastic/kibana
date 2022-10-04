@@ -18,7 +18,8 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe('runSoon', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/142564
+  describe.skip('runSoon', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
