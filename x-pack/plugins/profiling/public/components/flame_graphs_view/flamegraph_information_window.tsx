@@ -25,11 +25,10 @@ interface Props {
     exeFileName: string;
     functionName: string;
     sourceFileName: string;
-    samples: number;
-    childSamples: number;
+    countInclusive: number;
+    countExclusive: number;
   };
-  sampledTraces: number;
-  totalTraces: number;
+  totalSamples: number;
   totalSeconds: number;
   onClose: () => void;
   status: AsyncStatus;
@@ -105,8 +104,7 @@ function FlamegraphFrameInformationPanel({
 export function FlamegraphInformationWindow({
   onClose,
   frame,
-  sampledTraces,
-  totalTraces,
+  totalSamples,
   totalSeconds,
   status,
 }: Props) {
@@ -122,14 +120,13 @@ export function FlamegraphInformationWindow({
     );
   }
 
-  const { childSamples, exeFileName, samples, functionName, sourceFileName } = frame;
+  const { exeFileName, functionName, sourceFileName, countInclusive, countExclusive } = frame;
 
   const impactRows = getImpactRows({
-    samples,
-    childSamples,
-    sampledTraces,
+    countInclusive,
+    countExclusive,
+    totalSamples,
     totalSeconds,
-    totalTraces,
   });
 
   return (
