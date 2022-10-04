@@ -9,7 +9,7 @@
 import type { GuideId } from '../../common/types';
 import { guidesConfig } from '../constants/guides_config';
 import type { GuideConfig, StepConfig } from '../types';
-import { GuideConfig, GuidedOnboardingState, StepConfig, UseCase } from '../types';
+import { GuideConfig, GuidedOnboardingState, StepConfig } from '../types';
 
 export const getGuideConfig = (guideID?: string): GuideConfig | undefined => {
   if (guideID && Object.keys(guidesConfig).includes(guideID)) {

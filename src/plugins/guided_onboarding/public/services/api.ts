@@ -10,8 +10,8 @@ import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common';
-import { GuidedOnboardingApi, GuidedOnboardingState, UseCase } from '../types';
-import { getNextStep, isIntegrationInGuideStep, isLastStep } from './helpers';
+import { GuidedOnboardingApi, GuidedOnboardingState } from '../types';
+import { isIntegrationInGuideStep, isLastStep } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '../../common/types';
 import { isLastStep, getGuideConfig } from './helpers';
