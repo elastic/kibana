@@ -98,11 +98,12 @@ export const useSubAction = <P, R>({
 
         const res = await executeAction<R>({
           id: connectorId,
-          http,
           params: {
             subAction,
             subActionParams: memoParams,
           },
+          http,
+          signal: abortCtrl.signal,
         });
 
         if (isMounted) {
@@ -117,7 +118,7 @@ export const useSubAction = <P, R>({
         }
         return res.data;
       } catch (e) {
-        if (isMounted) {
+        if (isMounted && !abortCtrl.signal.aborted) {
           dispatch({
             type: SubActionsActionsList.ERROR,
             payload: e,

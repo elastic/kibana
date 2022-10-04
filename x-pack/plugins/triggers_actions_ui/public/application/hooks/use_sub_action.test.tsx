@@ -22,9 +22,11 @@ describe('useSubAction', () => {
   useKibanaMock().services.http.post = jest
     .fn()
     .mockImplementation(() => Promise.resolve({ status: 'ok', data: {} }));
+  let abortSpy = jest.spyOn(window, 'AbortController');
 
   beforeEach(() => {
     jest.clearAllMocks();
+    abortSpy.mockRestore();
   });
 
   it('init', async () => {
@@ -44,7 +46,10 @@ describe('useSubAction', () => {
 
     expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       '/api/actions/connector/test-id/_execute',
-      { body: '{"params":{"subAction":"test","subActionParams":{}}}' }
+      {
+        body: '{"params":{"subAction":"test","subActionParams":{}}}',
+        signal: new AbortController().signal,
+      }
     );
   });
 
@@ -114,7 +119,7 @@ describe('useSubAction', () => {
 
   it('returns an error correctly', async () => {
     const error = new Error('error executing');
-    useKibanaMock().services.http.post = jest.fn().mockRejectedValue(error);
+    useKibanaMock().services.http.post = jest.fn().mockRejectedValueOnce(error);
 
     const { result, waitForNextUpdate } = renderHook(() => useSubAction(params));
     await waitForNextUpdate();
@@ -124,6 +129,46 @@ describe('useSubAction', () => {
       response: undefined,
       error,
     });
+  });
+
+  it('should not set error if aborted', async () => {
+    const firstAbortCtrl = new AbortController();
+    firstAbortCtrl.abort();
+    abortSpy = jest.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
+
+    const error = new Error('error executing');
+    useKibanaMock().services.http.post = jest.fn().mockRejectedValueOnce(error);
+
+    const { result } = renderHook(() => useSubAction(params));
+
+    expect(result.current.error).toBe(null);
+  });
+
+  it('should abort on unmount', async () => {
+    const firstAbortCtrl = new AbortController();
+    abortSpy = jest.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
+
+    const { unmount } = renderHook(useSubAction, { initialProps: params });
+
+    unmount();
+
+    expect(firstAbortCtrl.signal.aborted).toEqual(true);
+  });
+
+  it('should abort on parameter change', async () => {
+    const firstAbortCtrl = new AbortController();
+    abortSpy = jest.spyOn(window, 'AbortController').mockImplementation(() => {
+      abortSpy.mockRestore();
+      return firstAbortCtrl;
+    });
+
+    const { rerender } = renderHook(useSubAction, { initialProps: params });
+
+    await act(async () => {
+      rerender({ ...params, connectorId: 'test-id-2' });
+    });
+
+    expect(firstAbortCtrl.signal.aborted).toEqual(true);
   });
 
   it('does not execute if disabled', async () => {

@@ -6,13 +6,13 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeParams, RenderParameterTemplates, Services } from '../types';
-import { SubActionConnector } from './sub_action_connector';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ActionTypeParams, RenderParameterTemplates, Services } from '../types';
+import type { SubActionConnector } from './sub_action_connector';
 
 export interface ServiceParams<Config, Secrets> {
   /**

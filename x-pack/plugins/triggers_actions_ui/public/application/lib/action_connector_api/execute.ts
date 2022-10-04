@@ -23,15 +23,18 @@ export async function executeAction<R>({
   id,
   params,
   http,
+  signal,
 }: {
   id: string;
   http: HttpSetup;
   params: Record<string, unknown>;
+  signal?: AbortSignal;
 }): Promise<ActionTypeExecutorResult<R>> {
   const res = await http.post<AsApiContract<ActionTypeExecutorResult<R>>>(
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}/_execute`,
     {
       body: JSON.stringify({ params }),
+      signal,
     }
   );
   return rewriteBodyRes<R>(res);
