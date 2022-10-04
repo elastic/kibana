@@ -205,7 +205,7 @@ export const createExternalService = (
         }),
         external: {
           system: {
-            id: incidentId,
+            id: JSON.stringify(incidentId),
           },
         },
       });
@@ -269,7 +269,7 @@ export const createExternalService = (
         ...stringifyObjValues({ comment: comment.comment }),
         external: {
           system: {
-            id: incidentId,
+            id: JSON.stringify(incidentId),
           },
         },
       });
