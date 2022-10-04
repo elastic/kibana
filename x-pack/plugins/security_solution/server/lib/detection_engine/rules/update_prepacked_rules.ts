@@ -99,8 +99,8 @@ export const createPromises = (
     } else {
       return patchRules({
         rulesClient,
-        rule: migratedRule,
-        params: {
+        existingRule: migratedRule,
+        nextParams: {
           ...rule,
           // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
           enabled: undefined,

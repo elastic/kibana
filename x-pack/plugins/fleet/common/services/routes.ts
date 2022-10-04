@@ -118,6 +118,10 @@ export const agentPolicyRouteService = {
     return AGENT_POLICY_API_ROUTES.LIST_PATTERN;
   },
 
+  getBulkGetPath: () => {
+    return AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN;
+  },
+
   getInfoPath: (agentPolicyId: string) => {
     return AGENT_POLICY_API_ROUTES.INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
@@ -190,6 +194,7 @@ export const agentRouteService = {
   getUpgradePath: (agentId: string) =>
     AGENT_API_ROUTES.UPGRADE_PATTERN.replace('{agentId}', agentId),
   getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
+  getActionStatusPath: () => AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
   getCurrentUpgradesPath: () => AGENT_API_ROUTES.CURRENT_UPGRADES_PATTERN,
   getCancelActionPath: (actionId: string) =>
     AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN.replace('{actionId}', actionId),

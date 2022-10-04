@@ -23,6 +23,7 @@
         ],
         "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -36,6 +37,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -49,6 +51,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -66,6 +69,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -88,6 +92,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -102,6 +107,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -121,6 +127,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -140,6 +147,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -155,6 +163,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -170,6 +179,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -189,6 +199,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -206,6 +217,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -220,7 +232,8 @@
               "never[] | NonNullable<RequiredServices>"
             ],
             "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -246,6 +259,7 @@
         ],
         "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -259,6 +273,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -279,6 +294,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -298,6 +314,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -323,6 +340,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -340,6 +358,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -357,6 +376,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -372,6 +392,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -391,6 +412,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -418,6 +440,7 @@
         ],
         "path": "src/plugins/presentation_util/public/services/create/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -441,6 +464,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -463,6 +487,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/create/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -482,6 +507,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -499,6 +525,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -516,6 +543,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -531,6 +559,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/create/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -553,6 +582,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/add_from_library.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -566,6 +596,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/add_from_library.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -584,6 +615,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -597,6 +629,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -611,6 +644,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -647,6 +681,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/test_helpers/function_wrapper.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -660,6 +695,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/test_helpers/function_wrapper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -680,6 +716,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -698,6 +735,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -721,6 +759,7 @@
         ],
         "path": "src/plugins/presentation_util/public/services/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -737,6 +776,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -750,6 +790,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -768,6 +809,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/httpurl.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -781,6 +823,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/httpurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -799,6 +842,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -812,6 +856,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -834,6 +879,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -847,7 +893,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -888,6 +935,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -901,7 +949,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -936,6 +985,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -949,7 +999,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -970,6 +1021,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -983,7 +1035,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1006,6 +1059,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1019,7 +1073,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1040,6 +1095,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1053,7 +1109,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1078,6 +1135,7 @@
         ],
         "path": "src/plugins/presentation_util/public/redux_embeddables/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1110,6 +1168,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1123,7 +1182,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1140,6 +1200,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1153,6 +1214,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1167,6 +1229,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1187,6 +1250,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1200,6 +1264,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_button.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1220,6 +1285,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1235,6 +1301,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1255,6 +1322,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1268,6 +1336,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1296,6 +1365,7 @@
         ],
         "path": "src/plugins/presentation_util/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1318,6 +1388,7 @@
             ],
             "path": "src/plugins/presentation_util/public/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1336,6 +1407,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1349,6 +1421,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1363,6 +1436,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1381,6 +1455,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1394,6 +1469,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -1408,6 +1484,7 @@
             ],
             "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1428,6 +1505,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/solution_toolbar/solution_toolbar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1441,6 +1519,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/solution_toolbar/solution_toolbar.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1461,6 +1540,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1474,6 +1554,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/button.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1494,6 +1575,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/popover.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1507,6 +1589,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/popover.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1532,6 +1615,7 @@
         ],
         "path": "src/plugins/presentation_util/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1604,6 +1688,7 @@
         ],
         "path": "src/plugins/presentation_util/public/redux_embeddables/use_redux_embeddable_context.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1676,6 +1761,7 @@
         ],
         "path": "src/plugins/presentation_util/public/redux_embeddables/use_redux_embeddable_context.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1694,6 +1780,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1709,6 +1796,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1725,6 +1813,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1754,6 +1843,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1775,7 +1865,8 @@
               "[]"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -1787,7 +1878,8 @@
               "Value of expression"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -1803,6 +1895,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -1816,6 +1909,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/components/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1834,7 +1928,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -1850,7 +1945,8 @@
               ".Height<string | number> | undefined"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -1872,7 +1968,8 @@
               " | undefined"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -1892,7 +1989,8 @@
               " | undefined"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1918,6 +2016,7 @@
         ],
         "path": "src/plugins/presentation_util/public/services/create/factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -1927,16 +2026,11 @@
             "label": "coreStart",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -1949,7 +2043,8 @@
               "Start"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -1961,17 +2056,12 @@
             "signature": [
               "BehaviorSubject",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppUpdater",
-                "text": "AppUpdater"
-              },
+              "AppUpdater",
               "> | undefined"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -1981,17 +2071,12 @@
             "label": "initContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.PluginInitializerContext",
-                "text": "PluginInitializerContext"
-              },
+              "PluginInitializerContext",
               "<object> | undefined"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2005,6 +2090,7 @@
         "description": [],
         "path": "src/plugins/presentation_util/public/services/capabilities.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -2018,6 +2104,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/capabilities.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2033,6 +2120,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/capabilities.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2048,6 +2136,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/capabilities.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2063,6 +2152,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/capabilities.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2078,6 +2168,7 @@
         "description": [],
         "path": "src/plugins/presentation_util/public/services/dashboards.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -2095,6 +2186,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/dashboards.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -2108,6 +2200,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/dashboards.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2122,6 +2215,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/dashboards.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2143,6 +2237,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/dashboards.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -2156,6 +2251,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/dashboards.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2173,6 +2269,7 @@
         "description": [],
         "path": "src/plugins/presentation_util/public/services/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -2186,6 +2283,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -2199,6 +2297,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2216,6 +2315,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2238,6 +2338,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -2251,6 +2352,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2264,7 +2366,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"presentation\" | \"dashboard\" | \"canvas\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -2276,6 +2378,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -2285,10 +2388,11 @@
                 "label": "solutions",
                 "description": [],
                 "signature": [
-                  "(\"presentation\" | \"dashboard\" | \"canvas\")[] | undefined"
+                  "(\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined"
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2306,6 +2410,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -2319,6 +2424,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2333,6 +2439,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2347,6 +2454,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2364,6 +2472,7 @@
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2391,6 +2500,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -2400,7 +2510,8 @@
             "label": "createType",
             "description": [],
             "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -2414,6 +2525,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2431,6 +2543,7 @@
         ],
         "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -2538,6 +2651,7 @@
             ],
             "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2585,7 +2699,8 @@
                   ", unknown>> | undefined; reducers: ReducerType; }"
                 ],
                 "path": "src/plugins/presentation_util/public/redux_embeddables/create_redux_embeddable_tools.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2613,6 +2728,7 @@
         ],
         "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -2625,7 +2741,8 @@
               "InputType"
             ],
             "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -2638,7 +2755,8 @@
               "OutputType"
             ],
             "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -2651,7 +2769,8 @@
               "StateType"
             ],
             "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2677,6 +2796,7 @@
         ],
         "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -2690,6 +2810,7 @@
             ],
             "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2705,6 +2826,7 @@
             ],
             "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2718,7 +2840,8 @@
                   "P & { children?: React.ReactNode; }"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -2731,7 +2854,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2750,6 +2874,7 @@
             ],
             "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2763,7 +2888,8 @@
                   "T"
                 ],
                 "path": "node_modules/redux/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2779,6 +2905,7 @@
             ],
             "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -2799,7 +2926,8 @@
               "<Partial<ReduxEmbeddableStateType[\"output\"]>, string>; }"
             ],
             "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2813,6 +2941,7 @@
         "description": [],
         "path": "src/plugins/presentation_util/public/components/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -2825,7 +2954,8 @@
               "SaveModalDocumentInfo"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -2835,7 +2965,8 @@
             "label": "canSaveByReference",
             "description": [],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -2845,7 +2976,8 @@
             "label": "objectType",
             "description": [],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -2859,6 +2991,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2882,6 +3015,7 @@
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -2902,6 +3036,7 @@
                 ],
                 "path": "src/plugins/presentation_util/public/components/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2926,7 +3061,8 @@
               ") => React.ReactNode)"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2950,6 +3086,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2964,6 +3101,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2988,6 +3126,7 @@
         ],
         "path": "src/plugins/presentation_util/public/services/create/factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3008,7 +3147,8 @@
               "<Start>"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3021,7 +3161,8 @@
               "RequiredServices"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3040,6 +3181,7 @@
         ],
         "path": "src/plugins/presentation_util/public/components/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3054,7 +3196,8 @@
               ".IStandaloneCodeEditor | null"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3073,6 +3216,7 @@
         ],
         "path": "src/plugins/presentation_util/public/services/create/factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3086,7 +3230,8 @@
               "Parameters"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3099,7 +3244,8 @@
               "RequiredServices"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3126,6 +3272,7 @@
         ],
         "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3155,6 +3302,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3169,6 +3317,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3188,6 +3337,7 @@
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/default_theme.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3199,6 +3349,7 @@
         "description": [],
         "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -3208,7 +3359,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3219,6 +3371,7 @@
             "description": [],
             "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -3228,7 +3381,8 @@
                 "label": "fontFamily",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3238,7 +3392,8 @@
                 "label": "fontWeight",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3248,7 +3403,8 @@
                 "label": "fontStyle",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3258,7 +3414,8 @@
                 "label": "textDecoration",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3268,7 +3425,8 @@
                 "label": "color",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3278,7 +3436,8 @@
                 "label": "textAlign",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3288,7 +3447,8 @@
                 "label": "fontSize",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3298,7 +3458,8 @@
                 "label": "lineHeight",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3310,7 +3471,8 @@
             "label": "css",
             "description": [],
             "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3327,6 +3489,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3339,6 +3502,7 @@
       "description": [],
       "path": "src/plugins/presentation_util/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -3352,6 +3516,7 @@
       "description": [],
       "path": "src/plugins/presentation_util/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "presentationUtil",
@@ -3365,6 +3530,7 @@
           ],
           "path": "src/plugins/presentation_util/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -3378,7 +3544,8 @@
                 "P & { children?: React.ReactNode; }"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             },
             {
               "parentPluginId": "presentationUtil",
@@ -3391,7 +3558,8 @@
                 "any"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         },
@@ -3412,7 +3580,8 @@
             }
           ],
           "path": "src/plugins/presentation_util/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "presentationUtil",
@@ -3434,6 +3603,7 @@
           ],
           "path": "src/plugins/presentation_util/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -3454,7 +3624,8 @@
                 "[]"
               ],
               "path": "src/plugins/presentation_util/public/index.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
@@ -3481,6 +3652,7 @@
         ],
         "path": "src/plugins/presentation_util/server/ui_settings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3501,6 +3673,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -3525,6 +3698,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -3538,6 +3712,7 @@
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3558,6 +3733,7 @@
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3575,6 +3751,7 @@
         "description": [],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -3587,7 +3764,8 @@
               "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3597,7 +3775,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/presentation_util/common/labs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3607,7 +3786,8 @@
             "label": "isActive",
             "description": [],
             "path": "src/plugins/presentation_util/common/labs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3617,7 +3797,8 @@
             "label": "isDisplayed",
             "description": [],
             "path": "src/plugins/presentation_util/common/labs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3630,7 +3811,8 @@
               "(\"kibana\" | \"browser\" | \"session\")[]"
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3640,7 +3822,8 @@
             "label": "description",
             "description": [],
             "path": "src/plugins/presentation_util/common/labs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3650,10 +3833,11 @@
             "label": "solutions",
             "description": [],
             "signature": [
-              "(\"presentation\" | \"dashboard\" | \"canvas\")[]"
+              "(\"dashboard\" | \"canvas\" | \"presentation\")[]"
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3673,6 +3857,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3687,6 +3872,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3701,6 +3887,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3715,6 +3902,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3729,6 +3917,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3745,6 +3934,7 @@
         ],
         "path": "src/plugins/presentation_util/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3759,6 +3949,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3773,6 +3964,7 @@
         ],
         "path": "src/plugins/presentation_util/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3787,6 +3979,7 @@
         ],
         "path": "src/plugins/presentation_util/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3816,6 +4009,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3830,6 +4024,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3851,6 +4046,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3861,10 +4057,11 @@
         "label": "SolutionName",
         "description": [],
         "signature": [
-          "\"presentation\" | \"dashboard\" | \"canvas\""
+          "\"dashboard\" | \"canvas\" | \"presentation\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3881,6 +4078,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3895,6 +4093,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3908,6 +4107,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
@@ -3918,6 +4118,7 @@
             "description": [],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -3930,7 +4131,8 @@
                   "\"labs:dashboard:deferBelowFold\""
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3943,7 +4145,8 @@
                   "false"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3956,7 +4159,8 @@
                   "true"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3969,7 +4173,8 @@
                   "(\"kibana\" | \"browser\" | \"session\")[]"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3979,7 +4184,8 @@
                 "label": "name",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -3989,7 +4195,8 @@
                 "label": "description",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4002,7 +4209,8 @@
                   "\"dashboard\"[]"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -4015,6 +4223,7 @@
             "description": [],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -4027,7 +4236,8 @@
                   "\"labs:dashboard:dashboardControls\""
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4040,7 +4250,8 @@
                   "true"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4053,7 +4264,8 @@
                   "true"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4066,7 +4278,8 @@
                   "(\"kibana\" | \"browser\" | \"session\")[]"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4076,7 +4289,8 @@
                 "label": "name",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4086,7 +4300,8 @@
                 "label": "description",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4099,7 +4314,8 @@
                   "\"dashboard\"[]"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -4112,6 +4328,7 @@
             "description": [],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "presentationUtil",
@@ -4124,7 +4341,8 @@
                   "\"labs:canvas:byValueEmbeddable\""
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4137,7 +4355,8 @@
                   "true"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4150,7 +4369,8 @@
                   "true"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4163,7 +4383,8 @@
                   "(\"kibana\" | \"browser\" | \"session\")[]"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4173,7 +4394,8 @@
                 "label": "name",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4183,7 +4405,8 @@
                 "label": "description",
                 "description": [],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "presentationUtil",
@@ -4196,7 +4419,8 @@
                   "\"canvas\"[]"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -4215,6 +4439,7 @@
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

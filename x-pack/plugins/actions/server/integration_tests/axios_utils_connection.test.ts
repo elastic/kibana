@@ -17,7 +17,7 @@ import { duration as momentDuration } from 'moment';
 import { schema } from '@kbn/config-schema';
 import getPort from 'get-port';
 
-import { request } from '../builtin_action_types/lib/axios_utils';
+import { request } from '../lib/axios_utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';

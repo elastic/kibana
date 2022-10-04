@@ -198,7 +198,8 @@ export class AnomaliesTableInternal extends Component {
       this.state.itemIdToExpandedRowMap,
       this.toggleRow,
       filter,
-      influencerFilter
+      influencerFilter,
+      this.props.sourceIndicesWithGeoFields
     );
 
     const sorting = {
@@ -275,4 +276,5 @@ AnomaliesTableInternal.propTypes = {
   influencerFilter: PropTypes.func,
   tableState: PropTypes.object.isRequired,
   updateTableState: PropTypes.func.isRequired,
+  sourceIndicesWithGeoFields: PropTypes.object.isRequired,
 };

@@ -9,7 +9,7 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RuntimeType } from '../../shared_imports';
 
-export const RUNTIME_FIELD_OPTIONS: Array<EuiComboBoxOptionOption<RuntimeType>> = [
+export const RUNTIME_FIELD_OPTIONS_PRIMITIVE: Array<EuiComboBoxOptionOption<RuntimeType>> = [
   {
     label: 'Keyword',
     value: 'keyword',
@@ -38,4 +38,12 @@ export const RUNTIME_FIELD_OPTIONS: Array<EuiComboBoxOptionOption<RuntimeType>> 
     label: 'Geo point',
     value: 'geo_point',
   },
+];
+
+export const RUNTIME_FIELD_OPTIONS = [
+  ...RUNTIME_FIELD_OPTIONS_PRIMITIVE,
+  {
+    label: 'Composite',
+    value: 'composite',
+  } as EuiComboBoxOptionOption<RuntimeType>,
 ];

@@ -6,7 +6,7 @@
  */
 
 import { getLegacyMetricVisualization } from './visualization';
-import type { MetricState } from '../../../common/types';
+import type { LegacyMetricState } from '../../../common/types';
 import { layerTypes } from '../../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { generateId } from '../../id_generator';
@@ -17,7 +17,7 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../id_generator');
 
-function exampleState(): MetricState {
+function exampleState(): LegacyMetricState {
   return {
     accessor: 'a',
     layerId: 'l1',
@@ -70,7 +70,7 @@ describe('metric_visualization', () => {
   describe('#clearLayer', () => {
     it('returns a clean layer', () => {
       (generateId as jest.Mock).mockReturnValueOnce('test-id1');
-      expect(metricVisualization.clearLayer(exampleState(), 'l1')).toEqual({
+      expect(metricVisualization.clearLayer(exampleState(), 'l1', 'indexPattern1')).toEqual({
         accessor: undefined,
         layerId: 'l1',
         layerType: layerTypes.DATA,

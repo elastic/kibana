@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, reduce } from 'lodash';
+import { reduce } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,18 +16,10 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import deepEqual from 'fast-deep-equal';
+import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
-import {
-  Form,
-  useForm,
-  useFormData,
-  getUseField,
-  Field,
-  FIELD_TYPES,
-  fieldValidators,
-} from '../../shared_imports';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
@@ -36,14 +28,12 @@ import { useAgentPolicies } from '../../agent_policies';
 import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
 import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
-import { idSchemaValidation } from '../queries/validations';
 import type { PackItem } from '../types';
+import { NameField } from './name_field';
+import { DescriptionField } from './description_field';
+import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
-const GhostFormField = () => <></>;
-
-const FORM_ID = 'scheduledQueryForm';
-
-const CommonUseField = getUseField({ component: Field });
+type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
 interface PackFormProps {
   defaultValue?: PackItem;
@@ -70,83 +60,52 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     withRedirect: true,
   });
 
-  const { form } = useForm<PackItem>({
-    id: FORM_ID,
-    schema: {
-      name: {
-        type: FIELD_TYPES.TEXT,
-        label: i18n.translate('xpack.osquery.pack.form.nameFieldLabel', {
-          defaultMessage: 'Name',
-        }),
-        validations: [
-          {
-            validator: idSchemaValidation,
-          },
-          {
-            validator: fieldValidators.emptyField(
-              i18n.translate('xpack.osquery.pack.form.nameFieldRequiredErrorMessage', {
-                defaultMessage: 'Name is a required field',
-              })
-            ),
-          },
-        ],
-      },
-      description: {
-        type: FIELD_TYPES.TEXT,
-        label: i18n.translate('xpack.osquery.pack.form.descriptionFieldLabel', {
-          defaultMessage: 'Description (optional)',
-        }),
-      },
-      policy_ids: {
-        defaultValue: [],
-        type: FIELD_TYPES.COMBO_BOX,
-        label: i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldLabel', {
-          defaultMessage: 'Scheduled agent policies (optional)',
-        }),
-        helpText: i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldHelpText', {
-          defaultMessage: 'Queries in this pack are scheduled for agents in the selected policies.',
-        }),
-      },
-      enabled: {
-        defaultValue: true,
-      },
-      queries: {
-        defaultValue: [],
-      },
-    },
-    onSubmit: async (formData, isValid) => {
-      if (isValid) {
-        try {
-          if (editMode) {
-            // @ts-expect-error update types
-            await updateAsync({ id: defaultValue?.id, ...formData });
-          } else {
-            // @ts-expect-error update types
-            await createAsync(formData);
-          }
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      }
-    },
-    deserializer: (payload) => ({
-      ...payload,
-      policy_ids: payload.policy_ids ?? [],
-      queries: convertPackQueriesToSO(payload.queries),
-    }),
-    // @ts-expect-error update types
-    serializer: (payload) => ({
-      ...payload,
-      queries: convertSOQueriesToPack(payload.queries),
-    }),
-    defaultValue,
+  const deserializer = (payload: PackItem) => ({
+    ...payload,
+    policy_ids: payload.policy_ids ?? [],
+    queries: convertPackQueriesToSO(payload.queries),
   });
 
-  const { setFieldValue, submit, isSubmitting } = form;
-
-  const [{ name: queryName, policy_ids: policyIds }] = useFormData({
-    form,
-    watch: ['name', 'policy_ids'],
+  const serializer = (payload: PackFormData) => ({
+    ...payload,
+    queries: convertSOQueriesToPack(payload.queries),
   });
+
+  const hooksForm = useHookForm({
+    defaultValues: defaultValue
+      ? deserializer(defaultValue)
+      : {
+          name: '',
+          description: '',
+          policy_ids: [],
+          enabled: true,
+          queries: [],
+        },
+  });
+
+  const {
+    handleSubmit,
+    watch,
+    formState: { isSubmitting },
+  } = hooksForm;
+
+  const onSubmit = useCallback(
+    async (values: PackFormData) => {
+      try {
+        if (editMode && defaultValue?.id) {
+          await updateAsync({ id: defaultValue?.id, ...serializer(values) });
+        } else {
+          await createAsync(serializer(values));
+        }
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
+    },
+    [createAsync, defaultValue?.id, editMode, updateAsync]
+  );
+
+  const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
+
+  const { policy_ids: policyIds } = watch();
 
   const agentCount = useMemo(
     () =>
@@ -162,11 +121,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [policyIds, agentPoliciesById]
   );
 
-  const handleNameChange = useCallback(
-    (newName: string) => isEmpty(queryName) && setFieldValue('name', newName),
-    [queryName, setFieldValue]
-  );
-
   const handleSaveClick = useCallback(() => {
     if (agentCount) {
       setShowConfirmationModal(true);
@@ -174,51 +128,40 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       return;
     }
 
-    submit();
-  }, [agentCount, submit]);
+    handleSubmitForm();
+  }, [agentCount, handleSubmitForm]);
 
   const handleConfirmConfirmationClick = useCallback(() => {
-    submit();
+    handleSubmitForm();
     setShowConfirmationModal(false);
-  }, [submit]);
+  }, [handleSubmitForm]);
 
   const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
 
   return (
     <>
-      <Form form={form}>
+      <FormProvider {...hooksForm}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CommonUseField path="name" euiFieldProps={euiFieldProps} />
+            <NameField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CommonUseField path="description" euiFieldProps={euiFieldProps} />
+            <DescriptionField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CommonUseField
-              path="policy_ids"
-              component={PolicyIdComboBoxField}
-              agentPoliciesById={agentPoliciesById}
-            />
+            <PolicyIdComboBoxField />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />
 
-        <CommonUseField
-          path="queries"
-          component={QueriesField}
-          handleNameChange={handleNameChange}
-          euiFieldProps={euiFieldProps}
-        />
-
-        <CommonUseField path="enabled" component={GhostFormField} />
-      </Form>
+        <QueriesField euiFieldProps={euiFieldProps} />
+      </FormProvider>
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
@@ -272,4 +215,4 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   );
 };
 
-export const PackForm = React.memo(PackFormComponent);
+export const PackForm = React.memo(PackFormComponent, deepEqual);

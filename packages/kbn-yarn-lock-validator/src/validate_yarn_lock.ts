@@ -93,14 +93,15 @@ export async function validateDependencies(log: SomeDevLog, yarnLock: YarnLock) 
   // look for packages that have the the `kibana.devOnly` flag in their package.json
   // and make sure they aren't included in the production dependencies of Kibana
   const bazelPackages = await discoverBazelPackages(REPO_ROOT);
-  const devOnlyPackagesInProduction = bazelPackages
-    .filter((p) => p.isDevOnly() && Object.hasOwn(kibanaPackageJson.dependencies, p.pkg.name))
-    .map((p) => p.pkg.name);
-
+  const devOnlyPackagesInProduction = bazelPackages.flatMap((p) =>
+    p.isDevOnly() && Object.hasOwn(kibanaPackageJson.dependencies, p.manifest.id)
+      ? p.manifest.id
+      : []
+  );
   if (devOnlyPackagesInProduction.length) {
     log.error(dedent`
       Some of the packages in the production dependency chain for Kibana and X-Pack are
-      flagged with "kibana.devOnly" in their package.json. Please check changes made to
+      flagged with "devOnly" in their package.json. Please check changes made to
       packages and their dependencies to ensure they don't end up in production.
 
       The devOnly dependencies that are being dependend on in production are:

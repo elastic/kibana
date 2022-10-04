@@ -37,6 +37,7 @@ import {
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
+  SAVED_QUERY_REQUIRED,
 } from './translations';
 
 export const schema: FormSchema<DefineStepRule> = {
@@ -127,7 +128,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path, formData }] = args;
-          const { query, filters } = value as FieldValueQueryBar;
+          const { query, filters, saved_id: savedId } = value as FieldValueQueryBar;
           const needsValidation = !isMlRule(formData.ruleType);
           if (!needsValidation) {
             return undefined;
@@ -135,6 +136,9 @@ export const schema: FormSchema<DefineStepRule> = {
           const isFieldEmpty = isEmpty(query.query as string) && isEmpty(filters);
           if (!isFieldEmpty) {
             return undefined;
+          }
+          if (savedId) {
+            return { code: 'ERR_FIELD_MISSING', path, message: SAVED_QUERY_REQUIRED };
           }
           const message = isEqlRule(formData.ruleType) ? EQL_QUERY_REQUIRED : CUSTOM_QUERY_REQUIRED;
           return { code: 'ERR_FIELD_MISSING', path, message };
@@ -622,5 +626,9 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
       }
     ),
+  },
+  shouldLoadQueryDynamically: {
+    type: FIELD_TYPES.CHECKBOX,
+    defaultValue: false,
   },
 };

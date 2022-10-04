@@ -26,8 +26,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
-
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { AddToTimelinePayload } from '../timelines/get_add_to_timeline';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -44,14 +45,15 @@ import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 const DataContext = createContext<ResultEdges>([]);
 
-interface ResultsTableComponentProps {
+export interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];
-  ecsMapping?: Record<string, string>;
+  ecsMapping?: ECSMapping;
   endDate?: string;
   startDate?: string;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
+  addToCase?: ({ actionId }: { actionId?: string }) => React.ReactElement;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -61,6 +63,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
   addToTimeline,
+  addToCase,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -186,10 +189,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     if (!ecsMapping) return;
 
     return reduce(
-      (acc, [key, value]) => {
-        // @ts-expect-error update types
+      (acc: Record<string, string[]>, [key, value]) => {
         if (value?.field) {
-          // @ts-expect-error update types
           acc[value?.field] = [...(acc[value?.field] ?? []), key];
         }
 
@@ -202,7 +203,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const getHeaderDisplay = useCallback(
     (columnName: string) => {
-      // @ts-expect-error update types
       if (ecsMappingConfig && ecsMappingConfig[columnName]) {
         return (
           <>
@@ -217,12 +217,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   />
                   {`:`}
                   <ul>
-                    {
-                      // @ts-expect-error update types
-                      ecsMappingConfig[columnName].map((fieldName) => (
-                        <li key={fieldName}>{fieldName}</li>
-                      ))
-                    }
+                    {ecsMappingConfig[columnName].map((fieldName) => (
+                      <li key={fieldName}>{fieldName}</li>
+                    ))}
                   </ul>
                 </>
               }
@@ -348,10 +345,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             startDate={startDate}
           />
           {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
+          {addToCase && addToCase({ actionId })}
         </>
       ),
     }),
-    [actionId, addToTimeline, endDate, startDate]
+    [actionId, addToCase, addToTimeline, endDate, startDate]
   );
 
   useEffect(

@@ -215,6 +215,16 @@ export const TIMELINE_KQLMODE_SEARCH = '[data-test-subj="kqlModePopoverSearch"]'
 
 export const TIMELINE_KQLMODE_FILTER = '[data-test-subj="kqlModePopoverFilter"]';
 
+export const QUERYBAR_MENU_POPOVER = '[data-test-subj="queryBarMenuPopover"]';
+
+export const TIMELINE_SHOWQUERYBARMENU_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="showQueryBarMenu"]`;
+
+export const TIMELINE_SWITCHQUERYLANGUAGE_BUTTON = '[data-test-subj="switchQueryLanguageButton"]';
+
+export const TIMELINE_LUCENELANGUAGE_BUTTON = '[data-test-subj="luceneLanguageMenuItem"]';
+
+export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem"]';
+
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
@@ -282,3 +292,23 @@ export const ACTIVE_TIMELINE_BOTTOM_BAR =
   '[data-test-subj="flyoutBottomBar"]  .active-timeline-button';
 
 export const DATA_GRID_BODY = '[data-test-subj=body-data-grid] .euiDataGrid__virtualized';
+
+export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
+  `[data-test-subj="draggable-content-${fieldName}"]`;
+
+export const GET_TIMELINE_GRID_HEADER = (fieldName: string) =>
+  `[data-test-subj="header-${fieldName}"]`;
+
+export const EMPTY_DROPPABLE_DATA_PROVIDER_GROUP = `.empty-providers-group`;
+
+export const TIMELINE_DATA_PROVIDERS_CONTAINER = '[data-test-subj="dataProviders"]';
+
+export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
+
+export const HOVER_ACTIONS = {
+  ADD_TO_TIMELINE: '[data-test-subj="add-to-timeline"]',
+  FILTER_FOR: '[data-test-subj="filter-for-value"]',
+  FILTER_OUT: '[data-test-subj="filter-out-value"]',
+  COPY: '[data-test-subj="clipboard"]',
+  SHOW_TOP: 'show-top-field',
+};

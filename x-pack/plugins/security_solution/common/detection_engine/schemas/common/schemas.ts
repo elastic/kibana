@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import {
-  enumeration,
   IsoDateString,
   NonEmptyString,
   PositiveInteger,
@@ -174,7 +173,7 @@ export const status = t.keyof({
   open: null,
   closed: null,
   acknowledged: null,
-  'in-progress': null, // TODO: Remove after `acknowledged` migrations
+  'in-progress': null,
 });
 export type Status = t.TypeOf<typeof status>;
 
@@ -359,75 +358,3 @@ export const privilege = t.type({
 });
 
 export type Privilege = t.TypeOf<typeof privilege>;
-
-export enum BulkAction {
-  'enable' = 'enable',
-  'disable' = 'disable',
-  'export' = 'export',
-  'delete' = 'delete',
-  'duplicate' = 'duplicate',
-  'edit' = 'edit',
-}
-
-export const bulkAction = enumeration('BulkAction', BulkAction);
-
-export enum BulkActionEditType {
-  'add_tags' = 'add_tags',
-  'delete_tags' = 'delete_tags',
-  'set_tags' = 'set_tags',
-  'add_index_patterns' = 'add_index_patterns',
-  'delete_index_patterns' = 'delete_index_patterns',
-  'set_index_patterns' = 'set_index_patterns',
-  'set_timeline' = 'set_timeline',
-}
-
-const bulkActionEditPayloadTags = t.type({
-  type: t.union([
-    t.literal(BulkActionEditType.add_tags),
-    t.literal(BulkActionEditType.delete_tags),
-    t.literal(BulkActionEditType.set_tags),
-  ]),
-  value: tags,
-});
-
-export type BulkActionEditPayloadTags = t.TypeOf<typeof bulkActionEditPayloadTags>;
-
-const bulkActionEditPayloadIndexPatterns = t.intersection([
-  t.type({
-    type: t.union([
-      t.literal(BulkActionEditType.add_index_patterns),
-      t.literal(BulkActionEditType.delete_index_patterns),
-      t.literal(BulkActionEditType.set_index_patterns),
-    ]),
-    value: index,
-  }),
-  t.exact(t.partial({ overwrite_data_views: t.boolean })),
-]);
-
-export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
-  typeof bulkActionEditPayloadIndexPatterns
->;
-
-const bulkActionEditPayloadTimeline = t.type({
-  type: t.literal(BulkActionEditType.set_timeline),
-  value: t.type({
-    timeline_id,
-    timeline_title,
-  }),
-});
-
-export type BulkActionEditPayloadTimeline = t.TypeOf<typeof bulkActionEditPayloadTimeline>;
-
-export const bulkActionEditPayload = t.union([
-  bulkActionEditPayloadTags,
-  bulkActionEditPayloadIndexPatterns,
-  bulkActionEditPayloadTimeline,
-]);
-
-export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
-
-export type BulkActionEditForRuleAttributes = BulkActionEditPayloadTags;
-
-export type BulkActionEditForRuleParams =
-  | BulkActionEditPayloadIndexPatterns
-  | BulkActionEditPayloadTimeline;

@@ -16,6 +16,7 @@ import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../com
 
 describe('ExternalServiceColumn ', () => {
   let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
@@ -30,6 +31,7 @@ describe('ExternalServiceColumn ', () => {
         />
       </TestProviders>
     );
+
     expect(
       wrapper.find(`[data-test-subj="case-table-column-external-notPushed"]`).last().exists()
     ).toBeTruthy();
@@ -44,6 +46,7 @@ describe('ExternalServiceColumn ', () => {
         />
       </TestProviders>
     );
+
     expect(
       wrapper.find(`[data-test-subj="case-table-column-external-upToDate"]`).last().exists()
     ).toBeTruthy();
@@ -58,6 +61,7 @@ describe('ExternalServiceColumn ', () => {
         />
       </TestProviders>
     );
+
     expect(
       wrapper.find(`[data-test-subj="case-table-column-external-requiresUpdate"]`).last().exists()
     ).toBeTruthy();

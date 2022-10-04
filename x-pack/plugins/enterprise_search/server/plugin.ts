@@ -26,10 +26,12 @@ import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ELASTICSEARCH_PLUGIN,
+  ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
+  ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
 } from '../common/constants';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -46,6 +48,7 @@ import {
 
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
+import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
@@ -56,6 +59,8 @@ import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
+
+import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { ConfigType } from '.';
 
@@ -90,7 +95,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public setup(
-    { capabilities, http, savedObjects, getStartServices }: CoreSetup<PluginsStart>,
+    { capabilities, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
     { usageCollection, security, features, infra, customIntegrations }: PluginsSetup
   ) {
     const config = this.config;
@@ -99,6 +104,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
+      ANALYTICS_PLUGIN.ID,
       APP_SEARCH_PLUGIN.ID,
       WORKPLACE_SEARCH_PLUGIN.ID,
     ];
@@ -126,6 +132,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     /**
+     * Register Enterprise Search UI Settings
+     */
+    uiSettings.register(enterpriseSearchUISettings);
+
+    /**
      * Register user access to the Enterprise Search plugins
      */
     capabilities.registerSwitcher(async (request: KibanaRequest) => {
@@ -140,6 +151,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         navLinks: {
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
+          enterpriseSearchAnalytics: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
@@ -147,6 +159,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         catalogue: {
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
+          enterpriseSearchAnalytics: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
@@ -168,6 +181,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     // Enterprise Search Routes
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
+    registerAnalyticsRoutes(dependencies);
 
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);
@@ -209,6 +223,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       logIndices: {
         type: 'index_name',
         indexName: 'logs-enterprise_search*',
+      },
+    });
+
+    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
+      name: 'Enterprise Search Behaviorial Analytics Logs',
+      logIndices: {
+        type: 'index_name',
+        indexName: 'logs-elastic_analytics.events-*',
       },
     });
   }

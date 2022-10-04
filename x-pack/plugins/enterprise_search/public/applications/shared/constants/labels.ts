@@ -10,6 +10,34 @@ import { i18n } from '@kbn/i18n';
 export const USERNAME_LABEL = i18n.translate('xpack.enterpriseSearch.usernameLabel', {
   defaultMessage: 'Username',
 });
+
+export const PASSWORD_LABEL = i18n.translate('xpack.enterpriseSearch.passwordLabel', {
+  defaultMessage: 'Password',
+});
+
+export const TOKEN_LABEL = i18n.translate('xpack.enterpriseSearch.tokenLabel', {
+  defaultMessage: 'Token',
+});
+
+export const TYPE_LABEL = i18n.translate('xpack.enterpriseSearch.typeLabel', {
+  defaultMessage: 'Type',
+});
+
 export const EMAIL_LABEL = i18n.translate('xpack.enterpriseSearch.emailLabel', {
   defaultMessage: 'Email',
+});
+
+export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview', // title case specifically requested
+  }
+);
+
+export const NAME_LABEL = i18n.translate('xpack.enterpriseSearch.nameLabel', {
+  defaultMessage: 'Name',
+});
+
+export const DESCRIPTION_LABEL = i18n.translate('xpack.enterpriseSearch.descriptionLabel', {
+  defaultMessage: 'Description',
 });

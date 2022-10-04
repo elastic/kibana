@@ -103,11 +103,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Page level controls',
       description: 'Screen reader announcement about heading controls',
     }),
-    'euiBreadcrumbs.collapsedBadge.ariaLabel': i18n.translate(
-      'core.euiBreadcrumbs.collapsedBadge.ariaLabel',
+    'euiBreadcrumb.collapsedBadge.ariaLabel': i18n.translate(
+      'core.euiBreadcrumb.collapsedBadge.ariaLabel',
       {
         defaultMessage: 'See collapsed breadcrumbs',
-        description: 'Displayed when one or more breadcrumbs are hidden.',
       }
     ),
     'euiBreadcrumbs.nav.ariaLabel': i18n.translate('core.euiBreadcrumbs.nav.ariaLabel', {

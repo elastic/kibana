@@ -24,5 +24,5 @@ export function plugin() {
 export type {
   ThreatIntelligencePluginSetup,
   ThreatIntelligencePluginStart,
-  ThreatIntelligenceSecuritySolutionContext,
+  SecuritySolutionPluginContext,
 } from './types';

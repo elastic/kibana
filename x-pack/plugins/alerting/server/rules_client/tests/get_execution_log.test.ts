@@ -21,6 +21,7 @@ import { RawRule } from '../../types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';
+import { fromKueryExpression } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -142,6 +143,10 @@ const aggregateResults = {
                       _id: 'S4wIZX8B8TGQpG7XQZns',
                       _score: 1.0,
                       _source: {
+                        rule: {
+                          id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+                          name: 'rule-name',
+                        },
                         event: {
                           outcome: 'success',
                         },
@@ -170,6 +175,25 @@ const aggregateResults = {
               executeStartTime: {
                 value: 1.646667512617e12,
                 value_as_string: '2022-03-07T15:38:32.617Z',
+              },
+              ruleId: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1.0,
+                  hits: [
+                    {
+                      _index: '.kibana-event-log-8.2.0-000001',
+                      _id: 'S4wIZX8B8TGQpG7XQZns',
+                      _score: 1.0,
+                      _source: {
+                        rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                      },
+                    },
+                  ],
+                },
               },
             },
             actionExecution: {
@@ -225,6 +249,7 @@ const aggregateResults = {
                       _id: 'a4wIZX8B8TGQpG7Xwpnz',
                       _score: 1.0,
                       _source: {
+                        rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule-name' },
                         event: {
                           outcome: 'success',
                         },
@@ -253,6 +278,25 @@ const aggregateResults = {
               executeStartTime: {
                 value: 1.646667545604e12,
                 value_as_string: '2022-03-07T15:39:05.604Z',
+              },
+              ruleId: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1.0,
+                  hits: [
+                    {
+                      _index: '.kibana-event-log-8.2.0-000001',
+                      _id: 'S4wIZX8B8TGQpG7XQZns',
+                      _score: 1.0,
+                      _source: {
+                        rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                      },
+                    },
+                  ],
+                },
               },
             },
             actionExecution: {
@@ -333,6 +377,8 @@ describe('getExecutionLogForRule()', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3126,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule-name',
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -353,6 +399,8 @@ describe('getExecutionLogForRule()', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3345,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule-name',
         },
       ],
     });
@@ -620,6 +668,75 @@ describe('getExecutionLogForRule()', () => {
           },
         })
       );
+    });
+  });
+});
+
+describe('getGlobalExecutionLogWithAuth()', () => {
+  let rulesClient: RulesClient;
+
+  beforeEach(() => {
+    rulesClient = new RulesClient(rulesClientParams);
+  });
+
+  test('runs as expected with some event log aggregation data', async () => {
+    const ruleSO = getRuleSavedObject({});
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: fromKueryExpression('*'),
+      ensureRuleTypeIsAuthorized() {},
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ruleSO);
+    eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValueOnce(aggregateResults);
+
+    const result = await rulesClient.getGlobalExecutionLogWithAuth(getExecutionLogByIdParams());
+    expect(result).toEqual({
+      total: 374,
+      data: [
+        {
+          id: '6705da7d-2635-499d-a6a8-1aee1ae1eac9',
+          timestamp: '2022-03-07T15:38:32.617Z',
+          duration_ms: 1056,
+          status: 'success',
+          message:
+            "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
+          num_active_alerts: 5,
+          num_new_alerts: 5,
+          num_recovered_alerts: 0,
+          num_triggered_actions: 5,
+          num_generated_actions: 5,
+          num_succeeded_actions: 5,
+          num_errored_actions: 0,
+          total_search_duration_ms: 0,
+          es_search_duration_ms: 0,
+          timed_out: false,
+          schedule_delay_ms: 3126,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule-name',
+        },
+        {
+          id: '41b2755e-765a-4044-9745-b03875d5e79a',
+          timestamp: '2022-03-07T15:39:05.604Z',
+          duration_ms: 1165,
+          status: 'success',
+          message:
+            "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
+          num_active_alerts: 5,
+          num_new_alerts: 5,
+          num_recovered_alerts: 5,
+          num_triggered_actions: 5,
+          num_generated_actions: 5,
+          num_succeeded_actions: 5,
+          num_errored_actions: 0,
+          total_search_duration_ms: 0,
+          es_search_duration_ms: 0,
+          timed_out: false,
+          schedule_delay_ms: 3345,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule-name',
+        },
+      ],
     });
   });
 });

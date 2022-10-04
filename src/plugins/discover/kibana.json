@@ -13,11 +13,22 @@
     "navigation",
     "uiActions",
     "savedObjects",
+    "savedObjectsFinder",
+    "savedObjectsManagement",
     "dataViewFieldEditor",
     "dataViewEditor",
-    "expressions"
+    "expressions",
+    "unifiedFieldList",
+    "unifiedSearch"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi"],
+  "optionalPlugins": [
+    "home",
+    "share",
+    "usageCollection",
+    "spaces",
+    "triggersActionsUi",
+    "savedObjectsTaggingOss"
+  ],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "dataViews", "unifiedSearch", "savedSearch"],
   "extraPublicDirs": ["common"],
   "owner": {

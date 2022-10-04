@@ -22,6 +22,7 @@ import { upsertQuery } from '../../store/inputs/helpers';
 
 import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
+import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('./modal', () => ({
   ModalInspectQuery: jest.fn(() => <div data-test-subj="mocker-modal" />),
@@ -32,7 +33,7 @@ describe('Inspect Button', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   const newQuery: UpdateQueryParams = {
-    inputId: 'global',
+    inputId: InputsModelId.global,
     id: 'myQuery',
     inspect: null,
     loading: false,
@@ -51,7 +52,7 @@ describe('Inspect Button', () => {
     test('Eui Empty Button', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton queryId={newQuery.id} inputId="timeline" title="My title" />
+          <InspectButton queryId={newQuery.id} inputId={InputsModelId.timeline} title="My title" />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
@@ -62,7 +63,12 @@ describe('Inspect Button', () => {
     test('it does NOT render the Eui Empty Button when timeline is timeline and compact is true', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton compact={true} queryId={newQuery.id} inputId="timeline" title="My title" />
+          <InspectButton
+            compact={true}
+            queryId={newQuery.id}
+            inputId={InputsModelId.timeline}
+            title="My title"
+          />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
@@ -75,7 +81,7 @@ describe('Inspect Button', () => {
         <TestProviders store={store}>
           <InspectButton
             queryId={newQuery.id}
-            inputId="timeline"
+            inputId={InputsModelId.timeline}
             showInspectButton={false}
             title="My title"
           />
@@ -100,7 +106,12 @@ describe('Inspect Button', () => {
     test('renders the Icon Button when inputId does NOT equal global, but compact is true', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton compact={true} inputId="timeline" queryId={newQuery.id} title="My title" />
+          <InspectButton
+            compact={true}
+            inputId={InputsModelId.timeline}
+            queryId={newQuery.id}
+            title="My title"
+          />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(

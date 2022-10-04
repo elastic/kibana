@@ -1,12 +1,106 @@
-#!/bin/bash
-
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
-orig_archive="x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces"
-new_archive="x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_spaces"
-newArchives=("x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_default_space")
-newArchives+=("x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_timezone_space")
-test_config="x-pack/test/reporting_api_integration/reporting_and_security.config.ts"
+orig_archive="x-pack/test/functional/es_archives/banners/multispace"
+new_archive="x-pack/test/functional/fixtures/kbn_archiver/banners/multi_space"
+
+# newArchives=("x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space")
+
+# testFiles=("x-pack/test/functional/apps/discover/preserve_url.ts")
+
+test_config="x-pack/test/banners_functional/config.ts"
+
+list_stragglers() {
+
+  echo "### OSS"
+  while read -r x; do
+    local a=$(grep -l '"index": ".kibana' "$x")
+    if [ -n "$a" ]; then
+      echo "${a%/mappings.json}"
+    fi
+  done <<<"$(find test/functional/fixtures/es_archiver -name mappings.json)"
+
+  echo
+  echo
+
+  echo "### X-PACK"
+  while read -r y; do
+    local b=$(grep -l '"index": ".kibana' "$y")
+    if [ -n "$b" ]; then
+      echo "${b%/mappings.json}"
+    fi
+  done <<<"$(find x-pack/test/functional/es_archives -name mappings.json)"
+
+}
+
+curl_so_count() {
+  local so=${1:-search-session}
+  local count
+  count=$(curl -s -XGET "http://elastic:changeme@localhost:9220/.kibana/_count" -H "kbn-xsrf: archive-migration-functions" -H "Content-Type: application/json" -d'
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match_phrase": {
+            "type": "${so}"
+          }
+        }
+      ]
+    }
+  }
+}' | jq '.count')
+
+  echo "  ### [${so}] count: ${count}"
+}
+
+watch_so_count() {
+  local so=${1:-search-session}
+
+  while true; do
+    curl_so_count "$so"
+    sleep 1
+  done
+}
+
+create_space() {
+  # Ex: Id, Name, and Disabled Features.
+  #   create_space tre "Tre Space" apm,ml,canvas,dashboard,visualize,maps,monitoring,uptime
+  # Ex: Id. Name is generated
+  #   create_space rashmi
+  # Ex: Id and Name. No disabled features.
+  #   create_space another-space "Another Space"
+  local id=${1:-sales}
+  local upperCased
+  upperCased=$(echo "${id:0:1}" | tr '[:lower:]' '[:upper:]')"${id:1}"
+  local name=${2:-$upperCased}
+  local disabledFeatures=${3:-}
+
+  if [[ -n $3 ]]; then
+    disabledFeatures="$3"
+  fi
+
+  # Use jq to create the i and n variables, then inject them.
+  local payload
+  payload=$(jq -n --arg i "$id" --arg n "$name" --arg df "$disabledFeatures" \
+    '{ "id": $i, "name": $n, "disabledFeatures": [$df] }')
+
+  curl -H "Content-Type: application/json" -H "kbn-xsrf: archive-migration-functions" \
+    -X POST -d "$payload" \
+    --user elastic:changeme http://localhost:5620/api/spaces/space
+}
+
+delete_space() {
+  local id=${1:?Need a space id.}
+
+  curl -H "kbn-xsrf: archive-migration-functions" \
+    -X DELETE \
+    --user elastic:changeme http://localhost:5620/api/spaces/space/"$id"
+}
+
+# Just a note that this is using Gnu date.
+# On OSX if you don't install this, and instead use the native date you only get seconds.
+# With gdate you can something like nanoseconds.
+alias timestamp='while read line; do echo "[`gdate +%H:%M:%S.%N`] $line"; done'
 
 arrayify_csv() {
   local xs=${1}
@@ -30,11 +124,6 @@ intersection() {
 
   echo "${intersections[@]}"
 }
-
-# Just a note that this is using Gnu date.
-# On OSX if you don't install this, and instead use the native date you only get seconds.
-# With gdate you can something like nanoseconds.
-alias timestamp='while read line; do echo "[`gdate +%H:%M:%S.%N`] $line"; done'
 
 is_zipped() {
   local archive=$1
@@ -98,6 +187,7 @@ _find_config() {
 
   local current
   local parent
+  local grandParent
   local greatGrand
   current=$(dirname "$test_file")
   parent=$(dirname "$current")
@@ -107,8 +197,9 @@ _find_config() {
   local dirs=("$current" "$parent" "$grandParent" "$greatGrand")
 
   local configs=()
+  local config
   for x in "${dirs[@]}"; do
-    local config=$(find "$x" -maxdepth 1 -type f -name '*config.js' -or -name '*config.ts')
+    config=$(find "$x" -maxdepth 1 -type f -name '*config.js' -or -name '*config.ts')
     if [ -n "$config" ]; then
       configs+=("$config")
     fi
@@ -277,14 +368,7 @@ save_kbn() {
 
 load_kbn() {
   local space=${1:-default}
-
-  set -x
-  node scripts/kbn_archiver.js --config "$test_config" load "$new_archive" --space "$space"
-  set +x
-}
-
-load_kbns() {
-  local space=${1:-default}
+  local archive=${2:-${new_archive}}
 
   for x in "${newArchives[@]}"; do
     set -x
@@ -300,8 +384,9 @@ load_created_kbn_archive() {
 }
 
 unload_kbn() {
+  local archive=${1:-${new_archive}}
   set -x
-  node scripts/kbn_archiver.js --config "$test_config" unload "$new_archive"
+  node scripts/kbn_archiver.js --config "$test_config" unload "$archive"
   set +x
 }
 
@@ -335,14 +420,6 @@ run_test() {
 
   set -x
   node scripts/functional_test_runner --config "$config"
-  set +x
-}
-
-run_test_with_timestamp() {
-  local config=${1:-$test_config}
-
-  set -x
-  node scripts/functional_test_runner --config "$config" | timestamp
   set +x
 }
 

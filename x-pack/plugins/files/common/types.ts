@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObject } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
 import type { Readable } from 'stream';
 import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
@@ -332,7 +333,16 @@ export interface FileUnshareOptions {
  * A class with set of properties and behaviors of the "smart" file object and adds
  * behaviours for interacting with files on top of the pure data.
  */
-export interface File<Meta = unknown> extends FileJSON<Meta> {
+export interface File<Meta = unknown> {
+  /**
+   * The file ID
+   */
+  id: string;
+
+  /**
+   * File metadata in camelCase form.
+   */
+  data: FileJSON<Meta>;
   /**
    * Update a file object's metadatathat can be updated.
    *
@@ -344,8 +354,9 @@ export interface File<Meta = unknown> extends FileJSON<Meta> {
    * Stream file content to storage.
    *
    * @param content - The content to stream to storage.
+   * @param abort$ - An observable that can be used to abort the upload at any time.
    */
-  uploadContent(content: Readable): Promise<void>;
+  uploadContent(content: Readable, abort$?: Observable<unknown>): Promise<File<Meta>>;
 
   /**
    * Stream file content from storage.
@@ -431,6 +442,8 @@ export interface FileKind {
   id: string;
   /**
    * Maximum size, in bytes, a file of this kind can be.
+   *
+   * @default 4MiB
    */
   maxSizeBytes?: number;
 
@@ -448,35 +461,41 @@ export interface FileKind {
   blobStoreSettings?: BlobStorageSettings;
 
   /**
-   * Optionally specify which HTTP routes to create for the file kind
+   * Specify which HTTP routes to create for the file kind.
+   *
+   * You can always create your own HTTP routes for working with files but
+   * this interface allows you to expose basic CRUD operations, upload, download
+   * and sharing of files over a RESTful-like interface.
+   *
+   * @note The public {@link FileClient} uses these endpoints.
    */
   http: {
     /**
-     * Enable creating this file type
+     * Expose file creation (and upload) over HTTP.
      */
     create?: HttpEndpointDefinition;
     /**
-     * Enable the file metadata to updated
+     * Expose file updates over HTTP.
      */
     update?: HttpEndpointDefinition;
     /**
-     * Enable the file to be deleted (metadata and contents)
+     * Expose file deletion over HTTP.
      */
     delete?: HttpEndpointDefinition;
     /**
-     * Enable file to be retrieved by ID.
+     * Expose "get by ID" functionality over HTTP.
      */
     getById?: HttpEndpointDefinition;
     /**
-     * Enable file to be listed
+     * Expose the ability to list all files of this kind over HTTP.
      */
     list?: HttpEndpointDefinition;
     /**
-     * Enable the file to be downloaded
+     * Expose the ability to download a file's contents over HTTP.
      */
     download?: HttpEndpointDefinition;
     /**
-     * Enable the file to be shared publicly
+     * Expose file share functionality over HTTP.
      */
     share?: HttpEndpointDefinition;
   };

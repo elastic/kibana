@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ChangeDataView } from './change_dataview';
 
@@ -45,6 +46,10 @@ export interface DataViewPickerProps {
    */
   currentDataViewId?: string;
   /**
+   * The adHocDataviews.
+   */
+  adHocDataViews?: DataView[];
+  /**
    * EuiSelectable properties.
    */
   selectableProps?: EuiSelectableProps;
@@ -58,6 +63,8 @@ export interface DataViewPickerProps {
    * Also works as a flag to show the create dataview button.
    */
   onDataViewCreated?: () => void;
+
+  onCreateDefaultAdHocDataView?: (pattern: string) => void;
   /**
    * List of the supported text based languages (SQL, ESQL) etc.
    * Defined per application, if not provided, no text based languages
@@ -68,6 +75,11 @@ export interface DataViewPickerProps {
    * Callback that is called when the user clicks the Save and switch transition modal button
    */
   onSaveTextLanguageQuery?: ({ onSave, onCancel }: OnSaveTextLanguageQueryProps) => void;
+
+  /**
+   * Makes the picker disabled by disabling the popover trigger
+   */
+  isDisabled?: boolean;
 }
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {
@@ -84,6 +96,7 @@ export interface DataViewPickerPropsExtended extends DataViewPickerProps {
 export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
+  adHocDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -93,6 +106,8 @@ export const DataViewPicker = ({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  onCreateDefaultAdHocDataView,
+  isDisabled,
 }: DataViewPickerPropsExtended) => {
   return (
     <ChangeDataView
@@ -101,12 +116,15 @@ export const DataViewPicker = ({
       onChangeDataView={onChangeDataView}
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
+      onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
+      adHocDataViews={adHocDataViews}
       selectableProps={selectableProps}
       textBasedLanguages={textBasedLanguages}
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}
       onTextLangQuerySubmit={onTextLangQuerySubmit}
       textBasedLanguage={textBasedLanguage}
+      isDisabled={isDisabled}
     />
   );
 };

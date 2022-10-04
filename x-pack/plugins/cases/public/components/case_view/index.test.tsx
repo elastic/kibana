@@ -30,7 +30,7 @@ import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import CaseView from '.';
 import { waitFor } from '@testing-library/dom';
 import { useGetTags } from '../../containers/use_get_tags';
-import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
+import { casesQueriesKeys } from '../../containers/constants';
 import {
   alertsHit,
   caseViewProps,
@@ -49,7 +49,9 @@ jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/use_get_case_metrics');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../user_actions/timestamp');
+jest.mock('../user_actions/timestamp', () => ({
+  UserActionTimestamp: () => <></>,
+}));
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../containers/api');
@@ -171,7 +173,8 @@ describe('CaseView', () => {
     const queryClientSpy = jest.spyOn(appMockRenderer.queryClient, 'invalidateQueries');
     const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
     userEvent.click(result.getByTestId('case-refresh'));
-    expect(queryClientSpy).toHaveBeenCalledWith('case');
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
   });
 
   describe('when a `refreshRef` prop is provided', () => {
@@ -203,7 +206,8 @@ describe('CaseView', () => {
     it('should refresh actions and comments', async () => {
       refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        expect(queryClientSpy).toHaveBeenCalledWith(CASE_VIEW_CACHE_KEY);
+        expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+        expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
       });
     });
   });

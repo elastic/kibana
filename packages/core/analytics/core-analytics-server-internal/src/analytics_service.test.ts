@@ -7,31 +7,37 @@
  */
 
 import { firstValueFrom, Observable } from 'rxjs';
+import { createTestEnv, createTestPackageInfo } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { analyticsClientMock } from './analytics_service.test.mocks';
 import { AnalyticsService } from './analytics_service';
+
+const packageInfo = createTestPackageInfo();
+
+const createCoreContext = () => {
+  const env = createTestEnv({ packageInfo });
+  return mockCoreContext.create({ env });
+};
 
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
   beforeEach(() => {
     jest.clearAllMocks();
-    analyticsService = new AnalyticsService(mockCoreContext.create());
+    analyticsService = new AnalyticsService(createCoreContext());
   });
 
   test('should register the context provider `build info` on creation', async () => {
     expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(1);
     await expect(
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
-    ).toMatchInlineSnapshot(`
-            Object {
-              "branch": "main",
-              "buildNum": 9007199254740991,
-              "buildSha": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-              "isDev": true,
-              "isDistributable": false,
-              "version": "8.5.0",
-            }
-          `);
+    ).toEqual({
+      branch: packageInfo.branch,
+      version: packageInfo.version,
+      buildNum: packageInfo.build.number,
+      buildSha: packageInfo.build.sha,
+      isDev: expect.any(Boolean),
+      isDistributable: packageInfo.build.distributable,
+    });
   });
 
   test('should register the `performance_metric` event type on creation', () => {

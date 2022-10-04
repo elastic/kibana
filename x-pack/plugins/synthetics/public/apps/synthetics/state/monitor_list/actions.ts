@@ -22,7 +22,7 @@ export const fetchMonitorListAction = createAsyncAction<
 
 export interface UpsertMonitorRequest {
   id: string;
-  monitor: EncryptedSyntheticsMonitor;
+  monitor: Partial<EncryptedSyntheticsMonitor>;
 }
 export const fetchUpsertMonitorAction = createAction<UpsertMonitorRequest>('fetchUpsertMonitor');
 export const fetchUpsertSuccessAction = createAction<{

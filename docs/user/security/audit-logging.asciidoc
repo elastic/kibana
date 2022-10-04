@@ -2,7 +2,7 @@
 [[xpack-security-audit-logging]]
 === Audit logs
 
-Audit logging is a https://www.elastic.co/subscriptions[subscription feature] that you can enable to keep track of security-related events,
+Audit logging is a {subscriptions}[subscription feature] that you can enable to keep track of security-related events,
 such as authorization success and failures. Logging these events enables you to monitor {kib} for suspicious activity and provides evidence
 in the event of an attack.
 
@@ -325,6 +325,9 @@ Possible values:
 | *Field*
 | *Description*
 
+| `user.id`
+| Unique identifier of the user across sessions (See {ref}/user-profile.html[user profiles]).
+
 | `user.name`
 | Login name of the user.
 
@@ -410,7 +413,7 @@ Example: `[marketing]`
 Example: `get`, `post`, `put`, `delete`
 
 | `url.domain`
-| Domain of the url.
+| Domain of the URL.
 
 Example: `www.elastic.co`
 
@@ -440,7 +443,7 @@ Example: `https`
 | *Description*
 
 | [[field-trace-id]] `trace.id`
-| Unique identifier allowing events of the same transaction from {kib} and {es} to be be correlated.
+| Unique identifier allowing events of the same transaction from {kib} and {es} to be correlated.
 
 |======
 

@@ -20,8 +20,7 @@ import type {
 import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
-
-import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
+import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 type Maybe<T> = T | undefined;
@@ -253,28 +252,6 @@ export interface PluginManifest {
    * configured, etc.) Default is false.
    */
   readonly enabledOnAnonymousPages?: boolean;
-}
-
-/**
- * @internal
- */
-export interface InternalPluginInfo {
-  /**
-   * Version of the plugin
-   */
-  readonly version: string;
-  /**
-   * Bundles that must be loaded for this plugin
-   */
-  readonly requiredBundles: readonly string[];
-  /**
-   * Path to the target/public directory of the plugin which should be served
-   */
-  readonly publicTargetDir: string;
-  /**
-   * Path to the plugin assets directory.
-   */
-  readonly publicAssetsDir: string;
 }
 
 /**

@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { Chat } from '@kbn/cloud-plugin/public';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -145,7 +145,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     defaultMessage: 'Set up a language client',
                   }
                 ),
-                to: docLinks.start,
+                to: docLinks.languageClients,
               },
               {
                 label: i18n.translate(

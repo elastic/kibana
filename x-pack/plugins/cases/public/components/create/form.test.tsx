@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act, render } from '@testing-library/react';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { useForm, Form, FormHook } from '../../common/shared_imports';
@@ -39,6 +40,7 @@ const initialCaseValue: FormProps = {
   connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,
+  assignees: [],
 };
 
 const casesFormProps: CreateCaseFormProps = {
@@ -48,6 +50,7 @@ const casesFormProps: CreateCaseFormProps = {
 
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
+
   const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
     children,
     testProviderProps = {},
@@ -151,5 +154,29 @@ describe('CreateCaseForm', () => {
     });
 
     expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
+  });
+
+  it('should not render the assignees on basic license', () => {
+    const result = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(result.queryByTestId('createCaseAssigneesComboBox')).toBeNull();
+  });
+
+  it('should render the assignees on platinum license', () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    const result = render(
+      <MockHookWrapperComponent testProviderProps={{ license }}>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(result.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
   });
 });

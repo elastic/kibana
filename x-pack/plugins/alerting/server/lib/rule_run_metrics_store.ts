@@ -8,6 +8,7 @@
 import { set } from 'lodash';
 import { ActionsCompletion } from '../types';
 import { ActionsConfigMap } from './get_actions_config_map';
+import { SearchMetrics } from './types';
 
 interface State {
   numSearches: number;
@@ -91,6 +92,13 @@ export class RuleRunMetricsStore {
   };
 
   // Setters
+  public setSearchMetrics = (searchMetrics: SearchMetrics[]) => {
+    for (const metric of searchMetrics) {
+      this.incrementNumSearches(metric.numSearches ?? 0);
+      this.incrementTotalSearchDurationMs(metric.totalSearchDurationMs ?? 0);
+      this.incrementEsSearchDurationMs(metric.esSearchDurationMs ?? 0);
+    }
+  };
   public setNumSearches = (numSearches: number) => {
     this.state.numSearches = numSearches;
   };
@@ -151,6 +159,15 @@ export class RuleRunMetricsStore {
     this.state.connectorTypes[actionTypeId]?.triggeredActionsStatus === ActionsCompletion.PARTIAL;
 
   // Incrementer
+  public incrementNumSearches = (incrementBy: number) => {
+    this.state.numSearches += incrementBy;
+  };
+  public incrementTotalSearchDurationMs = (incrementBy: number) => {
+    this.state.totalSearchDurationMs += incrementBy;
+  };
+  public incrementEsSearchDurationMs = (incrementBy: number) => {
+    this.state.esSearchDurationMs += incrementBy;
+  };
   public incrementNumberOfTriggeredActions = () => {
     this.state.numberOfTriggeredActions++;
   };

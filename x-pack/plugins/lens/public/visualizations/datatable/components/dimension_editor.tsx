@@ -318,6 +318,42 @@ export function TableDimensionEditor(
           />
         </EuiFormRow>
       )}
+      {props.groupId === 'rows' && (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.lens.table.columnFilterClickLabel', {
+            defaultMessage: 'Directly filter on click',
+          })}
+          display="columnCompressedSwitch"
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.table.columnFilterClickLabel', {
+              defaultMessage: 'Directly filter on click',
+            })}
+            showLabel={false}
+            data-test-subj="lns-table-column-one-click-filter"
+            checked={Boolean(column?.oneClickFilter)}
+            disabled={column.hidden}
+            onChange={() => {
+              const newState = {
+                ...state,
+                columns: state.columns.map((currentColumn) => {
+                  if (currentColumn.columnId === accessor) {
+                    return {
+                      ...currentColumn,
+                      oneClickFilter: !column.oneClickFilter,
+                    };
+                  } else {
+                    return currentColumn;
+                  }
+                }),
+              };
+              setState(newState);
+            }}
+          />
+        </EuiFormRow>
+      )}
     </>
   );
 }
