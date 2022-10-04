@@ -57,27 +57,11 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
         )}
         <EuiFlexGroup wrap>
           <EuiFlexItem grow={1}>
-            <TotalUsersKpi
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
+            <TotalUsersKpi from={from} to={to} setQuery={setQuery} />
           </EuiFlexItem>
 
           <EuiFlexItem grow={2}>
-            <UsersKpiAuthentications
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
+            <UsersKpiAuthentications from={from} to={to} setQuery={setQuery} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </>

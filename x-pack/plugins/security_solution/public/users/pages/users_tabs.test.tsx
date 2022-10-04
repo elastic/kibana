@@ -24,6 +24,9 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../common/components/visualization_actions/lens_embeddable', () => ({
+  LensEmbeddable: jest.fn(() => <div data-test-subj="mock-lens-embeddable" />),
+}));
 jest.mock('../../common/components/visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
@@ -72,7 +75,7 @@ const mockHistory = {
 };
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Users - rendering', () => {
-  test('it renders getting started page when no index is available', async () => {
+  test('it renders getting started page when no index is available', () => {
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
     });
@@ -88,7 +91,7 @@ describe('Users - rendering', () => {
     expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
   });
 
-  test('it should render tab navigation', async () => {
+  test('it should render tab navigation', () => {
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},

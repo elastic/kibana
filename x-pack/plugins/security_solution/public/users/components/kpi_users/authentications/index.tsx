@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiUserAuthenticationsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_area';
 import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_bar';
 import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_metric_success';
 import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentication_metric_failure';
-import { useUsersKpiAuthentications, ID } from '../../../containers/users/authentications';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+import { ID } from '../../../containers/users/authentications';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common/kpi_embeddable_component';
 import * as i18n from './translations';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { UsersKpiProps } from '../types';
 
 enum ChartColors {
@@ -54,41 +53,15 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const UsersKpiAuthenticationsComponent: React.FC<UsersKpiProps> = ({
-  filterQuery,
-  from,
-  indexNames,
-  to,
-  updateDateRange,
-  setQuery,
-  skip,
-}) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-  const [loading, { refetch, id, inspect, ...data }] = useUsersKpiAuthentications({
-    filterQuery,
-    endDate: to,
-    indexNames,
-    startDate: from,
-    skip: querySkip,
-  });
-
+const UsersKpiAuthenticationsComponent: React.FC<UsersKpiProps> = ({ from, to, setQuery }) => {
   return (
     <KpiBaseComponentManage
-      data={data}
-      id={id}
-      inspect={inspect}
-      loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}
-      to={to}
-      updateDateRange={updateDateRange}
-      refetch={refetch}
+      id={ID}
+      loading={false} // TODO: remove unused props
       setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
+      to={to}
     />
   );
 };
