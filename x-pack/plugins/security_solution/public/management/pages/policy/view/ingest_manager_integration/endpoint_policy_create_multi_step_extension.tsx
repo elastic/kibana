@@ -6,14 +6,20 @@
  */
 
 import React, { memo } from 'react';
-import { EuiText, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiText,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import styled from 'styled-components';
+import { css } from '@emotion/css';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../common/lib/kibana';
-
-const Container = styled('div')`
-  padding: 0 23px;
-`;
 
 const CenteredEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;
@@ -24,25 +30,12 @@ const LargeLogo = styled(EuiIcon)`
   height: 128px;
 `;
 
-const LargeCustomSpacer = () => (
-  <>
-    <EuiSpacer size="m" />
-    <EuiSpacer size="xxl" />
-  </>
-);
-
-const MediumCustomSpacer = () => (
-  <>
-    <EuiSpacer size="m" />
-    <EuiSpacer size="xl" />
-  </>
-);
-
 /**
  * A component to be displayed in multi step onboarding process.
  */
 export const EndpointPolicyCreateMultiStepExtension = memo(() => {
   const { docLinks } = useKibana().services;
+  const { size } = useEuiTheme().euiTheme;
 
   const title = (
     <EuiText>
@@ -96,13 +89,20 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
     </EuiText>
   );
 
-  return (
-    <Container>
-      <LargeCustomSpacer />
-      {title}
-      <MediumCustomSpacer />
+  const marginSize = `calc(${size.m} + ${size.l})`;
 
-      <EuiFlexGroup>
+  return (
+    <EuiPanel hasShadow={false} paddingSize="l">
+      <EuiSpacer size="xl" />
+
+      {title}
+
+      <EuiFlexGroup
+        css={css`
+          margin-bottom: ${marginSize};
+          margin-top: ${marginSize};
+        `}
+      >
         <CenteredEuiFlexItem grow={false}>
           <LargeLogo type="logoSecurity" />
         </CenteredEuiFlexItem>
@@ -112,10 +112,10 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <MediumCustomSpacer />
       {details}
-      <LargeCustomSpacer />
-    </Container>
+
+      <EuiSpacer size="xl" />
+    </EuiPanel>
   );
 });
 EndpointPolicyCreateMultiStepExtension.displayName = 'EndpointPolicyCreateMultiStepExtension';
