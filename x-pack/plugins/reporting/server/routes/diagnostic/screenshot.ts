@@ -5,96 +5,182 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import { lastValueFrom } from 'rxjs';
-import { APP_WRAPPER_CLASS } from '@kbn/core/server';
+import { getDefaultChromiumSandboxDisabled } from '@kbn/screenshotting-plugin/server/config/default_chromium_sandbox_disabled';
+import { getChromiumPackage, paths } from '@kbn/screenshotting-plugin/server/utils';
+import { getDataPath } from '@kbn/utils';
+import fs from 'fs';
+import path from 'path';
+import puppeteer from 'puppeteer';
+import { ReplaySubject, toArray } from 'rxjs';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { generatePngObservable } from '../../export_types/common';
-import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { DiagnosticResponse } from '.';
-import { incrementApiUsageCounter } from '..';
 
-const path = `${API_DIAGNOSE_URL}/screenshot`;
+const chromiumPath = path.resolve('x-pack/plugins/screenshotting/chromium');
+const DEFAULT_QUERY_VIEWPORT = '1200,3000,2';
 
-export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
+export const registerDiagnoseScreenshot = (reporting: ReportingCore, loggerContext: Logger) => {
+  const logger = loggerContext.get('diagnose-screenshot');
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  router.post(
-    { path, validate: {} },
-    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
-      incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
-
-      const config = reporting.getConfig();
-      const [basePath, protocol, hostname, port] = [
-        config.kbnConfig.get('server', 'basePath'),
-        config.get('kibanaServer', 'protocol'),
-        config.get('kibanaServer', 'hostname'),
-        config.get('kibanaServer', 'port'),
-      ] as string[];
-
-      const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
-      const hashUrl = getAbsoluteUrl({ path: '/', hash: '', search: '' });
-
-      // Hack the layout to make the base/login page work
-      const layout = {
-        dimensions: {
-          width: 1440,
-          height: 2024,
-        },
-        selectors: {
-          screenshot: `.${APP_WRAPPER_CLASS}`,
-          renderComplete: `.${APP_WRAPPER_CLASS}`,
-          itemsCountAttribute: 'data-test-subj="kibanaChrome"',
-          timefilterDurationAttribute: 'data-test-subj="kibanaChrome"',
-        },
-      };
-
-      return lastValueFrom(
-        generatePngObservable(reporting, logger, {
-          layout,
-          request: req,
-          browserTimezone: 'America/Los_Angeles',
-          urls: [hashUrl],
-        })
-          // Pipe is required to ensure that we can subscribe to it
-          .pipe()
-      )
-        .then((screenshot) => {
-          // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
-          if (screenshot.warnings.length) {
-            return res.ok({
-              body: {
-                success: false,
-                help: [],
-                logs: screenshot.warnings,
-              },
-            });
-          }
-          return res.ok({
-            body: {
-              success: true,
-              help: [],
-              logs: '',
-            } as DiagnosticResponse,
-          });
-        })
-        .catch((error) =>
-          res.ok({
-            body: {
-              success: false,
-              help: [
-                i18n.translate('xpack.reporting.diagnostic.screenshotFailureMessage', {
-                  defaultMessage: `We couldn't screenshot your Kibana install.`,
-                }),
-              ],
-              logs: error.message,
-            } as DiagnosticResponse,
+  router.post<void, { viewport: string } | undefined, void>(
+    {
+      path: `${API_DIAGNOSE_URL}/screenshot`,
+      validate: {
+        query: schema.maybe(
+          schema.object({
+            // width,height,deviceScaleFactor
+            // must validate as: `number,number,number`
+            viewport: schema.string({ validate: (input) => input }),
           })
-        );
-    })
+        ),
+      },
+    },
+    authorizedUserPreRouting(
+      reporting,
+      async (
+        _user,
+        context,
+        req,
+        res
+        // prettier-ignore
+      ) => {
+        if (context.reporting == null) {
+          return res.custom({ statusCode: 503 });
+        }
+
+        // width,height,deviceScaleFactor
+        const queryViewport = req.query?.viewport ?? DEFAULT_QUERY_VIEWPORT;
+
+        let browser: puppeteer.Browser | null = null;
+        let page: puppeteer.Page | null = null;
+        const error$ = new ReplaySubject<Error>();
+        const log$ = new ReplaySubject<string>();
+
+        try {
+          // SETUP
+          const packageInfo = getChromiumPackage();
+          const executablePath = paths.getBinaryPath(packageInfo, chromiumPath);
+          const dataDir = getDataPath();
+          fs.mkdirSync(dataDir, { recursive: true });
+          const userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
+          const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
+
+          logger.info(`sandbox disabled: ${disableSandbox}`);
+          logger.info(`os / distro: ${JSON.stringify(os)}`);
+          logger.info(`chromium path: ${chromiumPath}`);
+          logger.info(`browser info: ${JSON.stringify(packageInfo)}`);
+          logger.info(`binary path: ${executablePath}`);
+          logger.info(`viewport (width,height,deviceScaleFactor): ${queryViewport}`);
+          logger.info(`user data: ${userDataDir}`);
+
+          const args = [
+            `--disable-background-networking`,
+            `--disable-default-apps`,
+            `--disable-extensions`,
+            `--disable-gpu`,
+            `--disable-sync`,
+            `--disable-translate`,
+            `--headless`,
+            `--hide-scrollbars`,
+            `--mainFrameClipsContent=false`,
+            `--metrics-recording-only`,
+            `--mute-audio`,
+            `--no-first-run`,
+            `--safebrowsing-disable-auto-update`,
+            `--user-data-dir=${userDataDir}`,
+            `--window-size=1950,1200`,
+          ];
+          if (disableSandbox) {
+            args.push('--no-sandbox');
+          }
+
+          // LAUNCH
+          logger.info(`Launching the browser...`);
+          browser = await puppeteer.launch({ executablePath, userDataDir, args });
+          page = await browser.newPage();
+
+          // ADD LISTENERS
+          page.on('console', (msg) => {
+            const [text, type] = [msg.text(), msg.type()];
+            logger.info(`console-${type}: ${text}`);
+            log$.next(`console-${type}: ${text}`);
+          });
+
+          page.on('error', (err) => {
+            logger.error(err);
+            error$.next(err);
+          });
+
+          logger.info(`Navigating to test page...`);
+          await page.goto('https://webglsamples.org/aquarium/aquarium.html', {
+            waitUntil: 'load',
+          });
+        } catch (err) {
+          error$.next(err);
+          logger.error(err);
+        }
+
+        const [width, height, deviceScaleFactor] = queryViewport
+          .split(',')
+          .map((part) => parseInt(part, 10));
+        const viewport: puppeteer.Viewport = { width, height, deviceScaleFactor };
+
+        let capture: string | null = null;
+        if (page != null && browser != null) {
+          // FIXME: needs to poll the DOM or scan the console logs to determine when page is ready to capture
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          try {
+            // set device scale factor: affects the blurriness / clarity of the numbers
+            logger.info(`Resizing the window...`);
+            await page.setViewport(viewport);
+
+            // capture the page
+            logger.info(`Capturing screenshot...`);
+            const screenshot = await page.screenshot({
+              clip: { x: 0, y: 0, width: viewport.width, height: viewport.height },
+              captureBeyondViewport: false,
+            });
+
+            logger.info(`Closing the browser...`);
+            await browser.close();
+
+            logger.info(`Preparing the screenshot for response...`);
+            if (Buffer.isBuffer(screenshot)) {
+              capture = screenshot.toString('base64');
+            } else {
+              capture = screenshot;
+            }
+          } catch (err) {
+            logger.error(err);
+            error$.next(err);
+          }
+        }
+
+        let errors: string[] | undefined;
+        let logs: string[] | undefined;
+        error$.pipe(toArray()).subscribe((errs) => {
+          errors = errs.map((e) => e.toString() + '\n');
+        });
+        log$.pipe(toArray()).subscribe((ls) => {
+          logs = ls.map((l) => l + '\n');
+        });
+        error$.complete();
+        log$.complete();
+
+        return res.ok({
+          body: {
+            success: capture != null,
+            help: errors,
+            logs,
+            capture,
+          },
+        });
+      }
+    )
   );
 };
