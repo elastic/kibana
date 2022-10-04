@@ -18,15 +18,10 @@ import {
 import { HttpError, Status } from '../../../../../../../common/types/api';
 import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 
-import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
-import { KibanaLogic } from '../../../../../shared/kibana';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
 import { CreateMlInferencePipelineApiLogic } from '../../../../api/ml_models/create_ml_inference_pipeline';
 import { MLModelsApiLogic } from '../../../../api/ml_models/ml_models_logic';
-
-import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
-import { SearchIndexTabId } from '../../search_index';
 
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 import {
@@ -126,14 +121,6 @@ export const MLInferenceLogic = kea<
   },
   events: {},
   listeners: ({ values, actions }) => ({
-    createApiSuccess: () => {
-      KibanaLogic.values.navigateToUrl(
-        generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName: values.addInferencePipelineModal.indexName,
-          tabId: SearchIndexTabId.PIPELINES,
-        })
-      );
-    },
     createPipeline: () => {
       const {
         addInferencePipelineModal: { configuration, indexName },
