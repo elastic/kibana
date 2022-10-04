@@ -38,6 +38,7 @@ export const tcpNormalizers: TCPNormalizerMap = {
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: getTCPNormalizer(ConfigKey.PROXY_USE_LOCAL_RESOLVER),
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: getTCPNormalizer(ConfigKey.RESPONSE_RECEIVE_CHECK),
   [ConfigKey.REQUEST_SEND_CHECK]: getTCPNormalizer(ConfigKey.REQUEST_SEND_CHECK),
+  [ConfigKey.URLS]: getTCPNormalizer(ConfigKey.URLS),
   ...tlsNormalizers,
   ...commonNormalizers,
 };
