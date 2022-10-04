@@ -24,6 +24,33 @@ jest.mock('uuid', () => ({
   v4: () => 'test-id',
 }));
 
+const mockedIndices = [
+  {
+    id: 'test',
+    title: 'test',
+    timeFieldName: 'test_field',
+    getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
+  },
+] as unknown as DataView[];
+
+const indexPatternsService = {
+  getDefault: jest.fn(() =>
+    Promise.resolve({
+      id: 'default',
+      title: 'index',
+      getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
+    })
+  ),
+  get: jest.fn((id) => Promise.resolve({ ...mockedIndices[0], id })),
+  find: jest.fn((search: string, size: number) => {
+    if (size !== 1) {
+      // shouldn't request more than one data view since there is a significant performance penalty
+      throw new Error('trying to fetch too many data views');
+    }
+    return Promise.resolve(mockedIndices || []);
+  }),
+} as unknown as DataViewsPublicPluginStart;
+
 describe('getLayers', () => {
   const dataSourceLayers: Record<number, Layer> = [
     {
@@ -330,10 +357,16 @@ describe('getLayers', () => {
     series: [createSeries({ metrics: staticValueMetric })],
   });
 
-  test.each<[string, [Record<number, Layer>, Panel], Array<Partial<XYLayerConfig>>]>([
+  test.each<
+    [
+      string,
+      [Record<number, Layer>, Panel, DataViewsPublicPluginStart, boolean],
+      Array<Partial<XYLayerConfig>>
+    ]
+  >([
     [
       'data layer if columns do not include static column',
-      [dataSourceLayers, panel],
+      [dataSourceLayers, panel, indexPatternsService, false],
       [
         {
           layerType: 'data',
@@ -353,8 +386,29 @@ describe('getLayers', () => {
       ],
     ],
     [
+      'data layer with "left" axisMode if isSingleAxis is provided',
+      [dataSourceLayers, panel, indexPatternsService, true],
+      [
+        {
+          layerType: 'data',
+          accessors: ['column-id-1'],
+          xAccessor: 'column-id-2',
+          splitAccessor: 'column-id-3',
+          seriesType: 'area',
+          layerId: 'test-layer-1',
+          yConfig: [
+            {
+              forAccessor: 'column-id-1',
+              axisMode: 'left',
+              color: '#68BC00',
+            },
+          ],
+        },
+      ],
+    ],
+    [
       'reference line layer if columns include static column',
-      [dataSourceLayersWithStatic, panelWithStaticValue],
+      [dataSourceLayersWithStatic, panelWithStaticValue, indexPatternsService, false],
       [
         {
           layerType: 'referenceLine',
@@ -363,9 +417,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -373,7 +428,7 @@ describe('getLayers', () => {
     ],
     [
       'correct colors if columns include percentile columns',
-      [dataSourceLayersWithPercentile, panelWithPercentileMetric],
+      [dataSourceLayersWithPercentile, panelWithPercentileMetric, indexPatternsService, false],
       [
         {
           yConfig: [
@@ -393,7 +448,12 @@ describe('getLayers', () => {
     ],
     [
       'correct colors if columns include percentile rank columns',
-      [dataSourceLayersWithPercentileRank, panelWithPercentileRankMetric],
+      [
+        dataSourceLayersWithPercentileRank,
+        panelWithPercentileRankMetric,
+        indexPatternsService,
+        false,
+      ],
       [
         {
           yConfig: [
@@ -413,7 +473,7 @@ describe('getLayers', () => {
     ],
     [
       'annotation layer gets correct params and converts color, extraFields and icons',
-      [dataSourceLayersWithStatic, panelWithSingleAnnotation],
+      [dataSourceLayersWithStatic, panelWithSingleAnnotation, indexPatternsService, false],
       [
         {
           layerType: 'referenceLine',
@@ -422,9 +482,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -458,7 +519,12 @@ describe('getLayers', () => {
     ],
     [
       'annotation layer should gets correct default params',
-      [dataSourceLayersWithStatic, panelWithSingleAnnotationWithoutQueryStringAndTimefield],
+      [
+        dataSourceLayersWithStatic,
+        panelWithSingleAnnotationWithoutQueryStringAndTimefield,
+        indexPatternsService,
+        false,
+      ],
       [
         {
           layerType: 'referenceLine',
@@ -467,9 +533,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -503,7 +570,7 @@ describe('getLayers', () => {
     ],
     [
       'multiple annotations with different data views create separate layers',
-      [dataSourceLayersWithStatic, panelWithMultiAnnotations],
+      [dataSourceLayersWithStatic, panelWithMultiAnnotations, indexPatternsService, false],
       [
         {
           layerType: 'referenceLine',
@@ -512,9 +579,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -597,7 +665,12 @@ describe('getLayers', () => {
     ],
     [
       'annotation layer gets correct dataView when none is defined',
-      [dataSourceLayersWithStatic, panelWithSingleAnnotationDefaultDataView],
+      [
+        dataSourceLayersWithStatic,
+        panelWithSingleAnnotationDefaultDataView,
+        indexPatternsService,
+        false,
+      ],
       [
         {
           layerType: 'referenceLine',
@@ -606,9 +679,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -641,34 +715,7 @@ describe('getLayers', () => {
       ],
     ],
   ])('should return %s', async (_, input, expected) => {
-    const layers = await getLayers(...input, indexPatternsService as DataViewsPublicPluginStart);
+    const layers = await getLayers(...input);
     expect(layers).toEqual(expected.map(expect.objectContaining));
   });
 });
-
-const mockedIndices = [
-  {
-    id: 'test',
-    title: 'test',
-    timeFieldName: 'test_field',
-    getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
-  },
-] as unknown as DataView[];
-
-const indexPatternsService = {
-  getDefault: jest.fn(() =>
-    Promise.resolve({
-      id: 'default',
-      title: 'index',
-      getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
-    })
-  ),
-  get: jest.fn((id) => Promise.resolve({ ...mockedIndices[0], id })),
-  find: jest.fn((search: string, size: number) => {
-    if (size !== 1) {
-      // shouldn't request more than one data view since there is a significant performance penalty
-      throw new Error('trying to fetch too many data views');
-    }
-    return Promise.resolve(mockedIndices || []);
-  }),
-} as unknown as DataViewsPublicPluginStart;
