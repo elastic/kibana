@@ -65,7 +65,6 @@ export const createThresholdAlertType = (
       const {
         runOpts: {
           bulkCreate,
-          exceptionItems,
           completeRule,
           tuple,
           wrapHits,
@@ -76,16 +75,16 @@ export const createThresholdAlertType = (
           secondaryTimestamp,
           ruleExecutionLogger,
           aggregatableTimestampField,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         startedAt,
         state,
       } = execOptions;
-
       const result = await thresholdExecutor({
         completeRule,
         tuple,
-        exceptionItems,
         ruleExecutionLogger,
         services,
         version,
@@ -99,8 +98,9 @@ export const createThresholdAlertType = (
         primaryTimestamp,
         secondaryTimestamp,
         aggregatableTimestampField,
+        exceptionFilter,
+        unprocessedExceptions,
       });
-
       return result;
     },
   };

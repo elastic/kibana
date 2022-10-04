@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,24 +22,27 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
+import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
-import { useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
+import { useTimefilter, useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { MESSAGE_LEVEL, MessageLevel } from '../../../../common/constants/message_levels';
 import { ListingPageUrlState } from '../../../../common/types/common';
-import { usePageUrlState } from '../../util/url_state';
+import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
-import type { NotificationItem } from '../../../../common/types/notifications';
+import type {
+  MlNotificationMessageLevel,
+  NotificationItem,
+} from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
 
-const levelBadgeMap: Record<MessageLevel, IconColor> = {
-  error: 'danger',
-  info: 'default',
-  success: 'subdued',
-  warning: 'warning',
+const levelBadgeMap: Record<MlNotificationMessageLevel, IconColor> = {
+  [ML_NOTIFICATIONS_MESSAGE_LEVEL.ERROR]: 'danger',
+  [ML_NOTIFICATIONS_MESSAGE_LEVEL.WARNING]: 'warning',
+  [ML_NOTIFICATIONS_MESSAGE_LEVEL.INFO]: 'default',
 };
 
 export const getDefaultNotificationsListState = (): ListingPageUrlState => ({
@@ -56,7 +60,22 @@ export const NotificationsList: FC = () => {
   } = useMlKibana();
   const { displayErrorToast } = useToastNotificationService();
 
+  const { lastCheckedAt, setLastCheckedAt, notificationsCounts, latestRequestedAt } =
+    useMlNotifications();
+  const timeFilter = useTimefilter();
   const timeRange = useTimeRangeUpdates();
+
+  const [globalState] = useUrlState('_g');
+
+  useEffect(function setTimeRangeOnMount() {
+    if (globalState?.time || !lastCheckedAt) return;
+
+    timeFilter.setTime({
+      from: moment(lastCheckedAt).toISOString(),
+      to: 'now',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -117,6 +136,22 @@ export const NotificationsList: FC = () => {
     setIsLoading(false);
   }, [sorting, queryInstance, mlApiServices.notifications, displayErrorToast, timeRange]);
 
+  useEffect(
+    function updateLastCheckedAt() {
+      // Resolve the latest timestamp on the current page
+      const pageItemIndex = pagination.pageIndex * pagination.pageSize;
+      const currentPageItems = items.slice(pageItemIndex, pageItemIndex + pagination.pageSize);
+      const latestTimestamp = Math.max(
+        ...currentPageItems.map((v) => v.timestamp),
+        lastCheckedAt ?? 0
+      );
+      if (latestTimestamp !== lastCheckedAt && latestTimestamp !== 0) {
+        setLastCheckedAt(latestTimestamp);
+      }
+    },
+    [lastCheckedAt, setLastCheckedAt, items, pagination.pageIndex, pagination.pageSize]
+  );
+
   useDebounce(
     function refetchNotification() {
       fetchNotifications();
@@ -127,6 +162,7 @@ export const NotificationsList: FC = () => {
 
   const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
     {
+      id: 'timestamp',
       field: 'timestamp',
       name: <FormattedMessage id="xpack.ml.notifications.timeLabel" defaultMessage="Time" />,
       sortable: true,
@@ -140,8 +176,8 @@ export const NotificationsList: FC = () => {
       name: <FormattedMessage id="xpack.ml.notifications.levelLabel" defaultMessage="Level" />,
       sortable: true,
       truncateText: false,
-      'data-test-subj': 'mlNotificationLabel',
-      render: (value: MessageLevel) => {
+      'data-test-subj': 'mlNotificationLevel',
+      render: (value: MlNotificationMessageLevel) => {
         return <EuiBadge color={levelBadgeMap[value]}>{value}</EuiBadge>;
       },
       width: '100px',
@@ -152,14 +188,14 @@ export const NotificationsList: FC = () => {
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationType',
-      render: (value: MessageLevel) => {
+      render: (value: string) => {
         return <EuiBadge color={'hollow'}>{value}</EuiBadge>;
       },
       width: '200px',
     },
     {
       field: 'job_id',
-      name: <FormattedMessage id="xpack.ml.notifications.entityLabe" defaultMessage="Entity ID" />,
+      name: <FormattedMessage id="xpack.ml.notifications.entityLabel" defaultMessage="Entity ID" />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationEntity',
@@ -185,21 +221,21 @@ export const NotificationsList: FC = () => {
         multiSelect: 'or',
         options: [
           {
-            value: MESSAGE_LEVEL.ERROR,
+            value: ML_NOTIFICATIONS_MESSAGE_LEVEL.ERROR,
             name: i18n.translate('xpack.ml.notifications.filters.level.error', {
               defaultMessage: 'Error',
             }),
             field: 'level',
           },
           {
-            value: MESSAGE_LEVEL.WARNING,
+            value: ML_NOTIFICATIONS_MESSAGE_LEVEL.WARNING,
             name: i18n.translate('xpack.ml.notifications.filters.level.warning', {
               defaultMessage: 'Warning',
             }),
             field: 'level',
           },
           {
-            value: MESSAGE_LEVEL.INFO,
+            value: ML_NOTIFICATIONS_MESSAGE_LEVEL.INFO,
             name: i18n.translate('xpack.ml.notifications.filters.level.info', {
               defaultMessage: 'Info',
             }),
@@ -244,9 +280,28 @@ export const NotificationsList: FC = () => {
     ];
   }, []);
 
+  const newNotificationsCount = Object.values(notificationsCounts).reduce((a, b) => a + b);
+
   return (
     <>
       <SavedObjectsWarning onCloseFlyout={fetchNotifications} forceRefresh={isLoading} />
+
+      {newNotificationsCount ? (
+        <>
+          <EuiCallOut
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.ml.notifications.newNotificationsMessage"
+                defaultMessage="There {newNotificationsCount, plural, one {is # notification} other {are # notifications}} since {sinceDate}. Refresh the page to view updates."
+                values={{ sinceDate: dateFormatter(latestRequestedAt), newNotificationsCount }}
+              />
+            }
+            iconType="bell"
+          />
+          <EuiSpacer size={'m'} />
+        </>
+      ) : null}
 
       <EuiSearchBar
         query={queryInstance}
@@ -285,6 +340,7 @@ export const NotificationsList: FC = () => {
               },
             },
           },
+          'data-test-subj': 'mlNotificationsSearchBarInput',
         }}
         filters={filters}
         onChange={(e) => {

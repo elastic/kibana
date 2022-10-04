@@ -27,7 +27,11 @@ import { useCancelAddPackagePolicy, useOnSaveNavigate } from '../hooks';
 import type { CreatePackagePolicyRequest } from '../../../../../../../common/types';
 
 import { splitPkgKey } from '../../../../../../../common/services';
-import { dataTypes, FLEET_SYSTEM_PACKAGE } from '../../../../../../../common/constants';
+import {
+  dataTypes,
+  FLEET_SYSTEM_PACKAGE,
+  HIDDEN_API_REFERENCE_PACKAGES,
+} from '../../../../../../../common/constants';
 import { useConfirmForceInstall } from '../../../../../integrations/hooks';
 import type {
   AgentPolicy,
@@ -75,7 +79,10 @@ import {
   SelectedPolicyTab,
   StepSelectHosts,
 } from '../components';
-import { generateCreatePackagePolicyDevToolsRequest } from '../../services';
+import {
+  generateCreatePackagePolicyDevToolsRequest,
+  generateCreateAgentPolicyDevToolsRequest,
+} from '../../services';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 
@@ -557,14 +564,42 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
   ];
 
-  const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
-  const devtoolRequest = useMemo(
-    () =>
+  const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
+    ExperimentalFeaturesService.get();
+
+  const showDevtoolsRequest =
+    !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '') &&
+    isShowDevtoolRequestExperimentEnabled;
+
+  const [devtoolRequest, devtoolRequestDescription] = useMemo(() => {
+    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
+      return [
+        `${generateCreateAgentPolicyDevToolsRequest(
+          newAgentPolicy,
+          withSysMonitoring && !packagePolicyIsSystem
+        )}\n\n${generateCreatePackagePolicyDevToolsRequest({
+          ...packagePolicy,
+        })}`,
+        i18n.translate(
+          'xpack.fleet.createPackagePolicy.devtoolsRequestWithAgentPolicyDescription',
+          {
+            defaultMessage:
+              'These Kibana requests creates a new agent policy and a new package policy.',
+          }
+        ),
+      ];
+    }
+
+    return [
       generateCreatePackagePolicyDevToolsRequest({
         ...packagePolicy,
       }),
-    [packagePolicy]
-  );
+      i18n.translate('xpack.fleet.createPackagePolicy.devtoolsRequestDescription', {
+        defaultMessage: 'This Kibana request creates a new package policy.',
+      }),
+    ];
+  }, [packagePolicy, newAgentPolicy, withSysMonitoring, selectedPolicyTab]);
 
   // Display package error if there is one
   if (packageInfoError) {
@@ -640,12 +675,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   <EuiFlexItem grow={false}>
                     <DevtoolsRequestFlyoutButton
                       request={devtoolRequest}
-                      description={i18n.translate(
-                        'xpack.fleet.createPackagePolicy.devtoolsRequestDescription',
-                        {
-                          defaultMessage: 'This Kibana request creates a new package policy.',
-                        }
-                      )}
+                      description={devtoolRequestDescription}
                       btnProps={{
                         color: 'ghost',
                       }}

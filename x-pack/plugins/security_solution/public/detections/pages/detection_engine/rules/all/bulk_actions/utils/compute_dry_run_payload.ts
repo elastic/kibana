@@ -63,6 +63,13 @@ export const computeDryRunPayload = (
           value: { throttle: '1h', actions: [] },
         },
       ];
+    case BulkActionEditType.set_schedule:
+      return [
+        {
+          type: editAction,
+          value: { interval: '5m', lookback: '1m' },
+        },
+      ];
 
     default:
       assertUnreachable(editAction);

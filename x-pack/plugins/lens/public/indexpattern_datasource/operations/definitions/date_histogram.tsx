@@ -75,7 +75,7 @@ function getMultipleDateHistogramsErrorMessage(layer: IndexPatternLayer, columnI
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
   'field',
-  { interval: string; dropPartials?: boolean }
+  { interval: string; dropPartials?: boolean; includeEmptyRows?: boolean }
 > = {
   type: 'date_histogram',
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
@@ -116,7 +116,7 @@ export const dateHistogramOperation: OperationDefinition<
       scale: 'interval',
       params: {
         interval: columnParams?.interval ?? autoInterval,
-        includeEmptyRows: true,
+        includeEmptyRows: columnParams?.includeEmptyRows ?? true,
         dropPartials: Boolean(columnParams?.dropPartials),
       },
     };
@@ -515,6 +515,14 @@ export const dateHistogramOperation: OperationDefinition<
       </>
     );
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.dateHistogram.documentation.quick',
+    {
+      defaultMessage: `
+The date or date range values distributed into intervals.
+      `,
+    }
+  ),
 };
 
 function parseInterval(currentInterval: string) {

@@ -31,11 +31,9 @@ function TooltipRow({
   formatAsPercentage: boolean;
   showChange: boolean;
 }) {
-  const valueLabel = formatAsPercentage ? asPercentage(value, 2) : value.toString();
+  const valueLabel = formatAsPercentage ? asPercentage(value) : value.toString();
   const comparisonLabel =
-    formatAsPercentage && isNumber(comparison)
-      ? asPercentage(comparison, 2)
-      : comparison?.toString();
+    formatAsPercentage && isNumber(comparison) ? asPercentage(comparison) : comparison?.toString();
 
   const diff = showChange && isNumber(comparison) ? comparison - value : undefined;
 
@@ -46,7 +44,7 @@ function TooltipRow({
       defaultMessage: 'no change',
     });
   } else if (formatAsPercentage && diff !== undefined) {
-    diffLabel = asPercentage(diff, 2);
+    diffLabel = asPercentage(diff);
   }
 
   return (
@@ -149,7 +147,7 @@ function FlameGraphTooltip({
 
 export interface FlameGraphProps {
   id: string;
-  height: number;
+  height: number | string;
   comparisonMode: FlameGraphComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
@@ -226,10 +224,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
           exeFileName: highlightedFrame.ExeFileName,
           sourceFileName: highlightedFrame.SourceFilename,
           functionName: highlightedFrame.FunctionName,
-          samples: primaryFlamegraph.Value[highlightedVmIndex],
-          childSamples:
-            primaryFlamegraph.Value[highlightedVmIndex] -
-            primaryFlamegraph.CountExclusive[highlightedVmIndex],
+          countInclusive: primaryFlamegraph.Samples[highlightedVmIndex],
+          countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
         }
       : undefined;
 
@@ -256,7 +252,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
         <EuiFlexGroup direction="row">
           {columnarData.viewModel.label.length > 0 && (
             <EuiFlexItem grow>
-              <Chart size={['100%', height]} key={columnarData.key}>
+              <Chart key={columnarData.key}>
                 <Settings
                   theme={chartTheme}
                   onElementClick={(elements) => {
@@ -275,7 +271,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
                       const valueIndex = props.values[0].valueAccessor as number;
                       const label = primaryFlamegraph.Label[valueIndex];
-                      const samples = primaryFlamegraph.Value[valueIndex];
+                      const samples = primaryFlamegraph.Samples[valueIndex];
                       const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
                       const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
                       const nodeID = primaryFlamegraph.ID[valueIndex];
@@ -291,8 +287,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                           comparisonCountInclusive={comparisonNode?.CountInclusive}
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
                           totalSamples={totalSamples}
-                          comparisonTotalSamples={comparisonFlamegraph?.Value[0]}
-                          comparisonSamples={comparisonNode?.Value}
+                          comparisonTotalSamples={comparisonFlamegraph?.Samples[0]}
+                          comparisonSamples={comparisonNode?.Samples}
                         />
                       );
                     },
@@ -315,8 +311,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                 frame={selected}
                 status={highlightedFrameStatus}
                 totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
-                totalTraces={primaryFlamegraph?.TotalTraces ?? 0}
-                sampledTraces={primaryFlamegraph?.SampledTraces ?? 0}
+                totalSamples={totalSamples}
                 onClose={() => {
                   setShowInformationWindow(false);
                 }}

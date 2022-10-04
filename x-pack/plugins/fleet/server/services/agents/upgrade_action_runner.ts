@@ -8,10 +8,11 @@
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import moment from 'moment';
+import uuid from 'uuid';
 
 import { isAgentUpgradeable } from '../../../common/services';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 
 import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
 
@@ -20,21 +21,14 @@ import { appContextService } from '../app_context';
 import { ActionRunner } from './action_runner';
 
 import type { GetAgentsOptions } from './crud';
-import { errorsToResults, bulkUpdateAgents } from './crud';
-import { createAgentAction } from './actions';
+import { bulkUpdateAgents } from './crud';
+import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class UpgradeActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
-    return await upgradeBatch(
-      this.soClient,
-      this.esClient,
-      agents,
-      {},
-      this.actionParams! as any,
-      true
-    );
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
+    return await upgradeBatch(this.soClient, this.esClient, agents, {}, this.actionParams! as any);
   }
 
   protected getTaskType() {
@@ -59,9 +53,8 @@ export async function upgradeBatch(
     upgradeDurationSeconds?: number;
     startTime?: string;
     total?: number;
-  },
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+  }
+): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -80,7 +73,7 @@ export async function upgradeBatch(
       const isNotAllowed =
         !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
       if (isNotAllowed) {
-        throw new FleetError(`${agent.id} is not upgradeable`);
+        throw new FleetError(`Agent ${agent.id} is not upgradeable`);
       }
 
       if (!options.force && isHostedAgent(hostedPolicies, agent)) {
@@ -115,35 +108,41 @@ export async function upgradeBatch(
     options.upgradeDurationSeconds
   );
 
-  await createAgentAction(esClient, {
-    id: options.actionId,
-    created_at: now,
-    data,
-    ack_data: data,
-    type: 'UPGRADE',
-    total: options.total,
-    agents: agentsToUpdate.map((agent) => agent.id),
-    ...rollingUpgradeOptions,
-  });
-
   await bulkUpdateAgents(
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,
       data: {
+        upgraded_at: null,
         upgrade_started_at: now,
-        upgrade_status: 'started',
       },
-    }))
+    })),
+    errors
+  );
+
+  const actionId = options.actionId ?? uuid();
+  const total = options.total ?? givenAgents.length;
+
+  await createAgentAction(esClient, {
+    id: actionId,
+    created_at: now,
+    data,
+    ack_data: data,
+    type: 'UPGRADE',
+    total,
+    agents: agentsToUpdate.map((agent) => agent.id),
+    ...rollingUpgradeOptions,
+  });
+
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'cannot upgrade hosted agent or agent not upgradeable'
   );
 
   return {
-    items: errorsToResults(
-      givenAgents,
-      errors,
-      'agentIds' in options ? options.agentIds : undefined,
-      skipSuccess
-    ),
+    actionId,
   };
 }
 

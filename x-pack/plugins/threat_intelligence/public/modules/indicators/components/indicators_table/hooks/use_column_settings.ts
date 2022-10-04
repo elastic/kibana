@@ -34,7 +34,7 @@ type CachedColumnsPreferences = Partial<{
   sortingState: EuiDataGridSorting['columns'];
 }>;
 
-export interface ColumnSettings {
+export interface ColumnSettingsValue {
   columns: EuiDataGridColumn[];
   columnVisibility: {
     visibleColumns: string[];
@@ -45,7 +45,7 @@ export interface ColumnSettings {
   handleResetColumns: () => void;
 }
 
-export const useColumnSettings = (): ColumnSettings => {
+export const useColumnSettings = (): ColumnSettingsValue => {
   const {
     services: { storage },
   } = useKibana();

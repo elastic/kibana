@@ -72,6 +72,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
       },
       customIntegrations: {
         ContextProvider: getStorybookContextProvider(),
+        languageClientsUiComponents: {},
       },
       docLinks: getDocLinks(),
       http: getHttp(),

@@ -88,7 +88,6 @@ async function getComponent({
     onRemoveField: jest.fn(),
     showFieldStats,
     selected,
-    persistDataView: jest.fn(),
     state: {
       query: { query: '', language: 'lucene' },
       filters: [],

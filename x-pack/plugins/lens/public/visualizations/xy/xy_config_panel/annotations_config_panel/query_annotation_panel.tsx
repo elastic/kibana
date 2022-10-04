@@ -42,7 +42,7 @@ export const ConfigPanelQueryAnnotation = ({
 }) => {
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
   const currentExistingFields = frame.dataViews.existingFields[currentIndexPattern.title];
-  // list only supported field by operation, remove the rest
+  // list only date fields
   const options = currentIndexPattern.fields
     .filter((field) => field.type === 'date' && field.displayName)
     .map((field) => {
@@ -91,7 +91,6 @@ export const ConfigPanelQueryAnnotation = ({
 
       <EuiFormRow
         display="rowCompressed"
-        className="lnsRowCompressedMargin"
         fullWidth
         label={i18n.translate('xpack.lens.xyChart.annotation.queryField', {
           defaultMessage: 'Target date field',

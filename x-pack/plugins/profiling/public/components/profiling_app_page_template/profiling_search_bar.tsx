@@ -69,7 +69,8 @@ export function ProfilingSearchBar({
       showDatePicker
       showFilterBar={false}
       showSaveQuery={false}
-      showSubmitButton={showSubmitButton}
+      // showSubmitButton={showSubmitButton}
+      showSubmitButton={true}
       query={searchBarQuery}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}

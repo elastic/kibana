@@ -13,7 +13,7 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 
-import type { ESSearchResponse as SearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { FleetError } from '../../errors';
@@ -268,6 +268,24 @@ export async function generateEnrollmentAPIKey(
     id: res._id,
     ...body,
   };
+}
+
+export async function ensureDefaultEnrollmentAPIKeyForAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentPolicyId: string
+) {
+  const hasKey = await hasEnrollementAPIKeysForPolicy(esClient, agentPolicyId);
+
+  if (hasKey) {
+    return;
+  }
+
+  return generateEnrollmentAPIKey(soClient, esClient, {
+    name: `Default`,
+    agentPolicyId,
+    forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up
+  });
 }
 
 function getQueryForExistingKeyNameOnPolicy(agentPolicyId: string, providedKeyName: string) {

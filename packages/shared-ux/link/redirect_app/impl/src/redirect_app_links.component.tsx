@@ -28,6 +28,7 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
   children,
   navigateToUrl,
   currentAppId,
+  className,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +45,7 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <div ref={containerRef} onClick={handleClick}>
+    <div ref={containerRef} onClick={handleClick} className={className}>
       {children}
     </div>
   );

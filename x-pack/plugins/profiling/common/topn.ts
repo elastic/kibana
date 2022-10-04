@@ -6,7 +6,7 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { InferSearchResponseOf } from '@kbn/core/types/elasticsearch';
+import { InferSearchResponseOf } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { ProfilingESField } from './elasticsearch';
@@ -33,6 +33,7 @@ export interface TopNSamples {
 export interface TopNResponse extends TopNSamples {
   TotalCount: number;
   Metadata: Record<string, StackFrameMetadata[]>;
+  Labels: Record<string, string>;
 }
 
 export interface TopNSamplesHistogramResponse {
@@ -65,6 +66,21 @@ export function getTopNAggregationRequest({
         execution_hint: highCardinality ? ('map' as const) : ('global_ordinals' as const),
       },
       aggs: {
+        ...(searchField === ProfilingESField.HostID
+          ? {
+              sample: {
+                top_metrics: {
+                  metrics: [
+                    { field: ProfilingESField.HostName },
+                    { field: ProfilingESField.HostIP },
+                  ] as [{ field: ProfilingESField.HostName }, { field: ProfilingESField.HostIP }],
+                  sort: {
+                    '@timestamp': 'desc' as const,
+                  },
+                },
+              },
+            }
+          : {}),
         over_time: {
           date_histogram: {
             field: ProfilingESField.Timestamp,
@@ -188,6 +204,7 @@ export function createTopNSamples(
 
 export interface TopNSubchart {
   Category: string;
+  Label: string;
   Percentage: number;
   Series: CountPerTime[];
   Color: string;
@@ -199,10 +216,12 @@ export function groupSamplesByCategory({
   samples,
   totalCount,
   metadata,
+  labels,
 }: {
   samples: TopNSample[];
   totalCount: number;
   metadata: Record<string, StackFrameMetadata[]>;
+  labels: Record<string, string>;
 }): TopNSubchart[] {
   const seriesByCategory = new Map<string, CountPerTime[]>();
 
@@ -213,7 +232,10 @@ export function groupSamplesByCategory({
       seriesByCategory.set(sample.Category, []);
     }
     const series = seriesByCategory.get(sample.Category)!;
-    series.push({ Timestamp: sample.Timestamp, Count: sample.Count });
+    series.push({
+      Timestamp: sample.Timestamp,
+      Count: sample.Count,
+    });
   }
 
   const subcharts: Array<Omit<TopNSubchart, 'Color' | 'Index'>> = [];
@@ -222,6 +244,7 @@ export function groupSamplesByCategory({
     const totalPerCategory = series.reduce((sumOf, { Count }) => sumOf + (Count ?? 0), 0);
     subcharts.push({
       Category: category,
+      Label: labels[category] || category,
       Percentage: (totalPerCategory / totalCount) * 100,
       Series: series,
       Metadata: metadata[category] ?? [],

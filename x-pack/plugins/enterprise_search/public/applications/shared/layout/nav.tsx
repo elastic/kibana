@@ -18,13 +18,16 @@ import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
+import { enableBehavioralAnalyticsSection } from '../../../../common/ui_settings_keys';
 import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { productAccess } = useValues(KibanaLogic);
+  const { productAccess, uiSettings } = useValues(KibanaLogic);
+
+  const analyticsSectionEnabled = uiSettings?.get<boolean>(enableBehavioralAnalyticsSection, false);
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -67,25 +70,29 @@ export const useEnterpriseSearchNav = () => {
         defaultMessage: 'Content',
       }),
     },
-    {
-      id: 'enterpriseSearchAnalytics',
-      items: [
-        {
-          id: 'analytics_collections',
-          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollectionsTitle', {
-            defaultMessage: 'Collections',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
-            to: ANALYTICS_PLUGIN.URL,
-          }),
-        },
-      ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
-        defaultMessage: 'Analytics',
-      }),
-    },
+    ...(analyticsSectionEnabled
+      ? [
+          {
+            id: 'enterpriseSearchAnalytics',
+            items: [
+              {
+                id: 'analytics_collections',
+                name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollectionsTitle', {
+                  defaultMessage: 'Collections',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  shouldShowActiveForSubroutes: true,
+                  to: ANALYTICS_PLUGIN.URL,
+                }),
+              },
+            ],
+            name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
+              defaultMessage: 'Analytics',
+            }),
+          },
+        ]
+      : []),
     {
       id: 'search',
       items: [

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, VFC } from 'react';
+import React, { VFC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
-import { ComponentType } from '../../../../../common/types/component_type';
-import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_indicators_filters_context';
-import { getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
-import { FilterIn as FilterInConst, updateFiltersArray } from '../../lib/filter';
-import { EMPTY_VALUE } from '../../../../../common/constants';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useFilterInOut } from '../../hooks/use_filter_in_out';
+import { FilterIn } from '../../utils/filter';
 import { Indicator } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 
 const ICON_TYPE = 'plusInCircle';
-const ICON_TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterInButton', {
+const ICON_TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterInButtonIcon', {
+  defaultMessage: 'Filter In',
+});
+const CELL_ACTION_TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterInCellAction', {
   defaultMessage: 'Filter In',
 });
 
@@ -32,76 +32,109 @@ export interface FilterInProps {
    */
   field: string;
   /**
-   * Dictates the way the FilterIn component is rendered depending on the situation in which it's used
-   */
-  type?: ComponentType;
-  /**
-   * Display component for when the FilterIn component is used within a DataGrid
-   */
-  as?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
-  /**
    * Used for unit and e2e tests.
    */
   ['data-test-subj']?: string;
 }
 
+export interface FilterInCellActionProps extends FilterInProps {
+  /**
+   * Display component for when the FilterIn component is used within an {@link EuiDataGrid}.
+   */
+  Component: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+}
+
 /**
  * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
  *
- * The component has 3 renders depending on where it's used: within a EuiContextMenu, a EuiDataGrid or not.
+ * This component renders an {@link EuiButtonIcon}.
  *
- * @returns filter in button
+ * @returns filter in button icon
  */
-export const FilterIn: VFC<FilterInProps> = ({ data, field, type, as: Component, ...props }) => {
-  const styles = useStyles();
-
-  const { filterManager } = useIndicatorsFiltersContext();
-
-  const { key, value } =
-    typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
-
-  const filterIn = useCallback((): void => {
-    const existingFilters = filterManager.getFilters();
-    const newFilters: Filter[] = updateFiltersArray(existingFilters, key, value, FilterInConst);
-    filterManager.setFilters(newFilters);
-  }, [filterManager, key, value]);
-
-  if (!value || value === EMPTY_VALUE || !key) {
+export const FilterInButtonIcon: VFC<FilterInProps> = ({
+  data,
+  field,
+  'data-test-subj': dataTestSub,
+}) => {
+  const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
+  if (!filterFn) {
     return <></>;
   }
 
-  if (type === ComponentType.EuiDataGrid) {
-    return (
-      <div {...props} css={styles.button}>
-        {/* @ts-ignore*/}
-        <Component aria-label={ICON_TITLE} iconType={ICON_TYPE} onClick={filterIn} />
-      </div>
-    );
-  }
+  return (
+    <EuiToolTip content={ICON_TITLE}>
+      <EuiButtonIcon
+        aria-label={ICON_TITLE}
+        iconType={ICON_TYPE}
+        iconSize="s"
+        size="xs"
+        color="primary"
+        onClick={filterFn}
+        data-test-subj={dataTestSub}
+      />
+    </EuiToolTip>
+  );
+};
 
-  if (type === ComponentType.ContextMenu) {
-    return (
-      <EuiContextMenuItem
-        key="addToTimeline"
-        icon="plusInCircle"
-        size="s"
-        onClick={filterIn}
-        {...props}
-      >
-        Filter In
-      </EuiContextMenuItem>
-    );
+/**
+ * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
+ *
+ * This component is to be used in an EuiContextMenu.
+ *
+ * @returns filter in item for a context menu
+ */
+export const FilterInContextMenu: VFC<FilterInProps> = ({
+  data,
+  field,
+  'data-test-subj': dataTestSub,
+}) => {
+  const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
+  if (!filterFn) {
+    return <></>;
   }
 
   return (
-    <EuiButtonIcon
-      aria-label={ICON_TITLE}
-      iconType={ICON_TYPE}
-      iconSize="s"
-      size="xs"
-      color="primary"
-      onClick={filterIn}
-      {...props}
-    />
+    <EuiContextMenuItem
+      key="filterIn"
+      icon="plusInCircle"
+      size="s"
+      onClick={filterFn}
+      data-test-subj={dataTestSub}
+    >
+      <FormattedMessage
+        id="xpack.threatIntelligence.queryBar.filterInContextMenu"
+        defaultMessage="Filter In"
+      />
+    </EuiContextMenuItem>
+  );
+};
+
+/**
+ * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
+ *
+ * This component is to be used in an EuiDataGrid.
+ *
+ * @returns filter in button for data grid
+ */
+export const FilterInCellAction: VFC<FilterInCellActionProps> = ({
+  data,
+  field,
+  Component,
+  'data-test-subj': dataTestSub,
+}) => {
+  const styles = useStyles();
+
+  const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
+  if (!filterFn) {
+    return <></>;
+  }
+
+  return (
+    <EuiToolTip content={CELL_ACTION_TITLE}>
+      <div data-test-subj={dataTestSub} css={styles.button}>
+        {/* @ts-ignore*/}
+        <Component aria-label={CELL_ACTION_TITLE} iconType={ICON_TYPE} onClick={filterFn} />
+      </div>
+    </EuiToolTip>
   );
 };

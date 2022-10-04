@@ -65,6 +65,7 @@ export const useToGetInternalFlyout = () => {
           alertId={alertId}
           browserFields={browserFields}
           detailsData={detailsData}
+          detailsEcsData={ecsData}
           event={{ eventId: localAlert._id, indexName: localAlert._index }}
           hostName={hostName ?? ''}
           handleIsolationActionSuccess={handleIsolationActionSuccess}
@@ -86,6 +87,7 @@ export const useToGetInternalFlyout = () => {
       alertId,
       browserFields,
       detailsData,
+      ecsData,
       handleIsolationActionSuccess,
       hostName,
       isAlert,

@@ -21,7 +21,8 @@ import {
   isEmpty,
 } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Logger,
@@ -40,7 +41,11 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
+  TaskStatus,
+} from '@kbn/task-manager-plugin/server';
 import {
   IEvent,
   IEventLogClient,
@@ -117,7 +122,9 @@ import {
 import { AlertingRulesConfig } from '../config';
 import {
   formatExecutionLogResult,
+  formatExecutionKPIResult,
   getExecutionLogAggregation,
+  getExecutionKPIAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { IExecutionLogResult, IExecutionErrorsResult } from '../../common';
 import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
@@ -227,7 +234,7 @@ export interface FindOptions extends IndexType {
 
 export type BulkEditFields = keyof Pick<
   Rule,
-  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen'
+  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule' | 'apiKey'
 >;
 
 export type BulkEditOperation =
@@ -255,6 +262,21 @@ export type BulkEditOperation =
       operation: 'set';
       field: Extract<BulkEditFields, 'notifyWhen'>;
       value: Rule['notifyWhen'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'snoozeSchedule'>;
+      value: RuleSnoozeSchedule;
+    }
+  | {
+      operation: 'delete';
+      field: Extract<BulkEditFields, 'snoozeSchedule'>;
+      value?: string[];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'apiKey'>;
+      value?: undefined;
     };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
@@ -363,6 +385,19 @@ export interface GetExecutionLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+}
+
+export interface GetRuleExecutionKPIParams {
+  id: string;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+}
+
+export interface GetGlobalExecutionKPIParams {
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
 }
 
 export interface GetGlobalExecutionLogParams {
@@ -1023,6 +1058,125 @@ export class RulesClient {
     }
   }
 
+  public async getGlobalExecutionKpiWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+  }: GetGlobalExecutionKPIParams) {
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_GLOBAL_EXECUTION_KPI,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_GLOBAL_EXECUTION_KPI,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'alert',
+        authorizationTuple.filter as KueryNode,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionKPIAggregation(filter),
+        }
+      );
+
+      return formatExecutionKPIResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getGlobalExecutionKpiWithAuth(): error searching global execution KPI: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getRuleExecutionKPI({ id, dateStart, dateEnd, filter }: GetRuleExecutionKPIParams) {
+    this.logger.debug(`getRuleExecutionKPI(): getting execution KPI for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetRuleExecutionKPI,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionKPIAggregation(filter),
+        },
+        rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+
+      return formatExecutionKPIResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getRuleExecutionKPI(): error searching execution KPI for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
   public async find<Params extends RuleTypeParams = never>({
     options: { fields, ...options } = {},
     excludeFromPublicApi = false,
@@ -1094,7 +1248,7 @@ export class RulesClient {
       filter:
         (authorizationFilter && filterKueryNode
           ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
-          : authorizationFilter) ?? options.filter,
+          : authorizationFilter) ?? filterKueryNode,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
@@ -1553,14 +1707,7 @@ export class RulesClient {
       );
     }
 
-    let qNodeQueryFilter: null | KueryNode;
-    if (!queryFilter) {
-      qNodeQueryFilter = null;
-    } else if (typeof queryFilter === 'string') {
-      qNodeQueryFilter = fromKueryExpression(queryFilter);
-    } else {
-      qNodeQueryFilter = queryFilter;
-    }
+    const qNodeQueryFilter = buildKueryNodeFilter(queryFilter);
 
     const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
     let authorizationTuple;
@@ -1752,12 +1899,65 @@ export class RulesClient {
                 rule.references || []
               ),
             };
+
+            for (const operation of operations) {
+              const { field } = operation;
+              if (field === 'snoozeSchedule' || field === 'apiKey') {
+                if (rule.attributes.actions.length) {
+                  try {
+                    await this.actionsAuthorization.ensureAuthorized('execute');
+                  } catch (error) {
+                    throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
+                  }
+                }
+              }
+            }
+
+            let hasUpdateApiKeyOperation = false;
+
             for (const operation of operations) {
               switch (operation.field) {
                 case 'actions':
                   await this.validateActions(ruleType, operation.value);
                   ruleActions = applyBulkEditOperation(operation, ruleActions);
                   break;
+                case 'snoozeSchedule':
+                  // Silently skip adding snooze or snooze schedules on security
+                  // rules until we implement snoozing of their rules
+                  if (attributes.consumer === AlertConsumers.SIEM) {
+                    break;
+                  }
+                  if (operation.operation === 'set') {
+                    const snoozeAttributes = getBulkSnoozeAttributes(attributes, operation.value);
+                    try {
+                      verifySnoozeScheduleLimit(snoozeAttributes);
+                    } catch (error) {
+                      throw Error(`Error updating rule: could not add snooze - ${error.message}`);
+                    }
+                    attributes = {
+                      ...attributes,
+                      ...snoozeAttributes,
+                    };
+                  }
+                  if (operation.operation === 'delete') {
+                    const idsToDelete = operation.value && [...operation.value];
+                    if (idsToDelete?.length === 0) {
+                      attributes.snoozeSchedule?.forEach((schedule) => {
+                        if (schedule.id) {
+                          idsToDelete.push(schedule.id);
+                        }
+                      });
+                    }
+                    attributes = {
+                      ...attributes,
+                      ...getBulkUnsnoozeAttributes(attributes, idsToDelete),
+                    };
+                  }
+                  break;
+                case 'apiKey': {
+                  hasUpdateApiKeyOperation = true;
+                  break;
+                }
                 default:
                   attributes = applyBulkEditOperation(operation, attributes);
               }
@@ -1804,10 +2004,12 @@ export class RulesClient {
               validatedMutatedAlertTypeParams
             );
 
+            const shouldUpdateApiKey = attributes.enabled || hasUpdateApiKeyOperation;
+
             // create API key
             let createdAPIKey = null;
             try {
-              createdAPIKey = attributes.enabled
+              createdAPIKey = shouldUpdateApiKey
                 ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, attributes.name))
                 : null;
             } catch (error) {
@@ -2142,7 +2344,7 @@ export class RulesClient {
       });
     } else {
       // Task exists so set enabled to true
-      await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId!], true);
+      await this.taskManager.bulkEnable([attributes.scheduledTaskId!]);
     }
   }
 
@@ -2206,7 +2408,7 @@ export class RulesClient {
         const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 
         for (const instanceId of recoveredAlertInstanceIds) {
-          const { group: actionGroup, subgroup: actionSubgroup } =
+          const { group: actionGroup } =
             recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
           const instanceState = recoveredAlertInstances[instanceId].getState();
           const message = `instance '${instanceId}' has recovered due to the rule was disabled`;
@@ -2221,7 +2423,6 @@ export class RulesClient {
             message,
             state: instanceState,
             group: actionGroup,
-            subgroup: actionSubgroup,
             namespace: this.namespace,
             spaceId: this.spaceId,
             savedObjects: [
@@ -2290,7 +2491,7 @@ export class RulesClient {
         if (attributes.scheduledTaskId !== id) {
           await this.taskManager.removeIfExists(attributes.scheduledTaskId);
         } else {
-          await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId], false);
+          await this.taskManager.bulkDisable([attributes.scheduledTaskId]);
         }
       }
     }
@@ -2326,7 +2527,6 @@ export class RulesClient {
       'alert',
       id
     );
-    const { id: snoozeId, duration } = snoozeSchedule;
 
     try {
       await this.authorization.ensureAuthorized({
@@ -2360,20 +2560,13 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    // If duration is -1, instead mute all
-    const newAttrs =
-      duration === -1
-        ? {
-            muteAll: true,
-            snoozeSchedule: clearUnscheduledSnooze(attributes),
-          }
-        : {
-            snoozeSchedule: (snoozeId
-              ? clearScheduledSnoozesById(attributes, [snoozeId])
-              : clearUnscheduledSnooze(attributes)
-            ).concat(snoozeSchedule),
-            muteAll: false,
-          };
+    const newAttrs = getSnoozeAttributes(attributes, snoozeSchedule);
+
+    try {
+      verifySnoozeScheduleLimit(newAttrs);
+    } catch (error) {
+      throw Boom.badRequest(error.message);
+    }
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
@@ -2441,15 +2634,12 @@ export class RulesClient {
     );
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
-    const snoozeSchedule = scheduleIds
-      ? clearScheduledSnoozesById(attributes, scheduleIds)
-      : clearCurrentActiveSnooze(attributes);
+    const newAttrs = getUnsnoozeAttributes(attributes, scheduleIds);
 
     const updateAttributes = this.updateMeta({
-      snoozeSchedule,
+      ...newAttrs,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
-      ...(!scheduleIds ? { muteAll: false } : {}),
     });
     const updateOptions = { version };
 
@@ -2791,9 +2981,27 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    const taskDoc = attributes.scheduledTaskId
-      ? await this.taskManager.get(attributes.scheduledTaskId)
-      : null;
+    // Check that the rule is enabled
+    if (!attributes.enabled) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.disabledRuleError', {
+        defaultMessage: 'Error running rule: rule is disabled',
+      });
+    }
+
+    let taskDoc: ConcreteTaskInstance | null = null;
+    try {
+      taskDoc = attributes.scheduledTaskId
+        ? await this.taskManager.get(attributes.scheduledTaskId)
+        : null;
+    } catch (err) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.getTaskError', {
+        defaultMessage: 'Error running rule: {errMessage}',
+        values: {
+          errMessage: err.message,
+        },
+      });
+    }
+
     if (
       taskDoc &&
       (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
@@ -2803,7 +3011,16 @@ export class RulesClient {
       });
     }
 
-    await this.taskManager.runSoon(id);
+    try {
+      await this.taskManager.runSoon(attributes.scheduledTaskId ? attributes.scheduledTaskId : id);
+    } catch (err) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.runSoonError', {
+        defaultMessage: 'Error running rule: {errMessage}',
+        values: {
+          errMessage: err.message,
+        },
+      });
+    }
   }
 
   public async listAlertTypes() {
@@ -3175,20 +3392,98 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   return parsedDate;
 }
 
-function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
+function getSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSnoozeSchedule) {
+  // If duration is -1, instead mute all
+  const { id: snoozeId, duration } = snoozeSchedule;
+
+  if (duration === -1) {
+    return {
+      muteAll: true,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
+    };
+  }
+  return {
+    snoozeSchedule: (snoozeId
+      ? clearScheduledSnoozesById(attributes, [snoozeId])
+      : clearUnscheduledSnooze(attributes)
+    ).concat(snoozeSchedule),
+    muteAll: false,
+  };
+}
+
+function getBulkSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSnoozeSchedule) {
+  // If duration is -1, instead mute all
+  const { id: snoozeId, duration } = snoozeSchedule;
+
+  if (duration === -1) {
+    return {
+      muteAll: true,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
+    };
+  }
+
+  // Bulk adding snooze schedule, don't touch the existing snooze/indefinite snooze
+  if (snoozeId) {
+    const existingSnoozeSchedules = attributes.snoozeSchedule || [];
+    return {
+      muteAll: attributes.muteAll,
+      snoozeSchedule: [...existingSnoozeSchedules, snoozeSchedule],
+    };
+  }
+
+  // Bulk snoozing, don't touch the existing snooze schedules
+  return {
+    muteAll: false,
+    snoozeSchedule: [...clearUnscheduledSnooze(attributes), snoozeSchedule],
+  };
+}
+
+function getUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
+  const snoozeSchedule = scheduleIds
+    ? clearScheduledSnoozesById(attributes, scheduleIds)
+    : clearCurrentActiveSnooze(attributes);
+
+  return {
+    snoozeSchedule,
+    ...(!scheduleIds ? { muteAll: false } : {}),
+  };
+}
+
+function getBulkUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
+  // Bulk removing snooze schedules, don't touch the current snooze/indefinite snooze
+  if (scheduleIds) {
+    const newSchedules = clearScheduledSnoozesById(attributes, scheduleIds);
+    // Unscheduled snooze is also known as snooze now
+    const unscheduledSnooze =
+      attributes.snoozeSchedule?.filter((s) => typeof s.id === 'undefined') || [];
+
+    return {
+      snoozeSchedule: [...unscheduledSnooze, ...newSchedules],
+      muteAll: attributes.muteAll,
+    };
+  }
+
+  // Bulk unsnoozing, don't touch current snooze schedules that are NOT active
+  return {
+    snoozeSchedule: clearCurrentActiveSnooze(attributes),
+    muteAll: false,
+  };
+}
+
+function clearUnscheduledSnooze(attributes: RawRule) {
   // Clear any snoozes that have no ID property. These are "simple" snoozes created with the quick UI, e.g. snooze for 3 days starting now
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
     : [];
 }
 
-function clearScheduledSnoozesById(attributes: { snoozeSchedule?: RuleSnooze }, ids: string[]) {
+function clearScheduledSnoozesById(attributes: RawRule, ids: string[]) {
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id))
     : [];
 }
 
-function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; muteAll: boolean }) {
+function clearCurrentActiveSnooze(attributes: RawRule) {
   // First attempt to cancel a simple (unscheduled) snooze
   const clearedUnscheduledSnoozes = clearUnscheduledSnooze(attributes);
   // Now clear any scheduled snoozes that are currently active and never recur
@@ -3213,4 +3508,15 @@ function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; mut
     };
   });
   return clearedSnoozesAndSkippedRecurringSnoozes;
+}
+
+function verifySnoozeScheduleLimit(attributes: Partial<RawRule>) {
+  const schedules = attributes.snoozeSchedule?.filter((snooze) => snooze.id);
+  if (schedules && schedules.length > 5) {
+    throw Error(
+      i18n.translate('xpack.alerting.rulesClient.snoozeSchedule.limitReached', {
+        defaultMessage: 'Rule cannot have more than 5 snooze schedules',
+      })
+    );
+  }
 }

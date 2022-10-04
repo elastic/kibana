@@ -78,7 +78,6 @@ function getCompProps(): DiscoverSidebarProps {
     onDataViewCreated: jest.fn(),
     availableFields$,
     useNewFieldsApi: true,
-    persistDataView: jest.fn(),
   };
 }
 
@@ -194,5 +193,15 @@ describe('discover sidebar', function () {
     expect(addFieldButtonInDataViewPicker.length).toBe(0);
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(0);
+  });
+
+  it('should render the Visualize in Lens button in text based languages mode', () => {
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockDiscoverServices}>
+        <DiscoverSidebar {...props} onAddFilter={undefined} />
+      </KibanaContextProvider>
+    );
+    const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
+    expect(visualizeField.length).toBe(1);
   });
 });

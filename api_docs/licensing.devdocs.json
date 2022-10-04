@@ -2143,6 +2143,10 @@
               "path": "x-pack/plugins/searchprofiler/server/plugin.ts"
             },
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/executors/query.ts"
+            },
+            {
               "plugin": "snapshotRestore",
               "path": "x-pack/plugins/snapshot_restore/server/services/license.ts"
             },

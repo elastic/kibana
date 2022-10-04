@@ -22,11 +22,12 @@ import {
   useResizeObserver,
   EuiButton,
 } from '@elastic/eui';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { DataViewField, getFieldSubtypeMulti, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -39,6 +40,7 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import type { DataTableRecord } from '../../../../types';
+import { triggerVisualizeActionsTextBasedLanguages } from './lib/visualize_trigger_utils';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -93,7 +95,6 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   viewMode: VIEW_MODE;
 
   showDataViewPicker?: boolean;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }
 
 export function DiscoverSidebarComponent({
@@ -118,7 +119,6 @@ export function DiscoverSidebarComponent({
   createNewDataView,
   showDataViewPicker,
   state,
-  persistDataView,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -311,6 +311,12 @@ export function DiscoverSidebarComponent({
 
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
 
+  const visualizeAggregateQuery = useCallback(() => {
+    const aggregateQuery =
+      state.query && isOfAggregateQueryType(state.query) ? state.query : undefined;
+    triggerVisualizeActionsTextBasedLanguages(columns, selectedDataView, aggregateQuery);
+  }, [columns, selectedDataView, state.query]);
+
   if (!selectedDataView) {
     return null;
   }
@@ -415,7 +421,6 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
-                                persistDataView={persistDataView}
                                 state={state}
                                 contextualFields={columns}
                               />
@@ -478,7 +483,6 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
-                                persistDataView={persistDataView}
                                 state={state}
                                 contextualFields={columns}
                               />
@@ -510,7 +514,6 @@ export function DiscoverSidebarComponent({
                             onEditField={editField}
                             onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
-                            persistDataView={persistDataView}
                             state={state}
                             contextualFields={columns}
                           />
@@ -533,6 +536,20 @@ export function DiscoverSidebarComponent({
             >
               {i18n.translate('discover.fieldChooser.addField.label', {
                 defaultMessage: 'Add a field',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        {isPlainRecord && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="lensApp"
+              data-test-subj="textBased-visualize"
+              onClick={visualizeAggregateQuery}
+              size="s"
+            >
+              {i18n.translate('discover.textBasedLanguages.visualize.label', {
+                defaultMessage: 'Visualize in Lens',
               })}
             </EuiButton>
           </EuiFlexItem>

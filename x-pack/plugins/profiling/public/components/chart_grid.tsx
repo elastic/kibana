@@ -39,6 +39,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames 
                 index={subchart.Index}
                 color={subchart.Color}
                 category={subchart.Category}
+                label={subchart.Label}
                 percentage={subchart.Percentage}
                 metadata={subchart.Metadata}
                 height={200}
@@ -48,6 +49,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames 
                   setSelectedSubchart(subchart);
                 }}
                 showFrames={showFrames}
+                padTitle
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -64,6 +66,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames 
             index={selectedSubchart.Index}
             color={selectedSubchart.Color}
             category={selectedSubchart.Category}
+            label={selectedSubchart.Label}
             percentage={selectedSubchart.Percentage}
             metadata={selectedSubchart.Metadata}
             height={200}
@@ -71,6 +74,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames 
             showAxes
             onShowMoreClick={null}
             showFrames={showFrames}
+            padTitle
           />
         </EuiFlyout>
       )}

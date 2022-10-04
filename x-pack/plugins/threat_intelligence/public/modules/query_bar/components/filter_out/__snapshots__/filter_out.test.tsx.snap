@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<FilterOut /> should render an empty component (wrong data input) 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render an empty component (wrong data input) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -61,7 +61,7 @@ Object {
 }
 `;
 
-exports[`<FilterOut /> should render an empty component (wrong field input) 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render an empty component (wrong field input) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -122,11 +122,36 @@ Object {
 }
 `;
 
-exports[`<FilterOut /> should render one Component (for EuiDataGrid use) 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render one Component (for EuiDataGrid use) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
+      <span
+        class="euiToolTipAnchor"
+      >
+        <div
+          css="[object Object]"
+        >
+          <button
+            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="plusInCircle"
+            />
+          </button>
+        </div>
+      </span>
+    </div>
+  </body>,
+  "container": <div>
+    <span
+      class="euiToolTipAnchor"
+    >
       <div
         css="[object Object]"
       >
@@ -142,24 +167,7 @@ Object {
           />
         </button>
       </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      css="[object Object]"
-    >
-      <button
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        type="button"
-      >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="plusInCircle"
-        />
-      </button>
-    </div>
+    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
@@ -215,11 +223,34 @@ Object {
 }
 `;
 
-exports[`<FilterOut /> should render one EuiButtonIcon 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render one EuiButtonIcon 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
+      <span
+        class="euiToolTipAnchor"
+      >
+        <button
+          aria-label="Filter Out"
+          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          data-test-subj="abc"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="minusInCircle"
+          />
+        </button>
+      </span>
+    </div>
+  </body>,
+  "container": <div>
+    <span
+      class="euiToolTipAnchor"
+    >
       <button
         aria-label="Filter Out"
         class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
@@ -233,22 +264,7 @@ Object {
           data-euiicon-type="minusInCircle"
         />
       </button>
-    </div>
-  </body>,
-  "container": <div>
-    <button
-      aria-label="Filter Out"
-      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-      data-test-subj="abc"
-      type="button"
-    >
-      <span
-        aria-hidden="true"
-        class="euiButtonIcon__icon"
-        color="inherit"
-        data-euiicon-type="minusInCircle"
-      />
-    </button>
+    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
@@ -304,7 +320,7 @@ Object {
 }
 `;
 
-exports[`<FilterOut /> should render one EuiContextMenuItem (for EuiContextMenu use) 1`] = `
+exports[`<FilterOutButtonIcon /> <FilterOutContextMenu /> <FilterOutDataGrid /> should render one EuiContextMenuItem (for EuiContextMenu use) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -324,7 +340,9 @@ Object {
           <span
             class="euiContextMenuItem__text"
           >
-            Filter Out
+            <span>
+              Filter Out
+            </span>
           </span>
         </span>
       </button>
@@ -346,7 +364,9 @@ Object {
         <span
           class="euiContextMenuItem__text"
         >
-          Filter Out
+          <span>
+            Filter Out
+          </span>
         </span>
       </span>
     </button>

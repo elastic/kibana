@@ -6,17 +6,18 @@
  */
 
 import { isEmpty, reduce } from 'lodash';
-import type { ECSMapping } from './schemas';
+import type { DefaultValues } from 'react-hook-form';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-export const convertECSMappingToObject = (
-  ecsMapping: Array<{
-    key: string;
-    result: {
-      type: string;
-      value: string;
-    };
-  }>
-): ECSMapping =>
+export type ECSMappingArray = Array<{
+  key: string;
+  result: {
+    type: string;
+    value: string | string[];
+  };
+}>;
+
+export const convertECSMappingToObject = (ecsMapping: ECSMappingArray): ECSMapping =>
   reduce(
     ecsMapping,
     (acc, value) => {
@@ -28,5 +29,26 @@ export const convertECSMappingToObject = (
 
       return acc;
     },
-    {} as Record<string, { field?: string; value?: string }>
+    {} as ECSMapping
+  );
+
+export const convertECSMappingToArray = (
+  ecsMapping: DefaultValues<ECSMapping> | undefined
+): ECSMappingArray =>
+  reduce(
+    ecsMapping,
+    (acc, value, key) => {
+      if (value) {
+        acc.push({
+          key,
+          result: {
+            type: Object.keys(value)[0],
+            value: Object.values(value as string | string[])[0],
+          },
+        });
+      }
+
+      return acc;
+    },
+    [] as ECSMappingArray
   );

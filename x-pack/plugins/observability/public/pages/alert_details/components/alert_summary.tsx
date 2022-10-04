@@ -5,173 +5,162 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiPanel,
-  EuiTitle,
-  EuiLink,
-  EuiToolTip,
-  EuiIcon,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PageHeaderProps } from '../types';
+import moment from 'moment';
+import {
+  ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_RULE_TAGS,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
+import { asDuration } from '../../../../common/utils/formatters';
+import { AlertSummaryProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
+import { DEFAULT_DATE_FORMAT } from '../constants';
 
-export function AlertSummary({ alert }: PageHeaderProps) {
+export function AlertSummary({ alert }: AlertSummaryProps) {
   const { triggersActionsUi } = useKibana().services;
+  const tags = alert?.fields[ALERT_RULE_TAGS];
 
   return (
-    <>
-      <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
-        <EuiTitle size="xs">
-          <div>
-            <FormattedMessage
-              id="xpack.observability.pages.alertDetails.alertSummary"
-              defaultMessage="Alert Summary"
+    <div data-test-subj="alert-summary-container">
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.actualValue"
+                defaultMessage="Actual value"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {alert?.fields[ALERT_EVALUATION_VALUE] ?? '-'}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.expectedValue"
+                defaultMessage="Expected value"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {alert?.fields[ALERT_EVALUATION_THRESHOLD] ?? '-'}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.duration"
+                defaultMessage="Duration"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {asDuration(Number(alert?.fields[ALERT_DURATION]))}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.alertStatus"
+                defaultMessage="Status"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {alert?.fields[ALERT_STATUS] ? (
+            <AlertStatusIndicator
+              alertStatus={
+                alert?.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE
+                  ? ALERT_STATUS_ACTIVE
+                  : ALERT_STATUS_RECOVERED
+              }
             />
-            &nbsp;&nbsp;
-            <EuiToolTip content="Alert summary info here">
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+          ) : (
+            <div data-test-subj="noAlertStatus">-</div>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.source"
+                defaultMessage="Source"
+              />
+            </h5>
+          </EuiTitle>
+          <div>
+            <EuiSpacer size="s" />-
           </div>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiPanel hasBorder={true} hasShadow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.alertName"
-                    defaultMessage="Alert"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                #200-230
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.averageValue"
-                    defaultMessage="Average Value"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                55 ms (84% above the threshold of 30ms)
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.duration"
-                    defaultMessage="Duration"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                5 minutes (threshold breached 10 times)
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.alertStatus"
-                    defaultMessage="Status"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <AlertStatusIndicator alertStatus="active" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.runbook"
-                    defaultMessage="Runbook"
-                  />
-                  &nbsp;&nbsp;
-                  <EuiToolTip content="Runbook info here">
-                    <EuiIcon type="questionInCircle" color="subdued" />
-                  </EuiToolTip>
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiLink>
-                https://github.com...
-                <EuiButtonEmpty
-                  data-test-subj="ruleDetailsEditButton"
-                  iconType={'pencil'}
-                  onClick={() => {}}
-                />
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.started"
-                    defaultMessage="Started"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                Jul 22 2021
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
-                    defaultMessage="Last Status Update"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                2h ago
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.tags"
-                    defaultMessage="Tags"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <div>
-                <EuiSpacer size="s" />
-                {triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
-                  tagsOutPopover: true,
-                  tags: ['tag1', 'tag2', 'tag3'],
-                })}
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
-      <EuiSpacer size="xs" />
-    </>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.started"
+                defaultMessage="Started"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {moment(alert?.fields[ALERT_START]?.toString()).format(DEFAULT_DATE_FORMAT)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
+                defaultMessage="Last status update"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {moment(alert?.fields[TIMESTAMP]?.toString()).fromNow()},&nbsp;
+            {moment(alert?.fields[TIMESTAMP]?.toString()).format(DEFAULT_DATE_FORMAT)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.ruleTags"
+                defaultMessage="Rule Tags"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <div>
+            <EuiSpacer size="s" />
+            {tags &&
+              tags.length > 0 &&
+              triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
+                tagsOutPopover: true,
+                tags,
+              })}
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 }

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+
+import { generateMlInferencePipelineBody } from '../../../common/ml_inference_pipeline';
+import { MlInferencePipeline } from '../../../common/types/pipelines';
+import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
 export interface CreatedPipelines {
   created: string[];
-}
-
-export interface MlInferencePipeline extends IngestPipeline {
-  version?: number;
 }
 
 /**
@@ -35,7 +34,7 @@ export const createIndexPipelineDefinitions = (
   // TODO: add back descriptions (see: https://github.com/elastic/elasticsearch-specification/issues/1827)
   esClient.ingest.putPipeline({
     description: `Enterprise Search Machine Learning Inference pipeline for the '${indexName}' index`,
-    id: `${indexName}@ml-inference`,
+    id: getInferencePipelineNameFromIndexName(indexName),
     processors: [],
     version: 1,
   });
@@ -97,7 +96,7 @@ export const createIndexPipelineDefinitions = (
       {
         pipeline: {
           if: 'ctx?._run_ml_inference == true',
-          name: `${indexName}@ml-inference`,
+          name: getInferencePipelineNameFromIndexName(indexName),
           on_failure: [
             {
               append: {
@@ -148,29 +147,6 @@ export const createIndexPipelineDefinitions = (
         },
       },
       {
-        remove: {
-          field: [
-            '_attachment',
-            '_attachment_indexed_chars',
-            '_extracted_attachment',
-            '_extract_binary_content',
-          ],
-          if: 'ctx?._extract_binary_content == true',
-          ignore_missing: true,
-          on_failure: [
-            {
-              append: {
-                field: '_ingestion_errors',
-                value: [
-                  "Processor 'remove' with tag 'remove_attachment_fields' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
-                ],
-              },
-            },
-          ],
-          tag: 'remove_attachment_fields',
-        },
-      },
-      {
         gsub: {
           field: 'body',
           if: 'ctx?._reduce_whitespace == true',
@@ -209,26 +185,34 @@ export const createIndexPipelineDefinitions = (
       },
       {
         remove: {
-          field: ['_reduce_whitespace'],
-          if: 'ctx?._reduce_whitespace == true',
+          field: [
+            '_attachment',
+            '_attachment_indexed_chars',
+            '_extracted_attachment',
+            '_extract_binary_content',
+            '_reduce_whitespace',
+            '_run_ml_inference',
+          ],
           ignore_missing: true,
           on_failure: [
             {
               append: {
                 field: '_ingestion_errors',
                 value: [
-                  "Processor 'remove' with tag 'remove_whitespace_fields' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
+                  "Processor 'remove' with tag 'remove_meta_fields' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
                 ],
               },
             },
           ],
-          tag: 'remove_whitespace_fields',
+          tag: 'remove_meta_fields',
         },
       },
     ],
     version: 1,
   });
-  return { created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`] };
+  return {
+    created: [indexName, `${indexName}@custom`, getInferencePipelineNameFromIndexName(indexName)],
+  };
 };
 
 /**
@@ -240,54 +224,19 @@ export const createIndexPipelineDefinitions = (
  * @param esClient the Elasticsearch Client to use when retrieving model details.
  */
 export const formatMlPipelineBody = async (
+  pipelineName: string,
   modelId: string,
   sourceField: string,
   destinationField: string,
   esClient: ElasticsearchClient
 ): Promise<MlInferencePipeline> => {
+  // this will raise a 404 if model doesn't exist
   const models = await esClient.ml.getTrainedModels({ model_id: modelId });
-  // if we didn't find this model, we can't return anything useful
-  if (models.trained_model_configs === undefined || models.trained_model_configs.length === 0) {
-    throw new Error(`Couldn't find any trained models with id [${modelId}]`);
-  }
   const model = models.trained_model_configs[0];
-  // if model returned no input field, insert a placeholder
-  const modelInputField =
-    model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
-  const modelType = model.model_type;
-  const modelVersion = model.version;
-  return {
-    description: '',
-    version: 1,
-    processors: [
-      {
-        remove: {
-          field: `ml.inference.${destinationField}`,
-          ignore_missing: true,
-        },
-      },
-      {
-        inference: {
-          model_id: modelId,
-          target_field: `ml.inference.${destinationField}`,
-          field_map: {
-            [sourceField]: modelInputField,
-          },
-        },
-      },
-      {
-        append: {
-          field: '_source._ingest.processors',
-          value: [
-            {
-              type: modelType,
-              model_id: modelId,
-              model_version: modelVersion,
-              processed_timestamp: '{{{ _ingest.timestamp }}}',
-            },
-          ],
-        },
-      },
-    ],
-  };
+  return generateMlInferencePipelineBody({
+    destinationField,
+    model,
+    pipelineName,
+    sourceField,
+  });
 };

@@ -7,6 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
+
 import { createIndexPipelineDefinitions } from './create_pipeline_definitions';
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
@@ -20,7 +22,7 @@ describe('createIndexPipelineDefinitions util function', () => {
   };
 
   const expectedResult = {
-    created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`],
+    created: [indexName, `${indexName}@custom`, getInferencePipelineNameFromIndexName(indexName)],
   };
 
   beforeEach(() => {
@@ -37,9 +39,12 @@ describe('createIndexPipelineDefinitions util function', () => {
 });
 
 describe('formatMlPipelineBody util function', () => {
+  const pipelineName = 'ml-inference-my-ml-proc';
   const modelId = 'my-model-id';
   let modelInputField = 'my-model-input-field';
-  const modelType = 'my-model-type';
+  const modelType = 'pytorch';
+  const inferenceConfigKey = 'my-model-type';
+  const modelTypes = ['pytorch', 'my-model-type'];
   const modelVersion = 3;
   const sourceField = 'my-source-field';
   const destField = 'my-dest-field';
@@ -57,7 +62,6 @@ describe('formatMlPipelineBody util function', () => {
   it('should return the pipeline body', async () => {
     const expectedResult = {
       description: '',
-      version: 1,
       processors: [
         {
           remove: {
@@ -67,11 +71,11 @@ describe('formatMlPipelineBody util function', () => {
         },
         {
           inference: {
+            field_map: {
+              [sourceField]: modelInputField,
+            },
             model_id: modelId,
             target_field: `ml.inference.${destField}`,
-            field_map: {
-              'my-source-field': modelInputField,
-            },
           },
         },
         {
@@ -79,30 +83,35 @@ describe('formatMlPipelineBody util function', () => {
             field: '_source._ingest.processors',
             value: [
               {
-                type: modelType,
-                model_id: modelId,
                 model_version: modelVersion,
+                pipeline: pipelineName,
                 processed_timestamp: '{{{ _ingest.timestamp }}}',
+                types: modelTypes,
               },
             ],
           },
         },
       ],
+      version: 1,
     };
 
     const mockResponse = {
       count: 1,
       trained_model_configs: [
         {
-          model_id: modelId,
-          version: modelVersion,
-          model_type: modelType,
+          inference_config: {
+            [inferenceConfigKey]: {},
+          },
           input: { field_names: [modelInputField] },
+          model_id: modelId,
+          model_type: modelType,
+          version: modelVersion,
         },
       ],
     };
     mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
     const actualResult = await formatMlPipelineBody(
+      pipelineName,
       modelId,
       sourceField,
       destField,
@@ -113,21 +122,10 @@ describe('formatMlPipelineBody util function', () => {
   });
 
   it('should raise an error if no model found', async () => {
-    const mockResponse = {
-      error: {
-        root_cause: [
-          {
-            type: 'resource_not_found_exception',
-            reason: 'No known trained model with model_id [my-model-id]',
-          },
-        ],
-        type: 'resource_not_found_exception',
-        reason: 'No known trained model with model_id [my-model-id]',
-      },
-      status: 404,
-    };
-    mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
+    const mockError = new Error('No known trained model with model_id [my-model-id]');
+    mockClient.ml.getTrainedModels.mockImplementation(() => Promise.reject(mockError));
     const asyncCall = formatMlPipelineBody(
+      pipelineName,
       modelId,
       sourceField,
       destField,
@@ -141,7 +139,6 @@ describe('formatMlPipelineBody util function', () => {
     modelInputField = 'MODEL_INPUT_FIELD';
     const expectedResult = {
       description: '',
-      version: 1,
       processors: [
         {
           remove: {
@@ -151,11 +148,11 @@ describe('formatMlPipelineBody util function', () => {
         },
         {
           inference: {
+            field_map: {
+              [sourceField]: modelInputField,
+            },
             model_id: modelId,
             target_field: `ml.inference.${destField}`,
-            field_map: {
-              'my-source-field': modelInputField,
-            },
           },
         },
         {
@@ -163,29 +160,34 @@ describe('formatMlPipelineBody util function', () => {
             field: '_source._ingest.processors',
             value: [
               {
-                type: modelType,
-                model_id: modelId,
                 model_version: modelVersion,
+                pipeline: pipelineName,
                 processed_timestamp: '{{{ _ingest.timestamp }}}',
+                types: modelTypes,
               },
             ],
           },
         },
       ],
+      version: 1,
     };
     const mockResponse = {
       count: 1,
       trained_model_configs: [
         {
-          model_id: modelId,
-          version: modelVersion,
-          model_type: modelType,
+          inference_config: {
+            [inferenceConfigKey]: {},
+          },
           input: { field_names: [] },
+          model_id: modelId,
+          model_type: modelType,
+          version: modelVersion,
         },
       ],
     };
     mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
     const actualResult = await formatMlPipelineBody(
+      pipelineName,
       modelId,
       sourceField,
       destField,

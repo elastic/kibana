@@ -10,7 +10,6 @@ import { INDEX_EVENTS } from '../../common';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
-import { logExecutionLatency } from './logger';
 import { ProjectTimeQuery } from './query';
 import {
   mgetExecutables,
@@ -51,14 +50,14 @@ export async function getExecutablesAndStackTraces({
     if (totalCount > sampleSize * 1.1) {
       p = sampleSize / totalCount;
       logger.info('downsampling events with p=' + p);
-      await logExecutionLatency(logger, 'downsampling events', async () => {
-        const downsampledTotalCount = downsampleEventsRandomly(
-          stackTraceEvents,
-          p,
-          filter.toString()
-        );
-        logger.info('downsampled total count: ' + downsampledTotalCount);
-      });
+      const t0 = Date.now();
+      const downsampledTotalCount = downsampleEventsRandomly(
+        stackTraceEvents,
+        p,
+        filter.toString()
+      );
+      logger.info(`downsampling events took ${Date.now() - t0} ms`);
+      logger.info('downsampled total count: ' + downsampledTotalCount);
       logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
     }
 
@@ -69,7 +68,7 @@ export async function getExecutablesAndStackTraces({
       stackTraceEvents.set(id, Math.floor(count / (eventsIndex.sampleRate * p)));
     }
 
-    const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
+    const { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
       logger,
       client,
       events: stackTraceEvents,
@@ -87,6 +86,7 @@ export async function getExecutablesAndStackTraces({
         stackFrames,
         stackTraceEvents,
         totalCount,
+        totalFrames,
         eventsIndex,
       };
     });

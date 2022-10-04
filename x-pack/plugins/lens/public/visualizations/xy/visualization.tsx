@@ -18,19 +18,27 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { generateId } from '../../id_generator';
+import {
+  isDraggedDataViewField,
+  isOperationFromCompatibleGroup,
+  isOperationFromTheSameGroup,
+  renewIDs,
+} from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
-import type { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
+import { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
 import {
-  State,
+  type State,
+  type XYLayerConfig,
+  type XYDataLayerConfig,
+  type SeriesType,
+  type XYSuggestion,
+  type PersistedState,
   visualizationTypes,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  SeriesType,
-  XYSuggestion,
-  PersistedState,
 } from './types';
 import { layerTypes } from '../../../common';
 import {
@@ -76,12 +84,13 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import { XYState } from './types';
+import type { XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import { createAnnotationActions } from './annotations/actions';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -93,6 +102,7 @@ export const getXyVisualization = ({
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
+  unifiedSearch,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -102,6 +112,7 @@ export const getXyVisualization = ({
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }): Visualization<State, PersistedState> => ({
   id: XY_ID,
   visualizationTypes,
@@ -124,6 +135,24 @@ export const getXyVisualization = ({
       ...state,
       layers: state.layers.filter((l) => l.layerId !== layerId),
     };
+  },
+
+  cloneLayer(state, layerId, newLayerId, clonedIDsMap) {
+    const toCopyLayer = state.layers.find((l) => l.layerId === layerId);
+    if (toCopyLayer) {
+      if (isAnnotationsLayer(toCopyLayer)) {
+        toCopyLayer.annotations.forEach((i) => clonedIDsMap.set(i.id, generateId()));
+      }
+      const newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
+        clonedIDsMap.get(id)
+      );
+      newLayer.layerId = newLayerId;
+      return {
+        ...state,
+        layers: [...state.layers, newLayer],
+      };
+    }
+    return state;
   },
 
   appendLayer(state, layerId, layerType, indexPatternId) {
@@ -161,8 +190,8 @@ export const getXyVisualization = ({
     return extractReferences(state);
   },
 
-  fromPersistableState(state, references) {
-    return injectReferences(state, references);
+  fromPersistableState(state, references, initialContext) {
+    return injectReferences(state, references, initialContext);
   },
 
   getDescription,
@@ -212,6 +241,16 @@ export const getXyVisualization = ({
     ];
   },
 
+  getSupportedActionsForLayer(layerId, state, setState) {
+    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[layerIndex];
+    const actions = [];
+    if (isAnnotationsLayer(layer)) {
+      actions.push(...createAnnotationActions({ state, layerIndex, layer, setState }));
+    }
+    return actions;
+  },
+
   onIndexPatternChange(state, indexPatternId, layerId) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
@@ -252,10 +291,6 @@ export const getXyVisualization = ({
       paletteService,
       accessors: sortedAccessors,
     });
-
-    if (isReferenceLayer(layer)) {
-      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
-    }
 
     const dataLayer: XYDataLayerConfig = layer;
 
@@ -309,7 +344,7 @@ export const getXyVisualization = ({
           accessors: mappedAccessors,
           filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: true,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsXY_yDimensionPanel',
           enableDimensionEditor: true,
         },
@@ -334,7 +369,8 @@ export const getXyVisualization = ({
           filterOperations: isBucketed,
           supportsMoreColumns: !dataLayer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor,
+          requiredMinDimensionCount:
+            dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
           enableDimensionEditor: true,
         },
       ],
@@ -344,6 +380,39 @@ export const getXyVisualization = ({
   getMainPalette: (state) => {
     if (!state || state.layers.length === 0) return;
     return getFirstDataLayer(state.layers)?.palette;
+  },
+
+  getDropProps(dropProps) {
+    if (!dropProps.source) {
+      return;
+    }
+    const srcDataView = dropProps.source.indexPatternId;
+    const targetDataView = dropProps.target.indexPatternId;
+    if (!targetDataView || srcDataView !== targetDataView) {
+      return;
+    }
+
+    if (isDraggedDataViewField(dropProps.source)) {
+      if (dropProps.source.field.type === 'document') {
+        return;
+      }
+      return dropProps.target.isNewColumn
+        ? { dropTypes: ['field_add'] }
+        : { dropTypes: ['field_replace'] };
+    }
+
+    if (isOperationFromTheSameGroup(dropProps.source, dropProps.target)) {
+      return dropProps.target.isNewColumn
+        ? { dropTypes: ['duplicate_compatible'] }
+        : { dropTypes: ['reorder'] };
+    }
+    if (isOperationFromCompatibleGroup(dropProps.source, dropProps.target)) {
+      return {
+        dropTypes: dropProps.target.isNewColumn
+          ? ['move_compatible', 'duplicate_compatible']
+          : ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
+      };
+    }
   },
 
   onDrop(props) {
@@ -522,6 +591,7 @@ export const getXyVisualization = ({
               savedObjects: core.savedObjects,
               docLinks: core.docLinks,
               http: core.http,
+              unifiedSearch,
             }}
           >
             {dimensionEditor}
@@ -702,6 +772,9 @@ export const getXyVisualization = ({
   },
   getUniqueLabels(state) {
     return getUniqueLabels(state.layers);
+  },
+  getUsedDataView(state, layerId) {
+    return getAnnotationsLayers(state.layers).find((l) => l.layerId === layerId)?.indexPatternId;
   },
   getUsedDataViews(state) {
     return (
