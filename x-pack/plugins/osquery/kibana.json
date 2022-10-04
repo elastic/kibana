@@ -19,6 +19,7 @@
     "navigation",
     "taskManager",
     "triggersActionsUi",
+    "ruleRegistry",
     "security"
   ],
   "server": true,

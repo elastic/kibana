@@ -29,6 +29,7 @@ import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_que
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 
 export interface LiveQueryFormFields {
+  alertIds?: string[];
   query?: string;
   agentSelection: AgentSelection;
   savedQueryId?: string | null;
@@ -39,6 +40,7 @@ export interface LiveQueryFormFields {
 interface DefaultLiveQueryFormFields {
   query?: string;
   agentSelection?: AgentSelection;
+  alertIds?: string[];
   savedQueryId?: string | null;
   ecs_mapping?: ECSMapping;
   packId?: string;
@@ -119,6 +121,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   useEffect(() => {
     register('savedQueryId');
+    register('alertIds');
   }, [register]);
 
   const queryStatus = useMemo(() => {
@@ -135,19 +138,20 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const onSubmit = useCallback(
-    (values: LiveQueryFormFields) => {
+    async (values: LiveQueryFormFields) => {
       const serializedData = pickBy(
         {
           agentSelection: values.agentSelection,
           saved_query_id: values.savedQueryId,
           query: values.query,
+          alert_ids: values.alertIds,
           pack_id: values?.packId?.length ? values?.packId[0] : undefined,
           ecs_mapping: values.ecs_mapping,
         },
         (value) => !isEmpty(value)
       ) as unknown as LiveQueryFormFields;
 
-      mutateAsync(serializedData);
+      await mutateAsync(serializedData);
     },
     [mutateAsync]
   );
@@ -158,8 +162,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const { data: packsData, isFetched: isPackDataFetched } = usePacks({});
-
-  const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
   const submitButtonContent = useMemo(
     () => (
@@ -181,8 +183,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               id="submit-button"
-              disabled={!enabled || isSubmitting}
-              onClick={handleSubmitForm}
+              disabled={!enabled}
+              isLoading={isSubmitting}
+              onClick={handleSubmit(onSubmit)}
             >
               <FormattedMessage
                 id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
@@ -201,7 +204,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       handleShowSaveQueryFlyout,
       enabled,
       isSubmitting,
-      handleSubmitForm,
+      handleSubmit,
+      onSubmit,
     ]
   );
 
@@ -256,6 +260,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         setValue('agentSelection', defaultValue.agentSelection);
       }
 
+      if (defaultValue?.alertIds?.length) {
+        setValue('alertIds', defaultValue.alertIds);
+      }
+
       if (defaultValue?.packId && canRunPacks) {
         setQueryType('pack');
 
@@ -297,6 +305,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       resetField('query');
       resetField('ecs_mapping');
       resetField('savedQueryId');
+      resetField('alertIds');
       clearErrors();
     }
   }, [queryType, cleanupLiveQuery, resetField, setValue, clearErrors, defaultValue]);
@@ -329,7 +338,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ) : (
             <>
               <EuiFlexItem>
-                <LiveQueryQueryField handleSubmitForm={handleSubmitForm} />
+                <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
               </EuiFlexItem>
               {submitButtonContent}
               <EuiFlexItem>{resultsStepContent}</EuiFlexItem>

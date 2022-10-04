@@ -50,7 +50,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains('New live query').should('not.be.disabled');
     cy.contains('select * from uptime');
     cy.wait(1000);
-    cy.react('EuiTableBody').first().react('DefaultItemAction').first().click();
+    cy.react('EuiTableBody').first().react('CustomItemAction').first().click();
     cy.contains(SAVED_QUERY_ID);
     submitQuery();
     checkResults();

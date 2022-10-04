@@ -72,6 +72,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
+
+  const alertId = ecsRowData?.kibana?.alert ? ecsRowData?._id : null;
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
 
@@ -264,7 +266,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
       {isOsqueryFlyoutOpen && agentId && ecsRowData != null && (
-        <OsqueryFlyout agentId={agentId} onClose={handleOnOsqueryClick} />
+        <OsqueryFlyout
+          agentId={agentId}
+          defaultValues={alertId ? { alertIds: [alertId] } : undefined}
+          onClose={handleOnOsqueryClick}
+        />
       )}
     </>
   );
