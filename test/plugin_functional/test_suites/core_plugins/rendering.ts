@@ -171,14 +171,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.markdownPlugins.lens (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
         'xpack.cloud.base_url (string)',
-        'xpack.cloud.chat.chatURL (string)',
-        'xpack.cloud.chat.enabled (boolean)',
         'xpack.cloud.cname (string)',
         'xpack.cloud.deployment_url (string)',
-        'xpack.cloud.full_story.enabled (boolean)',
-        'xpack.cloud.full_story.org_id (any)',
+        'xpack.cloud_integrations.chat.chatURL (string)',
+        // No PII. This is an escape patch to override LaunchDarkly's flag resolution mechanism for testing or quick fix.
+        'xpack.cloud_integrations.experiments.flag_overrides (record)',
+        // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
+        // Added here for documentation purposes.
+        // 'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
+        'xpack.cloud_integrations.full_story.org_id (any)',
         // No PII. Just the list of event types we want to forward to FullStory.
-        'xpack.cloud.full_story.eventTypesAllowlist (array)',
+        'xpack.cloud_integrations.full_story.eventTypesAllowlist (array)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.profile_url (string)',

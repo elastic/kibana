@@ -45,11 +45,7 @@ export const useChatConfig = ({
     const handleMessage = (event: MessageEvent): void => {
       const { current: chatIframe } = ref;
 
-      if (
-        !chat.enabled ||
-        !chatIframe?.contentWindow ||
-        event.source !== chatIframe?.contentWindow
-      ) {
+      if (!chat || !chatIframe?.contentWindow || event.source !== chatIframe?.contentWindow) {
         return;
       }
 
@@ -108,7 +104,7 @@ export const useChatConfig = ({
     return () => window.removeEventListener('message', handleMessage);
   }, [chat, style, onReady, onResize, isReady, isResized]);
 
-  if (chat.enabled) {
+  if (chat) {
     return { enabled: true, src: chat.chatURL, ref, style, isReady, isResized };
   }
 
