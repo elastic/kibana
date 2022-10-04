@@ -10,20 +10,19 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import {
-  calculateThroughputWithInterval,
-  calculateThroughputWithRange,
-} from '../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 import {
@@ -85,17 +84,15 @@ export async function getTopDependencyOperations({
   );
 
   const aggs = {
-    duration: {
+    latency: {
       ...(searchServiceDestinationMetrics
-        ? {
-            weighted_avg: {
-              value: { field },
-              weight: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
-          }
+        ? { sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM } }
         : { avg: { field } }),
+    },
+    count: {
+      sum: {
+        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+      },
     },
     successful: {
       filter: {
@@ -186,14 +183,26 @@ export async function getTopDependencyOperations({
 
         bucket.over_time.buckets.forEach((dateBucket) => {
           const x = dateBucket.key + offsetInMs;
+          const latencyValue = isFiniteNumber(dateBucket.latency.value)
+            ? dateBucket.latency.value
+            : 0;
+          const count = isFiniteNumber(dateBucket.count.value)
+            ? dateBucket.count.value
+            : 1;
           timeseries.throughput.push({
             x,
-            y: calculateThroughputWithInterval({
+            y: calculateThroughputWithRange({
+              start: startWithOffset,
+              end: endWithOffset,
               value: dateBucket.doc_count,
-              bucketSize: 60,
             }),
           });
-          timeseries.latency.push({ x, y: dateBucket.duration.value });
+          timeseries.latency.push({
+            x,
+            y: searchServiceDestinationMetrics
+              ? latencyValue / count
+              : dateBucket.latency.value,
+          });
           timeseries.failureRate.push({
             x,
             y:
@@ -206,9 +215,18 @@ export async function getTopDependencyOperations({
           });
         });
 
+        const latencyValue = isFiniteNumber(bucket.latency.value)
+          ? bucket.latency.value
+          : 0;
+        const count = isFiniteNumber(bucket.count.value)
+          ? bucket.count.value
+          : 1;
+
         return {
           spanName: bucket.key as string,
-          latency: bucket.duration.value,
+          latency: searchServiceDestinationMetrics
+            ? latencyValue / count
+            : bucket.latency.value,
           throughput: calculateThroughputWithRange({
             start: startWithOffset,
             end: endWithOffset,
