@@ -86,7 +86,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
     };
   }
 
-  const configLayers = await getLayers(extendedLayers, model, dataViews);
+  const configLayers = await getLayers(extendedLayers, model, dataViews, true);
   if (configLayers === null) {
     return null;
   }
