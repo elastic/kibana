@@ -222,7 +222,7 @@ to show document details.
 image:images/document-table-expanded.png[Table view with document expanded]
 
 . Scan through the fields and their values. If you find a field of interest,
-hover your mouse over the *Actions* column for filters and other controls.
+hover your mouse over the *Actions* column for filters and other options.
 
 . To create a view of the document that you can bookmark and share, click **Single document**.
 
