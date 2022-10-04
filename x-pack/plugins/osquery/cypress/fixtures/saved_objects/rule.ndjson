@@ -47,7 +47,8 @@
         "winlogbeat-*"
       ],
       "query": "_id:*",
-      "filters": []
+      "filters": [],
+      "note": "!{osquery{\"query\":\"SELECT * FROM processes;\",\"label\":\"Get processes\",\"ecs_mapping\":{\"process.pid\":{\"field\":\"pid\"},\"process.name\":{\"field\":\"name\"},\"process.executable\":{\"field\":\"path\"},\"process.args\":{\"field\":\"cmdline\"},\"process.working_directory\":{\"field\":\"cwd\"},\"user.id\":{\"field\":\"uid\"},\"group.id\":{\"field\":\"gid\"},\"process.parent.pid\":{\"field\":\"parent\"},\"process.pgid\":{\"field\":\"pgroup\"}}}}\n\n!{osquery{\"query\":\"select * from users;\",\"label\":\"Get users\"}}"
     },
     "schedule": {
       "interval": "5m"
