@@ -112,6 +112,33 @@ describe('output preconfiguration', () => {
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
   });
 
+  it('should create a preconfigured output with ca_trusted_fingerprint that does not exists', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'non-existing-output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['http://test.fr'],
+        ca_trusted_fingerprint: 'testfingerprint',
+      },
+    ]);
+
+    expect(mockedOutputService.create).toBeCalled();
+    expect(mockedOutputService.create).toBeCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ca_trusted_fingerprint: 'testfingerprint',
+      }),
+      expect.anything()
+    );
+    expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+  });
+
   it('should create preconfigured logstash output that does not exist', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
