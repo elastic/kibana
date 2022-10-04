@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
   );
 
-  describe.only('find', () => {
+  describe('find', () => {
     before(async () => {
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await kibanaServer.importExport.load(
