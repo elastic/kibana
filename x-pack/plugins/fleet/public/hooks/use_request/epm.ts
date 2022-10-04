@@ -143,6 +143,16 @@ export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: b
   });
 };
 
+export const sendBulkInstallPackages = (packages: string[]) => {
+  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getBulkInstallPath(),
+    method: 'post',
+    body: {
+      packages,
+    },
+  });
+};
+
 export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgName, pkgVersion),
