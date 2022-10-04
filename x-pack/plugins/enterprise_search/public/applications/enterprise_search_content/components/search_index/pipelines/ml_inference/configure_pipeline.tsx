@@ -38,6 +38,7 @@ export const ConfigurePipeline: React.FC = () => {
 
   const { destinationField, modelID, pipelineName, sourceField } = configuration;
   const models = supportedMLModels ?? [];
+  const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
 
   return (
     <>
@@ -71,7 +72,7 @@ export const ConfigurePipeline: React.FC = () => {
             }
           )}
           helpText={
-            formErrors.pipelineName === undefined &&
+            !nameError &&
             i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
               {
@@ -80,8 +81,8 @@ export const ConfigurePipeline: React.FC = () => {
               }
             )
           }
-          error={formErrors.pipelineName}
-          isInvalid={formErrors.pipelineName !== undefined}
+          error={nameError && formErrors.pipelineName}
+          isInvalid={nameError}
         >
           <EuiFieldText
             fullWidth

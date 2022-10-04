@@ -54,6 +54,11 @@ const mockedServices = {
       getRedirectUrl: jest.fn(() => 'discover_url'),
     },
   } as unknown as DiscoverStart,
+  application: {
+    capabilities: {
+      discover: { save: true, saveQuery: true, show: true },
+    },
+  },
 };
 
 const InnerFieldItemWrapper: React.FC<FieldItemProps> = (props) => {
@@ -457,6 +462,32 @@ describe('IndexPattern Field Item', () => {
     const exploreInDiscoverBtn = findTestSubject(
       wrapper,
       'lnsFieldListPanel-exploreInDiscover-geo_point'
+    );
+    expect(exploreInDiscoverBtn.length).toBe(0);
+  });
+
+  it('should not display Explore in discover button if discover capabilities show is false', async () => {
+    const services = {
+      ...mockedServices,
+      application: {
+        capabilities: {
+          discover: { save: false, saveQuery: false, show: false },
+        },
+      },
+    };
+    const wrapper = await mountWithIntl(
+      <KibanaContextProvider services={services}>
+        <InnerFieldItem {...defaultProps} />
+      </KibanaContextProvider>
+    );
+
+    await clickField(wrapper, 'bytes');
+
+    await wrapper.update();
+
+    const exploreInDiscoverBtn = findTestSubject(
+      wrapper,
+      'lnsFieldListPanel-exploreInDiscover-bytes'
     );
     expect(exploreInDiscoverBtn.length).toBe(0);
   });
