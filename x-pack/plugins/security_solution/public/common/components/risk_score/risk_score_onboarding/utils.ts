@@ -303,22 +303,17 @@ export const restartRiskScoreTransforms = async ({
   refetch,
   renderDocLink,
   riskScoreEntity,
-  spaceId,
-  theme,
 }: {
   http: HttpSetup;
   notifications?: NotificationsStart;
   refetch?: inputsModel.Refetch;
   renderDocLink?: (message: string) => React.ReactNode;
   riskScoreEntity: RiskScoreEntity;
-  spaceId?: string;
-  theme?: ThemeServiceStart;
 }) => {
   const res = await restartTransforms({
     http,
     notifications,
     renderDocLink,
-    theme,
     riskScoreEntity,
   });
 
