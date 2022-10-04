@@ -26,7 +26,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import type { LegendItem } from '../../../../common/components/charts/legend_item';
-import type { EntityFilter } from './use_alerts_by_status';
+import type { AdditionalFilters, EntityFilter } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
@@ -64,6 +64,7 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
 interface AlertsByStatusProps {
   signalIndexName: string | null;
   entityFilter?: EntityFilter;
+  additionalFilters?: AdditionalFilters;
 }
 
 const legendField = 'kibana.alert.severity';
@@ -80,9 +81,13 @@ const eventKindSignalFilter: EntityFilter = {
   value: 'signal',
 };
 
-export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatusProps) => {
+export const AlertsByStatus = ({
+  additionalFilters,
+  signalIndexName,
+  entityFilter,
+}: AlertsByStatusProps) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
-  const { openEntityInTimeline } = useNavigateToTimeline();
+  const { openTimelineWithFilters } = useNavigateToTimeline();
   const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
   });
@@ -96,10 +101,10 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
       name: entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
       href: entityFilter ? undefined : href,
       onClick: entityFilter
-        ? () => openEntityInTimeline([entityFilter, eventKindSignalFilter])
+        ? () => openTimelineWithFilters([[entityFilter, eventKindSignalFilter]])
         : goToAlerts,
     }),
-    [entityFilter, href, goToAlerts, openEntityInTimeline]
+    [entityFilter, href, goToAlerts, openTimelineWithFilters]
   );
 
   const {
@@ -107,6 +112,7 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
     isLoading: loading,
     updatedAt,
   } = useAlertsByStatus({
+    additionalFilters,
     entityFilter,
     signalIndexName,
     skip: !toggleStatus,

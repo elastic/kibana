@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { BoolQuery } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
@@ -26,12 +27,17 @@ export const severityLabels: Record<Severity, string> = {
   low: STATUS_LOW_LABEL,
 };
 
+export type AdditionalFilters = Array<{
+  bool: BoolQuery;
+}>;
+
 export interface EntityFilter {
   field: string;
   value: string;
 }
 
 export const getAlertsByStatusQuery = ({
+  additionalFilters = [],
   from,
   to,
   entityFilter,
@@ -39,11 +45,13 @@ export const getAlertsByStatusQuery = ({
   from: string;
   to: string;
   entityFilter?: EntityFilter;
+  additionalFilters?: AdditionalFilters;
 }) => ({
   size: 0,
   query: {
     bool: {
       filter: [
+        ...additionalFilters,
         { range: { '@timestamp': { gte: from, lte: to } } },
         ...(entityFilter
           ? [
@@ -104,6 +112,7 @@ export interface UseAlertsByStatusProps {
   signalIndexName: string | null;
   skip?: boolean;
   entityFilter?: EntityFilter;
+  additionalFilters?: AdditionalFilters;
 }
 
 export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
@@ -113,6 +122,7 @@ export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
 };
 
 export const useAlertsByStatus: UseAlertsByStatus = ({
+  additionalFilters,
   entityFilter,
   queryId,
   signalIndexName,
@@ -134,6 +144,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       from,
       to,
       entityFilter,
+      additionalFilters,
     }),
     indexName: signalIndexName,
     skip,
@@ -146,9 +157,10 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
         from,
         to,
         entityFilter,
+        additionalFilters,
       })
     );
-  }, [setAlertsQuery, from, to, entityFilter]);
+  }, [setAlertsQuery, from, to, entityFilter, additionalFilters]);
 
   useEffect(() => {
     if (data == null) {

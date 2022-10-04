@@ -215,7 +215,11 @@ const NetworkDetailsComponent: React.FC = () => {
               <>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
+                    <AlertsByStatus
+                      signalIndexName={signalIndexName}
+                      entityFilter={entityFilter}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus

@@ -218,7 +218,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               <>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
+                    <AlertsByStatus
+                      signalIndexName={signalIndexName}
+                      entityFilter={entityFilter}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
@@ -243,7 +247,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}
-              filterQuery={filterQuery}
+              filterQuery={stringifiedAdditionalFilters}
               from={from}
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
