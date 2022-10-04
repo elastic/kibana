@@ -21,7 +21,7 @@ import { dataViewMock } from '../../../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
-import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
+import { AppState } from '../../services/discover_app_state_container';
 
 setHeaderActionMenuMounter(jest.fn());
 
