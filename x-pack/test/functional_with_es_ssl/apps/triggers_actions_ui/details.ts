@@ -394,7 +394,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // delete connector
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors(connector.name);
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');
@@ -405,7 +405,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
+        await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
@@ -458,7 +458,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // delete connector
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors(connector.name);
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');
@@ -469,7 +469,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // click on first rule
-        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
+        await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
@@ -510,7 +510,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // verify content
         await testSubjects.existOrFail('rulesList');
 
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors('new connector');
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');
