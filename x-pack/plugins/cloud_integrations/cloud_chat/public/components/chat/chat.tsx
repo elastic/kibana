@@ -57,7 +57,7 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
       }}
       size="xs"
     >
-      {i18n.translate('xpack.cloud.chat.hideChatButtonLabel', {
+      {i18n.translate('xpack.cloudChat.hideChatButtonLabel', {
         defaultMessage: 'Hide chat',
       })}
     </EuiButtonEmpty>
@@ -80,7 +80,7 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
       {button}
       <iframe
         data-test-subj="cloud-chat-frame"
-        title={i18n.translate('xpack.cloud.chat.chatFrameTitle', {
+        title={i18n.translate('xpack.cloudChat.chatFrameTitle', {
           defaultMessage: 'Chat',
         })}
         {...config}
