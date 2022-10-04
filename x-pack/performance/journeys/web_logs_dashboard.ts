@@ -52,5 +52,5 @@ export const journey = new Journey({
     await page.click(subj('launchSampleDataSetlogs'));
     await page.click(subj('viewSampleDataSetlogs-dashboard'));
 
-    await waitForVisualizations(page, 12);
+    await waitForVisualizations(page, 11);
   });
