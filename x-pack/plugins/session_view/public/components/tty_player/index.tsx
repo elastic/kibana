@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiBetaBadge,
 } from '@elastic/eui';
+import useResizeObserver from 'use-resize-observer';
 import { throttle } from 'lodash';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYSearchBar } from '../tty_search_bar';
@@ -45,7 +46,7 @@ export const TTYPlayer = ({
   autoSeekToEntityId,
 }: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});
 
   const { data, fetchNextPage, hasNextPage, isFetching, refetch } =
     useFetchIOEvents(sessionEntityId);
@@ -134,7 +135,12 @@ export const TTYPlayer = ({
             <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
-            <TTYSearchBar lines={lines} seekToLine={seekToLine} xTermSearchFn={search} />
+            <TTYSearchBar
+              lines={lines}
+              seekToLine={seekToLine}
+              xTermSearchFn={search}
+              setIsPlaying={setIsPlaying}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -183,7 +189,7 @@ export const TTYPlayer = ({
         textSizer={
           <TTYTextSizer
             tty={tty}
-            containerHeight={scrollRef?.current?.offsetHeight || 0}
+            containerHeight={containerHeight}
             fontSize={fontSize}
             onFontSizeChanged={setFontSize}
             isFullscreen={isFullscreen}

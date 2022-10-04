@@ -23,6 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { MLInferenceLogic } from './ml_inference_logic';
 
 export const ConfigurePipeline: React.FC = () => {
@@ -36,6 +38,7 @@ export const ConfigurePipeline: React.FC = () => {
 
   const { destinationField, modelID, pipelineName, sourceField } = configuration;
   const models = supportedMLModels ?? [];
+  const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
 
   return (
     <>
@@ -49,11 +52,7 @@ export const ConfigurePipeline: React.FC = () => {
             }
           )}
         </p>
-        <EuiLink
-          // TODO replace with docs link
-          href="https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-deploy-models.html"
-          target="_blank"
-        >
+        <EuiLink href={docLinks.deployTrainedModels} target="_blank">
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.docsLink',
             {
@@ -73,7 +72,7 @@ export const ConfigurePipeline: React.FC = () => {
             }
           )}
           helpText={
-            formErrors.pipelineName === undefined &&
+            !nameError &&
             i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
               {
@@ -82,8 +81,8 @@ export const ConfigurePipeline: React.FC = () => {
               }
             )
           }
-          error={formErrors.pipelineName}
-          isInvalid={formErrors.pipelineName !== undefined}
+          error={nameError && formErrors.pipelineName}
+          isInvalid={nameError}
         >
           <EuiFieldText
             fullWidth
@@ -182,7 +181,13 @@ export const ConfigurePipeline: React.FC = () => {
                 formErrors.destinationField === undefined &&
                 i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.destinationField.helpText',
-                  { defaultMessage: 'Your field name will be prefixed with "ml.inference."' }
+                  {
+                    defaultMessage:
+                      'Your field name will be prefixed with "ml.inference.", if not set it will be defaulted to "ml.inference.{pipelineName}"',
+                    values: {
+                      pipelineName,
+                    },
+                  }
                 )
               }
               error={formErrors.destinationField}
