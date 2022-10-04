@@ -25,11 +25,6 @@ const CenteredEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;
 `;
 
-const LargeLogo = styled(EuiIcon)`
-  width: 128px;
-  height: 128px;
-`;
-
 /**
  * A component to be displayed in multi step onboarding process.
  */
@@ -46,6 +41,17 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
         />
       </h3>
     </EuiText>
+  );
+
+  const logoSize = `calc(2 * ${size.xxxxl})`;
+  const securityLogo = (
+    <EuiIcon
+      type="logoSecurity"
+      css={css`
+        width: ${logoSize};
+        height: ${logoSize};
+      `}
+    />
   );
 
   const features = (
@@ -103,9 +109,7 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
           margin-top: ${marginSize};
         `}
       >
-        <CenteredEuiFlexItem grow={false}>
-          <LargeLogo type="logoSecurity" />
-        </CenteredEuiFlexItem>
+        <CenteredEuiFlexItem grow={false}>{securityLogo}</CenteredEuiFlexItem>
 
         <EuiFlexItem>
           <div>{features}</div>
