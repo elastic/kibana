@@ -575,7 +575,7 @@ const lensMigrations: SavedObjectMigrationMap = {
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
   '8.5.0': flow(migrateMetricIds, enrichAnnotationLayers, migratePartitionChartGroups),
-  '8.6.0': migrateIndexPatternDatasource,
+  '8.6.0': flow(migrateIndexPatternDatasource),
 };
 
 export const getAllMigrations = (

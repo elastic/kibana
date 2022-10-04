@@ -37,7 +37,7 @@ type LensAttributes<TVisType, TVisState> = Omit<
   visualizationType: TVisType;
   state: Omit<Document['state'], 'datasourceStates' | 'visualization'> & {
     datasourceStates: {
-      indexpattern: FormBasedPersistedState;
+      formBased: FormBasedPersistedState;
     };
     visualization: TVisState;
   };
