@@ -11,20 +11,20 @@ function isImage(file: Blob | File): boolean {
   return file.type?.startsWith('image/');
 }
 
-const resizeTo = {
+export const boxDimensions = {
   width: 300,
   height: 300,
 };
 
 /**
- * Calculate the size of an image, fitting to our limits see {@link resizeTo},
+ * Calculate the size of an image, fitting to our limits see {@link boxDimensions},
  * while preserving the aspect ratio.
  */
 export function fitToBox(width: number, height: number): { width: number; height: number } {
   const offsetRatio = Math.abs(
     Math.min(
       // Find the aspect at which our box is smallest, if less than 1, it means we exceed the limits
-      Math.min(resizeTo.width / width, resizeTo.height / height),
+      Math.min(boxDimensions.width / width, boxDimensions.height / height),
       // Values greater than 1 are within our limits
       1
     ) - 1 // Get the percentage we are exceeding. E.g., 0.3 - 1 = -0.7 means the image needs to shrink by 70% to fit

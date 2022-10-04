@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createBlurhash, BlurhashFactory } from './util';
+export { createBlurhash, BlurhashFactory } from './blurhash';
