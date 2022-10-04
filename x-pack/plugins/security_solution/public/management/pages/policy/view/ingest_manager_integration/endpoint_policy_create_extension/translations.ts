@@ -10,20 +10,35 @@ import { i18n } from '@kbn/i18n';
 export const NGAV = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionNGAV',
   {
-    defaultMessage: 'NGAV',
+    defaultMessage: 'Next-Generation Antivirus (NGAV)',
+  }
+);
+
+export const NGAV_NOTE = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionNGAVNote',
+  {
+    defaultMessage: 'Note: advanced protections require a platinum license level.',
   }
 );
 
 export const EDR_ESSENTIAL = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionEDREssential',
   {
-    defaultMessage: 'EDR Essential',
+    defaultMessage: 'Essential EDR (Endpoint Detection & Response)',
   }
 );
 export const EDR_COMPLETE = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionEDRComplete',
   {
-    defaultMessage: 'EDR Complete',
+    defaultMessage: 'Complete EDR (Endpoint Detection & Response)',
+  }
+);
+
+export const EDR_NOTE = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionEDRNote',
+  {
+    defaultMessage:
+      'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.',
   }
 );
 
@@ -49,11 +64,5 @@ export const ALL_EVENTS = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersAllEvents',
   {
     defaultMessage: 'All events',
-  }
-);
-export const PREVENT_MALICIOUS_BEHAVIOR = i18n.translate(
-  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersPreventionMaliciousBehavior',
-  {
-    defaultMessage: 'Prevent Malicious Behavior',
   }
 );

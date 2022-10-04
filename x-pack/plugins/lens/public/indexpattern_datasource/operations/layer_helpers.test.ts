@@ -190,6 +190,7 @@ describe('state_helpers', () => {
             layerId: 'layer',
             dataView: indexPattern,
             filterOperations: () => true,
+            indexPatternId: '1',
           },
           target: {
             columnId: 'copy',
@@ -197,6 +198,7 @@ describe('state_helpers', () => {
             dataView: indexPattern,
             layerId: 'layer',
             filterOperations: () => true,
+            indexPatternId: '1',
           },
           shouldDeleteSource: false,
         }).layer
