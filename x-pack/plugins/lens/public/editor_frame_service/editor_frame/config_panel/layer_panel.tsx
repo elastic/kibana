@@ -28,6 +28,7 @@ import {
   DragDropOperation,
   DropType,
   isOperation,
+  VisualizationDimensionGroupConfig,
 } from '../../../types';
 import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
@@ -53,6 +54,7 @@ const initialActiveDimensionState = {
 export function LayerPanel(
   props: Exclude<LayerPanelProps, 'state' | 'setState'> & {
     activeVisualization: Visualization;
+    dimensionGroups: VisualizationDimensionGroupConfig[];
     layerId: string;
     layerIndex: number;
     isOnlyLayer: boolean;
@@ -89,6 +91,7 @@ export function LayerPanel(
     framePublicAPI,
     layerId,
     isOnlyLayer,
+    dimensionGroups,
     onRemoveLayer,
     onCloneLayer,
     registerNewLayerRef,
@@ -141,26 +144,15 @@ export function LayerPanel(
     dateRange,
   };
 
-  const { groups } = useMemo(
-    () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      layerVisualizationConfigProps.frame,
-      layerVisualizationConfigProps.state,
-      layerId,
-      activeVisualization,
-    ]
-  );
-
   const columnLabelMap =
     !layerDatasource && activeVisualization.getUniqueLabels
       ? activeVisualization.getUniqueLabels(props.visualizationState)
       : layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
 
-  const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
+  const isEmptyLayer = !dimensionGroups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
 
-  const allAccessors = groups.flatMap((group) =>
+  const allAccessors = dimensionGroups.flatMap((group) =>
     group.accessors.map((accessor) => accessor.columnId)
   );
 
@@ -197,10 +189,10 @@ export function LayerPanel(
             target: {
               ...(target as unknown as DragDropOperation),
               filterOperations:
-                groups.find(({ groupId: gId }) => gId === target.groupId)?.filterOperations ||
-                Boolean,
+                dimensionGroups.find(({ groupId: gId }) => gId === target.groupId)
+                  ?.filterOperations || Boolean,
             },
-            dimensionGroups: groups,
+            dimensionGroups,
             dropType,
             indexPatterns: framePublicAPI.dataViews.indexPatterns,
           })
@@ -217,7 +209,7 @@ export function LayerPanel(
               target,
               source,
               dropType,
-              group: groups.find(({ groupId: gId }) => gId === target.groupId),
+              group: dimensionGroups.find(({ groupId: gId }) => gId === target.groupId),
             },
             activeVisualization
           )
@@ -228,7 +220,7 @@ export function LayerPanel(
     layerDatasource,
     setNextFocusedButtonId,
     layerDatasourceState,
-    groups,
+    dimensionGroups,
     updateDatasource,
     datasourceId,
     activeVisualization,
@@ -397,7 +389,7 @@ export function LayerPanel(
             )}
           </header>
 
-          {groups.map((group, groupIndex) => {
+          {dimensionGroups.map((group, groupIndex) => {
             let errorText: string = '';
 
             if (!isEmptyLayer) {
@@ -664,7 +656,7 @@ export function LayerPanel(
                   groupId: activeGroup.groupId,
                   hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
-                  dimensionGroups: groups,
+                  dimensionGroups,
                   toggleFullscreen,
                   isFullscreen,
                   setState: updateDataLayerState,

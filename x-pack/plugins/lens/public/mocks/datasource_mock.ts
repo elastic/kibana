@@ -21,6 +21,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getFilters: jest.fn(),
     getMaxPossibleNumValues: jest.fn(),
     isTextBasedLanguage: jest.fn(() => false),
+    hasDefaultTimeField: jest.fn(() => true),
   };
 
   return {

@@ -769,7 +769,6 @@ describe('metric visualization', () => {
         Object {
           "canAddViaMenu": true,
           "disabled": false,
-          "hidden": true,
           "initialDimensions": undefined,
           "label": "Trendline",
           "type": "metricTrendline",

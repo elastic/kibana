@@ -48,6 +48,11 @@ describe('metric toolbar', () => {
     maxCols: 5,
     color: 'static-color',
     palette,
+    trendlineLayerId: 'second',
+    trendlineLayerType: 'metricTrendline',
+    trendlineMetricAccessor: 'trendline-metric-col-id',
+    trendlineTimeAccessor: 'trendline-time-col-id',
+    trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   };
 
   const frame = createMockFramePublicAPI();

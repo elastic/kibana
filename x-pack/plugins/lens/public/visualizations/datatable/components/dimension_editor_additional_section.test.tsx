@@ -8,7 +8,11 @@
 import React from 'react';
 import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../../types';
+import {
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  VisualizationDimensionEditorProps,
+} from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -67,6 +71,9 @@ describe('data table dimension editor additional section', () => {
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
+      addLayer: jest.fn(),
+      removeLayer: jest.fn(),
+      datasource: {} as DatasourcePublicAPI,
     };
   });
 

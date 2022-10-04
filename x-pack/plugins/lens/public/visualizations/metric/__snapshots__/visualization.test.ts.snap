@@ -168,5 +168,6 @@ Object {
       "supportsMoreColumns": false,
     },
   ],
+  "hidden": true,
 }
 `;

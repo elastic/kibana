@@ -584,6 +584,7 @@ export function getTextBasedLanguagesDatasource({
             },
           };
         },
+        hasDefaultTimeField: () => false,
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {

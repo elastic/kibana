@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
+import { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
 import {
   State,
@@ -21,7 +22,6 @@ import {
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
-import { LayerType } from '../../../common';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -297,7 +297,7 @@ export function newLayerState({
   indexPatternId,
 }: {
   layerId: string;
-  layerType?: LayerType;
+  layerType?: XYLayerType;
   seriesType: SeriesType;
   indexPatternId: string;
 }) {

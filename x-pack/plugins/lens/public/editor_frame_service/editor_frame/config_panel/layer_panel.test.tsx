@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
-import { FramePublicAPI, Visualization } from '../../../types';
+import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -89,6 +89,7 @@ describe('LayerPanel', () => {
     return {
       layerId: 'first',
       activeVisualization: mockVisualization,
+      dimensionGroups: mockVisualization.getConfiguration({} as VisualizationConfigProps).groups,
       datasourceMap: {
         testDatasource: mockDatasource,
       },

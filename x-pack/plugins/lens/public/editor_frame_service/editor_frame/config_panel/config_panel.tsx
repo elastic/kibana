@@ -240,16 +240,17 @@ export function LayerPanels(
   return (
     <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, layerIndex) => {
-        const hidden = activeVisualization.getConfiguration({
+        const { hidden, groups } = activeVisualization.getConfiguration({
           layerId,
           frame: props.framePublicAPI,
           state: visualization.state,
-        })?.hidden;
+        });
 
         return (
           !hidden && (
             <LayerPanel
               {...props}
+              dimensionGroups={groups}
               activeVisualization={activeVisualization}
               registerNewLayerRef={registerNewLayerRef}
               key={layerId}
