@@ -108,8 +108,8 @@ export class ApiService implements GuidedOnboardingApi {
   /**
    * Activates a guide by guideId
    * This is useful for the onboarding landing page, when a user selects a guide to start or continue
-   * @param {GuideId} guideID the id of the guide (one of search, observability, security)
-   * @param {GuideState} guideState (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
+   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideState} guide (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
    * @return {Promise} a promise with the updated guide state
    */
   public async activateGuide(
@@ -156,7 +156,7 @@ export class ApiService implements GuidedOnboardingApi {
    * Completes a guide
    * Updates the overall guide status to 'complete', and marks it as inactive
    * This is useful for the dropdown panel, when the user clicks the "Continue using Elastic" button after completing all steps
-   * @param {GuideId} guideID the id of the guide (one of search, observability, security)
+   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
    * @return {Promise} a promise with the updated guide state
    */
   public async completeGuide(guideId: GuideId): Promise<{ state: GuideState } | undefined> {
@@ -311,7 +311,7 @@ export class ApiService implements GuidedOnboardingApi {
    * An observable with the boolean value if the guided onboarding is currently active for the integration.
    * Returns true, if the passed integration is used in the current guide's step.
    * Returns false otherwise.
-   * @param {string} guideID the integration ID (package key) to check for in the guided onboarding config
+   * @param {string} integration the integration (package name) to check for in the guided onboarding config
    * @return {Observable} an observable with the boolean value
    */
   public isGuidedOnboardingActiveForIntegration$(integration?: string): Observable<boolean> {
