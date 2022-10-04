@@ -83,3 +83,21 @@ export function dbExitSpan({ spanName, spanSubType }: { spanName: string; spanSu
     'span.destination.service.type': spanType,
   };
 }
+
+export function elasticsearchSpan(spanName: string, statement?: string) {
+  const spanType = 'db';
+  const spanSubType = 'elasticsearch';
+
+  return {
+    spanName,
+    spanType,
+    spanSubType,
+    'service.target.type': spanSubType,
+    'destination.address': 'qwerty.us-west2.gcp.elastic-cloud.com',
+    'destination.port': 443,
+    'span.db.statement': statement,
+    'span.destination.service.name': spanSubType,
+    'span.destination.service.type': spanType,
+    'span.destination.service.resource': spanSubType,
+  };
+}
