@@ -9,7 +9,7 @@
 import { Observable } from 'rxjs';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
-import { GuideId, GuideStepIds, StepStatus } from '../common/types';
+import { GuideId, GuideState, GuideStepIds, StepStatus } from '../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingPluginSetup {}
@@ -25,25 +25,34 @@ export interface AppPluginStartDependencies {
 export interface ClientConfigType {
   ui: boolean;
 }
+
 export interface GuidedOnboardingApi {
   setup: (httpClient: HttpSetup) => void;
-  fetchGuideState$: () => Observable<GuidedOnboardingState>;
+  fetchActiveGuideState$: () => Observable<GuideState | undefined>;
+  fetchAllGuidesState: () => Promise<{ state: GuideState[] } | undefined>;
   updateGuideState: (
-    newState: GuidedOnboardingState
-  ) => Promise<{ state: GuidedOnboardingState } | undefined>;
-  isGuideStepActive$: (guideID: string, stepID: string) => Observable<boolean>;
+    newState: GuideState,
+    panelState: boolean
+  ) => Promise<{ state: GuideState } | undefined>;
+  activateGuide: (
+    guideId: GuideId,
+    guide?: GuideState
+  ) => Promise<{ state: GuideState } | undefined>;
+  completeGuide: (guideId: GuideId) => Promise<{ state: GuideState } | undefined>;
+  isGuideStepActive$: (guideId: GuideId, stepId: GuideStepIds) => Observable<boolean>;
+  startGuideStep: (
+    guideId: GuideId,
+    stepId: GuideStepIds
+  ) => Promise<{ state: GuideState } | undefined>;
   completeGuideStep: (
-    guideID: string,
-    stepID: string
-  ) => Promise<{ state: GuidedOnboardingState } | undefined>;
+    guideId: GuideId,
+    stepId: GuideStepIds
+  ) => Promise<{ state: GuideState } | undefined>;
   isGuidedOnboardingActiveForIntegration$: (integration?: string) => Observable<boolean>;
   completeGuidedOnboardingForIntegration: (
     integration?: string
-  ) => Promise<{ state: GuidedOnboardingState } | undefined>;
+  ) => Promise<{ state: GuideState } | undefined>;
 }
-
-export type UseCase = 'observability' | 'security' | 'search';
-export type StepStatus = 'incomplete' | 'complete' | 'in_progress';
 
 export interface StepConfig {
   id: GuideStepIds;

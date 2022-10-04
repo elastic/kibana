@@ -9,12 +9,15 @@
 import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
 
-import { API_BASE_PATH } from '../../common';
-import { GuidedOnboardingApi, GuidedOnboardingState } from '../types';
-import { isIntegrationInGuideStep, isLastStep } from './helpers';
+import { GuidedOnboardingApi } from '../types';
+import {
+  getGuideConfig,
+  getInProgressStepId,
+  isIntegrationInGuideStep,
+  isLastStep,
+} from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '../../common/types';
-import { isLastStep, getGuideConfig } from './helpers';
 
 export class ApiService implements GuidedOnboardingApi {
   private client: HttpSetup | undefined;
@@ -312,24 +315,28 @@ export class ApiService implements GuidedOnboardingApi {
    * @return {Observable} an observable with the boolean value
    */
   public isGuidedOnboardingActiveForIntegration$(integration?: string): Observable<boolean> {
-    return this.fetchGuideState$().pipe(
+    return this.fetchActiveGuideState$().pipe(
       map((state) => {
-        return isIntegrationInGuideStep(state, integration);
+        return state ? isIntegrationInGuideStep(state, integration) : false;
       })
     );
   }
 
   public async completeGuidedOnboardingForIntegration(
     integration?: string
-  ): Promise<{ state: GuidedOnboardingState } | undefined> {
+  ): Promise<{ state: GuideState } | undefined> {
     if (integration) {
-      const currentState = await firstValueFrom(this.fetchGuideState$());
-      const isIntegrationStepActive = isIntegrationInGuideStep(currentState, integration);
-      if (isIntegrationStepActive) {
-        return await this.completeGuideStep(currentState.activeGuide, currentState.activeStep);
+      const currentState = await firstValueFrom(this.fetchActiveGuideState$());
+      if (currentState) {
+        const inProgressStepId = getInProgressStepId(currentState);
+        if (inProgressStepId) {
+          const isIntegrationStepActive = isIntegrationInGuideStep(currentState, integration);
+          if (isIntegrationStepActive) {
+            return await this.completeGuideStep(currentState?.guideId, inProgressStepId);
+          }
+        }
       }
     }
-    return undefined;
   }
 }
 
