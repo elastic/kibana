@@ -16,17 +16,15 @@ export type PutConnectorNameAndDescriptionArgs = Partial<
   indexName: string;
 };
 
-export type PutConnectorNameAndDescriptionResponse = Partial<
-  Pick<Connector, 'name' | 'description'>
-> & {
+export type PutConnectorNameAndDescriptionResponse = Pick<Connector, 'name' | 'description'> & {
   indexName: string;
 };
 
 export const putConnectorNameAndDescription = async ({
   connectorId,
-  description,
+  description = null,
   indexName,
-  name,
+  name = '',
 }: PutConnectorNameAndDescriptionArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/name_and_description`;
 
