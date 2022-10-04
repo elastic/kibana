@@ -10,8 +10,6 @@ import expect from '@kbn/expect';
 import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-// do not commit
-
 // this file showcases how to use testing utilities defined in helpers.ts together with the kbn_tp_run_pipeline
 // test plugin to write automated tests for interpreter
 export default function ({
@@ -19,7 +17,7 @@ export default function ({
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
-  describe('basic visualize loader pipeline expression tests', () => {
+  describe.only('basic visualize loader pipeline expression tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
