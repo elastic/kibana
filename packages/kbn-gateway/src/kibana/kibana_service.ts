@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import fetch from 'node-fetch';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigStart } from '../config';
 import { ServerStart } from '../server';
-import type { KibanaConfigType } from './kibana_config';
+import { createStatusRoute } from './routes';
 
 interface KibanaServiceStartDependencies {
   server: ServerStart;
@@ -34,43 +33,10 @@ export class KibanaService {
   }
 
   async start({ server }: KibanaServiceStartDependencies) {
-    server.addRoute({
-      method: 'GET',
-      path: '/api/status',
-      handler: async (req: any, h: any) => {
-        const responses = await this.fetchKibanaResponses('/api/status');
-        // For now we're being super naïve and returning the highest status code
-        const statusCode = responses.reduce((acc, cur) => (cur.status > acc ? cur.status : acc), 0);
-        // Need to determine what response body, if any, we want to include
-        return h.response({}).type('application/json').code(statusCode);
-      },
-    });
+    server.addRoute(createStatusRoute({ config: this.config, log: this.log }));
   }
 
   stop() {
     // nothing to do here yet
-  }
-
-  private async fetchKibanaResponses(route: string) {
-    const requests = await Promise.allSettled(
-      this.config.atPathSync<KibanaConfigType>('kibana').hosts.map(async (host) => {
-        this.log.info(`Fetching response from ${host}${route}`);
-        const response = await fetch(`${host}${route}`);
-        const responseJson = await response.json();
-        this.log.info(
-          `Got response from ${host}${route}: ${JSON.stringify(responseJson.status.overall)}`
-        );
-        return response;
-      })
-    );
-
-    return requests.map((r) => {
-      if (r.status === 'fulfilled') {
-        return r.value;
-      } else {
-        this.log.error(`Unable to retrieve status from Kibana: ${JSON.stringify(r.reason)}`);
-        throw new Error(r.reason);
-      }
-    });
   }
 }

@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",
+  "author": "Kibana Core",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
     "start": "node ../../bazel-bin/packages/kbn-gateway/target_node/index.js"

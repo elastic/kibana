@@ -7,10 +7,11 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 export type ServerConfigType = TypeOf<typeof config.schema>;
 
-export const config = {
+export const config: ServiceConfigDescriptor = {
   path: 'server',
   schema: schema.object({
     host: schema.string({ defaultValue: 'localhost', hostname: true }),

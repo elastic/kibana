@@ -7,12 +7,13 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 export type KibanaConfigType = TypeOf<typeof config.schema>;
 
-export const config = {
+export const config: ServiceConfigDescriptor = {
   path: 'kibana',
   schema: schema.object({
     hosts: schema.arrayOf(hostURISchema, {

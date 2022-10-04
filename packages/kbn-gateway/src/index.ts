@@ -38,17 +38,17 @@ export function bootstrap() {
       const kibanaService = new KibanaService({ config: configStart, logger });
       await kibanaService.start({ server: serverStart });
 
-      const attemptGracefulShutdown = async () => {
+      const attemptGracefulShutdown = async (exitCode: number = 0) => {
         await server.stop();
         kibanaService.stop();
         await loggingSystem.stop();
         configService.stop();
-        process.exit(0);
+        process.exit(exitCode);
       };
 
-      process.on('unhandledRejection', (err: Error) => {
+      process.on('unhandledRejection', async (err: Error) => {
         log.error(err);
-        process.exit(1);
+        await attemptGracefulShutdown(1);
       });
 
       process.on('SIGINT', async () => await attemptGracefulShutdown());

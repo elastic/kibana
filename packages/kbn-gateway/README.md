@@ -1,6 +1,6 @@
 # @kbn/gateway
 
-This package runs a small proxy server called the Health Gateway, which exists to query
+This package runs a small server called the Health Gateway, which exists to query
 the status APIs of multiple Kibana instances and return an aggregated result.
 
 This is used by the Elastic Cloud infrastructure to run two different Kibana processes 
