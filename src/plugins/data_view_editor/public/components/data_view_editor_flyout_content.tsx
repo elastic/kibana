@@ -388,7 +388,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         {showManagementLink && editData && editData.id && (
           <EuiLink
             href={application.getUrlForApp('management', {
-              path: `/kibana/indexPatterns/patterns/${editData.id}`,
+              path: `/kibana/dataViews/dataView/${editData.id}`,
             })}
           >
             {i18n.translate('indexPatternEditor.goToManagementPage', {
