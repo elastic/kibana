@@ -334,15 +334,12 @@ describe('invalidateAPIKeysForAgents', () => {
         outputs: [
           {
             api_key_id: 'outputApiKey1',
-            to_retire_api_key_ids: [
-              { id: 'outputApiKeyRetire1' },
-              { id: 'outputApiKeyRetire2' },
-            ]
+            to_retire_api_key_ids: [{ id: 'outputApiKeyRetire1' }, { id: 'outputApiKeyRetire2' }],
           },
           {
             api_key_id: 'outputApiKey2',
-          }
-        ]
+          },
+        ],
       } as any,
     ]);
 

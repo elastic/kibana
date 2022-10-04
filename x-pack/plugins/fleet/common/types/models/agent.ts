@@ -98,7 +98,7 @@ export interface Agent extends AgentBase {
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
   outputs?: Array<{
     api_key_id: string;
-    to_retire_api_key_ids?: FleetServerAgent['default_api_key_history']
+    to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
   }>;
   status?: AgentStatus;
   packages: string[];
