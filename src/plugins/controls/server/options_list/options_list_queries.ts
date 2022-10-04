@@ -147,7 +147,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    */
   ip: {
     buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
-      const findSuggestions = {
+      const ipSuggestions = {
         terms: {
           field: fieldName,
           execution_hint: 'map',
@@ -155,21 +155,23 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         },
       };
 
-      if (!searchString || !Boolean(searchString)) {
-        return {
-          ...findSuggestions,
-        };
+      if (!searchString) {
+        return ipSuggestions;
       }
 
+      const ipSegments = searchString
+        .replace(/[^\d.]/g, '') // remove any non-numeric characters, excluding periods
+        .split('.')
+        .filter((segment) => segment !== '');
+
       // if a search string is provided that already is of the form `a.b.c.d` then simply search for that IP directly
-      const ipSegments = searchString.replace(/^\.+|\.+$/g, '').split('.');
       if (ipSegments.length === 4) {
         return {
           filter: {
             term: { [fieldName]: searchString },
           },
           aggs: {
-            filteredResults: { ...findSuggestions },
+            filteredSuggestions: { ...ipSuggestions },
           },
         };
       }
@@ -181,27 +183,27 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
       return {
         ip_range: {
           field: fieldName,
-          ranges: [{ key: 'searchResult_max', from: minIp, to: maxIp }],
+          ranges: [{ key: 'results', from: minIp, to: maxIp }],
         },
         aggs: {
-          filteredResults: { ...findSuggestions },
+          filteredSuggestions: { ...ipSuggestions },
         },
       };
     },
     parse: (rawEsResult) => {
-      const buckets: [{ key: string; filteredResults?: { buckets: [{ key: string }] } }] = get(
+      const buckets: [{ key: string; filteredSuggestions?: { buckets: [{ key: string }] } }] = get(
         rawEsResult,
         'aggregations.suggestions.buckets'
       );
       if (!Boolean(buckets)) {
-        // this means that the results are being filtered by a full IP search string
-        return get(rawEsResult, 'aggregations.suggestions.filteredResults.buckets')?.map(
+        // this means that a full IP was provided as a search string
+        return get(rawEsResult, 'aggregations.suggestions.filteredSuggestions.buckets')?.map(
           (suggestion: { key: string }) => suggestion.key
         );
       }
-      if (buckets[0].filteredResults) {
+      if (buckets[0].filteredSuggestions) {
         // this means that a partial IP was provided as a search string
-        return buckets[0].filteredResults.buckets.map((suggestion) => suggestion.key);
+        return buckets[0].filteredSuggestions.buckets.map((suggestion) => suggestion.key);
       }
       // this means that no search string has been provided
       return buckets.map((suggestion) => suggestion.key);
