@@ -68,5 +68,6 @@ export const useGetSavedQuery = (
   return {
     isSavedQueryLoading: savedQueryId ? query.isLoading : false,
     savedQueryBar,
+    savedQuery: query.data ?? undefined,
   };
 };

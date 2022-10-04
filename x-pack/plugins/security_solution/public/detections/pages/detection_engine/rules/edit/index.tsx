@@ -100,7 +100,7 @@ const EditRulePageComponent: FC = () => {
   const [ruleLoading, rule] = useRule(ruleId);
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
-  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(undefined, {
+  const { isSavedQueryLoading, savedQueryBar, savedQuery } = useGetSavedQuery(rule?.saved_id, {
     ruleType: rule?.type,
     onError: noop,
   });
@@ -236,6 +236,7 @@ const EditRulePageComponent: FC = () => {
                   threatIndicesConfig={threatIndicesConfig}
                   onRuleDataChange={onDataChange}
                   onPreviewDisabledStateChange={setIsPreviewDisabled}
+                  defaultSavedQuery={savedQuery}
                 />
               )}
               <EuiSpacer />
@@ -334,6 +335,7 @@ const EditRulePageComponent: FC = () => {
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
+      savedQuery,
     ]
   );
 
