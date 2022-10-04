@@ -18,6 +18,7 @@ import {
   AppMockRenderer,
   createAppMockRenderer,
   noDeleteCasesPermissions,
+  readCasesPermissions,
   TestProviders,
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
@@ -802,6 +803,19 @@ describe('AllCasesListGeneric', () => {
             ],
             expect.anything()
           );
+        });
+      });
+
+      it('should disable the checkboxes when the user has read only permissions', async () => {
+        appMockRenderer = createAppMockRenderer({ permissions: readCasesPermissions() });
+        const res = appMockRenderer.render(<AllCasesList />);
+
+        expect(res.getByTestId('checkboxSelectAll')).toBeDisabled();
+
+        await waitFor(() => {
+          for (const theCase of defaultGetCases.data.cases) {
+            expect(res.getByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
+          }
         });
       });
     });

@@ -37,7 +37,7 @@ import {
 } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
-import { getAllPermissionsExceptFrom } from '../../utils/permissions';
+import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
 
 const ProgressLoader = styled(EuiProgress)`
@@ -64,7 +64,7 @@ export interface AllCasesListProps {
 
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick }) => {
-    const { owner } = useCasesContext();
+    const { owner, permissions } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
     const isLoading = useIsLoadingCases();
 
@@ -221,8 +221,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       () => ({
         onSelectionChange: setSelectedCases,
         initialSelected: selectedCases,
+        selectable: () => !isReadOnlyPermissions(permissions),
       }),
-      [selectedCases, setSelectedCases]
+      [permissions, selectedCases]
     );
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
