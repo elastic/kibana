@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './open_indicator_flyout_button';
+export * from './field_browser';

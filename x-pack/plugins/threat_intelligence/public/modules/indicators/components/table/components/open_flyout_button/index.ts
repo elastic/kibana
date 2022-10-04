@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './indicators_table';
+export * from './open_flyout_button';

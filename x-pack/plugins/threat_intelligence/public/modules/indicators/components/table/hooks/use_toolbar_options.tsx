@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiDataGridColumn, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { useInspector } from '../../../../../hooks/use_inspector';
-import { IndicatorsFieldBrowser } from '../../indicators_field_browser';
+import { IndicatorsFieldBrowser } from '../components';
 
 const INSPECT_BUTTON_TEST_ID = 'tiIndicatorsGridInspect';
 

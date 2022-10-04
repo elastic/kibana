@@ -13,7 +13,7 @@ import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
 import { useFilters } from '../query_bar/hooks/use_filters';
 import moment from 'moment';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
-import { TABLE_TEST_ID } from './components/indicators_table';
+import { TABLE_TEST_ID } from './components/table';
 import { mockTimeRange } from '../../common/mocks/mock_indicators_filters_context';
 
 jest.mock('../query_bar/hooks/use_filters');

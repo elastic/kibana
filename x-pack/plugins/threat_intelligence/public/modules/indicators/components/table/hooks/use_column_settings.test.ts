@@ -7,7 +7,7 @@
 
 import { mockedServices, TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useColumnSettings } from './use_column_settings';
+import { useColumnSettings } from '.';
 
 const renderUseColumnSettings = () =>
   renderHook(() => useColumnSettings(), { wrapper: TestProvidersComponent });
