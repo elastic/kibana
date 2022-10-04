@@ -32,6 +32,7 @@ import type {
 } from '@kbn/securitysolution-list-utils';
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
+import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
@@ -137,9 +138,9 @@ export const formatExceptionItemForUpdate = (
  * @param exceptionItems new or existing ExceptionItem[]
  */
 export const prepareExceptionItemsForBulkClose = (
-  exceptionItems: ExceptionsBuilderReturnExceptionItem[]
-): ExceptionsBuilderReturnExceptionItem[] => {
-  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
+  exceptionItems: ExceptionListItemSchema[]
+): ExceptionListItemSchema[] => {
+  return exceptionItems.map((item: ExceptionListItemSchema) => {
     if (item.entries !== undefined) {
       const newEntries = item.entries.map((itemEntry: Entry | EntryNested) => {
         return {
@@ -823,7 +824,7 @@ export const enrichRuleExceptions = (
 ): ExceptionsBuilderReturnExceptionItem[] => {
   return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
     return {
-      ...item,
+      ...removeIdFromExceptionItemsEntries<ExceptionsBuilderReturnExceptionItem>(item),
       list_id: undefined,
       namespace_type: 'single',
     };
@@ -842,7 +843,7 @@ export const enrichSharedExceptions = (
   return lists.flatMap((list) => {
     return exceptionItems.map((item) => {
       return {
-        ...item,
+        ...removeIdFromExceptionItemsEntries<ExceptionsBuilderReturnExceptionItem>(item),
         list_id: list.list_id,
         namespace_type: list.namespace_type,
       };

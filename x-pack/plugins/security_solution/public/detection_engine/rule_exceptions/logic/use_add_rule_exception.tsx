@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useEffect, useRef, useState } from 'react';
 
 import type { CreateRuleExceptionListItemSchema } from '../../../../common/detection_engine/schemas/request';
@@ -21,7 +22,7 @@ import type { Rule } from '../../../detections/containers/detection_engine/rules
 export type AddRuleExceptionsFunc = (
   exceptions: CreateRuleExceptionListItemSchema[],
   rules: Rule[]
-) => Promise<void>;
+) => Promise<ExceptionListItemSchema[]>;
 
 export type ReturnUseAddRuleException = [boolean, AddRuleExceptionsFunc | null];
 
@@ -39,11 +40,11 @@ export const useAddRuleDefaultException = (): ReturnUseAddRuleException => {
     const addExceptionItemsToRule: AddRuleExceptionsFunc = async (
       exceptions: CreateRuleExceptionListItemSchema[],
       rules: Rule[]
-    ) => {
+    ): Promise<ExceptionListItemSchema[]> => {
       setIsLoading(true);
 
       // TODO: Update once bulk route is added
-      await Promise.all(
+      const result = await Promise.all(
         rules.map(async (rule) =>
           addRuleExceptions({
             items: exceptions,
@@ -54,6 +55,8 @@ export const useAddRuleDefaultException = (): ReturnUseAddRuleException => {
       );
 
       setIsLoading(false);
+
+      return result.flatMap((r) => r);
     };
     addRuleExceptionFunc.current = addExceptionItemsToRule;
 

@@ -13,6 +13,7 @@ import {
   ADD_TO_RULE_RADIO_LABEL,
   ADD_TO_SHARED_LIST_RADIO_LABEL,
   CLOSE_ALERTS_CHECKBOX,
+  CLOSE_SINGLE_ALERT_CHECKBOX,
   CONFIRM_BTN,
   EXCEPTION_ITEM_NAME_INPUT,
   EXCEPTION_ITEM_VIEWER_SEARCH,
@@ -102,16 +103,28 @@ export const addExceptionFlyoutFromViewerHeader = () => {
 };
 
 export const addExceptionFlyoutItemName = (name: string) => {
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`);
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
+  cy.root()
+    .pipe(($el) => {
+      return $el.find(EXCEPTION_ITEM_NAME_INPUT);
+    })
+    .type(`${name}{enter}`)
+    .should('have.value', name);
 };
 
 export const selectBulkCloseAlerts = () => {
   cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
 };
 
+export const selectCloseSingleAlerts = () => {
+  cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).click({ force: true });
+};
+
 export const addExceptionConditions = (exception: Exception) => {
-  cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
+  cy.root()
+    .pipe(($el) => {
+      return $el.find(FIELD_INPUT);
+    })
+    .type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);

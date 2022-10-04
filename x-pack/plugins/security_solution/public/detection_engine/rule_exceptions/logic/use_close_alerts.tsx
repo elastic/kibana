@@ -7,7 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
@@ -26,14 +26,14 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
  * Closes alerts.
  *
  * @param ruleStaticIds static id of the rules (rule.ruleId, not rule.id) where the exception updates will be applied
- * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
+ * @param exceptionItems array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  * @param bulkCloseIndex - optional index used to create bulk close query
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
   ruleStaticIds: string[],
-  exceptionItemsToAddOrUpdate: ExceptionsBuilderReturnExceptionItem[],
+  exceptionItems: ExceptionListItemSchema[],
   alertIdToClose?: string,
   bulkCloseIndex?: Index
 ) => Promise<void>;
@@ -55,7 +55,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
 
     const onUpdateAlerts: AddOrUpdateExceptionItemsFunc = async (
       ruleStaticIds,
-      exceptionItemsToAddOrUpdate,
+      exceptionItems,
       alertIdToClose,
       bulkCloseIndex
     ) => {
@@ -78,16 +78,12 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             'in-progress',
           ]);
 
-          const exceptionsToFilter = exceptionItemsToAddOrUpdate.map((exception) =>
-            removeIdFromExceptionItemsEntries(exception)
-          );
-
           const filter = await getEsQueryFilter(
             '',
             'kuery',
             [...ruleStaticIds.flatMap((id) => buildAlertsFilter(id)), ...alertStatusFilter],
             bulkCloseIndex,
-            prepareExceptionItemsForBulkClose(exceptionsToFilter),
+            prepareExceptionItemsForBulkClose(exceptionItems),
             false
           );
 

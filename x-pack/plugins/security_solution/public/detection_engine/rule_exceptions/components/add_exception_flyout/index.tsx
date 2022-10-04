@@ -326,7 +326,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         items: exceptionItems,
       });
 
-      await submitNewExceptionItems({
+      const addedItems = await submitNewExceptionItems({
         itemsToAdd: items,
         selectedRulesToAddTo,
         listType,
@@ -341,12 +341,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         : (rules ?? []).map(({ rule_id: ruleId }) => ruleId);
 
       if (closeAlerts != null && !isEmpty(ruleStaticIds) && (bulkCloseAlerts || closeSingleAlert)) {
-        await closeAlerts(ruleStaticIds, items, alertIdToClose, bulkCloseIndex);
+        await closeAlerts(ruleStaticIds, addedItems, alertIdToClose, bulkCloseIndex);
       }
 
       // Rule only would have been updated if we had to create a rule default list
       // to attach to it, all shared lists would already be referenced on the rule
-      onConfirm(addToRules, closeSingleAlert, bulkCloseAlerts);
+      onConfirm(true, closeSingleAlert, bulkCloseAlerts);
     } catch (e) {
       setErrorSubmitting(e);
     }

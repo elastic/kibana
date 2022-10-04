@@ -386,7 +386,7 @@ const ExceptionsViewerComponent = ({
         : null,
     [allReferences, exceptionToEdit]
   );
-console.log({currenFlyout, exceptionToEditList, rule, exceptionToEdit})
+
   return (
     <>
       {currenFlyout === 'editException' &&
@@ -419,9 +419,7 @@ console.log({currenFlyout, exceptionToEditList, rule, exceptionToEdit})
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
           <StyledText size="s">
-            {listType === ExceptionListTypeEnum.ENDPOINT
-              ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT
-              : i18n.EXCEPTIONS_TAB_ABOUT}
+            {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
           </StyledText>
           <EuiSpacer size="l" />
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (

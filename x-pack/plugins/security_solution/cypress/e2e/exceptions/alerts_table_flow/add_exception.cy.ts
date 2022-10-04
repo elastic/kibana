@@ -14,6 +14,7 @@ import {
   addExceptionFromFirstAlert,
   goToClosedAlerts,
   goToOpenedAlerts,
+  openAddExceptionFromAlertDetails,
 } from '../../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
@@ -25,10 +26,13 @@ import {
 } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
-  addsException,
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
+  selectCloseSingleAlerts,
+  submitNewExceptionItem,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 
@@ -75,7 +79,18 @@ describe('Adds rule exception from alerts flow', () => {
     // Create an exception from the alerts actions menu that matches
     // the existing alert
     addExceptionFromFirstAlert();
-    addsException(getException());
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add exception item conditions
+    addExceptionConditions(getException());
+
+    // select to close alert
+    selectCloseSingleAlerts();
+
+    // submit
+    submitNewExceptionItem();
 
     // Alerts table should now be empty from having added exception and closed
     // matching alert
@@ -98,5 +113,29 @@ describe('Adds rule exception from alerts flow', () => {
 
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
+  });
+
+  it.only('Creates an exception from alert details flyout', () => {
+    cy.get(ALERTS_COUNT).should('exist');
+    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
+    // Create an exception from the alerts actions menu that matches
+    // the existing alert
+    openAddExceptionFromAlertDetails();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add exception item conditions
+    addExceptionConditions(getException());
+
+    // select to close alert
+    selectCloseSingleAlerts();
+
+    // submit
+    submitNewExceptionItem();
+
+    // Alerts table should now be empty from having added exception and closed
+    // matching alert
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
   });
 });

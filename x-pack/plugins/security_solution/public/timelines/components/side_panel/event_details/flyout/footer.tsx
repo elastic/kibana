@@ -70,6 +70,15 @@ export const FlyoutFooterComponent = React.memo(
           ?.values,
       [detailsData]
     );
+    const ruleDataViewId = useMemo(
+      () =>
+        find({ category: 'signal', field: 'signal.rule.data_view_id' }, detailsData)?.values ??
+        find(
+          { category: 'kibana', field: 'kibana.alert.rule.parameters.data_view_id' },
+          detailsData
+        )?.values,
+      [detailsData]
+    );
 
     const addExceptionModalWrapperData = useMemo(
       () =>
@@ -102,6 +111,7 @@ export const FlyoutFooterComponent = React.memo(
 
     const {
       exceptionFlyoutType,
+      openAddExceptionFlyout,
       onAddExceptionTypeClick,
       onAddExceptionCancel,
       onAddExceptionConfirm,
@@ -154,12 +164,13 @@ export const FlyoutFooterComponent = React.memo(
         {/* This is still wrong to do render flyout/modal inside of the flyout
         We need to completely refactor the EventDetails  component to be correct
       */}
-        {exceptionFlyoutType != null &&
+        {openAddExceptionFlyout &&
           addExceptionModalWrapperData.ruleId != null &&
           addExceptionModalWrapperData.eventId != null && (
             <AddExceptionFlyoutWrapper
               {...addExceptionModalWrapperData}
               ruleIndices={ruleIndices}
+              ruleDataViewId={ruleDataViewId}
               exceptionListType={exceptionFlyoutType}
               onCancel={onAddExceptionCancel}
               onConfirm={onAddExceptionConfirm}

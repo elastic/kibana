@@ -133,3 +133,17 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Filter exceptions using simple query syntax, for example, name:"my list"',
   }
 );
+
+export const ADD_TO_ENDPOINT_LIST = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.addToEndpointListLabel',
+  {
+    defaultMessage: 'Add endpoint exception',
+  }
+);
+
+export const ADD_TO_DETECTIONS_LIST = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.addToDetectionsListLabel',
+  {
+    defaultMessage: 'Add rule exception',
+  }
+);

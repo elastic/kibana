@@ -6,7 +6,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
@@ -25,7 +28,9 @@ export interface AddNewExceptionItemHookProps {
   sharedLists: ExceptionListSchema[];
 }
 
-export type AddNewExceptionItemHookFuncProps = (arg: AddNewExceptionItemHookProps) => Promise<void>;
+export type AddNewExceptionItemHookFuncProps = (
+  arg: AddNewExceptionItemHookProps
+) => Promise<ExceptionListItemSchema[]>;
 
 export type ReturnUseAddNewExceptionItems = [boolean, AddNewExceptionItemHookFuncProps | null];
 
@@ -42,7 +47,6 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
   const addNewExceptionsRef = useRef<AddNewExceptionItemHookFuncProps | null>(null);
 
   useEffect(() => {
-    let isSubscribed = true;
     const abortCtrl = new AbortController();
 
     const addNewExceptions = async ({
@@ -52,8 +56,9 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
       addToRules,
       addToSharedLists,
       sharedLists,
-    }: AddNewExceptionItemHookProps) => {
+    }: AddNewExceptionItemHookProps): Promise<ExceptionListItemSchema[]> => {
       try {
+        let result: ExceptionListItemSchema[] = [];
         setIsLoading(true);
 
         if (
@@ -61,7 +66,7 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
           addRuleExceptions != null &&
           listType !== ExceptionListTypeEnum.ENDPOINT
         ) {
-          await addRuleExceptions(itemsToAdd, selectedRulesToAddTo);
+          result = await addRuleExceptions(itemsToAdd, selectedRulesToAddTo);
 
           const ruleNames = selectedRulesToAddTo.map(({ name }) => name).join(', ');
 
@@ -73,7 +78,7 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
           (listType === ExceptionListTypeEnum.ENDPOINT || addToSharedLists) &&
           addSharedExceptions != null
         ) {
-          await addSharedExceptions(itemsToAdd);
+          result = await addSharedExceptions(itemsToAdd);
 
           const sharedListNames = sharedLists.map(({ name }) => name);
 
@@ -83,21 +88,18 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
           });
         }
 
-        if (isSubscribed) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
+
+        return result;
       } catch (e) {
-        if (isSubscribed) {
-          setIsLoading(false);
-          addError(e, { title: i18n.SUBMIT_ERROR_TITLE });
-          throw e;
-        }
+        setIsLoading(false);
+        addError(e, { title: i18n.SUBMIT_ERROR_TITLE });
+        throw e;
       }
     };
 
     addNewExceptionsRef.current = addNewExceptions;
     return (): void => {
-      isSubscribed = false;
       abortCtrl.abort();
     };
   }, [addSuccess, addError, addWarning, addRuleExceptions, addSharedExceptions]);
