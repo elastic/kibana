@@ -43,7 +43,7 @@ export const installRiskScore = async ({
   signal?: AbortSignal;
   theme?: ThemeServiceStart;
 }) => {
-  const response = await http
+return http
     .post<Response[]>(INTERNAL_RISK_SCORE_URL, {
       body: JSON.stringify(options),
       signal,
