@@ -15,6 +15,7 @@ import { isLastStep, getGuideConfig } from './helpers';
 
 export class ApiService {
   private client: HttpSetup | undefined;
+  private isGuideAbandoned: boolean = false;
   private onboardingGuideState$!: BehaviorSubject<GuideState | undefined>;
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
@@ -32,7 +33,7 @@ export class ApiService {
     // TODO add error handling if this.client has not been initialized or request fails
     return this.onboardingGuideState$.pipe(
       concatMap((state) =>
-        state === undefined
+        this.isGuideAbandoned === false && state === undefined
           ? from(
               this.client!.get<{ state: GuideState[] }>(`${API_BASE_PATH}/state`, {
                 query: {
@@ -71,6 +72,30 @@ export class ApiService {
   }
 
   /**
+   * Async operation to delete a guide
+   * On the server, the SO is deleted for the selected guide ID
+   * This is used for the "Quit guide" functionality on the dropdown panel
+   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @return {Promise} a promise with the response or error
+   */
+  public async deleteGuide(guideId: GuideId): Promise<{ response?: GuideState; error?: Error }> {
+    if (!this.client) {
+      throw new Error('ApiService has not be initialized.');
+    }
+
+    try {
+      const response = await this.client.delete<GuideState>(`${API_BASE_PATH}/state/${guideId}`);
+      // Mark the guide as abandoned
+      this.isGuideAbandoned = true;
+      // Reset the guide state
+      this.onboardingGuideState$.next(undefined);
+      return { response };
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
    * Updates the SO with the updated guide state and refreshes the observables
    * This is largely used internally and for tests
    * @param {GuideState} guideState the updated guide state
@@ -102,7 +127,7 @@ export class ApiService {
   /**
    * Activates a guide by guideId
    * This is useful for the onboarding landing page, when a user selects a guide to start or continue
-   * @param {GuideId} guideID the id of the guide (one of search, observability, security)
+   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
    * @param {GuideState} guideState (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
    * @return {Promise} a promise with the updated guide state
    */

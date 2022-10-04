@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
+import { API_BASE_PATH } from '../../common/constants';
 import type { GuideState } from '../../common/types';
 import { guidedSetupSavedObjectsType } from '../saved_objects';
 
@@ -35,7 +36,7 @@ export function defineRoutes(router: IRouter) {
   // Fetch all guides state; optionally pass the query param ?active=true to only return the active guide
   router.get(
     {
-      path: '/api/guided_onboarding/state',
+      path: `${API_BASE_PATH}/state`,
       validate: {
         query: schema.object({
           active: schema.maybe(schema.boolean()),
@@ -69,7 +70,7 @@ export function defineRoutes(router: IRouter) {
   // will also check any existing active guides and update them to an "inactive" state
   router.put(
     {
-      path: '/api/guided_onboarding/state',
+      path: `${API_BASE_PATH}/state`,
       validate: {
         body: schema.object({
           status: schema.string(),
@@ -156,6 +157,40 @@ export function defineRoutes(router: IRouter) {
           body: {
             state: createdGuideResponse,
           },
+        });
+      }
+    }
+  );
+
+  // Delete SO for selected guide
+  router.delete(
+    {
+      path: `${API_BASE_PATH}/state/{guideId}`,
+      validate: {
+        params: schema.object({
+          guideId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+      const { guideId } = request.params;
+      const soClient = coreContext.savedObjects.client as SavedObjectsClient;
+
+      const existingGuideSO = await findGuideById(soClient, guideId);
+
+      if (existingGuideSO.total > 0) {
+        const existingGuide = existingGuideSO.saved_objects[0];
+
+        await soClient.delete(guidedSetupSavedObjectsType, existingGuide.id);
+
+        return response.ok({
+          body: {},
+        });
+      } else {
+        // In the case that the SO doesn't exist (unlikely), return successful response
+        return response.ok({
+          body: {},
         });
       }
     }

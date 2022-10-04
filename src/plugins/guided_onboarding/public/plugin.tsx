@@ -17,6 +17,7 @@ import {
   CoreTheme,
   ApplicationStart,
   PluginInitializerContext,
+  NotificationsSetup,
 } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -42,7 +43,7 @@ export class GuidedOnboardingPlugin
       return {};
     }
 
-    const { chrome, http, theme, application } = core;
+    const { chrome, http, theme, application, notifications } = core;
 
     // Initialize services
     apiService.setup(http);
@@ -55,6 +56,7 @@ export class GuidedOnboardingPlugin
           theme$: theme.theme$,
           api: apiService,
           application,
+          notifications,
         }),
     });
 
@@ -71,16 +73,18 @@ export class GuidedOnboardingPlugin
     theme$,
     api,
     application,
+    notifications,
   }: {
     targetDomElement: HTMLElement;
     theme$: Rx.Observable<CoreTheme>;
     api: ApiService;
     application: ApplicationStart;
+    notifications: NotificationsSetup;
   }) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
-          <GuidePanel api={api} application={application} />
+          <GuidePanel api={api} application={application} notifications={notifications} />
         </I18nProvider>
       </KibanaThemeProvider>,
       targetDomElement

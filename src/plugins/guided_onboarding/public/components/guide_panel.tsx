@@ -29,6 +29,7 @@ import {
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { NotificationsSetup } from '@kbn/core/public';
 import { guidesConfig } from '../constants/guides_config';
 import type { GuideState, GuideStepIds } from '../../common/types';
 import type { GuideConfig, StepConfig } from '../types';
@@ -42,6 +43,7 @@ import { getGuidePanelStyles } from './guide_panel.styles';
 interface GuidePanelProps {
   api: ApiService;
   application: ApplicationStart;
+  notifications: NotificationsSetup;
 }
 
 const getConfig = (state?: GuideState): GuideConfig | undefined => {
@@ -82,7 +84,7 @@ const getProgress = (state?: GuideState): number => {
   return 0;
 };
 
-export const GuidePanel = ({ api, application }: GuidePanelProps) => {
+export const GuidePanel = ({ api, application, notifications }: GuidePanelProps) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
@@ -123,9 +125,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
 
   useEffect(() => {
     const subscription = api.fetchActiveGuideState$().subscribe((newGuideState) => {
-      if (newGuideState) {
-        setGuideState(newGuideState);
-      }
+      setGuideState(newGuideState);
     });
     return () => subscription.unsubscribe();
   }, [api]);
@@ -338,7 +338,13 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
         </EuiFlyout>
       )}
 
-      {isQuitGuideModalOpen && <QuitGuideModal closeModal={closeQuitGuideModal} />}
+      {isQuitGuideModalOpen && (
+        <QuitGuideModal
+          closeModal={closeQuitGuideModal}
+          currentGuide={guideState!.guideId}
+          notifications={notifications}
+        />
+      )}
     </>
   );
 };
