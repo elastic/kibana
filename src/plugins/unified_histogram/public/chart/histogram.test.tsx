@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ChartData } from '../types';
+import { ChartData, UnifiedHistogramFetchStatus } from '../types';
 import { Histogram } from './histogram';
 import React from 'react';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -50,27 +50,32 @@ const chartData = {
   ],
 } as unknown as ChartData;
 
-function mountComponent(fetchStatus: FetchStatus) {
+function mountComponent(
+  status: UnifiedHistogramFetchStatus,
+  data: ChartData | null = chartData,
+  error?: Error
+) {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  const charts$ = new BehaviorSubject({
-    fetchStatus,
-    chartData,
-    bucketInterval: {
-      scaled: true,
-      description: 'test',
-      scale: 2,
-    },
-  }) as DataCharts$;
-
   const timefilterUpdateHandler = jest.fn();
 
   const props = {
     services: unifiedHistogramServicesMock,
-    savedSearchData$: charts$,
+    chart: {
+      status,
+      hidden: false,
+      timeInterval: 'auto',
+      bucketInterval: {
+        scaled: true,
+        description: 'test',
+        scale: 2,
+      },
+      data: data ?? undefined,
+      error,
+    },
     timefilterUpdateHandler,
   };
 
@@ -79,25 +84,12 @@ function mountComponent(fetchStatus: FetchStatus) {
 
 describe('Histogram', () => {
   it('renders correctly', () => {
-    jest.spyOn(hooks, 'useDataState').mockImplementation(() => ({
-      fetchStatus: FetchStatus.COMPLETE,
-      chartData,
-      bucketInterval: {
-        scaled: true,
-        description: 'Bucket interval',
-        scale: 1,
-      },
-    }));
-    const component = mountComponent(FetchStatus.COMPLETE);
+    const component = mountComponent('complete');
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
   });
 
   it('renders error correctly', () => {
-    jest.spyOn(hooks, 'useDataState').mockImplementation(() => ({
-      fetchStatus: FetchStatus.ERROR,
-      error: new Error('Loading error'),
-    }));
-    const component = mountComponent(FetchStatus.ERROR);
+    const component = mountComponent('error', null, new Error('Loading error'));
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(false);
     expect(component.find('[data-test-subj="unifiedHistogramErrorChartContainer"]').exists()).toBe(
       true
@@ -108,11 +100,7 @@ describe('Histogram', () => {
   });
 
   it('renders loading state correctly', () => {
-    jest.spyOn(hooks, 'useDataState').mockImplementation(() => ({
-      fetchStatus: FetchStatus.LOADING,
-      chartData: null,
-    }));
-    const component = mountComponent(FetchStatus.LOADING);
+    const component = mountComponent('loading', null);
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
     expect(component.find('[data-test-subj="unifiedHistogramChartLoading"]').exists()).toBe(true);
   });

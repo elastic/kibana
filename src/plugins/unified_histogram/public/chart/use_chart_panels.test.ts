@@ -18,8 +18,11 @@ describe('test useChartPanels', () => {
         onChangeInterval: jest.fn(),
         closePopover: jest.fn(),
         onResetChartHeight: jest.fn(),
-        hideChart: true,
-        interval: 'auto',
+        chart: {
+          status: 'complete',
+          hidden: true,
+          timeInterval: 'auto',
+        },
       });
     });
     const panels: EuiContextMenuPanelDescriptor[] = result.current;
@@ -35,8 +38,11 @@ describe('test useChartPanels', () => {
         onChangeInterval: jest.fn(),
         closePopover: jest.fn(),
         onResetChartHeight: jest.fn(),
-        hideChart: false,
-        interval: 'auto',
+        chart: {
+          status: 'complete',
+          hidden: false,
+          timeInterval: 'auto',
+        },
       });
     });
     const panels: EuiContextMenuPanelDescriptor[] = result.current;
@@ -52,8 +58,11 @@ describe('test useChartPanels', () => {
         toggleHideChart: jest.fn(),
         onChangeInterval: jest.fn(),
         closePopover: jest.fn(),
-        hideChart: false,
-        interval: 'auto',
+        chart: {
+          status: 'complete',
+          hidden: false,
+          timeInterval: 'auto',
+        },
       });
     });
     const panel0: EuiContextMenuPanelDescriptor = result.current[0];
@@ -68,8 +77,11 @@ describe('test useChartPanels', () => {
         onChangeInterval: jest.fn(),
         closePopover: jest.fn(),
         onResetChartHeight,
-        hideChart: false,
-        interval: 'auto',
+        chart: {
+          status: 'complete',
+          hidden: false,
+          timeInterval: 'auto',
+        },
       });
     });
     const panel0: EuiContextMenuPanelDescriptor = result.current[0];

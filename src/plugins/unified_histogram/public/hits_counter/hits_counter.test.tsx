@@ -12,6 +12,7 @@ import type { ReactWrapper } from 'enzyme';
 import type { HitsCounterProps } from './hits_counter';
 import { HitsCounter } from './hits_counter';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 describe('hits counter', function () {
   let props: HitsCounterProps;
@@ -19,22 +20,28 @@ describe('hits counter', function () {
 
   beforeAll(() => {
     props = {
-      onResetQuery: jest.fn(),
-      showResetButton: true,
-      hits: 2,
-      status: 'complete',
+      hits: {
+        status: 'complete',
+        number: 2,
+      },
     };
   });
 
-  it('HitsCounter renders a button by providing the showResetButton property', () => {
-    component = mountWithIntl(<HitsCounter {...props} />);
-    expect(findTestSubject(component, 'resetSavedSearch').length).toBe(1);
-  });
+  // it('HitsCounter renders a button by providing the showResetButton property', () => {
+  //   component = mountWithIntl(<HitsCounter {...props} />);
+  //   expect(findTestSubject(component, 'resetSavedSearch').length).toBe(1);
+  // });
 
-  it('HitsCounter not renders a button when the showResetButton property is false', () => {
-    component = mountWithIntl(<HitsCounter {...props} showResetButton={false} />);
-    expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
-  });
+  // it('HitsCounter not renders a button when the showResetButton property is false', () => {
+  //   component = mountWithIntl(<HitsCounter {...props} showResetButton={false} />);
+  //   expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
+  // });
+
+  // it('should reset query', function () {
+  //   component = mountWithIntl(<HitsCounter {...props} />);
+  //   findTestSubject(component, 'resetSavedSearch').simulate('click');
+  //   expect(props.onResetQuery).toHaveBeenCalled();
+  // });
 
   it('expect to render the number of hits', function () {
     component = mountWithIntl(<HitsCounter {...props} />);
@@ -44,15 +51,30 @@ describe('hits counter', function () {
 
   it('expect to render 1,899 hits if 1899 hits given', function () {
     component = mountWithIntl(
-      <HitsCounter {...props} hits={1899} showResetButton={false} onResetQuery={jest.fn()} />
+      <HitsCounter {...props} hits={{ status: 'complete', number: 1899 }} />
     );
     const hits = findTestSubject(component, 'unifiedHistogramQueryHits');
     expect(hits.text()).toBe('1,899');
   });
 
-  it('should reset query', function () {
+  it('should render the element passed to the append prop', () => {
+    const appendHitsCounter = <div data-test-subj="appendHitsCounter">appendHitsCounter</div>;
+    component = mountWithIntl(<HitsCounter {...props} append={appendHitsCounter} />);
+    expect(findTestSubject(component, 'appendHitsCounter').length).toBe(1);
+  });
+
+  it('should render a EuiLoadingSpinner when status is partial', () => {
+    component = mountWithIntl(<HitsCounter {...props} hits={{ status: 'partial', number: 2 }} />);
+    expect(component.find(EuiLoadingSpinner).length).toBe(1);
+  });
+
+  it('should render unifiedHistogramQueryHitsPartial when status is partial', () => {
+    component = mountWithIntl(<HitsCounter {...props} hits={{ status: 'partial', number: 2 }} />);
+    expect(component.find('[data-test-subj="unifiedHistogramQueryHitsPartial"]').length).toBe(1);
+  });
+
+  it('should render unifiedHistogramQueryHits when status is complete', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
-    findTestSubject(component, 'resetSavedSearch').simulate('click');
-    expect(props.onResetQuery).toHaveBeenCalled();
+    expect(component.find('[data-test-subj="unifiedHistogramQueryHits"]').length).toBe(1);
   });
 });

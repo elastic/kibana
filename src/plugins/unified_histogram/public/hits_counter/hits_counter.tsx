@@ -27,7 +27,7 @@ export function HitsCounter({ hits, append }: HitsCounterProps) {
   const formattedHits = (
     <strong
       data-test-subj={
-        status === 'partial' ? 'unifiedHistogramQueryHitsPartial' : 'unifiedHistogramQueryHits'
+        hits.status === 'partial' ? 'unifiedHistogramQueryHitsPartial' : 'unifiedHistogramQueryHits'
       }
     >
       <FormattedNumber value={hits.number ?? 0} />
@@ -48,14 +48,14 @@ export function HitsCounter({ hits, append }: HitsCounterProps) {
     >
       <EuiFlexItem grow={false} aria-live="polite">
         <EuiText>
-          {status === 'partial' && (
+          {hits.status === 'partial' && (
             <FormattedMessage
               id="unifiedHistogram.partialHits"
               defaultMessage="≥{formattedHits} {hits, plural, one {hit} other {hits}}"
               values={{ hits: hits.number, formattedHits }}
             />
           )}
-          {status !== 'partial' && (
+          {hits.status !== 'partial' && (
             <FormattedMessage
               id="unifiedHistogram.hitsPluralTitle"
               defaultMessage="{formattedHits} {hits, plural, one {hit} other {hits}}"
@@ -64,7 +64,7 @@ export function HitsCounter({ hits, append }: HitsCounterProps) {
           )}
         </EuiText>
       </EuiFlexItem>
-      {status === 'partial' && (
+      {hits.status === 'partial' && (
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner
             size="m"

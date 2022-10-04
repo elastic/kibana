@@ -9,30 +9,19 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { setHeaderActionMenuMounter, setUiActions } from '../../../../kibana_services';
-import { esHits } from '../../../../__mocks__/es_hits';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import type { ChartData } from '../types';
+import type { ChartData, UnifiedHistogramFetchStatus } from '../types';
 import { Chart } from './chart';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 
-setHeaderActionMenuMounter(jest.fn());
-
-async function mountComponent(isTimeBased: boolean = false) {
-  const searchSourceMock = createSearchSourceMock({});
+async function mountComponent({
+  noChart,
+  onEditVisualization = jest.fn(),
+}: { noChart?: boolean; onEditVisualization?: null | (() => void) } = {}) {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
-
-  const totalHits$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
-  }) as DataTotalHits$;
 
   const chartData = {
     xAxisOrderedValues: [
@@ -73,34 +62,29 @@ async function mountComponent(isTimeBased: boolean = false) {
     ],
   } as unknown as ChartData;
 
-  const charts$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    chartData,
-    bucketInterval: {
-      scaled: true,
-      description: 'test',
-      scale: 2,
-    },
-  }) as DataCharts$;
-
   const props = {
     services: unifiedHistogramServicesMock,
-    dataView: {
-      isTimeBased: () => isTimeBased,
-      id: '123',
-      getFieldByName: () => ({ type: 'date', name: 'timefield', visualizable: true }),
-      timeFieldName: 'timefield',
-      toSpec: () => ({ id: '123', timeFieldName: 'timefield' }),
-    } as unknown as DataView,
-    resetSavedSearch: jest.fn(),
-    savedSearch: savedSearchMock,
-    savedSearchDataChart$: charts$,
-    savedSearchDataTotalHits$: totalHits$,
-    savedSearchRefetch$: new Subject(),
-    searchSource: searchSourceMock,
-    state: { columns: [] },
-    isTimeBased,
+    hits: {
+      status: 'complete' as UnifiedHistogramFetchStatus,
+      number: 2,
+    },
+    chart: noChart
+      ? undefined
+      : {
+          status: 'complete' as UnifiedHistogramFetchStatus,
+          hidden: false,
+          timeInterval: 'auto',
+          bucketInterval: {
+            scaled: true,
+            description: 'test',
+            scale: 2,
+          },
+          data: chartData,
+        },
+    onEditVisualization: onEditVisualization || undefined,
     onResetChartHeight: jest.fn(),
+    onHideChartChange: jest.fn(),
+    onIntervalChange: jest.fn(),
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;
@@ -114,23 +98,15 @@ async function mountComponent(isTimeBased: boolean = false) {
 }
 
 describe('Chart', () => {
-  let triggerActions: unknown[] = [];
-  beforeEach(() => {
-    setUiActions({
-      getTriggerCompatibleActions: () => {
-        return triggerActions;
-      },
-    } as unknown as UiActionsStart);
-  });
   test('render without timefield', async () => {
-    const component = await mountComponent();
+    const component = await mountComponent({ noChart: true });
     expect(
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
     ).toBeFalsy();
   });
 
   test('render with timefield without visualize permissions', async () => {
-    const component = await mountComponent(true);
+    const component = await mountComponent({ onEditVisualization: null });
     expect(
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
     ).toBeTruthy();
@@ -140,8 +116,7 @@ describe('Chart', () => {
   });
 
   test('render with timefield with visualize permissions', async () => {
-    triggerActions = [{}];
-    const component = await mountComponent(true);
+    const component = await mountComponent();
     expect(
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
     ).toBeTruthy();
@@ -152,15 +127,7 @@ describe('Chart', () => {
 
   test('triggers ui action on click', async () => {
     const fn = jest.fn();
-    setUiActions({
-      getTrigger: () => ({
-        exec: fn,
-      }),
-      getTriggerCompatibleActions: () => {
-        return [{}];
-      },
-    } as unknown as UiActionsStart);
-    const component = await mountComponent(true);
+    const component = await mountComponent({ onEditVisualization: fn });
     await act(async () => {
       await component
         .find('[data-test-subj="unifiedHistogramEditVisualization"]')
