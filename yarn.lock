@@ -1455,10 +1455,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@49.0.0":
-  version "49.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-49.0.0.tgz#6cda2bdb8c92691c12843ba44014fad5a60d61b0"
-  integrity sha512-LXurKWGyPWXgMUJ6l21tSI4y9N3lJh3yJkDGCjvW9M5P3CXICR1V9ZizMMZlj9p1OXULsccrInsiUBFMU0Ktog==
+"@elastic/charts@50.0.1":
+  version "50.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-50.0.1.tgz#a0ee66668c857be7cfea2e134e0b84930d1564c5"
+  integrity sha512-O1L8rot0dycTQo/0eW7aD2P4K3Bh1LtzMgRBXYZAtIpbzdxveRkl8fOlIkGxeeHE4YNvntUJaJWeyT+ngGg7QA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
@@ -2954,6 +2954,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-request-handler-context-server-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-request-handler-context-server@link:bazel-bin/packages/core/http/core-http-request-handler-context-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-router-server-internal@link:bazel-bin/packages/core/http/core-http-router-server-internal":
   version "0.0.0"
   uid ""
@@ -3110,6 +3118,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-plugins-base-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-base-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal":
   version "0.0.0"
   uid ""
@@ -3139,6 +3151,18 @@
   uid ""
 
 "@kbn/core-rendering-browser-mocks@link:bazel-bin/packages/core/rendering/core-rendering-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-rendering-server-internal@link:bazel-bin/packages/core/rendering/core-rendering-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-rendering-server-mocks@link:bazel-bin/packages/core/rendering/core-rendering-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-root-browser-internal@link:bazel-bin/packages/core/root/core-root-browser-internal":
   version "0.0.0"
   uid ""
 
@@ -3551,6 +3575,10 @@
   uid ""
 
 "@kbn/securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-exception-list-components@link:bazel-bin/packages/kbn-securitysolution-exception-list-components":
   version "0.0.0"
   uid ""
 
@@ -4284,6 +4312,11 @@
   resolved "https://registry.yarnpkg.com/@octokit/openapi-types/-/openapi-types-12.10.1.tgz#57b5cc6c7b4e55d8642c93d06401fb1af4839899"
   integrity sha512-P+SukKanjFY0ZhsK6wSVnQmxTP2eVPPE8OPSNuxaMYtgVzwJZgfGdwlYjf4RlRU4vLEw4ts2fsE2icG4nZ5ddQ==
 
+"@octokit/openapi-types@^13.4.0":
+  version "13.4.0"
+  resolved "https://registry.yarnpkg.com/@octokit/openapi-types/-/openapi-types-13.4.0.tgz#06fe8fda93bf21bdd397fe7ef8805249efda6c06"
+  integrity sha512-2mVzW0X1+HDO3jF80/+QFZNzJiTefELKbhMu6yaBYbp/1gSMkVDm4rT472gJljTokWUlXaaE63m7WrWENhMDLw==
+
 "@octokit/plugin-paginate-rest@^1.1.1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-1.1.2.tgz#004170acf8c2be535aba26727867d692f7b488fc"
@@ -4291,12 +4324,12 @@
   dependencies:
     "@octokit/types" "^2.0.1"
 
-"@octokit/plugin-paginate-rest@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-3.0.0.tgz#df779de686aeb21b5e776e4318defc33b0418566"
-  integrity sha512-fvw0Q5IXnn60D32sKeLIxgXCEZ7BTSAjJd8cFAE6QU5qUp0xo7LjFUjjX1J5D7HgN355CN4EXE4+Q1/96JaNUA==
+"@octokit/plugin-paginate-rest@^4.0.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-4.1.0.tgz#670ac9ac369448c69a2371bfcd7e2b37d95534f2"
+  integrity sha512-2O5K5fpajYG5g62wjzHR7/cWYaCA88CextAW3vFP+yoIHD0KEdlVMHfM5/i5LyV+JMmqiYW7w5qfg46FR+McNw==
   dependencies:
-    "@octokit/types" "^6.39.0"
+    "@octokit/types" "^7.1.1"
 
 "@octokit/plugin-request-log@^1.0.0", "@octokit/plugin-request-log@^1.0.4":
   version "1.0.4"
@@ -4411,17 +4444,17 @@
     once "^1.4.0"
     universal-user-agent "^4.0.0"
 
-"@octokit/rest@^19.0.3":
-  version "19.0.3"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-19.0.3.tgz#b9a4e8dc8d53e030d611c053153ee6045f080f02"
-  integrity sha512-5arkTsnnRT7/sbI4fqgSJ35KiFaN7zQm0uQiQtivNQLI8RQx8EHwJCajcTUwmaCMNDg7tdCvqAnc7uvHHPxrtQ==
+"@octokit/rest@^19.0.4":
+  version "19.0.4"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-19.0.4.tgz#fd8bed1cefffa486e9ae46a9dc608ce81bcfcbdd"
+  integrity sha512-LwG668+6lE8zlSYOfwPj4FxWdv/qFXYBpv79TWIQEpBLKA9D/IMcWsF/U9RGpA3YqMVDiTxpgVpEW3zTFfPFTA==
   dependencies:
     "@octokit/core" "^4.0.0"
-    "@octokit/plugin-paginate-rest" "^3.0.0"
+    "@octokit/plugin-paginate-rest" "^4.0.0"
     "@octokit/plugin-request-log" "^1.0.4"
     "@octokit/plugin-rest-endpoint-methods" "^6.0.0"
 
-"@octokit/types@6.40.0", "@octokit/types@^6.0.0", "@octokit/types@^6.0.3", "@octokit/types@^6.16.1", "@octokit/types@^6.39.0":
+"@octokit/types@6.40.0", "@octokit/types@^6.0.0", "@octokit/types@^6.0.3", "@octokit/types@^6.16.1":
   version "6.40.0"
   resolved "https://registry.yarnpkg.com/@octokit/types/-/types-6.40.0.tgz#f2e665196d419e19bb4265603cf904a820505d0e"
   integrity sha512-MFZOU5r8SwgJWDMhrLUSvyJPtVsqA6VnbVI3TNbsmw+Jnvrktzvq2fYES/6RiJA/5Ykdwq4mJmtlYUfW7CGjmw==
@@ -4441,6 +4474,13 @@
   integrity sha512-UZ1pErDue6bZNjYOotCNveTXArOMZQFG6hKJfOnGnulVCMcVVi7YIIuuR4WfBhjo7zgpmzn/BkPDnUXtNx+PcQ==
   dependencies:
     "@types/node" ">= 8"
+
+"@octokit/types@^7.1.1":
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/@octokit/types/-/types-7.1.1.tgz#a30fd6ca3279d59d532fa75583d65d93b7588e6d"
+  integrity sha512-Dx6cNTORyVaKY0Yeb9MbHksk79L8GXsihbG6PtWqTpkyA2TY1qBWE26EQXVG3dHwY9Femdd/WEeRUEiD0+H3TQ==
+  dependencies:
+    "@octokit/openapi-types" "^13.4.0"
 
 "@openpgp/web-stream-tools@^0.0.10":
   version "0.0.10"
@@ -7059,6 +7099,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-http-request-handler-context-server-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-request-handler-context-server@link:bazel-bin/packages/core/http/core-http-request-handler-context-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-http-router-server-internal@link:bazel-bin/packages/core/http/core-http-router-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7215,6 +7263,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-plugins-base-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-base-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7248,6 +7300,18 @@
   uid ""
 
 "@types/kbn__core-rendering-browser-mocks@link:bazel-bin/packages/core/rendering/core-rendering-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-rendering-server-internal@link:bazel-bin/packages/core/rendering/core-rendering-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-rendering-server-mocks@link:bazel-bin/packages/core/rendering/core-rendering-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-root-browser-internal@link:bazel-bin/packages/core/root/core-root-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7644,6 +7708,10 @@
   uid ""
 
 "@types/kbn__securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__securitysolution-exception-list-components@link:bazel-bin/packages/kbn-securitysolution-exception-list-components/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -8138,10 +8206,10 @@
     "@types/node" "*"
     form-data "^2.3.3"
 
-"@types/node-forge@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.0.4.tgz#82df44938848e111463080286876e4cbe2b297a0"
-  integrity sha512-UpX8LTRrarEZPQvQqF5/6KQAqZolOVckH7txWdlsWIJrhBFFtwEUTcqeDouhrJl6t0F7Wg5cyUOAqqF8a6hheg==
+"@types/node-forge@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.3.0.tgz#c655e951e0fb5c4b53c9f4746c2128d4f93002fd"
+  integrity sha512-yUsIEHG3d81E2c+akGjZAMdVcjbfqMzpMjvpebnTO7pEGfqxCtBzpRV52kR1RETtwJ9fHkLdEjtaM+uMKWpwFA==
   dependencies:
     "@types/node" "*"
 
@@ -10478,18 +10546,18 @@ babel-runtime@6.x, babel-runtime@^6.26.0:
     core-js "^2.4.0"
     regenerator-runtime "^0.11.0"
 
-backport@^8.9.2:
-  version "8.9.2"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-8.9.2.tgz#cf0ec69428f9e86c20e1898dd77e8f6c12bf5afa"
-  integrity sha512-0ghVAwSssE0mamADGnsOybWn7RroKLSf9r4uU1IpAlxxa2zkRecfnGuSfEa5L1tQjh7lJwI/2i01JR6154r+qg==
+backport@^8.9.4:
+  version "8.9.4"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-8.9.4.tgz#2bbe58fd766ebda6c760852d029630a277098a54"
+  integrity sha512-REMiogdMQ+TOLQoEABttcCevbxJ14xlCMkHn7es0ZTeCleHz6T2bl93w/Fe+JIttuyZ0e8oPQW2DVe1feTG1pw==
   dependencies:
-    "@octokit/rest" "^19.0.3"
+    "@octokit/rest" "^19.0.4"
     axios "^0.27.2"
     dedent "^0.7.0"
     del "^6.1.1"
-    dotenv "^16.0.1"
+    dotenv "^16.0.2"
     find-up "^5.0.0"
-    graphql "^16.5.0"
+    graphql "^16.6.0"
     graphql-tag "^2.12.6"
     inquirer "^8.2.3"
     lodash "^4.17.21"
@@ -10499,9 +10567,9 @@ backport@^8.9.2:
     strip-json-comments "^3.1.1"
     terminal-link "^2.1.1"
     utility-types "^3.10.0"
-    winston "^3.8.1"
+    winston "^3.8.2"
     yargs "^17.5.1"
-    yargs-parser "^21.0.1"
+    yargs-parser "^21.1.1"
 
 bail@^1.0.0:
   version "1.0.2"
@@ -12515,10 +12583,10 @@ cypress-recurse@^1.23.0:
   resolved "https://registry.yarnpkg.com/cypress-recurse/-/cypress-recurse-1.23.0.tgz#f87334747516de6737bc4708754e8f429057bc6d"
   integrity sha512-CAsdvynhuR3SUEXVJRO2jBEnZRJ6nJp7nMXHwzV4UQq9Lap3Bj72AwcJK0cl51fJXcTaGDXYTQQ9zvGe3TyaQA==
 
-cypress@^10.7.0:
-  version "10.7.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-10.7.0.tgz#2d37f8b9751c6de33ee48639cb7e67a2ce593231"
-  integrity sha512-gTFvjrUoBnqPPOu9Vl5SBHuFlzx/Wxg/ZXIz2H4lzoOLFelKeF7mbwYUOzgzgF0oieU2WhJAestQdkgwJMMTvQ==
+cypress@^10.9.0:
+  version "10.9.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-10.9.0.tgz#273a61a6304766f9d6423e5ac8d4a9a11ed8b485"
+  integrity sha512-MjIWrRpc+bQM9U4kSSdATZWZ2hUqHGFEQTF7dfeZRa4MnalMtc88FIE49USWP2ZVtfy5WPBcgfBX+YorFqGElA==
   dependencies:
     "@cypress/request" "^2.88.10"
     "@cypress/xvfb" "^1.2.4"
@@ -12539,7 +12607,7 @@ cypress@^10.7.0:
     dayjs "^1.10.4"
     debug "^4.3.2"
     enquirer "^2.3.6"
-    eventemitter2 "^6.4.3"
+    eventemitter2 "6.4.7"
     execa "4.1.0"
     executable "^4.1.1"
     extract-zip "2.0.1"
@@ -13642,10 +13710,10 @@ dotenv-expand@^5.1.0:
   resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-5.1.0.tgz#3fbaf020bfd794884072ea26b1e9791d45a629f0"
   integrity sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==
 
-dotenv@^16.0.1:
-  version "16.0.1"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.1.tgz#8f8f9d94876c35dac989876a5d3a82a267fdce1d"
-  integrity sha512-1K6hR6wtk2FviQ4kEiSjFiH5rpzEVi8WW0x96aztHVMhEspNpc4DVOUTEHtEva5VThQ8IaBX1Pe4gSzpVVUsKQ==
+dotenv@^16.0.2:
+  version "16.0.2"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.2.tgz#0b0f8652c016a3858ef795024508cddc4bffc5bf"
+  integrity sha512-JvpYKUmzQhYoIFgK2MOnF3bciIZoItIIoryihy0rIA+H4Jy0FmgyKYAHCTN98P5ybGSJcIFbh6QKeJdtZd1qhA==
 
 dotenv@^8.0.0:
   version "8.2.0"
@@ -14635,10 +14703,10 @@ eventemitter-asyncresource@^1.0.0:
   resolved "https://registry.yarnpkg.com/eventemitter-asyncresource/-/eventemitter-asyncresource-1.0.0.tgz#734ff2e44bf448e627f7748f905d6bdd57bdb65b"
   integrity sha512-39F7TBIV0G7gTelxwbEqnwhp90eqCPON1k0NwNfwhgKn4Co4ybUbj2pECcXT0B3ztRKZ7Pw1JujUUgmQJHcVAQ==
 
-eventemitter2@^6.4.3:
-  version "6.4.3"
-  resolved "https://registry.yarnpkg.com/eventemitter2/-/eventemitter2-6.4.3.tgz#35c563619b13f3681e7eb05cbdaf50f56ba58820"
-  integrity sha512-t0A2msp6BzOf+QAcI6z9XMktLj52OjGQg+8SJH6v5+3uxNpWYRR3wQmfA+6xtMU9kOC59qk9licus5dYcrYkMQ==
+eventemitter2@6.4.7:
+  version "6.4.7"
+  resolved "https://registry.yarnpkg.com/eventemitter2/-/eventemitter2-6.4.7.tgz#a7f6c4d7abf28a14c1ef3442f21cb306a054271d"
+  integrity sha512-tYUSVOGeQPKt/eC1ABfhHy5Xd96N3oIijJvN3O9+TsC28T5V9yX9oEfEK5faP0EFSNVOG97qtAS68GBrQB2hDg==
 
 eventemitter3@^4.0.0:
   version "4.0.7"
@@ -16136,10 +16204,10 @@ graphql-tag@^2.12.6:
   dependencies:
     tslib "^2.1.0"
 
-graphql@^16.5.0:
-  version "16.5.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.5.0.tgz#41b5c1182eaac7f3d47164fb247f61e4dfb69c85"
-  integrity sha512-qbHgh8Ix+j/qY+a/ZcJnFQ+j8ezakqPiHwPiZhV/3PgGlgf96QMBB5/f2rkiC9sgLoy/xvT6TSiaf2nTHJh5iA==
+graphql@^16.6.0:
+  version "16.6.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.6.0.tgz#c2dcffa4649db149f6282af726c8c83f1c7c5fdb"
+  integrity sha512-KPIBPDlW7NxrbT/eh4qPXz5FiFdL5UbaA0XUNz2Rp3Z3hqBSkbj0GVjwFDztsWVauZUWsbKHgMg++sk8UX0bkw==
 
 growly@^1.3.0:
   version "1.3.0"
@@ -23318,10 +23386,10 @@ react-grid-layout@^1.3.4:
     react-draggable "^4.0.0"
     react-resizable "^3.0.4"
 
-react-hook-form@^7.35.0:
-  version "7.35.0"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.35.0.tgz#b133de48fc84b1e62f9277ba79dfbacd9bb13dd3"
-  integrity sha512-9CYdOed+Itbiu5VMVxW0PK9mBR3f0gDGJcZEyUSm0eJbDymQ913TRs2gHcQZZmfTC+rtxyDFRuelMxx/+xwMcw==
+react-hook-form@^7.36.1:
+  version "7.36.1"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.36.1.tgz#82a311fe8cbe75e689fd4529f083b7c983da6520"
+  integrity sha512-EbYYkCG2p8ywe7ikOH2l02lAFMrrrslZi1I8fqd8ifDGNAkhomHZQzQsP6ksvzrWBKntRe8b5L5L7Zsd+Gm02Q==
 
 react-input-autosize@^3.0.0:
   version "3.0.0"
@@ -27906,10 +27974,10 @@ vega-label@~1.2.0:
     vega-scenegraph "^4.9.2"
     vega-util "^1.15.2"
 
-vega-lite@^5.3.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-5.3.0.tgz#b9b9ecd80e869e823e6848c67d0a8ad94954bdee"
-  integrity sha512-6giodZ/bJnWyLq6Gj4OyiDt7EndoGyC9f5xDQjo82yPpUiO4MuG9iiPMqR1SPKmG9/qPBf+klWQR0v/7Mgju0Q==
+vega-lite@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-5.5.0.tgz#07345713d538cd63278748ec119c261722be66ff"
+  integrity sha512-MQBJt/iaUegvhRTS/hZVWfMOSF5ai4awlR2qtwTgHd84bErf9v7GtaZ9ArhJqXCb+FizvZ2jatmoYCzovgAhkg==
   dependencies:
     "@types/clone" "~2.1.1"
     array-flat-polyfill "^1.0.1"
@@ -28716,11 +28784,28 @@ winston-transport@^4.5.0:
     readable-stream "^3.6.0"
     triple-beam "^1.3.0"
 
-winston@^3.3.3, winston@^3.8.1:
+winston@^3.3.3:
   version "3.8.1"
   resolved "https://registry.yarnpkg.com/winston/-/winston-3.8.1.tgz#76f15b3478cde170b780234e0c4cf805c5a7fb57"
   integrity sha512-r+6YAiCR4uI3N8eQNOg8k3P3PqwAm20cLKlzVD9E66Ch39+LZC+VH1UKf9JemQj2B3QoUHfKD7Poewn0Pr3Y1w==
   dependencies:
+    "@dabh/diagnostics" "^2.0.2"
+    async "^3.2.3"
+    is-stream "^2.0.0"
+    logform "^2.4.0"
+    one-time "^1.0.0"
+    readable-stream "^3.4.0"
+    safe-stable-stringify "^2.3.1"
+    stack-trace "0.0.x"
+    triple-beam "^1.3.0"
+    winston-transport "^4.5.0"
+
+winston@^3.8.2:
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/winston/-/winston-3.8.2.tgz#56e16b34022eb4cff2638196d9646d7430fdad50"
+  integrity sha512-MsE1gRx1m5jdTTO9Ld/vND4krP2To+lgDoMEHGGa4HIlAUyXJtfc7CxQcGXVyz2IBpw5hbFkj2b/AtUdQwyRew==
+  dependencies:
+    "@colors/colors" "1.5.0"
     "@dabh/diagnostics" "^2.0.2"
     async "^3.2.3"
     is-stream "^2.0.0"
@@ -29000,10 +29085,15 @@ yargs-parser@^18.1.2:
     camelcase "^5.0.0"
     decamelize "^1.2.0"
 
-yargs-parser@^21.0.0, yargs-parser@^21.0.1:
+yargs-parser@^21.0.0:
   version "21.0.1"
   resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-21.0.1.tgz#0267f286c877a4f0f728fceb6f8a3e4cb95c6e35"
   integrity sha512-9BK1jFpLzJROCI5TzwZL/TU4gqjK5xiHV/RfWLOahrjAko/e4DJkRDZQXfvqAsiZzzYhgAzbgz6lg48jcm4GLg==
+
+yargs-parser@^21.1.1:
+  version "21.1.1"
+  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-21.1.1.tgz#9096bceebf990d21bb31fa9516e0ede294a77d35"
+  integrity sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==
 
 yargs-unparser@2.0.0:
   version "2.0.0"
