@@ -30,6 +30,7 @@ interface PartialColumnParams {
   kql?: string;
   lucene?: string;
   shift?: string;
+  reducedTimeRange?: string;
 }
 
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
@@ -68,6 +69,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   count: {
     input: 'field',
     filterable: true,
+    canReduceTimeRange: true,
     buildColumn: ({ field }: { field: IndexPatternField }, columnsParams: PartialColumnParams) => ({
       label: 'avg',
       dataType: 'number',
@@ -77,6 +79,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
       filter: getFilter(undefined, columnsParams),
+      reducedTimeRange: columnsParams.reducedTimeRange,
     }),
     getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
@@ -923,7 +926,7 @@ describe('formula', () => {
           }),
           col1X2: expect.objectContaining({
             operationType: 'count',
-            reducedTimeRange,
+            reducedTimeRange: '1s',
           }),
         })
       );

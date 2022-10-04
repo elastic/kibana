@@ -158,6 +158,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       if (columnParams?.format) {
         format = { format: columnParams.format };
       }
+      const isPreviousFormulaColumn = previousColumn?.operationType === 'formula';
 
       return {
         label: previousFormula || defaultLabel,
@@ -176,10 +177,8 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         references: [],
         // carry over the filter if coming from another formula,
         // otherwise the filter has been already migrated into the formula text
-        filter:
-          previousColumn?.operationType === 'formula'
-            ? getFilter(previousColumn, columnParams)
-            : undefined,
+        filter: isPreviousFormulaColumn ? getFilter(previousColumn, columnParams) : undefined,
+        reducedTimeRange: isPreviousFormulaColumn ? previousColumn.reducedTimeRange : undefined,
         timeScale: previousColumn?.timeScale,
       };
     },
