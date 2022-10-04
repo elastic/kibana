@@ -32,7 +32,7 @@ export const getAutoplayTextField = (wrapper: ReactWrapper) =>
   getAutoplayPanel(wrapper).find('EuiFieldText').find('input[type="text"]');
 
 export const getAutoplaySubmit = (wrapper: ReactWrapper) =>
-  getAutoplayPanel(wrapper).find('EuiButton');
+  getAutoplayPanel(wrapper).find('EuiButton button');
 
 export const getSettingsPanel = (wrapper: ReactWrapper) =>
   wrapper.find('Settings > SettingsComponent');
