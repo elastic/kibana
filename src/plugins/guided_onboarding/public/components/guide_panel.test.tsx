@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { httpServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
 
 import { guidesConfig } from '../constants/guides_config';
@@ -20,6 +20,7 @@ import { GuidePanel } from './guide_panel';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 const applicationMock = applicationServiceMock.createStartContract();
+const notificationsMock = notificationServiceMock.createSetupContract();
 
 const mockActiveSearchGuideState: GuideState = {
   guideId: 'search',
@@ -42,7 +43,9 @@ const mockActiveSearchGuideState: GuideState = {
 };
 
 const getGuidePanel = () => () => {
-  return <GuidePanel application={applicationMock} api={apiService} />;
+  return (
+    <GuidePanel application={applicationMock} api={apiService} notifications={notificationsMock} />
+  );
 };
 
 describe('Guided setup', () => {
@@ -55,6 +58,7 @@ describe('Guided setup', () => {
     httpClient.get.mockResolvedValue({
       state: [],
     });
+    httpClient.delete.mockResolvedValue({});
     apiService.setup(httpClient);
 
     await act(async () => {
@@ -226,6 +230,55 @@ describe('Guided setup', () => {
         component.update();
 
         expect(find('activeStepButtonLabel').text()).toEqual('Continue');
+      });
+    });
+
+    describe('Quit guide modal', () => {
+      beforeEach(async () => {
+        const { component, find, exists } = testBed;
+
+        await act(async () => {
+          // Enable the "search" guide
+          await apiService.updateGuideState(mockActiveSearchGuideState, true);
+        });
+
+        component.update();
+
+        await act(async () => {
+          find('quitGuideButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(exists('quitGuideModal')).toBe(true);
+      });
+
+      test('quit a guide', async () => {
+        const { component, find, exists } = testBed;
+
+        await act(async () => {
+          find('confirmQuitGuideButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(exists('quitGuideModal')).toBe(false);
+        // For now, the guide button is disabled once a user quits a guide
+        // This behavior will change once https://github.com/elastic/kibana/issues/141129 is implemented
+        expect(exists('disabledGuideButton')).toBe(true);
+      });
+
+      test('cancels out of the quit guide confirmation modal', async () => {
+        const { component, find, exists } = testBed;
+
+        await act(async () => {
+          find('cancelQuitGuideButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(exists('quitGuideModal')).toBe(false);
+        expect(exists('guideButton')).toBe(true);
       });
     });
   });

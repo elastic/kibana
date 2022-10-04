@@ -84,6 +84,14 @@ describe('GuidedOnboarding ApiService', () => {
     });
   });
 
+  describe('deleteGuide', () => {
+    it('sends a request to the delete API', async () => {
+      await apiService.deleteGuide(searchGuide);
+      expect(httpClient.delete).toHaveBeenCalledTimes(1);
+      expect(httpClient.delete).toHaveBeenCalledWith(`${API_BASE_PATH}/state/${searchGuide}`);
+    });
+  });
+
   describe('updateGuideState', () => {
     it('sends a request to the put API', async () => {
       const updatedState: GuideState = {

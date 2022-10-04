@@ -284,7 +284,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
           <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
             <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
               <EuiFlexItem>
-                <EuiButtonEmpty onClick={openQuitGuideModal}>
+                <EuiButtonEmpty onClick={openQuitGuideModal} data-test-subj="quitGuideButton">
                   {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
                     defaultMessage: 'Quit setup guide',
                   })}

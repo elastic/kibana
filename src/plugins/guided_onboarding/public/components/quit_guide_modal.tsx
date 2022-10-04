@@ -38,9 +38,9 @@ export const QuitGuideModal = ({
   const deleteGuide = async () => {
     setIsDeleting(true);
     const { error } = await apiService.deleteGuide(currentGuide);
-    setIsDeleting(false);
 
     if (error) {
+      setIsDeleting(false);
       notifications.toasts.addError(error, {
         title: i18n.translate('guidedOnboarding.quitGuideModal.errorToastTitle', {
           defaultMessage: 'There was an error quitting the guide. Please try again.',
@@ -51,7 +51,12 @@ export const QuitGuideModal = ({
   };
 
   return (
-    <EuiModal maxWidth={448} aria-label="quitGuideModal" onClose={closeModal}>
+    <EuiModal
+      maxWidth={448}
+      aria-label="quitGuideModal"
+      onClose={closeModal}
+      data-test-subj="quitGuideModal"
+    >
       <EuiModalBody>
         <EuiSpacer size="m" />
         <EuiTitle size="m">
@@ -71,12 +76,18 @@ export const QuitGuideModal = ({
         </EuiText>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal}>
+        <EuiButtonEmpty onClick={closeModal} data-test-subj="cancelQuitGuideButton">
           {i18n.translate('guidedOnboarding.quitGuideModal.cancelButtonLabel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton color="warning" isLoading={isDeleting} onClick={deleteGuide} fill>
+        <EuiButton
+          color="warning"
+          isLoading={isDeleting}
+          onClick={deleteGuide}
+          fill
+          data-test-subj="confirmQuitGuideButton"
+        >
           {i18n.translate('guidedOnboarding.quitGuideModal.quitButtonLabel', {
             defaultMessage: 'Quit guide',
           })}
