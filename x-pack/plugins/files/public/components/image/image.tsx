@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { HTMLAttributes } from 'react';
 import { type ImgHTMLAttributes, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { CSSProperties } from '@emotion/serialize';
 import { useViewportObserver } from './use_viewport_observer';
-import { MyImage, Blurhash } from './components';
+import { MyImage, MyImageProps, Blurhash } from './components';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -18,6 +17,11 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
    * A [blurhash](https://blurha.sh/) to be rendered while the image is downloading.
    */
   blurhash?: string;
+  size?: MyImageProps['size'];
+  /**
+   * Props to pass to the wrapper element
+   */
+  wrapperProps?: HTMLAttributes<HTMLDivElement>;
   /**
    * Emits when the image first becomes visible
    */
@@ -35,13 +39,13 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
  * ```
  */
 export const Image = React.forwardRef<HTMLImageElement, Props>(
-  ({ src, alt, onFirstVisible, onLoad, onError, blurhash, ...rest }, ref) => {
+  ({ src, alt, onFirstVisible, onLoad, onError, blurhash, wrapperProps, ...rest }, ref) => {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [blurDelayExpired, setBlurDelayExpired] = useState(false);
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
 
     useEffect(() => {
-      const id = window.setTimeout(() => setBlurDelayExpired(true), 50);
+      const id = window.setTimeout(() => setBlurDelayExpired(true), 400);
       return () => window.clearTimeout(id);
     }, []);
 
@@ -51,6 +55,7 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
           display: inline-block;
           position: relative;
         `}
+        {...wrapperProps}
       >
         {blurDelayExpired && blurhash && <Blurhash visible={!isLoaded} hash={blurhash} />}
         <MyImage

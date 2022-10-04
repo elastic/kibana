@@ -7,7 +7,6 @@
 import moment from 'moment';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -22,6 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { FileJSON } from '@kbn/files-plugin/common';
+import { css } from '@emotion/react';
 import { FileClients } from '../types';
 import { Image } from '../imports';
 
@@ -40,8 +40,24 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <div
+          css={css`
+            display: grid;
+            place-items: center;
+          `}
+        >
+          <Image
+            size="l"
+            blurhash={file.blurhash}
+            alt={file.alt ?? 'unknown'}
+            src={files.example.getDownloadHref(file)}
+          />
+        </div>
+        <EuiSpacer size="xl" />
         <EuiDescriptionList
           type="column"
+          align="center"
+          textStyle="reverse"
           listItems={[
             {
               title: 'Name',
@@ -74,15 +90,6 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
               ),
             },
           ]}
-        />
-        <EuiSpacer size="xl" />
-        <Image
-          css={css`
-            height: 400px;
-          `}
-          blurhash={file.blurhash}
-          alt={file.alt ?? 'unknown'}
-          src={files.example.getDownloadHref(file)}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
