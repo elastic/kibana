@@ -17,7 +17,7 @@ export interface Props {
   openTOCDetails: string[];
   createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) => void;
   setLayerParent: (layerId: string, parent: string | undefined) => void;
-  updateLayerOrder: (newOrder: number[]) => void;
+  moveLayerToLeftOfTarget: (moveLayerId: string, targetLayerId: string) => void;
 }
 
 export class LayerTOC extends Component<Props> {
@@ -51,27 +51,23 @@ export class LayerTOC extends Component<Props> {
       return;
     }
 
-    const prevIndex = reverseIndex(source.index);
-    const newIndex = reverseIndex(destination.index);
+    const sourceIndex = reverseIndex(source.index);
+    const destinationIndex = reverseIndex(destination.index);
 
-    const sourceLayerId = this.props.layerList[prevIndex].getId();
+    const sourceLayerId = this.props.layerList[sourceIndex].getId();
     const newRightSiblingIndex =
-      prevIndex > newIndex
+      sourceIndex > destinationIndex
         ? // When layer is moved to the right, new right sibling is layer to the right of destination
-          newIndex - 1
+          destinationIndex - 1
         : // When layer is moved to the left, new right sibling is the destination
-          newIndex;
+          destinationIndex;
     const newRightSiblingParentLayerId =
       newRightSiblingIndex < 0 ? undefined : this.props.layerList[newRightSiblingIndex].getParent();
     this.props.setLayerParent(sourceLayerId, newRightSiblingParentLayerId);
-
-    const newOrder = [];
-    for (let i = 0; i < this.props.layerList.length; i++) {
-      newOrder.push(i);
-    }
-    newOrder.splice(prevIndex, 1);
-    newOrder.splice(newIndex, 0, prevIndex);
-    this.props.updateLayerOrder(newOrder);
+    this.props.moveLayerToLeftOfTarget(
+      sourceLayerId,
+      this.props.layerList[newRightSiblingIndex].getId()
+    );
   };
 
   _getDepth(layer: ILayer, depth: number): { depth: number; showInTOC: boolean } {

@@ -9,7 +9,7 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { LayerTOC } from './layer_toc';
-import { createLayerGroup, setLayerParent, updateLayerOrder } from '../../../../actions';
+import { createLayerGroup, moveLayerToLeftOfTarget, setLayerParent } from '../../../../actions';
 import { getLayerList } from '../../../../selectors/map_selectors';
 import { getIsReadOnly, getOpenTOCDetails } from '../../../../selectors/ui_selectors';
 import { MapStoreState } from '../../../../reducers/store';
@@ -26,9 +26,10 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   return {
     createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) =>
       dispatch(createLayerGroup(draggedLayerId, combineWithLayerId)),
+    moveLayerToLeftOfTarget: (moveLayerId: string, targetLayerId: string) =>
+      dispatch(moveLayerToLeftOfTarget(moveLayerId, targetLayerId)),
     setLayerParent: (layerId: string, parent: string | undefined) =>
       dispatch(setLayerParent(layerId, parent)),
-    updateLayerOrder: (newOrder: number[]) => dispatch(updateLayerOrder(newOrder)),
   };
 }
 
