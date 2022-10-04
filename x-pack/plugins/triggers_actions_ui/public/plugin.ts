@@ -78,6 +78,8 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary';
 import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
+import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
+import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -123,6 +125,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
   getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => ReactElement<RuleAlertsSummaryProps>;
+  getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
 }
 
 interface PluginsSetup {
@@ -351,6 +354,9 @@ export class Plugin
       },
       getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => {
         return getRuleAlertsSummaryLazy(props);
+      },
+      getRuleSnoozeModal: (props: RuleSnoozeModalProps) => {
+        return getRuleSnoozeModalLazy(props);
       },
     };
   }
