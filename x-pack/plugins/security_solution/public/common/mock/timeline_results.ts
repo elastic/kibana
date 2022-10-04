@@ -2162,6 +2162,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
   to: '2018-11-05T19:03:25.937Z',
   notes: null,
   ruleNote: '# this is some markdown documentation',
+  ruleAuthor: ['elastic'],
 };
 
 export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
