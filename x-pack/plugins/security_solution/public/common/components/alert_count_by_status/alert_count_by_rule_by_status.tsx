@@ -110,7 +110,7 @@ export const AlertCountByRuleByStatus = React.memo(
             <HeaderSection
               id={queryId}
               title={i18n.ALERTS_BY_RULE}
-              titleSize="s"
+              titleSize="m"
               toggleStatus={toggleStatus}
               toggleQuery={setToggleStatus}
               subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}

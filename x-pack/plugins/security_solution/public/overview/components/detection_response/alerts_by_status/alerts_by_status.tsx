@@ -31,7 +31,8 @@ import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
   ALERTS_TEXT,
-  ALERTS_BY_STATUS_TEXT,
+  ALERTS_BY_SEVERITY_TEXT,
+  INVESTIGATE_IN_TIMELINE,
   STATUS_ACKNOWLEDGED,
   STATUS_CLOSED,
   STATUS_CRITICAL_LABEL,
@@ -92,7 +93,7 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
 
   const detailsButtonOptions = useMemo(
     () => ({
-      name: VIEW_ALERTS,
+      name: entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
       href: entityFilter ? undefined : href,
       onClick: entityFilter
         ? () => openEntityInTimeline([entityFilter, eventKindSignalFilter])
@@ -146,8 +147,8 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
           )}
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-            title={entityFilter ? ALERTS_BY_STATUS_TEXT : ALERTS_TEXT}
-            titleSize="s"
+            title={entityFilter ? ALERTS_BY_SEVERITY_TEXT : ALERTS_TEXT}
+            titleSize="m"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
             toggleStatus={toggleStatus}
