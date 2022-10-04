@@ -102,7 +102,11 @@ export function createColumnarViewModel(
   const colors = new Float32Array(numNodes * 4);
 
   if (assignColors) {
-    for (let i = 0; i < numNodes; i++) {
+    // Due to truncation of the frame types for stacktraces longer than 255,
+    // we need to use length of FrameType instead of the number of nodes.
+    // Ordinarily, these two values should be the same.
+    const numFrameTypes = flamegraph.FrameType.length;
+    for (let i = 0; i < numFrameTypes; i++) {
       const rgba = rgbToRGBA(frameTypeToRGB(flamegraph.FrameType[i], xs[i]));
       colors.set(rgba, 4 * i);
     }
