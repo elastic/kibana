@@ -194,7 +194,9 @@ export async function getTopDependencyOperations({
             y: calculateThroughputWithRange({
               start: startWithOffset,
               end: endWithOffset,
-              value: dateBucket.doc_count,
+              value: searchServiceDestinationMetrics
+                ? dateBucket.count.value || 0
+                : dateBucket.doc_count,
             }),
           });
           timeseries.latency.push({
@@ -230,7 +232,9 @@ export async function getTopDependencyOperations({
           throughput: calculateThroughputWithRange({
             start: startWithOffset,
             end: endWithOffset,
-            value: bucket.doc_count,
+            value: searchServiceDestinationMetrics
+              ? bucket.count.value || 0
+              : bucket.doc_count,
           }),
           failureRate:
             bucket.failure.doc_count > 0 || bucket.successful.doc_count > 0
