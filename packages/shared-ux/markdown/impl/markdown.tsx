@@ -12,36 +12,41 @@ import React, { useState } from 'react';
 export type MarkdownProps = Partial<
   Omit<EuiMarkdownEditorProps, 'editorId' | 'uiPlugins' | 'markdownFormatProps'>
 > & {
-  initialContent: string;
-  /** needed for instances where markdown is used as a presentation of error messages */
-  readonly: boolean;
+  /**
+   * @param readOnly is needed to differentiate where markdown is used as a presentation of error messages
+   * This was previous the MarkdownSimple component
+   */
+  readOnly: boolean;
   /** @link src/plugins/vis_type_markdown/public/markdown_vis_controller.tsx */
   openLinksInNewTab?: boolean;
   markdownContent?: string;
   ariaLabelContent?: string;
+  /** Eui allows the height of the markdown component to be set */
   height?: number | 'full';
   placeholder?: string | undefined;
 };
 
 export const Markdown = ({
-  initialContent,
   ariaLabelContent,
-  readonly,
-  placeholder,
+  readOnly,
   openLinksInNewTab,
-  height = 'full',
   markdownContent,
+  placeholder = '',
+  height = 'full',
 }: MarkdownProps) => {
-  const [value, setValue] = useState(initialContent);
+  const [value, setValue] = useState(placeholder);
 
-  if (readonly && markdownContent) {
+  if (readOnly && markdownContent) {
     return (
-     <EuiMarkdownFormat>{markdownContent}</EuiMarkdownFormat>
-    )
+      <EuiMarkdownFormat aria-label={ariaLabelContent ?? 'markdown component'}>
+        {markdownContent}
+      </EuiMarkdownFormat>
+    );
   }
 
   return (
     <EuiMarkdownEditor
+      readOnly={readOnly}
       aria-label={ariaLabelContent ?? 'markdown component'}
       placeholder={placeholder}
       value={value}

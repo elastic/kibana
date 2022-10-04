@@ -13,7 +13,7 @@ import { render } from 'enzyme';
 describe('shared ux markdown component', () => {
   it('renders', () => {
     const component = render(
-      <Markdown initialContent={''} ariaLabelContent={''} readonly={false} />
+      <Markdown placeholder={''} ariaLabelContent={''} readOnly={false} />
     );
     expect(component).toMatchSnapshot();
   });

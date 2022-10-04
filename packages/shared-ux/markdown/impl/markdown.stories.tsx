@@ -26,13 +26,8 @@ export default {
 const mock = new MarkdownStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-
 export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
-  return (
-    <Markdown 
-        {...params}
-    />
-  );
+  return <Markdown {...params} />;
 };
 
 MarkdownStoryComponent.argTypes = argTypes;

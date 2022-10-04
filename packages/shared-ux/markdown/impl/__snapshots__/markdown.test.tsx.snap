@@ -207,6 +207,7 @@ exports[`shared ux markdown component renders 1`] = `
         class="euiMarkdownEditorTextArea"
         data-test-subj="euiMarkdownEditorTextArea"
         id="generated-id"
+        placeholder=""
         rows="6"
         style="height:100%;max-height:"
       />

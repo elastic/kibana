@@ -9,41 +9,44 @@ import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-
 
 import type { MarkdownProps } from '@kbn/shared-ux-markdown';
 
-type PropArguments = Pick<MarkdownProps, 'readonly' | 'initialContent' | 'ariaLabelContent'>
+type PropArguments = Pick<MarkdownProps, 'readOnly' | 'placeholder'>;
 export type Params = ArgumentParams<PropArguments, {}>;
 
-type MarkdownServices = {};
+interface MarkdownServices {}
 
 /**
  * Storybook mock for the `Markdown` component
  */
-export class MarkdownStorybookMock extends AbstractStorybookMock<MarkdownProps, MarkdownServices, PropArguments> {
-    propArguments = {   
-        readonly: {
-            control: 'boolean',
-            defaultValue: false,
-        },
-        initialContent: {
-            control: {
-                type: 'text',
-            },
-            defaultValue: '',
-        },
-    }
-    serviceArguments = {};
-    dependecies = [];
 
-    getProps(params?: Params): MarkdownProps {
-        return {
-            readonly: this.getArgumentValue('readonly', params),
-            initialContent: this.getArgumentValue('initialContent', params),
-        }
-    }
+//@ts-ignore
+export class MarkdownStorybookMock extends AbstractStorybookMock<
+  MarkdownProps,
+  MarkdownServices,
+  PropArguments
+> {
+  propArguments = {
+    readOnly: {
+      control: 'boolean',
+      defaultValue: false,
+    },
+    placeholder: {
+      control: {
+        type: 'text',
+      },
+      defaultValue: '',
+    },
+  };
+  serviceArguments = {};
+  dependecies = [];
 
-    getServices(params: Params): MarkdownServices {
-        return {
+  getProps(params?: Params): MarkdownProps {
+    return {
+      readOnly: this.getArgumentValue('readOnly', params),
+      placeholder: this.getArgumentValue('placeholder', params),
+    };
+  }
 
-        };
-    }
-
+  getServices(params: Params): MarkdownServices {
+    return {};
+  }
 }
