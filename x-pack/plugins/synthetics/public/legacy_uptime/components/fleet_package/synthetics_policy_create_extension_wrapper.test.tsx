@@ -702,11 +702,15 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
   });
 
   it('handles browser validation', async () => {
-    const { getByText, getByLabelText, queryByText, getByRole } = render(<WrappedComponent />);
+    const { getByText, getByLabelText, queryByText, getByRole, getByTestId } = render(
+      <WrappedComponent />
+    );
 
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
 
+    const zip = getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
     const zipUrl = getByRole('textbox', { name: 'Zip URL' }) as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
 

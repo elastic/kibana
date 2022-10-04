@@ -7,7 +7,7 @@
 import 'jest-canvas-mock';
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import {
   TCPContextProvider,
@@ -247,6 +247,13 @@ describe('<CustomFields />', () => {
     fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
 
     // expect browser fields to be in the DOM
+    expect(
+      screen.getByText('Runs Synthetic test scripts that are defined inline.')
+    ).toBeInTheDocument();
+
+    const zip = screen.getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
+
     getAllByLabelText('Zip URL').forEach((node) => {
       expect(node).toBeInTheDocument();
     });

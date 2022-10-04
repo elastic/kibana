@@ -45,6 +45,7 @@ export enum API_URLS {
   TRIGGER_MONITOR = '/internal/uptime/service/monitors/trigger',
   SERVICE_ALLOWED = '/internal/uptime/service/allowed',
   SYNTHETICS_APIKEY = '/internal/uptime/service/api_key',
+  SYNTHETICS_HAS_ZIP_URL_MONITORS = '/internal/uptime/fleet/has_zip_url_monitors',
 
   // Project monitor public endpoint
   SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/service/project/monitors',
