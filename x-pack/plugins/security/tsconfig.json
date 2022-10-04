@@ -8,6 +8,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "references": [
+    { "path": "../cloud/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },

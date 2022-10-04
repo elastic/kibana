@@ -10,7 +10,10 @@ pageLoadAssetSize:
   cases: 144442
   charts: 55000
   cloud: 21076
+  cloudChat: 19894
   cloudExperiments: 59358
+  cloudFullStory: 18493
+  cloudLinks: 17629
   cloudSecurityPosture: 19109
   console: 46091
   controls: 40000

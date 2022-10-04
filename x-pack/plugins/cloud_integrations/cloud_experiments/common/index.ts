@@ -9,6 +9,5 @@ export type {
   CloudExperimentsMetric,
   CloudExperimentsMetricNames,
   CloudExperimentsPluginStart,
-  CloudExperimentsPluginSetup,
   CloudExperimentsFeatureFlagNames,
 } from './types';

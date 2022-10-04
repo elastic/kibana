@@ -20,6 +20,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import { ConfigSchema } from '../config';
@@ -42,6 +43,7 @@ export interface HomePluginStartDependencies {
 }
 
 export interface HomePluginSetupDependencies {
+  cloud?: CloudSetup;
   share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
@@ -66,7 +68,7 @@ export class HomePublicPlugin
 
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
-    { share, urlForwarding, usageCollection }: HomePluginSetupDependencies
+    { cloud, share, urlForwarding, usageCollection }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
     core.application.register({
       id: PLUGIN_ID,
@@ -127,10 +129,25 @@ export class HomePublicPlugin
       order: 500,
     });
 
+    const environment = { ...this.environmentService.setup() };
+    const tutorials = { ...this.tutorialService.setup() };
+    if (cloud) {
+      environment.update({ cloud: cloud.isCloudEnabled });
+      if (cloud.isCloudEnabled) {
+        tutorials.setVariable('cloud', {
+          id: cloud.cloudId,
+          baseUrl: cloud.baseUrl,
+          // Cloud's API already provides the full URLs
+          profileUrl: cloud.profileUrl?.replace(cloud.baseUrl ?? '', ''),
+          deploymentUrl: cloud.deploymentUrl?.replace(cloud.baseUrl ?? '', ''),
+        });
+      }
+    }
+
     return {
       featureCatalogue,
-      environment: { ...this.environmentService.setup() },
-      tutorials: { ...this.tutorialService.setup() },
+      environment,
+      tutorials,
       addData: { ...this.addDataService.setup() },
       welcomeScreen: { ...this.welcomeService.setup() },
     };

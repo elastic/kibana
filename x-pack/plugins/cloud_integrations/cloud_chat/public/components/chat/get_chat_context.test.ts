@@ -23,7 +23,7 @@ const REFERRER = 'referrer';
 describe('getChatContext', () => {
   const url = new URL(HREF);
 
-  test('retreive the context', () => {
+  test('retrieve the context', () => {
     Object.defineProperty(window, 'location', { value: url });
     Object.defineProperty(window, 'navigator', {
       value: {

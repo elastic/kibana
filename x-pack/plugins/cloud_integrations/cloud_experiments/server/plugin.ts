@@ -14,36 +14,33 @@ import type {
 } from '@kbn/core/server';
 import { get, has } from 'lodash';
 import LaunchDarkly, { type LDClient, type LDUser } from 'launchdarkly-node-server-sdk';
+import { createSHA256Hash } from '@kbn/crypto';
 import type { LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { registerUsageCollector } from './usage';
 import type { CloudExperimentsConfigType } from './config';
 import type {
   CloudExperimentsFeatureFlagNames,
   CloudExperimentsMetric,
-  CloudExperimentsPluginSetup,
   CloudExperimentsPluginStart,
 } from '../common';
 import { FEATURE_FLAG_NAMES, METRIC_NAMES } from '../common/constants';
 
 interface CloudExperimentsPluginSetupDeps {
+  cloud: CloudSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
 export class CloudExperimentsPlugin
-  implements
-    Plugin<
-      CloudExperimentsPluginSetup,
-      CloudExperimentsPluginStart,
-      CloudExperimentsPluginSetupDeps
-    >
+  implements Plugin<void, CloudExperimentsPluginStart, CloudExperimentsPluginSetupDeps>
 {
   private readonly logger: Logger;
   private readonly launchDarklyClient?: LDClient;
   private readonly flagOverrides?: Record<string, unknown>;
   private launchDarklyUser: LDUser | undefined;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     const config = initializerContext.config.get<CloudExperimentsConfigType>();
     if (config.flag_overrides) {
@@ -73,10 +70,7 @@ export class CloudExperimentsPlugin
     }
   }
 
-  public setup(
-    core: CoreSetup,
-    deps: CloudExperimentsPluginSetupDeps
-  ): CloudExperimentsPluginSetup {
+  public setup(core: CoreSetup, deps: CloudExperimentsPluginSetupDeps) {
     if (deps.usageCollection) {
       registerUsageCollector(deps.usageCollection, () => ({
         launchDarklyClient: this.launchDarklyClient,
@@ -84,12 +78,17 @@ export class CloudExperimentsPlugin
       }));
     }
 
-    return {
-      identifyUser: (userId, userMetadata) => {
-        this.launchDarklyUser = { key: userId, custom: userMetadata };
-        this.launchDarklyClient?.identify(this.launchDarklyUser!);
-      },
-    };
+    if (deps.cloud.isCloudEnabled && deps.cloud.cloudId) {
+      this.launchDarklyUser = {
+        // We use the Cloud ID as the userId in the Cloud Experiments
+        key: createSHA256Hash(deps.cloud.cloudId),
+        custom: {
+          // This list of deployment metadata will likely grow in future versions
+          kibanaVersion: this.initializerContext.env.packageInfo.version,
+        },
+      };
+      this.launchDarklyClient?.identify(this.launchDarklyUser);
+    }
   }
 
   public start(core: CoreStart) {

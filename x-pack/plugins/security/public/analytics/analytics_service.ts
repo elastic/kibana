@@ -9,12 +9,20 @@ import type { Subscription } from 'rxjs';
 import { filter } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 
-import type { HttpStart } from '@kbn/core/public';
+import type {
+  AnalyticsServiceSetup as CoreAnalyticsServiceSetup,
+  HttpStart,
+} from '@kbn/core/public';
 
+import type { AuthenticationServiceSetup } from '..';
 import type { SecurityLicense } from '../../common';
+import { registerUserContext } from './register_user_context';
 
 interface AnalyticsServiceSetupParams {
   securityLicense: SecurityLicense;
+  analytics: CoreAnalyticsServiceSetup;
+  authc: AuthenticationServiceSetup;
+  cloudId?: string;
 }
 
 interface AnalyticsServiceStartParams {
@@ -35,8 +43,9 @@ export class AnalyticsService {
   private securityLicense!: SecurityLicense;
   private securityFeaturesSubscription?: Subscription;
 
-  public setup({ securityLicense }: AnalyticsServiceSetupParams) {
+  public setup({ analytics, authc, cloudId, securityLicense }: AnalyticsServiceSetupParams) {
     this.securityLicense = securityLicense;
+    registerUserContext(analytics, authc, cloudId);
   }
 
   public start({ http }: AnalyticsServiceStartParams) {

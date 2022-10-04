@@ -6,33 +6,32 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UserMenuLink } from '@kbn/security-plugin/public';
-import { CloudConfigType } from '.';
-import { getFullCloudUrl } from './utils';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { UserMenuLink } from '@kbn/security-plugin/public';
 
-export const createUserMenuLinks = (config: CloudConfigType): UserMenuLink[] => {
-  const { profile_url: profileUrl, organization_url: organizationUrl, base_url: baseUrl } = config;
+export const createUserMenuLinks = (cloud: CloudStart): UserMenuLink[] => {
+  const { profileUrl, organizationUrl } = cloud;
   const userMenuLinks = [] as UserMenuLink[];
 
-  if (baseUrl && profileUrl) {
+  if (profileUrl) {
     userMenuLinks.push({
-      label: i18n.translate('xpack.cloud.userMenuLinks.profileLinkText', {
+      label: i18n.translate('xpack.cloudLinks.userMenuLinks.profileLinkText', {
         defaultMessage: 'Edit profile',
       }),
       iconType: 'user',
-      href: getFullCloudUrl(baseUrl, profileUrl),
+      href: profileUrl,
       order: 100,
       setAsProfile: true,
     });
   }
 
-  if (baseUrl && organizationUrl) {
+  if (organizationUrl) {
     userMenuLinks.push({
-      label: i18n.translate('xpack.cloud.userMenuLinks.accountLinkText', {
+      label: i18n.translate('xpack.cloudLinks.userMenuLinks.accountLinkText', {
         defaultMessage: 'Account & Billing',
       }),
       iconType: 'gear',
-      href: getFullCloudUrl(baseUrl, organizationUrl),
+      href: organizationUrl,
       order: 200,
     });
   }

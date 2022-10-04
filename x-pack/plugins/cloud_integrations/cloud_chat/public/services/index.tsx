@@ -7,12 +7,7 @@
 
 import React, { FC, createContext, useContext } from 'react';
 
-interface WithoutChat {
-  enabled: false;
-}
-
-interface WithChat {
-  enabled: true;
+export interface ChatConfig {
   chatURL: string;
   user: {
     jwt: string;
@@ -21,26 +16,24 @@ interface WithChat {
   };
 }
 
-export type ChatConfig = WithChat | WithoutChat;
-
-export interface CloudServices {
-  chat: ChatConfig;
+export interface CloudChatServices {
+  chat?: ChatConfig;
 }
 
-const ServicesContext = createContext<CloudServices>({ chat: { enabled: false } });
+const ServicesContext = createContext<CloudChatServices>({});
 
-export const ServicesProvider: FC<CloudServices> = ({ children, ...services }) => (
+export const ServicesProvider: FC<CloudChatServices> = ({ children, ...services }) => (
   <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
 );
 
 /**
- * React hook for accessing the pre-wired `CloudServices`.
+ * React hook for accessing the pre-wired `CloudChatServices`.
  */
 export function useServices() {
   return useContext(ServicesContext);
 }
 
-export function useChat(): ChatConfig {
+export function useChat(): ChatConfig | undefined {
   const { chat } = useServices();
   return chat;
 }
