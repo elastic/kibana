@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client, type HttpConnection, type ClusterConnectionPool } from '@elastic/elasticsearch';
+import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
