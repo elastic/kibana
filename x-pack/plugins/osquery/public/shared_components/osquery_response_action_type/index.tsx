@@ -49,8 +49,8 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   ResponseActionValidatorRef,
   OsqueryResponseActionsParamsFormProps
 >(({ item }, ref) => {
-  const context = useFormContext();
-  const data = context.getFormData();
+  const { updateFieldValues, getFormData } = useFormContext();
+  const data = getFormData();
   const { params: defaultParams } = get(data, item.path);
   const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
@@ -79,40 +79,34 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   );
   const onSubmit = useCallback(
     async (formData) => {
-      try {
-        if (queryType === 'pack') {
-          context.updateFieldValues({
-            [item.path]: {
-              actionTypeId: OSQUERY_TYPE,
-              params: {
-                id: formData.id,
-                packId: formData?.packId?.length ? formData?.packId[0] : undefined,
-                queries: packData
-                  ? map(packData.queries, (query, queryId: string) => ({
-                      ...query,
-                      id: queryId,
-                    }))
-                  : formData.queries,
+      updateFieldValues({
+        [item.path]:
+          queryType === 'pack'
+            ? {
+                actionTypeId: OSQUERY_TYPE,
+                params: {
+                  id: formData.id,
+                  packId: formData?.packId?.length ? formData?.packId[0] : undefined,
+                  queries: packData
+                    ? map(packData.queries, (query, queryId: string) => ({
+                        ...query,
+                        id: queryId,
+                      }))
+                    : formData.queries,
+                },
+              }
+            : {
+                actionTypeId: OSQUERY_TYPE,
+                params: {
+                  id: formData.id,
+                  savedQueryId: formData.savedQueryId,
+                  query: formData.query,
+                  ecsMapping: formData.ecs_mapping,
+                },
               },
-            },
-          });
-        } else {
-          context.updateFieldValues({
-            [item.path]: {
-              actionTypeId: OSQUERY_TYPE,
-              params: {
-                id: formData.id,
-                savedQueryId: formData.savedQueryId,
-                query: formData.query,
-                ecsMapping: formData.ecs_mapping,
-              },
-            },
-          });
-        }
-        // eslint-disable-next-line no-empty
-      } catch (e) {}
+      });
     },
-    [context, item.path, packData, queryType]
+    [updateFieldValues, item.path, packData, queryType]
   );
 
   useEffect(() => {
