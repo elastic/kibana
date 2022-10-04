@@ -10,13 +10,15 @@ APM_CYPRESS_RECORD_KEY="$(retry 5 5 vault read -field=CYPRESS_RECORD_KEY secret/
 .buildkite/scripts/download_build_artifacts.sh
 
 export JOB=kibana-apm-cypress
+CLI_NUMBER=$((BUILDKITE_PARALLEL_JOB+1))
 
 echo "--- APM Cypress Tests"
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "APM Cypress Tests" \
+checks-reporter-with-killswitch "APM Cypress Tests $CLI_NUMBER" \
   node plugins/apm/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   --record \
-  --key "$APM_CYPRESS_RECORD_KEY"
+  --key "$APM_CYPRESS_RECORD_KEY" \
+  --parallel
