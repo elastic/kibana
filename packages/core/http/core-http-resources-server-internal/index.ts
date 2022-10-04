@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { HttpResourcesService } from './http_resources_service';
+export { HttpResourcesService } from './src';
 
-export type {
-  HttpResourcesRenderOptions,
-  HttpResourcesResponseOptions,
-  HttpResourcesServiceToolkit,
-  HttpResourcesRequestHandler,
-  HttpResources,
-  InternalHttpResourcesPreboot,
-  InternalHttpResourcesSetup,
-} from './types';
+export type { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './src';

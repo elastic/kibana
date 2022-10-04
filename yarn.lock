@@ -2962,6 +2962,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-resources-server-internal@link:bazel-bin/packages/core/http/core-http-resources-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-resources-server-mocks@link:bazel-bin/packages/core/http/core-http-resources-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-resources-server@link:bazel-bin/packages/core/http/core-http-resources-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-router-server-internal@link:bazel-bin/packages/core/http/core-http-router-server-internal":
   version "0.0.0"
   uid ""
@@ -7104,6 +7116,18 @@
   uid ""
 
 "@types/kbn__core-http-request-handler-context-server@link:bazel-bin/packages/core/http/core-http-request-handler-context-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-resources-server-internal@link:bazel-bin/packages/core/http/core-http-resources-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-resources-server-mocks@link:bazel-bin/packages/core/http/core-http-resources-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-resources-server@link:bazel-bin/packages/core/http/core-http-resources-server/npm_module_types":
   version "0.0.0"
   uid ""
 
