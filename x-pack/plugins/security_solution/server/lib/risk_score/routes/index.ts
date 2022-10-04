@@ -18,4 +18,4 @@ export { deleteStoredScriptRoute } from '../stored_scripts/delete_script_route';
 export { getRiskScoreIndexStatusRoute } from '../index_status';
 
 export { installRiskScoresRoute } from '../onboarding/routes/install_risk_scores';
-export { restartTransfornRoute } from '../transform/restart_transform';
+export { restartTransformRoute } from '../transform/restart_transform';
