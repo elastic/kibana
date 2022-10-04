@@ -103,6 +103,7 @@ export interface GetCasesColumn {
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
   showSolutionColumn?: boolean;
+  disableActions?: boolean;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -117,9 +118,10 @@ export const useCasesColumns = ({
   connectors = [],
   onRowClick,
   showSolutionColumn,
+  disableActions = false,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-  const { actions } = useActions();
+  const { actions } = useActions({ disableActions });
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {

@@ -32,7 +32,7 @@ describe('useActions', () => {
   });
 
   it('renders column actions', async () => {
-    const { result } = renderHook(() => useActions(), {
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -48,7 +48,7 @@ describe('useActions', () => {
   });
 
   it('renders the popover', async () => {
-    const { result } = renderHook(() => useActions(), {
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -59,7 +59,7 @@ describe('useActions', () => {
   });
 
   it('open the action popover', async () => {
-    const { result } = renderHook(() => useActions(), {
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -80,7 +80,7 @@ describe('useActions', () => {
   it('change the status of the case', async () => {
     const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-    const { result } = renderHook(() => useActions(), {
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -118,7 +118,7 @@ describe('useActions', () => {
     it('delete a case', async () => {
       const deleteSpy = jest.spyOn(api, 'deleteCases');
 
-      const { result } = renderHook(() => useActions(), {
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -153,7 +153,7 @@ describe('useActions', () => {
     });
 
     it('closes the modal', async () => {
-      const { result } = renderHook(() => useActions(), {
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -191,7 +191,7 @@ describe('useActions', () => {
   describe('Permissions', () => {
     it('shows the correct actions with all permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: allCasesPermissions() });
-      const { result } = renderHook(() => useActions(), {
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -211,7 +211,7 @@ describe('useActions', () => {
 
     it('shows the correct actions with no delete permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: noDeleteCasesPermissions() });
-      const { result } = renderHook(() => useActions(), {
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -231,7 +231,7 @@ describe('useActions', () => {
 
     it('shows the correct actions with only delete permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
-      const { result } = renderHook(() => useActions(), {
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -251,11 +251,25 @@ describe('useActions', () => {
 
     it('returns null if the user does not have update or delete permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
-      const { result } = renderHook(() => useActions(), {
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: appMockRender.AppWrapper,
       });
 
       expect(result.current.actions).toBe(null);
+    });
+
+    it('disables the action correctly', async () => {
+      appMockRender = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
+      const { result } = renderHook(() => useActions({ disableActions: true }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      await waitFor(() => {
+        expect(res.getByTestId(`case-action-popover-button-${basicCase.id}`)).toBeDisabled();
+      });
     });
   });
 });

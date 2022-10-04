@@ -204,6 +204,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       connectors,
       onRowClick,
       showSolutionColumn: !hasOwner && availableSolutions.length > 1,
+      disableActions: selectedCases.length > 0,
     });
 
     const pagination = useMemo(

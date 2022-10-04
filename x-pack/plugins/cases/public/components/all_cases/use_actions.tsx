@@ -24,11 +24,10 @@ import * as i18n from './translations';
 import { statuses } from '../status';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
-interface UseBulkActionsReturnValue {
-  actions: EuiTableComputedColumnType<Case> | null;
-}
-
-const ActionColumnComponent: React.FC<{ theCase: Case }> = ({ theCase }) => {
+const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }> = ({
+  theCase,
+  disableActions,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -114,6 +113,7 @@ const ActionColumnComponent: React.FC<{ theCase: Case }> = ({ theCase }) => {
             color="text"
             key={`case-action-popover-button-${theCase.id}`}
             data-test-subj={`case-action-popover-button-${theCase.id}`}
+            disabled={disableActions}
           />
         }
         isOpen={isPopoverOpen}
@@ -142,7 +142,15 @@ ActionColumnComponent.displayName = 'ActionColumnComponent';
 
 const ActionColumn = React.memo(ActionColumnComponent);
 
-export const useActions = (): UseBulkActionsReturnValue => {
+interface UseBulkActionsReturnValue {
+  actions: EuiTableComputedColumnType<Case> | null;
+}
+
+interface UseBulkActionsProps {
+  disableActions: boolean;
+}
+
+export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
   const { permissions } = useCasesContext();
   const shouldShowActions = permissions.update || permissions.delete;
 
@@ -152,7 +160,9 @@ export const useActions = (): UseBulkActionsReturnValue => {
           name: i18n.ACTIONS,
           align: 'right',
           render: (theCase: Case) => {
-            return <ActionColumn theCase={theCase} key={theCase.id} />;
+            return (
+              <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />
+            );
           },
         }
       : null,

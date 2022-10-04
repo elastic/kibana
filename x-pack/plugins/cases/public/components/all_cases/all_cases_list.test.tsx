@@ -897,6 +897,20 @@ describe('AllCasesListGeneric', () => {
           expect(deleteCasesSpy).toHaveBeenCalledWith(['basic-case-id'], expect.anything());
         });
       });
+
+      it('should disable row actions when bulk selecting cases', async () => {
+        const res = appMockRenderer.render(<AllCasesList />);
+
+        act(() => {
+          userEvent.click(res.getByTestId('checkboxSelectAll'));
+        });
+
+        await waitFor(() => {
+          for (const theCase of defaultGetCases.data.cases) {
+            expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeDisabled();
+          }
+        });
+      });
     });
   });
 });
