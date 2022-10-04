@@ -54,7 +54,8 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
             iconType="boxesHorizontal"
             iconSize="s"
             size="xs"
-            onClick={() => setPopover(!isPopoverOpen)}
+            onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
+            style={{ height: '100%' }}
           />
         </EuiToolTip>
       }

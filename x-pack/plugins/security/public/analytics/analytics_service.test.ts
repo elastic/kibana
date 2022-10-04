@@ -11,6 +11,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { licenseMock } from '../../common/licensing/index.mock';
+import { authenticationMock } from '../authentication/index.mock';
+import { securityMock } from '../mocks';
 import { AnalyticsService } from './analytics_service';
 
 describe('AnalyticsService', () => {
@@ -29,7 +31,14 @@ describe('AnalyticsService', () => {
 
     expect(localStorage.getItem(AnalyticsService.AuthTypeInfoStorageKey)).toBeNull();
 
-    analyticsService.setup({ securityLicense: licenseMock.create({ allowLogin: true }) });
+    const authc = authenticationMock.createSetup();
+    authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
+
+    analyticsService.setup({
+      authc,
+      analytics: coreMock.createSetup().analytics,
+      securityLicense: licenseMock.create({ allowLogin: true }),
+    });
     analyticsService.start({ http: mockCore.http });
 
     await nextTick();
@@ -51,7 +60,12 @@ describe('AnalyticsService', () => {
     mockCore.http.post.mockResolvedValue({ signature: 'some-signature', timestamp: 1234 });
 
     const licenseFeatures$ = new BehaviorSubject({ allowLogin: true });
+    const authc = authenticationMock.createSetup();
+    authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
+
     analyticsService.setup({
+      authc,
+      analytics: coreMock.createSetup().analytics,
       securityLicense: licenseMock.create(licenseFeatures$.asObservable()),
     });
     analyticsService.start({ http: mockCore.http });
@@ -99,7 +113,14 @@ describe('AnalyticsService', () => {
     });
     localStorage.setItem(AnalyticsService.AuthTypeInfoStorageKey, mockCurrentAuthTypeInfo);
 
-    analyticsService.setup({ securityLicense: licenseMock.create({ allowLogin: true }) });
+    const authc = authenticationMock.createSetup();
+    authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
+
+    analyticsService.setup({
+      authc,
+      analytics: coreMock.createSetup().analytics,
+      securityLicense: licenseMock.create({ allowLogin: true }),
+    });
     analyticsService.start({ http: mockCore.http });
 
     await nextTick();
@@ -117,7 +138,14 @@ describe('AnalyticsService', () => {
   it('does not report authentication type if security is not available', async () => {
     const mockCore = coreMock.createStart();
 
-    analyticsService.setup({ securityLicense: licenseMock.create({ allowLogin: false }) });
+    const authc = authenticationMock.createSetup();
+    authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
+
+    analyticsService.setup({
+      authc,
+      analytics: coreMock.createSetup().analytics,
+      securityLicense: licenseMock.create({ allowLogin: false }),
+    });
     analyticsService.start({ http: mockCore.http });
 
     await nextTick();
@@ -136,7 +164,14 @@ describe('AnalyticsService', () => {
     });
     localStorage.setItem(AnalyticsService.AuthTypeInfoStorageKey, mockCurrentAuthTypeInfo);
 
-    analyticsService.setup({ securityLicense: licenseMock.create({ allowLogin: true }) });
+    const authc = authenticationMock.createSetup();
+    authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
+
+    analyticsService.setup({
+      authc,
+      analytics: coreMock.createSetup().analytics,
+      securityLicense: licenseMock.create({ allowLogin: true }),
+    });
     analyticsService.start({ http: mockCore.http });
 
     await nextTick();
