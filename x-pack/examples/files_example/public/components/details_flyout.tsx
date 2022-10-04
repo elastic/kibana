@@ -80,6 +80,7 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
           css={css`
             height: 400px;
           `}
+          blurhash={file.blurhash}
           alt={file.alt ?? 'unknown'}
           src={files.example.getDownloadHref(file)}
         />
