@@ -31,7 +31,7 @@ import type {
   HttpResourcesServiceToolkit,
 } from '@kbn/core-http-resources-server';
 
-import { InternalHttpResourcesSetup } from './types';
+import type { InternalHttpResourcesSetup } from './types';
 
 import { getApmConfig } from './get_apm_config';
 

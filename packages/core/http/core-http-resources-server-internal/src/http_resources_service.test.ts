@@ -12,37 +12,15 @@ import type { RouteConfig } from '@kbn/core-http-server';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
-
-import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
+import type { HttpResources } from '@kbn/core-http-resources-server';
+import {
+  createCoreRequestHandlerContextMock,
+  createHttpResourcesResponseFactory,
+} from './test_helpers/http_resources_service_test_mocks';
 
 const coreContext = mockCoreContext.create();
-
-// partial duplicate of coreMock
-function createCoreRequestHandlerContextMock() {
-  return {
-    core: {
-      uiSettings: { client: uiSettingsServiceMock.createClient() },
-    },
-  };
-}
-
-// duplicate of public mock for internal testing only
-function createHttpResourcesResponseFactory() {
-  const mocked: jest.Mocked<HttpResourcesServiceToolkit> = {
-    renderCoreApp: jest.fn(),
-    renderAnonymousCoreApp: jest.fn(),
-    renderHtml: jest.fn(),
-    renderJs: jest.fn(),
-  };
-
-  return {
-    ...httpServerMock.createResponseFactory(),
-    ...mocked,
-  };
-}
 
 describe('HttpResources service', () => {
   let service: HttpResourcesService;
