@@ -89,14 +89,27 @@ describe('Storage Explorer', () => {
     });
 
     it('has a list of services and environments', () => {
-      cy.contains('opbeans-node');
-      cy.contains('opbeans-java');
-      cy.contains('opbeans-rum');
+      cy.contains(
+        '[data-test-subj="apmStorageExplorerServiceLink"]',
+        'opbeans-node'
+      );
+      cy.contains(
+        '[data-test-subj="apmStorageExplorerServiceLink"]',
+        'opbeans-java'
+      );
+      cy.contains(
+        '[data-test-subj="apmStorageExplorerServiceLink"]',
+        'opbeans-rum'
+      );
       cy.get('td:contains(production)').should('have.length', 3);
     });
 
     it('when clicking on a service it loads the service overview for that service', () => {
-      cy.contains('opbeans-node').click({ force: true });
+      cy.contains(
+        '[data-test-subj="apmStorageExplorerServiceLink"]',
+        'opbeans-node'
+      ).click();
+
       cy.url().should('include', '/apm/services/opbeans-node/overview');
       cy.contains('h1', 'opbeans-node');
     });
