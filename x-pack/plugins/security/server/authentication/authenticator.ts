@@ -419,7 +419,7 @@ export class Authenticator {
             )
           ) {
             // FIXME: Clean session storage client side!!!
-            authenticationResult.options.redirectURL += '&msg=SESSION_EXPIRED';
+            authenticationResult.redirectURL += '&msg=SESSION_EXPIRED';
           }
           return enrichWithUserProfileId(
             this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult),
