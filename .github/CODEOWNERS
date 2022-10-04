@@ -784,6 +784,7 @@ packages/core/notifications/core-notifications-browser-mocks @elastic/kibana-cor
 packages/core/overlays/core-overlays-browser @elastic/kibana-core
 packages/core/overlays/core-overlays-browser-internal @elastic/kibana-core
 packages/core/overlays/core-overlays-browser-mocks @elastic/kibana-core
+packages/core/plugins/core-plugins-base-server-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
@@ -792,6 +793,8 @@ packages/core/preboot/core-preboot-server-internal @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
+packages/core/rendering/core-rendering-server-internal @elastic/kibana-core
+packages/core/rendering/core-rendering-server-mocks @elastic/kibana-core
 packages/core/root/core-root-browser-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-browser @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server @elastic/kibana-core
