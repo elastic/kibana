@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useLocalStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { useEffect, useMemo } from 'react';
