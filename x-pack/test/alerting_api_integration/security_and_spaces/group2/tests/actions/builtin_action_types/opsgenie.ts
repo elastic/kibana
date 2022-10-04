@@ -108,7 +108,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://opsgenie.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating action type config: error validating url: target url "http://opsgenie.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -211,11 +211,30 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 });
               });
           });
+
+          it("should fail to close an alert when the alias parameter isn't included", async () => {
+            await supertest
+              .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: { subAction: 'closeAlert', subActionParams: {} },
+              })
+              .then((resp: any) => {
+                expect(resp.body).to.eql({
+                  connector_id: opsgenieActionId,
+                  status: 'error',
+                  retry: false,
+                  message: 'an error occurred while running the action',
+                  service_message:
+                    'Request validation failed (Error: [alias]: expected value of type [string] but got [undefined])',
+                });
+              });
+          });
         });
       });
 
       describe('execution', () => {
-        describe('successful response', () => {
+        describe('successful response simulator', () => {
           const simulator = new OpsgenieSimulator({
             proxy: {
               config: configService.get('kbnTestServer.serverArgs'),
@@ -243,6 +262,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               .expect(200);
 
             expect(simulator.requestData).to.eql({ message: 'message' });
+            expect(simulator.requestUrl).to.eql(createUrlString(simulatorUrl, 'v2/alerts'));
             expect(body).to.eql({
               status: 'ok',
               connector_id: opsgenieActionId,
@@ -255,11 +275,61 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
-                params: { subAction: 'closeAlert', subActionParams: {} },
+                params: { subAction: 'closeAlert', subActionParams: { alias: '123' } },
               })
               .expect(200);
 
             expect(simulator.requestData).to.eql({});
+            expect(simulator.requestUrl).to.eql(
+              createCloseAlertUrl(simulatorUrl, 'v2/alerts/123/close')
+            );
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: opsgenieActionId,
+              data: opsgenieSuccessResponse,
+            });
+          });
+
+          it('should preserve the alias when it is 512 characters', async () => {
+            const alias = 'a'.repeat(512);
+
+            const { body } = await supertest
+              .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: { subAction: 'closeAlert', subActionParams: { alias } },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql({});
+            expect(simulator.requestUrl).to.eql(
+              createCloseAlertUrl(simulatorUrl, `v2/alerts/${alias}/close`)
+            );
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: opsgenieActionId,
+              data: opsgenieSuccessResponse,
+            });
+          });
+
+          it('should sha256 hash the alias when it is over 512 characters', async () => {
+            const alias = 'a'.repeat(513);
+
+            // sha256 hash for 513 a characters
+            const hashedAlias = '02425c0f5b0dabf3d2b9115f3f7723a02ad8bcfb1534a0d231614fd42b8188f6';
+
+            const { body } = await supertest
+              .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: { subAction: 'closeAlert', subActionParams: { alias } },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql({});
+            expect(simulator.requestUrl).to.eql(
+              createCloseAlertUrl(simulatorUrl, `v2/alerts/${hashedAlias}/close`)
+            );
             expect(body).to.eql({
               status: 'ok',
               connector_id: opsgenieActionId,
@@ -268,7 +338,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('error response', () => {
+        describe('error response simulator', () => {
           const simulator = new OpsgenieSimulator({
             returnError: true,
             proxy: {
@@ -354,3 +424,17 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
     });
   });
 }
+
+const createCloseAlertUrl = (baseUrl: string, path: string) => {
+  return createUrlString(baseUrl, path, { identifierType: 'alias' });
+};
+
+const createUrlString = (baseUrl: string, path: string, queryParams?: Record<string, string>) => {
+  const fullURL = new URL(path, baseUrl);
+
+  for (const [key, value] of Object.keys(queryParams ?? {})) {
+    fullURL.searchParams.set(key, value);
+  }
+
+  return fullURL.toString();
+};

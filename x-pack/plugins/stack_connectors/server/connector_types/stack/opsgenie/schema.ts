@@ -39,7 +39,7 @@ const validateDetails = (details: Record<string, string>): string | void => {
 
 export const CreateAlertParamsSchema = schema.object({
   message: schema.string({ maxLength: 130 }),
-  alias: schema.maybe(schema.string({ maxLength: 500 })),
+  alias: schema.maybe(schema.string()),
   description: schema.maybe(schema.string({ maxLength: 15000 })),
   responders: schema.maybe(
     schema.arrayOf(
@@ -119,6 +119,7 @@ const FailureResponse = schema.object(
 export const Response = schema.oneOf([SuccessfulResponse, FailureResponse]);
 
 export const CloseAlertParamsSchema = schema.object({
+  alias: schema.string({ maxLength: 512 }),
   user: schema.maybe(schema.string({ maxLength: 100 })),
   source: schema.maybe(schema.string({ maxLength: 100 })),
   note: schema.maybe(schema.string({ maxLength: 25000 })),
