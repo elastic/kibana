@@ -99,7 +99,7 @@ export function useAlertPrevalenceFromProcessTree({
 }: UseAlertPrevalenceFromProcessTree): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
 
-  const { selectedPatterns, to, from } = useTimelineDataFilters(timelineId);
+  const { selectedPatterns } = useTimelineDataFilters(timelineId);
   const alertAndOriginalIndices = [...new Set(selectedPatterns.concat(indices))];
   const { loading, id, schema } = useAlertDocumentAnalyzerSchema({
     documentId,
@@ -115,7 +115,6 @@ export function useAlertPrevalenceFromProcessTree({
           descendants: 500,
           indexPatterns: alertAndOriginalIndices,
           nodes: [id],
-          timeRange: { from, to },
           includeHits: true,
         }),
       });
