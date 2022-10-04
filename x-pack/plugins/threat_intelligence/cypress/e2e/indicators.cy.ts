@@ -185,9 +185,7 @@ describe('Indicators', () => {
       it('should render the inspector flyout', () => {
         cy.get(INSPECTOR_BUTTON).last().click({ force: true });
 
-        cy.get(INSPECTOR_PANEL).should('be.visible');
-
-        cy.get(INSPECTOR_PANEL).contains('Index patterns');
+        cy.get(INSPECTOR_PANEL).contains('Indicators search requests');
       });
     });
   });
