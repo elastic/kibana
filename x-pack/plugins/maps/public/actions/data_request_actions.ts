@@ -49,6 +49,7 @@ import { DataRequestMeta, MapExtent, DataFilters } from '../../common/descriptor
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { getLayersExtent } from './get_layers_extent';
+import { isLayerGroup } from '../classes/layers/layer_group';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -100,7 +101,7 @@ export function cancelAllInFlightRequests() {
 export function updateStyleMeta(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
-    if (!layer) {
+    if (!layer || isLayerGroup(layer)) {
       return;
     }
 

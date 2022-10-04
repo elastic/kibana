@@ -678,6 +678,12 @@ function removeLayerFromLayerList(layerId: string) {
     if (openTOCDetails.includes(layerId)) {
       dispatch(hideTOCDetails(layerId));
     }
+
+    if (isLayerGroup(layerGettingRemoved)) {
+      (layerGettingRemoved as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(removeLayerFromLayerList(childLayer.getId()));
+      });
+    }
   };
 }
 
@@ -807,7 +813,7 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFea
 }
 
 function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
-  if (!layer.getSource().isESSource()) {
+  if (isLayerGroup(layer) || !layer.getSource().isESSource()) {
     return;
   }
 
