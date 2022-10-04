@@ -4182,6 +4182,10 @@ describe('SavedObjectsRepository', () => {
           type: 'foo',
           id: '1',
         },
+        hasNoReference: {
+          type: 'bar',
+          id: '1',
+        },
       };
 
       it(`passes mappings, registry, and search options to getSearchDsl`, async () => {
