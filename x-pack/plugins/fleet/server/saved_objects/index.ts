@@ -46,6 +46,7 @@ import {
   migratePackagePolicyToV840,
 } from './migrations/to_v8_4_0';
 import { migratePackagePolicyToV850, migrateAgentPolicyToV850 } from './migrations/to_v8_5_0';
+import { migrateSettingsToV860 } from './migrations/to_v8_6_0';
 
 /*
  * Saved object types and mappings
@@ -56,6 +57,7 @@ import { migratePackagePolicyToV850, migrateAgentPolicyToV850 } from './migratio
 const getSavedObjectTypes = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): { [key: string]: SavedObjectsType } => ({
+  // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -67,12 +69,12 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
-        has_seen_fleet_migration_notice: { type: 'boolean', index: false },
       },
     },
     migrations: {
       '7.10.0': migrateSettingsToV7100,
       '7.13.0': migrateSettingsToV7130,
+      '8.6.0': migrateSettingsToV860,
     },
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {

@@ -51,9 +51,7 @@ describe('AgentApp', () => {
     mockedUseGetSettings.mockReturnValue({
       isLoading: false,
       data: {
-        item: {
-          has_seen_fleet_migration_notice: true,
-        },
+        item: {},
       },
     } as any);
     mockedUseAuthz.mockReturnValue({
