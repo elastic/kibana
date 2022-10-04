@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
+import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 
 import { INTERNAL_RISK_SCORE_URL } from '../../../../../common/constants';
 

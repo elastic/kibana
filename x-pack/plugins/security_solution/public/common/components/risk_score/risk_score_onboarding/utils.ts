@@ -25,7 +25,7 @@ import {
   UNINSTALLATION_ERROR,
 } from '../../../../risk_score/containers/onboarding/api/translations';
 
-interface InstallRiskyScoreModule {
+interface InstallRiskScoreModule {
   dashboard?: DashboardStart;
   http: HttpSetup;
   notifications?: NotificationsStart;
@@ -41,7 +41,7 @@ interface InstallRiskyScoreModule {
   };
 }
 
-type UpgradeRiskyScoreModule = InstallRiskyScoreModule;
+type UpgradeRiskScoreModule = InstallRiskScoreModule;
 
 const installHostRiskScoreModule = async ({
   dashboard,
@@ -50,10 +50,9 @@ const installHostRiskScoreModule = async ({
   refetch,
   renderDashboardLink,
   renderDocLink,
-  spaceId = 'default',
   theme,
   timerange,
-}: InstallRiskyScoreModule) => {
+}: InstallRiskScoreModule) => {
   await installRiskScore({
     http,
     renderDocLink,
@@ -61,16 +60,6 @@ const installHostRiskScoreModule = async ({
     options: {
       riskScoreEntity: RiskScoreEntity.host,
     },
-  });
-
-  await restartRiskScoreTransforms({
-    http,
-    notifications,
-    refetch,
-    renderDocLink,
-    riskScoreEntity: RiskScoreEntity.host,
-    spaceId,
-    theme,
   });
 
   // Install dashboards and relevant saved objects
@@ -102,7 +91,7 @@ const installUserRiskScoreModule = async ({
   spaceId = 'default',
   theme,
   timerange,
-}: InstallRiskyScoreModule) => {
+}: InstallRiskScoreModule) => {
   await installRiskScore({
     http,
     renderDocLink,
@@ -131,7 +120,7 @@ const installUserRiskScoreModule = async ({
   }
 };
 
-export const installRiskScoreModule = async (settings: InstallRiskyScoreModule) => {
+export const installRiskScoreModule = async (settings: InstallRiskScoreModule) => {
   if (settings.riskScoreEntity === RiskScoreEntity.user) {
     await installUserRiskScoreModule(settings);
   } else {
@@ -252,7 +241,7 @@ export const upgradeHostRiskScoreModule = async ({
   spaceId = 'default',
   theme,
   timerange,
-}: UpgradeRiskyScoreModule) => {
+}: UpgradeRiskScoreModule) => {
   await uninstallLegacyRiskScoreModule({
     http,
     notifications,
@@ -285,7 +274,7 @@ export const upgradeUserRiskScoreModule = async ({
   spaceId = 'default',
   theme,
   timerange,
-}: UpgradeRiskyScoreModule) => {
+}: UpgradeRiskScoreModule) => {
   await uninstallLegacyRiskScoreModule({
     http,
     notifications,
