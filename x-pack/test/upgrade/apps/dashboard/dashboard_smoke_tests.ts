@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);
           log.debug('Checking input controls rendered');
-          await dashboardExpect.inputControlItemCount(3);
+          await dashboardExpect.controlCount(3);
           log.debug('Checking tag cloud rendered');
           await dashboardExpect.tagCloudWithValuesFound([
             'Sunny',
