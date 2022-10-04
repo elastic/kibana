@@ -31,7 +31,7 @@ import {
   AgentDetailsActionMenu,
   AgentDetailsContent,
   AgentDashboardLink,
-  AgentDiagnostics,
+  AgentDiagnosticsTab,
 } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
@@ -234,7 +234,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
       <Route
         path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
         render={() => {
-          return <AgentDiagnostics agentId={agent.id} />;
+          return <AgentDiagnosticsTab agent={agent} />;
         }}
       />
       <Route

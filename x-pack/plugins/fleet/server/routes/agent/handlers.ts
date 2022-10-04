@@ -28,6 +28,7 @@ import type {
   GetAgentTagsResponse,
   GetAvailableVersionsResponse,
   GetActionStatusResponse,
+  GetAgentUploadsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -357,6 +358,20 @@ export const getActionStatusHandler: RequestHandler<
   try {
     const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
     const body: GetActionStatusResponse = { items: actionStatuses };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getAgentUploadsHandler: RequestHandler<
+  TypeOf<typeof GetOneAgentRequestSchema.params>
+> = async (context, request, response) => {
+  try {
+    const body: GetAgentUploadsResponse = {
+      items: await AgentService.getAgentUploads(request.params.agentId),
+    };
+
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

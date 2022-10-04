@@ -7,7 +7,14 @@
 
 import type { SearchHit } from '@kbn/es-types';
 
-import type { Agent, AgentAction, ActionStatus, CurrentUpgrade, NewAgentAction } from '../models';
+import type {
+  Agent,
+  AgentAction,
+  ActionStatus,
+  CurrentUpgrade,
+  NewAgentAction,
+  AgentDiagnostics,
+} from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
 
@@ -36,6 +43,10 @@ export interface GetOneAgentRequest {
 
 export interface GetOneAgentResponse {
   item: Agent;
+}
+
+export interface GetAgentUploadsResponse {
+  items: AgentDiagnostics[];
 }
 
 export interface PostNewAgentActionRequest {

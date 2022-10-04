@@ -24,6 +24,7 @@ import {
   PostCancelActionRequestSchema,
   GetActionStatusRequestSchema,
   PostRequestDiagnosticsActionRequestSchema,
+  ListAgentUploadsRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -44,6 +45,7 @@ import {
   bulkUpdateAgentTagsHandler,
   getAvailableVersionsHandler,
   getActionStatusHandler,
+  getAgentUploadsHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -189,6 +191,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     requestDiagnosticsHandler
+  );
+
+  router.get(
+    {
+      path: AGENT_API_ROUTES.LIST_UPLOADS_PATTERN,
+      validate: ListAgentUploadsRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAgentUploadsHandler
   );
 
   // Get agent status for policy

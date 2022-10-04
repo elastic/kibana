@@ -8,6 +8,7 @@
 import type {
   GetActionStatusResponse,
   GetAgentTagsResponse,
+  GetAgentUploadsResponse,
   PostBulkUpdateAgentTagsRequest,
   PutRequestDiagnosticsResponse,
   UpdateAgentRequest,
@@ -179,6 +180,22 @@ export function sendPostRequestDiagnostics(agentId: string, options?: RequestOpt
     ...options,
   });
 }
+
+export function sendGetAgentUploads(agentId: string, options?: RequestOptions) {
+  return sendRequest<GetAgentUploadsResponse>({
+    path: agentRouteService.getListAgentUploads(agentId),
+    method: 'get',
+    ...options,
+  });
+}
+
+export const useGetAgentUploads = (agentId: string, options?: RequestOptions) => {
+  return useRequest<GetAgentUploadsResponse>({
+    path: agentRouteService.getListAgentUploads(agentId),
+    method: 'get',
+    ...options,
+  });
+};
 
 export function sendPostAgentAction(
   agentId: string,
