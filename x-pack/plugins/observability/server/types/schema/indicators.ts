@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { allOrAnyString } from './common';
 
-const apmTransactionDurationIndicatorTypeSchema = t.literal('slo.apm.transaction_duration');
+const apmTransactionDurationIndicatorTypeSchema = t.literal<string>('slo.apm.transaction_duration');
 
 const apmTransactionDurationIndicatorSchema = t.type({
   type: apmTransactionDurationIndicatorTypeSchema,
@@ -21,7 +21,9 @@ const apmTransactionDurationIndicatorSchema = t.type({
   }),
 });
 
-const apmTransactionErrorRateIndicatorTypeSchema = t.literal('slo.apm.transaction_error_rate');
+const apmTransactionErrorRateIndicatorTypeSchema = t.literal<string>(
+  'slo.apm.transaction_error_rate'
+);
 
 const apmTransactionErrorRateIndicatorSchema = t.type({
   type: apmTransactionErrorRateIndicatorTypeSchema,

@@ -20,11 +20,7 @@ const SOME_SLO = createSLO(createAPMTransactionDurationIndicator());
 function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
   return {
     id: slo.id,
-    attributes: {
-      ...slo,
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-    },
+    attributes: slo,
     type: SO_SLO_TYPE,
     references: [],
   };
@@ -73,7 +69,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
         updated_at: expect.anything(),
         created_at: expect.anything(),
       }),
-      { id: SOME_SLO.id }
+      { id: SOME_SLO.id, overwrite: true }
     );
   });
 
