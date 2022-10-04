@@ -131,6 +131,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await testSubjects.click('lnsMetric_trendline_toggle');
 
+      await PageObjects.lens.waitForVisualization('mtrVis');
+
       expect(
         (await PageObjects.lens.getMetricVisualizationData()).some(
           (datum) => datum.showingTrendline
@@ -141,16 +143,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await inspector.getNumberOfTables()).to.equal(2);
 
-      await PageObjects.lens.openDimensionEditor(
-        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
-      );
+      await inspector.close();
+
       await testSubjects.click('lnsMetric_trendline_toggle');
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
 
       expect(
         (await PageObjects.lens.getMetricVisualizationData()).some(
           (datum) => datum.showingTrendline
         )
       ).to.be(false);
+
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should filter by click', async () => {
