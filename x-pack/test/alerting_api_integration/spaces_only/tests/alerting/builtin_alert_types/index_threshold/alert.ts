@@ -444,11 +444,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         aggType: 'count',
         groupBy: 'all',
         thresholdComparator: '>',
+        timeWindowSize: 3000,
         threshold: [-1],
         filterKuery: 'group: group-0',
       });
 
-      const docs = await waitForDocs(2);
+      const docs = await waitForDocs(1);
       const doc = docs[0];
       const { message } = doc._source.params;
 
