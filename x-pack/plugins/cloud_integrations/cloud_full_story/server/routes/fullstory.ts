@@ -40,7 +40,7 @@ export const renderFullStoryLibraryFactory = (dist = true) =>
     }
   );
 
-export const registerFullstoryRoute = ({
+export const registerFullStoryRoute = ({
   httpResources,
   packageInfo,
 }: {
