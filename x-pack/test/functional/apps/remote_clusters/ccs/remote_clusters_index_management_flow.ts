@@ -47,7 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         // await remoteEs.
         await pageObjects.common.navigateToApp('indexManagement');
-      })
+      });
     });
   });
 };
