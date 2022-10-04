@@ -41,7 +41,7 @@ export const useToolbarOptions = ({
   return useMemo(
     () => ({
       showDisplaySelector: false,
-      showFullScreenSelector: false,
+      showFullScreenSelector: true,
       additionalControls: {
         left: {
           prepend: (
