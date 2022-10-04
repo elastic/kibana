@@ -52,7 +52,7 @@ describe('Custom links', () => {
 
   it('creates custom link', () => {
     cy.visitKibana(basePath);
-    const emptyPrompt = cy.get('[data-test-subj="customLinksEmptyPrompt"]');
+    const emptyPrompt = cy.getByTestSubj('customLinksEmptyPrompt');
     cy.contains('Create custom link').click();
     cy.contains('Create link');
     cy.contains('Save').should('be.disabled');
@@ -63,7 +63,7 @@ describe('Custom links', () => {
     emptyPrompt.should('not.exist');
     cy.contains('foo');
     cy.contains('https://foo.com');
-    cy.get('[data-test-subj="editCustomLink"]').click();
+    cy.getByTestSubj('editCustomLink').click();
     cy.contains('Delete').click();
   });
 
@@ -71,14 +71,14 @@ describe('Custom links', () => {
     cy.visitKibana(basePath);
 
     // wait for empty prompt
-    cy.get('[data-test-subj="customLinksEmptyPrompt"]').should('be.visible');
+    cy.getByTestSubj('customLinksEmptyPrompt').should('be.visible');
 
     cy.contains('Create custom link').click();
-    cy.get('[data-test-subj="filter-0"]').select('service.name');
+    cy.getByTestSubj('filter-0').select('service.name');
     cy.get(
       '[data-test-subj="service.name.value"] [data-test-subj="comboBoxSearchInput"]'
     ).type('foo');
-    cy.get('[data-test-subj="filter-0"]').select('service.environment');
+    cy.getByTestSubj('filter-0').select('service.environment');
     cy.get(
       '[data-test-subj="service.environment.value"] [data-test-subj="comboBoxInput"]'
     ).should('not.contain', 'foo');

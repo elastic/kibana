@@ -85,7 +85,7 @@ describe('Storage Explorer', () => {
     });
 
     it('renders the storage timeseries chart', () => {
-      cy.get('[data-test-subj="storageExplorerTimeseriesChart"]');
+      cy.getByTestSubj('storageExplorerTimeseriesChart');
     });
 
     it('has a list of services and environments', () => {
@@ -115,7 +115,7 @@ describe('Storage Explorer', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.get('[data-test-subj="environmentFilter"]').type('production');
+      cy.getByTestSubj('environmentFilter').type('production');
 
       cy.contains('button', 'production').click({ force: true });
 
@@ -148,7 +148,7 @@ describe('Storage Explorer', () => {
     it('with the correct lifecycle phase when changing the lifecycle phase', () => {
       cy.wait(mainAliasNames);
 
-      cy.get('[data-test-subj="storageExplorerLifecyclePhaseSelect"]').click();
+      cy.getByTestSubj('storageExplorerLifecyclePhaseSelect').click();
       cy.contains('button', 'Warm').click();
 
       cy.expectAPIsToHaveBeenCalledWith({
@@ -180,13 +180,13 @@ describe('Storage Explorer', () => {
       cy.wait(mainAliasNames);
       cy.contains('opbeans-node');
 
-      cy.get('[data-test-subj="storageDetailsButton_opbeans-node"]').click();
-      cy.get('[data-test-subj="loadingSpinner"]').should('be.visible');
+      cy.getByTestSubj('storageDetailsButton_opbeans-node').click();
+      cy.getByTestSubj('loadingSpinner').should('be.visible');
       cy.wait('@storageDetailsRequest');
 
       cy.contains('Service storage details');
-      cy.get('[data-test-subj="storageExplorerTimeseriesChart"]');
-      cy.get('[data-test-subj="serviceStorageDetailsTable"]');
+      cy.getByTestSubj('storageExplorerTimeseriesChart');
+      cy.getByTestSubj('serviceStorageDetailsTable');
     });
   });
 });
