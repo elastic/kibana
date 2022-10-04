@@ -67,7 +67,7 @@ async function saveDataSource({
       text: error.message,
     });
   }
-  return stateContainer.actions.persistSavedSearch(savedSearch, {
+  return stateContainer.savedSearchContainer.persist(savedSearch, {
     onError,
     onSuccess,
     saveOptions,

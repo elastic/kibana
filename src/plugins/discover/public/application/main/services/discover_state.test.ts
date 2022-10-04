@@ -33,7 +33,9 @@ describe('Test discover state', () => {
       history,
     });
     await state.setAppState({}, true);
-    stopSync = state.startSync();
+    const { start, stop } = state.appStateContainer.syncState();
+    start();
+    stopSync = stop;
   });
   afterEach(() => {
     stopSync();
@@ -67,7 +69,7 @@ describe('Test discover state', () => {
     state.setAppState({ index: 'first' });
     const stateA = state.appStateContainer.getState();
     state.setAppState({ index: 'second' });
-    expect(state.getPreviousAppState()).toEqual(stateA);
+    expect(state.appStateContainer.getPrevious()).toEqual(stateA);
   });
 
   test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
@@ -88,7 +90,7 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.setAppState({}, true);
-    const stopSync = state.startSync();
+    const stopSync = state.appStateContainer.syncState().stop;
     expect(state.appStateContainer.getState().sort).toEqual([['order_date', 'desc']]);
     stopSync();
   });
@@ -102,7 +104,7 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.setAppState({}, true);
-    const stopSync = state.startSync();
+    const stopSync = state.appStateContainer.syncState().stop;
     expect(state.appStateContainer.getState().sort).toEqual([['bytes', 'desc']]);
     stopSync();
   });
@@ -114,8 +116,8 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
-    const stopSync = state.startSync();
+    await state.setAppState({}, true);
+    const stopSync = state.appStateContainer.syncState().stop;
     expect(state.appStateContainer.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();
   });

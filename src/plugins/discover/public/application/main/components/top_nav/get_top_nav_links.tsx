@@ -176,7 +176,7 @@ export const getTopNavLinks = ({
               defaultMessage: 'Untitled discover search',
             }),
         },
-        isDirty: !savedSearch.id || stateContainer.savedSearchContainer.hasChanged(),
+        isDirty: !savedSearch.id || stateContainer.savedSearchContainer.hasChanged$.getValue(),
         showPublicUrlSwitch,
         onClose: () => {
           anchorElement?.focus();

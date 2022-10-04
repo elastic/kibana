@@ -123,5 +123,10 @@ export const discoverServiceMock = {
   expressions: expressionsPlugin,
   savedObjectsTagging: {},
   dataViews: dataViewsMock,
-  timefilter: { createFilter: jest.fn() },
+  timefilter: {
+    createFilter: jest.fn(),
+    getRefreshInterval: jest.fn(() => ({
+      pause: jest.fn(),
+    })),
+  },
 } as unknown as DiscoverServices;

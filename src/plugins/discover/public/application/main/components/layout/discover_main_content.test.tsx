@@ -7,12 +7,11 @@
  */
 
 import React from 'react';
-import { Subject, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { GetStateReturn } from '../../services/discover_state';
 import {
   AvailableFields$,
   DataCharts$,
@@ -42,6 +41,8 @@ import { ReactWrapper } from 'enzyme';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverStateProvider } from '../../services/discover_state_react';
 
 const mountComponent = async ({
   isPlainRecord = false,
@@ -140,25 +141,21 @@ const mountComponent = async ({
     charts$,
     availableFields$,
   };
+  const stateContainer = getDiscoverStateMock({ isTimeBased });
+  stateContainer.setAppState({
+    interval: 'auto',
+    hideChart,
+    columns: [],
+  });
 
   const props: DiscoverMainContentProps = {
     isPlainRecord,
     dataView: dataViewMock,
     navigateTo: jest.fn(),
-    resetSavedSearch: jest.fn(),
     setExpandedDoc: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchData$,
-    savedSearchRefetch$: new Subject(),
-    state: { columns: [], hideChart },
-    stateContainer: {
-      setAppState: () => {},
-      appStateContainer: {
-        getState: () => ({
-          interval: 'auto',
-        }),
-      },
-    } as unknown as GetStateReturn,
+    stateContainer,
     isTimeBased,
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
@@ -172,7 +169,9 @@ const mountComponent = async ({
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <KibanaThemeProvider theme$={coreTheme$}>
-        <DiscoverMainContent {...props} />
+        <DiscoverStateProvider value={stateContainer}>
+          <DiscoverMainContent {...props} />
+        </DiscoverStateProvider>
       </KibanaThemeProvider>
     </KibanaContextProvider>
   );

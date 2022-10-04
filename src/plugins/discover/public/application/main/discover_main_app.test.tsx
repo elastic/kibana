@@ -7,29 +7,26 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
-import { savedSearchMock } from '../../__mocks__/saved_search';
 import { setHeaderActionMenuMounter, setUrlTracker } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { urlTrackerMock } from '../../__mocks__/url_tracker.mock';
+import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { AppStateProvider } from './services/discover_app_state_container';
+import { InternalStateProvider } from './services/discover_internal_state_container';
 
 setHeaderActionMenuMounter(jest.fn());
 setUrlTracker(urlTrackerMock);
 
 describe('DiscoverMainApp', () => {
   test('renders', () => {
-    const dataViewList = [dataViewMock].map((ip) => {
-      return { ...ip, ...{ attributes: { title: ip.title } } };
-    }) as unknown as DataViewListItem[];
     const props = {
-      dataViewList,
-      savedSearch: savedSearchMock,
+      stateContainer: getDiscoverStateMock(),
     };
     const history = createMemoryHistory({
       initialEntries: ['/'],
@@ -38,7 +35,11 @@ describe('DiscoverMainApp', () => {
     const component = mountWithIntl(
       <Router history={history}>
         <KibanaContextProvider services={discoverServiceMock}>
-          <DiscoverMainApp {...props} />
+          <AppStateProvider value={props.stateContainer.appStateContainer}>
+            <InternalStateProvider value={props.stateContainer.internalStateContainer}>
+              <DiscoverMainApp {...props} />
+            </InternalStateProvider>
+          </AppStateProvider>
         </KibanaContextProvider>
       </Router>
     );

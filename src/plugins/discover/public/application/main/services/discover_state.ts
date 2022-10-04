@@ -31,23 +31,19 @@ import {
 } from '@kbn/data-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { TimeRange } from '@kbn/data-plugin/common';
-import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import {
   DiscoverInternalState,
   getInternalStateContainer,
 } from './discover_internal_state_container';
 import {
-  APP_STATE_URL_KEY,
   AppState,
   AppStateContainer,
-  getEnhancedAppStateContainer,
+  getDiscoverAppStateContainer,
 } from './discover_app_state_container';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_search_container';
 import { changeDataView } from '../hooks/utils/change_data_view';
-import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
-import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { DiscoverSearchSessionManager } from './discover_search_session';
@@ -99,7 +95,7 @@ export interface DiscoverStateContainer {
   flushToUrl: () => void;
 
   actions: {
-    resetSavedSearch: (id: string) => void;
+    resetSavedSearch: (id: string | SavedSearch) => void;
     undoSavedSearchChanges: () => void;
     onOpenSavedSearch: (newSavedSearchId: string) => void;
     onUpdateQuery: (
@@ -115,15 +111,12 @@ export interface DiscoverStateContainer {
      * Pause the auto refresh interval without pushing an entry to history
      */
     pauseAutoRefreshInterval: () => Promise<void>;
+    /**
+     * Trigger data fetching, by reset=true the loading indicator is displayed.
+     * Previous data state is cleared
+     * @param reset
+     */
     fetch: (reset?: boolean) => void;
-    persistSavedSearch: (
-      savedSearch: SavedSearch,
-      params: {
-        onError: (error: Error, savedSearch: SavedSearch) => void;
-        onSuccess: (id: string) => void;
-        saveOptions: SavedObjectSaveOpts;
-      }
-    ) => Promise<any>;
     changeDataView: (id: string) => void;
     changeDataViewId: (id: string) => void;
   };
@@ -142,10 +135,6 @@ export function getDiscoverStateContainer({
 }: GetStateParams): DiscoverStateContainer {
   const initialSavedSearch = savedSearch ?? getEmptySavedSearch(services.data);
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
-  const savedSearchContainer = getSavedSearchContainer({
-    savedSearch: initialSavedSearch,
-    services,
-  });
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -160,16 +149,20 @@ export function getDiscoverStateContainer({
     session: services.data.search.session,
   });
 
-  const appStateContainer = getEnhancedAppStateContainer(
+  const appStateContainer = getDiscoverAppStateContainer(
     stateStorage,
     initialSavedSearch,
     services
   );
 
-  const replaceUrlAppState = async (newPartial: AppState = {}) => {
-    const state = { ...appStateContainer.getState(), ...newPartial };
-    await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
-  };
+  const savedSearchContainer = getSavedSearchContainer({
+    savedSearch: initialSavedSearch,
+    appStateContainer,
+    services,
+  });
+
+  const replaceUrlAppState = appStateContainer.replace;
+  const setAppState = appStateContainer.update;
 
   const pauseAutoRefreshInterval = async () => {
     const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
@@ -237,26 +230,7 @@ export function getDiscoverStateContainer({
     appStateContainer,
     savedSearchContainer,
   });
-  const setAppState = (newPartial: AppState, replace = false) => {
-    if (replace) {
-      replaceUrlAppState(newPartial);
-    } else {
-      setState(appStateContainer, newPartial);
-    }
-  };
 
-  const resetSavedSearch = async (id: string) => {
-    const nextSavedSearch = await savedSearchContainer.reset(id);
-    const newAppState = handleSourceColumnState(
-      getStateDefaults({
-        savedSearch: nextSavedSearch,
-        services,
-      }),
-      services.uiSettings
-    );
-    setAppState(newAppState);
-    await replaceUrlAppState(newAppState);
-  };
   const internalStateContainer = getInternalStateContainer();
 
   return {
@@ -268,16 +242,18 @@ export function getDiscoverStateContainer({
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     initializeAndSync,
     actions: {
-      resetSavedSearch,
+      resetSavedSearch: (id) => {
+        savedSearchContainer.resetUrl(id);
+      },
       undoSavedSearchChanges: () => {
-        resetSavedSearch(savedSearchContainer.get().id || '');
+        savedSearchContainer.resetUrl(savedSearchContainer.get().id || '');
       },
       onOpenSavedSearch: async (newSavedSearchId: string) => {
         const currentSavedSearch = savedSearchContainer.savedSearch$.getValue();
         if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
           await savedSearchContainer.reset(currentSavedSearch.id);
         } else {
-          await resetSavedSearch(newSavedSearchId);
+          await savedSearchContainer.resetUrl(newSavedSearchId);
           history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
         }
       },
@@ -310,14 +286,6 @@ export function getDiscoverStateContainer({
       fetch: (reset?: boolean) => {
         const msg = reset ? 'reset' : undefined;
         dataStateContainer.refetch$.next(msg);
-      },
-      persistSavedSearch: (nextSavedSearch, { onError, onSuccess, saveOptions }) => {
-        return savedSearchContainer.persist(nextSavedSearch, {
-          onError,
-          onSuccess,
-          saveOptions,
-          state: appStateContainer.getState(),
-        });
       },
       changeDataView: (id: string) => {
         return changeDataView(id, {

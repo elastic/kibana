@@ -9,6 +9,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { AppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import {
@@ -19,7 +20,6 @@ import {
 } from '../../../../common';
 
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
-import {AppState} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -44,12 +44,11 @@ export function getStateDefaults({
   const { searchSource } = savedSearch;
   const { data, uiSettings, storage } = services;
   const dataView = searchSource.getField('index');
-
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const sort = getSortArray(savedSearch.sort ?? [], dataView!);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = storage.get(CHART_HIDDEN_KEY);
-  const filters = (cloneDeep(searchSource.getOwnField('filter')) as AppState['filters']) || [];
+  const filters = cloneDeep(searchSource.getOwnField('filter')) as AppState['filters'];
 
   const defaultState: AppState = {
     query,

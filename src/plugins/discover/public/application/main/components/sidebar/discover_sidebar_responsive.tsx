@@ -23,6 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -33,7 +34,6 @@ import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
-import {useAppStateSelector} from "@kbn/discover-plugin/public/application/main/services/discover_app_state_container";
 
 export interface DiscoverSidebarResponsiveProps {
   /**

@@ -15,6 +15,7 @@ import {
   AnalyticsNoDataPageKibanaProvider,
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
+import { DiscoverStateProvider } from './services/discover_state_react';
 import { loadSavedSearch } from './utils/load_saved_search';
 import { useSingleton } from './hooks/use_singleton';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
@@ -24,8 +25,6 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
 import { HistoryLocationState } from '../../locator';
-import { InternalStateProvider } from './services/discover_internal_state_container';
-import { AppStateProvider } from './services/discover_app_state_container';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -105,7 +104,7 @@ export function DiscoverMainRoute(props: Props) {
         dataViewSpec: props.historyLocationState?.dataViewSpec,
       });
       if (currentSavedSearch) {
-        stateContainer.savedSearchContainer.set(currentSavedSearch);
+        stateContainer.actions.resetSavedSearch(currentSavedSearch);
       }
       setLoading(false);
 
@@ -200,10 +199,8 @@ export function DiscoverMainRoute(props: Props) {
   }
 
   return (
-    <AppStateProvider value={stateContainer.appStateContainer}>
-      <InternalStateProvider value={stateContainer.internalStateContainer}>
-        <DiscoverMainAppMemoized stateContainer={stateContainer} />
-      </InternalStateProvider>
-    </AppStateProvider>
+    <DiscoverStateProvider value={stateContainer}>
+      <DiscoverMainAppMemoized stateContainer={stateContainer} />
+    </DiscoverStateProvider>
   );
 }
