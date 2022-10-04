@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './query_bar';
+import { defaultConfig } from '@kbn/storybook';
 
-// eslint-disable-next-line import/no-default-export
-export { QueryBar as default } from './query_bar';
+module.exports = defaultConfig;
