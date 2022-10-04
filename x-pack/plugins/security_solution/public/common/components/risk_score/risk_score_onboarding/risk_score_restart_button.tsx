@@ -10,7 +10,6 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { useSpaceId } from '../../../hooks/use_space_id';
 import { useKibana } from '../../../lib/kibana';
 import type { inputsModel } from '../../../store';
 import { REQUEST_NAMES, useFetch } from '../../../hooks/use_fetch';
