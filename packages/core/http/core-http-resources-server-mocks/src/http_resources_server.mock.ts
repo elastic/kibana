@@ -7,7 +7,25 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { HttpResources, HttpResourcesServiceToolkit } from './types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
+import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
+
+export type HttpResourcesMock = jest.Mocked<PublicMethodsOf<HttpResourcesService>>;
+
+function createHttpResourcesService() {
+  const mock: HttpResourcesMock = {
+    preboot: jest.fn(),
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+
+  mock.preboot.mockReturnValue(createInternalHttpResourcesPreboot());
+  mock.setup.mockReturnValue(createInternalHttpResourcesSetup());
+
+  return mock;
+}
 
 const createHttpResourcesMock = (): jest.Mocked<HttpResources> => ({
   register: jest.fn(),
@@ -38,6 +56,7 @@ function createHttpResourcesResponseFactory() {
 }
 
 export const httpResourcesMock = {
+  create: createHttpResourcesService,
   createRegistrar: createHttpResourcesMock,
   createPrebootContract: createInternalHttpResourcesPreboot,
   createSetupContract: createInternalHttpResourcesSetup,

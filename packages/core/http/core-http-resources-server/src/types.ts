@@ -7,7 +7,6 @@
  */
 
 import type {
-  IRouter,
   RouteConfig,
   IKibanaResponse,
   ResponseHeaders,
@@ -84,20 +83,6 @@ export type HttpResourcesRequestHandler<
   B = unknown,
   Context extends RequestHandlerContext = RequestHandlerContext
 > = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
-
-/**
- * Allows to configure HTTP response parameters
- * @internal
- */
-export interface InternalHttpResourcesPreboot {
-  createRegistrar(router: IRouter): HttpResources;
-}
-
-/**
- * Allows to configure HTTP response parameters
- * @internal
- */
-export type InternalHttpResourcesSetup = InternalHttpResourcesPreboot;
 
 /**
  * HttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.
