@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { metricsServiceMock, sampleEsClientMetrics } from './src/metrics_service.mock';
+import type { AgentStore, NetworkAgent } from '@kbn/core-elasticsearch-client-server-internal';
+
+export const createAgentStoreMock = (agents: Set<NetworkAgent> = new Set()): AgentStore => ({
+  getAgents: jest.fn(() => agents),
+});

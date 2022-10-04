@@ -120,6 +120,7 @@ export class ElasticsearchService
         }
         this.unauthorizedErrorHandler = handler;
       },
+      agentStore: this.agentManager,
     };
   }
 
@@ -182,7 +183,7 @@ export class ElasticsearchService
       authHeaders: this.authHeaders,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
-      agentManager: this.agentManager,
+      agentFactoryProvider: this.agentManager,
       kibanaVersion: this.kibanaVersion,
     });
   }
