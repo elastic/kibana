@@ -17,7 +17,7 @@ import {
   EuiLink,
   EuiConfirmModal,
 } from '@elastic/eui';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -55,7 +55,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
   const [isResetAllModalVisible, setIsResetAllModalVisible] = useState(false);
 
   const preconfiguredPolicies = useQuery(
-    'debug-preconfigured-policies',
+    ['debug-preconfigured-policies'],
     fetchPreconfiguredPolicies
   );
 
@@ -91,7 +91,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         defaultMessage: 'Successfully reset policy',
       })
     );
-    queryClient.invalidateQueries('debug-preconfigured-policies');
+    queryClient.invalidateQueries(['debug-preconfigured-policies']);
     setSelectedPolicyId(undefined);
     setIsResetModalVisible(false);
 
@@ -116,7 +116,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         defaultMessage: 'Successfully reset policies',
       })
     );
-    queryClient.invalidateQueries('debug-preconfigured-policies');
+    queryClient.invalidateQueries(['debug-preconfigured-policies']);
     setSelectedPolicyId(undefined);
     setIsResetAllModalVisible(false);
 

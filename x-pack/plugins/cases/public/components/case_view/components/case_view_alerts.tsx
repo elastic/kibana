@@ -28,6 +28,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     }),
     [caseData.comments]
   );
+
   const alertRegistrationContexts = useMemo(
     () => getRegistrationContextFromAlerts(caseData.comments),
     [caseData.comments]

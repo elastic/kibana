@@ -170,10 +170,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getLastToast = async () => {
     const toastList = await testSubjects.find('globalToastList');
-    const titles = await toastList.findAllByCssSelector('.euiToastHeader');
+    const titles = await toastList.findAllByTestSubject('euiToastHeader');
     const lastTitleElement = last(titles)!;
     const title = await lastTitleElement.getVisibleText();
-    const messages = await toastList.findAllByCssSelector('.euiToastBody');
+    const messages = await toastList.findAllByTestSubject('euiToastBody');
     const lastMessageElement = last(messages)!;
     const message = await lastMessageElement.getVisibleText();
     return { message, title };
@@ -182,7 +182,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getErrorToastTitle = async () => {
     const toastList = await testSubjects.find('globalToastList');
     const title = await (
-      await toastList.findByCssSelector('.euiToast--danger > .euiToastHeader')
+      await toastList.findByCssSelector(
+        '[class*="euiToast-danger"] > [data-test-subj="euiToastHeader"]'
+      )
     ).getVisibleText();
     return title;
   };

@@ -29,7 +29,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
   HttpSetup,
-  CoreSetup,
+  CoreStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { generateId } from '../../id_generator';
@@ -46,7 +46,7 @@ import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';
-import { Window } from './window';
+import { ReducedTimeRange } from './reduced_time_range';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
 import { layerTypes } from '../../../common';
@@ -55,8 +55,8 @@ jest.mock('./reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
 jest.mock('../loader');
-jest.mock('../query_input', () => ({
-  QueryInput: () => null,
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  QueryStringInput: () => null,
 }));
 
 jest.mock('../operations');
@@ -123,6 +123,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    isPersisted: true,
+    spec: {},
   },
 };
 
@@ -238,12 +240,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       } as unknown as DataPublicPluginStart,
-      core: {} as CoreSetup,
+      core: {} as CoreStart,
       dimensionGroups: [],
       groupId: 'a',
       isFullscreen: false,
       supportStaticValue: false,
       toggleFullscreen: jest.fn(),
+      enableFormatSelector: true,
+      formatSelectorOptions: undefined,
     };
 
     jest.clearAllMocks();
@@ -1262,7 +1266,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
   });
 
-  describe('window', () => {
+  describe('reduced time range', () => {
     function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
@@ -1280,7 +1284,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       };
     }
 
-    it('should not show the window component if window is not available', () => {
+    it('should not show the reduced time range component if reduced time range is not available', () => {
       const props = {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1307,19 +1311,27 @@ describe('IndexPatternDimensionEditorPanel', () => {
       };
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
-      expect(wrapper.find('[data-test-subj="indexPattern-dimension-window-row"]')).toHaveLength(0);
+      expect(
+        wrapper.find('[data-test-subj="indexPattern-dimension-reducedTimeRange-row"]')
+      ).toHaveLength(0);
     });
 
-    it('should show current window if set', () => {
-      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({ window: '5m' })} />);
-      expect(wrapper.find(Window).find(EuiComboBox).prop('selectedOptions')[0].value).toEqual('5m');
+    it('should show current reduced time range if set', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent {...getProps({ reducedTimeRange: '5m' })} />
+      );
+      expect(
+        wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('selectedOptions')[0].value
+      ).toEqual('5m');
     });
 
-    it('should allow to set window initially', () => {
+    it('should allow to set reduced time range initially', () => {
       const props = getProps({});
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
-      wrapper.find(Window).find(EuiComboBox).prop('onChange')!([{ value: '1h', label: '' }]);
+      wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onChange')!([
+        { value: '1h', label: '' },
+      ]);
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1328,7 +1340,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columns: {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
-                window: '1h',
+                reducedTimeRange: '1h',
               }),
             },
           },
@@ -1336,9 +1348,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
-    it('should carry over window to other operation if possible', () => {
+    it('should carry over reduced time range to other operation if possible', () => {
       const props = getProps({
-        window: '1d',
+        reducedTimeRange: '1d',
         sourceField: 'bytes',
         operationType: 'sum',
         label: 'Sum of bytes per hour',
@@ -1353,7 +1365,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columns: {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
-                window: '1d',
+                reducedTimeRange: '1d',
               }),
             },
           },
@@ -1361,12 +1373,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
-    it('should allow to change window', () => {
+    it('should allow to change reduced time range', () => {
       const props = getProps({
         timeShift: '1d',
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper.find(Window).find(EuiComboBox).prop('onCreateOption')!('7m', []);
+      wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onCreateOption')!('7m', []);
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1375,7 +1387,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columns: {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
-                window: '7m',
+                reducedTimeRange: '7m',
               }),
             },
           },
@@ -1383,18 +1395,18 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
-    it('should report a generic error for invalid window string', () => {
+    it('should report a generic error for invalid reduced time range string', () => {
       const props = getProps({
-        window: '5 months',
+        reducedTimeRange: '5 months',
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
 
-      expect(wrapper.find(Window).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
+      expect(wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
 
       expect(
         wrapper
-          .find(Window)
-          .find('[data-test-subj="indexPattern-dimension-window-row"]')
+          .find(ReducedTimeRange)
+          .find('[data-test-subj="indexPattern-dimension-reducedTimeRange-row"]')
           .first()
           .prop('error')
       ).toBe('Time range value is not valid.');
@@ -2232,6 +2244,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 searchable: true,
               },
             ]),
+            isPersisted: true,
+            spec: {},
           },
         }}
       />

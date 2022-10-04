@@ -24,7 +24,7 @@ const rawControlAttributes2: RawControlGroupAttributes = {
   controlStyle: 'oneLine',
   chainingSystem: 'NONE',
   panelsJSON:
-    '{"9cf90205-e94d-43c9-a3aa-45f359a7522f":{"order":0,"width":"auto","type":"rangeSliderControl","explicitInput":{"title":"DistanceKilometers","fieldName":"DistanceKilometers","id":"9cf90205-e94d-43c9-a3aa-45f359a7522f","enhancements":{}}},"b47916fd-fc03-4dcd-bef1-5c3b7a315723":{"order":1,"width":"auto","type":"timeSlider","explicitInput":{"title":"timestamp","fieldName":"timestamp","id":"b47916fd-fc03-4dcd-bef1-5c3b7a315723","enhancements":{}}},"f6b076c6-9ef5-483e-b08d-d313d60d4b8c":{"order":2,"width":"auto","type":"rangeSliderControl","explicitInput":{"title":"DistanceMiles","fieldName":"DistanceMiles","id":"f6b076c6-9ef5-483e-b08d-d313d60d4b8c","enhancements":{}}}}',
+    '{"9cf90205-e94d-43c9-a3aa-45f359a7522f":{"order":0,"width":"auto","type":"rangeSliderControl","explicitInput":{"title":"DistanceKilometers","fieldName":"DistanceKilometers","id":"9cf90205-e94d-43c9-a3aa-45f359a7522f","enhancements":{}}},"f6b076c6-9ef5-483e-b08d-d313d60d4b8c":{"order":2,"width":"auto","type":"rangeSliderControl","explicitInput":{"title":"DistanceMiles","fieldName":"DistanceMiles","id":"f6b076c6-9ef5-483e-b08d-d313d60d4b8c","enhancements":{}}}}',
   ignoreParentSettingsJSON:
     '{"ignoreFilters":true,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
 };
@@ -34,7 +34,7 @@ const rawControlAttributes3: RawControlGroupAttributes = {
   controlStyle: 'oneLine',
   chainingSystem: 'HIERARCHICAL',
   panelsJSON:
-    '{"9cf90205-e94d-43c9-a3aa-45f359a7522f":{"order":0,"width":"auto","type":"rangeSliderControl","explicitInput":{"title":"DistanceKilometers","fieldName":"DistanceKilometers","id":"9cf90205-e94d-43c9-a3aa-45f359a7522f","enhancements":{}}},"b47916fd-fc03-4dcd-bef1-5c3b7a315723":{"order":1,"width":"auto","type":"timeSlider","explicitInput":{"title":"timestamp","fieldName":"timestamp","id":"b47916fd-fc03-4dcd-bef1-5c3b7a315723","enhancements":{}}},"ee325e9e-6ec1-41f9-953f-423d59850d44":{"order":2,"width":"auto","type":"optionsListControl","explicitInput":{"title":"Carrier","fieldName":"Carrier","id":"ee325e9e-6ec1-41f9-953f-423d59850d44","enhancements":{}}},"cb0f5fcd-9ad9-4d4a-b489-b75bd060399b":{"order":3,"width":"auto","type":"optionsListControl","explicitInput":{"title":"DestCityName","fieldName":"DestCityName","id":"cb0f5fcd-9ad9-4d4a-b489-b75bd060399b","enhancements":{}}}}',
+    '{"9cf90205-e94d-43c9-a3aa-45f359a7522f":{"order":0,"width":"auto","type":"rangeSliderControl","explicitInput":{"title":"DistanceKilometers","fieldName":"DistanceKilometers","id":"9cf90205-e94d-43c9-a3aa-45f359a7522f","enhancements":{}}},"ee325e9e-6ec1-41f9-953f-423d59850d44":{"order":2,"width":"auto","type":"optionsListControl","explicitInput":{"title":"Carrier","fieldName":"Carrier","id":"ee325e9e-6ec1-41f9-953f-423d59850d44","enhancements":{}}},"cb0f5fcd-9ad9-4d4a-b489-b75bd060399b":{"order":3,"width":"auto","type":"optionsListControl","explicitInput":{"title":"DestCityName","fieldName":"DestCityName","id":"cb0f5fcd-9ad9-4d4a-b489-b75bd060399b","enhancements":{}}}}',
   ignoreParentSettingsJSON:
     '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
 };
@@ -97,7 +97,7 @@ describe('Control group telemetry function', () => {
   });
 
   test('counts all telemetry over multiple runs', () => {
-    expect(finalTelemetry.total).toBe(10);
+    expect(finalTelemetry.total).toBe(8);
   });
 
   test('counts control types over multiple runs.', () => {
@@ -109,10 +109,6 @@ describe('Control group telemetry function', () => {
       rangeSliderControl: {
         details: {},
         total: 3,
-      },
-      timeSlider: {
-        details: {},
-        total: 2,
       },
     });
   });

@@ -16,8 +16,8 @@ import {
   EuiButtonIcon,
   EuiSpacer,
   EuiButton,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

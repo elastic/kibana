@@ -12,12 +12,12 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiImage,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from '@kbn/core/public';
@@ -36,99 +36,100 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   if (canAccessIntegrations) {
     return (
-      <>
-        <section className="homDataAdd" aria-labelledby="homDataAdd__title">
-          <EuiFlexGroup alignItems="flexEnd">
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2 id="homDataAdd__title">
-                  <FormattedMessage
-                    id="home.addData.sectionTitle"
-                    defaultMessage="Get started by adding integrations"
-                  />
-                </h2>
-              </EuiTitle>
+      <KibanaPageTemplate.Section
+        bottomBorder
+        paddingSize="xl"
+        className="homDataAdd"
+        aria-labelledby="homDataAdd__title"
+      >
+        <EuiFlexGroup alignItems="flexEnd">
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2 id="homDataAdd__title">
+                <FormattedMessage
+                  id="home.addData.sectionTitle"
+                  defaultMessage="Get started by adding integrations"
+                />
+              </h2>
+            </EuiTitle>
 
-              <EuiSpacer />
+            <EuiSpacer />
 
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="home.addData.text"
-                    defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, add a sample data set."
-                  />
-                </p>
-              </EuiText>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="home.addData.text"
+                  defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, add a sample data set."
+                />
+              </p>
+            </EuiText>
 
-              <EuiSpacer />
+            <EuiSpacer />
 
-              <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-                <EuiFlexItem grow={false}>
-                  <RedirectAppLinks application={application}>
-                    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                    <EuiButton
-                      data-test-subj="homeAddData"
-                      fill
-                      href={addBasePath('/app/integrations/browse')}
-                      iconType="plusInCircle"
-                      onClick={(event: MouseEvent) => {
-                        trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
-                        createAppNavigationHandler('/app/integrations/browse')(event);
-                      }}
-                    >
-                      <FormattedMessage
-                        id="home.addData.addDataButtonLabel"
-                        defaultMessage="Add integrations"
-                      />
-                    </EuiButton>
-                  </RedirectAppLinks>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="addSampleData"
-                    href={addBasePath('#/tutorial_directory/sampleData')}
-                    iconType="documents"
+            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <RedirectAppLinks application={application}>
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiButton
+                    data-test-subj="homeAddData"
+                    fill
+                    href={addBasePath('/app/integrations/browse')}
+                    iconType="plusInCircle"
+                    onClick={(event: MouseEvent) => {
+                      trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
+                      createAppNavigationHandler('/app/integrations/browse')(event);
+                    }}
                   >
                     <FormattedMessage
-                      id="home.addData.sampleDataButtonLabel"
-                      defaultMessage="Try sample data"
+                      id="home.addData.addDataButtonLabel"
+                      defaultMessage="Add integrations"
                     />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                  </EuiButton>
+                </RedirectAppLinks>
+              </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="uploadFile"
-                    href={addBasePath('#/tutorial_directory/fileDataViz')}
-                    iconType="importAction"
-                  >
-                    <FormattedMessage
-                      id="home.addData.uploadFileButtonLabel"
-                      defaultMessage="Upload a file"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="addSampleData"
+                  href={addBasePath('#/tutorial_directory/sampleData')}
+                  iconType="documents"
+                >
+                  <FormattedMessage
+                    id="home.addData.sampleDataButtonLabel"
+                    defaultMessage="Try sample data"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiImage
-                alt="Illustration of Elastic data integrations"
-                className="homDataAdd__illustration"
-                src={
-                  addBasePath('/plugins/kibanaReact/assets/') +
-                  (isDarkMode
-                    ? 'illustration_integrations_darkmode.svg'
-                    : 'illustration_integrations_lightmode.svg')
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </section>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="uploadFile"
+                  href={addBasePath('#/tutorial_directory/fileDataViz')}
+                  iconType="importAction"
+                >
+                  <FormattedMessage
+                    id="home.addData.uploadFileButtonLabel"
+                    defaultMessage="Upload a file"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
 
-        <EuiHorizontalRule margin="xxl" />
-      </>
+          <EuiFlexItem>
+            <EuiImage
+              alt="Illustration of Elastic data integrations"
+              className="homDataAdd__illustration"
+              src={
+                addBasePath('/plugins/kibanaReact/assets/') +
+                (isDarkMode
+                  ? 'illustration_integrations_darkmode.svg'
+                  : 'illustration_integrations_lightmode.svg')
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </KibanaPageTemplate.Section>
     );
   } else {
     return null;

@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
-import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
+import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
   useAuthz,
@@ -35,8 +35,12 @@ import {
   sendGetAgentTags,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
-import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../../constants';
+import {
+  AgentStatusKueryHelper,
+  isAgentUpgradeable,
+  policyHasFleetServer,
+} from '../../../services';
+import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -47,7 +51,6 @@ import {
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
-import { CurrentBulkUpgradeCallout } from './components';
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
@@ -55,7 +58,7 @@ import { Tags } from './components/tags';
 import { TagsAddRemove } from './components/tags_add_remove';
 import { TableRowActions } from './components/table_row_actions';
 import { EmptyPrompt } from './components/empty_prompt';
-import { useCurrentUpgrades } from './hooks';
+import { AgentActivityFlyout } from './components';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -132,6 +135,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     isOpen: false,
   });
 
+  const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
+
   const flyoutContext = useFlyoutContext();
 
   // Agent actions states
@@ -206,6 +211,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
+  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
@@ -389,10 +395,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       return false;
     }
 
-    return agentPolicy.package_policies.some(
-      (ap: string | PackagePolicy) =>
-        typeof ap !== 'string' && ap.package?.name === FLEET_SERVER_PACKAGE
-    );
+    return policyHasFleetServer(agentPolicy);
   }, [agentToUnenroll, agentPoliciesIndexedById]);
 
   // Fleet server unhealthy status
@@ -401,8 +404,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
 
-  // Current upgrades
-  const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades(fetchData);
+  const onClickAgentActivity = useCallback(() => {
+    setAgentActivityFlyoutOpen(true);
+  }, [setAgentActivityFlyoutOpen]);
 
   const columns = [
     {
@@ -543,8 +547,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
   ];
 
+  const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
+    fetchData({ refreshTags });
+    setShowAgentActivityTour({ isOpen: true });
+  };
+
   return (
     <>
+      {isAgentActivityFlyoutOpen ? (
+        <EuiPortal>
+          <AgentActivityFlyout
+            onAbortSuccess={fetchData}
+            onClose={() => setAgentActivityFlyoutOpen(false)}
+            refreshAgentActivity={isLoading}
+          />
+        </EuiPortal>
+      ) : null}
       {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
@@ -563,7 +581,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agents={[agentToReassign]}
             onClose={() => {
               setAgentToReassign(undefined);
-              fetchData();
+              refreshAgents();
             }}
           />
         </EuiPortal>
@@ -575,7 +593,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agentCount={1}
             onClose={() => {
               setAgentToUnenroll(undefined);
-              fetchData({ refreshTags: true });
+              refreshAgents({ refreshTags: true });
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
             hasFleetServer={agentToUnenrollHasFleetServer}
@@ -589,8 +607,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agentCount={1}
             onClose={() => {
               setAgentToUpgrade(undefined);
-              fetchData();
-              refreshUpgrades();
+              refreshAgents();
             }}
           />
         </EuiPortal>
@@ -602,7 +619,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           selectedTags={agentToAddRemoveTags?.tags ?? []}
           button={tagsPopoverButton!}
           onTagsUpdated={() => {
-            fetchData();
+            refreshAgents();
           }}
           onClosePopover={() => {
             setShowTagsAddRemove(false);
@@ -619,13 +636,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiSpacer size="l" />
         </>
       )}
-      {/* Current upgrades callout */}
-      {currentUpgrades.map((currentUpgrade) => (
-        <React.Fragment key={currentUpgrade.actionId}>
-          <CurrentBulkUpgradeCallout currentUpgrade={currentUpgrade} abortUpgrade={abortUpgrade} />
-          <EuiSpacer size="l" />
-        </React.Fragment>
-      ))}
       {/* Search and filter bar */}
       <SearchAndFilterBar
         agentPolicies={agentPolicies}
@@ -646,12 +656,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) =>
-          Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
-        }
+        refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
         visibleAgents={agents}
+        onClickAgentActivity={onClickAgentActivity}
+        showAgentActivityTour={showAgentActivityTour}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

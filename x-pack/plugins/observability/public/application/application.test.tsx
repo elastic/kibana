@@ -11,8 +11,8 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
-import { ObservabilityPublicPluginsStart } from '../plugin';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from '.';
 
@@ -66,9 +66,16 @@ describe('renderApp', () => {
       theme$: themeServiceMock.createTheme$(),
     } as unknown as AppMountParameters;
 
+    const config = {
+      unsafe: {
+        alertDetails: { enabled: false },
+      },
+    } as ConfigSchema;
+
     expect(() => {
       const unmount = renderApp({
         core,
+        config,
         plugins,
         appMountParameters: params,
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),

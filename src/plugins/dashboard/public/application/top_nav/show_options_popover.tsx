@@ -8,11 +8,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
 import { OptionsMenu } from './options';
-import { KibanaThemeProvider } from '../../services/kibana_react';
+import { pluginServices } from '../../services/plugin_services';
 
 let isOpen = false;
 
@@ -33,7 +35,6 @@ export interface ShowOptionsPopoverProps {
   onSyncTooltipsChange: (syncTooltips: boolean) => void;
   hidePanelTitles: boolean;
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
-  theme$: CoreStart['theme']['theme$'];
 }
 
 export function showOptionsPopover({
@@ -46,8 +47,13 @@ export function showOptionsPopover({
   onSyncColorsChange,
   syncTooltips,
   onSyncTooltipsChange,
-  theme$,
 }: ShowOptionsPopoverProps) {
+  const {
+    settings: {
+      theme: { theme$ },
+    },
+  } = pluginServices.getServices();
+
   if (isOpen) {
     onClose();
     return;

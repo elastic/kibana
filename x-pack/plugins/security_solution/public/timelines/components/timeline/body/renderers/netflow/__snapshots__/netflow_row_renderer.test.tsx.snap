@@ -3,6 +3,7 @@
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <DocumentFragment>
   .c0 {
+  display: inline-block;
   font-size: 12px;
   line-height: 1.5;
   padding-left: 12px;

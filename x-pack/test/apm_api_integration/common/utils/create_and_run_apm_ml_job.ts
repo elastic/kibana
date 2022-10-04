@@ -10,11 +10,12 @@ import datafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/apm_t
 import { MlApi } from '../../../functional/services/ml/api';
 
 export function createAndRunApmMlJob({ ml, environment }: { ml: MlApi; environment: string }) {
+  const jobId = `apm-tx-metrics-${environment}`;
   return ml.createAndRunAnomalyDetectionLookbackJob(
     // @ts-expect-error not entire job config
     {
       ...job,
-      job_id: `apm-tx-metrics-${environment}`,
+      job_id: jobId,
       allow_lazy_open: false,
       custom_settings: {
         job_tags: {
@@ -25,8 +26,9 @@ export function createAndRunApmMlJob({ ml, environment }: { ml: MlApi; environme
     },
     {
       ...datafeed,
-      job_id: `apm-tx-metrics-${environment}`,
-      indices: ['apm-*'],
+      indices_options: { allow_no_indices: true },
+      job_id: jobId,
+      indices: ['metrics-apm*', 'apm-*'],
       datafeed_id: `apm-tx-metrics-${environment}-datafeed`,
       query: {
         bool: {

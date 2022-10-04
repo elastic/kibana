@@ -1077,10 +1077,11 @@ describe('embeddable', () => {
 
   it('should call onload after rerender and onData$ call ', async () => {
     const onLoad = jest.fn();
+    const adapters = { tables: {} };
 
     expressionRenderer = jest.fn(({ onData$ }) => {
       setTimeout(() => {
-        onData$?.({});
+        onData$?.({}, adapters);
       }, 10);
 
       return null;
@@ -1157,9 +1158,7 @@ describe('embeddable', () => {
 
     // loading should become false
     expect(onLoad).toHaveBeenCalledTimes(2);
-
-    expect(onLoad.mock.calls[1][0]).toEqual(false);
-    expect(onLoad.mock.calls[1][1]).toMatchInlineSnapshot(`undefined`);
+    expect(onLoad).toHaveBeenNthCalledWith(2, false, adapters);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
@@ -1206,9 +1205,7 @@ describe('embeddable', () => {
 
     // loading should again become false
     expect(onLoad).toHaveBeenCalledTimes(4);
-
-    expect(onLoad.mock.calls[3][0]).toEqual(false);
-    expect(onLoad.mock.calls[3][1]).toMatchInlineSnapshot(`undefined`);
+    expect(onLoad).toHaveBeenNthCalledWith(4, false, adapters);
   });
 
   it('should call onFilter event on filter call ', async () => {
@@ -1468,5 +1465,89 @@ describe('embeddable', () => {
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
     expect(expressionRenderer.mock.calls[1][0]!.expression).toBe(`edited`);
+  });
+
+  it('should override noPadding in the display options if noPadding is set in the embeddable input', async () => {
+    expressionRenderer = jest.fn((_) => null);
+
+    const visDocument: Document = {
+      state: {
+        visualization: {},
+        datasourceStates: {},
+        query: { query: '', language: 'lucene' },
+        filters: [],
+      },
+      references: [],
+      title: 'My title',
+      visualizationType: 'testVis',
+    };
+
+    const createEmbeddable = (noPadding?: boolean) => {
+      return new Embeddable(
+        {
+          timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+          attributeService: attributeServiceMockFromSavedVis(visDocument),
+          data: dataMock,
+          expressionRenderer,
+          basePath,
+          dataViews: {} as DataViewsContract,
+          capabilities: {
+            canSaveDashboards: true,
+            canSaveVisualizations: true,
+            discover: {},
+            navLinks: {},
+          },
+          inspector: inspectorPluginMock.createStartContract(),
+          getTrigger,
+          theme: themeServiceMock.createStartContract(),
+          visualizationMap: {
+            [visDocument.visualizationType as string]: {
+              getDisplayOptions: () => ({
+                noPadding: false,
+              }),
+            } as unknown as Visualization,
+          },
+          datasourceMap: {},
+          injectFilterReferences: jest.fn(mockInjectFilterReferences),
+          documentToExpression: () =>
+            Promise.resolve({
+              ast: {
+                type: 'expression',
+                chain: [
+                  { type: 'function', function: 'my', arguments: {} },
+                  { type: 'function', function: 'expression', arguments: {} },
+                ],
+              },
+              errors: undefined,
+            }),
+          uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
+        },
+        {
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+          noPadding,
+        } as LensEmbeddableInput
+      );
+    };
+
+    let embeddable = createEmbeddable();
+    embeddable.render(mountpoint);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+    expect(expressionRenderer.mock.calls[0][0]!.padding).toBe('s');
+
+    embeddable = createEmbeddable(true);
+    embeddable.render(mountpoint);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+    expect(expressionRenderer.mock.calls[1][0]!.padding).toBe(undefined);
   });
 });

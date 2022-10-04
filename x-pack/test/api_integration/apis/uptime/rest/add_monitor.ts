@@ -8,7 +8,8 @@ import uuid from 'uuid';
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
-import { DataStream, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, DataStream, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
@@ -20,7 +21,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[POST] /internal/uptime/service/monitors', function () {
+  describe('AddNewMonitors', function () {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertest');
@@ -139,6 +140,41 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.status).eql(400);
     });
 
+    it('omits unknown keys', async () => {
+      // Delete a required property to make payload invalid
+      const newMonitor = {
+        name: 'Sample name',
+        url: 'https://elastic.co',
+        unknownKey: 'unknownValue',
+        type: 'http',
+        locations: [
+          {
+            id: 'eu-west-01',
+            label: 'Europe West',
+            geo: {
+              lat: 33.2343132435,
+              lon: 73.2342343434,
+            },
+            url: 'https://example-url.com',
+            isServiceManaged: true,
+          },
+        ],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(newMonitor)
+        .expect(200);
+
+      const response = await supertestAPI
+        .get(`${API_URLS.SYNTHETICS_MONITORS}/${apiResponse.body.id}`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(response.body.attributes).not.to.have.keys('unknownkey', 'url');
+    });
+
     it('can create monitor with API key with proper permissions', async () => {
       await supertestAPI
         .post('/internal/security/api_key')
@@ -248,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
       const password = `${username}-password`;
       const SPACE_ID = `test-space-${uuid.v4()}`;
       const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+
       try {
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
@@ -287,6 +324,146 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
+      }
+    });
+
+    it('sets namespace to Kibana space when not set to a custom namespace', async () => {
+      const username = 'admin';
+      const password = `${username}-password`;
+      const roleName = 'uptime-role';
+      const SPACE_ID = `test-space-${uuid.v4()}`;
+      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const EXPECTED_NAMESPACE = formatKibanaNamespace(SPACE_ID);
+      const monitor = {
+        ...httpMonitorJson,
+        [ConfigKey.NAMESPACE]: 'default',
+      };
+      let monitorId = '';
+
+      try {
+        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        const apiResponse = await supertestWithoutAuth
+          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send(monitor)
+          .expect(200);
+        monitorId = apiResponse.body.id;
+        expect(apiResponse.body.attributes[ConfigKey.NAMESPACE]).eql(EXPECTED_NAMESPACE);
+      } finally {
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+        await supertestAPI
+          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+      }
+    });
+
+    it('preserves the passed namespace when preserve_namespace is passed', async () => {
+      const username = 'admin';
+      const password = `${username}-password`;
+      const roleName = 'uptime-role';
+      const SPACE_ID = `test-space-${uuid.v4()}`;
+      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const monitor = {
+        ...httpMonitorJson,
+        [ConfigKey.NAMESPACE]: 'default',
+      };
+      let monitorId = '';
+
+      try {
+        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        const apiResponse = await supertestWithoutAuth
+          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .query({ preserve_namespace: true })
+          .set('kbn-xsrf', 'true')
+          .send(monitor)
+          .expect(200);
+        monitorId = apiResponse.body.id;
+        expect(apiResponse.body.attributes[ConfigKey.NAMESPACE]).eql('default');
+      } finally {
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+        await supertestAPI
+          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+      }
+    });
+
+    it('sets namespace to custom namespace when set', async () => {
+      const username = 'admin';
+      const password = `${username}-password`;
+      const roleName = 'uptime-role';
+      const SPACE_ID = `test-space-${uuid.v4()}`;
+      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const monitor = httpMonitorJson;
+      let monitorId = '';
+
+      try {
+        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        const apiResponse = await supertestWithoutAuth
+          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send(monitor)
+          .expect(200);
+        monitorId = apiResponse.body.id;
+        expect(apiResponse.body.attributes[ConfigKey.NAMESPACE]).eql(monitor[ConfigKey.NAMESPACE]);
+      } finally {
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+        await supertestAPI
+          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
       }
     });
   });

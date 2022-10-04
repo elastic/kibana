@@ -14,7 +14,7 @@ import type {
   PutPreconfigurationSchema,
   PostResetOnePreconfiguredAgentPoliciesSchema,
 } from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import {
   ensurePreconfiguredPackagesAndPolicies,
   outputService,
@@ -48,7 +48,7 @@ export const updatePreconfigurationHandler: FleetRequestHandler<
     );
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -65,7 +65,7 @@ export const resetOnePreconfigurationHandler: FleetRequestHandler<
     await resetPreconfiguredAgentPolicies(soClient, esClient, request.params.agentPolicyId);
     return response.ok({});
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -82,6 +82,6 @@ export const resetPreconfigurationHandler: FleetRequestHandler<
     await resetPreconfiguredAgentPolicies(soClient, esClient);
     return response.ok({});
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

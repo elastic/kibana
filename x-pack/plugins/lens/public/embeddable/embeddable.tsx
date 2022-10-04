@@ -7,6 +7,7 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { DataViewBase, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -19,11 +20,11 @@ import {
   getEsQueryConfig,
   mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
-import type { Adapters, Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
-import { ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
+import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -44,6 +45,7 @@ import {
   SelfStyledEmbeddable,
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -54,7 +56,8 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -78,7 +81,7 @@ import { getLensInspectorService, LensInspector } from '../lens_inspector_servic
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
 import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
-import { convertDataViewIntoLensIndexPattern } from '../indexpattern_service/loader';
+import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -95,12 +98,14 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  timeslice?: [number, number];
   palette?: PaletteOutput;
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
+  noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
-  onLoad?: (isLoading: boolean, adapters: Adapters | undefined) => void;
+  onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onFilter?: (data: ClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
@@ -231,6 +236,7 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
+  private warningDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
   private errors: ErrorMessage[] | undefined;
@@ -467,15 +473,23 @@ export class Embeddable
     const cleanedFilters = containerState.filters
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
+    const nextTimeRange =
+      containerState.timeslice !== undefined
+        ? {
+            from: new Date(containerState.timeslice[0]).toISOString(),
+            to: new Date(containerState.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : containerState.timeRange;
     if (
-      !isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
+      !isEqual(nextTimeRange, this.externalSearchContext.timeRange) ||
       !isEqual(containerState.query, this.externalSearchContext.query) ||
       !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
       this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
       this.embeddableTitle !== this.getTitle()
     ) {
       this.externalSearchContext = {
-        timeRange: containerState.timeRange,
+        timeRange: nextTimeRange,
         query: containerState.query,
         filters: cleanedFilters,
         searchSessionId: containerState.searchSessionId,
@@ -485,6 +499,26 @@ export class Embeddable
     }
 
     return isDirty;
+  }
+
+  private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+    if (!activeDatasourceId || !adapters?.requests) return;
+    const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const warnings: React.ReactNode[] = [];
+    this.deps.data.search.showWarnings(adapters.requests, (warning) => {
+      const warningMessage = activeDatasource.getSearchWarningMessages?.(
+        docDatasourceState,
+        warning
+      );
+
+      warnings.push(...(warningMessage || []));
+      if (warningMessage && warningMessage.length) return true;
+    });
+    if (warnings && this.warningDomNode) {
+      render(<Warnings warnings={warnings} />, this.warningDomNode);
+    }
   }
 
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
@@ -500,6 +534,8 @@ export class Embeddable
       loading: false,
       error: type === 'error' ? error : undefined,
     });
+
+    this.handleWarnings(adapters);
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -527,10 +563,18 @@ export class Embeddable
 
     const executionContext = this.getExecutionContext();
 
-    trackUiCounterEvents(
-      [...datasourceEvents, ...visualizationEvents, ...getExecutionContextEvents(executionContext)],
-      executionContext
-    );
+    const events = [
+      ...datasourceEvents,
+      ...visualizationEvents,
+      ...getExecutionContextEvents(executionContext),
+    ];
+
+    const adHocDataViews = Object.values(this.savedVis?.state.adHocDataViews || {});
+    adHocDataViews.forEach(() => {
+      events.push('ad_hoc_data_view');
+    });
+
+    trackUiCounterEvents(events, executionContext);
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
@@ -615,6 +659,19 @@ export class Embeddable
           }}
           noPadding={this.visDisplayOptions?.noPadding}
         />
+        <div
+          css={css({
+            position: 'absolute',
+            zIndex: 2,
+            right: euiThemeVars.euiSizeM,
+            bottom: euiThemeVars.euiSizeM,
+          })}
+          ref={(el) => {
+            if (el) {
+              this.warningDomNode = el;
+            }
+          }}
+        />
       </KibanaThemeProvider>,
       domNode
     );
@@ -655,6 +712,7 @@ export class Embeddable
         this.savedVis.state.filters,
         this.savedVis.references
       ),
+      disableShardWarnings: true,
     };
 
     if (this.externalSearchContext.query) {
@@ -757,9 +815,12 @@ export class Embeddable
   }
 
   private async loadViewUnderlyingDataArgs(): Promise<boolean> {
+    if (!this.savedVis || !this.activeDataInfo.activeData) {
+      return false;
+    }
     const mergedSearchContext = this.getMergedSearchContext();
 
-    if (!this.activeDataInfo.activeData || !mergedSearchContext.timeRange || !this.savedVis) {
+    if (!mergedSearchContext.timeRange) {
       return false;
     }
 
@@ -770,8 +831,20 @@ export class Embeddable
 
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const adHocDataviews = await Promise.all(
+      Object.values(this.savedVis?.state.adHocDataViews || {})
+        .map((persistedSpec) => {
+          return DataViewPersistableStateService.inject(
+            persistedSpec,
+            this.savedVis?.references || []
+          );
+        })
+        .map((spec) => this.deps.dataViews.create(spec))
+    );
 
-    const indexPatternsCache = this.indexPatterns.reduce(
+    const allIndexPatterns = [...this.indexPatterns, ...adHocDataviews];
+
+    const indexPatternsCache = allIndexPatterns.reduce(
       (acc, indexPattern) => ({
         [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
         ...acc,
@@ -782,7 +855,7 @@ export class Embeddable
     if (!this.activeDataInfo.activeDatasourceState) {
       this.activeDataInfo.activeDatasourceState = this.activeDataInfo.activeDatasource.initialize(
         docDatasourceState,
-        this.savedVis?.references,
+        [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],
         undefined,
         undefined,
         indexPatternsCache
@@ -831,6 +904,13 @@ export class Embeddable
       this.savedVis?.references.map(({ id }) => id) || [],
       this.deps.dataViews
     );
+    (
+      await Promise.all(
+        Object.values(this.savedVis?.state.adHocDataViews || {}).map((spec) =>
+          this.deps.dataViews.create(spec)
+        )
+      )
+    ).forEach((dataView) => indexPatterns.push(dataView));
 
     this.indexPatterns = uniqBy(indexPatterns, 'id');
 
@@ -945,6 +1025,17 @@ export class Embeddable
     ) {
       return;
     }
-    return this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+
+    let displayOptions =
+      this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+
+    if (this.input.noPadding !== undefined) {
+      displayOptions = {
+        ...displayOptions,
+        noPadding: this.input.noPadding,
+      };
+    }
+
+    return displayOptions;
   }
 }

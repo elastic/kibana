@@ -6,12 +6,12 @@
  */
 
 import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
+import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 
 import type { ExportRulesDetails } from '../../../../common/detection_engine/schemas/response/export_rules_details_schema';
-import type { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 
 export const getExportDetailsNdjson = (
-  rules: Array<Partial<RulesSchema>>,
+  rules: FullResponseSchema[],
   missingRules: Array<{ rule_id: string }> = [],
   exceptionDetails?: ExportExceptionDetails
 ): string => {

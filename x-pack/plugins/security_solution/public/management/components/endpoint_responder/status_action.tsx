@@ -46,7 +46,7 @@ export const EndpointStatusActionResult = memo<
     error: fetchedDetailsError,
     isFetching,
     isFetched,
-  } = useGetEndpointDetails(endpointId, { enabled: isPending, queryKey });
+  } = useGetEndpointDetails(endpointId, { enabled: isPending, queryKey: [queryKey] });
 
   const { data: fetchedPendingActionsSummary } = useGetEndpointPendingActionsSummary([endpointId], {
     enabled: isPending,

@@ -1,0 +1,160 @@
+{
+  "id": "@kbn/core-application-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-application-common",
+        "id": "def-common.AppCategory",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppCategory",
+        "description": [
+          "\nA category definition for nav links to know where to sort them in the left hand nav"
+        ],
+        "path": "packages/core/application/core-application-common/src/app_category.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-application-common",
+            "id": "def-common.AppCategory.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique identifier for the categories"
+            ],
+            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-application-common",
+            "id": "def-common.AppCategory.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "\nLabel used for category name.\nAlso used as aria-label if one isn't set."
+            ],
+            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-application-common",
+            "id": "def-common.AppCategory.ariaLabel",
+            "type": "string",
+            "tags": [],
+            "label": "ariaLabel",
+            "description": [
+              "\nIf the visual label isn't appropriate for screen readers,\ncan override it here"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-application-common",
+            "id": "def-common.AppCategory.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [
+              "\nThe order that categories will be sorted in\nPrefer large steps between categories to allow for further editing\n(Default categories are in steps of 1000)"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-application-common",
+            "id": "def-common.AppCategory.euiIconType",
+            "type": "string",
+            "tags": [],
+            "label": "euiIconType",
+            "description": [
+              "\nDefine an icon to be used for the category\nIf the category is only 1 item, and no icon is defined, will default to the product icon\nDefaults to initials if no icon is defined"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-application-common",
+        "id": "def-common.APP_WRAPPER_CLASS",
+        "type": "string",
+        "tags": [],
+        "label": "APP_WRAPPER_CLASS",
+        "description": [
+          "\nThe class name for top level *and* nested application wrappers to ensure proper layout"
+        ],
+        "signature": [
+          "\"kbnAppWrapper\""
+        ],
+        "path": "packages/core/application/core-application-common/src/app_wrapper_class.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-application-common",
+        "id": "def-common.DEFAULT_APP_CATEGORIES",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_APP_CATEGORIES",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "@kbn/core-application-common",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationCommonPluginApi",
+            "section": "def-common.AppCategory",
+            "text": "AppCategory"
+          },
+          "; }"
+        ],
+        "path": "packages/core/application/core-application-common/src/default_app_categories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

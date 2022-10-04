@@ -7,7 +7,7 @@
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
 import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';

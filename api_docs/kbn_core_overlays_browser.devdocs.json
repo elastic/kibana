@@ -29,6 +29,7 @@
         "description": [],
         "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -46,6 +47,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
@@ -62,6 +64,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -78,6 +81,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -99,6 +103,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
@@ -114,6 +119,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -137,6 +143,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
@@ -152,6 +159,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -169,6 +177,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -185,6 +194,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -204,6 +214,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -219,6 +230,7 @@
         "description": [],
         "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -231,7 +243,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -244,7 +257,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -257,7 +271,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -270,7 +285,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -283,7 +299,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -293,10 +310,11 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | undefined"
+              "\"m\" | \"s\" | \"l\" | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -309,7 +327,8 @@
               "string | number | boolean | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -322,7 +341,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -335,7 +355,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -349,7 +370,8 @@
               " | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -367,6 +389,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
@@ -380,6 +403,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -399,6 +423,7 @@
         ],
         "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -427,6 +452,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
@@ -443,6 +469,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -466,6 +493,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -483,6 +511,7 @@
         "description": [],
         "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -495,7 +524,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -508,7 +538,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -521,7 +552,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -534,7 +566,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -547,7 +580,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -560,7 +594,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -573,7 +608,8 @@
               "\"cancel\" | \"confirm\" | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -587,7 +623,8 @@
               " | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -602,7 +639,8 @@
               "string | number | boolean | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -616,6 +654,7 @@
         "description": [],
         "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -628,7 +667,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -641,7 +681,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -654,7 +695,8 @@
               "string | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -667,7 +709,8 @@
               "string | number | boolean | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -683,6 +726,7 @@
         ],
         "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -711,6 +755,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
@@ -727,6 +772,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -750,6 +796,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -779,6 +826,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
@@ -796,6 +844,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -819,6 +868,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -836,6 +886,7 @@
         "description": [],
         "path": "packages/core/overlays/core-overlays-browser/src/overlays.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -856,7 +907,8 @@
               }
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/overlays.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -883,6 +935,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/overlays.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -898,6 +951,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -911,7 +965,8 @@
                       "T"
                     ],
                     "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -933,7 +988,8 @@
                   " | undefined"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -962,6 +1018,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/overlays.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -977,6 +1034,7 @@
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -990,7 +1048,8 @@
                       "T"
                     ],
                     "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1012,7 +1071,8 @@
                   " | undefined"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1040,6 +1100,7 @@
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/overlays.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1055,7 +1116,8 @@
                   "<HTMLElement>"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
@@ -1075,7 +1137,8 @@
                   " | undefined"
                 ],
                 "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

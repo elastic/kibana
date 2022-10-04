@@ -11,17 +11,20 @@ import type { File } from '../../common/types';
 export function getDownloadHeadersForFile(file: File, fileName?: string): ResponseHeaders {
   return {
     'content-type':
-      (fileName && mime.getType(fileName)) ?? file.mimeType ?? 'application/octet-stream',
+      (fileName && mime.getType(fileName)) ?? file.data.mimeType ?? 'application/octet-stream',
     // Note, this name can be overridden by the client if set via a "download" attribute on the HTML tag.
     'content-disposition': `attachment; filename="${fileName || getDownloadedFileName(file)}"`,
+    'cache-control': 'max-age=31536000, immutable',
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+    'x-content-type-options': 'nosniff',
   };
 }
 
 export function getDownloadedFileName(file: File): string {
   // When creating a file we also calculate the extension so the `file.extension`
   // check is not really necessary except for type checking.
-  if (file.mimeType && file.extension) {
-    return `${file.name}.${file.extension}`;
+  if (file.data.mimeType && file.data.extension) {
+    return `${file.data.name}.${file.data.extension}`;
   }
-  return file.name;
+  return file.data.name;
 }

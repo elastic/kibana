@@ -7,14 +7,23 @@ PKG_REQUIRE_NAME = "@kbn/shared-ux-page-solution-nav"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.scss",
-    "src/**/*.mdx",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.scss",
+    "**/*.mdx",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -69,20 +78,19 @@ TYPES_DEPS = [
   "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
   "//packages/shared-ux/avatar/solution:npm_module_types",
+  "//packages/shared-ux/page/kibana_template/types"
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  root_input_dir = "src",
 )
 
 jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  root_input_dir = "src",
   web = True,
   additional_args = [
     "--copy-files",
@@ -107,7 +115,6 @@ ts_project(
   declaration = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

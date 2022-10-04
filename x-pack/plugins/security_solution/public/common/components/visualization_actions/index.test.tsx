@@ -24,6 +24,7 @@ import { useKibana } from '../../lib/kibana/kibana_react';
 import { CASES_FEATURE_ID } from '../../../../common/constants';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { allCasesCapabilities, allCasesPermissions } from '../../../cases_test_utils';
+import { InputsModelId } from '../../store/inputs/constants';
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return {
@@ -44,7 +45,7 @@ describe('VisualizationActions', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   const newQuery: UpdateQueryParams = {
-    inputId: 'global',
+    inputId: InputsModelId.global,
     id: 'networkDnsHistogramQuery',
     inspect: {
       dsl: ['mockDsl'],

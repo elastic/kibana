@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { servicesFactory } from '@kbn/shared-ux-storybook';
+import { action } from '@storybook/addon-actions';
+
 import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import type {
   KibanaNoDataPageServices,
   KibanaNoDataPageProps,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
-import type { NoDataPageProps } from '@kbn/shared-ux-components';
+import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
 import {
   NoDataViewsPromptStorybookMock,
@@ -23,7 +24,6 @@ import {
   NoDataCardStorybookMock,
   NoDataCardStorybookParams,
 } from '@kbn/shared-ux-card-no-data-mocks';
-import { action } from '@storybook/addon-actions';
 
 type PropArguments = Pick<NoDataPageProps, 'solution' | 'logo'>;
 type ServiceArguments = Pick<KibanaNoDataPageServices, 'hasUserDataView' | 'hasESData'>;
@@ -83,22 +83,11 @@ export class StorybookMock extends AbstractStorybookMock<
   }
 
   getServices(params: Params): KibanaNoDataPageServices {
-    // Workaround to leverage the services package.
-    const { application, data, docLinks, editors, http, permissions, platform } =
-      servicesFactory(params);
-
     return {
-      ...application,
-      ...data,
-      ...docLinks,
-      ...editors,
-      ...http,
-      ...permissions,
-      ...platform,
-      hasESData: () => params.hasESData,
-      hasUserDataView: () => params.hasUserDataView,
       ...noDataCardMock.getServices(params),
       ...noDataViewsMock.getServices(params),
+      hasESData: () => params.hasESData,
+      hasUserDataView: () => params.hasUserDataView,
     };
   }
 }

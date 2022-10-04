@@ -41,8 +41,10 @@ export abstract class Embeddable<
   protected output: TEmbeddableOutput;
   protected input: TEmbeddableInput;
 
-  private readonly input$: Rx.BehaviorSubject<TEmbeddableInput>;
-  private readonly output$: Rx.BehaviorSubject<TEmbeddableOutput>;
+  private readonly inputSubject = new Rx.ReplaySubject<TEmbeddableInput>(1);
+  private readonly outputSubject = new Rx.ReplaySubject<TEmbeddableOutput>(1);
+  private readonly input$ = this.inputSubject.asObservable();
+  private readonly output$ = this.outputSubject.asObservable();
 
   protected renderComplete = new RenderCompleteDispatcher();
 
@@ -71,8 +73,8 @@ export abstract class Embeddable<
     };
     this.parent = parent;
 
-    this.input$ = new Rx.BehaviorSubject<TEmbeddableInput>(this.input);
-    this.output$ = new Rx.BehaviorSubject<TEmbeddableOutput>(this.output);
+    this.inputSubject.next(this.input);
+    this.outputSubject.next(this.output);
 
     if (parent) {
       this.parentSubscription = Rx.merge(parent.getInput$(), parent.getOutput$()).subscribe(() => {
@@ -89,12 +91,7 @@ export abstract class Embeddable<
         map(({ title }) => title || ''),
         distinctUntilChanged()
       )
-      .subscribe(
-        (title) => {
-          this.renderComplete.setTitle(title);
-        },
-        () => {}
-      );
+      .subscribe((title) => this.renderComplete.setTitle(title));
   }
 
   public reportsEmbeddableLoad() {
@@ -142,11 +139,11 @@ export abstract class Embeddable<
   }
 
   public getInput$(): Readonly<Rx.Observable<TEmbeddableInput>> {
-    return this.input$.asObservable();
+    return this.input$;
   }
 
   public getOutput$(): Readonly<Rx.Observable<TEmbeddableOutput>> {
-    return this.output$.asObservable();
+    return this.output$;
   }
 
   public getOutput(): Readonly<TEmbeddableOutput> {
@@ -238,8 +235,8 @@ export abstract class Embeddable<
   public destroy(): void {
     this.destroyed = true;
 
-    this.input$.complete();
-    this.output$.complete();
+    this.inputSubject.complete();
+    this.outputSubject.complete();
 
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
@@ -257,20 +254,20 @@ export abstract class Embeddable<
     }
   }
 
-  protected updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
+  public updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
     const newOutput = {
       ...this.output,
       ...outputChanges,
     };
     if (!fastIsEqual(this.output, newOutput)) {
       this.output = newOutput;
-      this.output$.next(this.output);
+      this.outputSubject.next(this.output);
     }
   }
 
   protected onFatalError(e: Error) {
     this.fatalError = e;
-    this.output$.error(e);
+    this.outputSubject.error(e);
     // if the container is waiting for this embeddable to complete loading,
     // a fatal error counts as complete.
     if (this.deferEmbeddableLoad && this.parent?.isContainer) {
@@ -282,7 +279,7 @@ export abstract class Embeddable<
     if (!fastIsEqual(this.input, newInput)) {
       const oldLastReloadRequestTime = this.input.lastReloadRequestTime;
       this.input = newInput;
-      this.input$.next(newInput);
+      this.inputSubject.next(newInput);
       this.updateOutput({
         title: getPanelTitle(this.input, this.output),
       } as Partial<TEmbeddableOutput>);

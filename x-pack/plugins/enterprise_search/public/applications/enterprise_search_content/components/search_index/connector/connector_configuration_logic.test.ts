@@ -8,7 +8,7 @@
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
-import { ConnectorConfigurationApiLogic } from '../../../api/connector_package/update_connector_configuration_api_logic';
+import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
 
 import { IndexNameLogic } from '../index_name_logic';

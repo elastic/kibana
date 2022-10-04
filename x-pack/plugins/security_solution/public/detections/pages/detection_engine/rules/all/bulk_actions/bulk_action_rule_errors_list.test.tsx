@@ -13,7 +13,7 @@ import { render, screen } from '@testing-library/react';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import type { DryRunResult } from './types';
-import { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkAction } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 
 const Wrapper: FC = ({ children }) => {
   return (
