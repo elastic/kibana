@@ -857,30 +857,36 @@ export function createLayerGroup(draggedLayerId: string, combineLayerId: string)
     dispatch(setLayerParent(draggedLayerId, group.id));
     dispatch(setLayerParent(combineLayerId, group.id));
 
-    // Move group to be on top of combine-layer
-    moveLayer(group.id, combineLayerId, dispatch, getState);
+    // Move group to left of combine-layer
+    moveLayerToLeftOfTarget(group.id, combineLayerId, dispatch, getState);
 
-    // Move dragged-layer to be on top of combine-layer
-    moveLayer(draggedLayerId, combineLayerId, dispatch, getState);
+    // Move dragged-layer to left of combine-layer
+    moveLayerToLeftOfTarget(draggedLayerId, combineLayerId, dispatch, getState);
   };
 }
 
-function moveLayer(
+function moveLayerToLeftOfTarget(
   moveLayerId: string,
-  aboveLayerId: string,
+  targetLayerId: string,
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
   getState: () => MapStoreState
 ) {
   const layerListRaw = getLayerListRaw(getState());
   const moveLayerIndex = layerListRaw.findIndex((layer) => layer.id === moveLayerId);
-  const aboveLayerIndex = layerListRaw.findIndex((layer) => layer.id === aboveLayerId);
-  if (moveLayerIndex !== -1 && aboveLayerIndex !== -1) {
+  const targetLayerIndex = layerListRaw.findIndex((layer) => layer.id === targetLayerId);
+  if (moveLayerIndex !== -1 && targetLayerIndex !== -1) {
+    const newIndex =
+      moveLayerIndex > targetLayerIndex
+        ? // When layer is moved to the right, new left sibling index is to the left of destination
+          targetLayerIndex + 1
+        : // When layer is moved to the left, new left sibling index is the destination index
+          targetLayerIndex;
     const newOrder = [];
     for (let i = 0; i < layerListRaw.length; i++) {
       newOrder.push(i);
     }
     newOrder.splice(moveLayerIndex, 1);
-    newOrder.splice(aboveLayerIndex + 1, 0, moveLayerIndex);
+    newOrder.splice(newIndex, 0, moveLayerIndex);
     dispatch(updateLayerOrder(newOrder));
   }
 }
