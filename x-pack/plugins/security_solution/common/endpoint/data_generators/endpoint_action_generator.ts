@@ -188,7 +188,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         type: ActivityLogItemTypes.RESPONSE,
         item: {
           id: this.seededUUIDv4(),
-          data: this.generateResponse(),
+          data: this.generateResponse({ ...(overrides?.item?.data ?? {}) }),
         },
       },
       overrides
