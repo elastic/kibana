@@ -2857,4 +2857,81 @@ describe('xy_visualization', () => {
       });
     });
   });
+
+  describe('getSupportedActionsForLayer', () => {
+    it('should return no actions for a data layer', () => {
+      expect(
+        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn())
+      ).toHaveLength(0);
+    });
+
+    it('should return one action for an annotation layer', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.getSupportedActionsForLayer?.(
+          'annotation',
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+                indexPatternId: 'myIndexPattern',
+              },
+            ],
+          },
+          jest.fn()
+        )
+      ).toEqual([
+        expect.objectContaining({
+          displayName: 'Keep global filters',
+          description:
+            'All the dimensions configured in this layer respect filters defined at kibana level.',
+          icon: 'eye',
+          isCompatible: true,
+          'data-test-subj': 'lnsXY_annotationLayer_keepFilters',
+        }),
+      ]);
+    });
+
+    it('should return an action that performs a state update on click', () => {
+      const baseState = exampleState();
+      const setState = jest.fn();
+      const [action] = xyVisualization.getSupportedActionsForLayer?.(
+        'annotation',
+        {
+          ...baseState,
+          layers: [
+            ...baseState.layers,
+            {
+              layerId: 'annotation',
+              layerType: layerTypes.ANNOTATIONS,
+              annotations: [exampleAnnotation2],
+              ignoreGlobalFilters: true,
+              indexPatternId: 'myIndexPattern',
+            },
+          ],
+        },
+        setState
+      )!;
+      action.execute();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: expect.arrayContaining([
+            {
+              layerId: 'annotation',
+              layerType: layerTypes.ANNOTATIONS,
+              annotations: [exampleAnnotation2],
+              ignoreGlobalFilters: false,
+              indexPatternId: 'myIndexPattern',
+            },
+          ]),
+        })
+      );
+    });
+  });
 });
