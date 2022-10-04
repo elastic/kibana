@@ -43,6 +43,7 @@ import { getFieldBrowserLazy } from './common/get_field_browser';
 import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
+import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -123,6 +124,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRuleStatusPanel: (props) => {
       return getRuleStatusPanelLazy(props);
+    },
+    getRuleSnoozeModal: (props) => {
+      return getRuleSnoozeModalLazy(props);
     },
   };
 }
