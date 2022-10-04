@@ -31,7 +31,6 @@ export const tableDefaults: SubsetTGridModel = {
   ],
   graphEventId: '',
   sessionViewConfig: null,
-  savedObjectId: null,
   columns: defaultHeaders,
   queryFields: [],
 };

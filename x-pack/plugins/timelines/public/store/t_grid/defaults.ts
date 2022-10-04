@@ -84,7 +84,6 @@ export const tGridDefaults: SubsetTGridModel = {
       sortDirection: Direction.desc,
     },
   ],
-  savedObjectId: null,
   graphEventId: '',
   sessionViewConfig: null,
   queryFields: [],

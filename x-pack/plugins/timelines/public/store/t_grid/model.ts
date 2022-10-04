@@ -58,7 +58,6 @@ export interface TGridModel extends TGridModelSettings {
   loadingEventIds: string[];
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for bulk actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
-  savedObjectId: string | null;
   initialized?: boolean;
   sessionViewConfig: SessionViewConfig | null;
   /** updated saved object timestamp */
@@ -83,7 +82,6 @@ export type SubsetTGridModel = Readonly<
     | 'showCheckboxes'
     | 'sort'
     | 'selectedEventIds'
-    | 'savedObjectId'
     | 'graphEventId'
     | 'sessionViewConfig'
     | 'queryFields'

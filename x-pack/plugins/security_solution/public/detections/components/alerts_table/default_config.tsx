@@ -156,7 +156,6 @@ export const getAlertsDefaultModel = (license?: LicenseService): SubsetTGridMode
   ...tableDefaults,
   columns: getColumns(license),
   showCheckboxes: true,
-  savedObjectId: null,
 });
 
 export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTGridModel => ({

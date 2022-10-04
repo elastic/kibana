@@ -42,7 +42,6 @@ export const mockGlobalState: TableState = {
         },
       ],
       selectedEventIds: {},
-      savedObjectId: null,
       defaultColumns: defaultHeaders,
       loadingText: 'loading events',
       queryFields: [],

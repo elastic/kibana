@@ -392,7 +392,6 @@ export const mockGlobalState: State = {
             sortDirection: 'desc',
           },
         ],
-        savedObjectId: null,
         graphEventId: '',
         sessionViewConfig: null,
         selectAll: false,

@@ -2060,7 +2060,6 @@ export const mockTGridModel: TGridModel = {
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
   loadingEventIds: [],
-  savedObjectId: 'ef579e40-jibber-jabber',
   selectedEventIds: {},
   sessionViewConfig: null,
   sort: [
