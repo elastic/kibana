@@ -115,6 +115,7 @@ export interface DocLinks {
     readonly crawlerGettingStarted: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
+    readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
