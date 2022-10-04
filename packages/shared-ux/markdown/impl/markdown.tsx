@@ -6,16 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EuiMarkdownEditor, EuiMarkdownEditorProps } from '@elastic/eui';
+import { EuiMarkdownEditor, EuiMarkdownEditorProps, EuiMarkdownFormat } from '@elastic/eui';
 import React, { useState } from 'react';
 
 export type MarkdownProps = Partial<
   Omit<EuiMarkdownEditorProps, 'editorId' | 'uiPlugins' | 'markdownFormatProps'>
 > & {
   initialContent: string;
-  ariaLabelContent: string;
   /** needed for instances where markdown is used as a presentation of error messages */
   readonly: boolean;
+  /** @link src/plugins/vis_type_markdown/public/markdown_vis_controller.tsx */
+  openLinksInNewTab?: boolean;
+  markdownContent?: string;
+  ariaLabelContent?: string;
   height?: number | 'full';
   placeholder?: string | undefined;
 };
@@ -25,21 +28,16 @@ export const Markdown = ({
   ariaLabelContent,
   readonly,
   placeholder,
+  openLinksInNewTab,
   height = 'full',
+  markdownContent,
 }: MarkdownProps) => {
   const [value, setValue] = useState(initialContent);
 
-  if (readonly) {
+  if (readonly && markdownContent) {
     return (
-      <EuiMarkdownEditor
-        readOnly
-        placeholder={placeholder}
-        aria-label={ariaLabelContent ?? 'markdown component'}
-        value={value}
-        onChange={setValue}
-        height={height}
-      />
-    );
+     <EuiMarkdownFormat>{markdownContent}</EuiMarkdownFormat>
+    )
   }
 
   return (

@@ -8,11 +8,14 @@
 
 import React from 'react';
 
+import { MarkdownStorybookMock, MarkdownStorybookParams } from '@kbn/shared-ux-markdown-mocks';
+
 import mdx from './README.mdx';
+import { Markdown } from './markdown';
 
 export default {
   title: 'Markdown/Markdown',
-  description: 'A wrapper around `EuiMarkdown`, to be used for markdown within Kibana',
+  description: 'A wrapper around `EuiMarkdownEditor`, to be used for markdown within Kibana',
   parameters: {
     docs: {
       page: mdx,
@@ -20,8 +23,16 @@ export default {
   },
 };
 
-export const Markdown = () => {
-  return <Markdown />;
+const mock = new MarkdownStorybookMock();
+const argTypes = mock.getArgumentTypes();
+
+
+export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
+  return (
+    <Markdown 
+        {...params}
+    />
+  );
 };
 
-// Card.argTypes = argTypes;
+MarkdownStoryComponent.argTypes = argTypes;
