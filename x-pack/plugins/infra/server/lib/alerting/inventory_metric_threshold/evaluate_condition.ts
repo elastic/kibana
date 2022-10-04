@@ -20,14 +20,14 @@ interface AdditionalContextField {
   [x: string]: any;
 }
 
-export type AdditionalContext = {
+export interface AdditionalContext {
   cloud?: AdditionalContextField;
   host?: AdditionalContextField;
   container?: AdditionalContextField;
   orchestrator?: AdditionalContextField;
   labels?: AdditionalContextField;
-  tags?: AdditionalContextField
-};
+  tags?: AdditionalContextField;
+}
 
 export type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean;
@@ -36,7 +36,7 @@ export type ConditionResult = InventoryMetricConditions & {
   isNoData: boolean;
   isError: boolean;
   context: AdditionalContext;
-}
+};
 
 export const evaluateCondition = async ({
   condition,
@@ -102,8 +102,8 @@ export const evaluateCondition = async ({
         container: value.container,
         orchestrator: value.orchestrator,
         labels: value.labels,
-        tags: value.tags
-      }
+        tags: value.tags,
+      },
     };
   }) as unknown; // Typescript doesn't seem to know what `throw` is doing
 
