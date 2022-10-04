@@ -39,7 +39,12 @@ import {
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
-import { useGetPackageInfoByKey, useLink, useAgentPolicyContext, useIsGuidedOnboardingActive } from '../../../../hooks';
+import {
+  useGetPackageInfoByKey,
+  useLink,
+  useAgentPolicyContext,
+  useIsGuidedOnboardingActive,
+} from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
