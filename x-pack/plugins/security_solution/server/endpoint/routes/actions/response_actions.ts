@@ -18,6 +18,7 @@ import type { ResponseActionBodySchema } from '../../../../common/endpoint/schem
 import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
+  EndpointActionGetFileSchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
@@ -32,6 +33,7 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
+  GET_FILE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -157,6 +159,19 @@ export function registerResponseActionRoutes(
       responseActionRequestHandler(endpointContext, 'running-processes')
     )
   );
+
+  router.post(
+    {
+      path: GET_FILE_ROUTE,
+      validate: EndpointActionGetFileSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canWriteFileOperations'] },
+      logger,
+      responseActionRequestHandler(endpointContext, 'get-file')
+    )
+  );
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
@@ -165,6 +180,7 @@ const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
   ['kill-process', 'KILL_PROCESS'],
   ['suspend-process', 'SUSPEND_PROCESS'],
   ['running-processes', 'RUNNING_PROCESSES'],
+  ['get-file', 'GET_FILE'],
 ]);
 
 const returnActionIdCommands: ResponseActions[] = ['isolate', 'unisolate'];
@@ -233,8 +249,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         } as EndpointActionData<T>,
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
       user: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        id: user!.username,
+        id: user ? user.username : 'unknown',
       },
     };
 

@@ -115,3 +115,13 @@ export const EndpointActionListRequestSchema = {
 };
 
 export type EndpointActionListRequestQuery = TypeOf<typeof EndpointActionListRequestSchema.query>;
+
+export const EndpointActionGetFileSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+
+    parameters: schema.object({
+      file: schema.string({ minLength: 1 }),
+    }),
+  }),
+};
