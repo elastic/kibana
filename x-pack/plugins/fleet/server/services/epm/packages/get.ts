@@ -152,13 +152,12 @@ export async function getPackageInfo({
   // If same version is available in registry and skipArchive is true, use the info from the registry (faster),
   // otherwise build it from the archive
   let paths: string[];
-  let packageInfo: RegistryPackage | ArchivePackage | undefined = skipArchive
-    ? await Registry.fetchInfo(pkgName, resolvedPkgVersion).catch(() => undefined)
-    : undefined;
-
+  const registryInfo = await Registry.fetchInfo(pkgName, resolvedPkgVersion).catch(() => undefined);
+  let packageInfo;
   // We need to get input only packages from source to get all fields
   // see https://github.com/elastic/package-registry/issues/864
-  if (packageInfo && packageInfo.type !== 'input') {
+  if (registryInfo && skipArchive && registryInfo.type !== 'input') {
+    packageInfo = registryInfo;
     // Fix the paths
     paths =
       packageInfo.assets?.map((path) =>
