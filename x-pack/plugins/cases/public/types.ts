@@ -20,6 +20,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
@@ -27,6 +28,7 @@ import type {
   CasesMetricsRequest,
   CasesStatusRequest,
   CommentRequestAlertType,
+  CommentRequestExternalReferenceNoSOType,
   CommentRequestPersistableStateType,
   CommentRequestUserType,
 } from '../common/api';
@@ -55,6 +57,7 @@ export interface CasesPluginSetup {
 export interface CasesPluginStart {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
+  licensing?: LicensingPluginStart;
   lens: LensPublicStart;
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
@@ -150,7 +153,8 @@ export interface CasesUiStart {
 export type SupportedCaseAttachment =
   | CommentRequestAlertType
   | CommentRequestUserType
-  | CommentRequestPersistableStateType;
+  | CommentRequestPersistableStateType
+  | CommentRequestExternalReferenceNoSOType;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

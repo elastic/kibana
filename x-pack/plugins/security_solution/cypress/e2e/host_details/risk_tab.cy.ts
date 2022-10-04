@@ -14,12 +14,12 @@ import { TABLE_CELL, TABLE_ROWS } from '../../screens/alerts_details';
 describe('risk tab', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risky_hosts');
+    esArchiverLoad('risk_hosts');
     login();
   });
 
   after(() => {
-    esArchiverUnload('risky_hosts');
+    esArchiverUnload('risk_hosts');
   });
 
   it('renders risk tab', () => {

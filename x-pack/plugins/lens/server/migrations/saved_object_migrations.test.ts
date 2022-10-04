@@ -2294,7 +2294,7 @@ describe('Lens migrations', () => {
     });
   });
 
-  describe('8.5.0 Add Annotation event type and dataView references', () => {
+  describe('8.5.0 Add Annotation event type and ignore filters flag', () => {
     const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
@@ -2328,6 +2328,7 @@ describe('Lens migrations', () => {
       expect(annotationLayer).toEqual({
         layerType: 'annotations',
         annotations: [{ id: 'annotation-id', type: 'manual' }],
+        ignoreGlobalFilters: true,
       });
     });
   });

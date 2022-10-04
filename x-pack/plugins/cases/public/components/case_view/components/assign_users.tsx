@@ -12,7 +12,7 @@ import {
   EuiText,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -170,7 +170,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   }, [isPopoverOpen, needToUpdateAssignees, onAssigneesChanged, selectedAssignees]);
 
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} data-test-subj="case-view-assignees">
       <EuiFlexGroup
         alignItems="center"
         gutterSize="xs"
@@ -195,7 +195,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="xs" />
       <AssigneesList
         assignees={allAssignees}
         currentUserProfile={currentUserProfile}

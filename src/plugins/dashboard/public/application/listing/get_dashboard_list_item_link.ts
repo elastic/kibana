@@ -6,24 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import { QueryState } from '@kbn/data-plugin/public';
+import type { QueryState } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   DashboardConstants,
   createDashboardEditUrl,
   GLOBAL_STATE_STORAGE_KEY,
 } from '../../dashboard_constants';
-import { IKbnUrlStateStorage } from '../../services/kibana_utils';
+import { pluginServices } from '../../services/plugin_services';
 
 export const getDashboardListItemLink = (
-  application: ApplicationStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
-  useHash: boolean,
   id: string,
   timeRestore: boolean
 ) => {
-  let url = application.getUrlForApp(DashboardConstants.DASHBOARDS_ID, {
+  const {
+    application: { getUrlForApp },
+    settings: { uiSettings },
+  } = pluginServices.getServices();
+  const useHash = uiSettings.get('state:storeInSessionStorage'); // use hash
+
+  let url = getUrlForApp(DashboardConstants.DASHBOARDS_ID, {
     path: `#${createDashboardEditUrl(id)}`,
   });
   const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};

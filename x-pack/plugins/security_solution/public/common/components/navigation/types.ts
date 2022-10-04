@@ -62,10 +62,13 @@ export interface NavTab {
   urlKey?: UrlStateType;
   pageId?: SecurityPageName;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }
 export const securityNavKeys = [
   SecurityPageName.alerts,
-  SecurityPageName.actionHistory,
+  SecurityPageName.responseActionsHistory,
   SecurityPageName.blocklist,
   SecurityPageName.detectionAndResponse,
   SecurityPageName.case,
@@ -113,4 +116,7 @@ export interface NavLinkItem {
   title: string;
   skipUrlState?: boolean;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }

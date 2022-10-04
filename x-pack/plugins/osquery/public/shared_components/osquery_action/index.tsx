@@ -6,26 +6,23 @@
  */
 
 import { EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import {
-  AGENT_STATUS_ERROR,
-  EMPTY_PROMPT,
-  NOT_AVAILABLE,
-  PERMISSION_DENIED,
-  SHORT_EMPTY_TITLE,
-} from './translations';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { OsqueryEmptyPrompt, OsqueryNotAvailablePrompt } from '../prompts';
+import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
+import { AGENT_STATUS_ERROR, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQuery } from '../../live_queries';
 import { OsqueryIcon } from '../../components/osquery_icon';
-import { useIsOsqueryAvailable } from './use_is_osquery_available';
+import { useIsOsqueryAvailable } from '../use_is_osquery_available';
 
 export interface OsqueryActionProps {
   agentId?: string;
   defaultValues?: {};
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
@@ -37,22 +34,11 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
-  const emptyPrompt = useMemo(
-    () => (
-      <EuiEmptyPrompt
-        icon={<OsqueryIcon />}
-        title={<h2>{SHORT_EMPTY_TITLE}</h2>}
-        titleSize="xs"
-        body={<p>{EMPTY_PROMPT}</p>}
-      />
-    ),
-    []
-  );
   const { osqueryAvailable, agentFetched, isLoading, policyFetched, policyLoading, agentData } =
     useIsOsqueryAvailable(agentId);
 
   if (agentId && agentFetched && !agentData) {
-    return emptyPrompt;
+    return <OsqueryEmptyPrompt />;
   }
 
   if (
@@ -66,8 +52,14 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
         titleSize="xs"
         body={
           <p>
-            To access this page, ask your administrator for <EuiCode>osquery</EuiCode> Kibana
-            privileges.
+            <FormattedMessage
+              id="xpack.osquery.action.missingPrivilleges"
+              defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{
+                osquery: <EuiCode>osquery</EuiCode>,
+              }}
+            />
           </p>
         }
       />
@@ -83,14 +75,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   }
 
   if (agentId && !osqueryAvailable) {
-    return (
-      <EuiEmptyPrompt
-        icon={<OsqueryIcon />}
-        title={<h2>{SHORT_EMPTY_TITLE}</h2>}
-        titleSize="xs"
-        body={<p>{NOT_AVAILABLE}</p>}
-      />
-    );
+    return <OsqueryNotAvailablePrompt />;
   }
 
   if (agentId && agentData?.status !== 'online') {

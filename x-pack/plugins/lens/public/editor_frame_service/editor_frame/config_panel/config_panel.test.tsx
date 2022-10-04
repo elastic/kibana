@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import type { Query, AggregateQuery } from '@kbn/es-query';
+
 import {
   createMockFramePublicAPI,
   mockVisualizationMap,
@@ -25,9 +27,20 @@ import { mountWithProvider } from '../../../mocks';
 import { LayerType, layerTypes } from '../../../../common';
 import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
+import { AddLayerButton } from './add_layer';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 jest.mock('../../../id_generator');
+
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
+  return {
+    ...original,
+    Storage: class Storage {
+      get = () => ({ skipDeleteModal: true });
+    },
+  };
+});
 
 const waitMs = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -58,7 +71,8 @@ describe('ConfigPanel', () => {
 
   function prepareAndMountComponent(
     props: ReturnType<typeof getDefaultProps>,
-    customStoreProps?: Partial<MountStoreProps>
+    customStoreProps?: Partial<MountStoreProps>,
+    query?: Query | AggregateQuery
   ) {
     (generateId as jest.Mock).mockReturnValue(`newId`);
     return mountWithProvider(
@@ -72,6 +86,7 @@ describe('ConfigPanel', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
+          query: query as Query,
         },
         storeDeps: mockStoreDeps({
           datasourceMap: props.datasourceMap,
@@ -166,12 +181,10 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
+
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
@@ -193,12 +206,10 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
+
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondLayerFocusable);
     });
@@ -219,12 +230,10 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--1"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
+
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
@@ -460,6 +469,30 @@ describe('ConfigPanel', () => {
         prevState: undefined,
       });
       expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('text based languages', () => {
+    it('should not allow to add a new layer', async () => {
+      const datasourceMap = mockDatasourceMap();
+      const visualizationMap = mockVisualizationMap();
+
+      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+        { type: layerTypes.DATA, label: 'Data Layer' },
+        {
+          type: layerTypes.REFERENCELINE,
+          label: 'Reference layer',
+        },
+      ]);
+      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      const props = getDefaultProps({ datasourceMap, visualizationMap });
+
+      const { instance } = await prepareAndMountComponent(
+        props,
+        {},
+        { sql: 'SELECT * from "foo"' }
+      );
+      expect(instance.find(AddLayerButton).exists()).toBe(false);
     });
   });
 });

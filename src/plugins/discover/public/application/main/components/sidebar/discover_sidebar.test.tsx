@@ -36,6 +36,7 @@ jest.mock('../../../../kibana_services', () => ({
 
 function getCompProps(): DiscoverSidebarProps {
   const dataView = stubLogstashDataView;
+  dataView.toSpec = jest.fn(() => ({}));
   const hits = getDataTableRecords(dataView);
 
   const dataViewList = [
@@ -86,6 +87,14 @@ describe('discover sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
+    mockDiscoverServices.data.dataViews.getIdsWithTitle = jest
+      .fn()
+      .mockReturnValue(props.dataViewList);
+    mockDiscoverServices.data.dataViews.get = jest.fn().mockImplementation((id) => {
+      const dataView = props.dataViewList.find((d) => d.id === id);
+      return { ...dataView, isPersisted: () => true };
+    });
+
     comp = mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
         <DiscoverSidebar {...props} />
@@ -184,5 +193,15 @@ describe('discover sidebar', function () {
     expect(addFieldButtonInDataViewPicker.length).toBe(0);
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(0);
+  });
+
+  it('should render the Visualize in Lens button in text based languages mode', () => {
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockDiscoverServices}>
+        <DiscoverSidebar {...props} onAddFilter={undefined} />
+      </KibanaContextProvider>
+    );
+    const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
+    expect(visualizeField.length).toBe(1);
   });
 });

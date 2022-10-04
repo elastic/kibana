@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type {
   IRouter,
   RouteConfig,
@@ -17,11 +18,11 @@ import type {
 
 import type { FleetAuthz } from '../../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../../common';
-import { calculateAuthz } from '../../common/authz';
+import { calculateAuthz, calculatePackagePrivilegesFromKibanaPrivileges } from '../../common/authz';
 
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';
-import { PLUGIN_ID } from '../constants';
+import { PLUGIN_ID, ENDPOINT_PRIVILEGES } from '../constants';
 
 function checkSecurityEnabled() {
   return appContextService.getSecurityLicense().isEnabled();
@@ -63,12 +64,16 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
 
   if (security.authz.mode.useRbacForRequest(req)) {
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
+    const endpointPrivileges = ENDPOINT_PRIVILEGES.map((privilege) =>
+      security.authz.actions.api.get(`${DEFAULT_APP_CATEGORIES.security.id}-${privilege}`)
+    );
     const { privileges } = await checkPrivileges({
       kibana: [
         security.authz.actions.api.get(`${PLUGIN_ID}-all`),
+        security.authz.actions.api.get(`${PLUGIN_ID}-setup`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-all`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-read`),
-        security.authz.actions.api.get('fleet-setup'),
+        ...endpointPrivileges,
       ],
     });
     const fleetAllAuth = getAuthorizationFromPrivileges(privileges.kibana, `${PLUGIN_ID}-all`);
@@ -82,16 +87,25 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
     );
     const fleetSetupAuth = getAuthorizationFromPrivileges(privileges.kibana, 'fleet-setup');
 
-    return calculateAuthz({
-      fleet: { all: fleetAllAuth, setup: fleetSetupAuth },
-      integrations: { all: intAllAuth, read: intReadAuth },
-      isSuperuser: checkSuperuser(req),
-    });
+    return {
+      ...calculateAuthz({
+        fleet: { all: fleetAllAuth, setup: fleetSetupAuth },
+        integrations: {
+          all: intAllAuth,
+          read: intReadAuth,
+        },
+        isSuperuser: checkSuperuser(req),
+      }),
+      packagePrivileges: calculatePackagePrivilegesFromKibanaPrivileges(privileges.kibana),
+    };
   }
 
   return calculateAuthz({
     fleet: { all: false, setup: false },
-    integrations: { all: false, read: false },
+    integrations: {
+      all: false,
+      read: false,
+    },
     isSuperuser: false,
   });
 }
@@ -118,7 +132,7 @@ function containsRequirement(authz: Authz, requirements: DeepPartialTruthy<Authz
   return true;
 }
 
-function hasRequiredFleetAuthzPrivilege(
+export function hasRequiredFleetAuthzPrivilege(
   authz: FleetAuthz,
   { fleetAuthz }: { fleetAuthz?: FleetAuthzRequirements }
 ): boolean {
@@ -146,7 +160,7 @@ type FleetAuthzRouteRegistrar<
   handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
 
-interface FleetAuthzRouteConfig {
+export interface FleetAuthzRouteConfig {
   fleetAuthz?: FleetAuthzRequirements;
 }
 

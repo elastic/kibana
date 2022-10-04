@@ -104,6 +104,7 @@ describe('format', () => {
       'check.response.status': [],
       enabled,
       form_monitor_type: 'http',
+      journey_id: '',
       locations: [
         {
           id: 'us_central',
@@ -133,6 +134,7 @@ describe('format', () => {
       timeout: '16',
       type: 'http',
       urls: 'sample url',
+      'url.port': null,
       username: '',
     });
   });
@@ -316,6 +318,7 @@ describe('format', () => {
       'check.response.status': [],
       enabled: true,
       form_monitor_type: 'http',
+      journey_id: '',
       locations: [
         {
           id: 'us_central',
@@ -345,6 +348,7 @@ describe('format', () => {
       timeout: '16',
       type: 'http',
       urls: 'sample url',
+      'url.port': null,
       username: '',
     });
   });

@@ -29,6 +29,7 @@ import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
 } from '@kbn/alerting-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
@@ -96,6 +97,7 @@ export interface ApmPluginStartDeps {
   infra?: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  storage: IStorageWrapper;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {

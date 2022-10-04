@@ -28,12 +28,20 @@ export {
   loadExecutionLogAggregations,
   loadGlobalExecutionLogAggregations,
 } from './load_execution_log_aggregations';
+export type { LoadExecutionKPIAggregationsProps } from './load_execution_kpi_aggregations';
+export { loadExecutionKPIAggregations } from './load_execution_kpi_aggregations';
+export type { LoadGlobalExecutionKPIAggregationsProps } from './load_global_execution_kpi_aggregations';
+export { loadGlobalExecutionKPIAggregations } from './load_global_execution_kpi_aggregations';
 export type { LoadActionErrorLogProps } from './load_action_error_log';
 export { loadActionErrorLog } from './load_action_error_log';
 export { unmuteAlertInstance } from './unmute_alert';
 export { unmuteRule, unmuteRules } from './unmute';
 export { updateRule } from './update';
 export { resolveRule } from './resolve_rule';
-export { snoozeRule } from './snooze';
-export { unsnoozeRule } from './unsnooze';
-export { updateAPIKey } from './update_api_key';
+export type { BulkSnoozeRulesProps } from './snooze';
+export { snoozeRule, bulkSnoozeRules } from './snooze';
+export type { BulkUnsnoozeRulesProps } from './unsnooze';
+export { unsnoozeRule, bulkUnsnoozeRules } from './unsnooze';
+export type { BulkUpdateAPIKeyProps } from './update_api_key';
+export { updateAPIKey, bulkUpdateAPIKey } from './update_api_key';
+export { runSoon } from './run_soon';

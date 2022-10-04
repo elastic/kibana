@@ -27,6 +27,7 @@ import {
   dedupAssignees,
   getClosedInfoForUpdate,
   getDurationForUpdate,
+  getEntity,
   getLatestPushInfo,
   prepareFieldsForTransformation,
   transformComments,
@@ -37,6 +38,7 @@ import { Actions, CaseStatuses } from '../../../common/api';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
+import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 
 const formatComment = {
   commentId: commentObj.id,
@@ -275,7 +277,7 @@ describe('utils', () => {
   describe('transformComments', () => {
     test('transform creation comments', () => {
       const comments = [commentObj];
-      const res = transformComments(comments, ['informationCreated']);
+      const res = transformComments(comments, ['informationCreated'], new Map());
       expect(res).toEqual([
         {
           ...formatComment,
@@ -296,7 +298,7 @@ describe('utils', () => {
           },
         },
       ];
-      const res = transformComments(comments, ['informationUpdated']);
+      const res = transformComments(comments, ['informationUpdated'], new Map());
       expect(res).toEqual([
         {
           ...formatComment,
@@ -307,7 +309,7 @@ describe('utils', () => {
 
     test('transform added comments', () => {
       const comments = [commentObj];
-      const res = transformComments(comments, ['informationAdded']);
+      const res = transformComments(comments, ['informationAdded'], new Map());
       expect(res).toEqual([
         {
           ...formatComment,
@@ -336,7 +338,7 @@ describe('utils', () => {
           updated_by: { full_name: 'Elastic2', username: 'elastic', email: 'elastic@elastic.co' },
         },
       ];
-      const res = transformComments(comments, ['informationAdded']);
+      const res = transformComments(comments, ['informationAdded'], new Map());
       expect(res).toEqual([
         {
           ...formatComment,
@@ -353,7 +355,7 @@ describe('utils', () => {
           updated_by: { full_name: '', username: 'elastic2', email: 'elastic@elastic.co' },
         },
       ];
-      const res = transformComments(comments, ['informationAdded']);
+      const res = transformComments(comments, ['informationAdded'], new Map());
       expect(res).toEqual([
         {
           ...formatComment,
@@ -364,7 +366,7 @@ describe('utils', () => {
 
     test('transform isolate action comment', () => {
       const comments = [isolateCommentActions];
-      const res = transformComments(comments, ['informationCreated']);
+      const res = transformComments(comments, ['informationCreated'], new Map());
       const actionText = `Isolated host ${formatIsolateActionComment.actions.targets[0].hostname} with comment: ${formatIsolateActionComment.comment}`;
       expect(res).toEqual([
         {
@@ -376,7 +378,7 @@ describe('utils', () => {
 
     test('transform release action comment', () => {
       const comments = [releaseCommentActions];
-      const res = transformComments(comments, ['informationCreated']);
+      const res = transformComments(comments, ['informationCreated'], new Map());
       const actionText = `Released host ${formatReleaseActionComment.actions.targets[0].hostname} with comment: ${formatReleaseActionComment.comment}`;
       expect(res).toEqual([
         {
@@ -388,7 +390,7 @@ describe('utils', () => {
 
     test('transform isolate action comment with multiple hosts', () => {
       const comments = [isolateCommentActionsMultipleTargets];
-      const res = transformComments(comments, ['informationCreated']);
+      const res = transformComments(comments, ['informationCreated'], new Map());
       const actionText = `Isolated host ${formatIsolateCommentActionsMultipleTargets.actions.targets[0].hostname} and 1 more with comment: ${formatIsolateCommentActionsMultipleTargets.comment}`;
       expect(res).toEqual([
         {
@@ -973,6 +975,235 @@ describe('utils', () => {
           duration: 0,
         });
       });
+    });
+  });
+
+  describe('getEntity', () => {
+    const userProfilesMapNoFullNames = new Map(
+      Array.from(userProfilesMap.entries()).map((profileTuple) => [
+        profileTuple[0],
+        { ...profileTuple[1], user: { ...profileTuple[1].user, full_name: undefined } },
+      ])
+    );
+
+    it('returns the username when full name is empty for updatedBy', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: { email: null, full_name: null, username: null },
+          updatedAt: '',
+          updatedBy: { email: null, full_name: '', username: 'updatedBy_username' },
+        })
+      ).toEqual('updatedBy_username');
+    });
+
+    it('returns the username when full name is empty for createdBy', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: { email: null, full_name: '', username: 'createdBy_username' },
+          updatedAt: '',
+          updatedBy: null,
+        })
+      ).toEqual('createdBy_username');
+    });
+
+    it('returns an empty string with neither updatedBy or createdBy are defined', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          // @ts-expect-error createdBy should be defined but for testing purposes we want to make sure the function handles null
+          createdBy: null,
+          updatedAt: '',
+          updatedBy: null,
+        })
+      ).toEqual('');
+    });
+
+    it('returns an empty string when createdBy fields are all null', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: { email: null, full_name: null, username: null },
+          updatedAt: '',
+          updatedBy: null,
+        })
+      ).toEqual('');
+    });
+
+    it('returns the full name of updatedBy when available', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: { email: null, full_name: 'createdBy_full_name', username: null },
+          updatedAt: '',
+          updatedBy: { full_name: 'updatedBy_full_name', email: null, username: null },
+        })
+      ).toEqual('updatedBy_full_name');
+    });
+
+    it('returns the username of updatedBy when available', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: { email: null, full_name: null, username: 'createdBy_username' },
+          updatedAt: '',
+          updatedBy: { full_name: null, email: null, username: 'updatedBy_username' },
+        })
+      ).toEqual('updatedBy_username');
+    });
+
+    it('returns an empty string when updatedBy username is null', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: { email: null, full_name: null, username: 'createdBy_username' },
+          updatedAt: '',
+          updatedBy: { full_name: null, email: null, username: null },
+        })
+      ).toEqual('');
+    });
+
+    it('returns the full name of createdBy when available', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: {
+            email: null,
+            full_name: 'createdBy_full_name',
+            username: 'createdBy_username',
+          },
+          updatedAt: '',
+          updatedBy: null,
+        })
+      ).toEqual('createdBy_full_name');
+    });
+
+    it('returns the username of createdBy when available', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: { email: null, full_name: null, username: 'createdBy_username' },
+          updatedAt: '',
+          updatedBy: null,
+        })
+      ).toEqual('createdBy_username');
+    });
+
+    it('returns updatedBy full name when the profile uid is not found', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: { email: null, full_name: null, username: 'createdBy_username' },
+          updatedAt: '',
+          updatedBy: {
+            email: null,
+            full_name: 'updatedBy_full_name',
+            username: 'createdBy_username',
+            profile_uid: '123',
+          },
+        })
+      ).toEqual('updatedBy_full_name');
+    });
+
+    it('returns createdBy full name when the profile uid is not found', () => {
+      expect(
+        getEntity({
+          createdAt: '',
+          createdBy: {
+            email: null,
+            full_name: 'createdBy_full_name',
+            username: 'createdBy_username',
+            profile_uid: '123',
+          },
+          updatedAt: '',
+          updatedBy: null,
+        })
+      ).toEqual('createdBy_full_name');
+    });
+
+    it('returns updatedBy profile full name when the profile is found', () => {
+      expect(
+        getEntity(
+          {
+            createdAt: '',
+            createdBy: {
+              email: null,
+              full_name: null,
+              username: null,
+            },
+            updatedAt: '',
+            updatedBy: {
+              email: null,
+              full_name: null,
+              username: null,
+              profile_uid: userProfiles[0].uid,
+            },
+          },
+          userProfilesMap
+        )
+      ).toEqual(userProfiles[0].user.full_name);
+    });
+
+    it('returns updatedBy profile username when the profile is found', () => {
+      expect(
+        getEntity(
+          {
+            createdAt: '',
+            createdBy: {
+              email: null,
+              full_name: null,
+              username: null,
+            },
+            updatedAt: '',
+            updatedBy: {
+              email: null,
+              full_name: null,
+              username: null,
+              profile_uid: userProfiles[0].uid,
+            },
+          },
+          userProfilesMapNoFullNames
+        )
+      ).toEqual(userProfiles[0].user.username);
+    });
+
+    it('returns createdBy profile full name when the profile is found', () => {
+      expect(
+        getEntity(
+          {
+            createdAt: '',
+            createdBy: {
+              email: null,
+              full_name: null,
+              username: null,
+              profile_uid: userProfiles[0].uid,
+            },
+            updatedAt: '',
+            updatedBy: null,
+          },
+          userProfilesMap
+        )
+      ).toEqual(userProfiles[0].user.full_name);
+    });
+
+    it('returns createdBy profile username when the profile is found', () => {
+      expect(
+        getEntity(
+          {
+            updatedAt: '',
+            updatedBy: null,
+            createdAt: '',
+            createdBy: {
+              email: null,
+              full_name: null,
+              username: null,
+              profile_uid: userProfiles[0].uid,
+            },
+          },
+          userProfilesMapNoFullNames
+        )
+      ).toEqual(userProfiles[0].user.username);
     });
   });
 });

@@ -10,6 +10,7 @@ import { AppMountParameters, PluginInitializerContext } from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
@@ -74,6 +75,11 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
+    const infraEntries = [
+      { label: 'Inventory', app: 'metrics', path: '/inventory' },
+      { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+    ];
+    const hostInfraEntry = { label: 'Hosts', app: 'metrics', path: '/hosts' };
     pluginsSetup.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(
@@ -100,11 +106,9 @@ export class Plugin implements InfraClientPluginClass {
                   {
                     label: 'Infrastructure',
                     sortKey: 300,
-                    entries: [
-                      { label: 'Hosts', app: 'metrics', path: '/hosts' },
-                      { label: 'Inventory', app: 'metrics', path: '/inventory' },
-                      { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-                    ],
+                    entries: core.uiSettings.get(enableInfrastructureHostsView)
+                      ? [hostInfraEntry, ...infraEntries]
+                      : infraEntries,
                   },
                 ]
               : []),
@@ -167,6 +171,36 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
+    const infraDeepLinks = [
+      {
+        id: 'inventory',
+        title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+          defaultMessage: 'Inventory',
+        }),
+        path: '/inventory',
+      },
+      {
+        id: 'metrics-explorer',
+        title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+          defaultMessage: 'Metrics Explorer',
+        }),
+        path: '/explorer',
+      },
+      {
+        id: 'settings',
+        title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+          defaultMessage: 'Settings',
+        }),
+        path: '/settings',
+      },
+    ];
+    const hostInfraDeepLink = {
+      id: 'metrics-hosts',
+      title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+        defaultMessage: 'Hosts',
+      }),
+      path: '/hosts',
+    };
     core.application.register({
       id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
@@ -177,36 +211,9 @@ export class Plugin implements InfraClientPluginClass {
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
-      deepLinks: [
-        {
-          id: 'inventory',
-          title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-            defaultMessage: 'Inventory',
-          }),
-          path: '/inventory',
-        },
-        {
-          id: 'metrics-explorer',
-          title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-            defaultMessage: 'Metrics Explorer',
-          }),
-          path: '/explorer',
-        },
-        {
-          id: 'metrics-hosts',
-          title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-            defaultMessage: 'Hosts',
-          }),
-          path: '/hosts',
-        },
-        {
-          id: 'settings',
-          title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-            defaultMessage: 'Settings',
-          }),
-          path: '/settings',
-        },
-      ],
+      deepLinks: core.uiSettings.get(enableInfrastructureHostsView)
+        ? [hostInfraDeepLink, ...infraDeepLinks]
+        : infraDeepLinks,
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();

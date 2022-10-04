@@ -753,13 +753,7 @@
           ],
           "signature": [
             "(uiSettings: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.IUiSettingsClient",
-              "text": "IUiSettingsClient"
-            },
+            "IUiSettingsClient",
             ") => Promise<",
             {
               "pluginId": "fieldFormats",
@@ -784,13 +778,7 @@
                 "- {@link IUiSettingsClient }"
               ],
               "signature": [
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCorePluginApi",
-                  "section": "def-server.IUiSettingsClient",
-                  "text": "IUiSettingsClient"
-                }
+                "IUiSettingsClient"
               ],
               "path": "src/plugins/field_formats/server/types.ts",
               "deprecated": false,

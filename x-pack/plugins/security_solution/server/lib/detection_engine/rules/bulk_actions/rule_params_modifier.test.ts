@@ -351,4 +351,28 @@ describe('ruleParamsModifier', () => {
       expect(editedRuleParams.timelineTitle).toBe('Test timeline');
     });
   });
+
+  describe('schedule', () => {
+    test('should set schedule', () => {
+      const INTERVAL_IN_MINUTES = 5;
+      const LOOKBACK_IN_MINUTES = 1;
+      const FROM_IN_SECONDS = (INTERVAL_IN_MINUTES + LOOKBACK_IN_MINUTES) * 60;
+      const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
+        {
+          type: BulkActionEditType.set_schedule,
+          value: {
+            interval: `${INTERVAL_IN_MINUTES}m`,
+            lookback: `${LOOKBACK_IN_MINUTES}m`,
+          },
+        },
+      ]);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((editedRuleParams as any).interval).toBeUndefined();
+      expect(editedRuleParams.meta).toStrictEqual({
+        from: '1m',
+      });
+      expect(editedRuleParams.from).toBe(`now-${FROM_IN_SECONDS}s`);
+    });
+  });
 });

@@ -10,22 +10,26 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getSLODestinationIndexName, SLO_INGEST_PIPELINE_NAME } from '../../../assets/constants';
+import { ALL_VALUE } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
+import { TransformGenerator } from '.';
+import {
+  SLO_DESTINATION_INDEX_NAME,
+  SLO_INGEST_PIPELINE_NAME,
+  getSLOTransformId,
+} from '../../../assets/constants';
 import {
   apmTransactionErrorRateSLOSchema,
   APMTransactionErrorRateSLO,
   SLO,
 } from '../../../types/models';
-import { ALL_VALUE } from '../../../types/schema';
-import { TransformGenerator } from '.';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
 
 export class ApmTransactionErrorRateTransformGenerator implements TransformGenerator {
-  public getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest {
+  public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!apmTransactionErrorRateSLOSchema.is(slo)) {
       throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -33,14 +37,14 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildSource(slo),
-      this.buildDestination(slo, spaceId),
+      this.buildDestination(),
       this.buildGroupBy(),
       this.buildAggregations(slo)
     );
   }
 
   private buildTransformId(slo: APMTransactionErrorRateSLO): string {
-    return `slo-${slo.id}`;
+    return getSLOTransformId(slo.id);
   }
 
   private buildSource(slo: APMTransactionErrorRateSLO) {
@@ -102,15 +106,11 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
     };
   }
 
-  private buildDestination(slo: APMTransactionErrorRateSLO, spaceId: string) {
-    if (slo.settings.destination_index === undefined) {
-      return {
-        pipeline: SLO_INGEST_PIPELINE_NAME,
-        index: getSLODestinationIndexName(spaceId),
-      };
-    }
-
-    return { index: slo.settings.destination_index };
+  private buildDestination() {
+    return {
+      pipeline: SLO_INGEST_PIPELINE_NAME,
+      index: SLO_DESTINATION_INDEX_NAME,
+    };
   }
 
   private buildGroupBy() {

@@ -33,6 +33,7 @@ import {
 } from './mocks';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -101,8 +102,10 @@ describe('CaseViewPage', () => {
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: new Map(), isLoading: false });
-
-    appMockRenderer = createAppMockRenderer();
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+    appMockRenderer = createAppMockRenderer({ license });
   });
 
   it('should render CaseViewPage', async () => {
@@ -117,8 +120,12 @@ describe('CaseViewPage', () => {
       },
     };
 
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
     const props = { ...caseProps, caseData: caseDataWithDamagedRaccoon };
-    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] } });
+    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] }, license });
     const result = appMockRenderer.render(<CaseViewPage {...props} />);
 
     expect(result.getByTestId('header-page-title')).toHaveTextContent(data.title);
@@ -418,6 +425,11 @@ describe('CaseViewPage', () => {
                 delete: true,
                 push: true,
               }),
+            },
+          },
+          notifications: {
+            toasts: {
+              addDanger: () => {},
             },
           },
         },

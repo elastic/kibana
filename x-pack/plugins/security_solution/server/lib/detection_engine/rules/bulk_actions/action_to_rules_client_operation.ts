@@ -87,6 +87,18 @@ export const bulkEditActionToRulesClientOperation = (
         getNotifyWhenOperation(action.value.throttle),
       ];
 
+    // schedule actions
+    case BulkActionEditType.set_schedule:
+      return [
+        {
+          field: 'schedule',
+          operation: 'set',
+          value: {
+            interval: action.value.interval,
+          },
+        },
+      ];
+
     default:
       return assertUnreachable(action);
   }
