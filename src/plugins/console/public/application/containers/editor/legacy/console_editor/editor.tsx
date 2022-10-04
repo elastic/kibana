@@ -259,8 +259,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   }, [settings]);
 
   useEffect(() => {
-    const { isKeyboardShortcutsDisabled } = settings;
-    if (!isKeyboardShortcutsDisabled) {
+    const { isKeyboardShortcutsEnabled } = settings;
+    if (isKeyboardShortcutsEnabled) {
       registerCommands({
         senseEditor: editorInstanceRef.current!,
         sendCurrentRequest,
