@@ -83,7 +83,7 @@ describe('#checkAuthorization', () => {
 
     await expect(
       securityExtension.checkAuthorization({ types: new Set(), spaces, actions })
-    ).rejects.toThrowError('Failed to check authorization for 0 object types');
+    ).rejects.toThrowError('No types specified for authorization check');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -92,7 +92,7 @@ describe('#checkAuthorization', () => {
 
     await expect(
       securityExtension.checkAuthorization({ types, spaces: new Set(), actions })
-    ).rejects.toThrowError('Failed to check authorization for 0 spaces');
+    ).rejects.toThrowError('No spaces specified for authorization check');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -101,7 +101,7 @@ describe('#checkAuthorization', () => {
 
     await expect(
       securityExtension.checkAuthorization({ types, spaces, actions: [] })
-    ).rejects.toThrowError('Failed to check authorization for 0 actions');
+    ).rejects.toThrowError('No actions specified for authorization check');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
