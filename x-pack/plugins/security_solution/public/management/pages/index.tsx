@@ -76,7 +76,8 @@ const ResponseActionsTelemetry = () => (
 );
 
 export const ManagementContainer = memo(() => {
-  const { loading, canAccessEndpointManagement } = useUserPrivileges().endpointPrivileges;
+  const { loading, canAccessEndpointManagement, canReadActionsLogManagement } =
+    useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
   if (loading) {
@@ -103,10 +104,12 @@ export const ManagementContainer = memo(() => {
         component={HostIsolationExceptionsTelemetry}
       />
       <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
-      <Route
-        path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
-        component={ResponseActionsTelemetry}
-      />
+      {canReadActionsLogManagement && (
+        <Route
+          path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
+          component={ResponseActionsTelemetry}
+        />
+      )}
       <Route path={MANAGEMENT_PATH} exact>
         <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>
