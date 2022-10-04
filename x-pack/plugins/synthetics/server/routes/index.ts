@@ -26,10 +26,12 @@ import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
 import { syntheticsGetPingsRoute } from './pings';
+import { createGetCurrentStatusRoute } from './status/current_status';
 import {
   SyntheticsRestApiRouteFactory,
   SyntheticsStreamingRouteFactory,
 } from '../legacy_uptime/routes';
+import { getHasZipUrlMonitorRoute } from './fleet/get_has_zip_url_monitors';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
@@ -48,6 +50,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
   syntheticsGetPingsRoute,
+  getHasZipUrlMonitorRoute,
+  createGetCurrentStatusRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
