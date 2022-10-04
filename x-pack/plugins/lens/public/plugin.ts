@@ -56,7 +56,7 @@ import type {
   IndexPatternDatasourceSetupPlugins,
   FormulaPublicApi,
 } from './indexpattern_datasource';
-import type { TextBasedLanguagesDatasource as TextBasedLanguagesDatasourceType } from './text_based_languages_datasource';
+import type { TextBasedLanguagesDatasource as TextBasedLanguagesDatasourceType } from './text_based_datasource';
 
 import type {
   XyVisualization as XyVisualizationType,

@@ -652,7 +652,7 @@ export const LensTopNavMenu = ({
             setIsOnTextBasedMode(true);
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'textBasedLanguages',
+                newDatasourceId: 'textBased',
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })

@@ -157,7 +157,7 @@ export function getTextBasedLanguagesDatasource({
     TextBasedLanguagesPrivateState,
     TextBasedLanguagesPersistedState
   > = {
-    id: 'textBasedLanguages',
+    id: 'textBased',
 
     checkIntegrity: () => {
       return [];
@@ -538,7 +538,7 @@ export function getTextBasedLanguagesDatasource({
 
     getPublicAPI({ state, layerId }: PublicAPIProps<TextBasedLanguagesPrivateState>) {
       return {
-        datasourceId: 'textBasedLanguages',
+        datasourceId: 'textBased',
 
         getTableSpec: () => {
           return (
