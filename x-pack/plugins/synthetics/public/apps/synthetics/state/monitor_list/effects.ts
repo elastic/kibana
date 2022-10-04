@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from '@kbn/core-http-browser';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { call, put, takeEvery, takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
+import { serializeHttpFetchError } from '../utils/http_error';
 import {
   fetchMonitorListAction,
   fetchUpsertFailureAction,
@@ -40,7 +40,7 @@ export function* upsertMonitorEffect() {
         );
       } catch (error) {
         yield put(
-          fetchUpsertFailureAction({ id: action.payload.id, error: error as IHttpFetchError })
+          fetchUpsertFailureAction({ id: action.payload.id, error: serializeHttpFetchError(error) })
         );
       }
     }
