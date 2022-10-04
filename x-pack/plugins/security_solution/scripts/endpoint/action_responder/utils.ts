@@ -174,7 +174,7 @@ export const sendEndpointActionResponse = async (
       id: `${fileMeta._id}.0`,
       body: {
         bid: fileMeta._id,
-        last: false,
+        last: true,
         data: 'UEsDBBQACAAIAFVeRFUAAAAAAAAAABMAAAAMACAAYmFkX2ZpbGUudHh0VVQNAAdTVjxjU1Y8Y1NWPGN1eAsAAQT1AQAABBQAAAArycgsVgCiRIWkxBSFtMycVC4AUEsHCKkCwMsTAAAAEwAAAFBLAQIUAxQACAAIAFVeRFWpAsDLEwAAABMAAAAMACAAAAAAAAAAAACkgQAAAABiYWRfZmlsZS50eHRVVA0AB1NWPGNTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFoAAABtAAAAAAA=',
       },
       refresh: 'wait_for',
