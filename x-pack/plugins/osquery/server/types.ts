@@ -20,6 +20,7 @@ import type {
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 
 export interface OsqueryPluginSetup {
@@ -46,4 +47,5 @@ export interface StartPlugins {
   fleet?: FleetStartContract;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
+  ruleRegistry?: RuleRegistryPluginStartContract;
 }
