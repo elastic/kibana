@@ -264,19 +264,25 @@ describe('getReferencesFilter', () => {
 
         expect(clause).toEqual({
           bool: {
-            must_not: references.map((ref) => ({
-              nested: {
-                path: 'references',
-                query: {
-                  bool: {
-                    must: [
-                      { term: { 'references.id': ref.id } },
-                      { term: { 'references.type': ref.type } },
-                    ],
-                  },
+            must_not: [
+              {
+                bool: {
+                  must: references.map((ref) => ({
+                    nested: {
+                      path: 'references',
+                      query: {
+                        bool: {
+                          must: [
+                            { term: { 'references.id': ref.id } },
+                            { term: { 'references.type': ref.type } },
+                          ],
+                        },
+                      },
+                    },
+                  })),
                 },
               },
-            })),
+            ],
           },
         });
       });
