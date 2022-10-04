@@ -11,8 +11,8 @@ import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { getTestDataLoader } from '../lib/test_data_loader';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 
 type TestResponse = Record<string, any>;
 
@@ -43,6 +43,21 @@ interface ResolveCopyToSpaceTestDefinition {
 }
 
 const NON_EXISTENT_SPACE_ID = 'non_existent_space';
+
+const SPACE_DATA_TO_LOAD: Array<{ spaceName: string | null; dataUrl: string }> = [
+  {
+    spaceName: null,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/default_space.json',
+  },
+  {
+    spaceName: SPACE_1.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_1.json',
+  },
+  {
+    spaceName: SPACE_2.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2.json',
+  },
+];
 
 const getDestinationSpace = (originSpaceId?: string) => {
   if (!originSpaceId || originSpaceId === DEFAULT_SPACE_ID) {
@@ -432,8 +447,10 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
         });
 
         describe('single-namespace types', () => {
-          beforeEach(async () => await testDataLoader.beforeEach());
-          afterEach(async () => await testDataLoader.afterEach());
+          beforeEach(
+            async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD)
+          );
+          afterEach(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
           const visualizationObject = { type: 'visualization', id: 'cts_vis_3' };
@@ -522,8 +539,8 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
         const includeReferences = false;
         const createNewCopies = false;
         describe(`multi-namespace types with "overwrite" retry`, () => {
-          before(async () => await testDataLoader.beforeEach());
-          after(async () => await testDataLoader.afterEach());
+          before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
+          after(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const testCases = tests.multiNamespaceTestCases();
           testCases.forEach(({ testTitle, objects, retries, statusCode, response }) => {
