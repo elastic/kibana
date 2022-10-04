@@ -18,7 +18,7 @@ interface MarkdownServices {}
  * Storybook mock for the `Markdown` component
  */
 
-//@ts-ignore
+// @ts-ignore
 export class MarkdownStorybookMock extends AbstractStorybookMock<
   MarkdownProps,
   MarkdownServices,
