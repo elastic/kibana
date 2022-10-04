@@ -41,6 +41,8 @@ jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
 jest.mock('../../guided_onboarding');
 jest.mock('../../user_privileges');
 
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+
 describe('useSecuritySolutionNavigation', () => {
   const mockRouteSpy = [
     {
@@ -58,7 +60,7 @@ describe('useSecuritySolutionNavigation', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
-    (useUserPrivileges as jest.Mock).mockImplementation(() => ({
+    mockUseUserPrivileges.mockImplementation(() => ({
       endpointPrivileges: { canReadActionsLogManagement: true },
     }));
     (useTourContext as jest.Mock).mockReturnValue({ isTourShown: false });
@@ -86,6 +88,10 @@ describe('useSecuritySolutionNavigation', () => {
         },
       },
     });
+  });
+
+  afterEach(() => {
+    mockUseUserPrivileges.mockReset();
   });
 
   it('should create navigation config', async () => {
@@ -123,7 +129,7 @@ describe('useSecuritySolutionNavigation', () => {
   });
 
   it('should omit response actions history if hook reports false', () => {
-    (useUserPrivileges as jest.Mock).mockImplementation(() => ({
+    mockUseUserPrivileges.mockImplementation(() => ({
       endpointPrivileges: { canReadActionsLogManagement: false },
     }));
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
