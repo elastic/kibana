@@ -16,8 +16,5 @@
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../cloud_integrations/cloud_experiments/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
   ]
 }

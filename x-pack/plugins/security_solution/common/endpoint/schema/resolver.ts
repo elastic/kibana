@@ -58,10 +58,12 @@ export const validateEvents = {
     afterEvent: schema.maybe(schema.string()),
   }),
   body: schema.object({
-    timeRange: schema.object({
-      from: schema.string(),
-      to: schema.string(),
-    }),
+    timeRange: schema.maybe(
+      schema.object({
+        from: schema.string(),
+        to: schema.string(),
+      })
+    ),
     indexPatterns: schema.arrayOf(schema.string()),
     filter: schema.maybe(schema.string()),
     entityType: schema.maybe(schema.string()),
