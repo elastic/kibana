@@ -49,7 +49,7 @@ export const kpiUserAuthenticationsMetricSuccessLensAttributes: LensAttributes =
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '4590dafb-4ac7-45aa-8641-47a3ff0b817c': {
             columnOrder: ['0eb97c09-a351-4280-97da-944e4bd30dd7'],

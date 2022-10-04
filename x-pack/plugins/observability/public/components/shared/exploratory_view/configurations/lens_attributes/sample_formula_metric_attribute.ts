@@ -21,7 +21,7 @@ export const sampleMetricFormulaAttribute = {
   ],
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
             columnOrder: [

@@ -29,7 +29,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
       description: '',
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               'b4c8cd6f-2499-4791-a0f7-01b0d3f75efc': {
                 columnOrder: [
@@ -131,7 +131,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
       description: '',
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               'b885eaad-3c68-49ad-9891-70158d912dbd': {
                 columnOrder: [

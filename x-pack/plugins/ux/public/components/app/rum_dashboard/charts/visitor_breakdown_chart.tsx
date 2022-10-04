@@ -174,7 +174,7 @@ export function getVisitorBreakdownLensAttributes({
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },

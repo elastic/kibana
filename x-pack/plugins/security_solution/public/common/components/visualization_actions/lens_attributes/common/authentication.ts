@@ -98,7 +98,7 @@ export const authenticationLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '3fd0c5d5-f762-4a27-8c56-14eee0223e13': {
             columns: {

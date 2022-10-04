@@ -11,7 +11,7 @@ export const kpiUniqueIpsDestinationMetricLensAttributes: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '8be0156b-d423-4a39-adf1-f54d4c9f2e69': {
             columnOrder: ['d9a6eb6b-8b78-439e-98e7-a718f8ffbebe'],

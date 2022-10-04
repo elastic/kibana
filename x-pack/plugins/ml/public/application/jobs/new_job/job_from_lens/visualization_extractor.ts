@@ -68,7 +68,7 @@ export class VisualizationExtractor {
       );
     }
 
-    const indexpattern = vis.state.datasourceStates.indexpattern as FormBasedPersistedState;
+    const indexpattern = vis.state.datasourceStates.formBased as FormBasedPersistedState;
     const compatibleIndexPatternLayer = Object.entries(indexpattern.layers).find(
       ([id]) => layer.layerId === id
     );

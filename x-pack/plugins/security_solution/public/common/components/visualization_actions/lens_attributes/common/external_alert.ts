@@ -71,7 +71,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
         },
       ],
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             'a3c54471-615f-4ff9-9fda-69b5b2ea3eef': {
               columns: {

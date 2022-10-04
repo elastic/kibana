@@ -29,7 +29,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       description: null,
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               'b885eaad-3c68-49ad-9891-70158d912dbd': {
                 columnOrder: [
@@ -289,7 +289,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       description: null,
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               '2f34d626-d0ee-4ade-9e75-13c480699485': {
                 columnOrder: [

@@ -33,7 +33,7 @@ const getLensHostsTable = (
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             'cbe5d8a0-381d-49bf-b8ac-f8f312ec7129': {
               columns: {
