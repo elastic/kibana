@@ -26,6 +26,7 @@ import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
 import { syntheticsGetPingsRoute } from './pings';
+import { createGetCurrentStatusRoute } from './status/current_status';
 import {
   SyntheticsRestApiRouteFactory,
   SyntheticsStreamingRouteFactory,
@@ -50,6 +51,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getAPIKeySyntheticsRoute,
   syntheticsGetPingsRoute,
   getHasZipUrlMonitorRoute,
+  createGetCurrentStatusRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
