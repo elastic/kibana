@@ -37,7 +37,8 @@ import { PipelinesLogic } from './pipelines_logic';
 export const IngestPipelinesCard: React.FC = () => {
   const { indexName } = useValues(IndexViewLogic);
 
-  const { canSetPipeline, index, pipelineState, showModal } = useValues(PipelinesLogic);
+  const { canSetPipeline, index, pipelineName, pipelineState, showModal } =
+    useValues(PipelinesLogic);
   const { closeModal, openModal, setPipelineState, savePipeline } = useActions(PipelinesLogic);
   const { makeRequest: fetchCustomPipeline } = useActions(FetchCustomPipelineApiLogic);
   const { makeRequest: createCustomPipeline } = useActions(CreateCustomPipelineApiLogic);
@@ -61,7 +62,7 @@ export const IngestPipelinesCard: React.FC = () => {
         indexName={indexName}
         isGated={isGated}
         isLoading={false}
-        pipeline={pipelineState}
+        pipeline={{ ...pipelineState, name: pipelineName }}
         savePipeline={savePipeline}
         setPipeline={setPipelineState}
         showModal={showModal}
@@ -111,7 +112,7 @@ export const IngestPipelinesCard: React.FC = () => {
                       <CurlRequest
                         document={{ body: 'body', title: 'Title' }}
                         indexName={indexName}
-                        pipeline={pipelineState}
+                        pipeline={{ ...pipelineState, name: pipelineName }}
                       />
                     </EuiAccordion>
                   </EuiFlexItem>
