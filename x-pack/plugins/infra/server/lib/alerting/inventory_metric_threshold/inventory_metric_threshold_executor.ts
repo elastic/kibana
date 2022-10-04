@@ -194,7 +194,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
         scheduledActionsCount++;
 
-        const additionalContext = results && results.length > 0 ? results[0][group] : null;
+        const additionalContext = results && results.length > 0 ? results[0][group].context : null;
 
         const context = {
           group,

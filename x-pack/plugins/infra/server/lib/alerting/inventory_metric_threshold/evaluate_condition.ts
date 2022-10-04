@@ -35,7 +35,8 @@ export type ConditionResult = InventoryMetricConditions & {
   currentValue: number;
   isNoData: boolean;
   isError: boolean;
-} & AdditionalContext;
+  context: AdditionalContext;
+}
 
 export const evaluateCondition = async ({
   condition,
@@ -95,12 +96,14 @@ export const evaluateCondition = async ({
       isNoData: value === null,
       isError: value === undefined,
       currentValue: value.value,
-      cloud: value.cloud,
-      host: value.host,
-      container: value.container,
-      orchestrator: value.orchestrator,
-      labels: value.labels,
-      tags: value.tags
+      context: {
+        cloud: value.cloud,
+        host: value.host,
+        container: value.container,
+        orchestrator: value.orchestrator,
+        labels: value.labels,
+        tags: value.tags
+      }
     };
   }) as unknown; // Typescript doesn't seem to know what `throw` is doing
 
