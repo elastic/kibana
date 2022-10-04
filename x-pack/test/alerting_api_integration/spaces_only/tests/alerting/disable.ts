@@ -26,7 +26,8 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const retry = getService('retry');
   const supertest = getService('supertest');
 
-  describe('disable', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/141864
+  describe.skip('disable', () => {
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
     const ruleUtils = new RuleUtils({ space: Spaces.space1, supertestWithoutAuth });
 
