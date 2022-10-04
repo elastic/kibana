@@ -116,7 +116,6 @@ export interface CreateExecutionHandlerOptions<
 
 export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   actionGroup: ActionGroupIds;
-  actionSubgroup?: string;
   alertId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
