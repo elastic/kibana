@@ -325,6 +325,9 @@ Possible values:
 | *Field*
 | *Description*
 
+| `user.id`
+| Unique identifier of the user across sessions (See {ref}/user-profile.html[user profiles]).
+
 | `user.name`
 | Login name of the user.
 
