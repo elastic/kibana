@@ -21,4 +21,5 @@ checks-reporter-with-killswitch "APM Cypress Tests $CLI_NUMBER" \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   --record \
   --key "$APM_CYPRESS_RECORD_KEY" \
-  --parallel
+  --parallel \
+  --ci-build-id "${BUILDKITE_BUILD_ID}"
