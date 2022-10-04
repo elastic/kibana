@@ -193,7 +193,7 @@ export function FormBasedDataPanel({
       {Object.keys(indexPatterns).length === 0 && indexPatternRefs.length === 0 ? (
         <EuiFlexGroup
           gutterSize="m"
-          className="lnsInnerFormBasedDataPanel"
+          className="lnsInnerIndexPatternDataPanel"
           direction="column"
           responsive={false}
         >
@@ -615,7 +615,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
         gutterSize="none"
-        className="lnsInnerFormBasedDataPanel"
+        className="lnsInnerIndexPatternDataPanel"
         direction="column"
         responsive={false}
       >
@@ -672,7 +672,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
                   data-test-subj="lnsIndexPatternTypeFilterOptions"
                   items={(availableFieldTypes as DataType[]).map((type) => (
                     <EuiContextMenuItem
-                      className="lnsInnerFormBasedDataPanel__filterType"
+                      className="lnsInnerIndexPatternDataPanel__filterType"
                       key={type}
                       icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
                       data-test-subj={`typeFilter-${type}`}
@@ -685,7 +685,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
                         }));
                       }}
                     >
-                      <span className="lnsInnerFormBasedDataPanel__filterTypeInner">
+                      <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
                         <LensFieldIcon type={type} /> {fieldTypeNames[type]}
                       </span>
                     </EuiContextMenuItem>
@@ -695,7 +695,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
             }
           >
             <input
-              className="euiFieldText euiFieldText--fullWidth lnsInnerFormBasedDataPanel__textField"
+              className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
               data-test-subj="lnsIndexPatternFieldSearch"
               placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                 defaultMessage: 'Search field names',

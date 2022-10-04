@@ -86,7 +86,7 @@ export function TextBasedDataPanel({
       <ChildDragDropProvider {...dragDropContext}>
         <EuiFlexGroup
           gutterSize="none"
-          className="lnsInnerFormBasedDataPanel"
+          className="lnsInnerIndexPatternDataPanel"
           direction="column"
           responsive={false}
         >
@@ -107,7 +107,7 @@ export function TextBasedDataPanel({
               }}
             >
               <input
-                className="euiFieldText euiFieldText--fullWidth lnsInnerFormBasedDataPanel__textField"
+                className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
                 data-test-subj="lnsTextBasedLangugesFieldSearch"
                 placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                   defaultMessage: 'Search field names',
@@ -129,7 +129,7 @@ export function TextBasedDataPanel({
             <div className="lnsIndexPatternFieldList">
               <div className="lnsIndexPatternFieldList__accordionContainer">
                 <ul
-                  className="lnsInnerFormBasedDataPanel__fieldItems"
+                  className="lnsInnerIndexPatternDataPanel__fieldItems"
                   data-test-subj="lnsTextBasedLanguagesPanelFields"
                 >
                   {filteredFields.length > 0 &&

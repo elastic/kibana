@@ -116,7 +116,7 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   const renderButton = useMemo(() => {
     const titleClassname = classNames({
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      lnsInnerFormBasedDataPanel__titleTooltip: !!helpTooltip,
+      lnsInnerIndexPatternDataPanel__titleTooltip: !!helpTooltip,
     });
     return (
       <EuiText size="xs">
@@ -190,7 +190,7 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
       <EuiSpacer size="s" />
       {hasLoaded &&
         (!!fieldsCount ? (
-          <ul className="lnsInnerFormBasedDataPanel__fieldItems">
+          <ul className="lnsInnerIndexPatternDataPanel__fieldItems">
             {paginatedFields && paginatedFields.map(renderField)}
           </ul>
         ) : (

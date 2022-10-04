@@ -1,41 +1,41 @@
-.lnsInnerFormBasedDataPanel {
+.lnsInnerIndexPatternDataPanel {
   width: 100%;
   height: 100%;
   padding: $euiSize $euiSize 0;
 }
 
-.lnsInnerFormBasedDataPanel__switcher {
+.lnsInnerIndexPatternDataPanel__switcher {
   min-width: 0;
 }
 
-.lnsInnerFormBasedDataPanel__header {
+.lnsInnerIndexPatternDataPanel__header {
   display: flex;
   align-items: center;
   margin-bottom: $euiSizeS;
 }
 
-.lnsInnerFormBasedDataPanel__titleTooltip {
+.lnsInnerIndexPatternDataPanel__titleTooltip {
   margin-right: $euiSizeXS;
 }
 
-.lnsInnerFormBasedDataPanel__fieldItems {
+.lnsInnerIndexPatternDataPanel__fieldItems {
   // Quick fix for making sure the shadow and focus rings are visible outside the accordion bounds
   padding: $euiSizeXS;
 }
 
-.lnsInnerFormBasedDataPanel__textField {
+.lnsInnerIndexPatternDataPanel__textField {
   @include euiFormControlLayoutPadding(1, 'right');
   @include euiFormControlLayoutPadding(1, 'left');
   box-shadow: none;
 }
 
-.lnsInnerFormBasedDataPanel__filterType {
+.lnsInnerIndexPatternDataPanel__filterType {
   font-size: $euiFontSizeS;
   padding: $euiSizeS;
   border-bottom: 1px solid $euiColorLightestShade;
 }
 
-.lnsInnerFormBasedDataPanel__filterTypeInner {
+.lnsInnerIndexPatternDataPanel__filterTypeInner {
   display: flex;
   align-items: center;
 
