@@ -19,6 +19,8 @@ import React, { useCallback, useMemo } from 'react';
 import type { ShapeTreeNode } from '@elastic/charts';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
+
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { SecurityPageName } from '../../../../../common/constants';
@@ -26,7 +28,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import type { LegendItem } from '../../../../common/components/charts/legend_item';
-import type { AdditionalFilters, EntityFilter } from './use_alerts_by_status';
+import type { EntityFilter } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
@@ -64,7 +66,7 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
 interface AlertsByStatusProps {
   signalIndexName: string | null;
   entityFilter?: EntityFilter;
-  additionalFilters?: AdditionalFilters;
+  additionalFilters?: ESBoolQuery[];
 }
 
 const legendField = 'kibana.alert.severity';

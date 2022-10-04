@@ -11,6 +11,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
+import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { SecurityPageName } from '../../../../common/constants';
 import type { Filter } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
@@ -25,10 +26,7 @@ import { SecuritySolutionLinkAnchor } from '../links';
 import { useLocalStorage } from '../local_storage';
 import { MultiSelectPopover } from './components';
 import * as i18n from './translations';
-import type {
-  AlertCountByRuleByStatusItem,
-  AdditionalFilters,
-} from './use_alert_count_by_rule_by_status';
+import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_status';
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
 
 interface EntityFilter {
@@ -37,7 +35,7 @@ interface EntityFilter {
 }
 interface AlertCountByStatusProps {
   entityFilter: EntityFilter;
-  additionalFilters?: AdditionalFilters;
+  additionalFilters?: ESBoolQuery[];
   signalIndexName: string | null;
 }
 

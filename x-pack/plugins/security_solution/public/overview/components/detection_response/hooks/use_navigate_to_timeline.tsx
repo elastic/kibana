@@ -59,6 +59,13 @@ export const useNavigateToTimeline = () => {
     );
   };
 
+  /** *
+   * Open a timeline with the given filters prepopulated.
+   * It accepts an array of Filter[]s where each item represents a set of AND queries, and each top level comma represents an OR.
+   *
+   * [[filter1 & filter2] OR [filter3 & filter4]]
+   *
+   */
   const openTimelineWithFilters = (filters: Array<[...Filter[]]>) => {
     const dataProviders = [];
 
@@ -77,7 +84,7 @@ export const useNavigateToTimeline = () => {
     navigateToTimeline(dataProviders);
   };
 
-  // TODO: Replace the usage of functions with openEntityInTimeline
+  // TODO: Replace the usage of functions with openTimelineWithFilters
 
   const openHostInTimeline = ({ hostName, severity }: { hostName: string; severity?: string }) => {
     const dataProvider = getDataProvider('host.name', '', hostName);

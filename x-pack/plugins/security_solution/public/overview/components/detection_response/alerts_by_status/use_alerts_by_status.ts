@@ -7,7 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { BoolQuery } from '@kbn/es-query';
+
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
@@ -27,10 +28,6 @@ export const severityLabels: Record<Severity, string> = {
   low: STATUS_LOW_LABEL,
 };
 
-export type AdditionalFilters = Array<{
-  bool: BoolQuery;
-}>;
-
 export interface EntityFilter {
   field: string;
   value: string;
@@ -45,7 +42,7 @@ export const getAlertsByStatusQuery = ({
   from: string;
   to: string;
   entityFilter?: EntityFilter;
-  additionalFilters?: AdditionalFilters;
+  additionalFilters?: ESBoolQuery[];
 }) => ({
   size: 0,
   query: {
@@ -112,7 +109,7 @@ export interface UseAlertsByStatusProps {
   signalIndexName: string | null;
   skip?: boolean;
   entityFilter?: EntityFilter;
-  additionalFilters?: AdditionalFilters;
+  additionalFilters?: ESBoolQuery[];
 }
 
 export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {

@@ -7,18 +7,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import type { BoolQuery } from '@kbn/es-query';
-
+import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import type { GenericBuckets } from '../../../../common/search_strategy';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { useQueryInspector } from '../page/manage_query';
-
-export type AdditionalFilters = Array<{
-  bool: BoolQuery;
-}>;
 
 export interface AlertCountByRuleByStatusItem {
   ruleName: string;
@@ -27,7 +22,7 @@ export interface AlertCountByRuleByStatusItem {
 }
 
 export interface UseAlertCountByRuleByStatusProps {
-  additionalFilters?: AdditionalFilters;
+  additionalFilters?: ESBoolQuery[];
   field: string;
   value: string;
   queryId: string;
@@ -129,7 +124,7 @@ export const buildRuleAlertsByEntityQuery = ({
   value,
   statuses,
 }: {
-  additionalFilters?: AdditionalFilters;
+  additionalFilters?: ESBoolQuery[];
   from: string;
   to: string;
   statuses: string[];
