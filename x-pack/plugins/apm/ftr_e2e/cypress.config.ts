@@ -24,6 +24,9 @@ module.exports = defineConfig({
   video: true,
   videoUploadOnPasses: false,
   screenshotOnRunFailure: true,
+  retries: {
+    runMode: 1,
+  },
   e2e: {
     setupNodeEvents,
     baseUrl: 'http://localhost:5601',
