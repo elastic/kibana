@@ -82,7 +82,11 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
       Read more about Endpoint security configuration in our {docsPage}."
           values={{
             docsPage: (
-              <EuiLink href={docLinks.links.securitySolution.configureEndpointIntegrationPolicy}>
+              <EuiLink
+                href={docLinks.links.securitySolution.configureEndpointIntegrationPolicy}
+                target="_blank"
+                external
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.docsPage"
                   defaultMessage="documentation"
