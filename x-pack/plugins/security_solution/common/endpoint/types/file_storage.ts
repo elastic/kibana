@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * The Metadata information about a file that was uploaded by Endpoint
+ * as a result of a `get-file` response action
+ */
 export interface UploadedFile {
   file: {
     /** The chunk size used for each chunk in this file */
@@ -32,14 +36,14 @@ export interface UploadedFile {
       tlsh?: string;
     };
     mime_type?: string;
-    mode: string;
+    mode?: string;
     /** File name */
     name: string;
     /** The full path to the file on the host machine */
-    path: 'string';
+    path: string;
     /** The total size in bytes */
     size: number;
     created?: string;
-    type: 'file';
+    type: string;
   };
 }
