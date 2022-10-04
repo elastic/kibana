@@ -18,7 +18,7 @@ import type {
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { EuiLoadingContent } from '@elastic/eui';
-import { MlStorageContextProvider } from '../contexts/storage';
+import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
@@ -105,11 +105,11 @@ export const MlRouter: FC<{
 }> = ({ pageDeps }) => (
   <Router history={pageDeps.history}>
     <LegacyHashUrlRedirect>
-      <MlStorageContextProvider>
-        <UrlStateProvider>
+      <UrlStateProvider>
+        <MlNotificationsContextProvider>
           <MlPage pageDeps={pageDeps} />
-        </UrlStateProvider>
-      </MlStorageContextProvider>
+        </MlNotificationsContextProvider>
+      </UrlStateProvider>
     </LegacyHashUrlRedirect>
   </Router>
 );

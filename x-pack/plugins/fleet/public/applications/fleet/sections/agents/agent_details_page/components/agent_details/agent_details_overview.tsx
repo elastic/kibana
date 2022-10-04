@@ -59,6 +59,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             ),
           },
           {
+            title: i18n.translate('xpack.fleet.agentDetails.lastCheckinMessageLabel', {
+              defaultMessage: 'Last checkin message',
+            }),
+            description: agent.last_checkin_message ? agent.last_checkin_message : '-',
+          },
+          {
             title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
               defaultMessage: 'Agent ID',
             }),
