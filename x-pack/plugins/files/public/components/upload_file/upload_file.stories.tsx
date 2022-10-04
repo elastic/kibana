@@ -8,7 +8,6 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { HttpSetup } from '@kbn/core-http-browser';
 import {
   FileKindsRegistryImpl,
   setFileKindsRegistry,
