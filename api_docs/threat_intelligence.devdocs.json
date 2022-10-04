@@ -274,6 +274,103 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.useQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "useQuery",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Query"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.useFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "useFilters",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Filter",
+              "[]"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.useGlobalTime",
+            "type": "Function",
+            "tags": [],
+            "label": "useGlobalTime",
+            "description": [],
+            "signature": [
+              "() => ",
+              "TimeRange"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.SiemSearchBar",
+            "type": "Function",
+            "tags": [],
+            "label": "SiemSearchBar",
+            "description": [],
+            "signature": [
+              "React.VoidFunctionComponent<any>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.SiemSearchBar.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.SiemSearchBar.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

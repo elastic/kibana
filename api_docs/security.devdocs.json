@@ -125,6 +125,22 @@
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthenticatedUser.profile_uid",
+            "type": "string",
+            "tags": [],
+            "label": "profile_uid",
+            "description": [
+              "\nUser profile ID of this user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1518,6 +1534,22 @@
             "label": "elastic_cloud_user",
             "description": [
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
+            ],
+            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuthenticatedUser.profile_uid",
+            "type": "string",
+            "tags": [],
+            "label": "profile_uid",
+            "description": [
+              "\nUser profile ID of this user."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false,
@@ -3073,6 +3105,22 @@
             "label": "elastic_cloud_user",
             "description": [
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
+            ],
+            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.AuthenticatedUser.profile_uid",
+            "type": "string",
+            "tags": [],
+            "label": "profile_uid",
+            "description": [
+              "\nUser profile ID of this user."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false,

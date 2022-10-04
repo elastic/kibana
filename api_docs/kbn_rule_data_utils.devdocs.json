@@ -942,7 +942,7 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"recovered\" | \"active\""
+          "\"active\" | \"recovered\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_status.ts",
         "deprecated": false,
