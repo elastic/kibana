@@ -709,7 +709,7 @@ describe('Combined Queries', () => {
       });
 
       invalidViewSelections.forEach((value) => {
-        test(`it returns false when value is INvalid: ${value}`, () => {
+        test(`it returns false when value is invalid: ${value}`, () => {
           expect(isViewSelection(value)).toBe(false);
         });
       });
@@ -726,9 +726,9 @@ describe('Combined Queries', () => {
             });
           });
 
-          describe('given INvalid values', () => {
+          describe('given invalid values', () => {
             invalidViewSelections.forEach((value) => {
-              test(`it ALWAYS returns 'gridView' for NON-selectable timelineId ${timelineId}, with INvalid value: ${value}`, () => {
+              test(`it ALWAYS returns 'gridView' for NON-selectable timelineId ${timelineId}, with invalid value: ${value}`, () => {
                 expect(getDefaultViewSelection({ timelineId, value })).toEqual('gridView');
               });
             });
@@ -749,7 +749,7 @@ describe('Combined Queries', () => {
 
         describe('given INvalid values', () => {
           invalidViewSelections.forEach((value) => {
-            test(`it ALWAYS returns 'gridView' for selectable timelineId ${timelineId}, with INvalid value: ${value}`, () => {
+            test(`it ALWAYS returns 'gridView' for selectable timelineId ${timelineId}, with invalid value: ${value}`, () => {
               expect(getDefaultViewSelection({ timelineId, value })).toEqual('gridView');
             });
           });

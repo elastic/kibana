@@ -18,11 +18,3 @@ export const getAdditionalScreenReaderOnlyContext = ({
 
   return Array.isArray(value) ? `${field} ${value.join(' ')}` : `${field} ${value}`;
 };
-
-export const convertNumericArrayToStringArray = (
-  value: string | Array<string | number>
-): string | string[] => {
-  if (Array.isArray(value)) {
-    return value.map((item) => String(item));
-  } else return value;
-};

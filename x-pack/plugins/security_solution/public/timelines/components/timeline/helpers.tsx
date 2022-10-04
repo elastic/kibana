@@ -108,6 +108,8 @@ const buildQueryMatch = (
           queryString + type !== DataProviderType.template
             ? buildISQueryMatch({ browserFields, field, isFieldTypeNested, value })
             : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+      } else {
+        queryString += `${field} : ${value[0]}`;
       }
 
       break;
@@ -117,8 +119,9 @@ const buildQueryMatch = (
       break;
     case IS_ONE_OF_OPERATOR:
       if (isStringOrNumberArray(value)) {
-        queryString =
-          queryString + buildISONEOFQueryMatch({ browserFields, field, isFieldTypeNested, value });
+        queryString = queryString + buildISONEOFQueryMatch({ field, isFieldTypeNested, value });
+      } else {
+        queryString += `${field} : ${value}`;
       }
       break;
   }
@@ -307,35 +310,21 @@ const buildEXISTSQueryMatch = ({
 };
 
 const buildISONEOFQueryMatch = ({
-  browserFields,
   field,
-  isFieldTypeNested,
   value,
 }: {
-  browserFields: BrowserFields;
   field: string;
   isFieldTypeNested: boolean;
   value: Array<string | number>;
 }): string => {
-  if (isFieldTypeNested) {
-    // some kind of nested handler implementation if needed, I assume with BrowserFields?
-    return '';
-  } else {
-    // "['open', 'closed']"
-
-    return `${field} : ${JSON.stringify(value)
-      .replace(/\[/g, '(')
-      .replace(/\]/g, ')')
-      .replace(/,/g, ' OR ')}`;
-  }
+  return `${field} : ${value
+    .map((item) => (isNumber(item) ? Number(item) : `"${item}"`))
+    .join(' OR ')
+    .replace(/^\[/, '(')
+    .replace(/\]$/g, ')')}`;
 };
 
-function isStringOrNumberArray(
+const isStringOrNumberArray = (
   val: string | number | Array<string | number>
-): val is Array<string | number> {
-  return (
-    typeof val !== 'string' &&
-    typeof val !== 'number' &&
-    (typeof val[0] === 'string' || typeof val[0] === 'number')
-  );
-}
+): val is Array<string | number> =>
+  Array.isArray(val) && (typeof val[0] === 'string' || typeof val[0] === 'number');

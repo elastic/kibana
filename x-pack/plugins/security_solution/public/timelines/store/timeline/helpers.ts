@@ -46,7 +46,7 @@ import {
 import { activeTimeline } from '../../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
-import { convertIsOneOfQueryStringArrayToDisplayValue } from '../../components/timeline/data_providers/helpers';
+import { getDisplayValue } from '../../components/timeline/data_providers/helpers';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineHistoryParams {
@@ -903,7 +903,7 @@ const updateProviderProperties = ({
             field,
             displayField: field,
             value,
-            displayValue: convertIsOneOfQueryStringArrayToDisplayValue(value),
+            displayValue: getDisplayValue(value),
             operator,
           },
         }
@@ -941,7 +941,7 @@ const updateAndProviderProperties = ({
                     field,
                     displayField: field,
                     value,
-                    displayValue: convertIsOneOfQueryStringArrayToDisplayValue(value),
+                    displayValue: getDisplayValue(value),
                     operator,
                   },
                 }

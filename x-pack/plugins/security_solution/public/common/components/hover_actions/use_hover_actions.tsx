@@ -13,7 +13,6 @@ import { HoverActions } from '.';
 import type { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
-import { convertNumericArrayToStringArray } from './utils';
 
 const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
   const links = draggableElement?.querySelectorAll('.euiLink') ?? [];
@@ -87,6 +86,20 @@ export const useHoverActions = ({
     setShowTopN(false);
   }, []);
 
+  const values = useMemo(() => {
+    const val = dataProvider.queryMatch.value;
+
+    if (typeof val === 'number') {
+      return `${val}`;
+    }
+
+    if (Array.isArray(val)) {
+      return val.map((item) => String(item));
+    }
+
+    return val;
+  }, [dataProvider.queryMatch.value]);
+
   const hoverContent = useMemo(() => {
     // display links as additional content in the hover menu to enable keyboard
     // navigation of links (when the draggable contains them):
@@ -117,11 +130,7 @@ export const useHoverActions = ({
         showTopN={showTopN}
         timelineId={timelineId ?? timelineIdFind}
         toggleTopN={toggleTopN}
-        values={
-          typeof dataProvider.queryMatch.value !== 'number'
-            ? convertNumericArrayToStringArray(dataProvider.queryMatch.value)
-            : `${dataProvider.queryMatch.value}`
-        }
+        values={values}
       />
     );
   }, [
@@ -139,6 +148,7 @@ export const useHoverActions = ({
     timelineId,
     timelineIdFind,
     toggleTopN,
+    values,
   ]);
 
   const setContainerRef = useCallback((e: HTMLDivElement) => {

@@ -17,7 +17,7 @@ export const EXISTS_OPERATOR = ':*';
 export const IS_ONE_OF_OPERATOR = 'includes';
 
 /** The operator applied to a field */
-export type QueryOperator = ':' | ':*' | 'includes';
+export type QueryOperator = typeof IS_OPERATOR | typeof EXISTS_OPERATOR | typeof IS_ONE_OF_OPERATOR;
 
 export enum DataProviderType {
   default = 'default',

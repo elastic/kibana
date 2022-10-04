@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
 
@@ -67,7 +67,7 @@ export const useNavigateToTimeline = () => {
     if (mainFilter) {
       const dataProvider = getDataProvider(
         mainFilter.field,
-        uuid.v4(),
+        useId(),
         mainFilter.value,
         mainFilter.operator
       );

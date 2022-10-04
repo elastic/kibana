@@ -452,20 +452,14 @@ const buildISONEOFQueryMatch = ({
   isFieldTypeNested: boolean;
   value: Array<string | number>;
 }): string => {
-  const formattedValues = value.map((item) => (isNumber(item) ? Number(item) : item));
-
-  return `${field} : ${JSON.stringify(formattedValues)
+  return `${field} : ${value
+    .map((item) => (isNumber(item) ? Number(item) : `"${item}"`))
+    .join(' OR ')
     .replace(/^\[/, '(')
-    .replace(/\]$/g, ')')
-    .replace(/,/g, ' OR ')}`;
+    .replace(/\]$/g, ')')}`;
 };
 
-function isStringOrNumberArray(
+const isStringOrNumberArray = (
   val: string | number | Array<string | number>
-): val is Array<string | number> {
-  return (
-    typeof val !== 'string' &&
-    typeof val !== 'number' &&
-    (typeof val[0] === 'string' || typeof val[0] === 'number')
-  );
-}
+): val is Array<string | number> =>
+  Array.isArray(val) && (typeof val[0] === 'string' || typeof val[0] === 'number');

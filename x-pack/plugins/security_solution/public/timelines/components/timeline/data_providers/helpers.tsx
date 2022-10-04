@@ -343,7 +343,7 @@ export const addContentToTimeline = ({
   }
 };
 
-export const convertIsOneOfQueryStringArrayToDisplayValue = (
+export const getDisplayValue = (
   value: string | number | Array<string | number>
 ): string | number => {
   if (isStringOrNumberArray(value)) {
