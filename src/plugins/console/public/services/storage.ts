@@ -7,6 +7,7 @@
  */
 
 import { transform, keys, startsWith } from 'lodash';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 type IStorageEngine = typeof window.localStorage;
 
@@ -71,3 +72,5 @@ export class Storage {
 export function createStorage(deps: { engine: IStorageEngine; prefix: string }) {
   return new Storage(deps.engine, deps.prefix);
 }
+
+export const [getStorage, setStorage] = createGetterSetter<Storage>('storage');

@@ -20,6 +20,8 @@ import {
   PieChartTypes,
 } from './constants';
 
+export type { OriginalColumn } from './expressions/map_to_columns';
+
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export interface ExistingFields {
@@ -63,8 +65,10 @@ export enum EmptySizeRatios {
 }
 
 export interface SharedPieLayerState {
-  groups: string[];
+  primaryGroups: string[];
+  secondaryGroups?: string[];
   metric?: string;
+  collapseFns?: Record<string, string>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
@@ -88,7 +92,7 @@ export interface PieVisualizationState {
   layers: PieLayerState[];
   palette?: PaletteOutput;
 }
-export interface MetricState {
+export interface LegacyMetricState {
   layerId: string;
   accessor?: string;
   layerType: LayerType;

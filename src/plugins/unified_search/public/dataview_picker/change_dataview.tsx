@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPopover,
@@ -24,10 +24,11 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IUnifiedSearchPluginServices } from '../types';
 import type { DataViewPickerPropsExtended } from '.';
 import { DataViewsList } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
@@ -60,6 +61,7 @@ export const TextBasedLanguagesList = (props: TextBasedLanguagesListProps) => (
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
+  adHocDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -69,9 +71,14 @@ export function ChangeDataView({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  isDisabled,
+  onCreateDefaultAdHocDataView,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const [noDataViewMatches, setNoDataViewMatches] = useState(false);
+  const [dataViewSearchString, setDataViewSearchString] = useState('');
+  const [indexMatches, setIndexMatches] = useState(0);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
@@ -80,7 +87,7 @@ export function ChangeDataView({
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, storage } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
@@ -93,10 +100,39 @@ export function ChangeDataView({
   useEffect(() => {
     const fetchDataViews = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      if (adHocDataViews?.length) {
+        adHocDataViews.forEach((adHocDataView) => {
+          if (adHocDataView.id) {
+            dataViewsRefs.push({
+              title: adHocDataView.title,
+              name: adHocDataView.name,
+              id: adHocDataView.id,
+            });
+          }
+        });
+      }
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId]);
+  }, [data, currentDataViewId, adHocDataViews]);
+
+  const pendingIndexMatch = useRef<undefined | NodeJS.Timeout>();
+  useEffect(() => {
+    async function checkIndices() {
+      if (dataViewSearchString !== '' && noDataViewMatches) {
+        const matches = await kibana.services.dataViews.getIndices({
+          pattern: dataViewSearchString,
+          isRollupIndex: () => false,
+          showAllIndices: false,
+        });
+        setIndexMatches(matches.length);
+      }
+    }
+    if (pendingIndexMatch.current) {
+      clearTimeout(pendingIndexMatch.current);
+    }
+    pendingIndexMatch.current = setTimeout(checkIndices, 250);
+  }, [dataViewSearchString, kibana.services.dataViews, noDataViewMatches]);
 
   useEffect(() => {
     if (trigger.label) {
@@ -126,8 +162,9 @@ export function ChangeDataView({
         color={isMissingCurrent ? 'danger' : 'primary'}
         iconSide="right"
         iconType="arrowDown"
-        title={title}
+        title={triggerLabel}
         fullWidth={fullWidth}
+        disabled={isDisabled}
         {...rest}
       >
         {triggerLabel}
@@ -221,6 +258,16 @@ export function ChangeDataView({
                 onClick={() => {
                   setPopoverIsOpen(false);
                   onDataViewCreated();
+                  // go to dataview mode
+                  if (isTextBasedLangSelected) {
+                    setIsTextBasedLangSelected(false);
+                    // clean up the Text based language query
+                    onTextLangQuerySubmit?.({
+                      language: 'kuery',
+                      query: '',
+                    });
+                    setTriggerLabel(trigger.label);
+                  }
                 }}
                 size="xs"
                 iconType="plusInCircleFilled"
@@ -248,7 +295,7 @@ export function ChangeDataView({
               setIsTextBasedLangSelected(false);
               // clean up the Text based language query
               onTextLangQuerySubmit?.({
-                language: 'kql',
+                language: 'kuery',
                 query: '',
               });
               onChangeDataView(newId);
@@ -258,10 +305,57 @@ export function ChangeDataView({
             }
           }}
           currentDataViewId={currentDataViewId}
-          selectableProps={selectableProps}
+          selectableProps={{
+            ...(selectableProps || {}),
+            // @ts-expect-error Some EUI weirdness
+            searchProps: {
+              ...(selectableProps?.searchProps || {}),
+              onChange: (value, matches) => {
+                selectableProps?.searchProps?.onChange?.(value, matches);
+                setNoDataViewMatches(matches.length === 0 && dataViewsList.length > 0);
+                setDataViewSearchString(value);
+              },
+            },
+          }}
           searchListInputId={searchListInputId}
           isTextBasedLangSelected={isTextBasedLangSelected}
         />
+        {onCreateDefaultAdHocDataView && noDataViewMatches && indexMatches > 0 && (
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            justifyContent="spaceBetween"
+            data-test-subj="select-text-based-language-panel"
+            css={css`
+              margin: ${euiTheme.size.s};
+              margin-bottom: 0;
+            `}
+          >
+            <EuiFlexItem grow={true}>
+              <EuiButton
+                fullWidth
+                size="s"
+                onClick={() => {
+                  setPopoverIsOpen(false);
+                  onCreateDefaultAdHocDataView(dataViewSearchString);
+                }}
+              >
+                {i18n.translate(
+                  'unifiedSearch.query.queryBar.indexPattern.createForMatchingIndices',
+                  {
+                    defaultMessage: `Explore {indicesLength, plural,
+            one {# matching index}
+            other {# matching indices}}`,
+                    values: {
+                      indicesLength: indexMatches,
+                    },
+                  }
+                )}
+              </EuiButton>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </>
     );
 
@@ -321,7 +415,7 @@ export function ChangeDataView({
       setIsTextBasedLangSelected(false);
       // clean up the Text based language query
       onTextLangQuerySubmit?.({
-        language: 'kql',
+        language: 'kuery',
         query: '',
       });
       if (selectedDataViewId) {

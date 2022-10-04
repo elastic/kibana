@@ -19,6 +19,8 @@ import {
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../../lib/helpers/setup_request';
+import { serviceGroupQuery } from '../../lib/service_group_query';
+import { ServiceGroup } from '../../../common/service_groups';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
@@ -28,18 +30,20 @@ export async function getTraceSampleIds({
   setup,
   start,
   end,
+  serviceGroup,
 }: {
   serviceNames?: string[];
   environment: string;
   setup: Setup;
   start: number;
   end: number;
+  serviceGroup: ServiceGroup | null;
 }) {
   const { apmEventClient, config } = setup;
 
   const query = {
     bool: {
-      filter: [...rangeQuery(start, end)],
+      filter: [...rangeQuery(start, end), ...serviceGroupQuery(serviceGroup)],
     },
   };
 
@@ -76,6 +80,7 @@ export async function getTraceSampleIds({
       events,
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query,
       aggs: {

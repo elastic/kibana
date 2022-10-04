@@ -10,7 +10,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Privilege Escalation via Windir Environment Variable",
-  "query": "registry where registry.path : (\"HKEY_USERS\\\\*\\\\Environment\\\\windir\", \"HKEY_USERS\\\\*\\\\Environment\\\\systemroot\") and \n not registry.data.strings : (\"C:\\\\windows\", \"%SystemRoot%\")\n",
+  "query": "registry where registry.path : (\"HKEY_USERS\\\\*\\\\Environment\\\\windir\", \"HKEY_USERS\\\\*\\\\Environment\\\\systemroot\") and\n not registry.data.strings : (\"C:\\\\windows\", \"%SystemRoot%\")\n",
   "references": [
     "https://www.tiraniddo.dev/2017/05/exploiting-environment-variables-in.html"
   ],
@@ -62,5 +62,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 100
 }

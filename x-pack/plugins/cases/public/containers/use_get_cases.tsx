@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useQuery, UseQueryResult } from 'react-query';
-import { CASE_LIST_CACHE_KEY, DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { casesQueriesKeys, DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import { Cases, FilterOptions, QueryParams, SortFieldCase, StatusAll, SeverityAll } from './types';
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
@@ -19,6 +19,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   searchFields: DEFAULT_SEARCH_FIELDS,
   severity: SeverityAll,
+  assignees: [],
   reporters: [],
   status: StatusAll,
   tags: [],
@@ -50,7 +51,7 @@ export const useGetCases = (
 ): UseQueryResult<Cases> => {
   const toasts = useToasts();
   return useQuery(
-    [CASE_LIST_CACHE_KEY, 'cases', params],
+    casesQueriesKeys.cases(params),
     () => {
       const abortCtrl = new AbortController();
       return getCases({

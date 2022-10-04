@@ -171,7 +171,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
     return {
       title: 'Prefilled from exploratory view app',
       description: String(refresh),
-      visualizationType: 'lnsMetric',
+      visualizationType: 'lnsLegacyMetric',
       references: this.getReferences(),
       state: {
         visualization,

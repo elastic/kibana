@@ -182,6 +182,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           options={[
             {
               id: `${dataTypes.Logs}_${monitoringCheckboxIdSuffix}`,
+              'data-test-subj': 'collectLogsCheckbox',
               label: (
                 <>
                   <FormattedMessage
@@ -204,6 +205,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             },
             {
               id: `${dataTypes.Metrics}_${monitoringCheckboxIdSuffix}`,
+              'data-test-subj': 'collectMetricsCheckbox',
               label: (
                 <>
                   <FormattedMessage

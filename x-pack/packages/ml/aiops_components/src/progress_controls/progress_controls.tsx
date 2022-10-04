@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import {
+  useEuiTheme,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,9 +16,11 @@ import {
   EuiProgress,
   EuiText,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+
+import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_background';
 
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
@@ -37,6 +42,9 @@ export function ProgressControls({
   isRunning,
   shouldRerunAnalysis,
 }: ProgressControlProps) {
+  const { euiTheme } = useEuiTheme();
+  const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -51,7 +59,7 @@ export function ProgressControls({
               />
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem css={isRunning ? runningProgressBarStyles : undefined}>
             <EuiProgress
               aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
                 defaultMessage: 'Progress',
@@ -66,6 +74,7 @@ export function ProgressControls({
       <EuiFlexItem grow={false}>
         {!isRunning && (
           <EuiButton
+            data-test-subj={`aiopsRerunAnalysisButton${shouldRerunAnalysis ? ' shouldRerun' : ''}`}
             size="s"
             onClick={onRefresh}
             color={shouldRerunAnalysis ? 'warning' : 'primary'}
@@ -96,8 +105,8 @@ export function ProgressControls({
           </EuiButton>
         )}
         {isRunning && (
-          <EuiButton size="s" onClick={onCancel}>
-            <FormattedMessage id="xpack.aiops.cancelButtonTitle" defaultMessage="Cancel" />
+          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
+            <FormattedMessage id="xpack.aiops.cancelAnalysisButtonTitle" defaultMessage="Cancel" />
           </EuiButton>
         )}
       </EuiFlexItem>

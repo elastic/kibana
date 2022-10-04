@@ -7,7 +7,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import type {
   AddConfigDeprecation,
   ChangedDeprecatedPaths,

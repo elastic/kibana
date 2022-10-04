@@ -370,10 +370,8 @@ export async function saveVisualization(
 
   try {
     await checkForDuplicateTitle(
-      {
-        ...savedObject,
-        copyOnSave,
-      } as any,
+      savedObject,
+      copyOnSave,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
       services as any

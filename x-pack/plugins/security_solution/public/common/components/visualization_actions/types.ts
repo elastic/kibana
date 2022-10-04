@@ -14,7 +14,7 @@ export type GetLensAttributes = (stackByField?: string) => LensAttributes;
 export interface VisualizationActionsProps {
   className?: string;
   getLensAttributes?: GetLensAttributes;
-  inputId?: InputsModelId;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
   isInspectButtonDisabled?: boolean;
   isMultipleQuery?: boolean;

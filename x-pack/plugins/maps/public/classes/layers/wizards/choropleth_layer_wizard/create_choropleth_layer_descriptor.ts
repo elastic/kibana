@@ -38,14 +38,12 @@ function createChoroplethLayerDescriptor({
   sourceDescriptor,
   leftField,
   rightIndexPatternId,
-  rightIndexPatternTitle,
   rightTermField,
   layerType,
 }: {
   sourceDescriptor: EMSFileSourceDescriptor | ESSearchSourceDescriptor;
   leftField: string;
   rightIndexPatternId: string;
-  rightIndexPatternTitle: string;
   rightTermField: string;
   layerType: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR;
 }) {
@@ -98,7 +96,6 @@ function createChoroplethLayerDescriptor({
         type: SOURCE_TYPES.ES_TERM_SOURCE,
         id: joinId,
         indexPatternId: rightIndexPatternId,
-        indexPatternTitle: rightIndexPatternTitle,
         term: rightTermField,
         metrics: [metricsDescriptor],
         applyGlobalQuery: true,
@@ -125,13 +122,11 @@ export function createEmsChoroplethLayerDescriptor({
   leftEmsFileId,
   leftEmsField,
   rightIndexPatternId,
-  rightIndexPatternTitle,
   rightTermField,
 }: {
   leftEmsFileId: string;
   leftEmsField: string;
   rightIndexPatternId: string;
-  rightIndexPatternTitle: string;
   rightTermField: string;
 }) {
   return createChoroplethLayerDescriptor({
@@ -141,7 +136,6 @@ export function createEmsChoroplethLayerDescriptor({
     }),
     leftField: leftEmsField,
     rightIndexPatternId,
-    rightIndexPatternTitle,
     rightTermField,
     layerType: LAYER_TYPE.GEOJSON_VECTOR,
   });
@@ -152,14 +146,12 @@ export function createEsChoroplethLayerDescriptor({
   leftGeoField,
   leftJoinField,
   rightIndexPatternId,
-  rightIndexPatternTitle,
   rightTermField,
 }: {
   leftIndexPatternId: string;
   leftGeoField: string;
   leftJoinField: string;
   rightIndexPatternId: string;
-  rightIndexPatternTitle: string;
   rightTermField: string;
 }) {
   return createChoroplethLayerDescriptor({
@@ -174,7 +166,6 @@ export function createEsChoroplethLayerDescriptor({
     }),
     leftField: leftJoinField,
     rightIndexPatternId,
-    rightIndexPatternTitle,
     rightTermField,
     layerType: LAYER_TYPE.MVT_VECTOR,
   });

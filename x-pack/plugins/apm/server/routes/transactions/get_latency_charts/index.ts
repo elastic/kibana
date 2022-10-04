@@ -83,6 +83,7 @@ function searchLatency({
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -136,8 +137,8 @@ export async function getLatencyTimeseries({
   environment: string;
   kuery: string;
   serviceName: string;
-  transactionType: string | undefined;
-  transactionName: string | undefined;
+  transactionType?: string;
+  transactionName?: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;

@@ -46,7 +46,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
               defaultMessage: 'Status',
             }),
-            description: <AgentHealth agent={agent} />,
+            description: <AgentHealth agent={agent} showOfflinePreviousStatus={true} />,
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
@@ -59,6 +59,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             ),
           },
           {
+            title: i18n.translate('xpack.fleet.agentDetails.lastCheckinMessageLabel', {
+              defaultMessage: 'Last checkin message',
+            }),
+            description: agent.last_checkin_message ? agent.last_checkin_message : '-',
+          },
+          {
             title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
               defaultMessage: 'Agent ID',
             }),
@@ -69,7 +75,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Agent policy',
             }),
             description: agentPolicy ? (
-              <AgentPolicySummaryLine policy={agentPolicy} />
+              <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
             ) : (
               agent.policy_id || '-'
             ),

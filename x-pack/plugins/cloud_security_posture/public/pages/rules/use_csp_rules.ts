@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FunctionKeys } from 'utility-types';
 import type { SavedObjectsFindOptions, SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +43,7 @@ const UPDATE_FAILED_TEXT = i18n.translate('xpack.csp.rules.rulesErrorToast.updat
 });
 
 export const useBulkUpdateCspRules = () => {
-  const { savedObjects, notifications, http } = useKibana().services;
+  const { notifications, http } = useKibana().services;
   const queryClient = useQueryClient();
 
   return useMutation(
@@ -53,20 +53,16 @@ export const useBulkUpdateCspRules = () => {
     }: {
       savedObjectRules: RuleSavedObject[];
       packagePolicyId: CspRule['package_policy_id'];
-    }) => {
-      await savedObjects.client.bulkUpdate<RuleSavedObject>(
-        savedObjectRules.map((savedObjectRule) => ({
-          type: CSP_RULE_SAVED_OBJECT_TYPE,
-          id: savedObjectRule.id,
-          attributes: savedObjectRule.attributes,
-        }))
-      );
-      await http.post(UPDATE_RULES_CONFIG_ROUTE_PATH, {
+    }) =>
+      http.post(UPDATE_RULES_CONFIG_ROUTE_PATH, {
         body: JSON.stringify({
           package_policy_id: packagePolicyId,
+          rules: savedObjectRules.map((savedObjectRule) => ({
+            id: savedObjectRule.id,
+            enabled: savedObjectRule.attributes.enabled,
+          })),
         }),
-      });
-    },
+      }),
     {
       onError: (err) => {
         if (err instanceof Error) notifications.toasts.addError(err, { title: UPDATE_FAILED_TEXT });
@@ -74,10 +70,7 @@ export const useBulkUpdateCspRules = () => {
       },
       onSettled: () =>
         // Invalidate all queries for simplicity
-        queryClient.invalidateQueries({
-          queryKey: CSP_RULE_SAVED_OBJECT_TYPE,
-          exact: false,
-        }),
+        queryClient.invalidateQueries([CSP_RULE_SAVED_OBJECT_TYPE]),
     }
   );
 };

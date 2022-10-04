@@ -12,7 +12,7 @@ exports[`PipelineViewer component passes expected props 1`] = `
         />
       </h1>
     </EuiScreenReaderOnly>
-    <EuiPageContent
+    <EuiPageContent_Deprecated
       className="monPipelineViewer"
       horizontalPosition="center"
       verticalPosition="center"
@@ -72,7 +72,7 @@ exports[`PipelineViewer component passes expected props 1`] = `
         iconType="logstashOutput"
         onShowVertexDetails={[MockFunction]}
       />
-    </EuiPageContent>
+    </EuiPageContent_Deprecated>
   </EuiPageBody>
 </EuiPage>
 `;
@@ -89,7 +89,7 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
         />
       </h1>
     </EuiScreenReaderOnly>
-    <EuiPageContent
+    <EuiPageContent_Deprecated
       className="monPipelineViewer"
       horizontalPosition="center"
       verticalPosition="center"
@@ -157,7 +157,7 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
           }
         }
       />
-    </EuiPageContent>
+    </EuiPageContent_Deprecated>
   </EuiPageBody>
 </EuiPage>
 `;

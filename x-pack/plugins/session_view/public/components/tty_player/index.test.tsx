@@ -28,6 +28,8 @@ describe('TTYPlayer component', () => {
         dispatchEvent: jest.fn(),
       })),
     });
+
+    global.ResizeObserver = require('resize-observer-polyfill');
   });
 
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -47,8 +49,10 @@ describe('TTYPlayer component', () => {
       sessionViewIOEventsMock?.events?.[0]?._source?.process?.entry_leader?.entity_id;
 
     props = {
+      show: true,
       sessionEntityId: mockSessionEntityId,
       onClose: jest.fn(),
+      onJumpToEvent: jest.fn(),
       isFullscreen: false,
     };
   });

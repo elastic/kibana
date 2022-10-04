@@ -9,35 +9,33 @@ import expect from '@kbn/expect';
 
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { ES_TEST_INDEX_NAME, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
-  getUrlPrefix,
-  ObjectRemover,
-} from '../../../../../common/lib';
-import { createEsDocuments, createDataStream, deleteDataStream } from '../lib/create_test_data';
-
-const RULE_TYPE_ID = '.es-query';
-const CONNECTOR_TYPE_ID = '.index';
-const ES_TEST_INDEX_SOURCE = 'builtin-rule:es-query';
-const ES_TEST_INDEX_REFERENCE = '-na-';
-const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-output`;
-const ES_TEST_DATA_STREAM_NAME = 'test-data-stream';
-
-const RULE_INTERVALS_TO_WRITE = 5;
-const RULE_INTERVAL_SECONDS = 4;
-const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
-const ES_GROUPS_TO_WRITE = 3;
+  createConnector,
+  ES_GROUPS_TO_WRITE,
+  ES_TEST_DATA_STREAM_NAME,
+  ES_TEST_INDEX_REFERENCE,
+  ES_TEST_INDEX_SOURCE,
+  ES_TEST_OUTPUT_INDEX_NAME,
+  getRuleServices,
+  RULE_INTERVALS_TO_WRITE,
+  RULE_INTERVAL_MILLIS,
+  RULE_INTERVAL_SECONDS,
+  RULE_TYPE_ID,
+} from './common';
+import { createDataStream, deleteDataStream } from '../lib/create_test_data';
 
 // eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const retry = getService('retry');
   const indexPatterns = getService('indexPatterns');
-  const es = getService('es');
-  const esTestIndexTool = new ESTestIndexTool(es, retry);
-  const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
-  const esTestIndexToolDataStream = new ESTestIndexTool(es, retry, ES_TEST_DATA_STREAM_NAME);
+  const {
+    es,
+    esTestIndexTool,
+    esTestIndexToolOutput,
+    esTestIndexToolDataStream,
+    createEsDocumentsInGroups,
+  } = getRuleServices(getService);
 
   describe('rule', async () => {
     let endDate: string;
@@ -51,7 +49,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await esTestIndexToolOutput.destroy();
       await esTestIndexToolOutput.setup();
 
-      connectorId = await createConnector(supertest, objectRemover);
+      connectorId = await createConnector(supertest, objectRemover, ES_TEST_OUTPUT_INDEX_NAME);
 
       // write documents in the future, figure out the end date
       const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
@@ -130,7 +128,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: threshold on hit count < > for ${searchType} search type`, async () => {
         // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
         await initData();
 
         const docs = await waitForDocs(2);
@@ -222,7 +220,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: use epoch millis - threshold on hit count < > for ${searchType} search type`, async () => {
         // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
         await initData();
 
         const docs = await waitForDocs(2);
@@ -333,7 +331,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     ].forEach(([searchType, initData]) =>
       it(`runs correctly with query: threshold on hit count < > for ${searchType}`, async () => {
         // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
         await initData();
 
         const docs = await waitForDocs(1);
@@ -471,7 +469,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         // delay to let rule run once before adding data
         await new Promise((resolve) => setTimeout(resolve, 3000));
-        await createEsDocumentsInGroups(1);
+        await createEsDocumentsInGroups(1, endDate);
 
         const docs = await waitForDocs(2);
         const activeDoc = docs[0];
@@ -573,6 +571,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         // write documents from now to the future end date in groups
         await createEsDocumentsInGroups(
           ES_GROUPS_TO_WRITE,
+          endDate,
           esTestIndexToolDataStream,
           ES_TEST_DATA_STREAM_NAME
         );
@@ -602,21 +601,78 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       })
     );
 
-    async function createEsDocumentsInGroups(
-      groups: number,
-      indexTool: ESTestIndexTool = esTestIndexTool,
-      indexName: string = ES_TEST_INDEX_NAME
-    ) {
-      await createEsDocuments(
-        es,
-        indexTool,
-        endDate,
-        RULE_INTERVALS_TO_WRITE,
-        RULE_INTERVAL_MILLIS,
-        groups,
-        indexName
-      );
-    }
+    describe('excludeHitsFromPreviousRun', () => {
+      it('excludes hits from the previous rule run when excludeHitsFromPreviousRun is true', async () => {
+        endDate = new Date().toISOString();
+
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+
+        await createRule({
+          name: 'always fire',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [0],
+          timeWindowSize: 300,
+          excludeHitsFromPreviousRun: true,
+        });
+
+        const docs = await waitForDocs(2);
+
+        expect(docs[0]._source.hits.length).greaterThan(0);
+        expect(docs[0]._source.params.message).to.match(/rule 'always fire' is active/);
+
+        expect(docs[1]._source.hits.length).to.be(0);
+        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is recovered/);
+      });
+
+      it('excludes hits from the previous rule run when excludeHitsFromPreviousRun is undefined', async () => {
+        endDate = new Date().toISOString();
+
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+
+        await createRule({
+          name: 'always fire',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [0],
+          timeWindowSize: 300,
+        });
+
+        const docs = await waitForDocs(2);
+
+        expect(docs[0]._source.hits.length).greaterThan(0);
+        expect(docs[0]._source.params.message).to.match(/rule 'always fire' is active/);
+
+        expect(docs[1]._source.hits.length).to.be(0);
+        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is recovered/);
+      });
+
+      it('does not exclude hits from the previous rule run when excludeHitsFromPreviousRun is false', async () => {
+        endDate = new Date().toISOString();
+
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+
+        await createRule({
+          name: 'always fire',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [0],
+          timeWindowSize: 300,
+          excludeHitsFromPreviousRun: false,
+        });
+
+        const docs = await waitForDocs(2);
+
+        expect(docs[0]._source.hits.length).greaterThan(0);
+        expect(docs[0]._source.params.message).to.match(/rule 'always fire' is active/);
+
+        expect(docs[1]._source.hits.length).greaterThan(0);
+        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is active/);
+      });
+    });
 
     async function waitForDocs(count: number): Promise<any[]> {
       return await esTestIndexToolOutput.waitForDocs(
@@ -638,6 +694,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       searchType?: 'searchSource';
       notifyWhen?: string;
       indexName?: string;
+      excludeHitsFromPreviousRun?: boolean;
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -713,6 +770,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
             searchType: params.searchType,
+            ...(params.excludeHitsFromPreviousRun !== undefined && {
+              excludeHitsFromPreviousRun: params.excludeHitsFromPreviousRun,
+            }),
             ...ruleParams,
           },
         })
@@ -724,24 +784,4 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       return ruleId;
     }
   });
-}
-
-async function createConnector(supertest: any, objectRemover: ObjectRemover): Promise<string> {
-  const { body: createdConnector } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-    .set('kbn-xsrf', 'foo')
-    .send({
-      name: 'index action for es query FT',
-      connector_type_id: CONNECTOR_TYPE_ID,
-      config: {
-        index: ES_TEST_OUTPUT_INDEX_NAME,
-      },
-      secrets: {},
-    })
-    .expect(200);
-
-  const connectorId = createdConnector.id;
-  objectRemover.add(Spaces.space1.id, connectorId, 'connector', 'actions');
-
-  return connectorId;
 }

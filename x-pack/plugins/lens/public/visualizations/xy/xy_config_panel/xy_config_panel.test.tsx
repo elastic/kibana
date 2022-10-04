@@ -137,6 +137,37 @@ describe('XY Config panels', () => {
       expect(component.find(AxisSettingsPopover).at(2).prop('setEndzoneVisibility')).toBeFalsy();
     });
 
+    it('should pass in current time marker visibility setter and current state for time chart', () => {
+      const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        dataType: 'date',
+      });
+      const mockSetState = jest.fn();
+      const stateForTest = testState();
+      const state = {
+        ...stateForTest,
+        showCurrentTimeMarker: true,
+        layers: [
+          {
+            ...stateForTest.layers[0],
+            yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
+          } as XYDataLayerConfig,
+        ],
+      };
+      const component = shallow(<XyToolbar frame={frame} state={state} setState={mockSetState} />);
+
+      expect(
+        component.find(AxisSettingsPopover).at(0).prop('setCurrentTimeMarkerVisibility')
+      ).toBeFalsy();
+      expect(
+        component.find(AxisSettingsPopover).at(1).prop('setCurrentTimeMarkerVisibility')
+      ).toBeTruthy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('currentTimeMarkerVisible')).toBe(true);
+      expect(
+        component.find(AxisSettingsPopover).at(2).prop('setCurrentTimeMarkerVisibility')
+      ).toBeFalsy();
+    });
+
     it('should pass in information about current data bounds', () => {
       const state = testState();
       frame.activeData = {

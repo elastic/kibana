@@ -164,29 +164,34 @@ export function MachineLearningCommonUIProvider({
     },
 
     async setMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
-      await testSubjects.clickWhenNotDisabled(`${testDataSubj}-button`);
-      await testSubjects.existOrFail(`${testDataSubj}-popover`);
-      await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
-      const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);
+      await retry.tryForTime(60 * 1000, async () => {
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
 
-      for (const fieldType of fieldTypes) {
-        await retry.tryForTime(5000, async () => {
-          await searchBarInput.clearValueWithKeyboard();
-          await searchBarInput.type(fieldType);
-          if (!(await testSubjects.exists(`${testDataSubj}-option-${fieldType}-checked`))) {
-            await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}`);
-            await testSubjects.click(`${testDataSubj}-option-${fieldType}`);
-            await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}-checked`);
-          }
-        });
-      }
+        await testSubjects.clickWhenNotDisabledWithoutRetry(`${testDataSubj}-button`);
+        await testSubjects.existOrFail(`${testDataSubj}-popover`);
+        await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
+        const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);
+
+        for (const fieldType of fieldTypes) {
+          await retry.tryForTime(5000, async () => {
+            await searchBarInput.clearValueWithKeyboard();
+            await searchBarInput.type(fieldType);
+            if (!(await testSubjects.exists(`${testDataSubj}-option-${fieldType}-checked`))) {
+              await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}`);
+              await testSubjects.click(`${testDataSubj}-option-${fieldType}`);
+              await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}-checked`);
+            }
+          });
+        }
+      });
 
       // escape popover
       await browser.pressKeys(browser.keys.ESCAPE);
     },
 
     async removeMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
-      await testSubjects.clickWhenNotDisabled(`${testDataSubj}-button`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`${testDataSubj}-button`);
       await testSubjects.existOrFail(`${testDataSubj}-popover`);
       await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
       const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);

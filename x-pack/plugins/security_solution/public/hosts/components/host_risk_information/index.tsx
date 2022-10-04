@@ -13,7 +13,6 @@ import {
   EuiFlyoutHeader,
   EuiText,
   EuiTitle,
-  EuiLink,
   EuiBasicTable,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -27,12 +26,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
-
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
-import { RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
@@ -129,15 +127,18 @@ const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
         <EuiSpacer size="l" />
         <FormattedMessage
           id="xpack.securitySolution.hosts.hostRiskInformation.learnMore"
-          defaultMessage="You can learn more about host risk {hostsRiskScoreDocumentationLink}"
+          defaultMessage="You can learn more about host risk {HostRiskScoreDocumentationLink}"
           values={{
-            hostsRiskScoreDocumentationLink: (
-              <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
-                <FormattedMessage
-                  id="xpack.securitySolution.hosts.hostRiskInformation.link"
-                  defaultMessage="here"
-                />
-              </EuiLink>
+            HostRiskScoreDocumentationLink: (
+              <RiskScoreDocLink
+                riskScoreEntity={RiskScoreEntity.host}
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.hosts.hostRiskInformation.link"
+                    defaultMessage="here"
+                  />
+                }
+              />
             ),
           }}
         />

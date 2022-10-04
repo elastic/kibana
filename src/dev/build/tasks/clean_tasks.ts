@@ -8,6 +8,7 @@
 
 import minimatch from 'minimatch';
 import { discoverBazelPackages } from '@kbn/bazel-packages';
+import { REPO_ROOT } from '@kbn/utils';
 import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
 
 export const Clean: GlobalTask = {
@@ -31,20 +32,6 @@ export const CleanPackageManagerRelatedFiles: Task = {
 
   async run(config, log, build) {
     await deleteAll([build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')], log);
-  },
-};
-
-export const CleanTypescript: Task = {
-  description: 'Cleaning typescript source files that have been transpiled to JS',
-
-  async run(config, log, build) {
-    log.info(
-      'Deleted %d files',
-      await scanDelete({
-        directory: build.resolvePath(),
-        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.(json|tsbuildinfo)$/],
-      })
-    );
   },
 };
 
@@ -83,6 +70,8 @@ export const CleanExtraFilesFromModules: Task = {
       '**/CHANGELOG.md',
       '**/Changelog.md',
       '**/changelog.md',
+
+      '**/CODE_OF_CONDUCT.md',
 
       // examples
       '**/example',
@@ -164,6 +153,9 @@ export const CleanExtraFilesFromModules: Task = {
       '**/.codecov.yml',
       '**/.airtap.yml',
       '**/.gitpod.yml',
+      '**/karma.conf.ci.js',
+      '**/karma.conf.js',
+      '**/karma-ci.conf.js',
 
       // metadata
       '**/package-lock.json',
@@ -192,13 +184,31 @@ export const CleanExtraFilesFromModules: Task = {
       '**/*.tgz',
       '**/*.gz',
 
+      '**/*.cc',
+      '**/*.pl',
+      '**/*.py',
+      '**/*.gz',
+      '**/*.h',
       '**/*.xml',
+      '**/*.html',
+
+      '**/*.development.js',
+      '**/*.dev.js',
+      '**/benchmark',
+      '**/benchmarks',
+      '**/benchmark.js',
+      '**/benchmarks.js',
+
+      '**/rollup.config.js',
+      '**/webpack.config.js',
+      '**/commitlint.config.js',
+      '**/styleguide.config.js',
 
       '**/@elastic/eui/es',
       '**/@elastic/eui/test-env',
       '**/@elastic/eui/optimize',
       '**/@elastic/eui/i18ntokens.json',
-    ]);
+    ]).concat([/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.(json|tsbuildinfo)$/]);
 
     log.info(
       'Deleted %d files',
@@ -250,9 +260,15 @@ export const DeleteBazelPackagesFromBuildRoot: Task = {
     'Deleting bazel packages outputs from build folder root as they are now installed as node_modules',
 
   async run(config, log, build) {
-    const bazelPackagesOnBuildRoot = (await discoverBazelPackages()).map((pkg) =>
-      build.resolvePath(pkg.normalizedRepoRelativeDir)
-    );
+    const bazelPackagesOnBuildRoot = (await discoverBazelPackages(REPO_ROOT)).flatMap((pkg) => {
+      const bldSrc = build.resolvePath(pkg.normalizedRepoRelativeDir);
+
+      if (pkg.manifest.type.startsWith('plugin-')) {
+        return bldSrc;
+      }
+
+      return [bldSrc, build.resolvePath('node_modules', pkg.manifest.id, 'kibana.jsonc')];
+    });
 
     await deleteAll(bazelPackagesOnBuildRoot, log);
   },

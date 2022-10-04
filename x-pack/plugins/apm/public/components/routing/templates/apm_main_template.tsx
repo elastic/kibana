@@ -9,7 +9,7 @@ import { EuiPageHeaderProps } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -48,7 +48,7 @@ export function ApmMainTemplate({
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks, observability } = services;
+  const { http, docLinks, observability, application } = services;
   const basePath = http?.basePath.get();
 
   const ObservabilityPageTemplate = observability.navigation.PageTemplate;
@@ -56,6 +56,19 @@ export function ApmMainTemplate({
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/has_data');
   }, []);
+
+  // create static data view on inital load
+  useFetcher(
+    (callApmApi) => {
+      const canCreateDataView =
+        application?.capabilities.savedObjectsManagement.edit;
+
+      if (canCreateDataView) {
+        return callApmApi('POST /internal/apm/data_view/static');
+      }
+    },
+    [application?.capabilities.savedObjectsManagement.edit]
+  );
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
     location.pathname.includes(path)
