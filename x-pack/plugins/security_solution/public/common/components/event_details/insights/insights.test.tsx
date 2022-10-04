@@ -134,7 +134,7 @@ describe('Insights', () => {
 
         expect(screen.getByTestId('related-alerts-by-ancestry')).toBeInTheDocument();
         expect(
-          screen.queryByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+          screen.queryByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
         ).not.toBeInTheDocument();
       });
     });
@@ -150,7 +150,7 @@ describe('Insights', () => {
         );
 
         expect(
-          screen.getByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+          screen.getByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
         ).toBeInTheDocument();
         expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
       });
@@ -169,7 +169,7 @@ describe('Insights', () => {
 
       expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
       expect(
-        screen.queryByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+        screen.queryByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
       ).not.toBeInTheDocument();
     });
   });
