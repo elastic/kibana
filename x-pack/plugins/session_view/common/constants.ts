@@ -48,8 +48,7 @@ export const ALERT_STATUS = {
 export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 export const DEBOUNCE_TIMEOUT = 500;
-export const DEFAULT_TTY_PLAYSPEED_MS = 50; // milliseconds per render loop
-export const TTY_LINES_PER_FRAME = 5; // number of lines to print to xterm on each render loop
+export const DEFAULT_TTY_PLAYSPEED_MS = 30; // milliseconds per render loop
 export const TTY_LINES_PRE_SEEK = 200; // number of lines to redraw before the point we are seeking to.
 export const DEFAULT_TTY_FONT_SIZE = 11;
 export const DEFAULT_TTY_ROWS = 66;
