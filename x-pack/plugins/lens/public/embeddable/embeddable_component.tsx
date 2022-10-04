@@ -22,7 +22,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
-import type { FormBasedPersistedState } from '../form_based_datasource/types';
+import type { FormBasedPersistedState } from '../datasources/form_based/types';
 import type { XYState } from '../visualizations/xy/types';
 import type { PieVisualizationState, LegacyMetricState } from '../../common';
 import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';

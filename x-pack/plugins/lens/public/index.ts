@@ -44,7 +44,7 @@ export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   FormBasedPersistedState,
-  PersistedFormBasedLayer,
+  PersistedIndexPatternLayer,
   OperationType,
   IncompleteColumn,
   GenericIndexPatternColumn,
@@ -75,7 +75,7 @@ export type {
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
   FormBasedLayer,
-} from './form_based_datasource/types';
+} from './datasources/form_based/types';
 export type {
   XYArgs,
   XYRender,

@@ -28,7 +28,7 @@ import { LayerType, layerTypes } from '../../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../../common/expressions';
 import type { ColumnState, SortingState } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
-import { FormBasedLayer } from '../../form_based_datasource/types';
+import { FormBasedLayer } from '../../datasources/form_based/types';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];

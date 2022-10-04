@@ -29,12 +29,12 @@ export * from './visualizations/heatmap';
 export * from './visualizations/gauge/gauge_visualization';
 export * from './visualizations/gauge';
 
-export * from './form_based_datasource/form_based';
-export { getTextBasedDatasource } from './text_based_datasource/text_based_languages';
-export { createFormulaPublicApi } from './form_based_datasource/operations/definitions/formula/formula_public_api';
+export * from './datasources/form_based/form_based';
+export { getTextBasedDatasource } from './datasources/text_based/text_based_languages';
+export { createFormulaPublicApi } from './datasources/form_based/operations/definitions/formula/formula_public_api';
 
-export * from './text_based_datasource';
-export * from './form_based_datasource';
+export * from './datasources/text_based';
+export * from './datasources/form_based';
 export * from './lens_ui_telemetry';
 export * from './lens_ui_errors';
 export * from './editor_frame_service/editor_frame';

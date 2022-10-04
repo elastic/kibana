@@ -55,8 +55,8 @@ import type {
   FormBasedDatasource as FormBasedDatasourceType,
   FormBasedDatasourceSetupPlugins,
   FormulaPublicApi,
-} from './form_based_datasource';
-import type { TextBasedDatasource as TextBasedDatasourceType } from './text_based_datasource';
+} from './datasources/form_based';
+import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/text_based';
 
 import type {
   XyVisualization as XyVisualizationType,
