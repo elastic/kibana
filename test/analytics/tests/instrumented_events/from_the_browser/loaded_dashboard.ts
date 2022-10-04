@@ -200,7 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(event.properties.key2).to.be('num_of_panels');
-        expect(event.properties.value2).to.be(17);
+        expect(event.properties.value2).to.be(16);
       });
 
       /**
