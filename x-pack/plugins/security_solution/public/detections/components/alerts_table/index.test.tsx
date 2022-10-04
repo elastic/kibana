@@ -29,9 +29,7 @@ describe('AlertsTableComponent', () => {
             language: 'language',
           }}
           globalFilters={[]}
-          deletedEventIds={[]}
           loadingEventIds={[]}
-          selectedEventIds={{}}
           isSelectAllChecked={false}
           showBuildingBlockAlerts={false}
           onShowBuildingBlockAlertsChanged={jest.fn()}
