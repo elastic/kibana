@@ -13,7 +13,7 @@ import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { createEsQuery } from '../../../../common/utils/es_search';
-import { UptimeESClient } from '../lib';
+import { UptimeEsClient } from '../lib';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 
 export interface GetMonitorStatusParams {
@@ -83,7 +83,7 @@ const executeQueryParams = async ({
   timestampRange: GetMonitorStatusParams['timestampRange'];
   filters: GetMonitorStatusParams['filters'];
   afterKey?: AfterKey;
-  uptimeEsClient: UptimeESClient;
+  uptimeEsClient: UptimeEsClient;
   locations: string[];
 }) => {
   const queryParams = createEsQuery({

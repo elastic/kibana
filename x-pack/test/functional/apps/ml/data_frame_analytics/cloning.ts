@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   // FLAKY: https://github.com/elastic/kibana/issues/142118
+  // Failing: See https://github.com/elastic/kibana/issues/142118
   describe.skip('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
