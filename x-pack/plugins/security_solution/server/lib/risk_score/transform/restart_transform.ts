@@ -30,7 +30,7 @@ const restartRiskScoreTransformsSchema = {
   }),
 };
 
-export const restartTransfornRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const restartTransformRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
     {
       path: RISK_SCORE_RESTART_TRANSFORMS,
