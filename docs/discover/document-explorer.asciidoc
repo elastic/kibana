@@ -49,7 +49,7 @@ Column widths are stored with a saved search.  When you visualize saved searches
 
 [float]
 [[document-explorer-row-height]]
-==== Adjust row height
+==== Adjust the row height
 
 To set the row height to 1 or more lines, or automatically
 adjust the height to fit the contents, click the row height icon
