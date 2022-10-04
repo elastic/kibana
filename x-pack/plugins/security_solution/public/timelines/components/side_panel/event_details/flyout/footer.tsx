@@ -63,6 +63,7 @@ export const FlyoutFooterComponent = React.memo(
     timelineQuery,
     refetchFlyoutData,
   }: FlyoutFooterProps & PropsFromRedux) => {
+    const alertId = detailsEcsData?.kibana?.alert ? detailsEcsData?._id : null;
     const ruleIndex = useMemo(
       () =>
         find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
@@ -184,7 +185,11 @@ export const FlyoutFooterComponent = React.memo(
           />
         )}
         {isOsqueryFlyoutOpenWithAgentId && detailsEcsData != null && (
-          <OsqueryFlyout agentId={isOsqueryFlyoutOpenWithAgentId} onClose={closeOsqueryFlyout} />
+          <OsqueryFlyout
+            agentId={isOsqueryFlyoutOpenWithAgentId}
+            defaultValues={alertId ? { alertIds: [alertId] } : undefined}
+            onClose={closeOsqueryFlyout}
+          />
         )}
       </>
     );
