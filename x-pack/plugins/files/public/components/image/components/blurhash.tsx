@@ -4,32 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { decode } from 'blurhash';
 import type { FunctionComponent } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import React, { useRef, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { decode } from 'blurhash';
+import { boxDimensions } from '../../common/blurhash';
 
 interface Props {
-  isLoaded: boolean;
-  hash?: string;
+  visible: boolean;
+  hash: string;
 }
 
-export const Blurhash: FunctionComponent<Props> = ({ isLoaded, hash }) => {
+export const Blurhash: FunctionComponent<Props> = ({ visible, hash }) => {
   const ref = useRef<null | HTMLCanvasElement>(null);
   const { euiTheme } = useEuiTheme();
   useEffect(() => {
-    if (!hash) return;
     const pixels = decode(hash, 100, 100);
     const ctx = ref.current!.getContext('2d')!;
-    const imageData = ctx.createImageData(300, 300);
+    const imageData = ctx.createImageData(boxDimensions.width, boxDimensions.height);
     imageData.data.set(pixels);
     ctx.putImageData(imageData, 0, 0);
   }, [hash]);
-
-  if (!hash) {
-    return null;
-  }
   return (
     <canvas
       css={css`

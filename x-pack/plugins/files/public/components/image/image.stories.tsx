@@ -9,26 +9,12 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { CUSTOM_BLURHASH_HEADER } from '../../../common/constants';
 import { FilesContext } from '../context';
 import { createBlurhash } from '../common';
 import { Image, Props } from './image';
-import { getImageData as getBlob } from './image.constants.stories';
+import { getImageData as getBlob, base64dLogo } from './image.constants.stories';
 
-const defaultArgs: Props = { alt: 'test', src: 'test' };
-
-const myClient = {
-  get: async () => {
-    const blurhash = await createBlurhash(getBlob());
-    return {
-      response: {
-        headers: new Map<string, undefined | string>([[CUSTOM_BLURHASH_HEADER, blurhash]]),
-        blob: () => getBlob(),
-      },
-    };
-  },
-} as unknown as HttpSetup;
+const defaultArgs: Props = { alt: 'test', src: `data:image/png;base64,${base64dLogo}` };
 
 export default {
   title: 'components/Image',
@@ -36,7 +22,7 @@ export default {
   args: defaultArgs,
   decorators: [
     (Story) => (
-      <FilesContext http={myClient}>
+      <FilesContext>
         <Story />
       </FilesContext>
     ),

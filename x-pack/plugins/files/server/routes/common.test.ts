@@ -56,21 +56,4 @@ describe('getDownloadHeadersForFile', () => {
       expectHeaders({ contentType: 'application/pdf', contentDisposition: 'a cool file.pdf' })
     );
   });
-  test('mime type, name and blurhash', () => {
-    const fileWithMimeAndHash = {
-      data: { ...file.data, mimeType: 'application/pdf', blurhash: 'blurhash' },
-    } as File;
-    expect(
-      getDownloadHeadersForFile({
-        file: fileWithMimeAndHash,
-        fileName: 'a cool file.pdf',
-      })
-    ).toEqual(
-      expectHeaders({
-        contentType: 'application/pdf',
-        contentDisposition: 'a cool file.pdf',
-        blurhash: 'blurhash',
-      })
-    );
-  });
 });

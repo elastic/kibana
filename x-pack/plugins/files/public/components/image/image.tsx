@@ -32,33 +32,15 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
  * ```
  */
 export const Image = React.forwardRef<HTMLImageElement, Props>(
-  ({ src, alt, onFirstVisible, onLoad, ...rest }, ref) => {
-    const { http } = useFilesContext();
-
-    const [hash, setHash] = useState<undefined | string>(undefined);
-    const [imgSrc, setImageSrc] = useState<undefined | string>(undefined);
+  ({ src, alt, onFirstVisible, onLoad, onError, blurhash, ...rest }, ref) => {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
-
+    const [blurDelayExpired, setBlurDelayExpired] = useState(false);
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
 
     useEffect(() => {
-      if (!isVisible || imgSrc) return;
-      let imgUrl: undefined | string;
-      (async () => {
-        try {
-          const { response } = await http.get(src, { asResponse: true });
-          setHash(response?.headers.get(CUSTOM_BLURHASH_HEADER) ?? undefined);
-          const blob = await response!.blob();
-          imgUrl = URL.createObjectURL(blob);
-          setImageSrc(imgUrl);
-        } catch (e) {
-          setImageSrc(src);
-        }
-      })();
-      return () => {
-        if (imgUrl) URL.revokeObjectURL(imgUrl);
-      };
-    }, [src, http, isVisible, imgSrc]);
+      const id = window.setTimeout(() => setBlurDelayExpired(true), 50);
+      return () => window.clearTimeout(id);
+    }, []);
 
     return (
       <div
