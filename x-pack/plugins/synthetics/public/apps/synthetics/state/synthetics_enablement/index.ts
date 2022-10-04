@@ -18,11 +18,10 @@ import {
   getSyntheticsEnablementFailure,
 } from './actions';
 import { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '../utils/http_error';
 
 export interface SyntheticsEnablementState {
   loading: boolean;
-  error: IHttpSerializedFetchError | null;
+  error: Error | null;
   enablement: MonitorManagementEnablementResult | null;
 }
 
