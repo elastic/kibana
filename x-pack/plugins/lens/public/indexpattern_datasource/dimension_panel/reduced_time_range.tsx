@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
@@ -24,21 +24,23 @@ import { reducedTimeRangeOptions } from '../reduced_time_range_utils';
 export function setReducedTimeRange(
   columnId: string,
   layer: IndexPatternLayer,
-  reducedTimeRange: string | undefined
+  reducedTimeRange: string | undefined,
+  skipLabelUpdate?: boolean
 ) {
   const trimmedReducedTimeRange = reducedTimeRange?.trim();
   const currentColumn = layer.columns[columnId];
-  const label = currentColumn.customLabel
-    ? currentColumn.label
-    : adjustTimeScaleLabelSuffix(
-        currentColumn.label,
-        currentColumn.timeScale,
-        currentColumn.timeScale,
-        currentColumn.timeShift,
-        currentColumn.timeShift,
-        currentColumn.reducedTimeRange,
-        trimmedReducedTimeRange
-      );
+  const label =
+    currentColumn.customLabel || skipLabelUpdate
+      ? currentColumn.label
+      : adjustTimeScaleLabelSuffix(
+          currentColumn.label,
+          currentColumn.timeScale,
+          currentColumn.timeScale,
+          currentColumn.timeShift,
+          currentColumn.timeShift,
+          currentColumn.reducedTimeRange,
+          trimmedReducedTimeRange
+        );
   return {
     ...layer,
     columns: {
@@ -62,12 +64,16 @@ export function ReducedTimeRange({
   layer,
   updateLayer,
   indexPattern,
+  helpMessage,
+  skipLabelUpdate,
 }: {
   selectedColumn: GenericIndexPatternColumn;
   columnId: string;
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
   indexPattern: IndexPattern;
+  helpMessage: string | null;
+  skipLabelUpdate?: boolean;
 }) {
   const [localValue, setLocalValue] = useState(selectedColumn.reducedTimeRange);
   useEffect(() => {
@@ -99,6 +105,9 @@ export function ReducedTimeRange({
       },
     ];
   }
+  const label = i18n.translate('xpack.lens.indexPattern.reducedTimeRange.label', {
+    defaultMessage: 'Reduced time range',
+  });
 
   return (
     <div>
@@ -106,9 +115,25 @@ export function ReducedTimeRange({
         display="rowCompressed"
         fullWidth
         data-test-subj="indexPattern-dimension-reducedTimeRange-row"
-        label={i18n.translate('xpack.lens.indexPattern.reducedTimeRange.label', {
-          defaultMessage: 'Reduced time range',
-        })}
+        label={
+          helpMessage ? (
+            <>
+              {label}{' '}
+              <EuiIconTip
+                color="subdued"
+                content={helpMessage}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </>
+          ) : (
+            label
+          )
+        }
         helpText={i18n.translate('xpack.lens.indexPattern.reducedTimeRange.help', {
           defaultMessage:
             'Reduces the time range specified in the global time filter from the end of the global time filter.',
@@ -144,14 +169,14 @@ export function ReducedTimeRange({
               onCreateOption={(val) => {
                 const parsedVal = parseTimeShift(val);
                 if (!isInvalid(parsedVal)) {
-                  updateLayer(setReducedTimeRange(columnId, layer, val));
+                  updateLayer(setReducedTimeRange(columnId, layer, val, skipLabelUpdate));
                 } else {
                   setLocalValue(val);
                 }
               }}
               onChange={(choices) => {
                 if (choices.length === 0) {
-                  updateLayer(setReducedTimeRange(columnId, layer, ''));
+                  updateLayer(setReducedTimeRange(columnId, layer, '', skipLabelUpdate));
                   setLocalValue('');
                   return;
                 }
@@ -159,7 +184,7 @@ export function ReducedTimeRange({
                 const choice = choices[0].value as string;
                 const parsedVal = parseTimeShift(choice);
                 if (!isInvalid(parsedVal)) {
-                  updateLayer(setReducedTimeRange(columnId, layer, choice));
+                  updateLayer(setReducedTimeRange(columnId, layer, choice, skipLabelUpdate));
                 } else {
                   setLocalValue(choice);
                 }

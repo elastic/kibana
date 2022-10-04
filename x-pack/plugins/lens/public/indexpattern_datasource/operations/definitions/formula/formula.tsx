@@ -54,6 +54,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         defaultMessage: 'The provided filter will be applied to the entire formula.',
       }),
     },
+    canReduceTimeRange: {
+      helpMessage: i18n.translate('xpack.lens.indexPattern.formulaFilterableHelpText', {
+        defaultMessage: 'The provided reduced time range will be applied to the entire formula.',
+      }),
+    },
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },

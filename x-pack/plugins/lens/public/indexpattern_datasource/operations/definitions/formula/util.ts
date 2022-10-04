@@ -69,6 +69,7 @@ export function mergeWithGlobalFilters(
       mappedParams[language] = globalFilter.query as string;
     }
   }
+  // Local definition override the global one
   if (globalReducedTimeRange && operation.canReduceTimeRange && !mappedParams.reducedTimeRange) {
     mappedParams.reducedTimeRange = globalReducedTimeRange;
   }

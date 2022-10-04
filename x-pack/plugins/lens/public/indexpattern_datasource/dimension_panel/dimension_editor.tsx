@@ -85,6 +85,10 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
 
 const operationDisplay = getOperationDisplay();
 
+function getHelpMessage(flag?: boolean | { helpMessage: string }) {
+  return flag && typeof flag !== 'boolean' ? flag.helpMessage : null;
+}
+
 export function DimensionEditor(props: DimensionEditorProps) {
   const {
     selectedColumn,
@@ -1025,12 +1029,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   columnId={columnId}
                   layer={state.layers[layerId]}
                   updateLayer={setStateWrapper}
-                  helpMessage={
-                    selectedOperationDefinition.filterable &&
-                    typeof selectedOperationDefinition.filterable !== 'boolean'
-                      ? selectedOperationDefinition.filterable.helpMessage
-                      : null
-                  }
+                  helpMessage={getHelpMessage(selectedOperationDefinition.filterable)}
                 />
               ) : null,
             },
@@ -1043,6 +1042,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   indexPattern={currentIndexPattern}
                   layer={state.layers[layerId]}
                   updateLayer={setStateWrapper}
+                  skipLabelUpdate={hasFormula}
+                  helpMessage={getHelpMessage(selectedOperationDefinition.canReduceTimeRange)}
                 />
               ) : null,
             },
