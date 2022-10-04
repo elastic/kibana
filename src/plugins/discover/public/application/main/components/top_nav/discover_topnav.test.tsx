@@ -9,13 +9,12 @@
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '../../../../__mocks__/data_view';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { Query } from '@kbn/es-query';
-import { DiscoverStateContainer } from '../../services/discover_state';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -30,9 +29,7 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
   discoverServiceMock.capabilities.discover!.save = savePermissions;
 
   return {
-    stateContainer: {
-      savedSearch: savedSearchMock,
-    } as DiscoverStateContainer,
+    stateContainer: getDiscoverStateMock({ isTimeBased: true }),
     dataView: dataViewMock,
     navigateTo: jest.fn(),
     query: {} as Query,

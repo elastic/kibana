@@ -14,19 +14,22 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { DataTotalHits$ } from '../../hooks/use_saved_search';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 describe('hits counter', function () {
   let props: HitsCounterProps;
   let component: ReactWrapper<HitsCounterProps>;
 
   beforeAll(() => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    stateContainer.savedSearchContainer.hasChanged$ = new BehaviorSubject<boolean>(true);
     props = {
-      onResetQuery: jest.fn(),
       showResetButton: true,
       savedSearchData$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
         result: 2,
       }) as DataTotalHits$,
+      stateContainer,
     };
   });
 
@@ -52,12 +55,7 @@ describe('hits counter', function () {
       result: 1899,
     }) as DataTotalHits$;
     component = mountWithIntl(
-      <HitsCounter
-        {...props}
-        savedSearchData$={data$}
-        showResetButton={false}
-        onResetQuery={jest.fn()}
-      />
+      <HitsCounter {...props} savedSearchData$={data$} showResetButton={false} />
     );
     const hits = findTestSubject(component, 'discoverQueryHits');
     expect(hits.text()).toBe('1,899');
@@ -65,7 +63,9 @@ describe('hits counter', function () {
 
   it('should reset query', function () {
     component = mountWithIntl(<HitsCounter {...props} />);
+    const undo = jest.fn();
+    props.stateContainer.savedSearchContainer.undo = undo;
     findTestSubject(component, 'resetSavedSearch').simulate('click');
-    expect(props.onResetQuery).toHaveBeenCalled();
+    expect(undo).toHaveBeenCalled();
   });
 });

@@ -71,8 +71,10 @@ export const useAdHocDataViews = ({
     [dataViews, stateContainer]
   );
 
-  const { openConfirmSavePrompt, updateSavedSearch } =
-    useConfirmPersistencePrompt(updateAdHocDataViewId);
+  const { openConfirmSavePrompt, updateSavedSearch } = useConfirmPersistencePrompt(
+    updateAdHocDataViewId,
+    stateContainer
+  );
   const persistDataView = useCallback(async () => {
     const savedSearch = stateContainer.savedSearchContainer.savedSearch$.getValue();
     const currentDataView = savedSearch.searchSource.getField('index')!;
@@ -84,8 +86,7 @@ export const useAdHocDataViews = ({
 
         // update saved search with saved data view
         if (savedSearch.id) {
-          const currentState = stateContainer.appStateContainer.getState();
-          await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
+          await updateSavedSearch({ savedSearch, dataView: createdDataView });
         }
         getUrlTracker().setTrackingEnabled(true);
         return createdDataView;

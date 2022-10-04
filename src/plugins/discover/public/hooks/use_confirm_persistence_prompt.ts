@@ -12,10 +12,11 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 import { showConfirmPanel } from './show_confirm_panel';
-import { persistSavedSearch } from '../application/main/utils/persist_saved_search';
+import { DiscoverStateContainer } from '../application/main/services/discover_state';
 
 export const useConfirmPersistencePrompt = (
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>,
+  stateContainer: DiscoverStateContainer
 ) => {
   const services = useDiscoverServices();
 
@@ -91,17 +92,18 @@ export const useConfirmPersistencePrompt = (
   );
 
   const updateSavedSearch = useCallback(
-    ({ savedSearch, dataView, state }) => {
-      return persistSavedSearch(savedSearch, {
-        dataView,
-        onSuccess: (id) => onUpdateSuccess(id, savedSearch),
-        onError: (error) => onUpdateError(error, savedSearch),
-        state,
-        saveOptions: {},
-        services,
-      });
+    ({ savedSearch, dataView }: { savedSearch: SavedSearch; dataView: DataView }) => {
+      return stateContainer.savedSearchContainer.persist(
+        savedSearch,
+        {
+          onSuccess: (id) => onUpdateSuccess(id, savedSearch),
+          onError: (error) => onUpdateError(error, savedSearch),
+          saveOptions: {},
+        },
+        dataView
+      );
     },
-    [onUpdateError, onUpdateSuccess, services]
+    [onUpdateError, onUpdateSuccess, stateContainer.savedSearchContainer]
   );
 
   return { openConfirmSavePrompt, updateSavedSearch };

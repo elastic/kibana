@@ -50,7 +50,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          stateContainer.actions.resetSavedSearch(savedSearch.id || '');
+          stateContainer.savedSearchContainer.resetUrl(savedSearch.id || '');
         }
       }
     }
@@ -135,17 +135,22 @@ export async function onSaveSearch({
       !dataView.isPersisted() && newCopyOnSave ? await updateAdHocDataViewId(dataView) : dataView;
 
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
-    const response = await saveDataSource({
-      dataView: updatedDataView,
-      saveOptions,
-      services,
-      navigateTo,
-      savedSearch,
-      stateContainer,
-      navigateOrReloadSavedSearch,
-    });
-    // If the save wasn't successful, put the original values back.
-    if (!response.id || response.error) {
+    try {
+      const response = await saveDataSource({
+        dataView: updatedDataView,
+        saveOptions,
+        services,
+        navigateTo,
+        savedSearch,
+        stateContainer,
+        navigateOrReloadSavedSearch,
+      });
+      onSaveCb?.();
+
+      return response;
+    } catch (e) {
+      // If the save wasn't successful, put the original values back.
+
       savedSearch.title = currentTitle;
       savedSearch.timeRestore = currentTimeRestore;
       savedSearch.rowsPerPage = currentRowsPerPage;
@@ -154,8 +159,6 @@ export async function onSaveSearch({
         savedSearch.tags = currentTags;
       }
     }
-    onSaveCb?.();
-    return response;
   };
 
   const saveModal = (

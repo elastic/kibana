@@ -322,7 +322,10 @@ export const DiscoverGrid = ({
   const onTableSort = useCallback(
     (sortingColumnsData) => {
       if (isSortEnabled && onSort) {
-        onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
+        const nextSort = sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]);
+        if (nextSort.length) {
+          onSort(nextSort);
+        }
       }
     },
     [onSort, isSortEnabled]

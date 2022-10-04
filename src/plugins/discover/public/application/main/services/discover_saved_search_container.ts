@@ -18,28 +18,28 @@ import { restoreStateFromSavedSearch } from '../../../services/saved_searches/re
 import { persistSavedSearch, updateSavedSearch } from '../utils/persist_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
 
+export interface PersistParams {
+  onError: (error: Error, savedSearch: SavedSearch) => void;
+  onSuccess: (id: string) => void;
+  saveOptions: SavedObjectSaveOpts;
+}
+
 export interface SavedSearchContainer {
   savedSearch$: BehaviorSubject<SavedSearch>;
   savedSearchPersisted$: BehaviorSubject<SavedSearch>;
   hasChanged$: BehaviorSubject<boolean>;
   set: (savedSearch: SavedSearch) => SavedSearch;
   get: () => SavedSearch;
-  update: (nextDataView: DataView, nextState: AppState) => SavedSearch;
+  update: (nextDataView: DataView | undefined, nextState: AppState) => SavedSearch;
   reset: (id: string | undefined) => Promise<SavedSearch>;
   resetUrl: (id: string | SavedSearch) => Promise<SavedSearch>;
+  undo: () => void;
   isPersisted: () => boolean;
   persist: (
     nextSavedSearch: SavedSearch,
-    {
-      onError,
-      onSuccess,
-      saveOptions,
-    }: {
-      onError: (error: Error, savedSearch: SavedSearch) => void;
-      onSuccess: (id: string) => void;
-      saveOptions: SavedObjectSaveOpts;
-    }
-  ) => Promise<{ id: string | undefined } | { error: Error | undefined }>;
+    params: PersistParams,
+    dataView?: DataView
+  ) => Promise<{ id: string | undefined } | undefined>;
 }
 
 export function getSavedSearchContainer({
@@ -93,41 +93,40 @@ export function getSavedSearchContainer({
       }),
       services.uiSettings
     );
+    console.log(newAppState);
     appStateContainer.update(newAppState);
     await appStateContainer.replace(newAppState);
     return nextSavedSearch;
   };
 
-  const persist = (
+  const persist = async (
     nextSavedSearch: SavedSearch,
-    {
-      onError,
-      onSuccess,
-      saveOptions,
-    }: {
-      onError: (error: Error, savedSearch: SavedSearch) => void;
-      onSuccess: (id: string) => void;
-      saveOptions: SavedObjectSaveOpts;
-    }
+    params: PersistParams,
+    dataView?: DataView
   ) => {
-    return persistSavedSearch(nextSavedSearch, {
-      dataView: nextSavedSearch.searchSource.getField('index')!,
-      onError,
-      onSuccess: (id) => {
+    try {
+      const id = await persistSavedSearch(nextSavedSearch, {
+        dataView: dataView ?? nextSavedSearch.searchSource.getField('index')!,
+        state: appStateContainer.getState(),
+        services,
+        saveOptions: params.saveOptions,
+      });
+      if (id) {
         savedSearchPersisted$.next(nextSavedSearch);
-        onSuccess(id);
-      },
-      state: appStateContainer.getState(),
-      services,
-      saveOptions,
-    });
+        params.onSuccess(id);
+      }
+      return { id };
+    } catch (e) {
+      params.onError(e, nextSavedSearch);
+    }
   };
 
   const isPersisted = () => Boolean(savedSearch$.getValue().id);
-  const update = (nextDataView: DataView, nextState: AppState) => {
+  const update = (nextDataView: DataView | undefined, nextState: AppState) => {
+    const previousDataView = get();
     const nextSavedSearch = updateSavedSearch({
-      savedSearch: { ...get() },
-      dataView: nextDataView,
+      savedSearch: { ...previousDataView },
+      dataView: nextDataView ? nextDataView : previousDataView.searchSource.getField('index')!,
       state: nextState,
       services,
     });
@@ -135,6 +134,9 @@ export function getSavedSearchContainer({
     savedSearch$.next(nextSavedSearch);
 
     return nextSavedSearch;
+  };
+  const undo = () => {
+    return resetUrl(get().id || '');
   };
 
   return {
@@ -148,5 +150,6 @@ export function getSavedSearchContainer({
     isPersisted,
     get,
     update,
+    undo,
   };
 }

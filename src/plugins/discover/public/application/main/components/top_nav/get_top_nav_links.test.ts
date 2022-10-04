@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource } from '@kbn/data-plugin/public';
 import { getTopNavLinks } from './get_top_nav_links';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 const services = {
   capabilities: {
@@ -24,8 +23,6 @@ const services = {
   },
 } as unknown as DiscoverServices;
 
-const state = {} as unknown as DiscoverStateContainer;
-
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
     dataView: dataViewMock,
@@ -33,9 +30,7 @@ test('getTopNavLinks result', () => {
     onOpenInspector: jest.fn(),
     savedSearch: savedSearchMock,
     services,
-    state,
-    searchSource: {} as ISearchSource,
-    onOpenSavedSearch: () => {},
+    stateContainer: getDiscoverStateMock({ isTimeBased: true }),
     isPlainRecord: false,
     persistDataView: jest.fn(),
     updateAdHocDataViewId: jest.fn(),
@@ -97,9 +92,7 @@ test('getTopNavLinks result for sql mode', () => {
     onOpenInspector: jest.fn(),
     savedSearch: savedSearchMock,
     services,
-    state,
-    searchSource: {} as ISearchSource,
-    onOpenSavedSearch: () => {},
+    stateContainer: getDiscoverStateMock({ isTimeBased: true }),
     isPlainRecord: true,
     persistDataView: jest.fn(),
     updateAdHocDataViewId: jest.fn(),

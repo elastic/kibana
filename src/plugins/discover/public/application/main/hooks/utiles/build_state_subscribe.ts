@@ -5,35 +5,34 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash';
 import { AppState } from '../../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 import { addLog } from '../../../../utils/addLog';
-import { loadDataView } from '../../utils/resolve_data_view';
+import { loadDataView, resolveDataView } from '../../utils/resolve_data_view';
 import { FetchStatus } from '../../../types';
 
 export const buildStateSubscribe =
   ({
     stateContainer,
     services,
-    dataView,
   }: {
     stateContainer: DiscoverStateContainer;
     services: DiscoverServices;
-    dataView: DataView;
   }) =>
   async (nextState: AppState) => {
+    const prevState = stateContainer.appStateContainer.getPrevious();
+
     addLog('📦 AppStateContainer.subscribe update', nextState);
-    const { hideChart, interval, sort, index } = stateContainer.appStateContainer.getPrevious();
+    const { hideChart, interval, sort, index } = prevState;
     // chart was hidden, now it should be displayed, so data is needed
     const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
     const chartIntervalChanged = nextState.interval !== interval;
     const docTableSortChanged = !isEqual(nextState.sort, sort);
     const dataViewChanged = !isEqual(nextState.index, index);
     // NOTE: this is also called when navigating from discover app to context app
-    let nextDataView = dataView;
+    let nextDataView;
     if (nextState.index && dataViewChanged) {
       /**
        *  Without resetting the fetch state, e.g. a time column would be displayed when switching
@@ -50,11 +49,17 @@ export const buildStateSubscribe =
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (!nextDataViewObj.stateValFound) {
-        stateContainer.setAppState({ index: nextDataView.id }, true);
+        resolveDataView(
+          nextDataViewObj,
+          stateContainer.savedSearchContainer.get().searchSource,
+          services.toastNotifications
+        );
+        stateContainer.setAppState({ index }, true);
         return;
       }
       nextDataView = nextDataViewObj.loaded;
       stateContainer.dataStateContainer.reset();
+      stateContainer.internalStateContainer.transitions.setDataView(nextDataView);
     }
 
     stateContainer.savedSearchContainer.update(nextDataView, nextState);

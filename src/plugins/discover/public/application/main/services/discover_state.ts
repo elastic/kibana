@@ -42,7 +42,6 @@ import {
 } from './discover_app_state_container';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_search_container';
-import { changeDataView } from '../hooks/utils/change_data_view';
 import { DiscoverServices } from '../../../build_services';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { getValidFilters } from '../../../utils/get_valid_filters';
@@ -95,8 +94,6 @@ export interface DiscoverStateContainer {
   flushToUrl: () => void;
 
   actions: {
-    resetSavedSearch: (id: string | SavedSearch) => void;
-    undoSavedSearchChanges: () => void;
     onOpenSavedSearch: (newSavedSearchId: string) => void;
     onUpdateQuery: (
       payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
@@ -242,12 +239,6 @@ export function getDiscoverStateContainer({
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     initializeAndSync,
     actions: {
-      resetSavedSearch: (id) => {
-        savedSearchContainer.resetUrl(id);
-      },
-      undoSavedSearchChanges: () => {
-        savedSearchContainer.resetUrl(savedSearchContainer.get().id || '');
-      },
       onOpenSavedSearch: async (newSavedSearchId: string) => {
         const currentSavedSearch = savedSearchContainer.savedSearch$.getValue();
         if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
@@ -287,16 +278,12 @@ export function getDiscoverStateContainer({
         const msg = reset ? 'reset' : undefined;
         dataStateContainer.refetch$.next(msg);
       },
-      changeDataView: (id: string) => {
-        return changeDataView(id, {
-          appStateContainer,
-          savedSearchContainer,
-          services,
-          setAppState,
-        });
+      changeDataView: async (id: string) => {
+        setAppState({ index: id });
+        return;
       },
-      changeDataViewId: (id: string) => {
-        setAppState({ index: id }, true);
+      changeDataViewId: async (id: string) => {
+        await setAppState({ index: id }, true);
       },
     },
   };

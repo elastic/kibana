@@ -80,11 +80,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         const currentUrl = await browser.getCurrentUrl();
         const [, hash] = currentUrl.split('#/');
-        await PageObjects.common.navigateToUrl(
-          'discover',
-          hash.replace('columns:!(_source)', 'columns:!(relatedContent)'),
-          { useActualUrl: true }
-        );
+        const hashModified = hash.replace('columns:!(_source)', 'columns:!(relatedContent)');
+        await PageObjects.common.navigateToUrl('discover', hashModified, { useActualUrl: true });
         await retry.try(async function tryingForTime() {
           expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
 

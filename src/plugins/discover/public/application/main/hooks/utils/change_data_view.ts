@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import { SortOrder } from '@kbn/saved-search-plugin/public';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import { AppState } from '../../services/discover_app_state_container';
+import { AppStateContainer } from '../../services/discover_app_state_container';
 import { SavedSearchContainer } from '../../services/discover_saved_search_container';
 import { getUrlTracker } from '../../../../kibana_services';
 import { DiscoverServices } from '../../../../build_services';
@@ -33,12 +32,10 @@ export async function changeDataView(
     appStateContainer,
     savedSearchContainer,
     services,
-    setAppState,
   }: {
-    appStateContainer: ReduxLikeStateContainer<AppState>;
+    appStateContainer: AppStateContainer;
     savedSearchContainer: SavedSearchContainer;
     services: DiscoverServices;
-    setAppState: (state: AppState) => void;
   }
 ) {
   const { dataViews, uiSettings } = services;
@@ -62,6 +59,7 @@ export async function changeDataView(
     getUrlTracker().setTrackingEnabled(trackingEnabled);
 
     addLog('Change data view next app state', nextAppState);
-    setAppState(nextAppState);
+    console.log('1:: change data view update state', nextAppState);
+    return { nextDataView, nextAppState };
   }
 }

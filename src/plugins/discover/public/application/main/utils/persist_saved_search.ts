@@ -77,34 +77,22 @@ export async function persistSavedSearch(
   savedSearch: SavedSearch,
   {
     dataView,
-    onError,
-    onSuccess,
     services,
     saveOptions,
     state,
   }: {
     dataView: DataView;
-    onError: (error: Error, savedSearch: SavedSearch) => void;
-    onSuccess: (id: string) => void;
     saveOptions: SavedObjectSaveOpts;
     services: DiscoverServices;
     state: AppState;
   }
 ) {
   updateSavedSearch({ savedSearch, dataView, state, services });
-  try {
-    const id = await saveSavedSearch(
-      savedSearch,
-      saveOptions,
-      services.core.savedObjects.client,
-      services.savedObjectsTagging
-    );
-    if (id) {
-      onSuccess(id);
-    }
-    return { id };
-  } catch (saveError) {
-    onError(saveError, savedSearch);
-    return { error: saveError };
-  }
+
+  return await saveSavedSearch(
+    savedSearch,
+    saveOptions,
+    services.core.savedObjects.client,
+    services.savedObjectsTagging
+  );
 }

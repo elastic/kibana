@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
@@ -33,12 +33,12 @@ export function useDiscoverState({
 }) {
   const { dataViews } = services;
   const dataViewList = useInternalStateSelector((state: InternalState) => state.dataViews);
-  const savedSearch = useObservable<SavedSearch>(
-    stateContainer.savedSearchContainer.savedSearch$,
-    stateContainer.savedSearchContainer.savedSearch$.getValue()
-  );
-  const dataView = useMemo(() => savedSearch.searchSource.getField('index')!, [savedSearch]);
+  const dataView = useInternalStateSelector((state: InternalState) => state.dataView!);
 
+  const savedSearch = useObservable<SavedSearch>(
+    stateContainer.savedSearchContainer.savedSearchPersisted$,
+    stateContainer.savedSearchContainer.savedSearchPersisted$.getValue()
+  );
   /**
    * Search session logic
    */
@@ -60,7 +60,7 @@ export function useDiscoverState({
   /**
    * Data fetching logic
    */
-  const { data$, refetch$, inspectorAdapters, subscribe } = stateContainer.dataStateContainer;
+  const { data$, inspectorAdapters, subscribe } = stateContainer.dataStateContainer;
 
   useEffect(() => {
     const unsubscribe = subscribe();
@@ -98,10 +98,10 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const unsubscribe = stateContainer.appStateContainer.subscribe(
-      buildStateSubscribe({ stateContainer, dataView, services })
+      buildStateSubscribe({ stateContainer, services })
     );
     return () => unsubscribe();
-  }, [dataView, refetch$, savedSearch, services, stateContainer]);
+  }, [services, stateContainer]);
 
   /**
    * Trigger data fetching on dataView or savedSearch changes

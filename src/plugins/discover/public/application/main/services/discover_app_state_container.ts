@@ -29,8 +29,10 @@ export const APP_STATE_URL_KEY = '_a';
 export interface AppStateContainer extends ReduxLikeStateContainer<AppState> {
   getPrevious: () => AppState;
   syncState: () => ISyncStateRef;
-  update: (newPartial: AppState, replace?: false) => void;
-  replace: (newPartial: AppState) => void;
+  update: (newPartial: AppState, replace?: boolean) => void;
+  replace: (newPartial: AppState) => Promise<void>;
+  push: (newPartial: AppState) => Promise<void>;
+  reset: (savedSearch: SavedSearch) => void;
 }
 
 export const { Provider: AppStateProvider, useSelector: useAppStateSelector } =
@@ -95,7 +97,7 @@ export const getDiscoverAppStateContainer = (
   stateStorage: IKbnUrlStateStorage,
   savedSearch: SavedSearch,
   services: DiscoverServices
-) => {
+): AppStateContainer => {
   let previousAppState: AppState = {};
   const initialState = getInitialState(stateStorage, savedSearch, services);
   const appStateContainer = createStateContainer<AppState>(initialState);
@@ -103,12 +105,21 @@ export const getDiscoverAppStateContainer = (
     const state = { ...appStateContainer.getState(), ...newPartial };
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
+  const pushUrlState = async (newPartial: AppState) => {
+    const state = { ...appStateContainer.getState(), ...newPartial };
+    await stateStorage.set(APP_STATE_URL_KEY, state, { replace: false });
+  };
 
-  const enhancedAppState = {
+  const enhancedAppContainer = {
     ...appStateContainer,
+    reset: (nextSavedSearch: SavedSearch) => {
+      const resetState = getInitialState(stateStorage, nextSavedSearch, services);
+      console.log({ resetState });
+      appStateContainer.set(resetState);
+    },
     set: (value: AppState | null) => {
       if (value) {
-        previousAppState = appStateContainer.getState();
+        previousAppState = { ...appStateContainer.getState() };
         appStateContainer.set(value);
       }
     },
@@ -116,21 +127,23 @@ export const getDiscoverAppStateContainer = (
       return previousAppState;
     },
     replace: replaceUrlState,
+    push: pushUrlState,
     update: (newPartial: AppState, replace = false) => {
       if (replace) {
         return replaceUrlState(newPartial);
       } else {
+        previousAppState = { ...appStateContainer.getState() };
         setState(appStateContainer, newPartial);
       }
     },
   };
 
   return {
-    ...enhancedAppState,
+    ...enhancedAppContainer,
     syncState: () =>
       syncState({
         storageKey: APP_STATE_URL_KEY,
-        stateContainer: enhancedAppState,
+        stateContainer: enhancedAppContainer,
         stateStorage,
       }),
   };

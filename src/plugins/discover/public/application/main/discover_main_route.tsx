@@ -104,7 +104,8 @@ export function DiscoverMainRoute(props: Props) {
         dataViewSpec: props.historyLocationState?.dataViewSpec,
       });
       if (currentSavedSearch) {
-        stateContainer.actions.resetSavedSearch(currentSavedSearch);
+        await stateContainer.savedSearchContainer.set(currentSavedSearch);
+        await stateContainer.appStateContainer.reset(currentSavedSearch);
       }
       setLoading(false);
 
@@ -154,6 +155,7 @@ export function DiscoverMainRoute(props: Props) {
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
       if (nextDataView) {
+        setLoading(true);
         setShowNoDataPage(false);
         setError(undefined);
         await checkDataAndLoadSavedSearch();

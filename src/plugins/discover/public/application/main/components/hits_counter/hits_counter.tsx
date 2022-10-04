@@ -95,12 +95,12 @@ export function HitsCounter({
           />
         </EuiFlexItem>
       )}
-      {showResetButton && hasChanged && (
+      {showResetButton && typeof hasChanged === 'boolean' && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="refresh"
             data-test-subj="resetSavedSearch"
-            onClick={() => stateContainer.actions.undoSavedSearchChanges()}
+            onClick={() => stateContainer.savedSearchContainer.undo()}
             size="s"
             aria-label={i18n.translate('discover.reloadSavedSearchButton', {
               defaultMessage: 'Reset search',
