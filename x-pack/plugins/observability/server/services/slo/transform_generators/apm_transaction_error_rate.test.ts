@@ -19,9 +19,12 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       transform_id: expect.any(String),
       source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
     });
-    expect(transform.transform_id).toEqual(`slo-${anSLO.id}`);
+    expect(transform.transform_id).toEqual(`slo-${anSLO.id}-${anSLO.revision}`);
     expect(transform.source.runtime_mappings!['slo.id']).toMatchObject({
       script: { source: `emit('${anSLO.id}')` },
+    });
+    expect(transform.source.runtime_mappings!['slo.revision']).toMatchObject({
+      script: { source: `emit(${anSLO.revision})` },
     });
   });
 
