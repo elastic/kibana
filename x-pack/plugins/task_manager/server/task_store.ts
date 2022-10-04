@@ -295,6 +295,22 @@ export class TaskStore {
   }
 
   /**
+   * Bulk removes the specified tasks from the index.
+   *
+   * @param {SavedObjectsBulkDeleteObject[]} savedObjectsToDelete
+   * @returns {Promise<void>}
+   */
+  public async bulkRemove(taskIds: string[]): Promise<void> {
+    try {
+      const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: 'task' }));
+      await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete);
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+  }
+
+  /**
    * Gets a task by id
    *
    * @param {string} id

@@ -1810,9 +1810,11 @@ export class RulesClient {
       );
     }
     const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules, {}); // do we need force/refresh options here?
-    // TODO: delete task from task manager
 
-    // TODO: delete api keys is it enough?
+    if (taskIds) {
+      this.taskManager.bulkRemoveIfExist(taskIds);
+    }
+
     await bulkMarkApiKeysForInvalidation(
       { apiKeys: apiKeysToInvalidate },
       this.logger,
