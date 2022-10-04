@@ -34,35 +34,54 @@ const baseStyle = css`
   height: 200px;
 `;
 
-const Template: ComponentStory<typeof Image> = (props: Props) => (
-  <Image css={baseStyle} {...props} ref={action('ref')} />
+const Template: ComponentStory<typeof Image> = (props: Props, { loaded: { blurhash } }) => (
+  <Image css={baseStyle} {...props} blurhash={blurhash} ref={action('ref')} />
 );
 
 export const Basic = Template.bind({});
 
 export const WithBlurhash = Template.bind({});
-
-export const BrokenSrc = Template.bind({});
-BrokenSrc.decorators = [
+WithBlurhash.storyName = 'With blurhash';
+WithBlurhash.args = {
+  style: { opacity: 0 },
+};
+WithBlurhash.loaders = [
+  async () => ({
+    blurhash: await createBlurhash(getBlob()),
+  }),
+];
+WithBlurhash.decorators = [
   (Story) => {
+    const alwaysShowBlurhash = `canvas { opacity: 1 !important; }`;
     return (
-      <FilesContext
-        http={
-          {
-            get: () => {
-              throw new Error('Nope!');
-            },
-          } as unknown as HttpSetup
-        }
-      >
+      <>
+        <style>{alwaysShowBlurhash}</style>
         <Story />
-      </FilesContext>
+      </>
     );
   },
 ];
 
+export const BrokenSrc = Template.bind({});
+BrokenSrc.storyName = 'Broken src';
+BrokenSrc.args = {
+  src: 'foo',
+};
+
+export const WithBlurhashAndBrokenSrc = Template.bind({});
+WithBlurhashAndBrokenSrc.storyName = 'With blurhash and broken src';
+WithBlurhashAndBrokenSrc.args = {
+  src: 'foo',
+};
+WithBlurhashAndBrokenSrc.loaders = [
+  async () => ({
+    blurhash: await createBlurhash(getBlob()),
+  }),
+];
+
 export const OffScreen = Template.bind({});
-OffScreen.args = { ...defaultArgs, onFirstVisible: action('visible') };
+OffScreen.storyName = 'Offscreen';
+OffScreen.args = { onFirstVisible: action('visible') };
 OffScreen.decorators = [
   (Story) => (
     <>

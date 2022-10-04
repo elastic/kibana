@@ -33,7 +33,7 @@ export const Blurhash: FunctionComponent<Props> = ({ visible, hash }) => {
         height: 100%;
         width: 100%;
         z-index: -1;
-        opacity: ${isLoaded ? 0 : 1};
+        opacity: ${visible ? 1 : 0};
         transition: opacity ${euiTheme.animation.extraFast};
       `}
       width={32}

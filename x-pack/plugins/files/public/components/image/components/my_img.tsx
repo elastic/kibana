@@ -5,27 +5,27 @@
  * 2.0.
  */
 import type { ImgHTMLAttributes, MutableRefObject } from 'react';
-import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
 interface Props extends ImgHTMLAttributes<HTMLImageElement> {
-  isLoaded: boolean;
+  hidden: boolean;
   observerRef: (el: null | HTMLImageElement) => void;
 }
 
 export const MyImage = React.forwardRef<HTMLImageElement, Props>(
-  ({ observerRef, isLoaded, ...rest }, ref) => {
-    const { euiTheme } = useEuiTheme();
+  ({ observerRef, src, hidden, ...rest }, ref) => {
+    const hideCSS = hidden
+      ? css`
+          visibility: hidden;
+        `
+      : undefined;
     return (
       <img
         alt=""
-        css={css`
-          vertical-align: middle;
-          opacity: ${isLoaded ? 1 : 0};
-          transition: opacity ${euiTheme.animation.normal};
-        `}
+        css={hideCSS}
         {...rest}
+        src={src}
         ref={(element) => {
           observerRef(element);
           if (ref) {

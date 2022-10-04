@@ -5,16 +5,19 @@
  * 2.0.
  */
 import React from 'react';
-import { type ImgHTMLAttributes, useEffect, useState } from 'react';
+import { type ImgHTMLAttributes, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { CUSTOM_BLURHASH_HEADER } from '../../../common/constants';
-import { useFilesContext } from '../context';
+import { CSSProperties } from '@emotion/serialize';
 import { useViewportObserver } from './use_viewport_observer';
 import { MyImage, Blurhash } from './components';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
+  /**
+   * A [blurhash](https://blurha.sh/) to be rendered while the image is downloading.
+   */
+  blurhash?: string;
   /**
    * Emits when the image first becomes visible
    */
@@ -48,23 +51,21 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
           display: inline-block;
           position: relative;
         `}
-        style={{
-          width: rest.width ?? rest.style?.width,
-          maxWidth: rest.style?.maxWidth,
-          height: rest.height ?? rest.style?.height,
-          maxHeight: rest.style?.maxHeight,
-        }}
       >
-        <Blurhash isLoaded={isLoaded} hash={hash} />
+        {blurDelayExpired && blurhash && <Blurhash visible={!isLoaded} hash={blurhash} />}
         <MyImage
           observerRef={observerRef}
+          hidden={!isVisible}
           ref={ref}
-          src={imgSrc}
+          src={isVisible ? src : undefined}
           alt={alt}
-          isLoaded={isLoaded}
           onLoad={(ev) => {
             setIsLoaded(true);
             onLoad?.(ev);
+          }}
+          onError={(ev) => {
+            setIsLoaded(true);
+            onError?.(ev);
           }}
           {...rest}
         />

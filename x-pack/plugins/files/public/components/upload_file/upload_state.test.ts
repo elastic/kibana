@@ -11,7 +11,7 @@ import { TestScheduler } from 'rxjs/testing';
 import type { FileKind, FileJSON } from '../../../common';
 import { createMockFilesClient } from '../../mocks';
 import type { FilesClient } from '../../types';
-import { BlurhashFactory } from '../common/util';
+import { BlurhashFactory } from '../common/blurhash';
 
 import { UploadState } from './upload_state';
 
