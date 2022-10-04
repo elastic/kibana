@@ -5085,7 +5085,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
+              "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"active\" | \"ok\""
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -6055,7 +6055,7 @@
         "label": "RuleExecutionStatuses",
         "description": [],
         "signature": [
-          "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
+          "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"active\" | \"ok\""
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
