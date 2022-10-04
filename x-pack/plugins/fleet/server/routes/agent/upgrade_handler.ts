@@ -174,16 +174,14 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
     );
   }
 
-  if (
-    force &&
-    !(
-      semverMajor(kibanaVersionNumber) > semverMajor(versionToUpgradeNumber) ||
-      (semverMajor(kibanaVersionNumber) === semverMajor(versionToUpgradeNumber) &&
-        semverMinor(kibanaVersionNumber) >= semverMinor(versionToUpgradeNumber))
-    )
-  ) {
+  const kibanaMajorGt = semverMajor(kibanaVersionNumber) > semverMajor(versionToUpgradeNumber);
+  const kibanaMajorEqMinorGte = (semverMajor(kibanaVersionNumber) === semverMajor(versionToUpgradeNumber) &&
+    semverMinor(kibanaVersionNumber) >= semverMinor(versionToUpgradeNumber));
+
+  // When force is enabled, only the major and minor versions are checked
+  if (force && !(kibanaMajorGt || kibanaMajorEqMinorGte)) {
     throw new Error(
-      `cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisify the major and minor of the installed kibana version ${kibanaVersionNumber}`
+      `cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the installed kibana version ${kibanaVersionNumber}`
     );
   }
 };
@@ -210,13 +208,14 @@ const checkFleetServerVersion = (
     );
   }
 
-  if (
-    force &&
-    semverMajor(maxFleetServerVersion) !== semverMajor(versionToUpgradeNumber) &&
-    semverMinor(maxFleetServerVersion) !== semverMinor(versionToUpgradeNumber)
-  ) {
+  const fleetServerMajorGt = semverMajor(maxFleetServerVersion) > semverMajor(versionToUpgradeNumber);
+  const fleetServerMajorEqMinorGte = (semverMajor(maxFleetServerVersion) === semverMajor(versionToUpgradeNumber) &&
+    semverMinor(maxFleetServerVersion) >= semverMinor(versionToUpgradeNumber));
+
+  // When force is enabled, only the major and minor versions are checked
+  if (force && !(fleetServerMajorGt || fleetServerMajorEqMinorGte)) {
     throw new Error(
-      `cannot force upgrade agent to ${versionToUpgradeNumber} because it is not the same major and minor version as the latest fleet server version ${maxFleetServerVersion}`
+      `cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the latest fleet server version ${maxFleetServerVersion}`
     );
   }
 };
