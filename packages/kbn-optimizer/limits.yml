@@ -10,7 +10,10 @@ pageLoadAssetSize:
   cases: 144442
   charts: 55000
   cloud: 21076
+  cloudChat: 19894
   cloudExperiments: 59358
+  cloudFullStory: 18493
+  cloudLinks: 17629
   cloudSecurityPosture: 19109
   console: 46091
   controls: 40000
@@ -23,7 +26,7 @@ pageLoadAssetSize:
   dataViewEditor: 12000
   dataViewFieldEditor: 27000
   dataViewManagement: 5000
-  dataViews: 44532
+  dataViews: 46532
   dataVisualizer: 27530
   devTools: 38637
   discover: 99999
@@ -108,6 +111,7 @@ pageLoadAssetSize:
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 29684
+  stackConnectors: 36314
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586

@@ -22,9 +22,8 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
 import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
-import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
-import { useStorage } from '../../contexts/storage';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { useTimefilter, useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
 import { useToastNotificationService } from '../../services/toast_notification_service';
@@ -61,7 +60,8 @@ export const NotificationsList: FC = () => {
   } = useMlKibana();
   const { displayErrorToast } = useToastNotificationService();
 
-  const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
+  const { lastCheckedAt, setLastCheckedAt, notificationsCounts, latestRequestedAt } =
+    useMlNotifications();
   const timeFilter = useTimefilter();
   const timeRange = useTimeRangeUpdates();
 
@@ -162,6 +162,7 @@ export const NotificationsList: FC = () => {
 
   const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
     {
+      id: 'timestamp',
       field: 'timestamp',
       name: <FormattedMessage id="xpack.ml.notifications.timeLabel" defaultMessage="Time" />,
       sortable: true,
@@ -175,7 +176,7 @@ export const NotificationsList: FC = () => {
       name: <FormattedMessage id="xpack.ml.notifications.levelLabel" defaultMessage="Level" />,
       sortable: true,
       truncateText: false,
-      'data-test-subj': 'mlNotificationLabel',
+      'data-test-subj': 'mlNotificationLevel',
       render: (value: MlNotificationMessageLevel) => {
         return <EuiBadge color={levelBadgeMap[value]}>{value}</EuiBadge>;
       },
@@ -194,7 +195,7 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'job_id',
-      name: <FormattedMessage id="xpack.ml.notifications.entityLabe" defaultMessage="Entity ID" />,
+      name: <FormattedMessage id="xpack.ml.notifications.entityLabel" defaultMessage="Entity ID" />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationEntity',
@@ -279,9 +280,28 @@ export const NotificationsList: FC = () => {
     ];
   }, []);
 
+  const newNotificationsCount = Object.values(notificationsCounts).reduce((a, b) => a + b);
+
   return (
     <>
       <SavedObjectsWarning onCloseFlyout={fetchNotifications} forceRefresh={isLoading} />
+
+      {newNotificationsCount ? (
+        <>
+          <EuiCallOut
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.ml.notifications.newNotificationsMessage"
+                defaultMessage="There {newNotificationsCount, plural, one {is # notification} other {are # notifications}} since {sinceDate}. Refresh the page to view updates."
+                values={{ sinceDate: dateFormatter(latestRequestedAt), newNotificationsCount }}
+              />
+            }
+            iconType="bell"
+          />
+          <EuiSpacer size={'m'} />
+        </>
+      ) : null}
 
       <EuiSearchBar
         query={queryInstance}
@@ -320,6 +340,7 @@ export const NotificationsList: FC = () => {
               },
             },
           },
+          'data-test-subj': 'mlNotificationsSearchBarInput',
         }}
         filters={filters}
         onChange={(e) => {

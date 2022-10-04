@@ -11,9 +11,10 @@ import { useRiskScoreFeatureStatus } from '../feature_status';
 import { createFilter } from '../../../common/containers/helpers';
 import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
 import {
-  getHostRiskIndex,
-  getUserRiskIndex,
   RiskQueries,
+  getUserRiskIndex,
+  RiskScoreEntity,
+  getHostRiskIndex,
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 
@@ -51,8 +52,7 @@ export interface UseRiskScoreParams {
 }
 
 interface UseRiskScore<T> extends UseRiskScoreParams {
-  defaultIndex: string | undefined;
-  factoryQueryType: T;
+  riskEntity: T;
 }
 
 export const initialResult: Omit<
@@ -63,64 +63,48 @@ export const initialResult: Omit<
   data: undefined,
 };
 
-export const useHostRiskScore = (params?: UseRiskScoreParams) => {
-  const {
-    timerange,
-    onlyLatest = true,
-    filterQuery,
-    sort,
-    skip = false,
-    pagination,
-  } = params ?? {};
-  const spaceId = useSpaceId();
-  const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
-
+// use this function instead of directly using useRiskScore
+// typescript is happy with the type specific hooks
+export const useHostRiskScore = (
+  params?: UseRiskScoreParams
+): [boolean, RiskScoreState<RiskQueries.hostsRiskScore>] => {
   return useRiskScore({
-    timerange,
-    onlyLatest,
-    filterQuery,
-    sort,
-    skip,
-    pagination,
-    defaultIndex,
-    factoryQueryType: RiskQueries.hostsRiskScore,
+    ...params,
+    riskEntity: RiskScoreEntity.host,
   });
 };
 
-export const useUserRiskScore = (params?: UseRiskScoreParams) => {
-  const {
-    timerange,
-    onlyLatest = true,
-    filterQuery,
-    sort,
-    skip = false,
-    pagination,
-  } = params ?? {};
-  const spaceId = useSpaceId();
-  const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
-
-  return useRiskScore({
-    timerange,
-    onlyLatest,
-    filterQuery,
-    sort,
-    skip,
-    pagination,
-    defaultIndex,
-    factoryQueryType: RiskQueries.usersRiskScore,
+// use this function instead of directly using useRiskScore
+// typescript is happy with the type specific hooks
+export const useUserRiskScore = (
+  params?: UseRiskScoreParams
+): [boolean, RiskScoreState<RiskQueries.usersRiskScore>] =>
+  useRiskScore({
+    ...params,
+    riskEntity: RiskScoreEntity.user,
   });
-};
 
-const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
+const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
   timerange,
-  onlyLatest,
+  onlyLatest = true,
   filterQuery,
   sort,
   skip = false,
   pagination,
-  defaultIndex,
-  factoryQueryType,
-}: UseRiskScore<T>): [boolean, RiskScoreState<T>] => {
+  riskEntity,
+}: UseRiskScore<T>): [
+  boolean,
+  RiskScoreState<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>
+] => {
+  const spaceId = useSpaceId();
+  const defaultIndex = spaceId
+    ? riskEntity === RiskScoreEntity.host
+      ? getHostRiskIndex(spaceId, onlyLatest)
+      : getUserRiskIndex(spaceId, onlyLatest)
+    : undefined;
+  const factoryQueryType =
+    riskEntity === RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore;
+
   const { querySize, cursorStart } = pagination || {};
 
   const { addError } = useAppToasts();
@@ -131,7 +115,7 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
     isLicenseValid,
     isLoading: isDeprecatedLoading,
     refetch: refetchDeprecated,
-  } = useRiskScoreFeatureStatus(factoryQueryType, defaultIndex);
+  } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
 
   const {
     loading,
