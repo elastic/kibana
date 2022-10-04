@@ -319,10 +319,15 @@ export function LayerPanel(
           .getSupportedActionsForLayer?.(layerId, visualizationState)
           .map((action) => ({
             ...action,
-            execute: () =>
+            execute: () => {
               updateVisualization(
                 activeVisualization.onLayerAction?.(layerId, action.id, visualizationState)
-              ),
+              );
+
+              if (action.clearLayer) {
+                onRemoveLayer();
+              }
+            },
           })) || []),
         ...getSharedActions({
           layerId,

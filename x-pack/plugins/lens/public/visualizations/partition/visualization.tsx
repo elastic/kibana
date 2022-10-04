@@ -522,6 +522,7 @@ export const getPieVisualization = ({
             displayName: 'Disable multiple metrics',
             icon: 'visPie',
             isCompatible: true,
+            clearLayer: true,
           },
         ]
       : [
