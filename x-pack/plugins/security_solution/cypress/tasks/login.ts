@@ -12,7 +12,7 @@ import Url from 'url';
 import type { ROLES } from '../../common/test';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
-import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
+import { hostDetailsUrl, HOSTS_URL, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -357,6 +357,12 @@ export const visitTimeline = (timelineId: string, role?: ROLES) => {
 
 export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
   visit(hostDetailsUrl(hostName));
+  cy.get('[data-test-subj="loading-spinner"]').should('exist');
+  cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
+};
+
+export const visitHostsPage = () => {
+  visit(HOSTS_URL);
   cy.get('[data-test-subj="loading-spinner"]').should('exist');
   cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
 };

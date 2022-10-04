@@ -58,6 +58,7 @@ export interface GlobalGenericQuery {
   loading: boolean;
   selectedInspectIndex: number;
   invalidKqlQuery?: Error;
+  searchSessionId?: string;
 }
 
 export interface GlobalKqlQuery extends GlobalGenericQuery {

@@ -38,6 +38,14 @@ jest.mock('../../../common/lib/kibana', () => {
           navigateToApp: mockNavigateToApp,
           getUrlForApp: jest.fn(),
         },
+        data: {
+          search: {
+            session: {
+              start: jest.fn(),
+              clear: jest.fn(),
+            },
+          },
+        },
       },
     }),
     useUiSetting$: jest.fn().mockReturnValue([]),

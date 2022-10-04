@@ -9,14 +9,12 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecurityPageName } from '../../app/types';
-import type { UpdateDateRange } from '../../common/components/charts/common';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
@@ -33,7 +31,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import type { State } from '../../common/store';
 import { inputsSelectors } from '../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
@@ -69,7 +66,6 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const HostsComponent = () => {
-  const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
@@ -107,22 +103,7 @@ const HostsComponent = () => {
     }
     return filters;
   }, [severitySelection, tabName, filters]);
-  const updateDateRange = useCallback<UpdateDateRange>(
-    ({ x }) => {
-      if (!x) {
-        return;
-      }
-      const [min, max] = x;
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        })
-      );
-    },
-    [dispatch]
-  );
+
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
@@ -192,15 +173,7 @@ const HostsComponent = () => {
                 border
               />
 
-              <HostsKpiComponent
-                filterQuery={filterQuery}
-                indexNames={selectedPatterns}
-                from={from}
-                setQuery={setQuery}
-                to={to}
-                skip={isInitializing || !filterQuery}
-                updateDateRange={updateDateRange}
-              />
+              <HostsKpiComponent from={from} to={to} setQuery={setQuery} />
 
               <EuiSpacer />
 

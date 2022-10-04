@@ -615,7 +615,7 @@ export class Embeddable
     }
     super.render(domNode as HTMLElement);
     if (this.input.onLoad) {
-      this.input.onLoad(true);
+      this.input.onLoad(true, this.getInspectorAdapters());
     }
 
     this.domNode.setAttribute('data-shared-item', '');
