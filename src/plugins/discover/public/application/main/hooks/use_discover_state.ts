@@ -30,6 +30,7 @@ import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { useAdHocDataViews } from './use_adhoc_data_views';
+import { useFiltersValidation } from './use_filters_validation';
 
 export function useDiscoverState({
   services,
@@ -122,6 +123,11 @@ export function useDiscoverState({
   );
 
   /**
+   * Takes care of checking data view id references in filters
+   */
+  useFiltersValidation({ stateContainer });
+
+  /**
    * Adhoc data views functionality
    */
   const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
@@ -129,7 +135,7 @@ export function useDiscoverState({
     dataViews,
     stateContainer,
     savedSearch,
-    onChangeDataView,
+    setUrlTracking,
   });
 
   /**

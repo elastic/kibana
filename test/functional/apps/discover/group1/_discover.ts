@@ -364,20 +364,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('URL state', () => {
-      const getCurrentDataViewId = (currentUrl: string) => {
-        const [indexSubstring] = currentUrl.match(/index:[^,]*/)!;
-        const dataViewId = indexSubstring.replace('index:', '');
-        return dataViewId;
-      };
-
       it('should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID', async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
+
         const originalUrl = await browser.getCurrentUrl();
-        const dataViewId = getCurrentDataViewId(originalUrl);
         const newUrl = originalUrl.replace(dataViewId, 'invalid-data-view-id');
         await browser.get(newUrl);
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await browser.getCurrentUrl()).to.be(originalUrl);
         expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
@@ -387,10 +383,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         const originalHash = await browser.execute<[], string>('return window.location.hash');
-        const dataViewId = getCurrentDataViewId(originalHash);
+        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
+
         const newHash = originalHash.replace(dataViewId, 'invalid-data-view-id');
         await browser.execute(`window.location.hash = "${newHash}"`);
         await PageObjects.header.waitUntilLoadingHasFinished();
+
         const currentHash = await browser.execute<[], string>('return window.location.hash');
         expect(currentHash).to.be(originalHash);
         expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);

@@ -14,8 +14,9 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { getUiActions } from '../../../kibana_services';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
-import { getUiActions, getUrlTracker } from '../../../kibana_services';
 import { GetStateReturn } from '../services/discover_state';
 
 export const useAdHocDataViews = ({
@@ -23,14 +24,15 @@ export const useAdHocDataViews = ({
   savedSearch,
   dataViews,
   stateContainer,
-  onChangeDataView,
+  setUrlTracking,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
   dataViews: DataViewsContract;
   stateContainer: GetStateReturn;
-  onChangeDataView: (dataViewId: string) => Promise<void>;
+  setUrlTracking: (dataView: DataView) => void;
 }) => {
+  const { filterManager } = useDiscoverServices();
   const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
     !dataView.isPersisted() ? [dataView] : []
   );
@@ -57,22 +59,27 @@ export const useAdHocDataViews = ({
         prev.filter((d) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id)
       );
 
-      savedSearch.searchSource.setField('index', newDataView);
-
-      // update filters references
       const uiActions = await getUiActions();
       const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
       const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+
+      // execute shouldn't be awaited, this is important for pending history push cancellation
       action?.execute({
         trigger,
         fromDataView: dataViewToUpdate.id,
         toDataView: newDataView.id,
         usedDataViews: [],
       } as ActionExecutionContext);
+      stateContainer.kbnUrlStateStorage.kbnUrlControls.flush(true);
+
+      const updatedFilters = filterManager.getFilters();
+      savedSearch.searchSource.setField('index', newDataView);
+      stateContainer.replaceUrlAppState({ index: newDataView.id, filters: updatedFilters });
+      setUrlTracking(newDataView);
 
       return newDataView;
     },
-    [dataViews, savedSearch.searchSource]
+    [dataViews, filterManager, savedSearch.searchSource, setUrlTracking, stateContainer]
   );
 
   const { openConfirmSavePrompt, updateSavedSearch } =
@@ -81,22 +88,16 @@ export const useAdHocDataViews = ({
     const currentDataView = savedSearch.searchSource.getField('index')!;
     if (currentDataView && !currentDataView.isPersisted()) {
       const createdDataView = await openConfirmSavePrompt(currentDataView);
-      if (createdDataView) {
-        savedSearch.searchSource.setField('index', createdDataView);
-        await onChangeDataView(createdDataView.id!);
 
-        // update saved search with saved data view
-        if (savedSearch.id) {
-          const currentState = stateContainer.appStateContainer.getState();
-          await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
-        }
-        getUrlTracker().setTrackingEnabled(true);
-        return createdDataView;
+      // update saved search with saved data view
+      if (createdDataView && savedSearch.id) {
+        const currentState = stateContainer.appStateContainer.getState();
+        await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
       }
-      return undefined;
+      return createdDataView;
     }
     return currentDataView;
-  }, [stateContainer, onChangeDataView, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
+  }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
 
   return { adHocDataViewList, persistDataView, updateAdHocDataViewId };
 };

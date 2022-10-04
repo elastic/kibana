@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
+  const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -19,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const PageObjects = getPageObjects([
     'common',
     'unifiedSearch',
@@ -134,6 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
+      // trigger data view id update
       await PageObjects.discover.addRuntimeField(
         '_bytes-runtimefield',
         `emit(doc["bytes"].value.toString())`
@@ -151,6 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.removeField('_bytes-runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      // trigger data view id update
       await PageObjects.discover.addRuntimeField(
         '_bytes-runtimefield',
         `emit((doc["bytes"].value * 2).toString())`
@@ -186,6 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
+      // trigger data view id update
       await PageObjects.discover.editField('_bytes-runtimefield');
       await fieldEditor.setName('_bytes-runtimefield-edited', true);
       await fieldEditor.save();
@@ -206,6 +211,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(prevDataViewId).not.to.equal(newDataViewId);
+    });
+
+    it('should notify about invalid filter reffs', async () => {
+      await PageObjects.discover.createAdHocDataView('logstas', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await filterBar.addFilter('extension', 'is', 'jpg');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const first = await PageObjects.discover.getCurrentDataViewId();
+      // trigger data view id update
+      await PageObjects.discover.addRuntimeField(
+        '_bytes-runtimefield',
+        `emit((doc["bytes"].value * 2).toString())`
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const second = await PageObjects.discover.getCurrentDataViewId();
+      expect(first).not.equal(second);
+
+      await toasts.dismissAllToasts();
+
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const firstToast = await toasts.getToastContent(1);
+      expect(firstToast).to.equal(
+        `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`
+      );
+
+      const secondToast = await toasts.getToastContent(2);
+      expect(secondToast).to.equal(
+        `Index references in filters are differ from current data view\nData view id references in some of the applied filters are differ from chosen data view`
+      );
     });
   });
 }

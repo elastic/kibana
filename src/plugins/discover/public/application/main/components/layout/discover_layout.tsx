@@ -154,11 +154,11 @@ export function DiscoverLayout({
 
   const onFieldEdited = useCallback(async () => {
     if (!dataView.isPersisted()) {
-      const updateDataView = await updateAdHocDataViewId(dataView);
-      stateContainer.replaceUrlAppState({ index: updateDataView.id! });
+      await updateAdHocDataViewId(dataView);
+      return;
     }
     savedSearchRefetch$.next('reset');
-  }, [dataView, savedSearchRefetch$, stateContainer, updateAdHocDataViewId]);
+  }, [dataView, savedSearchRefetch$, updateAdHocDataViewId]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager
