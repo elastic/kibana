@@ -185,6 +185,7 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
+    // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
     const infraDeepLinks = [
       {
         id: 'inventory',
@@ -225,7 +226,6 @@ export class Plugin implements InfraClientPluginClass {
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       updater$: this.appUpdater$,
-      // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
       deepLinks: core.uiSettings.get<boolean>(enableInfrastructureHostsView)
         ? [hostInfraDeepLink, ...infraDeepLinks]
         : infraDeepLinks,
