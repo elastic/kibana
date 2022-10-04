@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
+  const browser = getService('browser');
 
   describe('Connectors', function () {
     before(async () => {
@@ -74,6 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const updatedConnectorName = `${connectorName}updated`;
       const createdAction = await createConnector(connectorName);
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -111,6 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const indexName = generateUniqueKey();
       const createdAction = await createIndexConnector(connectorName, indexName);
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -140,6 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const indexName = generateUniqueKey();
       const createdAction = await createIndexConnector(connectorName, indexName);
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -167,6 +171,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const connectorName = generateUniqueKey();
       const createdAction = await createConnector(connectorName);
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
+
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
@@ -194,6 +200,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await createConnector(connectorName);
       const createdAction = await createConnector(generateUniqueKey());
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -219,6 +226,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await createConnector(connectorName);
       const createdAction = await createConnector(generateUniqueKey());
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
