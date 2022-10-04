@@ -42,6 +42,9 @@ jest.mock('../../common/components/query_bar', () => ({
 jest.mock('../../common/components/visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
+jest.mock('../../common/components/visualization_actions/lens_embeddable', () => ({
+  LensEmbeddable: jest.fn(() => <div data-test-subj="mock-lens-embeddable" />),
+}));
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';

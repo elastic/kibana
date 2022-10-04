@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueFlowIdsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_flow_ids';
-import { useNetworkKpiUniqueFlows, ID } from '../../../containers/kpi_network/unique_flows';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+import { ID } from '../../../containers/kpi_network/unique_flows';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common/kpi_embeddable_component';
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -29,41 +28,15 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
-  filterQuery,
-  from,
-  indexNames,
-  to,
-  updateDateRange,
-  setQuery,
-  skip,
-}) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniqueFlows({
-    filterQuery,
-    endDate: to,
-    indexNames,
-    startDate: from,
-    skip: querySkip,
-  });
-
+const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({ from, to, setQuery }) => {
   return (
     <KpiBaseComponentManage
-      data={data}
-      id={id}
-      inspect={inspect}
-      loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}
-      to={to}
-      updateDateRange={updateDateRange}
-      refetch={refetch}
+      id={ID}
+      loading={false} // TODO: remove unused props
       setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
+      to={to}
     />
   );
 };
