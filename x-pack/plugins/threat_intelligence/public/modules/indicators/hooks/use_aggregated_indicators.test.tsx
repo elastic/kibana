@@ -5,128 +5,99 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { BehaviorSubject, throwError } from 'rxjs';
-import { renderHook } from '@testing-library/react-hooks';
-import { IKibanaSearchResponse, TimeRangeBounds } from '@kbn/data-plugin/common';
-import { mockKibanaDataService } from '../../../common/mocks/mock_kibana_data_service';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { useAggregatedIndicators, UseAggregatedIndicatorsParam } from './use_aggregated_indicators';
 import {
-  AGGREGATION_NAME,
-  RawAggregatedIndicatorsResponse,
-  useAggregatedIndicators,
-  UseAggregatedIndicatorsParam,
-} from './use_aggregated_indicators';
-import { DEFAULT_TIME_RANGE } from './use_filters/utils';
+  mockedTimefilterService,
+  TestProvidersComponent,
+} from '../../../common/mocks/test_providers';
+import { createFetchAggregatedIndicators } from '../services';
+import { mockTimeRange } from '../../../common/mocks/mock_indicators_filters_context';
 
-jest.mock('../../../hooks/use_kibana');
-
-const aggregationResponse = {
-  rawResponse: { aggregations: { [AGGREGATION_NAME]: { buckets: [] } } },
-};
-
-const calculateBoundsResponse: TimeRangeBounds = {
-  min: moment('1 Jan 2022 06:00:00 GMT'),
-  max: moment('1 Jan 2022 12:00:00 GMT'),
-};
+jest.mock('../services/fetch_aggregated_indicators');
 
 const useAggregatedIndicatorsParams: UseAggregatedIndicatorsParam = {
-  timeRange: DEFAULT_TIME_RANGE,
+  timeRange: mockTimeRange,
+  filters: [],
+  filterQuery: { language: 'kuery', query: '' },
 };
 
+const renderUseAggregatedIndicators = () =>
+  renderHook((props: UseAggregatedIndicatorsParam) => useAggregatedIndicators(props), {
+    initialProps: useAggregatedIndicatorsParams,
+    wrapper: TestProvidersComponent,
+  });
+
 describe('useAggregatedIndicators()', () => {
-  let mockData: ReturnType<typeof mockKibanaDataService>;
+  beforeEach(jest.clearAllMocks);
 
-  describe('when mounted', () => {
-    beforeEach(() => {
-      mockData = mockKibanaDataService({
-        searchSubject: new BehaviorSubject(aggregationResponse),
-        calculateSubject: calculateBoundsResponse,
-      });
-    });
+  type MockedCreateFetchAggregatedIndicators = jest.MockedFunction<
+    typeof createFetchAggregatedIndicators
+  >;
+  let aggregatedIndicatorsQuery: jest.MockedFunction<
+    ReturnType<typeof createFetchAggregatedIndicators>
+  >;
 
-    beforeEach(async () => {
-      renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams));
-    });
+  beforeEach(jest.clearAllMocks);
 
-    it('should query the database for threat indicators', async () => {
-      expect(mockData.search).toHaveBeenCalledTimes(1);
-    });
-
-    it('should retrieve index patterns from settings', () => {
-      expect(mockData.getUiSetting).toHaveBeenCalledWith(DEFAULT_THREAT_INDEX_KEY);
-    });
-
-    it('should use the calculateBounds to convert TimeRange to TimeRangeBounds', () => {
-      expect(mockData.calculateBounds).toHaveBeenCalledTimes(1);
-    });
+  beforeEach(() => {
+    aggregatedIndicatorsQuery = jest.fn();
+    (createFetchAggregatedIndicators as MockedCreateFetchAggregatedIndicators).mockReturnValue(
+      aggregatedIndicatorsQuery
+    );
   });
 
-  describe('when query fails', () => {
-    beforeEach(async () => {
-      mockData = mockKibanaDataService({
-        searchSubject: throwError(() => new Error('some random error')),
-        calculateSubject: calculateBoundsResponse,
-      });
+  it('should create and call the aggregatedIndicatorsQuery correctly', async () => {
+    aggregatedIndicatorsQuery.mockResolvedValue([]);
 
-      renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams));
-    });
+    const { result, rerender, waitFor } = renderUseAggregatedIndicators();
 
-    it('should show an error', async () => {
-      expect(mockData.showError).toHaveBeenCalledTimes(1);
+    // indicators service and the query should be called just once
+    expect(
+      createFetchAggregatedIndicators as MockedCreateFetchAggregatedIndicators
+    ).toHaveBeenCalledTimes(1);
+    expect(aggregatedIndicatorsQuery).toHaveBeenCalledTimes(1);
 
-      expect(mockData.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            body: expect.objectContaining({
-              aggregations: expect.any(Object),
-              query: expect.any(Object),
-              size: expect.any(Number),
-              fields: expect.any(Array),
-            }),
-          }),
-        }),
-        expect.objectContaining({
-          abortSignal: expect.any(AbortSignal),
-        })
-      );
-    });
-  });
+    // Ensure the timefilter service is called
+    expect(mockedTimefilterService.timefilter.calculateBounds).toHaveBeenCalled();
+    // Call the query function
+    expect(aggregatedIndicatorsQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        filterQuery: { language: 'kuery', query: '' },
+      }),
+      expect.any(AbortSignal)
+    );
 
-  describe('when query is successful', () => {
-    beforeEach(async () => {
-      mockData = mockKibanaDataService({
-        searchSubject: new BehaviorSubject<IKibanaSearchResponse<RawAggregatedIndicatorsResponse>>({
-          rawResponse: {
-            aggregations: {
-              [AGGREGATION_NAME]: {
-                buckets: [
-                  {
-                    doc_count: 1,
-                    key: '[Filebeat] AbuseCH Malware',
-                    events: {
-                      buckets: [
-                        {
-                          doc_count: 0,
-                          key: 1641016800000,
-                          key_as_string: '1 Jan 2022 06:00:00 GMT',
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        }),
-        calculateSubject: calculateBoundsResponse,
-      });
-    });
+    await act(async () =>
+      rerender({
+        filterQuery: { language: 'kuery', query: "threat.indicator.type: 'file'" },
+        filters: [],
+        timeRange: mockTimeRange,
+      })
+    );
 
-    it('should call mapping function on every hit', async () => {
-      const { result } = renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams));
+    expect(aggregatedIndicatorsQuery).toHaveBeenCalledTimes(2);
+    expect(aggregatedIndicatorsQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        filterQuery: { language: 'kuery', query: "threat.indicator.type: 'file'" },
+      }),
+      expect.any(AbortSignal)
+    );
 
-      expect(result.current.indicators.length).toEqual(1);
-    });
+    await waitFor(() => !result.current.isLoading);
+
+    expect(result.current).toMatchInlineSnapshot(`
+      Object {
+        "dateRange": Object {
+          "max": "2022-01-02T00:00:00.000Z",
+          "min": "2022-01-01T00:00:00.000Z",
+        },
+        "isFetching": false,
+        "isLoading": false,
+        "onFieldChange": [Function],
+        "selectedField": "threat.feed.name",
+        "series": Array [],
+      }
+    `);
   });
 });

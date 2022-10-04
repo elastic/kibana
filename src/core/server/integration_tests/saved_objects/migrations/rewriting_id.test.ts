@@ -13,7 +13,7 @@ import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '../../../root';
-import { deterministicallyRegenerateObjectId } from '../../../saved_objects/migrations/core/document_migrator';
+import { deterministicallyRegenerateObjectId } from '@kbn/core-saved-objects-migration-server-internal';
 
 const logFilePath = Path.join(__dirname, 'rewriting_id.log');
 

@@ -14,6 +14,7 @@ import {
   LayoutDirection,
   Metric,
   MetricElementEvent,
+  MetricWNumber,
   MetricWProgress,
   Settings,
 } from '@elastic/charts';
@@ -253,7 +254,7 @@ describe('MetricVisComponent', function () {
         }
       `);
     });
-    it('should display subtitle and secondary prefix', () => {
+    it('should display subtitle', () => {
       const component = shallow(
         <MetricVis
           config={{
@@ -268,41 +269,40 @@ describe('MetricVisComponent', function () {
       const [[visConfig]] = component.find(Metric).props().data!;
 
       expect(visConfig!.subtitle).toBe('subtitle');
-
-      expect(visConfig).toMatchInlineSnapshot(`
-        Object {
-          "color": "#f5f7fa",
-          "extra": <span />,
-          "subtitle": "subtitle",
-          "title": "Median products.base_price",
-          "value": 28.984375,
-          "valueFormatter": [Function],
-        }
-      `);
     });
     it('should display secondary metric', () => {
-      const component = shallow(
-        <MetricVis
-          config={{
-            ...config,
-            metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: 'secondary prefix' },
-            dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          }}
-          data={table}
-          {...defaultProps}
-        />
+      const getMetricConfig = (localConfig: MetricVisComponentProps['config']) =>
+        shallow(<MetricVis config={localConfig} data={table} {...defaultProps} />)
+          .find(Metric)
+          .props().data![0][0]!;
+
+      const configNoPrefix = getMetricConfig({
+        ...config,
+        metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: undefined },
+        dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+      });
+
+      expect(configNoPrefix!.extra).toEqual(
+        <span>
+          {table.columns.find((col) => col.id === minPriceColumnId)!.name}
+          {' ' + 13.63}
+        </span>
       );
 
-      const [[visConfig]] = component.find(Metric).props().data!;
+      const configWithPrefix = getMetricConfig({
+        ...config,
+        metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: 'secondary prefix' },
+        dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+      });
 
-      expect(visConfig!.extra).toEqual(
+      expect(configWithPrefix!.extra).toEqual(
         <span>
           {'secondary prefix'}
           {' ' + 13.63}
         </span>
       );
 
-      expect(visConfig).toMatchInlineSnapshot(`
+      expect(configWithPrefix).toMatchInlineSnapshot(`
         Object {
           "color": "#f5f7fa",
           "extra": <span>
@@ -955,7 +955,7 @@ describe('MetricVisComponent', function () {
                 "stops": Array [],
               },
               Object {
-                "max": 28.984375,
+                "max": 57.96875,
                 "min": 0,
               },
             ],
@@ -1125,7 +1125,7 @@ describe('MetricVisComponent', function () {
         value: primaryMetric,
         valueFormatter,
         extra,
-      } = component.find(Metric).props().data?.[0][0]!;
+      } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
 
       return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
     };
@@ -1216,6 +1216,17 @@ describe('MetricVisComponent', function () {
           useShortSuffix: true,
         },
       });
+    });
+
+    it('ignores suffix formatting', () => {
+      const { primary, secondary } = getFormattedMetrics(0.23939, 11.2, {
+        id: 'suffix',
+        params: {
+          id: 'percent',
+        },
+      });
+      expect(primary).toBe('23.94%');
+      expect(secondary).toBe('1.12K%');
     });
   });
 });

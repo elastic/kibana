@@ -12,8 +12,8 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
-import { QueryClientProvider } from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,

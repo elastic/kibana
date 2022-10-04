@@ -7,13 +7,13 @@
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { GetPolicyListResponse } from '../../pages/policy/types';
 
-export const sendGetEndpointSpecificPackagePoliciesMock = async (
+export const sendGetEndpointSpecificPackagePoliciesMock = (
   params: {
     page: number;
     perPage: number;
     count: number;
   } = { page: 1, perPage: 20, count: 5 }
-): Promise<GetPolicyListResponse> => {
+): GetPolicyListResponse => {
   const { page, perPage, count } = params;
   const generator = new FleetPackagePolicyGenerator();
   const items = Array.from({ length: count }, (_, index) => {

@@ -9,12 +9,16 @@
 
 import type { CommandDefinition } from '..';
 
-export type ParsedArgData = string[];
+export type PossibleArgDataTypes = string | boolean;
+
+export type ParsedArgData<T = PossibleArgDataTypes> = Array<
+  T extends PossibleArgDataTypes ? T : never
+>;
 
 interface ParsedCommandInput<TArgs extends object = any> {
   name: string;
   args: {
-    [key in keyof TArgs]: ParsedArgData;
+    [key in keyof TArgs]: ParsedArgData<Required<TArgs>[key]>;
   };
 }
 const parseInputString = (rawInput: string): ParsedCommandInput => {
@@ -58,7 +62,7 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
           response.args[argName] = [];
         }
 
-        // if this argument name as a value, then process that
+        // if this argument name has a value, then process that
         if (argName !== argNameAndValueTrimmedString && firstSpaceOrEqualSign) {
           let newArgValue = argNameAndValueTrimmedString
             .substring(firstSpaceOrEqualSign.index + 1)
@@ -74,6 +78,9 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
           }
 
           response.args[argName].push(newArgValue);
+        } else {
+          // Argument has not value (bare), set it to empty string
+          response.args[argName].push(true);
         }
       }
     }

@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-notifications-browser-mocks",
@@ -39,6 +40,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -58,6 +60,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -77,6 +80,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

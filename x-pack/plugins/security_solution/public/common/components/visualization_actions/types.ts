@@ -14,7 +14,7 @@ export type GetLensAttributes = (stackByField?: string) => LensAttributes;
 export interface VisualizationActionsProps {
   className?: string;
   getLensAttributes?: GetLensAttributes;
-  inputId?: InputsModelId;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
   isInspectButtonDisabled?: boolean;
   isMultipleQuery?: boolean;
@@ -30,7 +30,7 @@ export interface LensEmbeddableComponentProps {
   getLensAttributes?: GetLensAttributes;
   height?: string;
   id: string;
-  inputsModelId?: InputsModelId;
+  inputsModelId?: InputsModelId.global | InputsModelId.timeline;
   inspectTitle?: string;
   lensAttributes: LensAttributes;
   stackByField?: string;

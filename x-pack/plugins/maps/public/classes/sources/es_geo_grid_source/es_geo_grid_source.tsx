@@ -142,14 +142,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
-    let indexPatternName = this.getIndexPatternId();
-    try {
-      const indexPattern = await this.getIndexPattern();
-      indexPatternName = indexPattern.title;
-    } catch (error) {
-      // ignore error, title will just default to id
-    }
-
     return [
       {
         label: getDataSourceLabel(),
@@ -157,7 +149,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       },
       {
         label: getDataViewLabel(),
-        value: indexPatternName,
+        value: await this.getDisplayName(),
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {

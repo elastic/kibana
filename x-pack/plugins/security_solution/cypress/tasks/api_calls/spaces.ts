@@ -14,9 +14,17 @@ export const createSpace = (id: string) => {
       name: id,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
+  }).then((response) => {
+    expect(response.status).equal(200);
   });
 };
 
 export const removeSpace = (id: string) => {
-  cy.request(`/api/spaces/space/${id}`);
+  cy.request({
+    method: 'delete',
+    url: `/api/spaces/space/${id}`,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  }).then((response) => {
+    expect(response.status).equal(204);
+  });
 };

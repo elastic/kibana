@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+
+import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../common/search_strategy';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
@@ -22,16 +33,17 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
-import { HostsDetailsKpiComponent } from '../../components/kpi_hosts';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 import { HostDetailsTabs } from './details_tabs';
@@ -50,11 +62,11 @@ import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
+import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
+import { useLicense } from '../../../common/hooks/use_license';
 
+const ES_HOST_FIELD = 'host.hostname';
 const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
@@ -73,6 +85,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
+  const { signalIndexName } = useSignalIndex();
 
   const capabilities = useMlCapabilities();
   const kibana = useKibana();
@@ -82,12 +95,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
+  const isEnterprisePlus = useLicense().isEnterprise();
+
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: fromTo.from,
           to: fromTo.to,
         })
@@ -117,7 +132,18 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+
+  const entityFilter = useMemo(
+    () => ({
+      field: ES_HOST_FIELD,
+      value: detailName,
+    }),
+    [detailName]
+  );
 
   return (
     <>
@@ -125,7 +151,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper
@@ -170,18 +196,35 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   />
                 )}
               </AnomalyTableProvider>
-
               <EuiHorizontalRule />
-
-              <HostsDetailsKpiComponent from={from} to={to} setQuery={setQuery} />
-
               <EuiSpacer />
+
+              {canReadAlerts && (
+                <>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <AlertsByStatus
+                        signalIndexName={signalIndexName}
+                        entityFilter={entityFilter}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <AlertCountByRuleByStatus
+                        entityFilter={entityFilter}
+                        signalIndexName={signalIndexName}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer />
+                </>
+              )}
 
               <SecuritySolutionTabNavigation
                 navTabs={navTabsHostDetails({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isRiskyHostsEnabled: isPlatinumOrTrialLicense,
                   hostName: detailName,
+                  isEnterprise: isEnterprisePlus,
                 })}
               />
 

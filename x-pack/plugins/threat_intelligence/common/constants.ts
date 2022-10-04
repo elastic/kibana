@@ -7,8 +7,6 @@
 
 export const EMPTY_VALUE = '-';
 
-export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
-
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;

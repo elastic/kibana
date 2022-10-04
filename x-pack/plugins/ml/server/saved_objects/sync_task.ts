@@ -126,7 +126,7 @@ export class SavedObjectsSyncService {
 
       return taskInstance;
     } catch (e) {
-      this.log.error(`Error running task: ${SAVED_OBJECTS_SYNC_TASK_ID}, `, e?.message() ?? e);
+      this.log.error(`Error running task: ${SAVED_OBJECTS_SYNC_TASK_ID}, `, e?.message ?? e);
       return null;
     }
   }

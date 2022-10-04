@@ -63,9 +63,6 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
     return {
       ...normalizedDescriptor,
-      indexPatternTitle: descriptor.indexPatternTitle
-        ? descriptor.indexPatternTitle
-        : descriptor.indexPatternId,
       term: descriptor.term!,
       type: SOURCE_TYPES.ES_TERM_SOURCE,
     };
@@ -109,11 +106,18 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
+  async getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string> {
+    let indexPatternLabel: string | undefined;
+    try {
+      const indexPattern = await this.getIndexPattern();
+      indexPatternLabel = indexPattern.getName();
+    } catch (error) {
+      indexPatternLabel = this._descriptor.indexPatternId;
+    }
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
-          defaultMessage: `Count of {indexPatternTitle}`,
-          values: { indexPatternTitle: this._descriptor.indexPatternTitle },
+          defaultMessage: `Count of {indexPatternLabel}`,
+          values: { indexPatternLabel },
         })
       : super.getAggLabel(aggType, fieldLabel);
   }
@@ -145,14 +149,14 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
 
     const rawEsData = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: `${this._descriptor.indexPatternTitle}.${this._termField.getName()}`,
+      requestName: `${indexPattern.getName()}.${this._termField.getName()}`,
       searchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.esJoin.joinDescription', {
         defaultMessage: `Elasticsearch terms aggregation request, left source: {leftSource}, right source: {rightSource}`,
         values: {
           leftSource: `${leftSourceName}:${leftFieldName}`,
-          rightSource: `${this._descriptor.indexPatternTitle}:${this._termField.getName()}`,
+          rightSource: `${indexPattern.getName()}:${this._termField.getName()}`,
         },
       }),
       searchSessionId: searchFilters.searchSessionId,

@@ -35,10 +35,12 @@ const columnSortOrder = {
   ip: 3,
   boolean: 4,
   number: 5,
-  histogram: 6,
-  geo_point: 7,
-  geo_shape: 8,
-  murmur3: 9,
+  gauge: 6,
+  counter: 7,
+  histogram: 8,
+  geo_point: 9,
+  geo_shape: 10,
+  murmur3: 11,
 };
 
 /**
@@ -527,13 +529,17 @@ function buildSuggestion({
     layerType: layerTypes.DATA,
   };
 
+  const hasDateHistogramDomain =
+    xValue?.operation.dataType === 'date' && xValue.operation.scale === 'interval';
+
   // Maintain consistent order for any layers that were saved
   const keptLayers: XYLayerConfig[] = currentState
     ? currentState.layers
         // Remove layers that aren't being suggested
         .filter(
           (layer) =>
-            keptLayerIds.includes(layer.layerId) || layer.layerType === layerTypes.ANNOTATIONS
+            keptLayerIds.includes(layer.layerId) ||
+            (hasDateHistogramDomain && layer.layerType === layerTypes.ANNOTATIONS)
         )
         // Update in place
         .map((layer) => (layer.layerId === layerId ? newLayer : layer))
@@ -554,6 +560,7 @@ function buildSuggestion({
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,
     hideEndzones: currentState?.hideEndzones,
+    showCurrentTimeMarker: currentState?.showCurrentTimeMarker,
     valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
@@ -608,7 +615,12 @@ function getScore(
   changeType: TableChangeType
 ) {
   // Unchanged table suggestions half the score because the underlying data doesn't change
-  const changeFactor = changeType === 'unchanged' ? 0.5 : 1;
+  const changeFactor =
+    changeType === 'reduced' || changeType === 'layers'
+      ? 0.3
+      : changeType === 'unchanged'
+      ? 0.5
+      : 1;
   // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
   return (((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3) * changeFactor;
 }

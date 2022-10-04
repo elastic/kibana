@@ -31,7 +31,13 @@ export default function ({ getPageObjects }: FtrProviderContext) {
               basePath,
             });
             await PageObjects.header.waitUntilLoadingHasFinished();
-            await PageObjects.discover.selectIndexPattern(`kibana_sample_data_${name}`);
+            const indices = await PageObjects.discover.getIndexPatterns();
+            const index = indices.find((element) => {
+              if (element.toLowerCase().includes(name)) {
+                return true;
+              }
+            });
+            await PageObjects.discover.selectIndexPattern(String(index));
             await PageObjects.discover.waitUntilSearchingHasFinished();
             if (timefield) {
               await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');

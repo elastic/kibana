@@ -10,7 +10,7 @@ import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
-import { UptimeESClient } from '../lib';
+import { UptimeEsClient } from '../lib';
 import { createEsQuery } from '../../../../common/utils/es_search';
 
 export interface GetMonitorDetailsParams {
@@ -25,7 +25,7 @@ export const getMonitorAlerts = async ({
   rulesClient,
   monitorId,
 }: {
-  uptimeEsClient: UptimeESClient;
+  uptimeEsClient: UptimeEsClient;
   rulesClient: any;
   monitorId: string;
 }) => {

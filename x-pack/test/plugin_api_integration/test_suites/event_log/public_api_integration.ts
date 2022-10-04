@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Event Log public API', () => {
     before(async () => {
@@ -32,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     for (const namespace of [undefined, 'namespace-a']) {

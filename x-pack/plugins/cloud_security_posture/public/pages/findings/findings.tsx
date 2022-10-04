@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { UseQueryResult } from 'react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
@@ -28,7 +28,7 @@ export const Findings = () => {
   if (!hasFindings) return <NoFindingsStates />;
 
   let queryForCloudPosturePage: UseQueryResult = dataViewQuery;
-  if (pitQuery.isError || pitQuery.isLoading || pitQuery.isIdle) {
+  if (pitQuery.isError || pitQuery.isLoading) {
     queryForCloudPosturePage = pitQuery;
   }
 

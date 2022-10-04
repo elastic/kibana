@@ -15,13 +15,14 @@ import {
   FilterStateStore,
 } from '@kbn/es-query';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Container, Embeddable, FilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   APPLY_FILTER_TRIGGER,
   FilterManager,
@@ -33,6 +34,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord, EsHitRecord } from '../types';
@@ -53,8 +55,6 @@ import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
-import { getDefaultSort } from '../components/doc_table';
-import { SortOrder } from '../components/doc_table/components/table_header/helpers';
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
@@ -76,7 +76,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
   };
 
-interface SearchEmbeddableConfig {
+export interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
   editUrl: string;
   editPath: string;
@@ -103,6 +103,7 @@ export class SavedSearchEmbeddable
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
+  private prevSort?: SortOrder[];
   private prevSearchSessionId?: string;
   private searchProps?: SearchProps;
 
@@ -152,9 +153,9 @@ export class SavedSearchEmbeddable
         this.searchProps &&
         (titleChanged ||
           this.isFetchRequired(this.searchProps) ||
-          this.isInputChangedAndRerenderRequired(this.searchProps))
+          this.isRerenderRequired(this.searchProps))
       ) {
-        this.pushContainerStateParamsToProps(this.searchProps);
+        this.reload();
       }
     });
   }
@@ -285,10 +286,8 @@ export class SavedSearchEmbeddable
     }
   };
 
-  private getDefaultSort(dataView?: DataView) {
-    const defaultSortOrder = this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
-    const hidingTimeColumn = this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
-    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn);
+  private getSort(sort: SortPair[] | undefined, dataView?: DataView) {
+    return getSortForEmbeddable(sort, dataView, this.services.uiSettings);
   }
 
   private initializeSearchEmbeddableProps() {
@@ -299,16 +298,13 @@ export class SavedSearchEmbeddable
     if (!dataView) {
       return;
     }
-
-    if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
-      this.savedSearch.sort = this.getDefaultSort(dataView);
-    }
+    const sort = this.getSort(this.savedSearch.sort, dataView);
 
     const props: SearchProps = {
       columns: this.savedSearch.columns,
       dataView,
       isLoading: false,
-      sort: this.getDefaultSort(dataView),
+      sort,
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
@@ -339,9 +335,9 @@ export class SavedSearchEmbeddable
       onSetColumns: (columns: string[]) => {
         this.updateInput({ columns });
       },
-      onSort: (sort: string[][]) => {
+      onSort: (nextSort: string[][]) => {
         const sortOrderArr: SortOrder[] = [];
-        sort.forEach((arr) => {
+        nextSort.forEach((arr) => {
           sortOrderArr.push(arr as SortOrder);
         });
         this.updateInput({ sort: sortOrderArr });
@@ -381,8 +377,9 @@ export class SavedSearchEmbeddable
 
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
-      if (!this.searchProps || !this.input.timeRange) return;
-      return this.services.timefilter.createFilter(dataView, this.input.timeRange);
+      const timeRange = this.getTimeRange();
+      if (!this.searchProps || !timeRange) return;
+      return this.services.timefilter.createFilter(dataView, timeRange);
     });
 
     this.filtersSearchSource = searchSource.create();
@@ -390,7 +387,7 @@ export class SavedSearchEmbeddable
 
     searchSource.setParent(this.filtersSearchSource);
 
-    this.pushContainerStateParamsToProps(props);
+    this.load(props);
 
     props.isLoading = true;
 
@@ -399,24 +396,38 @@ export class SavedSearchEmbeddable
     }
   }
 
+  private getTimeRange() {
+    return this.input.timeslice !== undefined
+      ? {
+          from: new Date(this.input.timeslice[0]).toISOString(),
+          to: new Date(this.input.timeslice[1]).toISOString(),
+          mode: 'absolute' as 'absolute',
+        }
+      : this.input.timeRange;
+  }
+
   private isFetchRequired(searchProps?: SearchProps) {
-    if (!searchProps) {
+    if (!searchProps || !searchProps.dataView) {
       return false;
     }
+
     return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
-      !isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
+      !isEqual(this.prevTimeRange, this.getTimeRange()) ||
+      !isEqual(this.prevSort, this.input.sort) ||
       this.prevSearchSessionId !== this.input.searchSessionId
     );
   }
 
-  private isInputChangedAndRerenderRequired(searchProps?: SearchProps) {
+  private isRerenderRequired(searchProps?: SearchProps) {
     if (!searchProps) {
       return false;
     }
-    return this.input.rowsPerPage !== searchProps.rowsPerPageState;
+    return (
+      this.input.rowsPerPage !== searchProps.rowsPerPageState ||
+      (this.input.columns && !isEqual(this.input.columns, searchProps.columns))
+    );
   }
 
   private async pushContainerStateParamsToProps(
@@ -431,12 +442,11 @@ export class SavedSearchEmbeddable
       { columns: this.input.columns || this.savedSearch.columns },
       this.services.core.uiSettings
     ).columns;
+    searchProps.sort = this.getSort(
+      this.input.sort || this.savedSearch.sort,
+      searchProps?.dataView
+    );
 
-    const savedSearchSort =
-      this.savedSearch.sort && this.savedSearch.sort.length
-        ? this.savedSearch.sort
-        : this.getDefaultSort(this.searchProps?.dataView);
-    searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
@@ -451,16 +461,13 @@ export class SavedSearchEmbeddable
 
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
-      this.prevTimeRange = this.input.timeRange;
+      this.prevTimeRange = this.getTimeRange();
       this.prevSearchSessionId = this.input.searchSessionId;
+      this.prevSort = this.input.sort;
       this.searchProps = searchProps;
       await this.fetch();
     } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
-    }
-
-    if (this.node) {
-      this.renderReactComponent(this.node, this.searchProps!);
     }
   }
 
@@ -472,10 +479,10 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       throw new Error('Search props not defined');
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
-    }
+
     this.node = domNode;
+
+    this.renderReactComponent(this.node, this.searchProps!);
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
@@ -535,9 +542,17 @@ export class SavedSearchEmbeddable
     });
   }
 
+  private async load(searchProps: SearchProps, forceFetch = false) {
+    await this.pushContainerStateParamsToProps(searchProps, { forceFetch });
+
+    if (this.node) {
+      this.render(this.node);
+    }
+  }
+
   public reload() {
     if (this.searchProps) {
-      this.pushContainerStateParamsToProps(this.searchProps, { forceFetch: true });
+      this.load(this.searchProps, true);
     }
   }
 
@@ -573,6 +588,9 @@ export class SavedSearchEmbeddable
     super.destroy();
     if (this.searchProps) {
       delete this.searchProps;
+    }
+    if (this.node) {
+      unmountComponentAtNode(this.node);
     }
     this.subscription?.unsubscribe();
 

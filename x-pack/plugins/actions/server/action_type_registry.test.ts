@@ -169,6 +169,24 @@ describe('register()', () => {
     expect(getRetry(0, new ExecutorError('my message', {}, retryTime))).toEqual(retryTime);
   });
 
+  test('provides a getRetry function that handles errors based on maxAttempts', () => {
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      maxAttempts: 2,
+    });
+    expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    const registerTaskDefinitionsCall = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
+    const getRetry = registerTaskDefinitionsCall['actions:my-action-type'].getRetry!;
+
+    expect(getRetry(1, new Error())).toEqual(true);
+    expect(getRetry(2, new Error())).toEqual(false);
+  });
+
   test('registers gold+ action types to the licensing feature usage API', () => {
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({

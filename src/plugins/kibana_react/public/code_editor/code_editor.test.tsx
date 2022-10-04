@@ -43,7 +43,15 @@ const logs = `
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 `;
 
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 describe('<CodeEditor />', () => {
+  window.ResizeObserver = ResizeObserver;
+
   test('is rendered', () => {
     const component = mountWithIntl(
       <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />

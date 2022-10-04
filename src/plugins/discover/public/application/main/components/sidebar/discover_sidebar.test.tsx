@@ -12,8 +12,8 @@ import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { DataViewAttributes } from '@kbn/data-views-plugin/public';
-import { SavedObject } from '@kbn/core/types';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
+
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
@@ -36,12 +36,13 @@ jest.mock('../../../../kibana_services', () => ({
 
 function getCompProps(): DiscoverSidebarProps {
   const dataView = stubLogstashDataView;
+  dataView.toSpec = jest.fn(() => ({}));
   const hits = getDataTableRecords(dataView);
 
   const dataViewList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
+    { id: '0', title: 'b' } as DataViewListItem,
+    { id: '1', title: 'a' } as DataViewListItem,
+    { id: '2', title: 'c' } as DataViewListItem,
   ];
 
   const fieldCounts: Record<string, number> = {};
@@ -86,6 +87,14 @@ describe('discover sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
+    mockDiscoverServices.data.dataViews.getIdsWithTitle = jest
+      .fn()
+      .mockReturnValue(props.dataViewList);
+    mockDiscoverServices.data.dataViews.get = jest.fn().mockImplementation((id) => {
+      const dataView = props.dataViewList.find((d) => d.id === id);
+      return { ...dataView, isPersisted: () => true };
+    });
+
     comp = mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
         <DiscoverSidebar {...props} />
@@ -184,5 +193,15 @@ describe('discover sidebar', function () {
     expect(addFieldButtonInDataViewPicker.length).toBe(0);
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(0);
+  });
+
+  it('should render the Visualize in Lens button in text based languages mode', () => {
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockDiscoverServices}>
+        <DiscoverSidebar {...props} onAddFilter={undefined} />
+      </KibanaContextProvider>
+    );
+    const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
+    expect(visualizeField.length).toBe(1);
   });
 });

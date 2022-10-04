@@ -18,6 +18,7 @@ import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from '../alerts_treemap';
 import { KpiPanel } from '../../../detections/components/alerts_kpis/common/components';
 import { useInspectButton } from '../../../detections/components/alerts_kpis/common/hooks';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { FieldSelection } from '../field_selection';
 import { HeaderSection } from '../header_section';
 import { InspectButtonContainer } from '../inspect';
@@ -117,6 +118,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
     }),
     skip: !isPanelExpanded,
     indexName: signalIndexName,
+    queryName: ALERTS_QUERY_NAMES.TREE_MAP,
   });
 
   useEffect(() => {

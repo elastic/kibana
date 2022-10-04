@@ -18,7 +18,7 @@ jest.mock('./api');
 describe('useSuggestUserProfiles', () => {
   const props = {
     name: 'elastic',
-    owner: [GENERAL_CASES_OWNER],
+    owners: [GENERAL_CASES_OWNER],
   };
 
   const addSuccess = jest.fn();
@@ -26,21 +26,8 @@ describe('useSuggestUserProfiles', () => {
 
   let appMockRender: AppMockRenderer;
 
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
-    jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
   });
 
   it('calls suggestUserProfiles with correct arguments', async () => {
@@ -50,7 +37,6 @@ describe('useSuggestUserProfiles', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    jest.advanceTimersByTime(500);
     await waitFor(() => result.current.isSuccess);
 
     expect(spyOnSuggestUserProfiles).toBeCalledWith({
@@ -75,7 +61,6 @@ describe('useSuggestUserProfiles', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    jest.advanceTimersByTime(500);
     await waitFor(() => result.current.isError);
 
     expect(addError).toHaveBeenCalled();
