@@ -17,7 +17,7 @@ export default function ({
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
-  describe.only('basic visualize loader pipeline expression tests', () => {
+  describe('basic visualize loader pipeline expression tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
@@ -79,7 +79,7 @@ export default function ({
 
     // if we want to do multiple different tests using the same data, or reusing a part of expression its
     // possible to retrieve the intermediate result and reuse it in later expressions
-    describe('reusing partial results', () => {
+    describe.only('reusing partial results', () => {
       it('does some screenshot comparisons', async () => {
         const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
           aggs={aggCount id="1" enabled=true schema="metric"}
