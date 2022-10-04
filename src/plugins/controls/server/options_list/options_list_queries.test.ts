@@ -169,7 +169,7 @@ describe('options list queries', () => {
       `);
     });
 
-    test('create IP aggregation for IP field', () => {
+    test('create IP aggregation for IP field without a search string', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         fieldName: 'clientip',
         fieldSpec: { type: 'ip' } as unknown as FieldSpec,
@@ -178,10 +178,92 @@ describe('options list queries', () => {
       expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
-          "terms": Object {
-            "execution_hint": "map",
+          "aggs": Object {
+            "filteredSuggestions": Object {
+              "terms": Object {
+                "execution_hint": "map",
+                "field": "clientip",
+                "shard_size": 10,
+              },
+            },
+          },
+          "ip_range": Object {
             "field": "clientip",
-            "shard_size": 10,
+            "keyed": true,
+            "ranges": Array [
+              Object {
+                "from": "0.0.0.0",
+                "key": "rangeResults",
+                "to": "255.255.255.255",
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    test('create IP aggregation for IP field with a full IP in the search string', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        fieldName: 'clientip',
+        fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+        searchString: '41.77.243.255',
+      };
+      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+      expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        .toMatchInlineSnapshot(`
+        Object {
+          "aggs": Object {
+            "filteredSuggestions": Object {
+              "terms": Object {
+                "execution_hint": "map",
+                "field": "clientip",
+                "shard_size": 10,
+              },
+            },
+          },
+          "ip_range": Object {
+            "field": "clientip",
+            "keyed": true,
+            "ranges": Array [
+              Object {
+                "key": "rangeResults",
+                "mask": "41.77.243.255/32",
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    test('create IP aggregation for IP field with a partial IP in the search string', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        fieldName: 'clientip',
+        fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+        searchString: '41.77.',
+      };
+      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+      expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+        .toMatchInlineSnapshot(`
+        Object {
+          "aggs": Object {
+            "filteredSuggestions": Object {
+              "terms": Object {
+                "execution_hint": "map",
+                "field": "clientip",
+                "shard_size": 10,
+              },
+            },
+          },
+          "ip_range": Object {
+            "field": "clientip",
+            "keyed": true,
+            "ranges": Array [
+              Object {
+                "from": "41.77.0.0",
+                "key": "rangeResults",
+                "to": "41.77.255.255",
+              },
+            ],
           },
         }
       `);
@@ -292,12 +374,20 @@ describe('options list queries', () => {
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
       rawSearchResponseMock.aggregations = {
         suggestions: {
-          buckets: [
-            { doc_count: 5, key: '56.73.58.63' },
-            { doc_count: 20, key: '111.52.174.2' },
-            { doc_count: 10, key: '23.216.241.120' },
-            { doc_count: 15, key: '196.162.13.39' },
-          ],
+          buckets: {
+            rangeResults: {
+              from: '0.0.0.0',
+              to: '255.255.255.255',
+              filteredSuggestions: {
+                buckets: [
+                  { doc_count: 5, key: '56.73.58.63' },
+                  { doc_count: 20, key: '111.52.174.2' },
+                  { doc_count: 10, key: '23.216.241.120' },
+                  { doc_count: 15, key: '196.162.13.39' },
+                ],
+              },
+            },
+          },
         },
       };
       expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`

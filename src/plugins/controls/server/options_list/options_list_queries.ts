@@ -147,67 +147,50 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    */
   ip: {
     buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
-      const ipSuggestions = {
-        terms: {
-          field: fieldName,
-          execution_hint: 'map',
-          shard_size: 10,
-        },
+      let rangeQuery: { from: string; to: string } | { mask: string } = {
+        from: '0.0.0.0',
+        to: '255.255.255.255',
       };
-
-      if (!searchString) {
-        return ipSuggestions;
+      if (searchString) {
+        const ipSegments = searchString
+          .replace(/[^\d.]/g, '') // remove any non-numeric characters, excluding periods
+          .split('.')
+          .filter((segment) => segment !== '' && parseInt(segment, 10) <= 255); // prevent invalid IP search
+        if (ipSegments.length === 4) {
+          // if a full IP is given, then use CIDR mask to generate the proper range
+          // i.e. if the search string is `a.b.c.d` then `a.b.c.d\32` is equivalent to the range `a.b.c.d` to `a.b.c.(d+1)`
+          rangeQuery = { mask: searchString + '/32' };
+        } else {
+          // if a partial IP is provided as a search string, then find IPs that **start** with the given partial IP
+          // i.e. if the search string is `a.b` then do a search for IPs in the range `a.b.0.0` to `a.b.255.255`
+          const minIp = ipSegments.concat(Array(4 - ipSegments.length).fill('0')).join('.');
+          const maxIp = ipSegments.concat(Array(4 - ipSegments.length).fill('255')).join('.');
+          rangeQuery = { from: minIp, to: maxIp };
+        }
       }
 
-      const ipSegments = searchString
-        .replace(/[^\d.]/g, '') // remove any non-numeric characters, excluding periods
-        .split('.')
-        .filter((segment) => segment !== '');
-
-      // if a search string is provided that already is of the form `a.b.c.d` then simply search for that IP directly
-      if (ipSegments.length === 4) {
-        return {
-          filter: {
-            term: { [fieldName]: searchString },
-          },
-          aggs: {
-            filteredSuggestions: { ...ipSuggestions },
-          },
-        };
-      }
-
-      // otherwise, find IPs that **start** with the given partial IP - for example, if the search string is `a.b`
-      // then do a search for IPs in the range `a.b.0.0` to `a.b.255.255`
-      const minIp = ipSegments.concat(Array(4 - ipSegments.length).fill('0')).join('.');
-      const maxIp = ipSegments.concat(Array(4 - ipSegments.length).fill('255')).join('.');
       return {
         ip_range: {
           field: fieldName,
-          ranges: [{ key: 'results', from: minIp, to: maxIp }],
+          ranges: [{ key: 'rangeResults', ...rangeQuery }],
+          keyed: true,
         },
         aggs: {
-          filteredSuggestions: { ...ipSuggestions },
+          filteredSuggestions: {
+            terms: {
+              field: fieldName,
+              execution_hint: 'map',
+              shard_size: 10,
+            },
+          },
         },
       };
     },
-    parse: (rawEsResult) => {
-      const buckets: [{ key: string; filteredSuggestions?: { buckets: [{ key: string }] } }] = get(
+    parse: (rawEsResult) =>
+      get(
         rawEsResult,
-        'aggregations.suggestions.buckets'
-      );
-      if (!Boolean(buckets)) {
-        // this means that a full IP was provided as a search string
-        return get(rawEsResult, 'aggregations.suggestions.filteredSuggestions.buckets')?.map(
-          (suggestion: { key: string }) => suggestion.key
-        );
-      }
-      if (buckets[0].filteredSuggestions) {
-        // this means that a partial IP was provided as a search string
-        return buckets[0].filteredSuggestions.buckets.map((suggestion) => suggestion.key);
-      }
-      // this means that no search string has been provided
-      return buckets.map((suggestion) => suggestion.key);
-    },
+        'aggregations.suggestions.buckets.rangeResults.filteredSuggestions.buckets'
+      )?.map((suggestion: { key: string }) => suggestion.key),
   },
 
   /**
