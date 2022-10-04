@@ -29,11 +29,11 @@ describe('createIndexPipelineDefinitions util function', () => {
     jest.clearAllMocks();
   });
 
-  it('should create the pipelines', () => {
+  it('should create the pipelines', async () => {
     mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
-    expect(
+    await expect(
       createIndexPipelineDefinitions(indexName, mockClient as unknown as ElasticsearchClient)
-    ).toEqual(expectedResult);
+    ).resolves.toEqual(expectedResult);
     expect(mockClient.ingest.putPipeline).toHaveBeenCalledTimes(3);
   });
 });
