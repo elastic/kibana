@@ -39,7 +39,7 @@ export function AlertsSearchBar({
 
   return (
     <SearchBar
-      indexPatterns={loading || error ? undefined : [dataView!]}
+      indexPatterns={loading || error ? [] : [dataView!]}
       placeholder={translations.alertsSearchBar.placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       timeHistory={timeHistory}
