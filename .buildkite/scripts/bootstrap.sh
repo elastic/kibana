@@ -36,7 +36,7 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 
   node scripts/yarn_deduplicate
-  check_for_changed_files 'node scripts/yarn_deduplicate'
+  check_for_changed_files 'node scripts/yarn_deduplicate && yarn kbn bootstrap'
 fi
 
 ###
