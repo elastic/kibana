@@ -72,11 +72,14 @@ describe('Add exception using data views from rule details', () => {
 
     // clicks prompt button to add first exception that will also select to close
     // all matching alerts
-    addFirstExceptionFromRuleDetails({
-      field: 'agent.name',
-      operator: 'is',
-      values: ['foo'],
-    }, 'My item');
+    addFirstExceptionFromRuleDetails(
+      {
+        field: 'agent.name',
+        operator: 'is',
+        values: ['foo'],
+      },
+      'My item'
+    );
 
     // new exception item displays
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);

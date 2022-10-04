@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { KibanaServices } from '../../../common/lib/kibana';
-import { act } from '@testing-library/react';
 
 import { useAddRuleDefaultException } from './use_add_rule_exception';
 

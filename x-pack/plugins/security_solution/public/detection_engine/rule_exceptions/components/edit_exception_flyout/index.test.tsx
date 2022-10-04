@@ -21,10 +21,7 @@ import { useSignalIndex } from '../../../../detections/containers/detection_engi
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  getRulesEqlSchemaMock,
-  getRulesSchemaMock,
-} from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { getRulesEqlSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
