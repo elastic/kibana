@@ -280,7 +280,10 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({
+      http: httpSetup,
+      elasticsearchService: elasticsearchServiceSetup,
+    });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
       http: httpSetup,
