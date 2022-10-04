@@ -77,7 +77,7 @@ export const NotificationsList: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [queryError, setQueryError] = useState<string>('');
@@ -286,7 +286,7 @@ export const NotificationsList: FC = () => {
     <>
       <SavedObjectsWarning onCloseFlyout={fetchNotifications} forceRefresh={isLoading} />
 
-      {newNotificationsCount ? (
+      {newNotificationsCount && !isLoading ? (
         <>
           <EuiCallOut
             size="s"
