@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AgentStore, NetworkAgent } from '@kbn/core-elasticsearch-client-server-internal';
+import type { AgentStore, NetworkAgent } from '@kbn/core-elasticsearch-client-server-internal';
 
 export const createAgentStoreMock = (agents: Set<NetworkAgent> = new Set()): AgentStore => ({
   getAgents: jest.fn(() => agents),

@@ -24,9 +24,12 @@ import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
 import { getDefaultHeaders } from './headers';
-import { createInternalErrorHandler, InternalUnauthorizedErrorHandler } from './retry_unauthorized';
+import {
+  createInternalErrorHandler,
+  type InternalUnauthorizedErrorHandler,
+} from './retry_unauthorized';
 import { createTransport } from './create_transport';
-import { AgentFactoryProvider } from './agent_manager';
+import type { AgentFactoryProvider } from './agent_manager';
 
 const noop = () => undefined;
 

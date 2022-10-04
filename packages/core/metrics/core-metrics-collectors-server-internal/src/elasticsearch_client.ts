@@ -16,7 +16,7 @@ export class ElasticsearchClientsMetricsCollector
   constructor(private readonly agentStore: AgentStore) {}
 
   public async collect(): Promise<ElasticsearchClientsMetrics> {
-    return getAgentsSocketsStats(this.agentStore.getAgents());
+    return await getAgentsSocketsStats(this.agentStore.getAgents());
   }
 
   public reset() {

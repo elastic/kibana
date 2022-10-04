@@ -57,12 +57,13 @@ export const getAgentsSocketsStats = (agents: Set<NetworkAgent>): ElasticsearchC
 
   const activeSocketCounters = Object.values(nodesWithActiveSockets);
   const idleSocketCounters = Object.values(nodesWithIdleSockets);
-  let protocol: ElasticsearchClientProtocol;
-
-  if (http && https) protocol = 'mixed';
-  else if (https) protocol = 'https';
-  else if (http) protocol = 'http';
-  else protocol = 'none';
+  const protocol: ElasticsearchClientProtocol = http
+    ? https
+      ? 'mixed'
+      : 'http'
+    : https
+    ? 'https'
+    : 'none';
 
   return {
     protocol,

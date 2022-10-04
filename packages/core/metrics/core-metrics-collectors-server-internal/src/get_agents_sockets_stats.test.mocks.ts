@@ -11,16 +11,12 @@ import { Agent as HttpsAgent } from 'https';
 
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
-export const getHttpAgentMock = (defaults: Partial<HttpAgent>) => {
-  jest.doMock('http');
-  const agent = new HttpAgent();
-  return Object.assign(agent, defaults);
+export const getHttpAgentMock = (overrides: Partial<HttpAgent>) => {
+  return Object.assign(new HttpAgent(), overrides);
 };
 
-export const getHttpsAgentMock = (defaults: Partial<HttpsAgent>) => {
-  jest.doMock('https');
-  const agent = new HttpsAgent();
-  return Object.assign(agent, defaults);
+export const getHttpsAgentMock = (overrides: Partial<HttpsAgent>) => {
+  return Object.assign(new HttpsAgent(), overrides);
 };
 
 export const getAgentsSocketsStatsMock: jest.MockedFunction<typeof getAgentsSocketsStats> =
