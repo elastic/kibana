@@ -46,6 +46,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -57,7 +58,8 @@
               "\nThe unique identifier of the application.\n\nCan only be composed of alphanumeric characters, `-`, `:` and `_`"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -69,7 +71,8 @@
               "\nThe title of the application."
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -85,7 +88,8 @@
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -107,7 +111,8 @@
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -129,7 +134,8 @@
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -144,7 +150,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -159,7 +166,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -183,7 +191,8 @@
               "> | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -200,7 +209,8 @@
               "> | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -215,7 +225,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -255,6 +266,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -275,7 +287,8 @@
                   "<HistoryLocationState>"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -292,7 +305,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -307,7 +321,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -322,7 +337,8 @@
               "string[] | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -344,7 +360,8 @@
               "[] | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -360,6 +377,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -384,6 +402,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -399,6 +418,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -415,6 +435,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -431,6 +452,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -447,6 +469,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -464,6 +487,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -490,6 +514,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -507,6 +532,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -526,7 +552,8 @@
               ".confirm"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -536,7 +563,8 @@
             "label": "text",
             "description": [],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -549,7 +577,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -562,7 +591,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -576,7 +606,8 @@
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -590,6 +621,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -607,6 +639,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -626,7 +659,8 @@
               ".default"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -640,6 +674,7 @@
         "description": [],
         "path": "packages/core/application/core-application-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -663,6 +698,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -685,6 +721,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -714,6 +751,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -736,6 +774,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -753,6 +792,7 @@
         "description": [],
         "path": "packages/core/application/core-application-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -767,7 +807,8 @@
               "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -791,7 +832,8 @@
               ">>"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -815,6 +857,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -828,6 +871,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -851,6 +895,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -878,6 +923,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -893,6 +939,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -916,6 +963,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -935,6 +983,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -948,6 +997,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -959,6 +1009,7 @@
                 "description": [],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-application-browser",
@@ -971,7 +1022,8 @@
                       "string | undefined"
                     ],
                     "path": "packages/core/application/core-application-browser/src/contracts.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/core-application-browser",
@@ -984,7 +1036,8 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/core/application/core-application-browser/src/contracts.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/core-application-browser",
@@ -997,7 +1050,8 @@
                       "string | undefined"
                     ],
                     "path": "packages/core/application/core-application-browser/src/contracts.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1018,7 +1072,8 @@
               "<string | undefined>"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1042,6 +1097,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_mount.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1056,7 +1112,8 @@
               "HTMLElement"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1078,7 +1135,8 @@
               "<HistoryLocationState>"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1094,6 +1152,7 @@
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
+            "trackAdoption": false,
             "references": []
           },
           {
@@ -1121,6 +1180,7 @@
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
+            "trackAdoption": false,
             "references": [],
             "children": [
               {
@@ -1141,6 +1201,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_mount.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1162,6 +1223,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1176,6 +1238,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_mount.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1197,7 +1260,8 @@
               ">"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1213,6 +1277,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1227,7 +1292,8 @@
               "number | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1242,7 +1308,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1257,7 +1324,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1272,7 +1340,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1288,6 +1357,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1302,7 +1372,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1317,7 +1388,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1332,7 +1404,8 @@
               "unknown"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1347,7 +1420,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1362,7 +1436,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1377,7 +1452,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1393,6 +1469,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1407,7 +1484,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1422,7 +1500,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1437,7 +1516,8 @@
               "unknown"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1465,6 +1545,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1488,6 +1569,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1503,6 +1585,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1524,6 +1607,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1538,6 +1622,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1549,6 +1634,7 @@
                 "description": [],
                 "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-application-browser",
@@ -1561,7 +1647,8 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1584,6 +1671,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1597,6 +1685,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1610,6 +1699,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1660,6 +1750,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1690,6 +1781,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1724,6 +1816,7 @@
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": true,
         "removeBy": "8.8.0",
+        "trackAdoption": false,
         "references": [],
         "returnComment": [],
         "children": [
@@ -1744,7 +1837,8 @@
               }
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1757,7 +1851,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1800,6 +1895,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_mount.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [
           "An unmounting function that will be called to unmount the application. See {@link AppUnmount }."
         ],
@@ -1824,7 +1920,8 @@
               "<HistoryLocationState>"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1843,6 +1940,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_mount.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -1885,6 +1983,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1917,6 +2016,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1937,7 +2037,8 @@
               "<unknown>"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1980,6 +2081,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2028,6 +2130,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

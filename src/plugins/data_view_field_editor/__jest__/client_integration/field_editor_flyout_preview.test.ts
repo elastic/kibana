@@ -813,4 +813,48 @@ describe('Field editor Preview panel', () => {
       expect(exists('previewNotAvailableCallout')).toBe(true);
     });
   });
+
+  describe('composite runtime field', () => {
+    test('should display composite editor when composite type is selected', async () => {
+      testBed = await setup();
+      const {
+        exists,
+        actions: { fields, waitForUpdates },
+      } = testBed;
+      fields.updateType('composite', 'Composite');
+      await waitForUpdates();
+      expect(exists('compositeEditor')).toBe(true);
+    });
+
+    test('should show composite field types and update appropriately', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1] } });
+      testBed = await setup();
+      const {
+        exists,
+        actions: { fields, waitForUpdates },
+      } = testBed;
+      await fields.updateType('composite', 'Composite');
+      await fields.updateScript("emit('a',1)");
+      await waitForUpdates();
+      expect(exists('typeField_0')).toBe(true);
+
+      // increase the number of fields
+      httpRequestsMockHelpers.setFieldPreviewResponse({
+        values: { 'composite_field.a': [1], 'composite_field.b': [1] },
+      });
+      await fields.updateScript("emit('a',1); emit('b',1)");
+      await waitForUpdates();
+      expect(exists('typeField_0')).toBe(true);
+      expect(exists('typeField_1')).toBe(true);
+
+      // decrease the number of fields
+      httpRequestsMockHelpers.setFieldPreviewResponse({
+        values: { 'composite_field.a': [1] },
+      });
+      await fields.updateScript("emit('a',1)");
+      await waitForUpdates();
+      expect(exists('typeField_0')).toBe(true);
+      expect(exists('typeField_1')).toBe(false);
+    });
+  });
 });

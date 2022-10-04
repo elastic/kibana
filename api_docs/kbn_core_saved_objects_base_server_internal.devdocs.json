@@ -19,6 +19,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -28,7 +29,8 @@
             "label": "maxImportPayloadBytes",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -38,7 +40,8 @@
             "label": "maxImportExportSize",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -53,7 +56,8 @@
               "; readonly scrollDuration: string; readonly retryAttempts: number; }"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -67,6 +71,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -82,6 +87,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -98,6 +104,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -122,6 +129,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_request_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -135,6 +143,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_request_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -155,6 +164,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -168,6 +178,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -188,6 +199,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -198,6 +210,7 @@
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -210,7 +223,8 @@
                   "number | undefined"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -223,7 +237,8 @@
                   "number | undefined"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -245,6 +260,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -258,6 +274,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -272,6 +289,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -290,6 +308,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_index_for_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -303,6 +322,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_index_for_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -327,6 +347,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -342,6 +363,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -356,6 +378,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -379,6 +402,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -392,6 +416,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -413,6 +438,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties_objects.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -426,6 +452,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties_objects.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -448,6 +475,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -461,6 +489,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -485,6 +514,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -501,6 +531,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -514,6 +545,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -523,7 +555,8 @@
             "label": "path",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -543,7 +576,8 @@
               "<number>; }>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -557,6 +591,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -566,7 +601,8 @@
             "label": "path",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
@@ -598,7 +634,8 @@
               "<number>; }>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

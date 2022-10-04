@@ -6,12 +6,14 @@
  */
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { ProjectBrowserMonitor } from '../../../common/runtime_types';
+import { ProjectMonitor } from '../../../common/runtime_types';
 
 import { SyntheticsStreamingRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor_formatter';
+import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
+
+const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory = (
   libs: UMServerLibs
@@ -25,6 +27,11 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory =
       monitors: schema.arrayOf(schema.any()),
     }),
   },
+  options: {
+    body: {
+      maxBytes: MAX_PAYLOAD_SIZE,
+    },
+  },
   handler: async ({
     request,
     savedObjectsClient,
@@ -33,7 +40,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory =
     subject,
   }): Promise<any> => {
     try {
-      const monitors = (request.body?.monitors as ProjectBrowserMonitor[]) || [];
+      const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
       const spaceId = server.spaces.spacesService.getSpaceId(request);
       const { keep_stale: keepStale, project: projectId } = request.body || {};
       const { publicLocations, privateLocations } = await getAllLocations(

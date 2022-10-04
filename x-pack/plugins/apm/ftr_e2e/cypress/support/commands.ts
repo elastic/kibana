@@ -9,37 +9,46 @@ import { Interception } from 'cypress/types/net-stubbing';
 import 'cypress-axe';
 import moment from 'moment';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
+import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
 
 Cypress.Commands.add('loginAsViewerUser', () => {
-  return cy.loginAs({ username: 'viewer', password: 'changeme' });
+  return cy.loginAs({ username: ApmUsername.viewerUser, password: 'changeme' });
 });
 
 Cypress.Commands.add('loginAsEditorUser', () => {
-  return cy.loginAs({ username: 'editor', password: 'changeme' });
+  return cy.loginAs({ username: ApmUsername.editorUser, password: 'changeme' });
+});
+
+Cypress.Commands.add('loginAsMonitorUser', () => {
+  return cy.loginAs({
+    username: ApmUsername.apmMonitorIndices,
+    password: 'changeme',
+  });
 });
 
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    cy.log(`Calling 'loginAs'`);
-    cy.session([username, password], () => {
-      cy.log(`Logging in as ${username}`);
-      const kibanaUrl = Cypress.env('KIBANA_URL');
-      cy.request({
-        log: false,
-        method: 'POST',
-        url: `${kibanaUrl}/internal/security/login`,
-        body: {
-          providerType: 'basic',
-          providerName: 'basic',
-          currentURL: `${kibanaUrl}/login`,
-          params: { username, password },
-        },
-        headers: {
-          'kbn-xsrf': 'e2e_test',
-        },
-      });
+    // cy.session(username, () => {
+    const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+    cy.visit('/');
+    cy.request({
+      log: true,
+      method: 'POST',
+      url: `${kibanaUrl}/internal/security/login`,
+      body: {
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: `${kibanaUrl}/login`,
+        params: { username, password },
+      },
+      headers: {
+        'kbn-xsrf': 'e2e_test',
+      },
+      // });
     });
+    cy.visit('/');
   }
 );
 

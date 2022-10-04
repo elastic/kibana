@@ -105,7 +105,7 @@ export function MachineLearningAnomalyExplorerProvider(
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.filterDashboardSearchWithSearchString(dashboardTitle);
-        await testSubjects.clickWhenNotDisabled('~mlEmbeddableAddAndEditDashboard');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('~mlEmbeddableAddAndEditDashboard');
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();

@@ -43,11 +43,50 @@ export type {
   RulesListVisibleColumns,
 } from './types';
 
+export type {
+  ActionConnectorFieldsProps,
+  ActionParamsProps,
+  ActionTypeModel,
+  GenericValidationResult,
+} from './types';
+
+export {
+  AlertHistoryDefaultIndexName,
+  ALERT_HISTORY_PREFIX,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryEsIndexConnectorId,
+} from './types';
+
+export { useConnectorContext } from './application/context/use_connector_context';
+
 export {
   ActionForm,
   CreateConnectorFlyout,
   EditConnectorFlyout,
 } from './application/sections/action_connector_form';
+
+export type { ConnectorFormSchema } from './application/sections/action_connector_form';
+
+export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
+
+export {
+  ButtonGroupField,
+  HiddenField,
+  JsonEditorWithMessageVariables,
+  JsonFieldWrapper,
+  MustacheTextFieldWrapper,
+  PasswordField,
+  SimpleConnectorForm,
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+} from './application/components';
+
+export {
+  AlertProvidedActionVariables,
+  hasMustacheTokens,
+  templateActionVariable,
+  updateActionConnector,
+} from './application/lib';
 
 export type { ActionGroupWithCondition } from './application/sections';
 
@@ -57,6 +96,7 @@ export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
 }
 
+export { useKibana } from './common';
 export type { AggregationType, Comparator } from './common';
 
 export {
@@ -74,6 +114,8 @@ export {
   getTimeFieldOptions,
   GroupByExpression,
   COMPARATORS,
+  connectorDeprecatedMessage,
+  deprecatedMessage,
 } from './common';
 
 export type {

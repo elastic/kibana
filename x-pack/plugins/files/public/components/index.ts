@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { Image } from './image';
-export type { ImageProps } from './image';
+export { Image, type ImageProps } from './image';
+export { UploadFile, type UploadFileProps } from './upload_file';
+export { FilesContext } from './context';

@@ -15,8 +15,8 @@ import {
   type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import * as TEST_SUBJECTS from '../test_subjects';
-import type { CspFinding } from '../types';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import {
   baseFindingsColumns,
@@ -65,6 +65,7 @@ const FindingsTableComponent = ({
       createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.benchmark.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
       baseFindingsColumns['rule.tags'],
       createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),

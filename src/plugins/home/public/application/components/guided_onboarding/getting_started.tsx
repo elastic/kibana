@@ -12,6 +12,8 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
+  EuiPageTemplate,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -72,38 +74,40 @@ export const GettingStarted = () => {
     padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
   `;
   return (
-    <KibanaPageTemplate template="centeredBody">
-      <div css={paddingCss}>
-        <EuiTitle size="l" className="eui-textCenter">
-          <h1>{title}</h1>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued" size="s" textAlign="center">
-          <p>{subtitle}</p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiSpacer size="xxl" />
-        <EuiFlexGrid columns={3} gutterSize="xl">
-          <EuiFlexItem>
-            <UseCaseCard useCase="search" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseCaseCard useCase="observability" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseCaseCard useCase="security" />
-          </EuiFlexItem>
-        </EuiFlexGrid>
-        <EuiSpacer />
-        <EuiHorizontalRule />
-        <EuiSpacer />
-        <div className="eui-textCenter">
-          {/* data-test-subj used for FS tracking */}
-          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipUseCaseTourLink">
-            {skipText}
-          </EuiLink>
-        </div>
-      </div>
+    <KibanaPageTemplate panelled={false} grow>
+      <EuiPageTemplate.Section alignment="center">
+        <EuiPanel color="plain" hasShadow css={paddingCss}>
+          <EuiTitle size="l" className="eui-textCenter">
+            <h1>{title}</h1>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s" textAlign="center">
+            <p>{subtitle}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiSpacer size="xxl" />
+          <EuiFlexGrid columns={3} gutterSize="xl">
+            <EuiFlexItem>
+              <UseCaseCard useCase="search" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <UseCaseCard useCase="observability" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <UseCaseCard useCase="security" />
+            </EuiFlexItem>
+          </EuiFlexGrid>
+          <EuiSpacer />
+          <EuiHorizontalRule />
+          <EuiSpacer />
+          <div className="eui-textCenter">
+            {/* data-test-subj used for FS tracking */}
+            <EuiLink onClick={onSkip} data-test-subj="onboarding--skipUseCaseTourLink">
+              {skipText}
+            </EuiLink>
+          </div>
+        </EuiPanel>
+      </EuiPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };

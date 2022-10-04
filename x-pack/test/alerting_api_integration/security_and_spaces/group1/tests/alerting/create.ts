@@ -137,6 +137,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 spaceId: space.id,
                 consumer: 'alertsFixture',
               });
+              expect(taskRecord.task.enabled).to.eql(true);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,

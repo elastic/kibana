@@ -23,6 +23,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/appenders/console.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -35,7 +36,8 @@
               "\"console\""
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/console.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -62,7 +64,8 @@
               }
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/console.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -78,6 +81,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -90,7 +94,8 @@
               "\"file\""
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -117,7 +122,8 @@
               }
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -127,7 +133,8 @@
             "label": "fileName",
             "description": [],
             "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -143,6 +150,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/layout.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -155,7 +163,8 @@
               "\"json\""
             ],
             "path": "packages/core/logging/core-logging-server/src/layout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -171,6 +180,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/logger.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -183,7 +193,8 @@
               "string[]"
             ],
             "path": "packages/core/logging/core-logging-server/src/logger.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -193,7 +204,8 @@
             "label": "name",
             "description": [],
             "path": "packages/core/logging/core-logging-server/src/logger.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -203,10 +215,11 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"trace\" | \"warn\" | \"fatal\""
+              "\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\""
             ],
             "path": "packages/core/logging/core-logging-server/src/logger.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -222,6 +235,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -250,7 +264,8 @@
               "> | undefined"
             ],
             "path": "packages/core/logging/core-logging-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -270,7 +285,8 @@
               "[] | undefined"
             ],
             "path": "packages/core/logging/core-logging-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -286,6 +302,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -311,6 +328,7 @@
             ],
             "path": "packages/core/logging/core-logging-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-logging-server",
@@ -333,6 +351,7 @@
                 ],
                 "path": "packages/core/logging/core-logging-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -350,6 +369,7 @@
         "description": [],
         "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -362,7 +382,8 @@
               "\"meta\""
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -377,7 +398,8 @@
               "\"update\" | \"remove\""
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -399,7 +421,8 @@
               "[]"
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -413,6 +436,7 @@
         "description": [],
         "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -422,7 +446,8 @@
             "label": "path",
             "description": [],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -435,7 +460,8 @@
               "string | number | boolean | null | undefined"
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -449,6 +475,7 @@
         "description": [],
         "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -461,7 +488,8 @@
               "\"numeric\""
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -473,7 +501,8 @@
               "\nThe suffix pattern to apply when renaming a file. The suffix will be applied\nafter the `appender.fileName` file name, but before the file extension.\n\nMust include `%i`, as it is the value that will be converted to the file index\n"
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -485,7 +514,8 @@
               "\nThe maximum number of files to keep. Once this number is reached, oldest\nfiles will be deleted. Defaults to `7`"
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -501,6 +531,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/layout.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -513,7 +544,8 @@
               "\"pattern\""
             ],
             "path": "packages/core/logging/core-logging-server/src/layout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -526,7 +558,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/logging/core-logging-server/src/layout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -539,7 +572,8 @@
               "string | undefined"
             ],
             "path": "packages/core/logging/core-logging-server/src/layout.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -555,6 +589,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -567,7 +602,8 @@
               "\"rewrite\""
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -582,7 +618,8 @@
               "string[]"
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -603,7 +640,8 @@
               }
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -619,6 +657,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -631,7 +670,8 @@
               "\"rolling-file\""
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -660,7 +700,8 @@
               }
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -672,7 +713,8 @@
               "\nThe absolute path of the file to write to."
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -701,7 +743,8 @@
               }
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -722,7 +765,8 @@
               }
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -736,6 +780,7 @@
         "description": [],
         "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -748,7 +793,8 @@
               "\"size-limit\""
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -763,7 +809,8 @@
               "ByteSizeValue"
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -777,6 +824,7 @@
         "description": [],
         "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -789,7 +837,8 @@
               "\"time-interval\""
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -804,7 +853,8 @@
               "moment.Duration"
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
@@ -816,7 +866,8 @@
               "\nIndicates whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.\n\nFor example, if the interval is `4h` and the current hour is 3 am then\nthe first rollover will occur at 4 am and then next ones will occur at 8 am, noon, 4pm, etc.\nThe default value is true."
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -866,6 +917,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/appenders/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -896,6 +948,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/layout.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -918,6 +971,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -938,6 +992,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -968,6 +1023,7 @@
         ],
         "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

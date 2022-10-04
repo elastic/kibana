@@ -59,15 +59,17 @@ describe('useColumnSettings()', () => {
             "threat.indicator.last_seen",
           ]
         `);
+
+        expect(result.current.sorting.columns).toMatchInlineSnapshot(`Array []`);
       });
     });
 
     describe('when initial state is present in the plugin storage service', () => {
       beforeEach(() => {
         mockedServices.storage.set('indicatorsTable', {
-          visibleColumns: ['display_name', 'threat.indicator.last_seen', 'tags', 'stream'],
+          visibleColumns: ['threat.indicator.name', 'threat.indicator.last_seen', 'tags', 'stream'],
           columns: [
-            { id: 'display_name', displayAsText: 'Indicator' },
+            { id: 'threat.indicator.name', displayAsText: 'Indicator' },
             { id: 'threat.indicator.type', displayAsText: 'Indicator type' },
             { id: 'threat.feed.name', displayAsText: 'Feed' },
             { id: 'threat.indicator.first_seen', displayAsText: 'First seen' },
@@ -75,6 +77,14 @@ describe('useColumnSettings()', () => {
             { id: 'tags', displayAsText: 'tags' },
             { id: 'stream', displayAsText: 'stream' },
           ],
+          sortingState: {
+            columns: [
+              {
+                id: 'threat.indicator.name',
+                direction: 'asc',
+              },
+            ],
+          },
         });
       });
 
@@ -83,7 +93,7 @@ describe('useColumnSettings()', () => {
 
         expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
           Array [
-            "display_name",
+            "threat.indicator.name",
             "threat.indicator.last_seen",
             "tags",
             "stream",
@@ -94,7 +104,7 @@ describe('useColumnSettings()', () => {
           Array [
             Object {
               "displayAsText": "Indicator",
-              "id": "display_name",
+              "id": "threat.indicator.name",
             },
             Object {
               "displayAsText": "Indicator type",
@@ -121,6 +131,17 @@ describe('useColumnSettings()', () => {
               "id": "stream",
             },
           ]
+        `);
+
+        expect(result.current.sorting.columns).toMatchInlineSnapshot(`
+          Object {
+            "columns": Array [
+              Object {
+                "direction": "asc",
+                "id": "threat.indicator.name",
+              },
+            ],
+          }
         `);
       });
     });
@@ -256,6 +277,27 @@ describe('useColumnSettings()', () => {
           Object {
             "displayAsText": "Last seen",
             "id": "threat.indicator.last_seen",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('sorting', () => {
+    it('should update internal state when onSort is called', async () => {
+      const { result } = renderUseColumnSettings();
+
+      expect(result.current.sorting.columns).toMatchInlineSnapshot(`Array []`);
+
+      await act(async () => {
+        result.current.sorting.onSort([{ id: 'threat.indicator.name', direction: 'asc' }]);
+      });
+
+      expect(result.current.sorting.columns).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "direction": "asc",
+            "id": "threat.indicator.name",
           },
         ]
       `);

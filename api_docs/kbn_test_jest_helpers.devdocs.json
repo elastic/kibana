@@ -29,6 +29,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -38,7 +39,8 @@
             "label": "length",
             "description": [],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -52,6 +54,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -65,6 +68,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -82,6 +86,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -95,6 +100,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -112,6 +118,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -125,6 +132,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -139,6 +147,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -156,6 +165,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -169,6 +179,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -186,6 +197,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -201,6 +213,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -214,6 +227,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -231,6 +245,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -246,6 +261,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -268,6 +284,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -284,6 +301,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -297,6 +315,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -319,6 +338,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -332,6 +352,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -358,6 +379,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -374,6 +396,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -390,6 +413,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -406,6 +430,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -430,6 +455,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -443,6 +469,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -463,6 +490,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [
           "BroadcastChannel[]"
@@ -481,6 +509,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/random.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -491,6 +520,7 @@
             "description": [],
             "path": "packages/kbn-test-jest-helpers/src/random.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -500,7 +530,8 @@
                 "label": "min",
                 "description": [],
                 "path": "packages/kbn-test-jest-helpers/src/random.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -510,7 +541,8 @@
                 "label": "max",
                 "description": [],
                 "path": "packages/kbn-test-jest-helpers/src/random.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -530,6 +562,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/random.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -543,6 +576,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/random.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -565,6 +599,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -580,6 +615,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -596,6 +632,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -610,6 +647,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -634,6 +672,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -647,6 +686,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -673,6 +713,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -688,6 +729,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -699,6 +741,7 @@
             "description": [],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -711,7 +754,8 @@
                   "HTMLElement | undefined"
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -724,7 +768,8 @@
                   "any"
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -738,7 +783,8 @@
                   "<any> | undefined"
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -760,6 +806,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -778,6 +825,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -791,6 +839,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -825,10 +874,11 @@
             "section": "def-server.AsyncSetupFunc",
             "text": "AsyncSetupFunc"
           },
-          "<T>"
+          "<T, Partial<P>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -845,6 +895,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -867,6 +918,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -899,10 +951,11 @@
             "section": "def-server.SyncSetupFunc",
             "text": "SyncSetupFunc"
           },
-          "<T>"
+          "<T, Partial<P>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -917,6 +970,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -938,6 +992,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -978,10 +1033,11 @@
             "section": "def-server.SetupFunc",
             "text": "SetupFunc"
           },
-          "<T>"
+          "<T, Partial<P>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -996,6 +1052,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1025,6 +1082,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1049,6 +1107,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1064,6 +1123,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1075,6 +1135,7 @@
             "description": [],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -1087,7 +1148,8 @@
                   "any"
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -1101,7 +1163,8 @@
                   "<any> | undefined"
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1123,6 +1186,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1136,6 +1200,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1150,6 +1215,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1168,6 +1234,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1181,6 +1248,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1195,6 +1263,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1213,6 +1282,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1226,6 +1296,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1240,6 +1311,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1254,6 +1326,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1268,6 +1341,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1286,6 +1360,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1299,6 +1374,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1319,6 +1395,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1332,6 +1409,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1358,6 +1436,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1373,6 +1452,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1384,6 +1464,7 @@
             "description": [],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -1396,7 +1477,8 @@
                   "any"
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -1410,7 +1492,8 @@
                   "<any> | undefined"
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1434,6 +1517,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1450,6 +1534,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/stub_web_worker.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1468,6 +1553,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1482,6 +1568,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1496,6 +1583,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1518,6 +1606,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1534,6 +1623,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1548,6 +1638,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1566,6 +1657,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1579,6 +1671,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1607,6 +1700,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1619,7 +1713,8 @@
               "true"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1633,6 +1728,7 @@
         "description": [],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1651,7 +1747,8 @@
               "; value: string; }[]; }[]"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1666,7 +1763,8 @@
               "string[][]"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1690,6 +1788,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1705,7 +1804,8 @@
               "<any, {}, React.Component<{}, {}, any>>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1721,6 +1821,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -1736,6 +1837,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1752,6 +1854,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1774,6 +1877,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -1789,6 +1893,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1804,6 +1909,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1823,6 +1929,7 @@
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -1838,6 +1945,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1860,7 +1968,8 @@
               " | undefined) => string[]; }"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1881,7 +1990,8 @@
               "; }"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1894,7 +2004,8 @@
               "{ navigateTo: (url: string) => void; }"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1919,6 +2030,7 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1931,7 +2043,8 @@
               "false | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1947,7 +2060,7 @@
         "label": "AsyncSetupFunc",
         "description": [],
         "signature": [
-          "(props?: any) => Promise<",
+          "(props?: P | undefined) => Promise<",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -1959,20 +2072,22 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
             "id": "def-server.AsyncSetupFunc.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1985,7 +2100,7 @@
         "label": "SetupFunc",
         "description": [],
         "signature": [
-          "(props?: any) => ",
+          "(props?: P | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -2005,20 +2120,22 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
             "id": "def-server.SetupFunc.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2031,7 +2148,7 @@
         "label": "SyncSetupFunc",
         "description": [],
         "signature": [
-          "(props?: any) => ",
+          "(props?: P | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -2043,20 +2160,22 @@
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
             "id": "def-server.SyncSetupFunc.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2072,6 +2191,7 @@
         "description": [],
         "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -2082,6 +2202,7 @@
             "description": [],
             "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -2095,6 +2216,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [],
                 "returnComment": []
               },
@@ -2112,6 +2234,7 @@
                 ],
                 "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
@@ -2126,6 +2249,7 @@
                     ],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -2140,6 +2264,7 @@
                 "description": [],
                 "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
@@ -2149,7 +2274,8 @@
                     "label": "pathname",
                     "description": [],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
@@ -2159,7 +2285,8 @@
                     "label": "search",
                     "description": [],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
@@ -2169,7 +2296,8 @@
                     "label": "state",
                     "description": [],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
@@ -2179,7 +2307,8 @@
                     "label": "hash",
                     "description": [],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -2194,6 +2323,7 @@
             "description": [],
             "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
@@ -2204,6 +2334,7 @@
                 "description": [],
                 "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
@@ -2213,7 +2344,8 @@
                     "label": "pathname",
                     "description": [],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
@@ -2223,7 +2355,8 @@
                     "label": "search",
                     "description": [],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
@@ -2233,7 +2366,8 @@
                     "label": "state",
                     "description": [],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
@@ -2243,7 +2377,8 @@
                     "label": "hash",
                     "description": [],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }

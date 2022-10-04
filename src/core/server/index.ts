@@ -42,7 +42,6 @@ import type {
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
 import type {
-  RequestHandlerContextBase,
   IRouter,
   RequestHandler,
   KibanaResponseFactory,
@@ -64,28 +63,16 @@ import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server';
-import { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
-
-import { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
+import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-data-server';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { StatusServiceSetup } from '@kbn/core-status-server';
+import type { UiSettingsServiceSetup, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { HttpResources } from './http_resources';
-import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
-import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
-import { StatusServiceSetup } from './status';
-import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
+import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
-// Because of #79265 we need to explicitly import, then export these types for
-// scripts/telemetry_check.js to work as expected
-import {
-  CoreUsageStats,
-  CoreUsageData,
-  CoreConfigUsageData,
-  ConfigUsageData,
-  CoreEnvironmentUsageData,
-  CoreServicesUsageData,
-} from './core_usage_data';
-import type { CoreRequestHandlerContext } from './core_route_handler_context';
-import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
-
+export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
   CoreUsageStats,
   CoreUsageData,
@@ -93,7 +80,12 @@ export type {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
   ConfigUsageData,
-};
+  CoreUsageDataSetup,
+  CoreUsageDataStart,
+  CoreUsageCounter,
+  CoreIncrementUsageCounter,
+  CoreIncrementCounterParams,
+} from '@kbn/core-usage-data-server';
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
@@ -238,7 +230,6 @@ export type {
   HttpResourcesRequestHandler,
 } from './http_resources';
 
-export type { IRenderOptions } from './rendering';
 export type {
   LoggingServiceSetup,
   LoggerContextConfigInput,
@@ -344,6 +335,9 @@ export type {
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
   SavedObjectsPitParams,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObjectsServiceSetup,
@@ -403,16 +397,18 @@ export type {
 } from '@kbn/core-saved-objects-import-export-server-internal';
 
 export type {
-  IUiSettingsClient,
   UiSettingsParams,
   PublicUiSettingsParams,
   UiSettingsType,
-  UiSettingsServiceSetup,
-  UiSettingsServiceStart,
   UserProvidedValues,
   DeprecationSettings,
+} from '@kbn/core-ui-settings-common';
+export type {
+  IUiSettingsClient,
+  UiSettingsServiceSetup,
+  UiSettingsServiceStart,
   UiSettingsRequestHandlerContext,
-} from './ui_settings';
+} from '@kbn/core-ui-settings-server';
 
 export type {
   OpsMetrics,
@@ -439,16 +435,9 @@ export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 export type { AppCategory } from '@kbn/core-application-common';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
-export { ServiceStatusLevels } from './status';
-export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
-
-export type {
-  CoreUsageDataSetup,
-  CoreUsageDataStart,
-  CoreUsageCounter,
-  CoreIncrementUsageCounter,
-  CoreIncrementCounterParams,
-} from './core_usage_data';
+export { ServiceStatusLevels } from '@kbn/core-status-common';
+export type { CoreStatus, ServiceStatus, ServiceStatusLevel } from '@kbn/core-status-common';
+export type { StatusServiceSetup } from '@kbn/core-status-server';
 
 export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
@@ -470,33 +459,13 @@ export type {
   AnalyticsServicePreboot,
   AnalyticsServiceStart,
 } from '@kbn/core-analytics-server';
-
-export type { CoreRequestHandlerContext } from './core_route_handler_context';
-
-/**
- * Base context passed to a route handler, containing the `core` context part.
- *
- * @public
- */
-export interface RequestHandlerContext extends RequestHandlerContextBase {
-  core: Promise<CoreRequestHandlerContext>;
-}
-
-/**
- * @internal
- */
-export interface PrebootRequestHandlerContext extends RequestHandlerContextBase {
-  core: Promise<PrebootCoreRequestHandlerContext>;
-}
-
-/**
- * Mixin allowing plugins to define their own request handler contexts.
- *
- * @public
- */
-export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
-  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
-};
+export type {
+  RequestHandlerContext,
+  CoreRequestHandlerContext,
+  CustomRequestHandlerContext,
+  PrebootRequestHandlerContext,
+  PrebootCoreRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
 
 /**
  * Context passed to the `setup` method of `preboot` plugins.
@@ -607,7 +576,6 @@ export type {
   HttpResources,
   PluginsServiceSetup,
   PluginsServiceStart,
-  PluginOpaqueId,
 };
 
 /**

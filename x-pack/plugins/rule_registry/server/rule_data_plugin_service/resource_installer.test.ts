@@ -12,7 +12,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
@@ -137,6 +137,147 @@ describe('resourceInstaller', () => {
       expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: '.alerts-observability.logs.alerts-mappings' })
       );
+    });
+  });
+
+  // These tests only test the updateAliasWriteIndexMapping()
+  // method of ResourceInstaller, however to test that, you
+  // have to call installAndUpdateNamespaceLevelResources().
+  // So there's a bit of setup.  But the only real difference
+  // with the tests is what the es client simulateIndexTemplate()
+  // mock returns, as set in the test.
+  describe('updateAliasWriteIndexMapping()', () => {
+    const SimulateTemplateResponse = {
+      template: {
+        aliases: {
+          alias_name_1: {
+            is_hidden: true,
+          },
+          alias_name_2: {
+            is_hidden: true,
+          },
+        },
+        mappings: { enabled: false },
+        settings: {},
+      },
+    };
+
+    const GetAliasResponse = {
+      real_index: {
+        aliases: {
+          alias_1: {
+            is_hidden: true,
+          },
+          alias_2: {
+            is_hidden: true,
+          },
+        },
+      },
+    };
+
+    function setup(mockClusterClient: ElasticsearchClientMock) {
+      mockClusterClient.indices.simulateTemplate.mockImplementation(
+        async () => SimulateTemplateResponse
+      );
+      mockClusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+
+      const logger = loggerMock.create();
+      const resourceInstallerParams = {
+        logger,
+        isWriteEnabled: true,
+        disabledRegistrationContexts: [],
+        getResourceName: jest.fn(),
+        getClusterClient: async () => mockClusterClient,
+        pluginStop$,
+      };
+      const indexOptions = {
+        feature: AlertConsumers.OBSERVABILITY,
+        registrationContext: 'observability.metrics',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [],
+        componentTemplates: [
+          {
+            name: 'mappings',
+          },
+        ],
+      };
+
+      const installer = new ResourceInstaller(resourceInstallerParams);
+      const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: '8.4.0' });
+
+      return { installer, indexInfo, logger };
+    }
+
+    it('succeeds on the happy path', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      mockClusterClient.indices.simulateIndexTemplate.mockImplementation(
+        async () => SimulateTemplateResponse
+      );
+
+      const { installer, indexInfo } = setup(mockClusterClient);
+
+      let error: string | undefined;
+      try {
+        await installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default');
+      } catch (err) {
+        error = err.message;
+      }
+      expect(error).toBeFalsy();
+    });
+
+    it('gracefully fails on error simulating mappings', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      mockClusterClient.indices.simulateIndexTemplate.mockImplementation(async () => {
+        throw new Error('expecting simulateIndexTemplate() to throw');
+      });
+
+      const { installer, indexInfo, logger } = setup(mockClusterClient);
+
+      let error: string | undefined;
+      try {
+        await installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default');
+      } catch (err) {
+        error = err.message;
+      }
+      expect(error).toBeFalsy();
+
+      const errorMessages = loggerMock.collect(logger).error;
+      expect(errorMessages).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Ignored PUT mappings for alias alias_1; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
+          ],
+          Array [
+            "Ignored PUT mappings for alias alias_2; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
+          ],
+        ]
+      `);
+    });
+
+    it('gracefully fails on empty mappings', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      mockClusterClient.indices.simulateIndexTemplate.mockImplementation(async () => ({}));
+
+      const { installer, indexInfo, logger } = setup(mockClusterClient);
+
+      let error: string | undefined;
+      try {
+        await installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default');
+      } catch (err) {
+        error = err.message;
+      }
+      expect(error).toBeFalsy();
+      const errorMessages = loggerMock.collect(logger).error;
+      expect(errorMessages).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Ignored PUT mappings for alias alias_1; simulated mappings were empty",
+          ],
+          Array [
+            "Ignored PUT mappings for alias alias_2; simulated mappings were empty",
+          ],
+        ]
+      `);
     });
   });
 });

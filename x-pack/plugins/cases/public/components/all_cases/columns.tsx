@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
   EuiButton,
@@ -24,7 +23,8 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
-import { Case, DeleteCase, UpdateByKey } from '../../../common/ui/types';
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { Case, UpdateByKey } from '../../../common/ui/types';
 import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
@@ -40,10 +40,16 @@ import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { severities } from '../severity/config';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { UserToolTip } from '../user_profiles/user_tooltip';
+import { useAssignees } from '../../containers/user_profiles/use_assignees';
+import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
+import { CurrentUserProfile } from '../types';
+import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
+import { useCasesFeatures } from '../../common/use_cases_features';
+import { useRefreshCases } from './use_on_refresh_cases';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -57,10 +63,47 @@ const MediumShadeText = styled.p`
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
+const AssigneesColumn: React.FC<{
+  assignees: Case['assignees'];
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
+}> = ({ assignees, userProfiles, currentUserProfile }) => {
+  const { allAssignees } = useAssignees({
+    caseAssignees: assignees,
+    userProfiles,
+    currentUserProfile,
+  });
+
+  if (allAssignees.length <= 0) {
+    return getEmptyTagValue();
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="none" data-test-subj="case-table-column-assignee" wrap>
+      {allAssignees.map((assignee) => {
+        const dataTestSubjName = getUsernameDataTestSubj(assignee);
+        return (
+          <EuiFlexItem
+            grow={false}
+            key={assignee.uid}
+            data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
+          >
+            <UserToolTip userInfo={assignee.profile}>
+              <SmallUserAvatar userInfo={assignee.profile} />
+            </UserToolTip>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+};
+
+AssigneesColumn.displayName = 'AssigneesColumn';
+
 export interface GetCasesColumn {
   filterStatus: string;
-  handleIsLoading: (a: boolean) => void;
-  refreshCases?: (a?: boolean) => void;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
   isSelectorView: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
@@ -69,40 +112,41 @@ export interface GetCasesColumn {
 }
 export const useCasesColumns = ({
   filterStatus,
-  handleIsLoading,
-  refreshCases,
+  userProfiles,
+  currentUserProfile,
   isSelectorView,
   connectors = [],
   onRowClick,
   showSolutionColumn,
 }: GetCasesColumn): CasesColumns[] => {
-  // Delete case
-  const {
-    dispatchResetIsDeleted,
-    handleOnDeleteConfirm,
-    handleToggleModal,
-    isDeleted,
-    isDisplayConfirmDeleteModal,
-    isLoading: isDeleting,
-  } = useDeleteCases();
-
-  const { isAlertsEnabled } = useCasesFeatures();
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const { mutate: deleteCases } = useDeleteCases();
+  const refreshCases = useRefreshCases();
+  const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
-
-  const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
-    id: '',
-    title: '',
-  });
-
+  const [caseToBeDeleted, setCaseToBeDeleted] = useState<string>();
   const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
 
-  const toggleDeleteModal = useCallback(
-    (deleteCase: Case) => {
-      handleToggleModal();
-      setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title });
+  const closeModal = useCallback(() => setIsModalVisible(false), []);
+  const openModal = useCallback(() => setIsModalVisible(true), []);
+
+  const onDeleteAction = useCallback(
+    (theCase: Case) => {
+      openModal();
+      setCaseToBeDeleted(theCase.id);
     },
-    [handleToggleModal]
+    [openModal]
   );
+
+  const onConfirmDeletion = useCallback(() => {
+    closeModal();
+    if (caseToBeDeleted) {
+      deleteCases({
+        caseIds: [caseToBeDeleted],
+        successToasterTitle: i18n.DELETED_CASES(1),
+      });
+    }
+  }, [caseToBeDeleted, closeModal, deleteCases]);
 
   const handleDispatchUpdate = useCallback(
     ({ updateKey, updateValue, caseData }: UpdateByKey) => {
@@ -111,7 +155,7 @@ export const useCasesColumns = ({
         updateValue,
         caseData,
         onSuccess: () => {
-          if (refreshCases != null) refreshCases();
+          refreshCases();
         },
       });
     },
@@ -121,9 +165,9 @@ export const useCasesColumns = ({
   const actions = useMemo(
     () =>
       getActions({
-        deleteCaseOnClick: toggleDeleteModal,
+        deleteCaseOnClick: onDeleteAction,
       }),
-    [toggleDeleteModal]
+    [onDeleteAction]
   );
 
   const assignCaseAction = useCallback(
@@ -134,17 +178,6 @@ export const useCasesColumns = ({
     },
     [onRowClick]
   );
-
-  useEffect(() => {
-    handleIsLoading(isDeleting || isLoadingUpdateCase);
-  }, [handleIsLoading, isDeleting, isLoadingUpdateCase]);
-
-  useEffect(() => {
-    if (isDeleted) {
-      if (refreshCases != null) refreshCases();
-      dispatchResetIsDeleted();
-    }
-  }, [isDeleted, dispatchResetIsDeleted, refreshCases]);
 
   return [
     {
@@ -172,29 +205,21 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    {
-      field: 'createdBy',
-      name: i18n.REPORTER,
-      render: (createdBy: Case['createdBy']) => {
-        if (createdBy != null) {
-          return (
-            <EuiToolTip
-              position="top"
-              content={createdBy.username ?? i18n.UNKNOWN}
-              data-test-subj="case-table-column-createdBy-tooltip"
-            >
-              <EuiAvatar
-                className="userAction__circle"
-                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
-                size="s"
-                data-test-subj="case-table-column-createdBy"
+    ...(caseAssignmentAuthorized
+      ? [
+          {
+            field: 'assignees',
+            name: i18n.ASSIGNEES,
+            render: (assignees: Case['assignees']) => (
+              <AssigneesColumn
+                assignees={assignees}
+                userProfiles={userProfiles}
+                currentUserProfile={currentUserProfile}
               />
-            </EuiToolTip>
-          );
-        }
-        return getEmptyTagValue();
-      },
-    },
+            ),
+          },
+        ]
+      : []),
     {
       field: 'tags',
       name: i18n.TAGS,
@@ -383,12 +408,13 @@ export const useCasesColumns = ({
             name: (
               <>
                 {i18n.ACTIONS}
-                <ConfirmDeleteCaseModal
-                  caseTitle={deleteThisCase.title}
-                  isModalVisible={isDisplayConfirmDeleteModal}
-                  onCancel={handleToggleModal}
-                  onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase])}
-                />
+                {isModalVisible ? (
+                  <ConfirmDeleteCaseModal
+                    totalCasesToBeDeleted={1}
+                    onCancel={closeModal}
+                    onConfirm={onConfirmDeletion}
+                  />
+                ) : null}
               </>
             ),
             actions,

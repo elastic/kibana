@@ -120,10 +120,10 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
   defaultMessage: 'Blocklist',
 });
 
-export const RESPONSE_ACTIONS = i18n.translate(
-  'xpack.securitySolution.navigation.responseActions',
+export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
+  'xpack.securitySolution.navigation.responseActionsHistory',
   {
-    defaultMessage: 'Response Actions',
+    defaultMessage: 'Response actions history',
   }
 );
 

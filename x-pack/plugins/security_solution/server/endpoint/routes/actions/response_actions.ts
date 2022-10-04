@@ -40,9 +40,9 @@ import type {
   HostMetadata,
   LogsEndpointAction,
   LogsEndpointActionResponse,
-  ResponseActions,
   ResponseActionParametersWithPidOrEntityId,
 } from '../../../../common/endpoint/types';
+import type { ResponseActions } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,

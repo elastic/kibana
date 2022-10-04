@@ -12,6 +12,7 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
+import type { ResponseActionStatus, ResponseActions } from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -45,16 +46,6 @@ export interface KillProcessActionOutputContent {
   pid?: number;
   entity_id?: string;
 }
-
-export const RESPONSE_ACTION_COMMANDS = [
-  'isolate',
-  'unisolate',
-  'kill-process',
-  'suspend-process',
-  'running-processes',
-] as const;
-
-export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -311,6 +302,8 @@ export interface ActionDetails<TOutputContent extends object = object> {
       completedAt: string | undefined;
     }
   >;
+  /**  action status */
+  status: ResponseActionStatus;
   /** user that created the action */
   createdBy: string;
   /** comment submitted with action */
@@ -336,5 +329,6 @@ export interface ActionListApiResponse {
    * multiple agents
    */
   data: Array<Omit<ActionDetails, 'outputs'>>;
+  statuses: ResponseActionStatus[] | undefined;
   total: number;
 }

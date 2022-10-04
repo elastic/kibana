@@ -7,9 +7,25 @@
 
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
 
-import type { BulkActionEditForRuleAttributes } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditForRuleAttributes } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
+
+import { transformToAlertThrottle, transformToNotifyWhen } from '../utils';
+
+const getThrottleOperation = (throttle: string) =>
+  ({
+    field: 'throttle',
+    operation: 'set',
+    value: transformToAlertThrottle(throttle),
+  } as const);
+
+const getNotifyWhenOperation = (throttle: string) =>
+  ({
+    field: 'notifyWhen',
+    operation: 'set',
+    value: transformToNotifyWhen(throttle),
+  } as const);
 
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
@@ -18,31 +34,72 @@ import { assertUnreachable } from '../../../../../common/utility_types';
  */
 export const bulkEditActionToRulesClientOperation = (
   action: BulkActionEditForRuleAttributes
-): BulkEditOperation => {
+): BulkEditOperation[] => {
   switch (action.type) {
     // tags actions
     case BulkActionEditType.add_tags:
-      return {
-        field: 'tags',
-        operation: 'add',
-        value: action.value,
-      };
+      return [
+        {
+          field: 'tags',
+          operation: 'add',
+          value: action.value,
+        },
+      ];
 
     case BulkActionEditType.delete_tags:
-      return {
-        field: 'tags',
-        operation: 'delete',
-        value: action.value,
-      };
+      return [
+        {
+          field: 'tags',
+          operation: 'delete',
+          value: action.value,
+        },
+      ];
 
     case BulkActionEditType.set_tags:
-      return {
-        field: 'tags',
-        operation: 'set',
-        value: action.value,
-      };
+      return [
+        {
+          field: 'tags',
+          operation: 'set',
+          value: action.value,
+        },
+      ];
+
+    // rule actions
+    case BulkActionEditType.add_rule_actions:
+      return [
+        {
+          field: 'actions',
+          operation: 'add',
+          value: action.value.actions,
+        },
+        getThrottleOperation(action.value.throttle),
+        getNotifyWhenOperation(action.value.throttle),
+      ];
+
+    case BulkActionEditType.set_rule_actions:
+      return [
+        {
+          field: 'actions',
+          operation: 'set',
+          value: action.value.actions,
+        },
+        getThrottleOperation(action.value.throttle),
+        getNotifyWhenOperation(action.value.throttle),
+      ];
+
+    // schedule actions
+    case BulkActionEditType.set_schedule:
+      return [
+        {
+          field: 'schedule',
+          operation: 'set',
+          value: {
+            interval: action.value.interval,
+          },
+        },
+      ];
 
     default:
-      return assertUnreachable(action.type);
+      return assertUnreachable(action);
   }
 };

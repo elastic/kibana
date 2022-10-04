@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ResponseActions } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -24,7 +25,6 @@ import type {
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
-  ResponseActions,
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 import type { EndpointMetadataService } from '../metadata';
@@ -183,6 +183,27 @@ export const getActionCompletionInfo = (
   }
 
   return completedInfo;
+};
+
+export const getActionStatus = ({
+  expirationDate,
+  isCompleted,
+  wasSuccessful,
+}: {
+  expirationDate: string;
+  isCompleted: boolean;
+  wasSuccessful: boolean;
+}): { status: ActionDetails['status']; isExpired: boolean } => {
+  const isExpired = !isCompleted && expirationDate < new Date().toISOString();
+  const status = isExpired
+    ? 'failed'
+    : isCompleted
+    ? wasSuccessful
+      ? 'successful'
+      : 'failed'
+    : 'pending';
+
+  return { isExpired, status };
 };
 
 interface NormalizedAgentActionResponse {

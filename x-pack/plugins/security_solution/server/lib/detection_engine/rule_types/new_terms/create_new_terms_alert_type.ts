@@ -27,9 +27,14 @@ import {
   buildNewTermsAgg,
 } from './build_new_terms_aggregation';
 import type { SignalSource } from '../../signals/types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
 import { parseDateString, validateHistoryWindowStart } from './utils';
-import { addToSearchAfterReturn, createSearchAfterReturnType } from '../../signals/utils';
+import {
+  addToSearchAfterReturn,
+  createSearchAfterReturnType,
+  getUnprocessedExceptionsWarnings,
+} from '../../signals/utils';
+import { createEnrichEventsFunction } from '../../signals/enrichments';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -61,7 +66,6 @@ export const createNewTermsAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -87,7 +91,6 @@ export const createNewTermsAlertType = (
           ruleExecutionLogger,
           bulkCreate,
           completeRule,
-          exceptionItems,
           tuple,
           mergeStrategy,
           inputIndex,
@@ -95,6 +98,8 @@ export const createNewTermsAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           aggregatableTimestampField,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         params,
@@ -109,7 +114,7 @@ export const createNewTermsAlertType = (
         from: params.from,
       });
 
-      const filter = await getFilter({
+      const esFilter = await getFilter({
         filters: params.filters,
         index: inputIndex,
         language: params.language,
@@ -117,7 +122,7 @@ export const createNewTermsAlertType = (
         services,
         type: params.type,
         query: params.query,
-        lists: exceptionItems,
+        exceptionFilter,
       });
 
       const parsedHistoryWindowSize = parseDateString({
@@ -129,6 +134,11 @@ export const createNewTermsAlertType = (
       let afterKey;
 
       const result = createSearchAfterReturnType();
+
+      const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+      if (exceptionsWarning) {
+        result.warningMessages.push(exceptionsWarning);
+      }
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -152,7 +162,7 @@ export const createNewTermsAlertType = (
           to: tuple.to.toISOString(),
           services,
           ruleExecutionLogger,
-          filter,
+          filter: esFilter,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
@@ -202,7 +212,7 @@ export const createNewTermsAlertType = (
           to: tuple.to.toISOString(),
           services,
           ruleExecutionLogger,
-          filter,
+          filter: esFilter,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
@@ -244,7 +254,7 @@ export const createNewTermsAlertType = (
             to: tuple.to.toISOString(),
             services,
             ruleExecutionLogger,
-            filter,
+            filter: esFilter,
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,
@@ -276,7 +286,11 @@ export const createNewTermsAlertType = (
 
           const bulkCreateResult = await bulkCreate(
             wrappedAlerts,
-            params.maxSignals - result.createdSignalsCount
+            params.maxSignals - result.createdSignalsCount,
+            createEnrichEventsFunction({
+              services,
+              logger: ruleExecutionLogger,
+            })
           );
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });

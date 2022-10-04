@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import sinon from 'sinon';
 import { Subject } from 'rxjs';
 import moment from 'moment';
 
@@ -21,6 +22,7 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
 import { mustBeAllOf } from './queries/query_clauses';
 
+let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
   v4: () => 'v4uuid',
 }));
@@ -33,6 +35,11 @@ jest.mock('elastic-apm-node', () => ({
 }));
 
 describe('TaskScheduling', () => {
+  beforeAll(() => {
+    fakeTimer = sinon.useFakeTimers();
+  });
+  afterAll(() => fakeTimer.restore());
+
   const mockTaskStore = taskStoreMock.create({});
   const definitions = new TaskTypeDictionary(mockLogger());
   const taskSchedulingOpts = {
@@ -70,6 +77,26 @@ describe('TaskScheduling', () => {
       id: undefined,
       schedule: undefined,
       traceparent: 'parent',
+      enabled: true,
+    });
+  });
+
+  test('allows scheduling tasks that are disabled', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const task = {
+      taskType: 'foo',
+      enabled: false,
+      params: {},
+      state: {},
+    };
+    await taskScheduling.schedule(task);
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith({
+      ...task,
+      id: undefined,
+      schedule: undefined,
+      traceparent: 'parent',
+      enabled: false,
     });
   });
 
@@ -122,6 +149,226 @@ describe('TaskScheduling', () => {
       })
     ).rejects.toMatchObject({
       statusCode: 409,
+    });
+  });
+
+  describe('bulkEnable', () => {
+    const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+    beforeEach(() => {
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: mockTask() }])
+      );
+    });
+
+    test('should search for tasks by ids enabled = false when enabling', async () => {
+      mockTaskStore.fetch.mockResolvedValue({ docs: [] });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkEnable([id]);
+
+      expect(mockTaskStore.fetch).toHaveBeenCalledTimes(1);
+      expect(mockTaskStore.fetch).toHaveBeenCalledWith({
+        query: {
+          bool: {
+            must: [
+              {
+                terms: {
+                  _id: [`task:${id}`],
+                },
+              },
+              {
+                term: {
+                  'task.enabled': false,
+                },
+              },
+            ],
+          },
+        },
+        size: 100,
+      });
+    });
+
+    test('should split search on chunks when input ids array too large', async () => {
+      mockTaskStore.fetch.mockResolvedValue({ docs: [] });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkEnable(Array.from({ length: 1250 }), false);
+
+      expect(mockTaskStore.fetch).toHaveBeenCalledTimes(13);
+    });
+
+    test('should transform response into correct format', async () => {
+      const successfulTask = mockTask({
+        id: 'task-1',
+        enabled: false,
+        schedule: { interval: '1h' },
+      });
+      const failedTask = mockTask({ id: 'task-2', enabled: false, schedule: { interval: '1h' } });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([
+          { tag: 'ok', value: successfulTask },
+          { tag: 'err', error: { entity: failedTask, error: new Error('fail') } },
+        ])
+      );
+      mockTaskStore.fetch.mockResolvedValue({ docs: [successfulTask, failedTask] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const result = await taskScheduling.bulkEnable([successfulTask.id, failedTask.id]);
+
+      expect(result).toEqual({
+        tasks: [successfulTask],
+        errors: [{ task: failedTask, error: new Error('fail') }],
+      });
+    });
+
+    test('should not enable task if it is already enabled', async () => {
+      const task = mockTask({ id, enabled: true, schedule: { interval: '3h' } });
+
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkEnable([id]);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
+    test('should set runAt and scheduledAt if runSoon is true', async () => {
+      const task = mockTask({
+        id,
+        enabled: false,
+        schedule: { interval: '3h' },
+        runAt: new Date('1969-09-13T21:33:58.285Z'),
+        scheduledAt: new Date('1969-09-10T21:33:58.285Z'),
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkEnable([id]);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toEqual([
+        {
+          ...task,
+          enabled: true,
+          runAt: new Date('1970-01-01T00:00:00.000Z'),
+          scheduledAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
+    });
+
+    test('should not set runAt and scheduledAt if runSoon is false', async () => {
+      const task = mockTask({
+        id,
+        enabled: false,
+        schedule: { interval: '3h' },
+        runAt: new Date('1969-09-13T21:33:58.285Z'),
+        scheduledAt: new Date('1969-09-10T21:33:58.285Z'),
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkEnable([id], false);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toEqual([
+        {
+          ...task,
+          enabled: true,
+        },
+      ]);
+    });
+  });
+
+  describe('bulkDisable', () => {
+    const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+    beforeEach(() => {
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: mockTask() }])
+      );
+    });
+
+    test('should search for tasks by ids enabled = true when disabling', async () => {
+      mockTaskStore.fetch.mockResolvedValue({ docs: [] });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkDisable([id]);
+
+      expect(mockTaskStore.fetch).toHaveBeenCalledTimes(1);
+      expect(mockTaskStore.fetch).toHaveBeenCalledWith({
+        query: {
+          bool: {
+            must: [
+              {
+                terms: {
+                  _id: [`task:${id}`],
+                },
+              },
+              {
+                term: {
+                  'task.enabled': true,
+                },
+              },
+            ],
+          },
+        },
+        size: 100,
+      });
+    });
+
+    test('should split search on chunks when input ids array too large', async () => {
+      mockTaskStore.fetch.mockResolvedValue({ docs: [] });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkDisable(Array.from({ length: 1250 }));
+
+      expect(mockTaskStore.fetch).toHaveBeenCalledTimes(13);
+    });
+
+    test('should transform response into correct format', async () => {
+      const successfulTask = mockTask({
+        id: 'task-1',
+        enabled: false,
+        schedule: { interval: '1h' },
+      });
+      const failedTask = mockTask({ id: 'task-2', enabled: true, schedule: { interval: '1h' } });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([
+          { tag: 'ok', value: successfulTask },
+          { tag: 'err', error: { entity: failedTask, error: new Error('fail') } },
+        ])
+      );
+      mockTaskStore.fetch.mockResolvedValue({ docs: [successfulTask, failedTask] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const result = await taskScheduling.bulkDisable([successfulTask.id, failedTask.id]);
+
+      expect(result).toEqual({
+        tasks: [successfulTask],
+        errors: [{ task: failedTask, error: new Error('fail') }],
+      });
+    });
+
+    test('should not disable task if it is already disabled', async () => {
+      const task = mockTask({ id, enabled: false, schedule: { interval: '3h' } });
+
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkDisable([id]);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(0);
     });
   });
 
@@ -258,6 +505,7 @@ describe('TaskScheduling', () => {
       expect(bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(Date.now());
     });
   });
+
   describe('runSoon', () => {
     test('resolves when the task update succeeds', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
@@ -513,6 +761,40 @@ describe('TaskScheduling', () => {
           id: undefined,
           schedule: undefined,
           traceparent: 'parent',
+          enabled: true,
+        },
+      ]);
+    });
+
+    test('allows scheduling tasks that are disabled', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task1 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+      };
+      const task2 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        enabled: false,
+      };
+      await taskScheduling.bulkSchedule([task1, task2]);
+      expect(mockTaskStore.bulkSchedule).toHaveBeenCalled();
+      expect(mockTaskStore.bulkSchedule).toHaveBeenCalledWith([
+        {
+          ...task1,
+          id: undefined,
+          schedule: undefined,
+          traceparent: 'parent',
+          enabled: true,
+        },
+        {
+          ...task2,
+          id: undefined,
+          schedule: undefined,
+          traceparent: 'parent',
+          enabled: false,
         },
       ]);
     });
@@ -546,6 +828,7 @@ function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskIn
     taskType: 'foo',
     schedule: undefined,
     attempts: 0,
+    enabled: true,
     status: TaskStatus.Claiming,
     params: { hello: 'world' },
     state: { baby: 'Henhen' },

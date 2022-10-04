@@ -239,6 +239,7 @@ describe('when on the package policy create page', () => {
                 dataset: 'nginx.access',
                 type: 'logs',
               },
+              release: 'experimental',
               enabled: true,
               vars: {
                 paths: {
@@ -536,6 +537,7 @@ describe('when on the package policy create page', () => {
                 streams: [
                   {
                     ...newPackagePolicy.inputs[0].streams[0],
+                    release: 'experimental',
                     vars: {
                       paths: {
                         type: 'text',

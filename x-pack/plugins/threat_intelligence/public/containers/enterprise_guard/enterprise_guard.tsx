@@ -23,7 +23,7 @@ export const EnterpriseGuard: FC = ({ children }) => {
   }
 
   return (
-    <SecuritySolutionPluginTemplateWrapper template="noData">
+    <SecuritySolutionPluginTemplateWrapper isEmptyState>
       <Paywall
         licenseManagementHref={http.basePath.prepend('/app/management/stack/license_management')}
       />

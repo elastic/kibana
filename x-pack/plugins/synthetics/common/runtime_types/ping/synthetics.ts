@@ -198,8 +198,21 @@ export const ScreenshotBlockDocType = t.type({
 
 export type ScreenshotBlockDoc = t.TypeOf<typeof ScreenshotBlockDocType>;
 
+export interface PendingBlock {
+  status: 'pending' | 'loading';
+}
+
+export type StoreScreenshotBlock = ScreenshotBlockDoc | PendingBlock;
+export interface ScreenshotBlockCache {
+  [hash: string]: StoreScreenshotBlock;
+}
+
 export function isScreenshotBlockDoc(data: unknown): data is ScreenshotBlockDoc {
   return isRight(ScreenshotBlockDocType.decode(data));
+}
+
+export function isPendingBlock(data: unknown): data is PendingBlock {
+  return ['pending', 'loading'].some((s) => s === (data as PendingBlock)?.status);
 }
 
 /**

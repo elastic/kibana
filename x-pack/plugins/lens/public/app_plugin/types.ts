@@ -42,6 +42,8 @@ import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embedd
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type {
   DatasourceMap,
   EditorFrameInstance,
@@ -52,7 +54,7 @@ import type {
 import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
-import { IndexPatternServiceAPI } from '../indexpattern_service/service';
+import { IndexPatternServiceAPI } from '../data_views_service/service';
 import { Document } from '../persistence/saved_object_store';
 
 export interface RedirectToOriginProps {
@@ -106,6 +108,7 @@ export interface LensTopNavMenuProps {
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   runSave: RunSave;
   datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   title?: string;
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;
@@ -116,6 +119,7 @@ export interface LensTopNavMenuProps {
   currentDoc: Document | undefined;
   theme$: Observable<CoreTheme>;
   indexPatternService: IndexPatternServiceAPI;
+  onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
 }
 
 export interface HistoryLocationState {
@@ -150,7 +154,8 @@ export interface LensAppServices {
   spaces: SpacesApi;
   charts: ChartsPluginSetup;
   discover?: DiscoverStart;
-
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  docLinks: DocLinksStart;
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
   dataViewEditor: DataViewEditorStart;

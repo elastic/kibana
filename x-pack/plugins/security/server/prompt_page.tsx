@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent, EuiProvider } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiProvider,
+} from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
 import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
 // @ts-expect-error no definitions in component folder
@@ -14,8 +20,8 @@ import createCache from '@emotion/cache';
 import type { ReactNode } from 'react';
 import React from 'react';
 
+import { Fonts } from '@kbn/core-rendering-server-internal';
 import type { IBasePath } from '@kbn/core/server';
-import { Fonts } from '@kbn/core/server/rendering/views/fonts';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';

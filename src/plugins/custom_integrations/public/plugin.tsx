@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+
 import {
   CustomIntegrationsSetup,
   CustomIntegrationsStart,
@@ -21,6 +22,7 @@ import {
 
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/kibana';
+import { SampleClientReadme } from './components/fleet_integration/sample/sample_client_readme';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
@@ -43,6 +45,9 @@ export class CustomIntegrationsPlugin
     startPlugins: CustomIntegrationsStartDependencies
   ): CustomIntegrationsStart {
     const services = servicesFactory({ coreStart, startPlugins });
+
+    const languageClientsUiComponents = { sample: SampleClientReadme };
+
     const ContextProvider: React.FC = ({ children }) => (
       <CustomIntegrationsServicesProvider {...services}>
         {children}
@@ -51,6 +56,7 @@ export class CustomIntegrationsPlugin
 
     return {
       ContextProvider,
+      languageClientsUiComponents,
     };
   }
 

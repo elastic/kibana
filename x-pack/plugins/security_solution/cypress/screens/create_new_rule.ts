@@ -42,6 +42,8 @@ export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInp
 
 export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSelectInput"]';
 
+export const JSON_EDITOR = "[data-test-subj='actionJsonEditor']";
+
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
@@ -58,9 +60,13 @@ export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
+export const COMBO_BOX_SELECTION = '.euiMark';
+
 export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
+
+export const CUSTOM_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
 
 export const THREAT_MAPPING_COMBO_BOX_INPUT =
   '[data-test-subj="threatMatchInput"] [data-test-subj="fieldAutocompleteComboBox"]';
@@ -170,7 +176,9 @@ export const RISK_OVERRIDE =
 
 export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
 
-export const RULES_CREATION_PREVIEW = '[data-test-subj="rule-preview"]';
+export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-flyout"]';
+
+export const RULES_CREATION_PREVIEW_REFRESH_BUTTON = '[data-test-subj="previewSubmitButton"]';
 
 export const RULE_DESCRIPTION_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleDescription"] [data-test-subj="input"]';
@@ -236,3 +244,23 @@ export const NEW_TERMS_HISTORY_SIZE =
 
 export const NEW_TERMS_HISTORY_TIME_TYPE =
   '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="timeType"]';
+
+export const LOAD_QUERY_DYNAMICALLY_CHECKBOX =
+  '[data-test-subj="detectionEngineStepDefineRuleShouldLoadQueryDynamically"] input';
+
+export const SHOW_QUERY_BAR_BUTTON = '[data-test-subj="showQueryBarMenu"]';
+
+export const QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
+
+export const LOAD_SAVED_QUERIES_LIST_BUTTON =
+  '[data-test-subj="saved-query-management-load-button"]';
+
+export const savedQueryByName = (savedQueryName: string) =>
+  `[data-test-subj="load-saved-query-${savedQueryName}-button"]`;
+
+export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
+  '[data-test-subj="saved-query-management-apply-changes-button"]';
+
+export const INDEX_SELECTOR = "[data-test-subj='.index-siem-ActionTypeSelectOption']";
+
+export const CREATE_CONNECTOR_BTN = "[data-test-subj='createActionConnectorButton-0']";

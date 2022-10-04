@@ -13,7 +13,7 @@ import type { EqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
@@ -41,7 +41,6 @@ export const createEqlAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -68,24 +67,23 @@ export const createEqlAlertType = (
           tuple,
           inputIndex,
           runtimeMappings,
-          exceptionItems,
           ruleExecutionLogger,
           bulkCreate,
           wrapHits,
           wrapSequences,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
       } = execOptions;
-
       const result = await eqlExecutor({
         completeRule,
         tuple,
         inputIndex,
         runtimeMappings,
-        exceptionItems,
         ruleExecutionLogger,
         services,
         version,
@@ -94,6 +92,8 @@ export const createEqlAlertType = (
         wrapSequences,
         primaryTimestamp,
         secondaryTimestamp,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

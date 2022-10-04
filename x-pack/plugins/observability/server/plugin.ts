@@ -15,6 +15,7 @@ import {
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -25,12 +26,14 @@ import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId } from '../common';
+import { slo } from './saved_objects';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces: SpacesPluginStart;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -71,7 +74,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           ui: casesCapabilities.all,
         },
         read: {
-          api: ['bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -133,6 +136,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         logger.warn(err);
         throw err;
       });
+    }
+
+    if (config.unsafe.slo.enabled) {
+      core.savedObjects.registerType(slo);
     }
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);

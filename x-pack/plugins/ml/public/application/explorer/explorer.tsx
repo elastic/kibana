@@ -77,11 +77,8 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useMlContext } from '../contexts/ml';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import {
-  AnomalyExplorerPanelsState,
-  ML_ANOMALY_EXPLORER_PANELS,
-} from '../../../common/types/storage';
-import { useStorage } from '../contexts/ml/use_storage';
+import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
+import { useStorage } from '../contexts/storage';
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
@@ -173,8 +170,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
 }) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
-  const [anomalyExplorerPanelState, setAnomalyExplorerPanelState] =
-    useStorage<AnomalyExplorerPanelsState>(ML_ANOMALY_EXPLORER_PANELS, {
+  const [anomalyExplorerPanelState, setAnomalyExplorerPanelState] = useStorage(
+    ML_ANOMALY_EXPLORER_PANELS,
+    {
       topInfluencers: {
         isCollapsed: false,
         size: 20,
@@ -182,7 +180,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
       mainPage: {
         size: 80,
       },
-    });
+    }
+  );
 
   const topInfluencersPanelRef = useRef<HTMLDivElement | null>(null);
 
@@ -208,6 +207,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         }, 0);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       collapseFn.current,
       panelsInitialized,
@@ -228,6 +228,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [anomalyExplorerPanelState]
   );
 
@@ -256,6 +257,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         isCollapsed: !isCurrentlyCollapsed,
       },
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyExplorerPanelState]);
 
   const { displayWarningToast, displayDangerToast } = useToastNotificationService();
@@ -333,6 +335,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         );
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [explorerState, language, filterSettings]
   );
 
@@ -348,6 +351,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const {
@@ -435,6 +439,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         )
         .catch(console.error); // eslint-disable-line no-console
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedJobIds)]);
 
   if (noJobsSelected && !loading) {
