@@ -39,14 +39,14 @@ export const useNavigateToTimeline = () => {
     timelineType: TimelineType.default,
   });
 
-  const navigateToTimeline = (dataProvider: DataProvider) => {
+  const navigateToTimeline = (dataProviders: DataProvider[]) => {
     // Reset the current timeline
     clearTimeline();
     // Update the timeline's providers to match the current prevalence field query
     dispatch(
       updateProviders({
         id: TimelineId.active,
-        providers: [dataProvider],
+        providers: dataProviders,
       })
     );
 
@@ -59,18 +59,22 @@ export const useNavigateToTimeline = () => {
     );
   };
 
-  const openEntityInTimeline = (entityFilters: [Filter, ...Filter[]]) => {
-    const mainFilter = entityFilters.shift();
+  const openTimelineWithFilters = (filters: Array<[...Filter[]]>) => {
+    const dataProviders = [];
 
-    if (mainFilter) {
-      const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+    for (const orFilterGroup of filters) {
+      const mainFilter = orFilterGroup.shift();
 
-      for (const filter of entityFilters) {
-        dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+      if (mainFilter) {
+        const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+
+        for (const filter of orFilterGroup) {
+          dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+        }
+        dataProviders.push(dataProvider);
       }
-
-      navigateToTimeline(dataProvider);
     }
+    navigateToTimeline(dataProviders);
   };
 
   // TODO: Replace the usage of functions with openEntityInTimeline
@@ -82,7 +86,7 @@ export const useNavigateToTimeline = () => {
       dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
     }
 
-    navigateToTimeline(dataProvider);
+    navigateToTimeline([dataProvider]);
   };
 
   const openUserInTimeline = ({ userName, severity }: { userName: string; severity?: string }) => {
@@ -91,17 +95,17 @@ export const useNavigateToTimeline = () => {
     if (severity) {
       dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
     }
-    navigateToTimeline(dataProvider);
+    navigateToTimeline([dataProvider]);
   };
 
   const openRuleInTimeline = (ruleName: string) => {
     const dataProvider = getDataProvider('kibana.alert.rule.name', '', ruleName);
 
-    navigateToTimeline(dataProvider);
+    navigateToTimeline([dataProvider]);
   };
 
   return {
-    openEntityInTimeline,
+    openTimelineWithFilters,
     openHostInTimeline,
     openRuleInTimeline,
     openUserInTimeline,

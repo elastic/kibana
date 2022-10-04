@@ -6,6 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import { FlowTargetSourceDest } from '@kbn/security-solution-plugin/common/search_strategy';
 
 export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
   hostName

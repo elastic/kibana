@@ -7,12 +7,18 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import type { BoolQuery } from '@kbn/es-query';
+
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import type { GenericBuckets } from '../../../../common/search_strategy';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { useQueryInspector } from '../page/manage_query';
+
+export type AdditionalFilters = Array<{
+  bool: BoolQuery;
+}>;
 
 export interface AlertCountByRuleByStatusItem {
   ruleName: string;
@@ -21,6 +27,7 @@ export interface AlertCountByRuleByStatusItem {
 }
 
 export interface UseAlertCountByRuleByStatusProps {
+  additionalFilters?: AdditionalFilters;
   field: string;
   value: string;
   queryId: string;
@@ -37,6 +44,7 @@ export type UseAlertCountByRuleByStatus = (props: UseAlertCountByRuleByStatusPro
 const ALERTS_BY_RULE_AGG = 'alertsByRuleAggregation';
 
 export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
+  additionalFilters,
   field,
   value,
   queryId,
@@ -58,6 +66,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
     refetch: refetchQuery,
   } = useQueryAlerts({
     query: buildRuleAlertsByEntityQuery({
+      additionalFilters,
       from,
       to,
       field,
@@ -72,6 +81,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   useEffect(() => {
     setAlertsQuery(
       buildRuleAlertsByEntityQuery({
+        additionalFilters,
         from,
         to,
         field,
@@ -79,7 +89,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
         statuses,
       })
     );
-  }, [setAlertsQuery, from, to, field, value, statuses]);
+  }, [setAlertsQuery, from, to, field, value, statuses, additionalFilters]);
 
   useEffect(() => {
     if (!data) {
@@ -112,12 +122,14 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
 };
 
 export const buildRuleAlertsByEntityQuery = ({
+  additionalFilters = [],
   from,
   to,
   field,
   value,
   statuses,
 }: {
+  additionalFilters?: AdditionalFilters;
   from: string;
   to: string;
   statuses: string[];
@@ -128,6 +140,7 @@ export const buildRuleAlertsByEntityQuery = ({
   query: {
     bool: {
       filter: [
+        ...additionalFilters,
         {
           range: {
             '@timestamp': {

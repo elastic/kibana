@@ -13,6 +13,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { SecurityPageName } from '../../../../common/constants';
+import type { Filter } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import { useNavigateToTimeline } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { FormattedCount } from '../formatted_number';
@@ -24,7 +25,10 @@ import { SecuritySolutionLinkAnchor } from '../links';
 import { useLocalStorage } from '../local_storage';
 import { MultiSelectPopover } from './components';
 import * as i18n from './translations';
-import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_status';
+import type {
+  AlertCountByRuleByStatusItem,
+  AdditionalFilters,
+} from './use_alert_count_by_rule_by_status';
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
 
 interface EntityFilter {
@@ -33,6 +37,7 @@ interface EntityFilter {
 }
 interface AlertCountByStatusProps {
   entityFilter: EntityFilter;
+  additionalFilters?: AdditionalFilters;
   signalIndexName: string | null;
 }
 
@@ -45,6 +50,7 @@ type GetTableColumns = (
 ) => Array<EuiBasicTableColumn<AlertCountByRuleByStatusItem>>;
 
 const KIBANA_RULE_ALERT_FIELD = 'kibana.alert.rule.name';
+const KIBANA_WORKFLOW_STATUS = 'kibana.alert.workflow_status';
 const STATUSES = ['open', 'acknowledged', 'closed'] as const;
 const ALERT_COUNT_BY_RULE_BY_STATUS = 'alerts-by-status-by-rule';
 const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
@@ -58,21 +64,13 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
 `;
 
 export const AlertCountByRuleByStatus = React.memo(
-  ({ entityFilter, signalIndexName }: AlertCountByStatusProps) => {
+  ({ entityFilter, signalIndexName, additionalFilters }: AlertCountByStatusProps) => {
     const { field, value } = entityFilter;
 
     const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
 
-    const { openEntityInTimeline } = useNavigateToTimeline();
-
-    const columns = useMemo(
-      () =>
-        getTableColumns((ruleName: string) =>
-          openEntityInTimeline([{ field: KIBANA_RULE_ALERT_FIELD, value: ruleName }, entityFilter])
-        ),
-      [entityFilter, openEntityInTimeline]
-    );
+    const { openTimelineWithFilters } = useNavigateToTimeline();
 
     const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
       defaultValue: {
@@ -83,6 +81,24 @@ export const AlertCountByRuleByStatus = React.memo(
         return !valueFromStorage;
       },
     });
+
+    const columns = useMemo(() => {
+      return getTableColumns((ruleName: string) => {
+        const timelineFilters: Filter[][] = [];
+
+        for (const status of selectedStatusesByField[field]) {
+          timelineFilters.push([
+            entityFilter,
+            { field: KIBANA_RULE_ALERT_FIELD, value: ruleName },
+            {
+              field: KIBANA_WORKFLOW_STATUS,
+              value: status,
+            },
+          ]);
+        }
+        openTimelineWithFilters(timelineFilters);
+      });
+    }, [entityFilter, field, openTimelineWithFilters, selectedStatusesByField]);
 
     const updateSelection = useCallback(
       (selection: Status[]) => {
@@ -95,6 +111,7 @@ export const AlertCountByRuleByStatus = React.memo(
     );
 
     const { items, isLoading, updatedAt } = useAlertCountByRuleByStatus({
+      additionalFilters,
       field,
       value,
       queryId,
