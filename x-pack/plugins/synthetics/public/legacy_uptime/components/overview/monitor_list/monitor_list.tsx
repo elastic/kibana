@@ -212,7 +212,7 @@ export const MonitorListComponent: ({
         <TestNowColumn
           monitorId={item.monitor_id}
           configId={item.configId}
-          selectedMonitor={item.state.summaryPings[0]}
+          summaryPings={item.state.summaryPings}
         />
       ),
     },
