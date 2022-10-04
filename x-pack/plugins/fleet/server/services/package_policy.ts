@@ -469,7 +469,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy> {
     const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
@@ -479,22 +479,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (packagePolicyUpdate.is_managed && !options?.force) {
       throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
     }
-
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
-    // Check that the name does not exist already but exclude the current package policy
-    const existingPoliciesWithName = await this.list(soClient, {
-      perPage: SO_SEARCH_LIMIT,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
-    });
 
-    const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
-
-    if (filtered.length > 0) {
-      throw new FleetError(
-        `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
-      );
+    if (!options?.skipUniqueNameVerification) {
+      // Check that the name does not exist already but exclude the current package policy
+      const existingPoliciesWithName = await this.list(soClient, {
+        perPage: SO_SEARCH_LIMIT,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
+      });
+      const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
+      if (filtered.length > 0) {
+        throw new FleetError(
+          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
+        );
+      }
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -566,59 +566,56 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicyUpdates, soClient);
 
     await soClient.bulkUpdate<PackagePolicySOAttributes>(
-      await pMap(
-        packagePolicyUpdates,
-        async (packagePolicyUpdate) => {
-          const id = packagePolicyUpdate.id;
-          const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
-          const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
-          if (!oldPackagePolicy) {
-            throw new Error('Package policy not found');
-          }
+      await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
+        const id = packagePolicyUpdate.id;
+        const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
+        const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
+        if (!oldPackagePolicy) {
+          throw new Error('Package policy not found');
+        }
 
-          const { version, ...restOfPackagePolicy } = packagePolicy;
+        // id and version are not part of the saved object attributes
+        const { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
 
-          if (packagePolicyUpdate.is_managed && !options?.force) {
-            throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
-          }
+        if (packagePolicyUpdate.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
+        }
 
-          let inputs = restOfPackagePolicy.inputs.map((input) =>
-            assignStreamIdToInput(oldPackagePolicy.id, input)
+        let inputs = restOfPackagePolicy.inputs.map((input) =>
+          assignStreamIdToInput(oldPackagePolicy.id, input)
+        );
+
+        inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
+        let elasticsearch: PackagePolicy['elasticsearch'];
+        if (packagePolicy.package?.name) {
+          const pkgInfo = packageInfos.get(
+            `${packagePolicy.package.name}-${packagePolicy.package.version}`
           );
+          if (pkgInfo) {
+            validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-          inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
-          let elasticsearch: PackagePolicy['elasticsearch'];
-          if (packagePolicy.package?.name) {
-            const pkgInfo = packageInfos.get(
-              `${packagePolicy.package.name}-${packagePolicy.package.version}`
-            );
-            if (pkgInfo) {
-              validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-
-              inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
-              elasticsearch = pkgInfo.elasticsearch;
-            }
+            inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+            elasticsearch = pkgInfo.elasticsearch;
           }
+        }
 
-          // Handle component template/mappings updates for experimental features, e.g. synthetic source
-          await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+        // Handle component template/mappings updates for experimental features, e.g. synthetic source
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
 
-          return {
-            type: SAVED_OBJECT_TYPE,
-            id,
-            attributes: {
-              ...restOfPackagePolicy,
-              inputs,
-              elasticsearch,
-              revision: oldPackagePolicy.revision + 1,
-              updated_at: new Date().toISOString(),
-              updated_by: options?.user?.username ?? 'system',
-            },
-            version,
-          };
-        },
-        { concurrency: 50 }
-      )
+        return {
+          type: SAVED_OBJECT_TYPE,
+          id,
+          attributes: {
+            ...restOfPackagePolicy,
+            inputs,
+            elasticsearch,
+            revision: oldPackagePolicy.revision + 1,
+            updated_at: new Date().toISOString(),
+            updated_by: options?.user?.username ?? 'system',
+          },
+          version,
+        };
+      })
     );
 
     const agentPolicyIds = new Set(packagePolicyUpdates.map((p) => p.policy_id));
@@ -677,7 +674,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    const deletePackagePolicy = async (id: string) => {
+    const idsToDelete: string[] = [];
+
+    ids.forEach((id) => {
       try {
         const packagePolicy = packagePolicies.find((p) => p.id === id);
 
@@ -697,10 +696,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        // TODO: replace this with savedObject BulkDelete when following PR is merged
-        // https://github.com/elastic/kibana/pull/139680
-        await soClient.delete(SAVED_OBJECT_TYPE, id);
+        idsToDelete.push(id);
+      } catch (error) {
+        result.push({
+          id,
+          success: false,
+          ...fleetErrorToResponseOptions(error),
+        });
+      }
+    });
 
+    const { statuses } = await soClient.bulkDelete(
+      idsToDelete.map((id) => ({ id, type: SAVED_OBJECT_TYPE }))
+    );
+
+    statuses.forEach(({ id, success, error }) => {
+      const packagePolicy = packagePolicies.find((p) => p.id === id);
+      if (success && packagePolicy) {
         result.push({
           id,
           name: packagePolicy.name,
@@ -712,16 +724,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           },
           policy_id: packagePolicy.policy_id,
         });
-      } catch (error) {
+      } else if (!success && error) {
         result.push({
           id,
           success: false,
-          ...fleetErrorToResponseOptions(error),
+          statusCode: error.statusCode,
+          body: {
+            message: error.message,
+          },
         });
       }
-    };
-
-    await pMap(ids, deletePackagePolicy, { concurrency: 1000 });
+    });
 
     if (!options?.skipUnassignFromAgentPolicies) {
       const uniquePolicyIdsR = [
@@ -916,12 +929,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
     updatePackagePolicy.elasticsearch = packageInfo.elasticsearch;
 
+    const updateOptions = {
+      skipUniqueNameVerification: true,
+      ...options,
+    };
+
     await this.update(
       soClient,
       esClient,
       id,
       updatePackagePolicy,
-      options,
+      updateOptions,
       packagePolicy.package!.version
     );
 
@@ -1612,7 +1630,7 @@ export function updatePackageInputs(
 
       // Ignore any inputs removed from this policy template in the new package version
       const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
-        ? policyTemplate.type === input.type
+        ? policyTemplate.input === input.type
         : policyTemplate.inputs?.some(
             (policyTemplateInput) => policyTemplateInput.type === input.type
           ) ?? false;
@@ -1675,10 +1693,24 @@ export function updatePackageInputs(
     }
 
     if (update.streams) {
+      const isInputPkgUpdate =
+        packageInfo.type === 'input' &&
+        update.streams.length === 1 &&
+        originalInput?.streams.length === 1;
+
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
+
+        // this handles the input only pkg case where the new stream cannot have a dataset name
+        // so will never match. Input only packages only ever have one stream.
+        if (!originalStream && isInputPkgUpdate) {
+          originalStream = {
+            ...update.streams[0],
+            vars: originalInput?.streams[0].vars,
+          };
+        }
 
         if (originalStream === undefined) {
           originalInput.streams.push(stream);
@@ -1690,7 +1722,10 @@ export function updatePackageInputs(
         }
 
         if (stream.vars) {
-          const indexOfStream = originalInput.streams.indexOf(originalStream);
+          // streams wont match for input pkgs
+          const indexOfStream = isInputPkgUpdate
+            ? 0
+            : originalInput.streams.indexOf(originalStream);
           originalInput.streams[indexOfStream] = deepMergeVars(
             originalStream,
             stream as InputsOverride,

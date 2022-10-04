@@ -29,8 +29,8 @@ import { useCspIntegrationInfo } from './use_csp_integration';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
-import { CloudPostureIntegrations, cloudPostureIntegrations } from '../../common/constants';
 import * as TEST_SUBJECTS from './test_subjects';
+import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
 
 const getRulesBreadcrumbs = (
   name?: string,
@@ -52,43 +52,35 @@ const getRulesBreadcrumbs = (
   return breadCrumbs;
 };
 
-const isPolicyTemplate = (name: unknown): name is keyof CloudPostureIntegrations =>
-  typeof name === 'string' && name in cloudPostureIntegrations;
-
 const getRulesSharedValues = (
   packageInfo?: PackagePolicy
 ): NonNullable<EuiDescriptionListProps['listItems']> => {
-  const enabledInput = packageInfo?.inputs.find((input) => input.enabled);
-  if (!enabledInput || !isPolicyTemplate(enabledInput.policy_template)) return [];
+  const enabledIntegration = getEnabledCspIntegrationDetails(packageInfo);
+  const values = [];
 
-  const integration = cloudPostureIntegrations[enabledInput.policy_template];
-  const enabledIntegrationOption = integration.options.find(
-    (option) => option.type === enabledInput.type
-  );
-
-  const values = [
-    {
+  if (enabledIntegration?.integration?.shortName) {
+    values.push({
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.integrationTitle', {
         defaultMessage: 'Integration',
       }),
-      description: integration.shortName,
-    },
-  ];
+      description: enabledIntegration?.integration.shortName,
+    });
+  }
 
-  if (!enabledIntegrationOption) return values;
+  if (!enabledIntegration?.enabledIntegrationOption) return values;
 
   values.push(
     {
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.deploymentTypeTitle', {
         defaultMessage: 'Deployment Type',
       }),
-      description: enabledIntegrationOption.name,
+      description: enabledIntegration?.enabledIntegrationOption.name,
     },
     {
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.benchmarkTitle', {
         defaultMessage: 'Benchmark',
       }),
-      description: enabledIntegrationOption.benchmark,
+      description: enabledIntegration?.enabledIntegrationOption.benchmark,
     }
   );
 

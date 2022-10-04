@@ -28,6 +28,7 @@ import {
 import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
 import type { Dictionary } from './use_url_state';
+import type { GroupTableItem } from '../components/spike_analysis_table/spike_analysis_table_groups';
 
 const DEFAULT_BAR_TARGET = 75;
 
@@ -39,6 +40,7 @@ export const useData = (
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint,
+  selectedGroup?: GroupTableItem | null,
   barTarget: number = DEFAULT_BAR_TARGET
 ) => {
   const {
@@ -47,6 +49,7 @@ export const useData = (
       query: { filterManager },
     },
   } = useAiopsAppContext();
+
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined
@@ -109,15 +112,25 @@ export const useData = (
 
   const overallStatsRequest = useMemo(() => {
     return fieldStatsRequest
-      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: false }
+      ? {
+          ...fieldStatsRequest,
+          selectedChangePoint,
+          selectedGroup,
+          includeSelectedChangePoint: false,
+        }
       : undefined;
-  }, [fieldStatsRequest, selectedChangePoint]);
+  }, [fieldStatsRequest, selectedChangePoint, selectedGroup]);
 
   const selectedChangePointStatsRequest = useMemo(() => {
-    return fieldStatsRequest && selectedChangePoint
-      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
+    return fieldStatsRequest && (selectedChangePoint || selectedGroup)
+      ? {
+          ...fieldStatsRequest,
+          selectedChangePoint,
+          selectedGroup,
+          includeSelectedChangePoint: true,
+        }
       : undefined;
-  }, [fieldStatsRequest, selectedChangePoint]);
+  }, [fieldStatsRequest, selectedChangePoint, selectedGroup]);
 
   const documentStats = useDocumentCountStats(
     overallStatsRequest,

@@ -26,8 +26,10 @@ jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation
 }));
 
 jest.mock('../../lib/snooze/is_snooze_active', () => ({
-  isSnoozeActive: jest.fn(() => true),
+  isSnoozeActive: jest.fn(),
 }));
+
+const { isSnoozeActive } = jest.requireMock('../../lib/snooze/is_snooze_active');
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -310,9 +312,13 @@ describe('bulkEdit()', () => {
   });
 
   describe('snoozeSchedule operations', () => {
-    const getSnoozeSchedule = () => {
+    afterEach(() => {
+      isSnoozeActive.mockImplementation(() => false);
+    });
+
+    const getSnoozeSchedule = (useId: boolean = true) => {
       return {
-        id: uuid.v4(),
+        ...(useId && { id: uuid.v4() }),
         duration: 28800000,
         rRule: {
           dtstart: '2010-09-19T11:49:59.329Z',
@@ -321,8 +327,10 @@ describe('bulkEdit()', () => {
         },
       };
     };
-    test('should add snooze', async () => {
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const getMockAttribute = (override: Record<string, any> = {}) => {
+      return {
         saved_objects: [
           {
             id: '1',
@@ -339,15 +347,18 @@ describe('bulkEdit()', () => {
               notifyWhen: null,
               actions: [],
               snoozeSchedule: [],
+              ...override,
             },
             references: [],
             version: '123',
           },
         ],
-      });
+      };
+    };
 
-      const snoozePayload = getSnoozeSchedule();
-
+    test('should snooze', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
+      const snoozePayload = getSnoozeSchedule(false);
       await rulesClient.bulkEdit({
         filter: '',
         operations: [
@@ -374,32 +385,143 @@ describe('bulkEdit()', () => {
       );
     });
 
-    test('should delete snooze', async () => {
-      const existingSnooze = [getSnoozeSchedule(), getSnoozeSchedule()];
+    test('should add snooze schedule', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
 
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [
+      const snoozePayload = getSnoozeSchedule();
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
           {
-            id: '1',
-            type: 'alert',
-            attributes: {
-              enabled: true,
-              tags: ['foo', 'test-1'],
-              alertTypeId: 'myType',
-              schedule: { interval: '1m' },
-              consumer: 'myApp',
-              scheduledTaskId: 'task-123',
-              params: {},
-              throttle: null,
-              notifyWhen: null,
-              actions: [],
-              snoozeSchedule: existingSnooze,
-            },
-            references: [],
-            version: '123',
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: snoozePayload,
           },
         ],
       });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              snoozeSchedule: [snoozePayload],
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('should not unsnooze a snoozed rule when bulk adding snooze schedules', async () => {
+      const existingSnooze = [getSnoozeSchedule(false), getSnoozeSchedule()];
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              snoozeSchedule: existingSnooze,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
+
+      const snoozePayload = getSnoozeSchedule();
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: snoozePayload,
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              snoozeSchedule: [...existingSnooze, snoozePayload],
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('should not unsnooze an indefinitely snoozed rule when bulk adding snooze schedules', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              muteAll: true,
+              snoozeSchedule: [],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
+
+      const snoozePayload = getSnoozeSchedule();
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: snoozePayload,
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              muteAll: true,
+              snoozeSchedule: [snoozePayload],
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('should unsnooze', async () => {
+      const existingSnooze = [getSnoozeSchedule(false), getSnoozeSchedule(), getSnoozeSchedule()];
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              snoozeSchedule: existingSnooze,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
 
       await rulesClient.bulkEdit({
         filter: '',
@@ -418,7 +540,95 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              snoozeSchedule: [existingSnooze[1], existingSnooze[2]],
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('should remove snooze schedules', async () => {
+      const existingSnooze = [getSnoozeSchedule(), getSnoozeSchedule()];
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              snoozeSchedule: existingSnooze,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            operation: 'delete',
+            field: 'snoozeSchedule',
+            value: [],
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
               snoozeSchedule: [],
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('should not unsnooze rule when removing snooze schedules', async () => {
+      const existingSnooze = [getSnoozeSchedule(false), getSnoozeSchedule(), getSnoozeSchedule()];
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              snoozeSchedule: existingSnooze,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            operation: 'delete',
+            field: 'snoozeSchedule',
+            value: [],
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              snoozeSchedule: [existingSnooze[0]],
             }),
           }),
         ],
@@ -448,29 +658,7 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '1',
-            type: 'alert',
-            attributes: {
-              enabled: true,
-              tags: ['foo', 'test-1'],
-              alertTypeId: 'myType',
-              schedule: { interval: '1m' },
-              consumer: 'myApp',
-              scheduledTaskId: 'task-123',
-              params: {},
-              throttle: null,
-              notifyWhen: null,
-              actions: [],
-              snoozeSchedule: existingSnooze,
-            },
-            references: [],
-            version: '123',
-          },
-        ],
-      });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
 
       const snoozePayload = getSnoozeSchedule();
 
@@ -486,7 +674,7 @@ describe('bulkEdit()', () => {
       });
       expect(response.errors.length).toEqual(1);
       expect(response.errors[0].message).toEqual(
-        'Error updating rule: rule cannot have more than 5 snooze schedules'
+        'Error updating rule: could not add snooze - Rule cannot have more than 5 snooze schedules'
       );
     });
 
@@ -501,29 +689,7 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '1',
-            type: 'alert',
-            attributes: {
-              enabled: true,
-              tags: ['foo', 'test-1'],
-              alertTypeId: 'myType',
-              schedule: { interval: '1m' },
-              consumer: 'myApp',
-              scheduledTaskId: 'task-123',
-              params: {},
-              throttle: null,
-              notifyWhen: null,
-              actions: [],
-              snoozeSchedule: [],
-            },
-            references: [],
-            version: '123',
-          },
-        ],
-      });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
 
       const snoozePayload = getSnoozeSchedule();
 

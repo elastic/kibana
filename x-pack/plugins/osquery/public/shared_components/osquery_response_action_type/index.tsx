@@ -6,21 +6,14 @@
  */
 
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
-
 import { EuiSpacer } from '@elastic/eui';
-
 import uuid from 'uuid';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { get, isEmpty, map } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
-import {
-  convertECSMappingToFormValue,
-  convertECSMappingToObject,
-} from '../../../common/schemas/common/utils';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
-import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
-import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
 import { useFormContext } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
@@ -43,28 +36,28 @@ interface ResponseActionValidatorRef {
 interface OsqueryResponseActionsParamsFormFields {
   savedQueryId: string | null;
   id: string;
-  ecs_mapping: EcsMappingFormField[];
+  ecs_mapping: ECSMapping;
   query: string;
   packId?: string[];
   queries?: Array<{
     id: string;
-    ecs_mapping: EcsMappingFormField[];
+    ecs_mapping: ECSMapping;
     query: string;
   }>;
 }
 
-const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
-  React.PropsWithoutRef<OsqueryResponseActionsParamsFormProps> &
-    React.RefAttributes<ResponseActionValidatorRef>
-> = forwardRef(({ item }, ref) => {
+const OsqueryResponseActionParamsFormComponent = forwardRef<
+  ResponseActionValidatorRef,
+  OsqueryResponseActionsParamsFormProps
+>(({ item }, ref) => {
   const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
     defaultValues: {
-      ecs_mapping: [defaultEcsFormData],
+      ecs_mapping: {},
       id: uniqueId,
     },
   });
-  //
+
   const { watch, setValue, register, clearErrors, formState, handleSubmit } = hooksForm;
   const { errors, isValid } = formState;
   const context = useFormContext();
@@ -105,7 +98,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
               id: watchedValues.id,
               savedQueryId: watchedValues.savedQueryId,
               query: watchedValues.query,
-              ecs_mapping: convertECSMappingToObject(watchedValues.ecs_mapping),
+              ecsMapping: watchedValues.ecs_mapping,
             },
           },
         });
@@ -146,15 +139,16 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
 
   useEffectOnce(() => {
     if (defaultParams && defaultParams.id) {
-      const { packId, ecs_mapping: ecsMapping, ...restParams } = defaultParams;
+      const { packId, ecsMapping, ...restParams } = defaultParams;
+      // TODO change map into forEach, and type defaultParams
       map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
         if (!isEmpty(value)) {
           setValue(key, value);
         }
       });
-      if (ecsMapping) {
-        const converted = convertECSMappingToFormValue(ecsMapping);
-        setValue('ecs_mapping', converted);
+
+      if (!isEmpty(ecsMapping)) {
+        setValue('ecs_mapping', ecsMapping);
       }
 
       if (!isEmpty(packId)) {
@@ -167,7 +161,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
     setValue('packId', []);
     setValue('savedQueryId', '');
     setValue('query', '');
-    setValue('ecs_mapping', [defaultEcsFormData]);
+    setValue('ecs_mapping', {});
     clearErrors();
   }, [clearErrors, setValue]);
 

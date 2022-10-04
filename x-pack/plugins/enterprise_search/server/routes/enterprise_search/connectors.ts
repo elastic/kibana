@@ -16,6 +16,7 @@ import { addConnector } from '../../lib/connectors/add_connector';
 import { fetchSyncJobsByConnectorId } from '../../lib/connectors/fetch_sync_jobs';
 import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
+import { updateConnectorNameAndDescription } from '../../lib/connectors/update_connector_name_and_description';
 import { updateConnectorScheduling } from '../../lib/connectors/update_connector_scheduling';
 import { updateConnectorServiceType } from '../../lib/connectors/update_connector_service_type';
 import { updateConnectorStatus } from '../../lib/connectors/update_connector_status';
@@ -113,7 +114,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           connectorId: schema.string(),
         }),
         body: schema.object({
-          nextSyncConfig: schema.string(),
+          nextSyncConfig: schema.maybe(schema.string()),
         }),
       },
     },
@@ -241,6 +242,30 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         request.params.connectorId,
         request.body.status as ConnectorStatus
       );
+      return response.ok({ body: result });
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/name_and_description',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+        body: schema.object({
+          name: schema.string(),
+          description: schema.nullable(schema.string()),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { name, description } = request.body;
+      const result = await updateConnectorNameAndDescription(client, request.params.connectorId, {
+        description,
+        name,
+      });
       return response.ok({ body: result });
     })
   );

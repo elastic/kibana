@@ -606,6 +606,14 @@
           "name": "pkgVersion",
           "in": "path",
           "required": true
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
+          "in": "query"
         }
       ],
       "post": {
@@ -1244,19 +1252,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1833,19 +1832,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1909,19 +1899,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1992,19 +1973,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }

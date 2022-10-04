@@ -39,6 +39,8 @@ describe('SessionView component', () => {
         dispatchEvent: jest.fn(),
       })),
     });
+
+    global.ResizeObserver = require('resize-observer-polyfill');
   });
 
   beforeEach(() => {
@@ -189,7 +191,7 @@ describe('SessionView component', () => {
         });
       });
 
-      it('should NOT show tty player button, if session has no output', async () => {
+      it('should show tty player button as disabled, if session has no output', async () => {
         mockedApi.mockImplementation(async (options) => {
           // for some reason the typescript interface for options says its an object with a field called path.
           // in reality options is a string (which equals the path...)
@@ -207,7 +209,9 @@ describe('SessionView component', () => {
         render();
 
         await waitFor(() => {
-          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeFalsy();
+          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toHaveClass(
+            'euiButtonIcon-isDisabled'
+          );
         });
       });
     });

@@ -36,9 +36,15 @@ export async function getActionStatuses(
       size: 0,
       aggs: {
         ack_counts: {
-          terms: { field: 'action_id' },
+          terms: { field: 'action_id', size: actions.length || 10 },
           aggs: {
             max_timestamp: { max: { field: '@timestamp' } },
+            agent_count: {
+              cardinality: {
+                field: 'agent_id',
+                precision_threshold: 40000, // max value
+              },
+            },
           },
         },
       },
@@ -58,10 +64,13 @@ export async function getActionStatuses(
     const matchingBucket = (acks?.aggregations?.ack_counts as any)?.buckets?.find(
       (bucket: any) => bucket.key === action.actionId
     );
-    const nbAgentsAck = matchingBucket?.doc_count ?? 0;
+    const nbAgentsAck = Math.min(
+      matchingBucket?.doc_count ?? 0,
+      (matchingBucket?.agent_count as any)?.value ?? 0
+    );
     const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
     const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
-    const complete = nbAgentsAck === nbAgentsActioned;
+    const complete = nbAgentsAck >= nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 
     let errorCount = 0;
@@ -158,13 +167,6 @@ async function _getActions(
           {
             term: {
               type: 'CANCEL',
-            },
-          },
-        ],
-        must: [
-          {
-            exists: {
-              field: 'agents',
             },
           },
         ],

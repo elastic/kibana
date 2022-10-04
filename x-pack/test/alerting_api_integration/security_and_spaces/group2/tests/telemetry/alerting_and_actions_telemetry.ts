@@ -235,8 +235,9 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       // number of action executions broken down by connector type
       expect(telemetry.count_actions_executions_by_type_per_day['test.throw'] > 0).to.be(true);
 
-      // average execution time - just checking for non-zero as we can't set an exact number
-      expect(telemetry.avg_execution_time_per_day > 0).to.be(true);
+      // average execution time - just checking for a positive number as we can't set an exact number
+      // if the time is less than 1ms it will round down to 0
+      expect(telemetry.avg_execution_time_per_day >= 0).to.be(true);
 
       // average execution time broken down by rule type
       expect(telemetry.avg_execution_time_by_type_per_day['test.throw'] > 0).to.be(true);
@@ -246,6 +247,10 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_actions_executions_failed_by_type_per_day['test.throw'] > 0).to.be(
         true
       );
+
+      expect(
+        telemetry.count_connector_types_by_action_run_outcome_per_day['test.throw'].failure
+      ).to.greaterThan(0);
     }
 
     function verifyAlertingTelemetry(telemetry: any) {
@@ -528,6 +533,9 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         // eslint-disable-next-line @typescript-eslint/naming-convention
         alertsFixture: { test__noop: 9, test__throw: 9, __slack: 3 },
       });
+
+      expect(telemetry.count_rules_by_execution_status_per_day.failure).to.greaterThan(0);
+      expect(telemetry.count_rules_by_execution_status_per_day.success).to.greaterThan(0);
     }
 
     it('should retrieve telemetry data in the expected format', async () => {

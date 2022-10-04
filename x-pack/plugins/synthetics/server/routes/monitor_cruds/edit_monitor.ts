@@ -13,6 +13,7 @@ import {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   MonitorFields,
@@ -83,13 +84,13 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
-      if (!validationResult.valid) {
+      if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;
         return response.badRequest({ body: { message, attributes: { details, ...payload } } });
       }
 
       const monitorWithRevision = {
-        ...editedMonitor,
+        ...validationResult.decodedMonitor,
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
       const formattedMonitor = formatSecrets(monitorWithRevision);
@@ -101,7 +102,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         syntheticsMonitorClient,
         savedObjectsClient,
         request,
-        normalizedMonitor: editedMonitor,
+        normalizedMonitor: validationResult.decodedMonitor,
         monitorWithRevision: formattedMonitor,
         spaceId,
       });
@@ -153,11 +154,13 @@ export const syncEditedMonitor = async ({
       monitorWithRevision
     );
 
-    const editSyncPromise = syntheticsMonitorClient.editMonitor(
-      normalizedMonitor as MonitorFields,
-      previousMonitor.id,
+    const allPrivateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
+
+    const editSyncPromise = syntheticsMonitorClient.editMonitors(
+      [{ monitor: normalizedMonitor as MonitorFields, id: previousMonitor.id, previousMonitor }],
       request,
       savedObjectsClient,
+      allPrivateLocations,
       spaceId
     );
 

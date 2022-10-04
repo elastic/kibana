@@ -23,7 +23,7 @@ export const FLYOUT_TITLE = `[data-test-subj="tiIndicatorFlyoutTitle"]`;
 
 export const FLYOUT_TABS = `[data-test-subj="tiIndicatorFlyoutTabs"]`;
 
-export const FLYOUT_TABLE = `[data-test-subj="tiFlyoutTableMemoryTable"]`;
+export const FLYOUT_TABLE = `[data-test-subj="tiFlyoutTableTabRow"]`;
 
 export const FLYOUT_JSON = `[data-test-subj="tiFlyoutJsonCodeBlock"]`;
 
@@ -31,7 +31,7 @@ export const FILTERS_GLOBAL_CONTAINER = '[data-test-subj="filters-global-contain
 
 export const TIME_RANGE_PICKER = `[data-test-subj="superDatePickerToggleQuickMenuButton"]`;
 
-export const QUERY_INPUT = `[data-test-subj="iocListPageQueryInput"]`;
+export const QUERY_INPUT = `[data-test-subj="queryInput"]`;
 
 export const EMPTY_STATE = '[data-test-subj="indicatorsTableEmptyState"]';
 
@@ -45,7 +45,8 @@ export const FIELD_SELECTOR_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const FIELD_SELECTOR_TOGGLE_BUTTON = '[data-test-subj="comboBoxToggleListButton"]';
 
-export const FIELD_SELECTOR_LIST = '[data-test-subj="comboBoxOptionsList"]';
+export const FIELD_SELECTOR_LIST =
+  '[data-test-subj="comboBoxOptionsList tiIndicatorFieldSelectorDropdown-optionsList"]';
 
 export const FIELD_BROWSER = `[data-test-subj="show-field-browser"]`;
 
@@ -113,3 +114,6 @@ export const INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON =
 
 export const INDICATOR_FLYOUT_INVESTIGATE_IN_TIMELINE_BUTTON =
   '[data-test-subj="tiIndicatorFlyoutInvestigateInTimelineButton"]';
+export const INSPECTOR_BUTTON = '[data-test-subj="tiIndicatorsGridInspect"]';
+
+export const INSPECTOR_PANEL = '[data-test-subj="inspectorPanel"]';

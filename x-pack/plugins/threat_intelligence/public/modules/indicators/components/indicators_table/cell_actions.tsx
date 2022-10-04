@@ -7,13 +7,12 @@
 
 import React, { VFC } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { ComponentType } from '../../../../../common/types/component_type';
 import { Indicator } from '../../../../../common/types/indicator';
-import { Pagination } from '../../hooks/use_indicators';
-import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../lib/field_value';
-import { FilterIn } from '../../../query_bar/components/filter_in';
-import { FilterOut } from '../../../query_bar/components/filter_out';
+import { AddToTimelineCellAction } from '../../../timeline/components/add_to_timeline';
+import { FilterInCellAction } from '../../../query_bar/components/filter_in';
+import { FilterOutCellAction } from '../../../query_bar/components/filter_out';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../utils/field_value';
+import type { Pagination } from '../../services/fetch_indicators';
 
 export const CELL_TIMELINE_BUTTON_TEST_ID = 'tiIndicatorsTableCellTimelineButton';
 export const CELL_FILTER_IN_BUTTON_TEST_ID = 'tiIndicatorsTableCellFilterInButton';
@@ -52,24 +51,22 @@ export const CellActions: VFC<CellActionsProps> = ({
 
   return (
     <>
-      <FilterIn
-        as={Component}
+      <FilterInCellAction
         data={indicator}
         field={key}
-        type={ComponentType.EuiDataGrid}
+        Component={Component}
         data-test-subj={CELL_FILTER_IN_BUTTON_TEST_ID}
       />
-      <FilterOut
-        as={Component}
+      <FilterOutCellAction
         data={indicator}
         field={key}
-        type={ComponentType.EuiDataGrid}
+        Component={Component}
         data-test-subj={CELL_FILTER_OUT_BUTTON_TEST_ID}
       />
-      <AddToTimeline
+      <AddToTimelineCellAction
         data={indicator}
         field={key}
-        as={Component}
+        Component={Component}
         data-test-subj={CELL_TIMELINE_BUTTON_TEST_ID}
       />
     </>

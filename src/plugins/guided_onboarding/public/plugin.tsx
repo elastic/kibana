@@ -16,17 +16,16 @@ import {
   Plugin,
   CoreTheme,
   ApplicationStart,
-  HttpStart,
   PluginInitializerContext,
 } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   ClientConfigType,
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
 } from './types';
-import { GuidedOnboardingButton } from './components';
+import { GuidePanel } from './components';
 import { ApiService, apiService } from './services/api';
 
 export class GuidedOnboardingPlugin
@@ -56,7 +55,6 @@ export class GuidedOnboardingPlugin
           theme$: theme.theme$,
           api: apiService,
           application,
-          http,
         }),
     });
 
@@ -73,18 +71,16 @@ export class GuidedOnboardingPlugin
     theme$,
     api,
     application,
-    http,
   }: {
     targetDomElement: HTMLElement;
     theme$: Rx.Observable<CoreTheme>;
     api: ApiService;
     application: ApplicationStart;
-    http: HttpStart;
   }) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
-          <GuidedOnboardingButton api={api} application={application} http={http} />
+          <GuidePanel api={api} application={application} />
         </I18nProvider>
       </KibanaThemeProvider>,
       targetDomElement

@@ -68,6 +68,7 @@ export async function getLensServices(
     fieldFormats,
     spaces,
     discover,
+    unifiedSearch,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -108,6 +109,8 @@ export async function getLensServices(
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
     spaces,
     discover,
+    unifiedSearch,
+    docLinks: coreStart.docLinks,
   };
 }
 
@@ -383,5 +386,6 @@ export async function mountApp(
     lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
+    stateTransfer.clearEditorState?.(APP_ID);
   };
 }

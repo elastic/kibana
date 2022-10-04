@@ -7,12 +7,15 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-import { PackageNotFoundError } from '../../../errors';
+import { PackageNotFoundError, RegistryResponseError } from '../../../errors';
+
+import * as Archive from '../archive';
 
 import {
   splitPkgKey,
   fetchFindLatestPackageOrUndefined,
   fetchFindLatestPackageOrThrow,
+  fetchInfo,
   getLicensePath,
 } from '.';
 
@@ -21,12 +24,18 @@ const mockLogger = mockLoggerFactory.get('mock logger');
 
 const mockGetBundledPackageByName = jest.fn();
 const mockFetchUrl = jest.fn();
+
+const MockArchive = Archive as jest.Mocked<typeof Archive>;
+
+jest.mock('../archive');
+
 jest.mock('../..', () => ({
   appContextService: {
     getLogger: () => mockLogger,
     getKibanaBranch: () => 'main',
     getKibanaVersion: () => '99.0.0',
     getConfig: () => ({}),
+    getIsProductionMode: () => false,
   },
 }));
 
@@ -150,6 +159,8 @@ describe('fetch package', () => {
 });
 
 describe('getLicensePath', () => {
+  MockArchive.getPathParts = jest.requireActual('../archive').getPathParts;
+
   it('returns first license path if found', () => {
     const path = getLicensePath([
       '/package/good-1.0.0/NOTICE.txt',
@@ -169,5 +180,42 @@ describe('getLicensePath', () => {
       '/package/good-1.0.0/docs/README.md',
     ]);
     expect(path).toEqual(undefined);
+  });
+});
+
+describe('fetchInfo', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+
+    mockFetchUrl.mockRejectedValueOnce(new RegistryResponseError('Not found', 404));
+    mockGetBundledPackageByName.mockResolvedValueOnce({
+      name: 'test-package',
+      version: '1.0.0',
+      buffer: Buffer.from(''),
+    });
+    MockArchive.generatePackageInfoFromArchiveBuffer.mockResolvedValueOnce({
+      paths: [],
+      packageInfo: {
+        name: 'test-package',
+        title: 'Test Package',
+        version: '1.0.0',
+        description: 'Test package',
+        owner: { github: 'elastic' },
+        format_version: '1.0.0',
+      },
+    });
+  });
+
+  it('falls back to bundled package when one exists', async () => {
+    const fetchedInfo = await fetchInfo('test-package', '1.0.0');
+    expect(fetchedInfo).toBeTruthy();
+  });
+
+  it('throws when no corresponding bundled package exists', async () => {
+    try {
+      await fetchInfo('test-package', '1.0.0');
+    } catch (e) {
+      expect(e).toBeInstanceOf(PackageNotFoundError);
+    }
   });
 });

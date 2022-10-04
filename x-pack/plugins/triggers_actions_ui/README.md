@@ -917,13 +917,13 @@ export function getActionType(): ActionTypeModel {
     id: '.email',
     iconClass: 'email',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.selectMessageText',
+      'xpack.stackConnectors.components.email.selectMessageText',
       {
         defaultMessage: 'Send email from your server.',
       }
     ),
     actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.actionTypeTitle',
+      'xpack.stackConnectors.components.email.connectorTypeTitle',
       {
         defaultMessage: 'Send to email',
       }
