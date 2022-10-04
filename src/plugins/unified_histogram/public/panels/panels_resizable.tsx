@@ -8,6 +8,7 @@
 
 import { EuiResizableContainer, useGeneratedHtmlId, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isEqual, round } from 'lodash';
 import type { ReactElement, RefObject } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -15,7 +16,7 @@ const percentToPixels = (containerHeight: number, percentage: number) =>
   Math.round(containerHeight * (percentage / 100));
 
 const pixelsToPercent = (containerHeight: number, pixels: number) =>
-  +((pixels / containerHeight) * 100).toFixed(4);
+  (pixels / containerHeight) * 100;
 
 export const PanelsResizable = ({
   className,
@@ -66,23 +67,28 @@ export const PanelsResizable = ({
     z-index: 2;
   `;
 
-  // Instead of setting the panel sizes directly, we convert the top panel height
-  // from a percentage of the container height to a pixel value. This will trigger
-  // the effect below to update the panel sizes.
+  // We convert the top panel height from a percentage of the container height
+  // to a pixel value and emit the change to the parent component. We also convert
+  // the pixel value back to a percentage before updating the panel sizes to avoid
+  // rounding issues with the isEqual check in the effect below.
   const onPanelSizeChange = useCallback(
     ({ [topPanelId]: topPanelSize }: { [key: string]: number }) => {
       const newTopPanelHeight = percentToPixels(containerHeight, topPanelSize);
+      const newTopPanelSize = pixelsToPercent(containerHeight, newTopPanelHeight);
 
-      if (newTopPanelHeight !== topPanelHeight) {
-        onTopPanelHeightChange?.(newTopPanelHeight);
-      }
+      setPanelSizes({
+        topPanelSize: round(newTopPanelSize, 4),
+        mainPanelSize: round(100 - newTopPanelSize, 4),
+      });
+
+      onTopPanelHeightChange?.(newTopPanelHeight);
     },
-    [containerHeight, onTopPanelHeightChange, topPanelHeight, topPanelId]
+    [containerHeight, onTopPanelHeightChange, topPanelId]
   );
 
   // This effect will update the panel sizes based on the top panel height whenever
   // it or the container height changes. This allows us to keep the height of the
-  // top panel panel fixed when the window is resized.
+  // top panel fixed when the window is resized.
   useEffect(() => {
     if (!containerHeight) {
       return;
@@ -110,8 +116,17 @@ export const PanelsResizable = ({
       mainPanelSize = 100 - topPanelSize;
     }
 
-    setPanelSizes({ topPanelSize, mainPanelSize });
-  }, [containerHeight, topPanelHeight, minTopPanelHeight, minMainPanelHeight]);
+    const newPanelSizes = {
+      topPanelSize: round(topPanelSize, 4),
+      mainPanelSize: round(mainPanelSize, 4),
+    };
+
+    // Skip updating the panel sizes if they haven't changed
+    // since onPanelSizeChange will also trigger this effect.
+    if (!isEqual(panelSizes, newPanelSizes)) {
+      setPanelSizes(newPanelSizes);
+    }
+  }, [containerHeight, minMainPanelHeight, minTopPanelHeight, panelSizes, topPanelHeight]);
 
   const onResizeEnd = () => {
     // We don't want the resize button to retain focus after the resize is complete,
