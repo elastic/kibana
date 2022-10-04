@@ -28,13 +28,14 @@ The chart size is saved in your browser.
 
 [float]
 [[document-explorer-customize]]
-=== Customize the table
+=== Table display options
 
-To refine your view, resize the table columns and rows, set the column sort order, and filter the data.
+Customize the appearance of the table and its contents by resizing the columns and rows,
+sorting and modifying the fields, and filtering the documents.
 
 [float]
 [[document-explorer-columns]]
-==== Reorder and resize columns
+==== Reorder and resize the columns
 
 * To move a single column, click its header. In the dropdown menu,
 click *Move left* or *Move right*.
@@ -51,7 +52,7 @@ Column widths are stored with a saved search.  When you visualize saved searches
 [[document-explorer-row-height]]
 ==== Adjust the row height
 
-To set the row height to 1 or more lines, or automatically
+To set the row height to one or more lines, or automatically
 adjust the height to fit the contents, click the row height icon
 image:images/row-height-icon.png[icon to open the Row height pop-up].
 
@@ -88,11 +89,11 @@ image::images/document-explorer-multi-field.png[Multi field sort in the document
 [[document-explorer-edit-field]]
 ==== Edit a field
 
-Customize how {kib} displays a field.
+Change how {kib} displays a field.
 
 . Click the column header for the field, and then select *Edit data view field.*
 
-. In the Edit field form, change the field name and format.
+. In the *Edit field* form, change the field name and format.
 +
 For detailed information on formatting options, refer to <<managing-fields, Format data fields>>.
 
@@ -112,7 +113,7 @@ image::images/document-explorer-compare-data.png[Compare data in the document ta
 
 [float]
 [[document-explorer-configure-table]]
-==== Set the number of rows displayed per page
+==== Set the number of rows per page
 
 To change the numbers of rows you want to display on each page, use the *Rows per page* menu. By default, the document table displays 100 rows per page.
 
@@ -126,9 +127,8 @@ and search for *rows per page*.
 [[document-explorer-full-screen]]
 ==== View in fullscreen
 
-To view as much data as possible and eliminate distractions, click the fullscreen icon
-image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode]
-in the document table.
+To toggle the table in and out of fullscreen mode, click the fullscreen icon
+image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode].
 
 [float]
 [[document-explorer-expand-documents]]
