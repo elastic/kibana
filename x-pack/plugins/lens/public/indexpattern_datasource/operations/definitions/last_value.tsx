@@ -428,4 +428,12 @@ Example: Get the current status of server A:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.lastValue.documentation.quick',
+    {
+      defaultMessage: `
+The value of a field from the last document, ordered by the default time field of the data view.
+      `,
+    }
+  ),
 };
