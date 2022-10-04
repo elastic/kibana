@@ -13,7 +13,7 @@ import { get, isEmpty, map, omit } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
-import { useFormContext } from '../../shared_imports';
+import { useFormContext, useFormData } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
@@ -49,8 +49,8 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   ResponseActionValidatorRef,
   OsqueryResponseActionsParamsFormProps
 >(({ item }, ref) => {
-  const { updateFieldValues, getFormData } = useFormContext();
-  const data = getFormData();
+  const { updateFieldValues } = useFormContext();
+  const [data] = useFormData({ watch: [item.path] });
   const { params: defaultParams } = get(data, item.path);
   const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
