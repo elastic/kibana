@@ -18,7 +18,7 @@ export function createTelemetryConfigurationTaskConfig() {
   return {
     type: 'security:telemetry-configuration',
     title: 'Security Solution Telemetry Configuration Task',
-    interval: '45m',
+    interval: '1h',
     timeout: '1m',
     version: '1.0.0',
     runTask: async (
