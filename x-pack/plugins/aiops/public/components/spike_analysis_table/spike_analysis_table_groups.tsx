@@ -280,7 +280,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 +{Object.keys(repeatedValues).length}{' '}
                 <FormattedMessage
                   id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
-                  defaultMessage="more"
+                  defaultMessage="more field names and values also appearing in other groups"
                 />
               </EuiBadge>
               <EuiSpacer size="xs" />
