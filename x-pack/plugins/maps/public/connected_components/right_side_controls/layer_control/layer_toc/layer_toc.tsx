@@ -36,7 +36,7 @@ const CLEAR_DND_STATE = {
 
 export class LayerTOC extends Component<Props> {
   state: State = {
-    ...CLEAR_DND_STATE
+    ...CLEAR_DND_STATE,
   };
 
   componentWillUnmount() {
@@ -60,23 +60,20 @@ export class LayerTOC extends Component<Props> {
       return [];
     }
 
-    const parentLayer = this.props.layerList.find(findLayer => {
+    const parentLayer = this.props.layerList.find((findLayer) => {
       return findLayer.getId() === parentId;
     });
     if (!parentLayer) {
       return [];
     }
 
-    return [
-      ...this._getForebearers(parentLayer),
-      parentId
-    ];
+    return [...this._getForebearers(parentLayer), parentId];
   }
 
   _onDragUpdate = ({ combine, destination, source }: DropResult) => {
     if (combine) {
       const sourceLayer = this.props.layerList[this._reverseIndex(source.index)];
-      const combineLayer = this.props.layerList.find(findLayer => {
+      const combineLayer = this.props.layerList.find((findLayer) => {
         return findLayer.getId() === combine.draggableId;
       });
       const forebearers = combineLayer ? this._getForebearers(combineLayer) : [];
@@ -84,7 +81,7 @@ export class LayerTOC extends Component<Props> {
         combineLayer,
         newRightSiblingLayer: null,
         sourceLayer,
-        isOwnAncestor: forebearers.includes(sourceLayer.getId())
+        isOwnAncestor: forebearers.includes(sourceLayer.getId()),
       });
       return;
     }
@@ -111,19 +108,20 @@ export class LayerTOC extends Component<Props> {
           destinationIndex - 1
         : // When layer is moved to the left, new right sibling is the destination
           destinationIndex;
-    const newRightSiblingLayer = newRightSiblingIndex < 0 ? null : this.props.layerList[newRightSiblingIndex];
+    const newRightSiblingLayer =
+      newRightSiblingIndex < 0 ? null : this.props.layerList[newRightSiblingIndex];
     const forebearers = newRightSiblingLayer ? this._getForebearers(newRightSiblingLayer) : [];
 
     this.setState({
       combineLayer: null,
       newRightSiblingLayer,
       sourceLayer,
-      isOwnAncestor: forebearers.includes(sourceLayer.getId())
+      isOwnAncestor: forebearers.includes(sourceLayer.getId()),
     });
-  }
+  };
 
   _onDragEnd = () => {
-    const { combineLayer, isOwnAncestor, sourceLayer, newRightSiblingLayer} = this.state;
+    const { combineLayer, isOwnAncestor, sourceLayer, newRightSiblingLayer } = this.state;
     this.setState({ ...CLEAR_DND_STATE });
 
     if (isOwnAncestor || !sourceLayer) {
@@ -131,10 +129,7 @@ export class LayerTOC extends Component<Props> {
     }
 
     if (combineLayer) {
-      this.props.createLayerGroup(
-        sourceLayer.getId(),
-        combineLayer.getId()
-      );
+      this.props.createLayerGroup(sourceLayer.getId(), combineLayer.getId());
       return;
     }
 
@@ -143,10 +138,7 @@ export class LayerTOC extends Component<Props> {
     }
 
     this.props.setLayerParent(sourceLayer.getId(), newRightSiblingLayer.getParent());
-    this.props.moveLayerToLeftOfTarget(
-      sourceLayer.getId(),
-      newRightSiblingLayer.getId()
-    );
+    this.props.moveLayerToLeftOfTarget(sourceLayer.getId(), newRightSiblingLayer.getId());
   };
 
   _getDepth(layer: ILayer, depth: number): { depth: number; showInTOC: boolean } {
