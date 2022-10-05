@@ -12,7 +12,12 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent } from '../../../../types';
-import { sendPostRequestDiagnostics, useStartServices, useLink } from '../../../../hooks';
+import {
+  sendPostRequestDiagnostics,
+  sendPostBulkRequestDiagnostics,
+  useStartServices,
+  useLink,
+} from '../../../../hooks';
 
 interface Props {
   onClose: () => void;
@@ -34,7 +39,12 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
   async function onSubmit() {
     try {
       setIsSubmitting(true);
-      const { error } = await sendPostRequestDiagnostics((agents[0] as Agent).id);
+
+      const { error } = isSingleAgent
+        ? await sendPostRequestDiagnostics((agents[0] as Agent).id)
+        : await sendPostBulkRequestDiagnostics({
+            agents: typeof agents === 'string' ? agents : agents.map((agent) => agent.id),
+          });
       if (error) {
         throw error;
       }

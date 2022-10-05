@@ -132,8 +132,15 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PutRequestDiagnosticsResponse {}
+export type PostRequestDiagnosticsResponse = BulkAgentAction;
+export type PostBulkRequestDiagnosticsResponse = BulkAgentAction;
+
+export interface PostRequestBulkDiagnosticsRequest {
+  body: {
+    agents: string[] | string;
+    batchSize?: number;
+  };
+}
 
 export type PostBulkAgentReassignResponse = BulkAgentAction;
 

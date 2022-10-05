@@ -24,6 +24,7 @@ import {
   PostCancelActionRequestSchema,
   GetActionStatusRequestSchema,
   PostRequestDiagnosticsActionRequestSchema,
+  PostBulkRequestDiagnosticsActionRequestSchema,
   ListAgentUploadsRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
@@ -57,7 +58,10 @@ import {
   postAgentUpgradeHandler,
   postBulkAgentsUpgradeHandler,
 } from './upgrade_handler';
-import { requestDiagnosticsHandler } from './request_diagnostics_handler';
+import {
+  bulkRequestDiagnosticsHandler,
+  requestDiagnosticsHandler,
+} from './request_diagnostics_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Get one
@@ -191,6 +195,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     requestDiagnosticsHandler
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
+      validate: PostBulkRequestDiagnosticsActionRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    bulkRequestDiagnosticsHandler
   );
 
   router.get(

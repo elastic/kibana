@@ -119,6 +119,13 @@ export const PostRequestDiagnosticsActionRequestSchema = {
   }),
 };
 
+export const PostBulkRequestDiagnosticsActionRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    batchSize: schema.maybe(schema.number()),
+  }),
+};
+
 export const ListAgentUploadsRequestSchema = {
   params: schema.object({
     agentId: schema.string(),

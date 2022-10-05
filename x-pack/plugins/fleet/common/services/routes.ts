@@ -207,6 +207,7 @@ export const agentRouteService = {
   getAvailableVersionsPath: () => AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
   getRequestDiagnosticsPath: (agentId: string) =>
     AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN.replace('{agentId}', agentId),
+  getBulkRequestDiagnosticsPath: () => AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
   getListAgentUploads: (agentId: string) =>
     AGENT_API_ROUTES.LIST_UPLOADS_PATTERN.replace('{agentId}', agentId),
 };

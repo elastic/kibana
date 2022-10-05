@@ -28,6 +28,8 @@ import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common/consta
 
 import { getCommonTags } from '../utils';
 
+import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
+
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
@@ -67,6 +69,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
   const [updateModalState, setUpgradeModalState] = useState({ isOpen: false, isScheduled: false });
   const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
+  const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
+    useState<boolean>(false);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
@@ -166,6 +170,24 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             setUpgradeModalState({ isOpen: true, isScheduled: true });
           },
         },
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentBulkActions.requestDiagnostics"
+              data-test-subj="agentBulkActionsRequestDiagnostics"
+              defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
+            />
+          ),
+          icon: <EuiIcon type="trash" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected,
+          onClick: () => {
+            closeMenu();
+            setIsRequestDiagnosticsModalOpen(true);
+          },
+        },
       ],
     },
   ];
@@ -227,6 +249,17 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             closeMenu();
           }}
         />
+      )}
+      {isRequestDiagnosticsModalOpen && (
+        <EuiPortal>
+          <AgentRequestDiagnosticsModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsRequestDiagnosticsModalOpen(false);
+            }}
+          />
+        </EuiPortal>
       )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
