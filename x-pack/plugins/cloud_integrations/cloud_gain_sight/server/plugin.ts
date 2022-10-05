@@ -8,7 +8,7 @@
 import type { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
-import { registerGainSightRoute } from './routes';
+import { registerGainSightRoute, registerGainSightStyleRoute, registerGainSightWidgetRoute } from './routes';
 
 interface CloudGainSightSetupDeps {
   cloud: CloudSetup;
@@ -23,6 +23,14 @@ export class CloudGainSightPlugin implements Plugin {
         httpResources: core.http.resources,
         packageInfo: this.initializerContext.env.packageInfo,
       });
+      registerGainSightStyleRoute({
+        httpResources: core.http.resources,
+        packageInfo: this.initializerContext.env.packageInfo,
+      })
+      registerGainSightWidgetRoute({
+        httpResources: core.http.resources,
+        packageInfo: this.initializerContext.env.packageInfo,
+      })
     }
   }
 

@@ -17,15 +17,17 @@ const DAY = 24 * HOUR;
 
 /** @internal exported for testing */
 export const GAINSIGHT_LIBRARY_PATH = path.join(__dirname, '..', 'assets', 'gainsight_library.js');
+export const GAINSIGHT_WIDGET_PATH = path.join(__dirname, '..', 'assets', 'gainsight_widget.js');
+export const GAINSIGHT_STYLE_PATH = path.join(__dirname, '..', 'assets', 'gainsight_style.css');
 
 /** @internal exported for testing */
-export const renderGainSightLibraryFactory = (dist = true) =>
+export const renderGainSightLibraryFactory = (dist = true, path = GAINSIGHT_LIBRARY_PATH) =>
   once(
     async (): Promise<{
       body: Buffer;
       headers: HttpResponseOptions['headers'];
     }> => {
-      const srcBuffer = await fs.readFile(GAINSIGHT_LIBRARY_PATH);
+      const srcBuffer = await fs.readFile(path);
       const hash = createHash('sha1');
       hash.update(srcBuffer);
       const hashDigest = hash.digest('hex');
@@ -47,15 +49,84 @@ export const registerGainSightRoute = ({
   httpResources: HttpResources;
   packageInfo: Readonly<PackageInfo>;
 }) => {
-  const renderGainSightLibrary = renderGainSightLibraryFactory(packageInfo.dist);
+  const renderGainSightLibrary = renderGainSightLibraryFactory(packageInfo.dist, GAINSIGHT_LIBRARY_PATH);
 
   /**
-   * Register a custom JS endpoint in order to acheive best caching possible with `max-age` similar to plugin bundles.
+   * Register a custom JS endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
    */
   httpResources.register(
     {
       // Use the build number in the URL path to leverage max-age caching on production builds
       path: `/internal/cloud/${packageInfo.buildNum}/gainsight.js`,
+      validate: false,
+      options: {
+        authRequired: false,
+      },
+    },
+    async (context, req, res) => {
+      try {
+        return res.renderJs(await renderGainSightLibrary());
+      } catch (e) {
+        return res.customError({
+          body: `Could not load GainSight library from disk due to error: ${e.toString()}`,
+          statusCode: 500,
+        });
+      }
+    }
+  );
+};
+
+export const registerGainSightStyleRoute = ({
+  httpResources,
+  packageInfo,
+}: {
+  httpResources: HttpResources;
+  packageInfo: Readonly<PackageInfo>;
+}) => {
+  const renderGainSightLibrary = renderGainSightLibraryFactory(packageInfo.dist, GAINSIGHT_STYLE_PATH);
+
+  /**
+   * Register a custom JS endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
+   */
+  httpResources.register(
+    {
+      // Use the build number in the URL path to leverage max-age caching on production builds
+      path: `/internal/cloud/${packageInfo.buildNum}/gainsight.css`,
+      validate: false,
+      options: {
+        authRequired: false,
+      },
+    },
+    async (context, req, res) => {
+      try {
+        return res.renderJs(await renderGainSightLibrary());
+      } catch (e) {
+        return res.customError({
+          body: `Could not load GainSight library from disk due to error: ${e.toString()}`,
+          statusCode: 500,
+        });
+      }
+    }
+  );
+};
+
+
+export const registerGainSightWidgetRoute = ({
+  httpResources,
+  packageInfo,
+}: {
+  httpResources: HttpResources;
+  packageInfo: Readonly<PackageInfo>;
+}) => {
+  const renderGainSightLibrary = renderGainSightLibraryFactory(packageInfo.dist, GAINSIGHT_WIDGET_PATH);
+
+  /**
+   * Register a custom JS endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
+   */
+  httpResources.register(
+    {
+      // Use the build number in the URL path to leverage max-age caching on production builds
+      path: `/internal/cloud/${packageInfo.buildNum}/gainsight_widget.js`,
       validate: false,
       options: {
         authRequired: false,

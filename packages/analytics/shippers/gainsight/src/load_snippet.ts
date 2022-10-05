@@ -20,10 +20,15 @@ export interface GainSightSnippetConfig {
    * The URL to load the gainSight client from. Falls back to `web-sdk.aptrinsic.com` if not specified.
    */
   scriptUrl?: string;
+  cssFileEndpoint?: string;
+  widgetFileEndpoint?: string
+
 }
 export function loadSnippet({
   gainSightOrgId,
   scriptUrl = 'web-sdk.aptrinsic.com/api/aptrinsic.js',
+  cssFileEndpoint = 'web-sdk.aptrinsic.com/style.css',
+  widgetFileEndpoint = 'web-sdk.aptrinsic.com/widget/aptrinsic-widget.js ',
 }: GainSightSnippetConfig): GainSightApi {
   /* eslint-disable no-var,dot-notation,prefer-rest-params,@typescript-eslint/no-unused-expressions */
   (function (n, t, a, e, co) {
@@ -46,7 +51,10 @@ export function loadSnippet({
     var c = t.getElementsByTagName('script')[0];
     // @ts-expect-error
     c.parentNode.insertBefore(r, c);
-  })(window, document, scriptUrl, gainSightOrgId);
+  })(window, document, scriptUrl, gainSightOrgId, {
+    cssFileEndpoint,
+    widgetFileEndpoint
+  });
 
   const gainSightApi = window['aptrinsic'];
 

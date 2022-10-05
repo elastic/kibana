@@ -66,6 +66,12 @@ export class CloudGainSightPlugin implements Plugin {
       // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
       scriptUrl: basePath.prepend(
         `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/gainsight.js`
+      ),
+      cssFileEndpoint: basePath.prepend(
+        `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/gainsight.css`
+      ),
+      widgetFileEndpoint: basePath.prepend(
+        `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/gainsight_widget.js`
       )
     });
   }
