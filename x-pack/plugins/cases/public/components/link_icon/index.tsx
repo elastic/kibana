@@ -79,6 +79,7 @@ export const LinkIcon = React.memo<LinkIconProps>(
       }
       return theChild != null && Object.keys(theChild).length > 0 ? (theChild as string) : '';
     }, []);
+
     const aria = useMemo(() => {
       if (ariaLabel) {
         return ariaLabel;
