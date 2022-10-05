@@ -16,6 +16,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiImage,
   EuiSpacer,
   EuiSteps,
   EuiText,
@@ -42,6 +43,7 @@ interface State {
   logs: string;
   isBusy: boolean;
   success: boolean;
+  capture: string | null;
 }
 
 const initialState: State = {
@@ -52,6 +54,21 @@ const initialState: State = {
   logs: '',
   isBusy: false,
   success: true,
+  capture: null,
+};
+
+const VerificationScreenshot = ({ screenshotBase64 }: { screenshotBase64: string | null }) => {
+  if (screenshotBase64 != null) {
+    return (
+      <EuiImage
+        allowFullScreen
+        size="s"
+        src={`data:image/png;base64,${screenshotBase64}`}
+        alt="a computer generated image of an aquarium"
+      />
+    );
+  }
+  return null;
 };
 
 export const ReportDiagnostic = ({ apiClient }: Props) => {
@@ -61,7 +78,8 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       ...state,
       ...s,
     });
-  const { isBusy, screenshotStatus, chromeStatus, isFlyoutVisible, help, logs, success } = state;
+  const { isBusy, screenshotStatus, chromeStatus, isFlyoutVisible, help, logs, success, capture } =
+    state;
 
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });
@@ -74,6 +92,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           help: response.help,
           logs: response.logs,
           success: response.success,
+          capture: response.capture,
           [statusProp]: response.success ? 'complete' : 'danger',
         });
       })
@@ -88,6 +107,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           ],
           logs: `${error.message}`,
           success: false,
+          capture: null,
           [statusProp]: 'danger',
         });
       });
@@ -107,7 +127,10 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || chromeStatus === 'complete'}
-            onClick={apiWrapper(() => apiClient.verifyBrowser(), statuses.chromeStatus)}
+            onClick={apiWrapper(async () => {
+              const verify = await apiClient.verifyBrowser();
+              return verify;
+            }, statuses.chromeStatus)}
             isLoading={isBusy && chromeStatus === 'incomplete'}
             iconType={chromeStatus === 'complete' ? 'check' : undefined}
           >
@@ -145,6 +168,8 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
               defaultMessage="Capture screenshot"
             />
           </EuiButton>
+          <EuiSpacer />
+          <VerificationScreenshot screenshotBase64={capture} />
         </Fragment>
       ),
       status: !success && screenshotStatus !== 'complete' ? 'danger' : screenshotStatus,
