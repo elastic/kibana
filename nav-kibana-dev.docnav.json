@@ -172,6 +172,9 @@
       "label": "Contributors Newsletters",
       "items": [
         {
+          "id": "kibSeptember2022ContributorNewsletter"
+        },
+        {
           "id": "kibAugust2022ContributorNewsletter"
         },
         {
