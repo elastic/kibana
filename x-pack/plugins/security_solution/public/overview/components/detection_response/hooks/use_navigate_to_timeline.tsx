@@ -70,12 +70,12 @@ export const useNavigateToTimeline = () => {
     const dataProviders = [];
 
     for (const orFilterGroup of filters) {
-      const mainFilter = orFilterGroup.shift();
+      const mainFilter = orFilterGroup[0];
 
       if (mainFilter) {
         const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
 
-        for (const filter of orFilterGroup) {
+        for (const filter of orFilterGroup.slice(1)) {
           dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
         }
         dataProviders.push(dataProvider);

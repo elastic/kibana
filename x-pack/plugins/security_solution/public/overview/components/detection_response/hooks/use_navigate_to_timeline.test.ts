@@ -69,7 +69,7 @@ describe('useAlertCountByRuleByStatus', () => {
     );
   });
 
-  it('should handle many filter passed ( AND query)', () => {
+  it('should handle many filter passed ( AND query )', () => {
     const { result } = renderUseNavigatgeToTimeline();
     const openTimelineWithFilters = result.current.openTimelineWithFilters;
 
@@ -83,7 +83,7 @@ describe('useAlertCountByRuleByStatus', () => {
     );
   });
 
-  it('should handle many AND filter groups passed ( OR query with ANDS)', () => {
+  it('should handle many AND filter groups passed ( OR query with ANDS )', () => {
     const { result } = renderUseNavigatgeToTimeline();
     const openTimelineWithFilters = result.current.openTimelineWithFilters;
 
