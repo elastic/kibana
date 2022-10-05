@@ -22,6 +22,7 @@ interface FooterProps {
   onSubmit: (isAdHoc?: boolean) => void;
   submitDisabled: boolean;
   isEdit: boolean;
+  isPersisted: boolean;
   allowAdHoc: boolean;
 }
 
@@ -37,11 +38,25 @@ const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButt
   defaultMessage: 'Save',
 });
 
+const editUnpersistedButtonLabel = i18n.translate(
+  'indexPatternEditor.editor.flyoutEditUnpersistedButtonLabel',
+  {
+    defaultMessage: 'Continue to use without saving',
+  }
+);
+
 const exploreButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutExploreButtonLabel', {
   defaultMessage: 'Use without saving',
 });
 
-export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc }: FooterProps) => {
+export const Footer = ({
+  onCancel,
+  onSubmit,
+  submitDisabled,
+  isEdit,
+  allowAdHoc,
+  isPersisted,
+}: FooterProps) => {
   const submitPersisted = () => {
     onSubmit(false);
   };
@@ -89,7 +104,11 @@ export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc 
                 fill
                 disabled={submitDisabled}
               >
-                {isEdit ? editButtonLabel : saveButtonLabel}
+                {isEdit
+                  ? isPersisted
+                    ? editButtonLabel
+                    : editUnpersistedButtonLabel
+                  : saveButtonLabel}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
