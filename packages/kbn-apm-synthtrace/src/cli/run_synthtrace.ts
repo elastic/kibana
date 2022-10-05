@@ -132,7 +132,7 @@ function options(y: Argv) {
     .conflicts('local', 'cloudId');
 }
 
-export type RunCliFlags = ReturnType<typeof options>['argv'];
+export type RunCliFlags = Extract<ReturnType<typeof options>['argv'], { _: unknown[] }>;
 
 export function runSynthtrace() {
   yargs(process.argv.slice(2))
