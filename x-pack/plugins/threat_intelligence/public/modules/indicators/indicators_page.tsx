@@ -8,18 +8,19 @@
 import React, { FC, VFC } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IndicatorsBarChartWrapper } from './components/barchart';
-import { IndicatorsTable } from './components/indicators_table/indicators_table';
+import { IndicatorsTable } from './components/table';
 import { useIndicators } from './hooks/use_indicators';
 import { DefaultPageLayout } from '../../components/layout';
 import { useFilters } from '../query_bar/hooks/use_filters';
 import { FiltersGlobal } from '../../containers/filters_global';
-import QueryBar from '../query_bar/components/query_bar';
 import { useSourcererDataView } from './hooks/use_sourcerer_data_view';
 import { FieldTypesProvider } from '../../containers/field_types_provider';
 import { InspectorProvider } from '../../containers/inspector';
-import { useColumnSettings } from './components/indicators_table/hooks/use_column_settings';
+import { useColumnSettings } from './components/table/hooks';
 import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
 import { IndicatorsFilters } from './containers/indicators_filters';
+import { useSecurityContext } from '../../hooks/use_security_context';
+import { UpdateStatus } from '../../components/update_status';
 
 const queryClient = new QueryClient();
 
@@ -38,19 +39,9 @@ const IndicatorsPageContent: VFC = () => {
 
   const columnSettings = useColumnSettings();
 
-  const {
-    timeRange,
-    filters,
-    filterManager,
-    filterQuery,
-    handleSubmitQuery,
-    handleSubmitTimeRange,
-    handleSavedQuery,
-    savedQuery,
-  } = useFilters();
+  const { timeRange, filters, filterQuery } = useFilters();
 
   const {
-    handleRefresh,
     indicatorCount,
     indicators,
     onChangeItemsPerPage,
@@ -58,6 +49,7 @@ const IndicatorsPageContent: VFC = () => {
     pagination,
     isLoading: isLoadingIndicators,
     isFetching: isFetchingIndicators,
+    dataUpdatedAt,
   } = useIndicators({
     filters,
     filterQuery,
@@ -78,26 +70,18 @@ const IndicatorsPageContent: VFC = () => {
     filterQuery,
   });
 
+  const { SiemSearchBar } = useSecurityContext();
+
   return (
     <FieldTypesProvider>
-      <DefaultPageLayout pageTitle="Indicators">
+      <DefaultPageLayout
+        pageTitle="Indicators"
+        subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
+      >
         <FiltersGlobal>
-          <QueryBar
-            dateRangeFrom={timeRange?.from}
-            dateRangeTo={timeRange?.to}
-            indexPattern={indexPattern}
-            filterQuery={filterQuery}
-            filterManager={filterManager}
-            filters={filters}
-            dataTestSubj="iocListPageQueryInput"
-            displayStyle="detached"
-            savedQuery={savedQuery}
-            onRefresh={handleRefresh}
-            onSubmitQuery={handleSubmitQuery}
-            onSavedQuery={handleSavedQuery}
-            onSubmitDateRange={handleSubmitTimeRange}
-          />
+          <SiemSearchBar indexPattern={indexPattern} id="global" />
         </FiltersGlobal>
+
         <IndicatorsBarChartWrapper
           dateRange={dateRange}
           series={series}
