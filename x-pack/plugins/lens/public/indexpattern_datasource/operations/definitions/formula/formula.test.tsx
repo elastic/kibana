@@ -1612,7 +1612,53 @@ invalid: "
           });
         });
       } else {
-        it(`[${fn}] returns an error if the argument is of the wrong type`, () => {
+        const indexReverseMap = {
+          cond: [0],
+          left: [1],
+          right: [2],
+          all: [0, 1, 2],
+        };
+        it.each`
+          cond             | left                    | right                   | expectedFail
+          ${'1'}           | ${'2'}                  | ${'3'}                  | ${'cond'}
+          ${'1 > 1'}       | ${'2 > 2'}              | ${'3'}                  | ${'left'}
+          ${'1 > 1'}       | ${'2'}                  | ${'3 > 3'}              | ${'right'}
+          ${'1'}           | ${'2 > 2'}              | ${'3 > 3'}              | ${'all'}
+          ${'count()'}     | ${'average(bytes)'}     | ${'average(bytes)'}     | ${'cond'}
+          ${'count() > 1'} | ${'average(bytes) > 2'} | ${'average(bytes)'}     | ${'left'}
+          ${'count() > 1'} | ${'average(bytes)'}     | ${'average(bytes) > 3'} | ${'right'}
+          ${'count()'}     | ${'average(bytes) > 2'} | ${'average(bytes) > 3'} | ${'all'}
+        `(
+          `[${fn}] returns an error if $expectedFail argument is/are of the wrong type: ${fn}($cond, $left, $right)`,
+          ({
+            cond,
+            left,
+            right,
+            expectedFail,
+          }: {
+            cond: string;
+            left: string;
+            right: string;
+            expectedFail: keyof typeof indexReverseMap;
+          }) => {
+            const argsSorted = [cond, left, right];
+            expect(
+              formulaOperation.getErrorMessage!(
+                getNewLayerWithFormula(`${fn}(${cond}, ${left}, ${right})`),
+                'col1',
+                indexPattern,
+                operationDefinitionMap
+              )
+            ).toEqual(
+              indexReverseMap[expectedFail].map((i) => {
+                const arg = tinymathFunctions[fn].positionalArguments[i];
+                const passedValue = />/.test(argsSorted[i]) ? 'boolean' : 'number';
+                return `The ${arg.name} argument for the operation ${fn} in the Formula is of the wrong type: ${passedValue} instead of ${arg.type}`;
+              })
+            );
+          }
+        );
+        it(`[${fn}] returns an error if the condition argument is of the wrong type`, () => {
           const [firstArg] = tinymathFunctions[fn].positionalArguments;
           expect(
             formulaOperation.getErrorMessage!(

@@ -118,6 +118,22 @@ function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
   return [node.location].filter(nonNullable);
 }
 
+function getArgumentType(arg: TinymathAST, operations: Record<string, GenericOperationDefinition>) {
+  if (!isObject(arg)) {
+    return typeof arg;
+  }
+  if (arg.type === 'function') {
+    if (tinymathFunctions[arg.name]) {
+      return tinymathFunctions[arg.name].outputType ?? 'number';
+    }
+    // Assume it's a number for now
+    if (operations[arg.name]) {
+      return 'number';
+    }
+  }
+  // leave for now other argument types
+}
+
 export function isParsingError(message: string) {
   return message.includes('Failed to parse expression');
 }
@@ -688,7 +704,7 @@ function runFullASTValidation(
     const [firstArg] = node?.args || [];
 
     if (!nodeOperation) {
-      errors.push(...validateMathNodes(node, missingVariablesSet));
+      errors.push(...validateMathNodes(node, missingVariablesSet, operations));
       // carry on with the validation for all the functions within the math operation
       if (functions?.length) {
         return errors.concat(functions.flatMap((fn) => validateNode(fn)));
@@ -785,7 +801,8 @@ function runFullASTValidation(
         // In general this should be handled down the Esaggs route rather than here
         const isFirstArgumentNotValid = Boolean(
           !isArgumentValidType(firstArg, 'function') ||
-            (isMathNode(firstArg) && validateMathNodes(firstArg, missingVariablesSet).length)
+            (isMathNode(firstArg) &&
+              validateMathNodes(firstArg, missingVariablesSet, operations).length)
         );
         // First field has a special handling
         if (isFirstArgumentNotValid) {
@@ -989,7 +1006,11 @@ export function isArgumentValidType(arg: TinymathAST | string, type: TinymathNod
   return isObject(arg) && arg.type === type;
 }
 
-export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<string>) {
+export function validateMathNodes(
+  root: TinymathAST,
+  missingVariableSet: Set<string>,
+  operations: Record<string, GenericOperationDefinition>
+) {
   const mathNodes = findMathNodes(root);
   const errors: ErrorWrapper[] = [];
   mathNodes.forEach((node: TinymathFunction) => {
@@ -1083,26 +1104,26 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
         );
       }
     }
-    const wrongTypeArgumentIndex = positionalArguments.findIndex(({ type }, index) => {
-      const arg = node.args[index];
-      if (arg != null) {
-        if (!isObject(arg)) {
-          return typeof arg !== type;
+    const wrongTypeArgumentIndexes = positionalArguments
+      .map(({ type }, index) => {
+        const arg = node.args[index];
+        if (arg != null) {
+          const argType = getArgumentType(arg, operations);
+          if (argType && argType !== type) {
+            return index;
+          }
         }
-        if (arg.type === 'function' && tinymathFunctions[arg.name]) {
-          const { outputType = 'number' } = tinymathFunctions[arg.name];
-          return outputType !== type;
-        }
-      }
-    });
-    if (wrongTypeArgumentIndex > -1) {
+      })
+      .filter(nonNullable);
+    for (const wrongTypeArgumentIndex of wrongTypeArgumentIndexes) {
+      const arg = node.args[wrongTypeArgumentIndex];
       errors.push(
         getMessageFromId({
           messageId: 'wrongTypeArgument',
           values: {
             operation: node.name,
             name: positionalArguments[wrongTypeArgumentIndex].name,
-            type: typeof node.args[wrongTypeArgumentIndex],
+            type: getArgumentType(arg, operations) || 'number',
             expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
           },
           locations: getNodeLocation(node),
