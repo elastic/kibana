@@ -5,8 +5,6 @@ properties:
     type: string
   has_seen_add_data_notice:
     type: boolean
-  has_seen_fleet_migration_notice:
-    type: boolean
   fleet_server_hosts:
     type: array
     items:
