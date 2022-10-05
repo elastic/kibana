@@ -84,13 +84,17 @@ export class ApiService implements GuidedOnboardingApi {
    * @param {GuideId} guideId the id of the guide (one of search, observability, security)
    * @return {Promise} a promise with the response or error
    */
-  public async deleteGuide(guideId: GuideId): Promise<{ response?: GuideState; error?: Error }> {
+  public async deleteGuide(
+    guideId: GuideId
+  ): Promise<{ response?: { deletedGuide: GuideId }; error?: Error }> {
     if (!this.client) {
       throw new Error('ApiService has not be initialized.');
     }
 
     try {
-      const response = await this.client.delete<GuideState>(`${API_BASE_PATH}/state/${guideId}`);
+      const response = await this.client.delete<{ deletedGuide: GuideId }>(
+        `${API_BASE_PATH}/state/${guideId}`
+      );
       // Mark the guide as abandoned
       this.isGuideAbandoned = true;
       // Reset the guide state

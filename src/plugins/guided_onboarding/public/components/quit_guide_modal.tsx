@@ -7,16 +7,7 @@
  */
 import React, { useState } from 'react';
 
-import {
-  EuiModal,
-  EuiModalBody,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiText, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import { GuideId } from '../../common/types';
@@ -51,49 +42,31 @@ export const QuitGuideModal = ({
   };
 
   return (
-    <EuiModal
+    <EuiConfirmModal
       maxWidth={448}
+      title={i18n.translate('guidedOnboarding.quitGuideModal.modalTitle', {
+        defaultMessage: 'Quit this guide and discard progress?',
+      })}
+      onCancel={closeModal}
+      onConfirm={deleteGuide}
+      cancelButtonText={i18n.translate('guidedOnboarding.quitGuideModal.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('guidedOnboarding.quitGuideModal.quitButtonLabel', {
+        defaultMessage: 'Quit guide',
+      })}
       aria-label="quitGuideModal"
-      onClose={closeModal}
-      data-test-subj="quitGuideModal"
+      buttonColor="warning"
+      isLoading={isDeleting}
     >
-      <EuiModalBody>
-        <EuiSpacer size="m" />
-        <EuiTitle size="m">
-          <h2>
-            {i18n.translate('guidedOnboarding.quitGuideModal.modalTitle', {
-              defaultMessage: 'Quit this guide and discard progress?',
-            })}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiText>
-          <p>
-            {i18n.translate('guidedOnboarding.quitGuideModal.modalDescription', {
-              defaultMessage:
-                'You can restart anytime by opening the Setup guide from the Help menu.',
-            })}
-          </p>
-        </EuiText>
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal} data-test-subj="cancelQuitGuideButton">
-          {i18n.translate('guidedOnboarding.quitGuideModal.cancelButtonLabel', {
-            defaultMessage: 'Cancel',
+      <EuiText>
+        <p>
+          {i18n.translate('guidedOnboarding.quitGuideModal.modalDescription', {
+            defaultMessage:
+              'You can restart anytime by opening the Setup guide from the Help menu.',
           })}
-        </EuiButtonEmpty>
-        <EuiButton
-          color="warning"
-          isLoading={isDeleting}
-          onClick={deleteGuide}
-          fill
-          data-test-subj="confirmQuitGuideButton"
-        >
-          {i18n.translate('guidedOnboarding.quitGuideModal.quitButtonLabel', {
-            defaultMessage: 'Quit guide',
-          })}
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+        </p>
+      </EuiText>
+    </EuiConfirmModal>
   );
 };

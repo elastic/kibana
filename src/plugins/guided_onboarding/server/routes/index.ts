@@ -185,12 +185,16 @@ export function defineRoutes(router: IRouter) {
         await soClient.delete(guidedSetupSavedObjectsType, existingGuide.id);
 
         return response.ok({
-          body: {},
+          body: {
+            deletedGuide: guideId,
+          },
         });
       } else {
         // In the case that the SO doesn't exist (unlikely), return successful response
         return response.ok({
-          body: {},
+          body: {
+            deletedGuide: guideId,
+          },
         });
       }
     }
