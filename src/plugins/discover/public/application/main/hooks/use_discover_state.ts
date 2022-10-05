@@ -132,7 +132,6 @@ export function useDiscoverState({
    */
   const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
     dataView,
-    dataViews,
     stateContainer,
     savedSearch,
     setUrlTracking,
