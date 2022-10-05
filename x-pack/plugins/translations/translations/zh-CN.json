@@ -2269,6 +2269,7 @@
     "discover.openOptionsPopover.gotToSettings": "查看 Discover 设置",
     "discover.openOptionsPopover.tryDocumentExplorer": "试用 Document Explorer",
     "discover.pageTitleWithoutSavedSearch": "Discover - 尚未保存搜索",
+    "discover.reloadSavedSearchButton": "重置搜索",
     "discover.removeColumnLabel": "移除列",
     "discover.rootBreadcrumb": "Discover",
     "discover.sampleData.viewLinkLabel": "Discover",

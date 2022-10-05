@@ -2269,6 +2269,7 @@
     "discover.openOptionsPopover.gotToSettings": "Afficher les paramètres de Discover",
     "discover.openOptionsPopover.tryDocumentExplorer": "Testez l'explorateur de documents",
     "discover.pageTitleWithoutSavedSearch": "Discover - Recherche non encore enregistrée",
+    "discover.reloadSavedSearchButton": "Réinitialiser la recherche",
     "discover.removeColumnLabel": "Supprimer la colonne",
     "discover.rootBreadcrumb": "Découverte",
     "discover.sampleData.viewLinkLabel": "Découverte",

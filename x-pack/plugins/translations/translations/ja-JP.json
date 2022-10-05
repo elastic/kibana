@@ -2265,6 +2265,7 @@
     "discover.openOptionsPopover.gotToSettings": "Discover設定を表示",
     "discover.openOptionsPopover.tryDocumentExplorer": "ドキュメントエクスプローラーを試す",
     "discover.pageTitleWithoutSavedSearch": "Discover - 検索は保存されていません",
+    "discover.reloadSavedSearchButton": "検索をリセット",
     "discover.removeColumnLabel": "列を削除",
     "discover.rootBreadcrumb": "Discover",
     "discover.sampleData.viewLinkLabel": "Discover",
