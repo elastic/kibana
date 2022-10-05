@@ -68,8 +68,8 @@ import type {
 } from '@kbn/core-http-request-handler-context-server';
 import { RenderingService } from '@kbn/core-rendering-server-internal';
 
+import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import { CoreApp } from './core_app';
-import { HttpResourcesService } from './http_resources';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { DiscoveredPlugins } from './plugins';
@@ -280,7 +280,10 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({
+      http: httpSetup,
+      elasticsearchService: elasticsearchServiceSetup,
+    });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
       http: httpSetup,
