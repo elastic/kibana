@@ -156,10 +156,11 @@ export class ServerShortUrlClient implements IShortUrlClient {
    */
   protected updateAccessFields(record: ShortUrlRecord) {
     const { storage } = this.dependencies;
-    storage.update(record.data.id, {
-      accessDate: Date.now(),
-      accessCount: record.data.accessCount + 1,
-    })
+    storage
+      .update(record.data.id, {
+        accessDate: Date.now(),
+        accessCount: record.data.accessCount + 1,
+      })
       .catch(() => {}); // We are not interested if it succeeds or not.
   }
 
