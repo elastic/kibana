@@ -11,6 +11,7 @@ export {
   addChangePointsGroupHistogramAction,
   addChangePointsHistogramAction,
   addErrorAction,
+  pingAction,
   resetAction,
   updateLoadingStateAction,
   API_ACTION_NAME,
