@@ -67,14 +67,9 @@ const createTestCases = (spaceId: string) => {
   return { normalTypes, crossNamespace, hiddenType, allTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions, expectSavedObjectForbidden } = bulkGetTestSuiteFactory(
-    esArchiver,
-    supertest
-  );
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    bulkGetTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases

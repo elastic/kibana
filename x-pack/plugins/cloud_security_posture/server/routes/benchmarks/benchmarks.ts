@@ -13,7 +13,7 @@ import {
   CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
-import type { Benchmark, CspRulesStatus, AgentPolicyStatus } from '../../../common/types';
+import type { Benchmark, CspRulesStatus } from '../../../common/types';
 import type { CspRule } from '../../../common/schemas';
 import {
   createCspRuleSearchFilterByPackagePolicy,
@@ -74,32 +74,6 @@ export const addPackagePolicyCspRules = async (
   return packagePolicyRules;
 };
 
-export const createBenchmarkEntry = (
-  agentPolicyStatus: AgentPolicyStatus,
-  packagePolicy: PackagePolicy,
-  cspRulesStatus: CspRulesStatus
-): Benchmark => ({
-  package_policy: {
-    id: packagePolicy.id,
-    name: packagePolicy.name,
-    policy_id: packagePolicy.policy_id,
-    namespace: packagePolicy.namespace,
-    updated_at: packagePolicy.updated_at,
-    updated_by: packagePolicy.updated_by,
-    created_at: packagePolicy.created_at,
-    created_by: packagePolicy.created_by,
-    package: packagePolicy.package
-      ? {
-          name: packagePolicy.package.name,
-          title: packagePolicy.package.title,
-          version: packagePolicy.package.version,
-        }
-      : undefined,
-  },
-  agent_policy: agentPolicyStatus,
-  rules: cspRulesStatus,
-});
-
 const createBenchmarks = (
   soClient: SavedObjectsClientContract,
   agentPolicies: AgentPolicy[],
@@ -109,13 +83,16 @@ const createBenchmarks = (
   const cspPackagePoliciesMap = new Map(
     cspPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
   );
+
   return Promise.all(
     agentPolicies.flatMap((agentPolicy) => {
-      const cspPackagesOnAgent = agentPolicy.package_policies
-        .map((pckPolicyId) => {
-          if (typeof pckPolicyId === 'string') return cspPackagePoliciesMap.get(pckPolicyId);
-        })
-        .filter(isNonNullable);
+      const cspPackagesOnAgent =
+        agentPolicy.package_policies
+          ?.map(({ id: pckPolicyId }) => {
+            return cspPackagePoliciesMap.get(pckPolicyId);
+          })
+          .filter(isNonNullable) ?? [];
+
       const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
         const cspRulesStatus = await addPackagePolicyCspRules(soClient, cspPackage);
         const agentPolicyStatus = {
@@ -123,8 +100,12 @@ const createBenchmarks = (
           name: agentPolicy.name,
           agents: agentStatusByAgentPolicyId[agentPolicy.id].total,
         };
-        const benchmark = createBenchmarkEntry(agentPolicyStatus, cspPackage, cspRulesStatus);
-        return benchmark;
+
+        return {
+          package_policy: cspPackage,
+          agent_policy: agentPolicyStatus,
+          rules: cspRulesStatus,
+        };
       });
 
       return benchmarks;

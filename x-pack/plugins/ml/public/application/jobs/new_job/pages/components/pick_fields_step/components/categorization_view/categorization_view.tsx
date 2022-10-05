@@ -25,6 +25,7 @@ export const CategorizationView: FC<Props> = ({ isActive, setCanProceed }) => {
     if (typeof setCanProceed === 'function') {
       setCanProceed(categoryFieldValid && settingsValid);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryFieldValid, settingsValid]);
 
   return isActive === false ? (

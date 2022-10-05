@@ -15,18 +15,18 @@ exports[`UptimePageTemplateComponent styling applies the header centering on mob
 }
 
 <div
-  class="euiPage euiPage--grow euiPageTemplate c0"
+  class="euiPage euiPageTemplate c0 emotion-euiPage-row-grow"
   style="min-height: 460px;"
 >
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone"
+    class="euiPageBody emotion-euiPageBody"
   >
     <div
       class="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone emotion-euiPanel-grow-none-plain"
       role="main"
     >
       <div
-        class="euiPageContentBody euiPage--paddingLarge euiPage--restrictWidth-default"
+        class="euiPageContentBody euiPageContentBody--paddingLarge euiPageContentBody--restrictWidth-default"
       >
         <div
           style="visibility: initial;"
@@ -45,18 +45,18 @@ exports[`UptimePageTemplateComponent styling does not apply header centering on 
 }
 
 <div
-  class="euiPage euiPage--grow euiPageTemplate c0"
+  class="euiPage euiPageTemplate c0 emotion-euiPage-row-grow"
   style="min-height: 460px;"
 >
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone"
+    class="euiPageBody emotion-euiPageBody"
   >
     <div
       class="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone emotion-euiPanel-grow-none-plain"
       role="main"
     >
       <div
-        class="euiPageContentBody euiPage--paddingLarge euiPage--restrictWidth-default"
+        class="euiPageContentBody euiPageContentBody--paddingLarge euiPageContentBody--restrictWidth-default"
       >
         <div
           style="visibility: initial;"

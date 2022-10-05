@@ -25,8 +25,8 @@ import {
   DeleteIndexApiLogicArgs,
 } from '../../api/index/delete_index_api_logic';
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
-import { ElasticsearchViewIndex } from '../../types';
-import { indexToViewIndex } from '../../utils/indices';
+import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
+import { getIngestionMethod, indexToViewIndex } from '../../utils/indices';
 
 export interface IndicesActions {
   apiError(error: HttpError): HttpError;
@@ -64,14 +64,18 @@ export interface IndicesActions {
   }): { meta: Meta; returnHiddenIndices: boolean; searchQuery?: string };
   makeRequest: typeof FetchIndicesAPILogic.actions.makeRequest;
   onPaginate(newPageIndex: number): { newPageIndex: number };
-  openDeleteModal(indexName: string): { indexName: string };
+  openDeleteModal(index: ElasticsearchViewIndex): { index: ElasticsearchViewIndex };
   setIsFirstRequest(): void;
 }
 export interface IndicesValues {
   data: typeof FetchIndicesAPILogic.values.data;
+  deleteModalIndex: ElasticsearchViewIndex | null;
   deleteModalIndexName: string;
+  deleteModalIngestionMethod: IngestionMethod;
+  deleteStatus: typeof DeleteIndexApiLogic.values.status;
   hasNoIndices: boolean;
   indices: ElasticsearchViewIndex[];
+  isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
   isFirstRequest: boolean;
   isLoading: boolean;
@@ -89,7 +93,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       searchQuery,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
-    openDeleteModal: (indexName) => ({ indexName }),
+    openDeleteModal: (index) => ({ index }),
     setIsFirstRequest: true,
   },
   connect: {
@@ -99,7 +103,12 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       DeleteIndexApiLogic,
       ['apiError as deleteError', 'apiSuccess as deleteSuccess', 'makeRequest as deleteIndex'],
     ],
-    values: [FetchIndicesAPILogic, ['data', 'status']],
+    values: [
+      FetchIndicesAPILogic,
+      ['data', 'status'],
+      DeleteIndexApiLogic,
+      ['status as deleteStatus'],
+    ],
   },
   listeners: ({ actions, values }) => ({
     apiError: (e) => flashAPIErrors(e),
@@ -108,7 +117,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.content.indices.deleteIndex.successToast.title', {
           defaultMessage:
-            'Your index {indexName} and any associated connectors or crawlers were successfully deleted',
+            'Your index {indexName} and any associated ingestion configurations were successfully deleted',
           values: {
             indexName: values.deleteModalIndexName,
           },
@@ -125,11 +134,11 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
   reducers: () => ({
-    deleteModalIndexName: [
-      '',
+    deleteModalIndex: [
+      null,
       {
-        closeDeleteModal: () => '',
-        openDeleteModal: (_, { indexName }) => indexName,
+        closeDeleteModal: () => null,
+        openDeleteModal: (_, { index }) => index,
       },
     ],
     isDeleteModalVisible: [
@@ -163,6 +172,12 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     ],
   }),
   selectors: ({ selectors }) => ({
+    deleteModalIndexName: [() => [selectors.deleteModalIndex], (index) => index?.name ?? ''],
+    deleteModalIngestionMethod: [
+      () => [selectors.deleteModalIndex],
+      (index: ElasticsearchViewIndex | null) =>
+        index ? getIngestionMethod(index) : IngestionMethod.API,
+    ],
     hasNoIndices: [
       // We need this to show the landing page on the overview page if there are no indices
       // We can't rely just on there being no indices, because user might have entered a search query
@@ -172,6 +187,10 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     indices: [
       () => [selectors.data],
       (data) => (data?.indices ? data.indices.map(indexToViewIndex) : []),
+    ],
+    isDeleteLoading: [
+      () => [selectors.deleteStatus],
+      (status: IndicesValues['deleteStatus']) => [Status.LOADING].includes(status),
     ],
     isLoading: [
       () => [selectors.status, selectors.isFirstRequest],

@@ -70,9 +70,10 @@ export const enhancedEsSearchStrategyProvider = (
       const { body, headers } = id
         ? await client.asyncSearch.get(
             { ...params, id },
-            { signal: options.abortSignal, meta: true }
+            { ...options.transport, signal: options.abortSignal, meta: true }
           )
         : await client.asyncSearch.submit(params, {
+            ...options.transport,
             signal: options.abortSignal,
             meta: true,
           });

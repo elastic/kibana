@@ -10,13 +10,14 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
 import type { AppMountParameters } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { useVariation } from '../../../common/components/utils';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
@@ -45,6 +46,7 @@ export const GlobalHeader = React.memo(
       http: {
         basePath: { prepend },
       },
+      cloudExperiments,
     } = useKibana().services;
     const { pathname } = useLocation();
 
@@ -56,7 +58,15 @@ export const GlobalHeader = React.memo(
     const sourcererScope = getScopeFromPath(pathname);
     const showSourcerer = showSourcererByPath(pathname);
 
-    const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
+    const [addIntegrationsUrl, setAddIntegrationsUrl] = useState(ADD_DATA_PATH);
+    useVariation(
+      cloudExperiments,
+      'security-solutions.add-integrations-url',
+      ADD_DATA_PATH,
+      setAddIntegrationsUrl
+    );
+
+    const href = useMemo(() => prepend(addIntegrationsUrl), [prepend, addIntegrationsUrl]);
 
     useEffect(() => {
       setHeaderActionMenu((element) => {

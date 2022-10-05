@@ -10,7 +10,6 @@ import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import {
   DateHistogramIndexPatternColumn,
-  IndexPatternPersistedState,
   LensPublicSetup,
   LensPublicStart,
 } from '@kbn/lens-plugin/public';
@@ -131,54 +130,20 @@ export class EmbeddedLensExamplePlugin
       ],
     });
 
-    lens.registerTopNavMenuEntryGenerator(
-      ({ visualizationId, visualizationState, datasourceStates, query, filters }) => {
-        if (!datasourceStates.indexpattern.state || !visualizationState) return;
+    lens.registerTopNavMenuEntryGenerator(({ currentDoc }) => {
+      if (!currentDoc) return;
 
-        return {
-          label: 'Debug in Playground',
-          iconType: 'wrench',
-          run: async () => {
-            const [coreStart] = await core.getStartServices();
-            const datasourceState = datasourceStates.indexpattern
-              .state as IndexPatternPersistedState;
-            const layersIds = Object.keys(datasourceState.layers);
-            const layers = Object.values(datasourceState.layers) as Array<
-              PersistedIndexPatternLayer & { indexPatternId: string }
-            >;
-            const serializedFilters = JSON.parse(JSON.stringify(filters));
-            coreStart.application.navigateToApp('testing_embedded_lens', {
-              state: {
-                visualizationType: visualizationId,
-                title: 'Lens visualization',
-                references: [
-                  {
-                    id: layers[0].indexPatternId,
-                    name: 'indexpattern-datasource-current-indexpattern',
-                    type: 'index-pattern',
-                  },
-                  ...layers.map(({ indexPatternId }, i) => ({
-                    id: indexPatternId,
-                    name: `indexpattern-datasource-layer-${layersIds[i]}`,
-                    type: 'index-pattern',
-                  })),
-                ],
-                state: {
-                  datasourceStates: {
-                    indexpattern: {
-                      layers: datasourceState.layers,
-                    },
-                  },
-                  visualization: visualizationState,
-                  filters: serializedFilters,
-                  query,
-                },
-              },
-            });
-          },
-        };
-      }
-    );
+      return {
+        label: 'Debug in Playground',
+        iconType: 'wrench',
+        run: async () => {
+          const [coreStart] = await core.getStartServices();
+          coreStart.application.navigateToApp('testing_embedded_lens', {
+            state: { ...currentDoc, savedObjectId: undefined },
+          });
+        },
+      };
+    });
   }
 
   public start() {}

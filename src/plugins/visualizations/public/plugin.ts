@@ -25,6 +25,8 @@ import {
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -55,7 +57,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
-import { visualizeEditorTrigger } from './triggers';
+import { aggBasedVisualizationTrigger, visualizeEditorTrigger } from './triggers';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
 import { VisualizeLocatorDefinition } from '../common/locator';
@@ -88,6 +90,7 @@ import {
   setTheme,
   setExecutionContext,
   setFieldFormats,
+  setSavedObjectTagging,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 
@@ -134,6 +137,7 @@ export interface VisualizationsStartDeps {
   urlForwarding: UrlForwardingStart;
   screenshotMode: ScreenshotModePluginStart;
   fieldFormats: FieldFormatsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /**
@@ -286,6 +290,7 @@ export class VisualizationsPlugin
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
+          unifiedSearch: pluginsStart.unifiedSearch,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -333,6 +338,7 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
+    uiActions.registerTrigger(aggBasedVisualizationTrigger);
     uiActions.registerTrigger(visualizeEditorTrigger);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
@@ -376,6 +382,10 @@ export class VisualizationsPlugin
 
     if (spaces) {
       setSpaces(spaces);
+    }
+
+    if (savedObjectsTaggingOss) {
+      setSavedObjectTagging(savedObjectsTaggingOss);
     }
 
     return {

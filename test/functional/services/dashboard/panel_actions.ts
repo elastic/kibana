@@ -18,8 +18,8 @@ const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_P
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 const COPY_PANEL_TO_DATA_TEST_SUBJ = 'embeddablePanelAction-copyToDashboard';
-const LIBRARY_NOTIFICATION_TEST_SUBJ = 'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION';
 const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
+const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -79,7 +79,7 @@ export class DashboardPanelActionsService extends FtrService {
     await this.openContextMenu();
     const isActionVisible = await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
@@ -92,7 +92,7 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.openContextMenu();
     }
-    await this.testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
   }
 
   async clickExpandPanelToggle() {
@@ -179,6 +179,14 @@ export class DashboardPanelActionsService extends FtrService {
     return searchSessionId;
   }
 
+  async getSearchResponseByTitle(title: string) {
+    await this.openInspectorByTitle(title);
+    await this.inspector.openInspectorRequestsView();
+    const response = await this.inspector.getResponse();
+    await this.inspector.close();
+    return response;
+  }
+
   async openInspector(parent?: WebElementWrapper) {
     await this.openContextMenu(parent);
     const exists = await this.testSubjects.exists(OPEN_INSPECTOR_TEST_SUBJ);
@@ -190,11 +198,12 @@ export class DashboardPanelActionsService extends FtrService {
 
   async unlinkFromLibary(parent?: WebElementWrapper) {
     this.log.debug('unlinkFromLibrary');
-    const libraryNotification = parent
-      ? await this.testSubjects.findDescendant(LIBRARY_NOTIFICATION_TEST_SUBJ, parent)
-      : await this.testSubjects.find(LIBRARY_NOTIFICATION_TEST_SUBJ);
-    await libraryNotification.click();
-    await this.testSubjects.click('libraryNotificationUnlinkButton');
+    await this.openContextMenu(parent);
+    const exists = await this.testSubjects.exists(UNLINK_FROM_LIBRARY_TEST_SUBJ);
+    if (!exists) {
+      await this.clickContextMenuMoreItem();
+    }
+    await this.testSubjects.click(UNLINK_FROM_LIBRARY_TEST_SUBJ);
   }
 
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {

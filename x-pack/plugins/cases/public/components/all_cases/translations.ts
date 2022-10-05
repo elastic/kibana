@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
+export * from '../user_profiles/translations';
 
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
   defaultMessage: 'No cases to display',
@@ -70,10 +71,6 @@ export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
   defaultMessage: 'Closed',
 });
 
-export const DELETE = i18n.translate('xpack.cases.caseTable.delete', {
-  defaultMessage: 'Delete',
-});
-
 export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
   defaultMessage: 'Select',
 });
@@ -113,3 +110,60 @@ export const ATTC_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
 export const ATTC_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
   defaultMessage: 'The average duration (from creation to closure) for your current cases',
 });
+
+export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.filterAssigneesAriaLabel',
+  {
+    defaultMessage: 'click to filter assignees',
+  }
+);
+
+export const CLEAR_FILTERS = i18n.translate(
+  'xpack.cases.allCasesView.filterAssignees.clearFilters',
+  {
+    defaultMessage: 'Clear filters',
+  }
+);
+
+export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
+  i18n.translate('xpack.cases.allCasesView.totalFilteredUsers', {
+    defaultMessage: '{total, plural, one {# assignee} other {# assignees}} filtered',
+    values: { total },
+  });
+
+export const CLOSED_CASES = ({
+  totalCases,
+  caseTitle,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+}) =>
+  i18n.translate('xpack.cases.containers.closedCases', {
+    values: { caseTitle, totalCases },
+    defaultMessage: 'Closed {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
+  });
+
+export const REOPENED_CASES = ({
+  totalCases,
+  caseTitle,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+}) =>
+  i18n.translate('xpack.cases.containers.reopenedCases', {
+    values: { caseTitle, totalCases },
+    defaultMessage: 'Opened {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
+  });
+
+export const MARK_IN_PROGRESS_CASES = ({
+  totalCases,
+  caseTitle,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+}) =>
+  i18n.translate('xpack.cases.containers.markInProgressCases', {
+    values: { caseTitle, totalCases },
+    defaultMessage:
+      'Marked {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} as in progress',
+  });

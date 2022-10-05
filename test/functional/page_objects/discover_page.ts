@@ -15,6 +15,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');
@@ -22,6 +23,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -49,7 +51,11 @@ export class DiscoverPageObject extends FtrService {
     await fieldSearch.clearValue();
   }
 
-  public async saveSearch(searchName: string, saveAsNew?: boolean) {
+  public async saveSearch(
+    searchName: string,
+    saveAsNew?: boolean,
+    options: { tags: string[] } = { tags: [] }
+  ) {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -60,6 +66,14 @@ export class DiscoverPageObject extends FtrService {
         return (await saveButton.getAttribute('disabled')) !== 'true';
       }
     );
+
+    if (options.tags.length) {
+      await this.testSubjects.click('savedObjectTagSelector');
+      for (const tagName of options.tags) {
+        await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+      }
+      await this.testSubjects.click('savedObjectTitle');
+    }
 
     if (saveAsNew !== undefined) {
       await this.retry.waitFor(`save as new switch is set`, async () => {
@@ -365,6 +379,7 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click(`field-${field}`);
     await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
     await this.testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    await this.fieldEditor.confirmDelete();
   }
 
   public async clickIndexPatternActions() {
@@ -393,6 +408,17 @@ export class DiscoverPageObject extends FtrService {
       }
     );
     await (await this.find.byClassName('indexPatternEditor__form')).click();
+  }
+
+  async createAdHocDataView(name: string, hasTimeField = false) {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
+  }
+
+  async clickAddField() {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.testSubjects.existOrFail('indexPattern-add-field');
+    await this.testSubjects.click('indexPattern-add-field');
   }
 
   public async hasNoResults() {
@@ -460,7 +486,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickFieldListItemVisualize(fieldName: string) {
     const field = await this.testSubjects.find(`field-${fieldName}-showDetails`);
-    const isActive = await field.elementHasClass('dscSidebarItem--active');
+    const isActive = await field.elementHasClass('kbnFieldButton-isActive');
 
     if (!isActive) {
       // expand the field to show the "Visualize" button
@@ -468,6 +494,7 @@ export class DiscoverPageObject extends FtrService {
     }
 
     await this.testSubjects.click(`fieldVisualize-${fieldName}`);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async expectFieldListItemVisualize(field: string) {
@@ -646,7 +673,7 @@ export class DiscoverPageObject extends FtrService {
   public async clickViewModeFieldStatsButton() {
     await this.retry.tryForTime(2 * 1000, async () => {
       await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
-      await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('dscViewModeFieldStatsButton');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
   }

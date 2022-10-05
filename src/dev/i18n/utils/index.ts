@@ -12,7 +12,6 @@ export {
   writeFileAsync,
   makeDirAsync,
   accessAsync,
-  globAsync,
   // functions
   normalizePath,
   difference,

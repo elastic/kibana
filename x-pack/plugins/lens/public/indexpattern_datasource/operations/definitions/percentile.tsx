@@ -13,6 +13,7 @@ import {
   buildExpression,
   buildExpressionFunction,
   ExpressionAstExpressionBuilder,
+  ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
 import { AggExpressionFunctionArgs } from '@kbn/data-plugin/common';
 import { OperationDefinition } from '.';
@@ -30,7 +31,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
-import { getColumnWindowError } from '../../window_utils';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -49,7 +50,7 @@ function ofName(
   name: string,
   percentile: number,
   timeShift: string | undefined,
-  window: string | undefined
+  reducedTimeRange: string | undefined
 ) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileOf', {
@@ -62,7 +63,7 @@ function ofName(
     undefined,
     timeShift,
     undefined,
-    window
+    reducedTimeRange
   );
 }
 
@@ -87,9 +88,13 @@ export const percentileOperation: OperationDefinition<
   ],
   filterable: true,
   shiftable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
-    if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
+    if (
+      supportedFieldTypes.includes(fieldType) &&
+      aggregatable &&
+      (!aggregationRestrictions || aggregationRestrictions.percentiles)
+    ) {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -104,7 +109,7 @@ export const percentileOperation: OperationDefinition<
       newField &&
         supportedFieldTypes.includes(newField.type) &&
         newField.aggregatable &&
-        !newField.aggregationRestrictions
+        (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentiles)
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>
@@ -112,7 +117,7 @@ export const percentileOperation: OperationDefinition<
       getSafeName(column.sourceField, indexPattern),
       column.params.percentile,
       column.timeShift,
-      column.window
+      column.reducedTimeRange
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
@@ -126,7 +131,7 @@ export const percentileOperation: OperationDefinition<
         getSafeName(field.name, indexPattern),
         newPercentileParam,
         previousColumn?.timeShift,
-        previousColumn?.window
+        previousColumn?.reducedTimeRange
       ),
       dataType: 'number',
       operationType: 'percentile',
@@ -135,7 +140,7 @@ export const percentileOperation: OperationDefinition<
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      window: columnParams?.window || previousColumn?.window,
+      reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -149,7 +154,7 @@ export const percentileOperation: OperationDefinition<
         field.displayName,
         oldColumn.params.percentile,
         oldColumn.timeShift,
-        oldColumn.window
+        oldColumn.reducedTimeRange
       ),
       sourceField: field.name,
     };
@@ -191,6 +196,12 @@ export const percentileOperation: OperationDefinition<
       }
     });
 
+    const termsFuncs = aggs
+      .map((agg) => agg.functions[0])
+      .filter((func) => func.name === 'aggTerms') as Array<
+      ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
+    >;
+
     // collapse them into a single esAggs expression builder
     Object.values(percentileExpressionsByArgs).forEach((expressionBuilders) => {
       if (expressionBuilders.length <= 1) {
@@ -220,6 +231,7 @@ export const percentileOperation: OperationDefinition<
       const percentileToBuilder: Record<number, ExpressionAstExpressionBuilder> = {};
       for (const builder of expressionBuilders) {
         const percentile = builder.functions[0].getArgument('percentile')![0] as number;
+
         if (percentile in percentileToBuilder) {
           // found a duplicate percentile so let's optimize
 
@@ -244,6 +256,13 @@ export const percentileOperation: OperationDefinition<
           percentileToBuilder[percentile] = builder;
           aggPercentilesConfig.percents!.push(percentile);
         }
+
+        // update any terms order-bys
+        termsFuncs.forEach((func) => {
+          if (func.getArgument('orderBy')?.[0] === builder.functions[0].getArgument('id')?.[0]) {
+            func.replaceArgument('orderBy', [`${esAggsColumnId}.${percentile}`]);
+          }
+        });
       }
 
       const multiPercentilesAst = buildExpressionFunction<AggFunctionsMapping['aggPercentiles']>(
@@ -286,7 +305,7 @@ export const percentileOperation: OperationDefinition<
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
-      getColumnWindowError(layer, columnId, indexPattern),
+      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({
     paramEditorUpdater,
@@ -317,7 +336,7 @@ export const percentileOperation: OperationDefinition<
                   currentColumn.sourceField,
                 Number(value),
                 currentColumn.timeShift,
-                currentColumn.window
+                currentColumn.reducedTimeRange
               ),
           params: {
             ...currentColumn.params,
@@ -398,4 +417,12 @@ Example: Get the number of bytes larger than 95 % of values:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.percentile.documentation.quick',
+    {
+      defaultMessage: `
+      The largest value that is smaller than n percent of the values that occur in all documents.
+      `,
+    }
+  ),
 };

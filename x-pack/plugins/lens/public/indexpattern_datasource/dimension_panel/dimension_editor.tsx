@@ -20,6 +20,11 @@ import {
   useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiPanel,
+  EuiBasicTable,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
@@ -38,7 +43,7 @@ import {
   adjustColumnReferencesForChangedColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
-import { hasField } from '../pure_utils';
+import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { IndexPatternLayer } from '../types';
@@ -46,7 +51,7 @@ import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
-import { Window } from './window';
+import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
 import type { LayerType } from '../../../common';
@@ -116,6 +121,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
 
   const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
+  const closeHelp = () => setIsHelpOpen(false);
 
   const temporaryQuickFunction = Boolean(temporaryState === quickFunctionsName);
   const temporaryStaticValue = Boolean(temporaryState === staticValueOperationName);
@@ -289,15 +298,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
     };
   }, []);
 
+  const currentField =
+    selectedColumn &&
+    hasField(selectedColumn) &&
+    currentIndexPattern.getFieldByName(selectedColumn.sourceField);
+
+  const referencedField =
+    currentField || getReferencedField(selectedColumn, currentIndexPattern, state.layers[layerId]);
+
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
   const operationsWithCompatibility = possibleOperations.map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
-    const currentField =
-      selectedColumn &&
-      hasField(selectedColumn) &&
-      currentIndexPattern.getFieldByName(selectedColumn.sourceField);
     return {
       operationType,
       compatibleWithCurrentField: canTransition({
@@ -335,12 +348,36 @@ export function DimensionEditor(props: DimensionEditorProps) {
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
       );
 
-      let label: EuiListGroupItemProps['label'] = operationDisplay[operationType].displayName;
+      const partialIcon = compatibleWithCurrentField &&
+        referencedField?.partiallyApplicableFunctions?.[operationType] && (
+          <span data-test-subj={`${operationType}-partial-warning`}>
+            {' '}
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.lens.indexPattern.helpPartiallyApplicableFunctionLabel',
+                {
+                  defaultMessage:
+                    'This function may only return partial results, as it is unable to support the full time range of rolled-up historical data.',
+                }
+              )}
+              position="left"
+              size="s"
+              type="partial"
+              color="warning"
+            />
+          </span>
+        );
+      let label: EuiListGroupItemProps['label'] = (
+        <>
+          {operationDisplay[operationType].displayName}
+          {partialIcon}
+        </>
+      );
       if (isActive && disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
             <EuiText color="danger" size="s">
-              <strong>{operationDisplay[operationType].displayName}</strong>
+              <strong>{label}</strong>
             </EuiText>
           </EuiToolTip>
         );
@@ -568,12 +605,88 @@ export function DimensionEditor(props: DimensionEditorProps) {
     ...services,
   };
 
+  const helpButton = <EuiButtonIcon onClick={onHelpClick} iconType="documentation" />;
+
+  const columnsSidebar = [
+    {
+      field: 'function',
+      name: i18n.translate('xpack.lens.indexPattern.functionTable.functionHeader', {
+        defaultMessage: 'Function',
+      }),
+      width: '150px',
+    },
+    {
+      field: 'description',
+      name: i18n.translate('xpack.lens.indexPattern.functionTable.descriptionHeader', {
+        defaultMessage: 'Description',
+      }),
+    },
+  ];
+
+  const items = sideNavItems
+    .filter((item) => operationDefinitionMap[item.id!].quickFunctionDocumentation)
+    .map((item) => {
+      const operationDefinition = operationDefinitionMap[item.id!]!;
+      return {
+        id: item.id!,
+        function: operationDefinition.displayName,
+        description: operationDefinition.quickFunctionDocumentation!,
+      };
+    });
+
   const quickFunctions = (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-          defaultMessage: 'Function',
-        })}
+        label={
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
+                defaultMessage: 'Functions',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                anchorPosition="rightUp"
+                button={helpButton}
+                isOpen={isHelpOpen}
+                display="inlineBlock"
+                panelPaddingSize="none"
+                className="dscFieldTypesHelp__popover"
+                panelClassName="dscFieldTypesHelp__panel"
+                closePopover={closeHelp}
+                initialFocus="#dscFieldTypesHelpBasicTableId"
+              >
+                <EuiPopoverTitle paddingSize="s">
+                  {i18n.translate('xpack.lens.indexPattern.quickFunctions.popoverTitle', {
+                    defaultMessage: 'Quick functions',
+                  })}
+                </EuiPopoverTitle>
+                <EuiPanel
+                  className="eui-yScroll"
+                  style={{ maxHeight: '40vh' }}
+                  color="transparent"
+                  paddingSize="s"
+                >
+                  <EuiBasicTable
+                    id="dscFieldTypesHelpBasicTableId"
+                    style={{ width: 350 }}
+                    tableCaption={i18n.translate(
+                      'xpack.lens.indexPattern.quickFunctions.tableTitle',
+                      {
+                        defaultMessage: 'Description of functions',
+                      }
+                    )}
+                    items={items}
+                    compressed={true}
+                    rowHeader="firstName"
+                    columns={columnsSidebar}
+                    responsive={false}
+                  />
+                </EuiPanel>
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         fullWidth
       >
         <EuiListGroup
@@ -922,9 +1035,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ) : null,
             },
             {
-              dataTestSubj: 'indexPattern-window-enable',
-              inlineElement: selectedOperationDefinition.windowable ? (
-                <Window
+              dataTestSubj: 'indexPattern-reducedTimeRange-enable',
+              inlineElement: selectedOperationDefinition.canReduceTimeRange ? (
+                <ReducedTimeRange
                   selectedColumn={selectedColumn}
                   columnId={columnId}
                   indexPattern={currentIndexPattern}

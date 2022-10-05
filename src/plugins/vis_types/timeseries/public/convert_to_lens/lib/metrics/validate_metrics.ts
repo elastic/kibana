@@ -6,35 +6,40 @@
  * Side Public License, v 1.
  */
 
-import { Metric } from '../../../../common/types';
+import { Metric, MetricType } from '../../../../common/types';
+import { PANEL_TYPES } from '../../../../common/enums';
 import { SUPPORTED_METRICS } from '.';
 
 const isMetricValid = (
-  metricType: string,
-  panelType: string,
+  metricType: MetricType,
+  panelType: PANEL_TYPES,
   field?: string,
   timeRangeMode?: string
 ) => {
-  const isMetricSupported = SUPPORTED_METRICS[metricType];
-  if (!isMetricSupported) {
+  const metric = SUPPORTED_METRICS[metricType];
+  if (!metric) {
     return false;
   }
-  const isPanelTypeSupported =
-    SUPPORTED_METRICS[metricType].supportedPanelTypes.includes(panelType);
+  const isPanelTypeSupported = metric.supportedPanelTypes.includes(panelType);
   const isTimeRangeModeSupported =
-    !timeRangeMode || SUPPORTED_METRICS[metricType].supportedTimeRangeModes.includes(timeRangeMode);
-  return (
-    isPanelTypeSupported &&
-    isTimeRangeModeSupported &&
-    (!SUPPORTED_METRICS[metricType].isFieldRequired || field)
-  );
+    !timeRangeMode || (metric.supportedTimeRangeModes as string[]).includes(timeRangeMode);
+  return isPanelTypeSupported && isTimeRangeModeSupported && (!metric.isFieldRequired || field);
 };
 
-export const isValidMetrics = (metrics: Metric[], panelType: string, timeRangeMode?: string) => {
+export const isValidMetrics = (
+  metrics: Metric[],
+  panelType: PANEL_TYPES,
+  timeRangeMode?: string
+) => {
   return metrics.every((metric) => {
     const isMetricAggValid =
       metric.type !== 'filter_ratio' ||
-      isMetricValid(metric.metric_agg || 'count', panelType, metric.field, timeRangeMode);
+      isMetricValid(
+        (metric.metric_agg as MetricType) || 'count',
+        panelType,
+        metric.field,
+        timeRangeMode
+      );
     return (
       metric.type === 'series_agg' ||
       (isMetricValid(metric.type, panelType, metric.field, timeRangeMode) && isMetricAggValid)

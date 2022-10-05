@@ -12,6 +12,100 @@
     "classes": [
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+        "id": "def-server.ElasticsearchClientsMetricsCollector",
+        "type": "Class",
+        "tags": [],
+        "label": "ElasticsearchClientsMetricsCollector",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-metrics-collectors-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
+            "section": "def-server.ElasticsearchClientsMetricsCollector",
+            "text": "ElasticsearchClientsMetricsCollector"
+          },
+          " implements ",
+          "MetricsCollector",
+          "<",
+          "ElasticsearchClientsMetrics",
+          ">"
+        ],
+        "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.ElasticsearchClientsMetricsCollector.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+                "id": "def-server.ElasticsearchClientsMetricsCollector.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "agentStore",
+                "description": [],
+                "signature": [
+                  "AgentStore"
+                ],
+                "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.ElasticsearchClientsMetricsCollector.collect",
+            "type": "Function",
+            "tags": [],
+            "label": "collect",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "ElasticsearchClientsMetrics",
+              ">"
+            ],
+            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.ElasticsearchClientsMetricsCollector.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
         "id": "def-server.EventLoopDelaysMonitor",
         "type": "Class",
         "tags": [],
@@ -33,6 +127,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -48,6 +143,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -66,6 +162,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -83,6 +180,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -100,6 +198,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -129,6 +228,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -142,6 +242,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -161,6 +262,7 @@
                 ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -180,6 +282,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -195,6 +298,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -224,6 +328,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -241,6 +346,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -255,6 +361,7 @@
                 ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -274,6 +381,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -289,6 +397,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -318,6 +427,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -331,6 +441,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -344,6 +455,7 @@
                 ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -363,6 +475,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -378,6 +491,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -396,6 +510,7 @@
         "description": [],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -408,7 +523,8 @@
               "Logger"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -421,7 +537,8 @@
               "string | undefined"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
@@ -434,7 +551,8 @@
               "string | undefined"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

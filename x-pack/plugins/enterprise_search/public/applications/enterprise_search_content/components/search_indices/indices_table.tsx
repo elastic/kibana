@@ -7,11 +7,12 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import {
   CriteriaWithPagination,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiButtonIcon,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
@@ -19,7 +20,8 @@ import { i18n } from '@kbn/i18n';
 
 import { Meta } from '../../../../../common/types';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
+import { KibanaLogic } from '../../../shared/kibana';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
@@ -43,7 +45,7 @@ interface IndicesTableProps {
   isLoading?: boolean;
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
-  onDelete: (indexName: string) => void;
+  onDelete: (index: ElasticsearchViewIndex) => void;
 }
 
 export const IndicesTable: React.FC<IndicesTableProps> = ({
@@ -53,6 +55,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
   onChange,
   onDelete,
 }) => {
+  const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
     {
       field: 'name',
@@ -140,42 +143,37 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
         }
       },
       truncateText: true,
-      width: '10%',
+      width: '15%',
     },
     {
       actions: [
         {
-          render: ({ name }) => (
-            <EuiButtonIconTo
-              aria-label={name}
-              iconType="eye"
-              data-test-subj={`view-search-index-button-${name}`}
-              to={generateEncodedPath(SEARCH_INDEX_PATH, {
-                indexName: name,
-              })}
-            />
-          ),
+          description: 'View this index',
+          icon: 'eye',
+          isPrimary: false,
+          name: (index) => `View ${index.name}`,
+          onClick: (index) =>
+            navigateToUrl(
+              generateEncodedPath(SEARCH_INDEX_PATH, {
+                indexName: index.name,
+              })
+            ),
+          type: 'icon',
         },
         {
-          render: (index) =>
-            // We don't have a way to delete crawlers yet
-            isCrawlerIndex(index) ? (
-              <></>
-            ) : (
-              <EuiButtonIcon
-                aria-label={`Delete ${index.name}`}
-                iconType="trash"
-                color="danger"
-                data-test-subj={`delete-search-index-button-${name}`}
-                onClick={() => onDelete(index.name)}
-              />
-            ),
+          color: 'danger',
+          description: 'Delete this index',
+          icon: 'trash',
+          isPrimary: false,
+          name: (index) => `Delete ${index.name}`,
+          onClick: (index) => onDelete(index),
+          type: 'icon',
         },
       ],
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
         defaultMessage: 'Actions',
       }),
-      width: '5%',
+      width: '10%',
     },
   ];
   return (

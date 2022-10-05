@@ -23,7 +23,7 @@ import { act } from 'react-dom/test-utils';
 
 import { PalettePanelContainer } from '../../shared_components';
 import { layerTypes } from '../../../common';
-import type { MetricState } from '../../../common/types';
+import type { LegacyMetricState } from '../../../common/types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -48,13 +48,13 @@ function paletteParamsContaining(paramsToCheck: PaletteOutput<CustomPaletteParam
 
 describe('metric dimension editor', () => {
   let frame: FramePublicAPI;
-  let state: MetricState;
-  let setState: (newState: MetricState) => void;
-  let props: VisualizationDimensionEditorProps<MetricState> & {
+  let state: LegacyMetricState;
+  let setState: (newState: LegacyMetricState) => void;
+  let props: VisualizationDimensionEditorProps<LegacyMetricState> & {
     paletteService: PaletteRegistry;
   };
 
-  function testState(): MetricState {
+  function testState(): LegacyMetricState {
     return {
       layerId: 'first',
       layerType: layerTypes.DATA,

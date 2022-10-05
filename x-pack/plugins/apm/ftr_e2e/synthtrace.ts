@@ -8,11 +8,6 @@ import type { EntityIterable } from '@kbn/apm-synthtrace';
 
 export const synthtrace = {
   index: (events: EntityIterable) =>
-    new Promise((resolve) => {
-      cy.task('synthtrace:index', events.toArray()).then(resolve);
-    }),
-  clean: () =>
-    new Promise((resolve) => {
-      cy.task('synthtrace:clean').then(resolve);
-    }),
+    cy.task('synthtrace:index', events.toArray()),
+  clean: () => cy.task('synthtrace:clean'),
 };

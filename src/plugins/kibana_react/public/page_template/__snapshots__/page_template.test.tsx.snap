@@ -2,21 +2,22 @@
 
 exports[`KibanaPageTemplate render basic template 1`] = `
 <div
-  class="euiPage euiPage--grow euiPageTemplate kbnPageTemplate"
+  class="euiPage euiPageTemplate kbnPageTemplate emotion-euiPage-row-grow"
   style="min-height:460px"
 >
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone"
+    class="euiPageBody emotion-euiPageBody"
   >
     <header
-      class="euiPageHeader euiPageHeader--paddingLarge euiPageHeader--restrictWidth-default euiPageHeader--responsive euiPageHeader--center"
+      class="euiPageHeader emotion-euiPageHeader-l-border"
       title="test"
     >
       <div
-        class="euiPageHeaderContent"
+        class="euiPageHeaderContent emotion-euiPageHeaderContent-l"
+        style="max-width:1200px"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
         >
           <div
             class="euiFlexItem"
@@ -33,7 +34,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
             >
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -50,7 +51,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
       role="main"
     >
       <div
-        class="euiPageContentBody euiPage--paddingLarge euiPage--restrictWidth-default"
+        class="euiPageContentBody euiPageContentBody--paddingLarge euiPageContentBody--restrictWidth-default"
       />
     </div>
   </div>
@@ -187,27 +188,216 @@ exports[`KibanaPageTemplate render noDataContent 1`] = `
 
 exports[`KibanaPageTemplate render solutionNav 1`] = `
 <div
-  class="euiPage euiPage--grow euiPageTemplate kbnPageTemplate"
+  class="euiPage euiPageTemplate kbnPageTemplate emotion-euiPage-row-grow"
   style="min-height:460px"
 >
   <div
     class="euiPageSideBar euiPageSideBar--sticky kbnPageTemplate__pageSideBar"
-  />
+  >
+    <nav
+      aria-hidden="false"
+      aria-labelledby="euiSideNav_generated-id_heading"
+      class="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <h2
+        class="euiTitle euiSideNav__heading emotion-euiTitle-xs"
+        id="euiSideNav_generated-id_heading"
+      >
+        <div
+          aria-label="Solution"
+          class="euiAvatar euiAvatar--m euiAvatar--user kbnPageTemplateSolutionNavAvatar emotion-euiAvatar-m-user-plain"
+          role="img"
+          title="Solution"
+        >
+          <span
+            class="euiAvatar__icon"
+            data-euiicon-type="solution"
+          />
+        </div>
+        <strong>
+          Solution
+        </strong>
+      </h2>
+      <div
+        class="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="euiSideNav_generated-id_content"
+      >
+        <div
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+        >
+          <div
+            class="euiSideNavItemButton"
+          >
+            <span
+              class="euiSideNavItemButton__content"
+            >
+              <span
+                class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+              >
+                Ingest
+              </span>
+            </span>
+          </div>
+          <div
+            class="euiSideNavItem__items"
+          >
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Ingest Node Pipelines
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Logstash Pipelines
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Beats Central Management
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+        >
+          <div
+            class="euiSideNavItemButton"
+          >
+            <span
+              class="euiSideNavItemButton__content"
+            >
+              <span
+                class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+              >
+                Data
+              </span>
+            </span>
+          </div>
+          <div
+            class="euiSideNavItem__items"
+          >
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Index Management
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Index Lifecycle Policies
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Snapshot and Restore
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <button
+      aria-label="Collapse side navigation"
+      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small kbnPageTemplateSolutionNavCollapseButton"
+      title="Collapse side navigation"
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        class="euiButtonIcon__icon"
+        color="inherit"
+        data-euiicon-type="menuLeft"
+      />
+    </button>
+  </div>
   <div
-    class="euiPanel euiPanel--plain euiPageBody euiPageBody--borderRadiusNone emotion-euiPanel-grow-none-plain-hasShadow"
+    class="euiPanel euiPanel--plain euiPageBody emotion-euiPanel-grow-none-plain-hasShadow-euiPageBody"
   >
     <div
-      class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--paddingLarge"
+      class="euiPageBody emotion-euiPageBody-l"
     >
       <header
-        class="euiPageHeader euiPageHeader--restrictWidth-default euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
+        class="euiPageHeader emotion-euiPageHeader-headerMargin"
         title="test"
       >
         <div
-          class="euiPageHeaderContent"
+          class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+          style="max-width:1200px"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
           >
             <div
               class="euiFlexItem"
@@ -224,7 +414,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
               >
                 <div
                   class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -241,7 +431,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
         role="main"
       >
         <div
-          class="euiPageContentBody euiPage--restrictWidth-default"
+          class="euiPageContentBody euiPageContentBody--restrictWidth-default"
         />
       </div>
     </div>

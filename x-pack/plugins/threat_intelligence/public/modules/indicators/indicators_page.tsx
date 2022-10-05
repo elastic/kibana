@@ -5,76 +5,116 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
-import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
-import { IndicatorsTable } from './components/indicators_table/indicators_table';
+import React, { FC, VFC } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { IndicatorsBarChartWrapper } from './components/barchart';
+import { IndicatorsTable } from './components/table';
 import { useIndicators } from './hooks/use_indicators';
-import { EmptyPage } from '../empty_page';
-import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
 import { DefaultPageLayout } from '../../components/layout';
-import { useFilters } from './hooks/use_filters';
+import { useFilters } from '../query_bar/hooks/use_filters';
 import { FiltersGlobal } from '../../containers/filters_global';
-import QueryBar from './components/query_bar';
 import { useSourcererDataView } from './hooks/use_sourcerer_data_view';
+import { FieldTypesProvider } from '../../containers/field_types_provider';
+import { InspectorProvider } from '../../containers/inspector';
+import { useColumnSettings } from './components/table/hooks';
+import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
+import { IndicatorsFilters } from './containers/indicators_filters';
+import { useSecurityContext } from '../../hooks/use_security_context';
+import { UpdateStatus } from '../../components/update_status';
 
-export const IndicatorsPage: VFC = () => {
-  const { count: indicatorsTotalCount, isLoading: isIndicatorsTotalCountLoading } =
-    useIndicatorsTotalCount();
+const queryClient = new QueryClient();
 
+const IndicatorsPageProviders: FC = ({ children }) => (
+  <QueryClientProvider client={queryClient}>
+    <IndicatorsFilters>
+      <FieldTypesProvider>
+        <InspectorProvider>{children}</InspectorProvider>
+      </FieldTypesProvider>
+    </IndicatorsFilters>
+  </QueryClientProvider>
+);
+
+const IndicatorsPageContent: VFC = () => {
   const { browserFields, indexPattern } = useSourcererDataView();
 
-  const {
-    timeRange,
-    filters,
-    filterManager,
-    filterQuery,
-    handleSubmitQuery,
-    handleSubmitTimeRange,
-    handleSavedQuery,
-    savedQuery,
-  } = useFilters();
+  const columnSettings = useColumnSettings();
 
-  const { handleRefresh, ...indicators } = useIndicators({
+  const { timeRange, filters, filterQuery } = useFilters();
+
+  const {
+    indicatorCount,
+    indicators,
+    onChangeItemsPerPage,
+    onChangePage,
+    pagination,
+    isLoading: isLoadingIndicators,
+    isFetching: isFetchingIndicators,
+    dataUpdatedAt,
+  } = useIndicators({
     filters,
     filterQuery,
     timeRange,
+    sorting: columnSettings.sorting.columns,
   });
 
-  // This prevents indicators table flash when total count is loading.
-  // TODO: Improve this with custom loader component. It would require changes to security solutions' template wrapper - to allow
-  // 'template' overrides.
-  if (isIndicatorsTotalCountLoading) {
-    return null;
-  }
+  const {
+    dateRange,
+    series,
+    selectedField,
+    onFieldChange,
+    isLoading: isLoadingAggregatedIndicators,
+    isFetching: isFetchingAggregatedIndicators,
+  } = useAggregatedIndicators({
+    timeRange,
+    filters,
+    filterQuery,
+  });
 
-  const showEmptyPage = indicatorsTotalCount === 0;
+  const { SiemSearchBar } = useSecurityContext();
 
-  return showEmptyPage ? (
-    <EmptyPage />
-  ) : (
-    <DefaultPageLayout pageTitle="Indicators">
-      <FiltersGlobal>
-        <QueryBar
-          dateRangeFrom={timeRange?.from}
-          dateRangeTo={timeRange?.to}
+  return (
+    <FieldTypesProvider>
+      <DefaultPageLayout
+        pageTitle="Indicators"
+        subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
+      >
+        <FiltersGlobal>
+          <SiemSearchBar indexPattern={indexPattern} id="global" />
+        </FiltersGlobal>
+
+        <IndicatorsBarChartWrapper
+          dateRange={dateRange}
+          series={series}
+          timeRange={timeRange}
           indexPattern={indexPattern}
-          filterQuery={filterQuery}
-          filterManager={filterManager}
-          filters={filters}
-          dataTestSubj="iocListPageQueryInput"
-          displayStyle="detached"
-          savedQuery={savedQuery}
-          onRefresh={handleRefresh}
-          onSubmitQuery={handleSubmitQuery}
-          onSavedQuery={handleSavedQuery}
-          onSubmitDateRange={handleSubmitTimeRange}
+          field={selectedField}
+          onFieldChange={onFieldChange}
+          isFetching={isFetchingAggregatedIndicators}
+          isLoading={isLoadingAggregatedIndicators}
         />
-      </FiltersGlobal>
-      <IndicatorsBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
-      <IndicatorsTable {...indicators} browserFields={browserFields} indexPattern={indexPattern} />
-    </DefaultPageLayout>
+
+        <IndicatorsTable
+          browserFields={browserFields}
+          indexPattern={indexPattern}
+          columnSettings={columnSettings}
+          pagination={pagination}
+          indicatorCount={indicatorCount}
+          indicators={indicators}
+          isLoading={isLoadingIndicators}
+          isFetching={isFetchingIndicators}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+        />
+      </DefaultPageLayout>
+    </FieldTypesProvider>
   );
 };
+
+export const IndicatorsPage: VFC = () => (
+  <IndicatorsPageProviders>
+    <IndicatorsPageContent />
+  </IndicatorsPageProviders>
+);
 
 // Note: This is for lazy loading
 // eslint-disable-next-line import/no-default-export

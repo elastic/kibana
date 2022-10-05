@@ -36,6 +36,7 @@ export {
   AGENTS_PREFIX,
   AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS,
   agentPolicyStatuses,
+  FleetServerAgentComponentStatuses,
   // Routes
   PACKAGE_POLICY_API_ROOT,
   AGENT_API_ROUTES,
@@ -47,6 +48,8 @@ export {
   // Should probably be removed
   SO_SEARCH_LIMIT,
   // Statuses
+  // Authz
+  ENDPOINT_PRIVILEGES,
 } from './constants';
 export {
   // Route services
@@ -59,6 +62,7 @@ export {
   fleetSetupRouteService,
   // Package policy helpers
   isValidNamespace,
+  INVALID_NAMESPACE_CHARACTERS,
   // TODO Should probably not be exposed by Fleet
   decodeCloudId,
 } from './services';
@@ -101,6 +105,8 @@ export type {
   UpgradePackagePolicyResponseItem,
   UpgradePackagePolicyBaseResponse,
   UpgradePackagePolicyDryRunResponseItem,
+  BulkGetPackagePoliciesResponse,
+  BulkGetAgentPoliciesResponse,
   // Models
   Agent,
   AgentStatus,
@@ -175,6 +181,7 @@ export type {
   InstallFailed,
   // Fleet server models
   FleetServerAgent,
+  FleetServerAgentComponentStatus,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';

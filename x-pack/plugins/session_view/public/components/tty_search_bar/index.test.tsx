@@ -28,12 +28,13 @@ describe('TTYSearchBar component', () => {
     const events = sessionViewIOEventsMock?.events?.map((event) => event._source);
     const pages: ProcessEventsPage[] = [{ events, total: events?.length }];
     const { result } = renderHook(() => useIOLines(pages));
-    const lines = result.current;
+    const lines = result.current.lines;
 
     props = {
       lines,
       seekToLine: jest.fn(),
       xTermSearchFn: jest.fn(),
+      setIsPlaying: jest.fn(),
     };
   });
 
@@ -56,7 +57,10 @@ describe('TTYSearchBar component', () => {
     // there is a slight delay in the seek in xtermjs, so we wait 100ms before trying to highlight a result.
     await new Promise((r) => setTimeout(r, 100));
 
-    expect(props.xTermSearchFn).toHaveBeenCalledTimes(1);
+    expect(props.xTermSearchFn).toHaveBeenCalledTimes(2);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '', 0);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 6);
+    expect(props.setIsPlaying).toHaveBeenCalledWith(false);
   });
 
   it('calls seekToline and xTermSearchFn when currentMatch changes', async () => {
@@ -76,12 +80,14 @@ describe('TTYSearchBar component', () => {
 
     // two calls, first instance -h is at line 22, 2nd at line 42
     expect(props.seekToLine).toHaveBeenCalledTimes(2);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(1, 22);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(2, 42);
+    expect(props.seekToLine).toHaveBeenNthCalledWith(1, 26);
+    expect(props.seekToLine).toHaveBeenNthCalledWith(2, 100);
 
-    expect(props.xTermSearchFn).toHaveBeenCalledTimes(2);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '-h', 6);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 13);
+    expect(props.xTermSearchFn).toHaveBeenCalledTimes(3);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '', 0);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 6);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(3, '-h', 13);
+    expect(props.setIsPlaying).toHaveBeenCalledTimes(3);
   });
 
   it('calls xTermSearchFn with empty query when search is cleared', async () => {
@@ -97,6 +103,7 @@ describe('TTYSearchBar component', () => {
     userEvent.click(renderResult.getByTestId('clearSearchButton'));
     await new Promise((r) => setTimeout(r, 100));
 
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '', 0);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(3, '', 0);
+    expect(props.setIsPlaying).toHaveBeenCalledWith(false);
   });
 });

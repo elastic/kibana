@@ -78,7 +78,7 @@ export const createInitialState = (
     ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
-    inputs: createInitialInputsState(),
+    inputs: createInitialInputsState(enableExperimental.socTrendsEnabled),
     sourcerer: {
       ...sourcererModel.initialSourcererState,
       sourcererScopes: {

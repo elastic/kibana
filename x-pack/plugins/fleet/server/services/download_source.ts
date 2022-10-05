@@ -13,7 +13,7 @@ import {
 } from '../constants';
 
 import type { DownloadSource, DownloadSourceAttributes, DownloadSourceBase } from '../types';
-import { DownloadSourceError, IngestManagerError } from '../errors';
+import { DownloadSourceError, FleetError } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
@@ -63,7 +63,7 @@ class DownloadSourceService {
   public async create(
     soClient: SavedObjectsClientContract,
     downloadSource: DownloadSourceBase,
-    options?: { id?: string }
+    options?: { id?: string; overwrite?: boolean }
   ): Promise<DownloadSource> {
     const data: DownloadSourceAttributes = downloadSource;
 
@@ -89,6 +89,7 @@ class DownloadSourceService {
       data,
       {
         id: options?.id,
+        overwrite: options?.overwrite ?? false,
       }
     );
     return savedObjectToDownloadSource(newSo);
@@ -171,6 +172,7 @@ class DownloadSourceService {
 
       return await this.create(soClient, newDefaultDS, {
         id: DEFAULT_DOWNLOAD_SOURCE_ID,
+        overwrite: true,
       });
     }
 
@@ -197,7 +199,7 @@ class DownloadSourceService {
           ? `Download Source '${idsWithName[0]}' already exists`
           : `Download Sources '${idsWithName.join(',')}' already exist`;
 
-        throw new IngestManagerError(`${existClause} with name '${downloadSource.name}'`);
+        throw new FleetError(`${existClause} with name '${downloadSource.name}'`);
       }
     }
   }

@@ -23,6 +23,26 @@ describe('SessionView component', () => {
   let mockedContext: AppContextTestRender;
   let mockedApi: AppContextTestRender['coreStart']['http']['get'];
 
+  beforeAll(() => {
+    // https://stackoverflow.com/questions/39830580/jest-test-fails-typeerror-window-matchmedia-is-not-a-function
+    // xtermjs is using window.matchMedia, which isn't mocked in jest by default.
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(), // Deprecated
+        removeListener: jest.fn(), // Deprecated
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+
+    global.ResizeObserver = require('resize-observer-polyfill');
+  });
+
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     mockedApi = mockedContext.coreStart.http.get;
@@ -158,10 +178,10 @@ describe('SessionView component', () => {
           if (path === PROCESS_EVENTS_ROUTE) {
             return sessionViewProcessEventsMock;
           } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
-            return 1024;
+            return { total: 1024 };
           }
 
-          return 0;
+          return { total: 0 };
         });
 
         render();
@@ -171,7 +191,7 @@ describe('SessionView component', () => {
         });
       });
 
-      it('should NOT show tty player button, if session has no output', async () => {
+      it('should show tty player button as disabled, if session has no output', async () => {
         mockedApi.mockImplementation(async (options) => {
           // for some reason the typescript interface for options says its an object with a field called path.
           // in reality options is a string (which equals the path...)
@@ -180,16 +200,18 @@ describe('SessionView component', () => {
           if (path === PROCESS_EVENTS_ROUTE) {
             return sessionViewProcessEventsMock;
           } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
-            return 0;
+            return { total: 0 };
           }
 
-          return 0;
+          return { total: 0 };
         });
 
         render();
 
         await waitFor(() => {
-          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeFalsy();
+          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toHaveClass(
+            'euiButtonIcon-isDisabled'
+          );
         });
       });
     });

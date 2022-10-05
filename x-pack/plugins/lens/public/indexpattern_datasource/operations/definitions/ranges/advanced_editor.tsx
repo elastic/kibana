@@ -7,7 +7,7 @@
 
 import './advanced_editor.scss';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -23,15 +23,15 @@ import {
   keys,
 } from '@elastic/eui';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { useDebounceWithOptions } from '../../../../shared_components';
-import { RangeTypeLens, isValidRange } from './ranges';
-import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import {
-  NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,
-  LabelInput,
-} from '../shared_components';
+  NewBucketButton,
+  useDebounceWithOptions,
+} from '../../../../shared_components';
+import { RangeTypeLens, isValidRange } from './ranges';
+import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
+import { LabelInput } from '../shared_components';
 import { isValidNumber } from '../helpers';
 
 const generateId = htmlIdGenerator();
@@ -220,7 +220,7 @@ export const AdvancedRangeEditor = ({
     [localRanges]
   );
 
-  const addNewRange = () => {
+  const addNewRange = useCallback(() => {
     const newRangeId = generateId();
 
     setLocalRanges([
@@ -228,13 +228,13 @@ export const AdvancedRangeEditor = ({
       {
         id: newRangeId,
         from: localRanges[localRanges.length - 1].to,
-        to: Infinity,
+        to: Number.POSITIVE_INFINITY,
         label: '',
       },
     ]);
 
     setActiveRangeId(newRangeId);
-  };
+  }, [localRanges]);
 
   const changeActiveRange = (rangeId: string) => {
     let newActiveRangeId = rangeId;
@@ -264,11 +264,10 @@ export const AdvancedRangeEditor = ({
       <>
         <DragDropBuckets
           onDragEnd={setLocalRanges}
-          onDragStart={() => {}}
           droppableId="RANGES_DROPPABLE_AREA"
           items={localRanges}
         >
-          {localRanges.map((range: LocalRangeType, idx: number) => (
+          {localRanges.map((range, idx, arrayRef) => (
             <DraggableBucketContainer
               key={range.id}
               idx={idx}
@@ -278,20 +277,21 @@ export const AdvancedRangeEditor = ({
                 defaultMessage: 'This range is invalid',
               })}
               onRemoveClick={() => {
-                const newRanges = localRanges.filter((_, i) => i !== idx);
+                const newRanges = arrayRef.filter((_, i) => i !== idx);
                 setLocalRanges(newRanges);
               }}
               removeTitle={i18n.translate('xpack.lens.indexPattern.ranges.deleteRange', {
                 defaultMessage: 'Delete range',
               })}
-              isNotRemovable={localRanges.length === 1}
+              isNotRemovable={arrayRef.length === 1}
+              isNotDraggable={arrayRef.length < 2}
             >
               <RangePopover
                 range={range}
                 isOpen={range.id === activeRangeId}
                 triggerClose={() => changeActiveRange('')}
                 setRange={(newRange: LocalRangeType) => {
-                  const newRanges = [...localRanges];
+                  const newRanges = [...arrayRef];
                   if (newRange.id === newRanges[idx].id) {
                     newRanges[idx] = newRange;
                   } else {
@@ -320,9 +320,7 @@ export const AdvancedRangeEditor = ({
           ))}
         </DragDropBuckets>
         <NewBucketButton
-          onClick={() => {
-            addNewRange();
-          }}
+          onClick={addNewRange}
           label={i18n.translate('xpack.lens.indexPattern.ranges.addRange', {
             defaultMessage: 'Add range',
           })}

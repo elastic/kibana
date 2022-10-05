@@ -22,15 +22,19 @@ import { DEFAULT_META } from '../../../shared/constants';
 
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 
-import { IngestionStatus } from '../../types';
+import { IngestionMethod, IngestionStatus } from '../../types';
 
 import { IndicesLogic } from './indices_logic';
 
 const DEFAULT_VALUES = {
   data: undefined,
+  deleteModalIndex: null,
   deleteModalIndexName: '',
+  deleteModalIngestionMethod: IngestionMethod.API,
+  deleteStatus: Status.IDLE,
   hasNoIndices: false,
   indices: [],
+  isDeleteLoading: false,
   isDeleteModalVisible: false,
   isFirstRequest: true,
   isLoading: true,
@@ -76,17 +80,19 @@ describe('IndicesLogic', () => {
     });
     describe('openDeleteModal', () => {
       it('should set deleteIndexName and set isDeleteModalVisible to true', () => {
-        IndicesLogic.actions.openDeleteModal('delete');
+        IndicesLogic.actions.openDeleteModal(connectorIndex);
         expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          deleteModalIndexName: 'delete',
+          deleteModalIndex: connectorIndex,
+          deleteModalIndexName: 'connector',
+          deleteModalIngestionMethod: IngestionMethod.CONNECTOR,
           isDeleteModalVisible: true,
         });
       });
     });
     describe('closeDeleteModal', () => {
       it('should set deleteIndexName to empty and set isDeleteModalVisible to false', () => {
-        IndicesLogic.actions.openDeleteModal('delete');
+        IndicesLogic.actions.openDeleteModal(connectorIndex);
         IndicesLogic.actions.closeDeleteModal();
         expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
       });
@@ -248,6 +254,36 @@ describe('IndicesLogic', () => {
             meta,
           },
           status: Status.SUCCESS,
+        });
+      });
+    });
+    describe('deleteRequest', () => {
+      it('should update isDeleteLoading to true on deleteIndex', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.LOADING,
+          isDeleteLoading: true,
+        });
+      });
+      it('should update isDeleteLoading to to false on apiError', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        IndicesLogic.actions.deleteError({} as HttpError);
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.ERROR,
+          isDeleteLoading: false,
+        });
+      });
+      it('should update isDeleteLoading to to false on apiSuccess', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        IndicesLogic.actions.deleteSuccess();
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.SUCCESS,
+          isDeleteLoading: false,
         });
       });
     });

@@ -7,11 +7,19 @@ PKG_REQUIRE_NAME = "@kbn/core-metrics-server-internal"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -29,11 +37,15 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//rxjs",
   "@npm//moment",
-  "//packages/kbn-logging-mocks",
   "//packages/kbn-config-schema",
-  "//packages/core/http/core-http-server-mocks",
   "//packages/core/metrics/core-metrics-collectors-server-internal",
+  "//packages/core/elasticsearch/core-elasticsearch-server-internal",
+  ### test dependencies
+  "//packages/kbn-logging-mocks",
+  "//packages/core/http/core-http-server-mocks",
+  "//packages/core/metrics/core-metrics-server-mocks",
   "//packages/core/metrics/core-metrics-collectors-server-mocks",
+  "//packages/core/elasticsearch/core-elasticsearch-server-mocks",
 
 ]
 
@@ -49,6 +61,7 @@ TYPES_DEPS = [
   "//packages/core/http/core-http-server-internal:npm_module_types",
   "//packages/core/metrics/core-metrics-server:npm_module_types",
   "//packages/core/metrics/core-metrics-collectors-server-internal:npm_module_types",
+  "//packages/core/elasticsearch/core-elasticsearch-server-internal:npm_module_types",
 
 ]
 
@@ -56,7 +69,6 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  root_input_dir = "src",
 )
 
 ts_config(
@@ -77,7 +89,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

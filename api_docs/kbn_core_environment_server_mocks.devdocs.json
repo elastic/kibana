@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
@@ -37,6 +38,7 @@
             ],
             "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -54,6 +56,7 @@
             ],
             "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -71,6 +74,7 @@
             ],
             "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

@@ -10,15 +10,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-} from '@kbn/core/server';
+import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { nodeBuilder } from '@kbn/es-query';
 
+import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import {
   CasePatchRequest,
   CasesPatchRequest,
@@ -31,10 +27,12 @@ import {
   excess,
   throwErrors,
   CaseAttributes,
+  User,
 } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_ASSIGNEES_PER_CASE,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
@@ -50,7 +48,9 @@ import {
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
-import { getClosedInfoForUpdate, getDurationForUpdate } from './utils';
+import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { LicensingService } from '../../services/licensing';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -76,6 +76,66 @@ function throwIfTitleIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
     const ids = requestsInvalidTitle.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(
       `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
+/**
+ * Throws an error if any of the requests attempt to update the assignees of the case
+ * without the appropriate license
+ */
+function throwIfUpdateAssigneesWithoutValidLicense(
+  requests: UpdateRequestWithOriginalCase[],
+  hasPlatinumLicenseOrGreater: boolean
+) {
+  if (hasPlatinumLicenseOrGreater) {
+    return;
+  }
+
+  const requestsUpdatingAssignees = requests.filter(
+    ({ updateReq }) => updateReq.assignees !== undefined
+  );
+
+  if (requestsUpdatingAssignees.length > 0) {
+    const ids = requestsUpdatingAssignees.map(({ updateReq }) => updateReq.id);
+    throw Boom.forbidden(
+      `In order to assign users to cases, you must be subscribed to an Elastic Platinum license, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
+function notifyPlatinumUsage(
+  licensingService: LicensingService,
+  requests: UpdateRequestWithOriginalCase[]
+) {
+  const requestsUpdatingAssignees = requests.filter(
+    ({ updateReq }) => updateReq.assignees !== undefined
+  );
+
+  if (requestsUpdatingAssignees.length > 0) {
+    licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+  }
+}
+
+/**
+ * Throws an error if any of the requests attempt to add more than
+ * MAX_ASSIGNEES_PER_CASE to a case
+ */
+function throwIfTotalAssigneesAreInvalid(requests: UpdateRequestWithOriginalCase[]) {
+  const requestsUpdatingAssignees = requests.filter(
+    ({ updateReq }) => updateReq.assignees !== undefined
+  );
+
+  if (
+    requestsUpdatingAssignees.some(({ updateReq }) => areTotalAssigneesInvalid(updateReq.assignees))
+  ) {
+    const ids = requestsUpdatingAssignees.map(({ updateReq }) => updateReq.id);
+    throw Boom.badRequest(
+      `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case, ids: [${ids.join(
         ', '
       )}]`
     );
@@ -139,13 +199,11 @@ async function updateAlerts({
   casesWithSyncSettingChangedToOn,
   casesWithStatusChangedAndSynced,
   caseService,
-  unsecuredSavedObjectsClient,
   alertsService,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   alertsService: AlertService;
 }) {
   /**
@@ -236,7 +294,7 @@ export const update = async (
 ): Promise<CasesResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseService, userActionService, alertsService },
+    services: { caseService, userActionService, alertsService, licensingService },
     user,
     logger,
     authorization,
@@ -307,38 +365,16 @@ export const update = async (
       throw Boom.notAcceptable('All update fields are identical to current version.');
     }
 
+    const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
+
     throwIfUpdateOwner(updateCases);
     throwIfTitleIsInvalid(updateCases);
+    throwIfUpdateAssigneesWithoutValidLicense(updateCases, hasPlatinumLicense);
+    throwIfTotalAssigneesAreInvalid(updateCases);
 
-    const updatedDt = new Date().toISOString();
-    const updatedCases = await caseService.patchCases({
-      cases: updateCases.map(({ updateReq, originalCase }) => {
-        // intentionally removing owner from the case so that we don't accidentally allow it to be updated
-        const { id: caseId, version, owner, ...updateCaseAttributes } = updateReq;
+    notifyPlatinumUsage(licensingService, updateCases);
 
-        return {
-          caseId,
-          originalCase,
-          updatedAttributes: {
-            ...updateCaseAttributes,
-            ...getClosedInfoForUpdate({
-              user,
-              closedDate: updatedDt,
-              status: updateCaseAttributes.status,
-            }),
-            ...getDurationForUpdate({
-              status: updateCaseAttributes.status,
-              closedAt: updatedDt,
-              createdAt: originalCase.attributes.created_at,
-            }),
-            updated_at: updatedDt,
-            updated_by: user,
-          },
-          version,
-        };
-      }),
-      refresh: false,
-    });
+    const updatedCases = await patchCases({ caseService, user, casesToUpdate: updateCases });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status
     // attached to the case to the new status.
@@ -367,7 +403,6 @@ export const update = async (
       casesWithStatusChangedAndSynced,
       casesWithSyncSettingChangedToOn,
       caseService,
-      unsecuredSavedObjectsClient,
       alertsService,
     });
 
@@ -408,4 +443,50 @@ export const update = async (
       logger,
     });
   }
+};
+
+const patchCases = async ({
+  caseService,
+  casesToUpdate,
+  user,
+}: {
+  caseService: CasesService;
+  casesToUpdate: UpdateRequestWithOriginalCase[];
+  user: User;
+}) => {
+  const updatedDt = new Date().toISOString();
+
+  const updatedCases = await caseService.patchCases({
+    cases: casesToUpdate.map(({ updateReq, originalCase }) => {
+      // intentionally removing owner from the case so that we don't accidentally allow it to be updated
+      const { id: caseId, version, owner, assignees, ...updateCaseAttributes } = updateReq;
+
+      const dedupedAssignees = dedupAssignees(assignees);
+
+      return {
+        caseId,
+        originalCase,
+        updatedAttributes: {
+          ...updateCaseAttributes,
+          ...(dedupedAssignees && { assignees: dedupedAssignees }),
+          ...getClosedInfoForUpdate({
+            user,
+            closedDate: updatedDt,
+            status: updateCaseAttributes.status,
+          }),
+          ...getDurationForUpdate({
+            status: updateCaseAttributes.status,
+            closedAt: updatedDt,
+            createdAt: originalCase.attributes.created_at,
+          }),
+          updated_at: updatedDt,
+          updated_by: user,
+        },
+        version,
+      };
+    }),
+    refresh: false,
+  });
+
+  return updatedCases;
 };

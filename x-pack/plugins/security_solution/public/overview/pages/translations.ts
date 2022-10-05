@@ -49,6 +49,15 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
     defaultMessage: 'Detection & Response',
   }
 );
+
+export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.pageDesc',
+  {
+    defaultMessage:
+      'Detect threats from users and devices within your network with Entity Analytics',
+  }
+);
+
 export const NO_PERMISSIONS_MSG = i18n.translate(
   'xpack.securitySolution.detectionResponse.noPagePermissionsMessage',
   {
@@ -66,5 +75,12 @@ export const GO_TO_DOCUMENTATION = i18n.translate(
   'xpack.securitySolution.detectionResponse.goToDocumentationButton',
   {
     defaultMessage: 'View documentation',
+  }
+);
+
+export const TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
   }
 );

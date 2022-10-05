@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiBetaBadge, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
@@ -19,7 +19,6 @@ import { SimpleAlertTable } from './simple_alert_table';
 import { getEnrichedFieldInfo } from '../helpers';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { SESSION_LOADING, SESSION_EMPTY, SESSION_ERROR, SESSION_COUNT } from './translations';
-import { BETA } from '../../../translations';
 
 interface Props {
   browserFields: BrowserFields;
@@ -44,6 +43,7 @@ export const RelatedAlertsBySession = React.memo<Props>(
       timelineId: timelineId ?? '',
       signalIndexName: null,
       includeAlertIds: true,
+      ignoreTimerange: true,
     });
 
     const { fieldFromBrowserField } = getEnrichedFieldInfo({
@@ -100,7 +100,6 @@ export const RelatedAlertsBySession = React.memo<Props>(
         state={state}
         text={getTextFromState(state, count)}
         renderContent={renderContent}
-        extraAction={<EuiBetaBadge size="s" label={BETA} color="subdued" />}
       />
     );
   }

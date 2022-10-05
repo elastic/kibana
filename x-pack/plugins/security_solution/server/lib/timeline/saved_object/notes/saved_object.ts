@@ -258,19 +258,11 @@ export const convertSavedObjectToSavedNote = (
     }, identity)
   );
 
-// we have to use any here because the SavedObjectAttributes interface is like below
-// export interface SavedObjectAttributes {
-//   [key: string]: SavedObjectAttributes | string | number | boolean | null;
-// }
-// then this interface does not allow types without index signature
-// this is limiting us with our type for now so the easy way was to use any
-
 const pickSavedNote = (
   noteId: string | null,
   savedNote: SavedNote,
   userInfo: AuthenticatedUser | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
+) => {
   if (noteId == null) {
     savedNote.created = new Date().valueOf();
     savedNote.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;

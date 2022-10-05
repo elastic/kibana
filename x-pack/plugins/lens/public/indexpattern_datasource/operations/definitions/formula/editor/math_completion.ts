@@ -29,7 +29,10 @@ import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
 import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
-import { windowOptionOrder, windowOptions } from '../../../../window_utils';
+import {
+  reducedTimeRangeOptionOrder,
+  reducedTimeRangeOptions,
+} from '../../../../reduced_time_range_utils';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
@@ -37,7 +40,7 @@ export enum SUGGESTION_TYPE {
   FUNCTIONS = 'functions',
   KQL = 'kql',
   SHIFTS = 'shifts',
-  WINDOWS = 'windows',
+  REDUCED_TIME_RANGES = 'reducedTimeRanges',
 }
 
 export type LensMathSuggestion =
@@ -260,9 +263,9 @@ function getArgumentSuggestions(
         list.push('shift');
       }
     }
-    if (operation.windowable) {
-      if (!namedArguments.find((arg) => arg.name === 'timeRange')) {
-        list.push('timeRange');
+    if (operation.canReduceTimeRange) {
+      if (!namedArguments.find((arg) => arg.name === 'reducedTimeRange')) {
+        list.push('reducedTimeRange');
       }
     }
     if ('operationParams' in operation) {
@@ -369,10 +372,10 @@ export async function getNamedArgumentSuggestions({
       type: SUGGESTION_TYPE.SHIFTS,
     };
   }
-  if (ast.name === 'timeRange') {
+  if (ast.name === 'reducedTimeRange') {
     return {
-      list: windowOptions.map(({ value }) => value),
-      type: SUGGESTION_TYPE.WINDOWS,
+      list: reducedTimeRangeOptions.map(({ value }) => value),
+      type: SUGGESTION_TYPE.REDUCED_TIME_RANGES,
     };
   }
   if (ast.name !== 'kql' && ast.name !== 'lucene') {
@@ -429,8 +432,8 @@ export function getSuggestion(
     case SUGGESTION_TYPE.SHIFTS:
       sortText = String(timeShiftOptionOrder[label]).padStart(4, '0');
       break;
-    case SUGGESTION_TYPE.WINDOWS:
-      sortText = String(windowOptionOrder[label]).padStart(4, '0');
+    case SUGGESTION_TYPE.REDUCED_TIME_RANGES:
+      sortText = String(reducedTimeRangeOptionOrder[label]).padStart(4, '0');
       break;
     case SUGGESTION_TYPE.FIELD:
       kind = monaco.languages.CompletionItemKind.Value;
@@ -460,7 +463,12 @@ export function getSuggestion(
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
       kind = monaco.languages.CompletionItemKind.Keyword;
-      if (label === 'kql' || label === 'lucene' || label === 'shift' || label === 'timeRange') {
+      if (
+        label === 'kql' ||
+        label === 'lucene' ||
+        label === 'shift' ||
+        label === 'reducedTimeRange'
+      ) {
         command = TRIGGER_SUGGESTION_COMMAND;
         insertText = `${label}='$0'`;
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;

@@ -10,7 +10,7 @@ import { join } from 'path';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 
 import sinon from 'sinon';
-import glob from 'glob-all';
+import globby from 'globby';
 import del from 'del';
 
 import { Logger } from '../lib/logger';
@@ -82,8 +82,7 @@ describe('kibana cli', function () {
       mkdirSync(join(pluginDir, 'bar'), { recursive: true });
 
       remove(settings, logger);
-
-      const files = glob.sync('**/*', { cwd: pluginDir });
+      const files = globby.sync('**/*', { cwd: pluginDir, onlyFiles: false });
       const expected = ['bar'];
       expect(files.sort()).toEqual(expected.sort());
     });
