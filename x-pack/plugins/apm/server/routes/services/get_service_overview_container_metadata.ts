@@ -43,6 +43,7 @@ export const getServiceOverviewContainerMetadata = async ({
 
   const response = await infraMetricsClient.search({
     size: 0,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [

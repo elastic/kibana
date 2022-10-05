@@ -66,6 +66,7 @@ const supportedPanelTypes: readonly PANEL_TYPES[] = [
   PANEL_TYPES.TIMESERIES,
   PANEL_TYPES.TOP_N,
   PANEL_TYPES.METRIC,
+  PANEL_TYPES.GAUGE,
 ];
 
 const supportedTimeRangeModes: readonly TIME_RANGE_DATA_MODES[] = [

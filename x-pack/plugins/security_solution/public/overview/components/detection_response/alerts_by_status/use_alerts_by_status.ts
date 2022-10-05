@@ -7,6 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
@@ -32,6 +34,7 @@ export interface EntityFilter {
 }
 
 export const getAlertsByStatusQuery = ({
+  additionalFilters = [],
   from,
   to,
   entityFilter,
@@ -39,11 +42,13 @@ export const getAlertsByStatusQuery = ({
   from: string;
   to: string;
   entityFilter?: EntityFilter;
+  additionalFilters?: ESBoolQuery[];
 }) => ({
   size: 0,
   query: {
     bool: {
       filter: [
+        ...additionalFilters,
         { range: { '@timestamp': { gte: from, lte: to } } },
         ...(entityFilter
           ? [
@@ -104,6 +109,7 @@ export interface UseAlertsByStatusProps {
   signalIndexName: string | null;
   skip?: boolean;
   entityFilter?: EntityFilter;
+  additionalFilters?: ESBoolQuery[];
 }
 
 export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
@@ -113,6 +119,7 @@ export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
 };
 
 export const useAlertsByStatus: UseAlertsByStatus = ({
+  additionalFilters,
   entityFilter,
   queryId,
   signalIndexName,
@@ -134,6 +141,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       from,
       to,
       entityFilter,
+      additionalFilters,
     }),
     indexName: signalIndexName,
     skip,
@@ -146,9 +154,10 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
         from,
         to,
         entityFilter,
+        additionalFilters,
       })
     );
-  }, [setAlertsQuery, from, to, entityFilter]);
+  }, [setAlertsQuery, from, to, entityFilter, additionalFilters]);
 
   useEffect(() => {
     if (data == null) {
