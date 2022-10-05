@@ -245,6 +245,8 @@ const getTrendlineLayerConfiguration = (
           : [],
         supportsMoreColumns: !props.state.trendlineMetricAccessor,
         filterOperations: () => false,
+        hideGrouping: true,
+        nestingOrder: 2,
       },
       {
         groupId: GROUP_ID.TREND_TIME,
@@ -258,6 +260,8 @@ const getTrendlineLayerConfiguration = (
           : [],
         supportsMoreColumns: !props.state.trendlineTimeAccessor,
         filterOperations: () => false,
+        hideGrouping: true,
+        nestingOrder: 1,
       },
       {
         groupId: GROUP_ID.TREND_BREAKDOWN_BY,
@@ -273,6 +277,8 @@ const getTrendlineLayerConfiguration = (
           : [],
         supportsMoreColumns: !props.state.trendlineBreakdownByAccessor,
         filterOperations: () => false,
+        hideGrouping: true,
+        nestingOrder: 0,
       },
     ],
   };

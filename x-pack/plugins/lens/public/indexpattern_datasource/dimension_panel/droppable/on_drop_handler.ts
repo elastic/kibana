@@ -188,34 +188,28 @@ function onMoveCompatible(
     shouldDeleteSource,
   });
 
-  if (target.layerId === source.layerId) {
-    const updatedColumnOrder = reorderByGroups(
-      dimensionGroups,
-      getColumnOrder(modifiedLayers[target.layerId]),
-      target.groupId,
-      target.columnId
-    );
+  const updatedColumnOrder = reorderByGroups(
+    dimensionGroups,
+    getColumnOrder(modifiedLayers[target.layerId]),
+    target.groupId,
+    target.columnId
+  );
 
-    const newLayer = {
-      ...modifiedLayers[target.layerId],
-      columnOrder: updatedColumnOrder,
-      columns: modifiedLayers[target.layerId].columns,
-    };
+  const newLayer = {
+    ...modifiedLayers[target.layerId],
+    columnOrder: updatedColumnOrder,
+    columns: modifiedLayers[target.layerId].columns,
+  };
 
-    // Time to replace
-    setState(
-      mergeLayer({
-        state,
-        layerId: target.layerId,
-        newLayer,
-      })
-    );
-    return true;
-  } else {
-    setState(mergeLayers({ state, newLayers: modifiedLayers }));
-
-    return true;
-  }
+  // Time to replace
+  setState(
+    mergeLayer({
+      state,
+      layerId: target.layerId,
+      newLayer,
+    })
+  );
+  return true;
 }
 
 function onReorder({

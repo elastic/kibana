@@ -143,6 +143,8 @@ Object {
       "filterOperations": [Function],
       "groupId": "trendMetric",
       "groupLabel": "Primary metric",
+      "hideGrouping": true,
+      "nestingOrder": 2,
       "supportsMoreColumns": false,
     },
     Object {
@@ -154,6 +156,8 @@ Object {
       "filterOperations": [Function],
       "groupId": "trendTime",
       "groupLabel": "Time field",
+      "hideGrouping": true,
+      "nestingOrder": 1,
       "supportsMoreColumns": false,
     },
     Object {
@@ -165,6 +169,8 @@ Object {
       "filterOperations": [Function],
       "groupId": "trendBreakdownBy",
       "groupLabel": "Break down by",
+      "hideGrouping": true,
+      "nestingOrder": 0,
       "supportsMoreColumns": false,
     },
   ],
