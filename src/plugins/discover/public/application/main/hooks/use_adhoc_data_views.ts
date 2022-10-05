@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { DataViewsContract, type DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
@@ -22,17 +22,15 @@ import { GetStateReturn } from '../services/discover_state';
 export const useAdHocDataViews = ({
   dataView,
   savedSearch,
-  dataViews,
   stateContainer,
   setUrlTracking,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
-  dataViews: DataViewsContract;
   stateContainer: GetStateReturn;
   setUrlTracking: (dataView: DataView) => void;
 }) => {
-  const { filterManager } = useDiscoverServices();
+  const { dataViews, filterManager } = useDiscoverServices();
   const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
     !dataView.isPersisted() ? [dataView] : []
   );

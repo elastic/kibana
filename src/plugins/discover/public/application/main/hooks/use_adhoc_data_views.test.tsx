@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -15,6 +16,7 @@ import { useAdHocDataViews } from './use_adhoc_data_views';
 import * as persistencePromptModule from '../../../hooks/use_confirm_persistence_prompt';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 import { setUrlTracker } from '../../../kibana_services';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 jest.mock('../../../hooks/use_confirm_persistence_prompt', () => {
   const createdDataView = {
@@ -72,16 +74,25 @@ const savedSearchMock = {
 
 describe('useAdHocDataViews', () => {
   it('should save data view with new id and update saved search', async () => {
-    const hook = renderHook((d: DataView) =>
-      useAdHocDataViews({
-        dataView: mockDataView,
-        dataViews: mockDiscoverServices.dataViews,
-        savedSearch: savedSearchMock,
-        stateContainer: {
-          appStateContainer: { getState: jest.fn().mockReturnValue({}) },
-        } as unknown as GetStateReturn,
-        onChangeDataView: jest.fn(),
-      })
+    const hook = renderHook(
+      (d: DataView) =>
+        useAdHocDataViews({
+          dataView: mockDataView,
+          savedSearch: savedSearchMock,
+          stateContainer: {
+            appStateContainer: { getState: jest.fn().mockReturnValue({}) },
+            replaceUrlAppState: jest.fn(),
+            kbnUrlStateStorage: {
+              kbnUrlControls: { flush: jest.fn() },
+            },
+          } as unknown as GetStateReturn,
+          setUrlTracking: jest.fn(),
+        }),
+      {
+        wrapper: ({ children }) => (
+          <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
+        ),
+      }
     );
 
     const savedDataView = await hook.result.current.persistDataView();
@@ -98,16 +109,25 @@ describe('useAdHocDataViews', () => {
       ...mockDataView,
       id: 'updated-mock-id',
     }));
-    const hook = renderHook((d: DataView) =>
-      useAdHocDataViews({
-        dataView: mockDataView,
-        dataViews: mockDiscoverServices.dataViews,
-        savedSearch: savedSearchMock,
-        stateContainer: {
-          appStateContainer: { getState: jest.fn().mockReturnValue({}) },
-        } as unknown as GetStateReturn,
-        onChangeDataView: jest.fn(),
-      })
+    const hook = renderHook(
+      (d: DataView) =>
+        useAdHocDataViews({
+          dataView: mockDataView,
+          savedSearch: savedSearchMock,
+          stateContainer: {
+            appStateContainer: { getState: jest.fn().mockReturnValue({}) },
+            replaceUrlAppState: jest.fn(),
+            kbnUrlStateStorage: {
+              kbnUrlControls: { flush: jest.fn() },
+            },
+          } as unknown as GetStateReturn,
+          setUrlTracking: jest.fn(),
+        }),
+      {
+        wrapper: ({ children }) => (
+          <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
+        ),
+      }
     );
 
     let updatedDataView: DataView;
