@@ -7,9 +7,23 @@
  */
 
 import type { Optional } from '@kbn/utility-types';
-import { Params, SavedObjectsClientProvider } from './scoped_client_provider';
+import {
+  Params,
+  SavedObjectsClientProvider,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+} from './scoped_client_provider';
 import { httpServerMock } from '../../../http/http_server.mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { KibanaRequest } from '../../../http';
+import { extensionsMock } from './extensions/extensions.mock';
+import {
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+} from '../../saved_objects_service';
 
 function createClientProvider(
   params: Optional<
@@ -82,105 +96,108 @@ test(`throws error when more than one scoped saved objects client factory is set
   );
 });
 
-test(`throws error when registering a wrapper with a duplicate id`, () => {
-  const defaultClientFactoryMock = jest.fn();
-  const clientProvider = createClientProvider({
-    defaultClientFactory: defaultClientFactoryMock,
-    typeRegistry: typeRegistryMock.create(),
-  });
-  const firstClientWrapperFactoryMock = jest.fn();
-  const secondClientWrapperFactoryMock = jest.fn();
-
-  clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
-  expect(() =>
-    clientProvider.addClientWrapperFactory(0, 'foo', firstClientWrapperFactoryMock)
-  ).toThrowErrorMatchingInlineSnapshot(`"wrapper factory with id foo is already defined"`);
-});
-
-test(`invokes and uses wrappers in specified order`, () => {
+describe(`allows extensions to be excluded`, () => {
   const defaultClient = Symbol();
   const typeRegistry = typeRegistryMock.create();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
+
+  const mockEncryptionExt = extensionsMock.createEncryptionExtension();
+  const encryptionExtFactory: SavedObjectsEncryptionExtensionFactory = (params: {
+    typeRegistry: ISavedObjectTypeRegistry;
+    request: KibanaRequest;
+  }) => mockEncryptionExt;
+
+  const mockSpacesExt = extensionsMock.createSpacesExtension();
+  const spacesExtFactory: SavedObjectsSpacesExtensionFactory = (params: {
+    typeRegistry: ISavedObjectTypeRegistry;
+    request: KibanaRequest;
+  }) => mockSpacesExt;
+
+  const mockSecurityExt = extensionsMock.createSecurityExtension();
+  const securityExtFactory: SavedObjectsSecurityExtensionFactory = (params: {
+    typeRegistry: ISavedObjectTypeRegistry;
+    request: KibanaRequest;
+  }) => mockSecurityExt;
+
   const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
+    encryptionExtensionFactory: encryptionExtFactory,
+    spacesExtensionFactory: spacesExtFactory,
+    securityExtensionFactory: securityExtFactory,
     typeRegistry,
   });
-  const firstWrappedClient = Symbol('first client');
-  const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
-  const secondWrapperClient = Symbol('second client');
-  const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
-  const request = httpServerMock.createKibanaRequest();
 
-  clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
-  clientProvider.addClientWrapperFactory(0, 'bar', firstClientWrapperFactoryMock);
-  const actualClient = clientProvider.getClient(request);
+  test(`calls client factory with all extensions excluded`, async () => {
+    const request = httpServerMock.createKibanaRequest();
 
-  expect(actualClient).toBe(firstWrappedClient);
-  expect(firstClientWrapperFactoryMock).toHaveBeenCalledWith({
-    request,
-    client: secondWrapperClient,
-    typeRegistry,
-  });
-  expect(secondClientWrapperFactoryMock).toHaveBeenCalledWith({
-    request,
-    client: defaultClient,
-    typeRegistry,
-  });
-});
+    clientProvider.getClient(request, {
+      excludedExtensions: [ENCRYPTION_EXTENSION_ID, SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+    });
 
-test(`does not invoke or use excluded wrappers`, () => {
-  const defaultClient = Symbol();
-  const typeRegistry = typeRegistryMock.create();
-  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = createClientProvider({
-    defaultClientFactory: defaultClientFactoryMock,
-    typeRegistry,
-  });
-  const firstWrappedClient = Symbol('first client');
-  const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
-  const secondWrapperClient = Symbol('second client');
-  const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
-  const request = httpServerMock.createKibanaRequest();
-
-  clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
-  clientProvider.addClientWrapperFactory(0, 'bar', firstClientWrapperFactoryMock);
-
-  const actualClient = clientProvider.getClient(request, {
-    excludedWrappers: ['foo'],
+    expect(defaultClientFactoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extensions: {
+          encryptionExtension: undefined,
+          securityExtension: undefined,
+          spacesExtension: undefined,
+        },
+      })
+    );
   });
 
-  expect(actualClient).toBe(firstWrappedClient);
-  expect(firstClientWrapperFactoryMock).toHaveBeenCalledWith({
-    request,
-    client: defaultClient,
-    typeRegistry,
-  });
-  expect(secondClientWrapperFactoryMock).not.toHaveBeenCalled();
-});
+  test(`calls client factory with some extensions excluded`, async () => {
+    const request = httpServerMock.createKibanaRequest();
 
-test(`allows all wrappers to be excluded`, () => {
-  const defaultClient = Symbol();
-  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = createClientProvider({
-    defaultClientFactory: defaultClientFactoryMock,
-    typeRegistry: typeRegistryMock.create(),
-  });
-  const firstWrappedClient = Symbol('first client');
-  const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
-  const secondWrapperClient = Symbol('second client');
-  const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
-  const request = httpServerMock.createKibanaRequest();
+    clientProvider.getClient(request, {
+      excludedExtensions: [ENCRYPTION_EXTENSION_ID, SPACES_EXTENSION_ID],
+    });
 
-  clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
-  clientProvider.addClientWrapperFactory(0, 'bar', firstClientWrapperFactoryMock);
-
-  const actualClient = clientProvider.getClient(request, {
-    excludedWrappers: ['foo', 'bar'],
+    expect(defaultClientFactoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extensions: {
+          encryptionExtension: undefined,
+          securityExtension: mockSecurityExt,
+          spacesExtension: undefined,
+        },
+      })
+    );
   });
 
-  expect(actualClient).toBe(defaultClient);
-  expect(firstClientWrapperFactoryMock).not.toHaveBeenCalled();
-  expect(secondClientWrapperFactoryMock).not.toHaveBeenCalled();
+  test(`calls client factory with one extension excluded`, async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    clientProvider.getClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+
+    expect(defaultClientFactoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extensions: {
+          encryptionExtension: mockEncryptionExt,
+          securityExtension: undefined,
+          spacesExtension: mockSpacesExt,
+        },
+      })
+    );
+  });
+
+  test(`calls client factory with no extensions excluded`, async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    clientProvider.getClient(request, {
+      excludedExtensions: [],
+    });
+
+    expect(defaultClientFactoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extensions: {
+          encryptionExtension: mockEncryptionExt,
+          securityExtension: mockSecurityExt,
+          spacesExtension: mockSpacesExt,
+        },
+      })
+    );
+  });
 });
 
 test(`allows hidden typed to be included`, () => {

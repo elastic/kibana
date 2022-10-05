@@ -30,8 +30,6 @@ export type {
   SavedObjectsCreatePointInTimeFinderDependencies,
   ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
   SavedObjectsEncryptionExtensionFactory,

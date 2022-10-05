@@ -2201,7 +2201,7 @@ export type SavedObjectsClientFactoryProvider = (repositoryFactory: SavedObjects
 // @public
 export interface SavedObjectsClientProviderOptions {
     // (undocumented)
-    excludedWrappers?: string[];
+    excludedExtensions?: string[];
     // (undocumented)
     includedHiddenTypes?: string[];
 }
@@ -2823,7 +2823,7 @@ export class SavedObjectsSerializer {
 
 // @public
 export interface SavedObjectsServiceSetup {
-    addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    // addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
     getKibanaIndex: () => string;
     registerType: <Attributes extends SavedObjectAttributes = any>(type: SavedObjectsType<Attributes>) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;

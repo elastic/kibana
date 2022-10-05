@@ -32,8 +32,6 @@ export type {
 } from './point_in_time_finder';
 
 export type {
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
   ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientFactory,

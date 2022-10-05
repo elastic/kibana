@@ -835,8 +835,9 @@ export class SavedObjectsRepository {
         typesAndSpaces,
         action: 'bulk_create',
         typeMap: authorizationResult.typeMap,
-        // auditCallback is intentionally omitted, this function in the Security SOC wrapper did not have audit logging
-        // This is primarily because it is only used internally during imports, it is not exposed in a public HTTP API
+        // auditCallback is intentionally omitted, this function in the previous Security SOC wrapper implementation
+        // did not have audit logging. This is primarily because it is only used internally during imports, it is not
+        // exposed in a public HTTP API
       });
     }
 

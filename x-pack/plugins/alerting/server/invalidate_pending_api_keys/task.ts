@@ -127,7 +127,7 @@ function taskRunner(
             getFakeKibanaRequest(http.basePath.serverBasePath),
             {
               includedHiddenTypes: ['api_key_pending_invalidation'],
-              excludedWrappers: ['security'],
+              excludedExtensions: ['security'],
             }
           );
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({

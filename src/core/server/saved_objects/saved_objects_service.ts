@@ -40,7 +40,6 @@ import {
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import type {
   SavedObjectsClientFactoryProvider,
-  SavedObjectsClientWrapperFactory,
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
@@ -64,12 +63,11 @@ const kibanaIndex = '.kibana';
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
- * for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
+ * for registering Saved Object types, and creating and registering Saved Object client factories.
  *
  * @remarks
  * When plugins access the Saved Objects client, a new client is created using
- * the factory provided to `setClientFactory` and wrapped by all wrappers
- * registered through `addClientWrapper`.
+ * the factory provided to `setClientFactory`.
  *
  * @example
  * ```ts
@@ -104,15 +102,6 @@ export interface SavedObjectsServiceSetup {
    * Only one provider can be set, subsequent calls to this method will fail.
    */
   setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
-
-  /**
-   * Add a {@link SavedObjectsClientWrapperFactory | client wrapper factory} with the given priority.
-   */
-  addClientWrapper: (
-    priority: number,
-    id: string,
-    factory: SavedObjectsClientWrapperFactory
-  ) => void;
 
   /**
    * Add a {@link SavedObjectsEncryptionExtensionFactory encryption extension factory}.
@@ -208,8 +197,7 @@ export interface SavedObjectsServiceStart {
   /**
    * Creates a {@link SavedObjectsClientContract | Saved Objects client} that
    * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch. If other plugins have registered Saved Objects client
-   * wrappers, these will be applied to extend the functionality of the client.
+   * Elasticsearch.
    *
    * A client that is already scoped to the incoming request is also exposed
    * from the route handler context see {@link RequestHandlerContext}.
@@ -309,12 +297,6 @@ export interface SavedObjectsSetupDeps {
   deprecations: InternalDeprecationsServiceSetup;
 }
 
-interface WrappedClientFactoryWrapper {
-  priority: number;
-  id: string;
-  factory: SavedObjectsClientWrapperFactory;
-}
-
 /** @internal */
 export interface SavedObjectsStartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
@@ -331,7 +313,6 @@ export class SavedObjectsService
   private setupDeps?: SavedObjectsSetupDeps;
   private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
-  private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
   private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
   private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
@@ -397,16 +378,6 @@ export class SavedObjectsService
           throw new Error('custom client factory is already set, and can only be set once');
         }
         this.clientFactoryProvider = provider;
-      },
-      addClientWrapper: (priority, id, factory) => {
-        if (this.started) {
-          throw new Error('cannot call `addClientWrapper` after service startup.');
-        }
-        this.clientFactoryWrappers.push({
-          priority,
-          id,
-          factory,
-        });
       },
       addEncryptionExtension: (factory) => {
         if (this.started) {
@@ -554,9 +525,6 @@ export class SavedObjectsService
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
       clientProvider.setClientFactory(clientFactory);
     }
-    this.clientFactoryWrappers.forEach(({ id, factory, priority }) => {
-      clientProvider.addClientWrapperFactory(priority, id, factory);
-    });
 
     this.started = true;
 

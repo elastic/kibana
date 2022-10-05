@@ -9,7 +9,6 @@
 import { ISavedObjectsClientProvider } from './scoped_client_provider';
 
 const create = (): jest.Mocked<ISavedObjectsClientProvider> => ({
-  addClientWrapperFactory: jest.fn(),
   getClient: jest.fn(),
   setClientFactory: jest.fn(),
 });

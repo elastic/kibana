@@ -65,7 +65,7 @@ export function defineRoutes(
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         // Exclude the security and spaces wrappers to get around the safeguards those have in place to prevent
         // us from doing what we want to do - brute force replace the ApiKey
-        excludedWrappers: ['security', 'spaces'],
+        excludedExtensions: ['security', 'spaces'],
         includedHiddenTypes: ['alert'],
       });
 

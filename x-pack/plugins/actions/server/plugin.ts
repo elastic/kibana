@@ -538,7 +538,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     request: KibanaRequest
   ) =>
     savedObjects.getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: ['security'],
       includedHiddenTypes,
     });
 
@@ -601,7 +601,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             );
           }
           const unsecuredSavedObjectsClient = savedObjects.getScopedClient(request, {
-            excludedWrappers: ['security'],
+            excludedExtensions: ['security'],
             includedHiddenTypes,
           });
           return new ActionsClient({
