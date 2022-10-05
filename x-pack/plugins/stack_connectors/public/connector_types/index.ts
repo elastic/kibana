@@ -12,20 +12,20 @@ import {
   getIndexConnectorType,
   getPagerDutyConnectorType,
   getServerLogConnectorType,
+  getServiceNowITOMConnectorType,
   getSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
+  getXmattersConnectorType,
 } from './stack';
 
 import {
   getCasesWebhookConnectorType,
   getJiraConnectorType,
   getResilientConnectorType,
-  getServiceNowITOMConnectorType,
   getServiceNowITSMConnectorType,
   getServiceNowSIRConnectorType,
   getSwimlaneConnectorType,
-  getXmattersConnectorType,
 } from './cases';
 
 export interface RegistrationServices {

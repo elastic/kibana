@@ -29,6 +29,8 @@ export {
 } from './server_log';
 export type { ActionParamsType as ServerLogActionParams } from './server_log';
 
+export { getServiceNowITOMConnectorType, ServiceNowITOMConnectorTypeId } from './servicenow_itom';
+
 export {
   getConnectorType as getSlackConnectorType,
   ConnectorTypeId as SlackConnectorTypeId,
@@ -46,3 +48,9 @@ export {
   ConnectorTypeId as WebhookConnectorTypeId,
 } from './webhook';
 export type { ActionParamsType as WebhookActionParams } from './webhook';
+
+export {
+  getConnectorType as getXmattersConnectorType,
+  ConnectorTypeId as XmattersConnectorTypeId,
+} from './xmatters';
+export type { ActionParamsType as XmattersActionParams } from './xmatters';
