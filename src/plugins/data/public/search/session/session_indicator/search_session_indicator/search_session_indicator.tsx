@@ -75,7 +75,7 @@ const ContinueInBackgroundButton = ({
   <EuiToolTip content={saveDisabledReasonText}>
     <EuiButtonEmpty
       onClick={onContinueInBackground}
-      data-test-subj={'searchSessionIndicatorContinueInBackgroundBtn'}
+      data-test-subj={'searchSessionIndicatorSaveBtn'}
       isDisabled={saveDisabled}
       {...buttonProps}
     >

@@ -261,9 +261,10 @@ const installTransformsAssets = async (
     await Promise.all(
       destinationIndexTemplates
         .map((destinationIndexTemplate) => {
-          const customMappings = transformsSpecifications
-            .get(destinationIndexTemplate.transformModuleId)
-            ?.get('mappings');
+          const customMappings =
+            transformsSpecifications
+              .get(destinationIndexTemplate.transformModuleId)
+              ?.get('mappings') ?? {};
           const registryElasticsearch: RegistryElasticsearch = {
             'index_template.settings': destinationIndexTemplate.template.settings,
             'index_template.mappings': destinationIndexTemplate.template.mappings,
