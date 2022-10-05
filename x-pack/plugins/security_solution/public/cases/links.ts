@@ -26,12 +26,10 @@ export const getCasesLinkItems = (): LinkItem => {
         capabilities: [`${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`],
         licenseType: 'gold',
         sideNavDisabled: true,
-        hideTimeline: true,
       },
       [SecurityPageName.caseCreate]: {
         capabilities: [`${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`],
         sideNavDisabled: true,
-        hideTimeline: true,
       },
     },
   });
