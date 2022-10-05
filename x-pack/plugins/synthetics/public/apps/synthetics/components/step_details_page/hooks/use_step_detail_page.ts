@@ -20,7 +20,7 @@ export const useStepDetailPage = (): {
   handlePreviousRunHref: string;
   hasNextStep: boolean;
   hasPreviousStep: boolean;
-  journeyDetails?: SyntheticsJourneyApiResponse['details'];
+  journey?: SyntheticsJourneyApiResponse;
   stepIndex: number;
 } => {
   const { checkGroupId, stepIndex: stepIndexString } = useParams<{
@@ -57,7 +57,7 @@ export const useStepDetailPage = (): {
 
   return {
     checkGroupId,
-    journeyDetails: journey?.details,
+    journey,
     stepIndex,
     ...memoized,
     handleNextStepHref,

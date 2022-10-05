@@ -28,14 +28,14 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
 
   return (
     <>
-      {(!journey || journey.loading) && (
+      {!journey && (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {journey && !activeStep && !journey.loading && (
+      {journey && !activeStep && (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem>
             <EuiText textAlign="center">
@@ -44,7 +44,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {journey && activeStep && !journey.loading && (
+      {journey && activeStep && (
         <WaterfallChartContainer
           checkGroup={checkGroup}
           stepIndex={Number(stepIndex)}

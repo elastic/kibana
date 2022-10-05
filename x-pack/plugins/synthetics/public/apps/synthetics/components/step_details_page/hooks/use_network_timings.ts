@@ -6,9 +6,8 @@
  */
 
 import { useEsSearch } from '@kbn/observability-plugin/public';
-import { NETWORK_TIMINGS_FIELDS } from '@kbn/observability-plugin/common';
-import { useParams } from 'react-router-dom';
 import {
+  NETWORK_TIMINGS_FIELDS,
   SYNTHETICS_BLOCKED_TIMINGS,
   SYNTHETICS_CONNECT_TIMINGS,
   SYNTHETICS_DNS_TIMINGS,
@@ -18,7 +17,8 @@ import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
-} from '@kbn/observability-plugin/common/field_names/synthetics';
+} from '@kbn/observability-plugin/common';
+import { useParams } from 'react-router-dom';
 
 export const useStepFilters = (prevCheckGroupId?: string) => {
   const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
