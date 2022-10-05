@@ -135,7 +135,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           </EuiLink>
         ) : currentItem?.status === 'IN_PROGRESS' ? (
           <EuiText color="subdued">
-            <EuiLoadingSpinner /> &nbsp;{' '}
+            <EuiLoadingSpinner /> &nbsp;
             <FormattedMessage
               id="xpack.fleet.requestDiagnostics.generatingText"
               defaultMessage="Generating diagnostics file..."
@@ -143,11 +143,8 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           </EuiText>
         ) : (
           <EuiText color="subdued">
-            <EuiIcon type="alert" color="red" /> &nbsp;{' '}
-            <FormattedMessage
-              id="xpack.fleet.requestDiagnostics.generatingText"
-              defaultMessage="Generating diagnostics file..."
-            />
+            <EuiIcon type="alert" color="red" /> &nbsp;
+            {currentItem?.name}
           </EuiText>
         );
       },
