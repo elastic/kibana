@@ -32,6 +32,7 @@ import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -40,7 +41,6 @@ import type {
   CorePreboot,
   RequestHandlerContext,
 } from '.';
-import { httpResourcesMock } from './http_resources/http_resources_service.mock';
 import { SharedGlobalConfig } from './plugins';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -48,7 +48,7 @@ export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export { httpServerMock, sessionStorageMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 export { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 export { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-export { httpResourcesMock } from './http_resources/http_resources_service.mock';
+export { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 export { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 export {
   savedObjectsClientMock,

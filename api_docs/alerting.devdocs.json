@@ -2782,7 +2782,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>({ id, includeLegacyId, }: { id: string; includeLegacyId?: boolean | undefined; }) => Promise<",
+          " = never>({ id, includeLegacyId, includeSnoozeData, }: { id: string; includeLegacyId?: boolean | undefined; includeSnoozeData?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5085,7 +5085,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
+              "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"active\" | \"ok\""
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -6055,7 +6055,7 @@
         "label": "RuleExecutionStatuses",
         "description": [],
         "signature": [
-          "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
+          "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"active\" | \"ok\""
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
