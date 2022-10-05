@@ -50,6 +50,18 @@ export const IndexPipelinesConfigurationsLogic = kea<
       ['data as indexPipelinesData'],
     ],
   },
+  events: ({ actions, values }) => ({
+    afterMount: () => {
+      if (!values.indexPipelinesData || values.indexPipelinesData.length === 0) {
+        return;
+      }
+      const pipelineNames = Object.keys(values.indexPipelinesData).sort();
+      const defaultPipeline = pipelineNames.includes(values.indexName)
+        ? values.indexName
+        : pipelineNames[0];
+      actions.selectPipeline(defaultPipeline);
+    },
+  }),
   listeners: ({ actions, values }) => ({
     fetchIndexPipelinesDataSuccess: (pipelines) => {
       const names = Object.keys(pipelines ?? {}).sort();
