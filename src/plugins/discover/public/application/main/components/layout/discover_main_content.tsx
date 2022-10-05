@@ -90,9 +90,9 @@ export const DiscoverMainContent = ({
     chart,
     onEditVisualization,
     onTopPanelHeightChange,
-    resetTopPanelHeight,
+    onResetTopPanelHeight,
     onHideChartChange,
-    onIntervalChange,
+    onTimeIntervalChange,
   } = useDiscoverHistogram({
     stateContainer,
     state,
@@ -133,9 +133,9 @@ export const DiscoverMainContent = ({
       }
       onTopPanelHeightChange={onTopPanelHeightChange}
       onEditVisualization={onEditVisualization}
-      onResetChartHeight={resetTopPanelHeight}
+      onResetChartHeight={onResetTopPanelHeight}
       onHideChartChange={onHideChartChange}
-      onIntervalChange={onIntervalChange}
+      onTimeIntervalChange={onTimeIntervalChange}
     >
       <EuiFlexGroup
         className="eui-fullHeight"

@@ -40,7 +40,7 @@ export interface ChartProps {
   onEditVisualization?: () => void;
   onResetChartHeight?: () => void;
   onHideChartChange?: (hideChart: boolean) => void;
-  onIntervalChange?: (interval: string) => void;
+  onTimeIntervalChange?: (timeInterval: string) => void;
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -55,7 +55,7 @@ export function Chart({
   onEditVisualization,
   onResetChartHeight,
   onHideChartChange,
-  onIntervalChange,
+  onTimeIntervalChange,
 }: ChartProps) {
   const { data } = services;
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
@@ -99,7 +99,7 @@ export function Chart({
   const panels = useChartPanels({
     chart,
     toggleHideChart,
-    onChangeInterval: (newInterval) => onIntervalChange?.(newInterval),
+    onTimeIntervalChange: (timeInterval) => onTimeIntervalChange?.(timeInterval),
     closePopover: () => setShowChartOptionsPopover(false),
     onResetChartHeight,
   });

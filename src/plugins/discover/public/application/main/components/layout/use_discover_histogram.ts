@@ -79,7 +79,7 @@ export const useDiscoverHistogram = ({
     [storage]
   );
 
-  const resetTopPanelHeight = useCallback(
+  const onResetTopPanelHeight = useCallback(
     () => storeTopPanelHeight(undefined),
     [storeTopPanelHeight]
   );
@@ -101,7 +101,7 @@ export const useDiscoverHistogram = ({
     [stateContainer, storage]
   );
 
-  const onIntervalChange = useCallback(
+  const onTimeIntervalChange = useCallback(
     (newInterval: string) => {
       stateContainer.setAppState({ interval: newInterval });
     },
@@ -166,9 +166,9 @@ export const useDiscoverHistogram = ({
     hits,
     chart,
     onEditVisualization: canVisualize ? onEditVisualization : undefined,
-    resetTopPanelHeight,
+    onResetTopPanelHeight,
     onTopPanelHeightChange,
     onHideChartChange,
-    onIntervalChange,
+    onTimeIntervalChange,
   };
 };

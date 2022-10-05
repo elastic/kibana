@@ -17,13 +17,13 @@ import type { UnifiedHistogramChartContext } from '../types';
 export function useChartPanels({
   chart,
   toggleHideChart,
-  onChangeInterval,
+  onTimeIntervalChange,
   closePopover,
   onResetChartHeight,
 }: {
   chart?: UnifiedHistogramChartContext;
   toggleHideChart: () => void;
-  onChangeInterval: (value: string) => void;
+  onTimeIntervalChange: (value: string) => void;
   closePopover: () => void;
   onResetChartHeight?: () => void;
 }) {
@@ -107,7 +107,7 @@ export function useChartPanels({
             label: display,
             icon: val === chart.timeInterval ? 'check' : 'empty',
             onClick: () => {
-              onChangeInterval(val);
+              onTimeIntervalChange(val);
               closePopover();
             },
             'data-test-subj': `unifiedHistogramTimeInterval-${display}`,

@@ -15,7 +15,7 @@ describe('test useChartPanels', () => {
     const { result } = renderHook(() => {
       return useChartPanels({
         toggleHideChart: jest.fn(),
-        onChangeInterval: jest.fn(),
+        onTimeIntervalChange: jest.fn(),
         closePopover: jest.fn(),
         onResetChartHeight: jest.fn(),
         chart: {
@@ -35,7 +35,7 @@ describe('test useChartPanels', () => {
     const { result } = renderHook(() => {
       return useChartPanels({
         toggleHideChart: jest.fn(),
-        onChangeInterval: jest.fn(),
+        onTimeIntervalChange: jest.fn(),
         closePopover: jest.fn(),
         onResetChartHeight: jest.fn(),
         chart: {
@@ -56,7 +56,7 @@ describe('test useChartPanels', () => {
     const { result } = renderHook(() => {
       return useChartPanels({
         toggleHideChart: jest.fn(),
-        onChangeInterval: jest.fn(),
+        onTimeIntervalChange: jest.fn(),
         closePopover: jest.fn(),
         chart: {
           status: 'complete',
@@ -74,7 +74,7 @@ describe('test useChartPanels', () => {
     const { result } = renderHook(() => {
       return useChartPanels({
         toggleHideChart: jest.fn(),
-        onChangeInterval: jest.fn(),
+        onTimeIntervalChange: jest.fn(),
         closePopover: jest.fn(),
         onResetChartHeight,
         chart: {

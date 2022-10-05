@@ -31,7 +31,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   onEditVisualization?: () => void;
   onResetChartHeight?: () => void;
   onHideChartChange?: (hideChart: boolean) => void;
-  onIntervalChange?: (interval: string) => void;
+  onTimeIntervalChange?: (timeInterval: string) => void;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -46,7 +46,7 @@ export const UnifiedHistogramLayout = ({
   onEditVisualization,
   onResetChartHeight,
   onHideChartChange,
-  onIntervalChange,
+  onTimeIntervalChange,
   children,
 }: UnifiedHistogramLayoutProps) => {
   const topPanelNode = useMemo(
@@ -95,7 +95,7 @@ export const UnifiedHistogramLayout = ({
               : undefined
           }
           onHideChartChange={onHideChartChange}
-          onIntervalChange={onIntervalChange}
+          onTimeIntervalChange={onTimeIntervalChange}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>
