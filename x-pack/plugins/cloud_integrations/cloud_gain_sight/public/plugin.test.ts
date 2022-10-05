@@ -49,6 +49,8 @@ describe('Cloud Plugin', () => {
         expect(coreSetup.analytics.registerShipper).toHaveBeenCalledWith(expect.anything(), {
           gainSightOrgId: 'foo',
           scriptUrl: '/internal/cloud/100/gainsight.js',
+          cssFileEndpoint: '/internal/cloud/100/gainsight.css',
+          widgetFileEndpoint: '/internal/cloud/100/gainsight_widget.js',
         });
       });
 

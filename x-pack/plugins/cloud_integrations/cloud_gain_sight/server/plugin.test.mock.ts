@@ -6,7 +6,11 @@
  */
 
 export const registerGainSightRouteMock = jest.fn();
+export const registerGainSightStyleRouteMock = jest.fn();
+export const registerGainSightWidgetRouteMock = jest.fn();
 
 jest.doMock('./routes', () => ({
   registerGainSightRoute: registerGainSightRouteMock,
+  registerGainSightStyleRoute: registerGainSightStyleRouteMock,
+  registerGainSightWidgetRoute: registerGainSightWidgetRouteMock,
 }));

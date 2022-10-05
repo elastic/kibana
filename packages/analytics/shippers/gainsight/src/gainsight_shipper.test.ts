@@ -31,22 +31,23 @@ describe('gainSightShipper', () => {
     describe('identify', () => {
       test('calls `identify` when the userId is provided', () => {
         const userId = 'test-user-id';
-        gainSightShipper.extendContext({ userId });
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', userId);
+        const cluster_uuid = '123654'
+        gainSightShipper.extendContext({ userId, cluster_uuid });
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', {id: cluster_uuid, userType:'deployment'});
       });
 
       test('calls `identify` again only if the userId changes', () => {
         const userId = 'test-user-id';
-        gainSightShipper.extendContext({ userId });
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(1);
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', userId);
+        const cluster_uuid = '123654'
+        gainSightShipper.extendContext({ userId, cluster_uuid });
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2);
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', {id: cluster_uuid, userType:'deployment'});
 
-        gainSightShipper.extendContext({ userId });
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(1); // still only called once
+        gainSightShipper.extendContext({ userId, cluster_uuid });
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2);
 
-        gainSightShipper.extendContext({ userId: `${userId}-1` });
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2); // called again because the user changed
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', `${userId}-1`);
+        gainSightShipper.extendContext({ userId: `${userId}-1`, cluster_uuid });
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(4); // called again because the user changed
       });
     });
   });

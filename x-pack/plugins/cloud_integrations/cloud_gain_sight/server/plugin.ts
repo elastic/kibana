@@ -27,11 +27,11 @@ export class CloudGainSightPlugin implements Plugin {
         httpResources: core.http.resources,
         packageInfo: this.initializerContext.env.packageInfo,
       });
-      registerGainSightStyleRoute({
+      registerGainSightWidgetRoute({
         httpResources: core.http.resources,
         packageInfo: this.initializerContext.env.packageInfo,
       });
-      registerGainSightWidgetRoute({
+      registerGainSightStyleRoute({
         httpResources: core.http.resources,
         packageInfo: this.initializerContext.env.packageInfo,
       });
