@@ -685,11 +685,13 @@ export default function ({ getService }: FtrProviderContext) {
         schedule: { interval: '1h' },
         params: { historyItem },
       });
+      console.log(`scheduledTask - ${JSON.stringify(scheduledTask)}`);
 
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
         const task = await currentTask(scheduledTask.id);
+        console.log(`run task - ${JSON.stringify(scheduledTask)}`);
         expect(task.enabled).to.eql(true);
       });
 
@@ -699,6 +701,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const task = await currentTask(scheduledTask.id);
         expect(task.enabled).to.eql(false);
+        console.log(`disabled task - ${JSON.stringify(scheduledTask)}`);
       });
 
       // re-enable the task
@@ -708,6 +711,7 @@ export default function ({ getService }: FtrProviderContext) {
         const task = await currentTask(scheduledTask.id);
 
         expect(task.enabled).to.eql(true);
+        console.log(`enabled task - ${JSON.stringify(scheduledTask)}`);
         expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(scheduledTask.scheduledAt));
       });
     });
