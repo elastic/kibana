@@ -118,6 +118,14 @@ describe('Stack trace operations', () => {
     }
   });
 
+  test('runLengthDecode with larger output than available input', () => {
+    const bytes = Buffer.from([0x5, 0x0, 0x2, 0x2]);
+    const decoded = [0, 0, 0, 0, 0, 2, 2];
+    const expected = decoded.concat(Array(decoded.length).fill(0));
+
+    expect(runLengthDecode(bytes, expected.length)).toEqual(expected);
+  });
+
   test('runLengthDecode without optional parameter', () => {
     const tests: Array<{
       bytes: Buffer;
