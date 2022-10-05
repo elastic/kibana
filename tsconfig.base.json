@@ -562,6 +562,8 @@
       "@kbn/dashboard-plugin/*": ["src/plugins/dashboard/*"],
       "@kbn/data-plugin": ["src/plugins/data"],
       "@kbn/data-plugin/*": ["src/plugins/data/*"],
+      "@kbn/data-quality-plugin": ["x-pack/plugins/data_quality"],
+      "@kbn/data-quality-plugin/*": ["x-pack/plugins/data_quality/*"],
       "@kbn/data-search-plugin": ["test/plugin_functional/plugins/data_search"],
       "@kbn/data-search-plugin/*": ["test/plugin_functional/plugins/data_search/*"],
       "@kbn/data-view-editor-plugin": ["src/plugins/data_view_editor"],

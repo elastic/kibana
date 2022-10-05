@@ -43,6 +43,17 @@ export const VIEW_EVENTS = i18n.translate('xpack.securitySolution.overview.viewE
   defaultMessage: 'View events',
 });
 
+export const ELASTIC_COMMON_SCHEMA = i18n.translate(
+  'xpack.securitySolution.dataQuality.elasticCommonSchemaReferenceLink',
+  {
+    defaultMessage: 'Elastic Common Schema (ECS)',
+  }
+);
+
+export const DATA_QUALITY_TITLE = i18n.translate('xpack.securitySolution.dataQuality.pageTitle', {
+  defaultMessage: 'Data Quality',
+});
+
 export const DETECTION_RESPONSE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.pageTitle',
   {
