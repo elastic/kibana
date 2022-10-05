@@ -62,21 +62,19 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
   }, [listsToFetch, fetchReferences]);
 
   useEffect(() => {
-    if (referenceFetchError) {
-      setError(i18n.REFERENCES_FETCH_ERROR);
-    } else if (isLoadingReferences) {
-      setMessage(<EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />);
-    } else if (ruleReferences != null) {
-      const lists: ExceptionListRuleReferencesSchema[] = [];
-      for (const [_, value] of Object.entries(ruleReferences)) {
-        if (value.type === ExceptionListTypeEnum.DETECTION) {
-          lists.push(value);
-        }
-      }
-
-      setMessage(undefined);
-      setListsToDisplay(lists);
+    if (referenceFetchError) return setError(i18n.REFERENCES_FETCH_ERROR);
+    if (isLoadingReferences) {
+      return setMessage(
+        <EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />
+      );
     }
+    if (!ruleReferences) return;
+    const lists: ExceptionListRuleReferencesSchema[] = [];
+    for (const [_, value] of Object.entries(ruleReferences))
+      if (value.type === ExceptionListTypeEnum.DETECTION) lists.push(value);
+
+    setMessage(undefined);
+    setListsToDisplay(lists);
   }, [isLoadingReferences, referenceFetchError, ruleReferences, showAllSharedLists]);
 
   const selectionValue = {
