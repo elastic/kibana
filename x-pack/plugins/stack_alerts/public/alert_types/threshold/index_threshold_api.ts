@@ -36,6 +36,7 @@ export async function getThresholdAlertVisualizationData({
     termSize: model.termSize,
     timeWindowSize: model.timeWindowSize,
     timeWindowUnit: model.timeWindowUnit,
+    filterKuery: model.filterKuery,
     dateStart: new Date(visualizeOptions.rangeFrom).toISOString(),
     dateEnd: new Date(visualizeOptions.rangeTo).toISOString(),
     interval: visualizeOptions.interval,

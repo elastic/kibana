@@ -31,6 +31,7 @@ import {
   builtInAggregationTypes,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
 import './expression.scss';
@@ -142,9 +143,19 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     setEsFields(currentEsFields);
   };
 
+  const filterQueryHasError = (kuery: string) => {
+    try {
+      toElasticsearchQuery(fromKueryExpression(kuery));
+      return false;
+    } catch (e) {
+      return true;
+    }
+  };
+
   const handleFilterChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setRuleParams('filterKuery', e.target.value || undefined);
+      setRuleParams('filterKueryError', filterQueryHasError(e.target.value) ? true : undefined);
     },
     [setRuleParams]
   );

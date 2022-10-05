@@ -26,6 +26,7 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
     threshold,
     timeWindowSize,
     thresholdComparator,
+    filterKueryError,
   } = alertParams;
   const validationResult = { errors: {} };
   const errors = {
@@ -40,6 +41,14 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
     filterKuery: new Array<string>(),
   };
   validationResult.errors = errors;
+
+  if (filterKueryError) {
+    errors.filterKuery.push(
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.invalidKuery', {
+        defaultMessage: 'Filter query is invalid.',
+      })
+    );
+  }
 
   if (!index || index.length === 0) {
     errors.index.push(

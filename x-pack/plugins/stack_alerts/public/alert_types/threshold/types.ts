@@ -40,4 +40,5 @@ export interface IndexThresholdAlertParams extends RuleTypeParams {
   timeWindowSize: number;
   timeWindowUnit: string;
   filterKuery?: string;
+  filterKueryError?: boolean;
 }
