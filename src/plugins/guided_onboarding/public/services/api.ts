@@ -9,11 +9,17 @@
 import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
 
+import { GuidedOnboardingApi } from '../types';
+import {
+  getGuideConfig,
+  getInProgressStepId,
+  isIntegrationInGuideStep,
+  isLastStep,
+} from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '../../common/types';
-import { isLastStep, getGuideConfig } from './helpers';
 
-export class ApiService {
+export class ApiService implements GuidedOnboardingApi {
   private client: HttpSetup | undefined;
   private onboardingGuideState$!: BehaviorSubject<GuideState | undefined>;
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -102,8 +108,8 @@ export class ApiService {
   /**
    * Activates a guide by guideId
    * This is useful for the onboarding landing page, when a user selects a guide to start or continue
-   * @param {GuideId} guideID the id of the guide (one of search, observability, security)
-   * @param {GuideState} guideState (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
+   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideState} guide (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
    * @return {Promise} a promise with the updated guide state
    */
   public async activateGuide(
@@ -150,7 +156,7 @@ export class ApiService {
    * Completes a guide
    * Updates the overall guide status to 'complete', and marks it as inactive
    * This is useful for the dropdown panel, when the user clicks the "Continue using Elastic" button after completing all steps
-   * @param {GuideId} guideID the id of the guide (one of search, observability, security)
+   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
    * @return {Promise} a promise with the updated guide state
    */
   public async completeGuide(guideId: GuideId): Promise<{ state: GuideState } | undefined> {
@@ -299,6 +305,38 @@ export class ApiService {
     }
 
     return undefined;
+  }
+
+  /**
+   * An observable with the boolean value if the guided onboarding is currently active for the integration.
+   * Returns true, if the passed integration is used in the current guide's step.
+   * Returns false otherwise.
+   * @param {string} integration the integration (package name) to check for in the guided onboarding config
+   * @return {Observable} an observable with the boolean value
+   */
+  public isGuidedOnboardingActiveForIntegration$(integration?: string): Observable<boolean> {
+    return this.fetchActiveGuideState$().pipe(
+      map((state) => {
+        return state ? isIntegrationInGuideStep(state, integration) : false;
+      })
+    );
+  }
+
+  public async completeGuidedOnboardingForIntegration(
+    integration?: string
+  ): Promise<{ state: GuideState } | undefined> {
+    if (integration) {
+      const currentState = await firstValueFrom(this.fetchActiveGuideState$());
+      if (currentState) {
+        const inProgressStepId = getInProgressStepId(currentState);
+        if (inProgressStepId) {
+          const isIntegrationStepActive = isIntegrationInGuideStep(currentState, integration);
+          if (isIntegrationStepActive) {
+            return await this.completeGuideStep(currentState?.guideId, inProgressStepId);
+          }
+        }
+      }
+    }
   }
 }
 
