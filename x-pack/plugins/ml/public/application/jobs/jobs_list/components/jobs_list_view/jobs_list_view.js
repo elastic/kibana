@@ -7,6 +7,7 @@
 
 import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';

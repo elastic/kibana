@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { mergeWith, uniqBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Embeddable } from '@kbn/lens-plugin/public';
+import type {
+  Embeddable,
+  LensSavedObjectAttributes,
+  XYDataLayerConfig,
+} from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DashboardAppLocatorParams } from '@kbn/dashboard-plugin/public';
-
-import { Filter, Query, DataViewBase } from '@kbn/es-query';
-
-import type { LensSavedObjectAttributes, XYDataLayerConfig } from '@kbn/lens-plugin/public';
-
-import { i18n } from '@kbn/i18n';
-
+import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
@@ -359,12 +359,12 @@ export class QuickJobCreator {
       ),
     };
     const dashboardLocator = this.share.url.locators.get('DASHBOARD_APP_LOCATOR');
-    const url = await dashboardLocator?.getUrl(params);
-    return { url_name: 'Data dashboard', url_value: url };
+    const url = dashboardLocator ? await dashboardLocator.getUrl(params) : '';
+    return { url_name: 'Original dashboard', url_value: url };
   }
 
   private async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
-    return dashboard
+    return dashboard !== undefined
       ? { custom_urls: [await this.createDashboardLink(dashboard, datafeedConfig)] }
       : {};
   }
