@@ -30,8 +30,8 @@ jest.mock('../../lib/ml_inference_pipeline/get_inference_errors', () => ({
 import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
-import { createAndReferenceMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
 import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
+import { createAndReferenceMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
@@ -96,13 +96,10 @@ describe('Enterprise Search Managed Indices', () => {
       });
 
       await mockRouter.callRoute({
-        params: { indexName: 'my-index-name' }
+        params: { indexName: 'my-index-name' },
       });
 
-      expect(getMlInferenceErrors).toHaveBeenCalledWith(
-        'my-index-name',
-        mockClient.asCurrentUser
-      );
+      expect(getMlInferenceErrors).toHaveBeenCalledWith('my-index-name', mockClient.asCurrentUser);
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {

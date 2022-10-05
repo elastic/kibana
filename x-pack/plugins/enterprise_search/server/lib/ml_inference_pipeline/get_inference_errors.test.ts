@@ -14,39 +14,44 @@ describe('getMlInferenceErrors', () => {
 
   const mockClient = {
     search: jest.fn(),
-  }
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should fetch aggregations and transform them', async () => {
-    mockClient.search.mockImplementation(() => Promise.resolve({
-      aggregations: {
-        errors: {
-          buckets: [
-            {
-              key: 'Error message 1',
-              doc_count: 100,
-              max_error_timestamp: {
+    mockClient.search.mockImplementation(() =>
+      Promise.resolve({
+        aggregations: {
+          errors: {
+            buckets: [
+              {
+                key: 'Error message 1',
+                doc_count: 100,
+                max_error_timestamp: {
                   value: 1664977836100,
-                  value_as_string: '2022-10-05T13:50:36.100Z'
-              }
-            },
-            {
-              key: 'Error message 2',
-              doc_count: 200,
-              max_error_timestamp: {
+                  value_as_string: '2022-10-05T13:50:36.100Z',
+                },
+              },
+              {
+                key: 'Error message 2',
+                doc_count: 200,
+                max_error_timestamp: {
                   value: 1664977836200,
-                  value_as_string: '2022-10-05T13:50:36.200Z'
-              }
-            },
-          ]
-        }
-      }
-    }));
+                  value_as_string: '2022-10-05T13:50:36.200Z',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
 
-    const actualResult = await getMlInferenceErrors(indexName, mockClient as unknown as ElasticsearchClient);
+    const actualResult = await getMlInferenceErrors(
+      indexName,
+      mockClient as unknown as ElasticsearchClient
+    );
 
     expect(actualResult).toEqual([
       {
@@ -58,19 +63,24 @@ describe('getMlInferenceErrors', () => {
         message: 'Error message 2',
         doc_count: 200,
         timestamp: '2022-10-05T13:50:36.200Z',
-      }
+      },
     ]);
     expect(mockClient.search).toHaveBeenCalledTimes(1);
   });
 
   it('should return an empty array if there are no aggregates', async () => {
-    mockClient.search.mockImplementation(() => Promise.resolve({
-      aggregations: {
-        errors: []
-      }
-    }));
+    mockClient.search.mockImplementation(() =>
+      Promise.resolve({
+        aggregations: {
+          errors: [],
+        },
+      })
+    );
 
-    const actualResult = await getMlInferenceErrors(indexName, mockClient as unknown as ElasticsearchClient);
+    const actualResult = await getMlInferenceErrors(
+      indexName,
+      mockClient as unknown as ElasticsearchClient
+    );
 
     expect(actualResult).toEqual([]);
   });
