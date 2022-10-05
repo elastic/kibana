@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CloudExperimentsPluginSetup, CloudExperimentsPluginStart } from './types';
+import type { CloudExperimentsPluginStart } from './types';
 
 function createStartMock(): jest.Mocked<CloudExperimentsPluginStart> {
   return {
@@ -14,13 +14,6 @@ function createStartMock(): jest.Mocked<CloudExperimentsPluginStart> {
   };
 }
 
-function createSetupMock(): jest.Mocked<CloudExperimentsPluginSetup> {
-  return {
-    identifyUser: jest.fn(),
-  };
-}
-
 export const cloudExperimentsMock = {
-  createSetupMock,
   createStartMock,
 };
