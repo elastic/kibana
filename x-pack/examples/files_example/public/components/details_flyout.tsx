@@ -22,11 +22,12 @@ import {
 } from '@elastic/eui';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import { css } from '@emotion/react';
+import type { MyImageMetadata } from '../../common';
 import { FileClients } from '../types';
 import { Image } from '../imports';
 
 interface Props {
-  file: FileJSON;
+  file: FileJSON<MyImageMetadata>;
   files: FileClients;
   onDismiss: () => void;
 }
@@ -47,10 +48,10 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
           `}
         >
           <Image
-            size="l"
-            blurhash={file.blurhash}
+            size="original"
             alt={file.alt ?? 'unknown'}
             src={files.example.getDownloadHref(file)}
+            meta={file.meta}
           />
         </div>
         <EuiSpacer size="xl" />
