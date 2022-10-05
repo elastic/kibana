@@ -8,6 +8,7 @@
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
+import type { Filter } from '@kbn/es-query';
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
@@ -167,18 +168,57 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
   eventId: string;
   timelineId?: string;
 }> = ({ alertIds, eventId, timelineId }) => {
+  const dataProviderLimit = 5;
   const dataProviders = useMemo(() => {
     if (alertIds && alertIds.length) {
-      return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
-        const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
-        result.push(getDataProvider('_id', id, alertId));
-        return result;
-      }, []);
+      if (alertIds.length > dataProviderLimit) {
+        return null;
+      } else {
+        return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
+          const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
+          result.push(getDataProvider('_id', id, alertId));
+          return result;
+        }, []);
+      }
     }
     return null;
-  }, [alertIds, eventId, timelineId]);
+  }, [alertIds, eventId, timelineId, dataProviderLimit]);
 
-  if (!dataProviders) {
+  const filters: Filter[] | null = useMemo(() => {
+    if (alertIds && alertIds.length && alertIds.length >= dataProviderLimit) {
+      return [
+        {
+          meta: {
+            alias: 'Process Ancestry Alert IDs',
+            type: 'phrases',
+            key: '_id',
+            params: [...alertIds],
+            negate: false,
+            disabled: false,
+            value: alertIds.join(),
+          },
+          query: {
+            bool: {
+              should: [
+                ...alertIds.map((id) => {
+                  return {
+                    match_phrase: {
+                      _id: id,
+                    },
+                  };
+                }),
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      ];
+    } else {
+      return null;
+    }
+  }, [alertIds, dataProviderLimit]);
+
+  if (!dataProviders && !filters) {
     return null;
   }
 
@@ -189,6 +229,7 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
       <InvestigateInTimelineButton
         asEmptyButton={false}
         dataProviders={dataProviders}
+        filters={filters}
         data-test-subj="investigate-ancestry-in-timeline"
       >
         {ACTION_INVESTIGATE_IN_TIMELINE}
