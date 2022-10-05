@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBadgeGroup,
   EuiBadge,
@@ -24,7 +24,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { Case, UpdateByKey } from '../../../common/ui/types';
+import { Case } from '../../../common/ui/types';
 import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
@@ -32,26 +32,21 @@ import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { ALERTS } from '../../common/translations';
-import { getActions } from './actions';
-import { useDeleteCases } from '../../containers/use_delete_cases';
-import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useActions } from './use_actions';
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
-import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { severities } from '../severity/config';
-import { useUpdateCase } from '../../containers/use_update_case';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 import { CurrentUserProfile } from '../types';
 import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { useRefreshCases } from './use_on_refresh_cases';
+import { Status } from '../status';
 
-export type CasesColumns =
+type CasesColumns =
   | EuiTableActionsColumnType<Case>
   | EuiTableComputedColumnType<Case>
   | EuiTableFieldDataColumnType<Case>;
@@ -107,9 +102,14 @@ export interface GetCasesColumn {
   isSelectorView: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
-
   showSolutionColumn?: boolean;
+  disableActions?: boolean;
 }
+
+export interface UseCasesColumnsReturnValue {
+  columns: CasesColumns[];
+}
+
 export const useCasesColumns = ({
   filterStatus,
   userProfiles,
@@ -118,57 +118,10 @@ export const useCasesColumns = ({
   connectors = [],
   onRowClick,
   showSolutionColumn,
-}: GetCasesColumn): CasesColumns[] => {
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const { mutate: deleteCases } = useDeleteCases();
-  const refreshCases = useRefreshCases();
+  disableActions = false,
+}: GetCasesColumn): UseCasesColumnsReturnValue => {
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-  const { permissions } = useCasesContext();
-  const [caseToBeDeleted, setCaseToBeDeleted] = useState<string>();
-  const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
-
-  const closeModal = useCallback(() => setIsModalVisible(false), []);
-  const openModal = useCallback(() => setIsModalVisible(true), []);
-
-  const onDeleteAction = useCallback(
-    (theCase: Case) => {
-      openModal();
-      setCaseToBeDeleted(theCase.id);
-    },
-    [openModal]
-  );
-
-  const onConfirmDeletion = useCallback(() => {
-    closeModal();
-    if (caseToBeDeleted) {
-      deleteCases({
-        caseIds: [caseToBeDeleted],
-        successToasterTitle: i18n.DELETED_CASES(1),
-      });
-    }
-  }, [caseToBeDeleted, closeModal, deleteCases]);
-
-  const handleDispatchUpdate = useCallback(
-    ({ updateKey, updateValue, caseData }: UpdateByKey) => {
-      updateCaseProperty({
-        updateKey,
-        updateValue,
-        caseData,
-        onSuccess: () => {
-          refreshCases();
-        },
-      });
-    },
-    [refreshCases, updateCaseProperty]
-  );
-
-  const actions = useMemo(
-    () =>
-      getActions({
-        deleteCaseOnClick: onDeleteAction,
-      }),
-    [onDeleteAction]
-  );
+  const { actions } = useActions({ disableActions });
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {
@@ -179,7 +132,7 @@ export const useCasesColumns = ({
     [onRowClick]
   );
 
-  return [
+  const columns: CasesColumns[] = [
     {
       name: i18n.NAME,
       render: (theCase: Case) => {
@@ -205,129 +158,134 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    ...(caseAssignmentAuthorized
-      ? [
-          {
-            field: 'assignees',
-            name: i18n.ASSIGNEES,
-            render: (assignees: Case['assignees']) => (
-              <AssigneesColumn
-                assignees={assignees}
-                userProfiles={userProfiles}
-                currentUserProfile={currentUserProfile}
-              />
-            ),
-          },
-        ]
-      : []),
-    {
-      field: 'tags',
-      name: i18n.TAGS,
-      render: (tags: Case['tags']) => {
-        if (tags != null && tags.length > 0) {
-          const badges = (
-            <EuiBadgeGroup data-test-subj="case-table-column-tags">
-              {tags.map((tag: string, i: number) => (
-                <EuiBadge
-                  color="hollow"
-                  key={`${tag}-${i}`}
-                  data-test-subj={`case-table-column-tags-${tag}`}
-                >
-                  {tag}
-                </EuiBadge>
-              ))}
-            </EuiBadgeGroup>
-          );
+  ];
 
+  if (caseAssignmentAuthorized) {
+    columns.push({
+      field: 'assignees',
+      name: i18n.ASSIGNEES,
+      render: (assignees: Case['assignees']) => (
+        <AssigneesColumn
+          assignees={assignees}
+          userProfiles={userProfiles}
+          currentUserProfile={currentUserProfile}
+        />
+      ),
+    });
+  }
+
+  columns.push({
+    field: 'tags',
+    name: i18n.TAGS,
+    render: (tags: Case['tags']) => {
+      if (tags != null && tags.length > 0) {
+        const badges = (
+          <EuiBadgeGroup data-test-subj="case-table-column-tags">
+            {tags.map((tag: string, i: number) => (
+              <EuiBadge
+                color="hollow"
+                key={`${tag}-${i}`}
+                data-test-subj={`case-table-column-tags-${tag}`}
+              >
+                {tag}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        );
+
+        return (
+          <EuiToolTip
+            data-test-subj="case-table-column-tags-tooltip"
+            position="left"
+            content={badges}
+          >
+            {badges}
+          </EuiToolTip>
+        );
+      }
+      return getEmptyTagValue();
+    },
+    truncateText: true,
+  });
+
+  if (isAlertsEnabled) {
+    columns.push({
+      align: RIGHT_ALIGNMENT,
+      field: 'totalAlerts',
+      name: ALERTS,
+      render: (totalAlerts: Case['totalAlerts']) =>
+        totalAlerts != null
+          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+          : getEmptyTagValue(),
+    });
+  }
+
+  if (showSolutionColumn) {
+    columns.push({
+      align: RIGHT_ALIGNMENT,
+      field: 'owner',
+      name: i18n.SOLUTION,
+      render: (caseOwner: CasesOwners) => {
+        const ownerInfo = OWNER_INFO[caseOwner];
+        return ownerInfo ? (
+          <EuiIcon
+            size="m"
+            type={ownerInfo.iconType}
+            title={ownerInfo.label}
+            data-test-subj={`case-table-column-owner-icon-${caseOwner}`}
+          />
+        ) : (
+          getEmptyTagValue()
+        );
+      },
+    });
+  }
+
+  columns.push({
+    align: RIGHT_ALIGNMENT,
+    field: 'totalComment',
+    name: i18n.COMMENTS,
+    render: (totalComment: Case['totalComment']) =>
+      totalComment != null
+        ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
+        : getEmptyTagValue(),
+  });
+
+  if (filterStatus === CaseStatuses.closed) {
+    columns.push({
+      field: 'closedAt',
+      name: i18n.CLOSED_ON,
+      sortable: true,
+      render: (closedAt: Case['closedAt']) => {
+        if (closedAt != null) {
           return (
-            <EuiToolTip
-              data-test-subj="case-table-column-tags-tooltip"
-              position="left"
-              content={badges}
-            >
-              {badges}
-            </EuiToolTip>
+            <span data-test-subj={`case-table-column-closedAt`}>
+              <FormattedRelativePreferenceDate value={closedAt} />
+            </span>
           );
         }
         return getEmptyTagValue();
       },
-      truncateText: true,
-    },
-    ...(isAlertsEnabled
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            field: 'totalAlerts',
-            name: ALERTS,
-            render: (totalAlerts: Case['totalAlerts']) =>
-              totalAlerts != null
-                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-                : getEmptyTagValue(),
-          },
-        ]
-      : []),
-    ...(showSolutionColumn
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            field: 'owner',
-            name: i18n.SOLUTION,
-            render: (caseOwner: CasesOwners) => {
-              const ownerInfo = OWNER_INFO[caseOwner];
-              return ownerInfo ? (
-                <EuiIcon
-                  size="m"
-                  type={ownerInfo.iconType}
-                  title={ownerInfo.label}
-                  data-test-subj={`case-table-column-owner-icon-${caseOwner}`}
-                />
-              ) : (
-                getEmptyTagValue()
-              );
-            },
-          },
-        ]
-      : []),
-    {
-      align: RIGHT_ALIGNMENT,
-      field: 'totalComment',
-      name: i18n.COMMENTS,
-      render: (totalComment: Case['totalComment']) =>
-        totalComment != null
-          ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
-          : getEmptyTagValue(),
-    },
-    filterStatus === CaseStatuses.closed
-      ? {
-          field: 'closedAt',
-          name: i18n.CLOSED_ON,
-          sortable: true,
-          render: (closedAt: Case['closedAt']) => {
-            if (closedAt != null) {
-              return (
-                <span data-test-subj={`case-table-column-closedAt`}>
-                  <FormattedRelativePreferenceDate value={closedAt} />
-                </span>
-              );
-            }
-            return getEmptyTagValue();
-          },
+    });
+  } else {
+    columns.push({
+      field: 'createdAt',
+      name: i18n.CREATED_ON,
+      sortable: true,
+      render: (createdAt: Case['createdAt']) => {
+        if (createdAt != null) {
+          return (
+            <span data-test-subj={`case-table-column-createdAt`}>
+              <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
+            </span>
+          );
         }
-      : {
-          field: 'createdAt',
-          name: i18n.CREATED_ON,
-          sortable: true,
-          render: (createdAt: Case['createdAt']) => {
-            if (createdAt != null) {
-              return (
-                <span data-test-subj={`case-table-column-createdAt`}>
-                  <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
-                </span>
-              );
-            }
-            return getEmptyTagValue();
-          },
-        },
+        return getEmptyTagValue();
+      },
+    });
+  }
+
+  columns.push(
     {
       name: i18n.EXTERNAL_INCIDENT,
       render: (theCase: Case) => {
@@ -337,32 +295,16 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    ...(!isSelectorView
-      ? [
-          {
-            name: i18n.STATUS,
-            render: (theCase: Case) => {
-              if (theCase.status === null || theCase.status === undefined) {
-                return getEmptyTagValue();
-              }
+    {
+      name: i18n.STATUS,
+      render: (theCase: Case) => {
+        if (theCase.status === null || theCase.status === undefined) {
+          return getEmptyTagValue();
+        }
 
-              return (
-                <StatusContextMenu
-                  currentStatus={theCase.status}
-                  disabled={!permissions.update || isLoadingUpdateCase}
-                  onStatusChanged={(status) =>
-                    handleDispatchUpdate({
-                      updateKey: 'status',
-                      updateValue: status,
-                      caseData: theCase,
-                    })
-                  }
-                />
-              );
-            },
-          },
-        ]
-      : []),
+        return <Status type={theCase.status} />;
+      },
+    },
     {
       name: i18n.SEVERITY,
       render: (theCase: Case) => {
@@ -376,52 +318,37 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-    },
+    }
+  );
 
-    ...(isSelectorView
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            render: (theCase: Case) => {
-              if (theCase.id != null) {
-                return (
-                  <EuiButton
-                    data-test-subj={`cases-table-row-select-${theCase.id}`}
-                    onClick={() => {
-                      assignCaseAction(theCase);
-                    }}
-                    size="s"
-                    fill={true}
-                  >
-                    {i18n.SELECT}
-                  </EuiButton>
-                );
-              }
-              return getEmptyTagValue();
-            },
-          },
-        ]
-      : []),
-    ...(permissions.delete && !isSelectorView
-      ? [
-          {
-            name: (
-              <>
-                {i18n.ACTIONS}
-                {isModalVisible ? (
-                  <ConfirmDeleteCaseModal
-                    totalCasesToBeDeleted={1}
-                    onCancel={closeModal}
-                    onConfirm={onConfirmDeletion}
-                  />
-                ) : null}
-              </>
-            ),
-            actions,
-          },
-        ]
-      : []),
-  ];
+  if (isSelectorView) {
+    columns.push({
+      align: RIGHT_ALIGNMENT,
+      render: (theCase: Case) => {
+        if (theCase.id != null) {
+          return (
+            <EuiButton
+              data-test-subj={`cases-table-row-select-${theCase.id}`}
+              onClick={() => {
+                assignCaseAction(theCase);
+              }}
+              size="s"
+              fill={true}
+            >
+              {i18n.SELECT}
+            </EuiButton>
+          );
+        }
+        return getEmptyTagValue();
+      },
+    });
+  }
+
+  if (!isSelectorView && actions) {
+    columns.push(actions);
+  }
+
+  return { columns };
 };
 
 interface Props {
