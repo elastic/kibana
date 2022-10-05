@@ -12,8 +12,8 @@ import { VisParams } from '../../types';
 import { getPalette } from './palette';
 
 export const getPercentageModeConfig = (params: VisParams): PercentageModeConfig => {
-  if (!params.metric.percentageMode || params.metric.metricColorMode === 'None') {
-    return { isPercentageMode: params.metric.percentageMode };
+  if (!params.metric.percentageMode) {
+    return { isPercentageMode: false };
   }
   const { colorsRange } = params.metric;
   return {

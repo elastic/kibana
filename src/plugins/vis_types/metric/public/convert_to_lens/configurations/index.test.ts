@@ -43,12 +43,6 @@ describe('getPercentageModeConfig', () => {
     expect(getPercentageModeConfig(params)).toEqual({ isPercentageMode: false });
   });
 
-  test('should return falsy percentage mode if metric color mode is `None`', () => {
-    expect(
-      getPercentageModeConfig({ ...params, metric: { ...params.metric, metricColorMode: `None` } })
-    ).toEqual({ isPercentageMode: false });
-  });
-
   test('should return percentage mode config', () => {
     expect(
       getPercentageModeConfig({ ...params, metric: { ...params.metric, percentageMode: true } })
