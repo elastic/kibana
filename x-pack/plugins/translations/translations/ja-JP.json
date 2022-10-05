@@ -17401,7 +17401,6 @@
     "xpack.lens.app.showUnderlyingDataMultipleLayers": "複数レイヤーのビジュアライゼーションでは、基本データを表示できません",
     "xpack.lens.app.showUnderlyingDataNoData": "ビジュアライゼーションには表示するデータがありません",
     "xpack.lens.app.showUnderlyingDataTimeShifts": "時間シフトが構成されているときには基本データを表示できません",
-    "xpack.lens.app.showUnderlyingDataUnsupportedDatasource": "基本データは現在のデータソースをサポートしません",
     "xpack.lens.app.unsavedFilename": "未保存",
     "xpack.lens.app.unsavedWorkConfirmBtn": "変更を破棄",
     "xpack.lens.app.unsavedWorkMessage": "作業内容を保存せずに、Lens から移動しますか?",
