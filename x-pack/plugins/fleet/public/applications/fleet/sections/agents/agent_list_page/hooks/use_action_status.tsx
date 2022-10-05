@@ -54,7 +54,8 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
       try {
         const confirmRes = await overlays.openConfirm(
           i18n.translate('xpack.fleet.currentUpgrade.confirmDescription', {
-            defaultMessage: 'This action will abort upgrade of {nbAgents} agents',
+            defaultMessage:
+              'This action will abort upgrade of {nbAgents, plural, one {# agent} other {# agents}}',
             values: {
               nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
             },
