@@ -36,11 +36,11 @@ export const getMlInferenceErrors = async (
   esClient: ElasticsearchClient
 ): Promise<MlInferenceError[]> => {
   const searchResult = await esClient.search<
-      unknown,
-      {
-        errors: AggregationsMultiBucketAggregateBase<ErrorAggregationBucket>
-      }
-    >({
+    unknown,
+    {
+      errors: AggregationsMultiBucketAggregateBase<ErrorAggregationBucket>
+    }
+  >({
     index: indexName,
     body: {
       aggs: {
@@ -65,14 +65,16 @@ export const getMlInferenceErrors = async (
     }
   });
 
-  const processorBuckets = searchResult.aggregations?.errors.buckets;
-  if (!processorBuckets) {
+  const errorBuckets = searchResult.aggregations?.errors.buckets;
+  if (!errorBuckets) {
     return [];
   }
 
-  const buckets = Array.isArray(processorBuckets)
-    ? processorBuckets
-    : Object.values(processorBuckets);
+  // Buckets are either in an array or in a Record, we transform them to an array
+  const buckets = Array.isArray(errorBuckets)
+    ? errorBuckets
+    : Object.values(errorBuckets);
+
   return buckets.map((bucket) => ({
     message: bucket.key,
     doc_count: bucket.doc_count,
