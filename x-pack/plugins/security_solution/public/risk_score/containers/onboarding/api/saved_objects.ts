@@ -14,16 +14,14 @@ import type {
 } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../../../constants';
 import {
   prebuiltSavedObjectsBulkCreateUrl,
   prebuiltSavedObjectsBulkDeleteUrl,
 } from '../../../../../common/constants';
 
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import {
-  RISKY_HOSTS_DASHBOARD_TITLE,
-  RISKY_USERS_DASHBOARD_TITLE,
-} from '../../../../hosts/pages/navigation/constants';
+
 import {
   DELETE_SAVED_OBJECTS_FAILURE,
   IMPORT_SAVED_OBJECTS_FAILURE,
