@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const BULK_ACTION_DELETE_SELECTED = i18n.translate(
-  'xpack.cases.caseTable.bulkActions.deleteSelectedTitle',
-  {
-    defaultMessage: 'Delete selected',
-  }
-);
+export interface UseActionProps {
+  onAction: () => void;
+  onActionSuccess: () => void;
+  isDisabled: boolean;
+}
