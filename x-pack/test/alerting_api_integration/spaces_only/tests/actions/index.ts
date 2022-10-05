@@ -23,10 +23,10 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./enqueue'));
-    loadTestFile(require.resolve('./builtin_action_types/email'));
-    loadTestFile(require.resolve('./builtin_action_types/es_index'));
-    loadTestFile(require.resolve('./builtin_action_types/webhook'));
-    loadTestFile(require.resolve('./builtin_action_types/preconfigured_alert_history_connector'));
+    loadTestFile(require.resolve('./connector_types/stack/email'));
+    loadTestFile(require.resolve('./connector_types/stack/es_index'));
+    loadTestFile(require.resolve('./connector_types/stack/webhook'));
+    loadTestFile(require.resolve('./connector_types/stack/preconfigured_alert_history_connector'));
     loadTestFile(require.resolve('./type_not_enabled'));
 
     // note that this test will destroy existing spaces
