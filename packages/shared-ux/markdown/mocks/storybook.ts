@@ -5,25 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 
 import type { MarkdownProps } from '@kbn/shared-ux-markdown';
 
-type PropArguments = Pick<MarkdownProps, 'readOnly' | 'placeholder'>;
-export type Params = ArgumentParams<PropArguments, {}>;
+type PropArguments = Pick<MarkdownProps, 'readOnly' | 'placeholder' | 'openLinksInNewTab' | 'markdownContent' | 'height' | 'ariaLabelContent'>;
 
-interface MarkdownServices {}
+export type Params = Record<keyof PropArguments, any>;
 
 /**
  * Storybook mock for the `Markdown` component
  */
 
-//@ts-ignore
 export class MarkdownStorybookMock extends AbstractStorybookMock<
-  MarkdownProps,
-  MarkdownServices,
-  PropArguments
+  MarkdownProps, {}, PropArguments, {}
 > {
+
   propArguments = {
     readOnly: {
       control: 'boolean',
@@ -35,18 +32,47 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
       },
       defaultValue: '',
     },
+    openLinksInNewTab: {
+        control: 'boolean',
+        defaultValue: true,
+    },
+    markdownContent: {
+        control: {
+            type: 'text',
+        },
+        defaultValue: '',
+    },
+    ariaLabelContent: {
+        control: {
+            type: 'text',
+        },
+        defaultValue: 'markdown component'
+    },
+    height: {
+        control: {
+            type: 'select',
+            defaultValue: 'full',
+            label: 'height',
+            options: [ 0, 20, 'full'],
+        }
+    }
   };
+
   serviceArguments = {};
-  dependecies = [];
+  dependencies = [];
 
   getProps(params?: Params): MarkdownProps {
     return {
       readOnly: this.getArgumentValue('readOnly', params),
       placeholder: this.getArgumentValue('placeholder', params),
+      openLinksInNewTab: this.getArgumentValue('openLinksInNewTab', params),
+      markdownContent: this.getArgumentValue('markdownContent', params),
+      height: this.getArgumentValue('height', params),
+      ariaLabelContent: this.getArgumentValue('ariaLabelContent', params),
     };
   }
 
-  getServices(params: Params): MarkdownServices {
-    return {};
+  getServices() {
+    return { ...this.getProps() };
   }
 }

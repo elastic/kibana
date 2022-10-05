@@ -49,9 +49,8 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//react",
   "@npm//@storybook/addon-actions",
-  "@npm//rxjs",
   "//packages/shared-ux/storybook/mock",
-  '//packages/shared-ux/markdown/impl',
+  "//packages/shared-ux/markdown/impl",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -64,13 +63,14 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//@types/node",
-  "@npm//@types/jest",
   "@npm//@types/react",
   "@npm//@storybook/addon-actions",
-  "//packages/shared-ux/markdown/types:npm_module_types",
+  "@npm//@types/jest",
+  "@npm//@types/node",
   "//packages/shared-ux/storybook/mock:npm_module_types",
+  "//packages/shared-ux/markdown/types:npm_module_types",
   "//packages/shared-ux/markdown/impl:npm_module_types",
+
 ]
 
 jsts_transpiler(
