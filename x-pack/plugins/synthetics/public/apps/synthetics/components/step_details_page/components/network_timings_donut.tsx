@@ -118,36 +118,28 @@ export const formatMillisecond = (ms: number) => {
   return `${(ms / 1000).toFixed(1)} s`;
 };
 
-const SYNTHETICS_CONNECT_TIMINGS = i18n.translate(
-  'xpack.observability.expView.synthetics.connect',
-  {
-    defaultMessage: 'Connect',
-  }
-);
-const SYNTHETICS_DNS_TIMINGS = i18n.translate('xpack.observability.expView.synthetics.dns', {
+const SYNTHETICS_CONNECT_TIMINGS = i18n.translate('xpack.synthetics.connect.label', {
+  defaultMessage: 'Connect',
+});
+const SYNTHETICS_DNS_TIMINGS = i18n.translate('xpack.synthetics.dns', {
   defaultMessage: 'DNS',
 });
-const SYNTHETICS_WAIT_TIMINGS = i18n.translate('xpack.observability.expView.synthetics.wait', {
+const SYNTHETICS_WAIT_TIMINGS = i18n.translate('xpack.synthetics.wait', {
   defaultMessage: 'Wait',
 });
-const SYNTHETICS_SSL_TIMINGS = i18n.translate('xpack.observability.expView.synthetics.ssl', {
+
+const SYNTHETICS_SSL_TIMINGS = i18n.translate('xpack.synthetics.ssl', {
   defaultMessage: 'SSL',
 });
-const SYNTHETICS_BLOCKED_TIMINGS = i18n.translate(
-  'xpack.observability.expView.synthetics.blocked',
-  {
-    defaultMessage: 'Blocked',
-  }
-);
-const SYNTHETICS_SEND_TIMINGS = i18n.translate('xpack.observability.expView.synthetics.send', {
+const SYNTHETICS_BLOCKED_TIMINGS = i18n.translate('xpack.synthetics.blocked', {
+  defaultMessage: 'Blocked',
+});
+const SYNTHETICS_SEND_TIMINGS = i18n.translate('xpack.synthetics.send', {
   defaultMessage: 'Send',
 });
-const SYNTHETICS_RECEIVE_TIMINGS = i18n.translate(
-  'xpack.observability.expView.synthetics.receive',
-  {
-    defaultMessage: 'Receive',
-  }
-);
-const SYNTHETICS_TOTAL_TIMINGS = i18n.translate('xpack.observability.expView.synthetics.total', {
+const SYNTHETICS_RECEIVE_TIMINGS = i18n.translate('xpack.synthetics.receive', {
+  defaultMessage: 'Receive',
+});
+const SYNTHETICS_TOTAL_TIMINGS = i18n.translate('xpack.synthetics.total', {
   defaultMessage: 'Total',
 });
