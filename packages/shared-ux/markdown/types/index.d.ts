@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-
 /** Props for the `Markdown` component. */
 export type MarkdownProps = Partial<
   Omit<EuiMarkdownEditorProps, 'editorId' | 'uiPlugins' | 'markdownFormatProps'>
