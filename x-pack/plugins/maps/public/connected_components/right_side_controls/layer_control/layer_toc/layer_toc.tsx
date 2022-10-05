@@ -96,7 +96,7 @@ export class LayerTOC extends Component<Props> {
       return;
     }
 
-    if (!destination) {
+    if (!destination || source.index === destination.index) {
       this.setState({ ...CLEAR_DND_STATE });
       return;
     }
@@ -131,7 +131,7 @@ export class LayerTOC extends Component<Props> {
     }
 
     if (combineLayer) {
-      // add source to combine when combine is layer group
+      // add source to layer group when combine is layer group
       if (isLayerGroup(combineLayer) && newRightSiblingLayer) {
         this.props.setLayerParent(sourceLayer.getId(), combineLayer.getId());
         this.props.moveLayerToLeftOfTarget(sourceLayer.getId(), newRightSiblingLayer.getId());
@@ -197,7 +197,7 @@ export class LayerTOC extends Component<Props> {
           spacing="none"
           isCombineEnabled={!this.props.isReadOnly}
         >
-          {(droppableProvided, snapshot) => {
+          {(droppableProvided, droppableSnapshot) => {
             const tocEntries = tocEntryList.map(({ draggableIndex, depth, layer }) => (
               <EuiDraggable
                 spacing="none"
@@ -207,15 +207,15 @@ export class LayerTOC extends Component<Props> {
                 customDragHandle={true}
                 disableInteractiveElementBlocking // Allows button to be drag handle
               >
-                {(provided, state) => {
+                {(draggableProvided, draggableSnapshot) => {
                   return (
                     <TOCEntry
                       depth={depth}
                       layer={layer}
-                      dragHandleProps={provided.dragHandleProps}
-                      isDragging={state.isDragging}
-                      isCombining={!!state.combineWith}
-                      isDraggingOver={snapshot.isDraggingOver}
+                      dragHandleProps={draggableProvided.dragHandleProps}
+                      isDragging={draggableSnapshot.isDragging}
+                      isCombining={!!draggableSnapshot.combineWith}
+                      isDraggingOver={droppableSnapshot.isDraggingOver}
                     />
                   );
                 }}
