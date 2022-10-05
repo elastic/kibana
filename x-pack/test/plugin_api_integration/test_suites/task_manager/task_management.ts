@@ -691,7 +691,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect((await historyDocs()).length).to.eql(1);
 
         const task = await currentTask(scheduledTask.id);
-        console.log(`run task - ${JSON.stringify(scheduledTask)}`);
+        console.log(`run task - ${JSON.stringify(task)}`);
         expect(task.enabled).to.eql(true);
       });
 
@@ -701,7 +701,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const task = await currentTask(scheduledTask.id);
         expect(task.enabled).to.eql(false);
-        console.log(`disabled task - ${JSON.stringify(scheduledTask)}`);
+        console.log(`disabled task - ${JSON.stringify(task)}`);
       });
 
       // re-enable the task
@@ -711,8 +711,8 @@ export default function ({ getService }: FtrProviderContext) {
         const task = await currentTask(scheduledTask.id);
 
         expect(task.enabled).to.eql(true);
-        console.log(`enabled task - ${JSON.stringify(scheduledTask)}`);
-        expect(task.scheduledAt).to.eql(scheduledTask.scheduledAt);
+        console.log(`enabled task - ${JSON.stringify(task)}`);
+        expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(scheduledTask.scheduledAt));
       });
     });
 

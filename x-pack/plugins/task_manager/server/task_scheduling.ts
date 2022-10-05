@@ -200,7 +200,8 @@ export class TaskScheduling {
         }
 
         if (runSoon) {
-          acc.push({ ...task, enabled: true, scheduledAt: new Date(), runAt: new Date() });
+          const now = new Date();
+          acc.push({ ...task, enabled: true, scheduledAt: now, runAt: now });
         } else {
           acc.push({ ...task, enabled: true });
         }
