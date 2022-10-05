@@ -80,26 +80,18 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     });
 
     const command = overrides?.EndpointActions?.data?.command ?? this.randomResponseActionCommand();
-    let parameters: EndpointActionDataParameterTypes = overrides?.EndpointActions?.data?.parameters;
-    let output: ActionResponseOutput = overrides?.EndpointActions?.data
-      ?.output as ActionResponseOutput;
+    let output: ActionResponseOutput<ResponseActionGetFileOutputContent> = overrides
+      ?.EndpointActions?.data?.output as ActionResponseOutput<ResponseActionGetFileOutputContent>;
 
     if (command === 'get-file') {
-      if (!parameters) {
-        parameters = {
-          path: '/some/path/bad_file.txt',
-        };
-      }
-
       if (!output) {
         output = {
           type: 'json',
           content: {
-            file: {
-              name: 'bad_file.txt',
-              path: '/some/path/bad_file.txt',
-              size: 221,
-            },
+            code: 'ra_get-file_success',
+            path: '/some/path/bad_file.txt',
+            size: 1234,
+            zip_size: 123,
           },
         };
       }
@@ -119,7 +111,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           data: {
             command,
             comment: '',
-            parameters,
             output,
           },
         },
