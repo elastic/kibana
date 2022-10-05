@@ -20,7 +20,25 @@ export interface Props {
   moveLayerToLeftOfTarget: (moveLayerId: string, targetLayerId: string) => void;
 }
 
+interface State {
+  combineLayer: ILayer | null;
+  isOwnAncestor: boolean;
+  newRightSiblingLayer: ILayer | null;
+  sourceLayer: ILayer | null;
+}
+
+const CLEAR_DND_STATE = {
+  combineLayer: null,
+  isOwnAncestor: false,
+  newRightSiblingLayer: null,
+  sourceLayer: null,
+};
+
 export class LayerTOC extends Component<Props> {
+  state: State = {
+    ...CLEAR_DND_STATE
+  };
+
   componentWillUnmount() {
     this._updateDebounced.cancel();
   }
@@ -36,41 +54,98 @@ export class LayerTOC extends Component<Props> {
     return this.props.layerList.length - index - 1;
   }
 
-  _onDragEnd = ({ combine, destination, source }: DropResult) => {
+  _getForebearers(layer: ILayer): string[] {
+    const parentId = layer.getParent();
+    if (!parentId) {
+      return [];
+    }
+
+    const parentLayer = this.props.layerList.find(findLayer => {
+      return findLayer.getId() === parentId;
+    });
+    if (!parentLayer) {
+      return [];
+    }
+
+    return [
+      ...this._getForebearers(parentLayer),
+      parentId
+    ];
+  }
+
+  _onDragUpdate = ({ combine, destination, source }: DropResult) => {
     if (combine) {
-      this.props.createLayerGroup(
-        this.props.layerList[this._reverseIndex(source.index)].getId(),
-        combine.draggableId
-      );
+      const sourceLayer = this.props.layerList[this._reverseIndex(source.index)];
+      const combineLayer = this.props.layerList.find(findLayer => {
+        return findLayer.getId() === combine.draggableId;
+      });
+      const forebearers = combineLayer ? this._getForebearers(combineLayer) : [];
+      this.setState({
+        combineLayer,
+        newRightSiblingLayer: null,
+        sourceLayer,
+        isOwnAncestor: forebearers.includes(sourceLayer.getId())
+      });
       return;
     }
 
     // Dragging item out of EuiDroppable results in destination of null
     if (!destination) {
+      this.setState({ ...CLEAR_DND_STATE });
       return;
     }
 
     // Dragged item to same location, nothing to update
     if (source.index === destination.index) {
-      return 0;
+      this.setState({ ...CLEAR_DND_STATE });
+      return;
     }
 
     const sourceIndex = this._reverseIndex(source.index);
-    const destinationIndex = this._reverseIndex(destination.index);
+    const sourceLayer = this.props.layerList[sourceIndex];
 
-    const sourceLayerId = this.props.layerList[sourceIndex].getId();
+    const destinationIndex = this._reverseIndex(destination.index);
     const newRightSiblingIndex =
       sourceIndex > destinationIndex
         ? // When layer is moved to the right, new right sibling is layer to the right of destination
           destinationIndex - 1
         : // When layer is moved to the left, new right sibling is the destination
           destinationIndex;
-    const newRightSiblingParentLayerId =
-      newRightSiblingIndex < 0 ? undefined : this.props.layerList[newRightSiblingIndex].getParent();
-    this.props.setLayerParent(sourceLayerId, newRightSiblingParentLayerId);
+    const newRightSiblingLayer = newRightSiblingIndex < 0 ? null : this.props.layerList[newRightSiblingIndex];
+    const forebearers = newRightSiblingLayer ? this._getForebearers(newRightSiblingLayer) : [];
+
+    this.setState({
+      combineLayer: null,
+      newRightSiblingLayer,
+      sourceLayer,
+      isOwnAncestor: forebearers.includes(sourceLayer.getId())
+    });
+  }
+
+  _onDragEnd = () => {
+    const { combineLayer, isOwnAncestor, sourceLayer, newRightSiblingLayer} = this.state;
+    this.setState({ ...CLEAR_DND_STATE });
+
+    if (isOwnAncestor || !sourceLayer) {
+      return;
+    }
+
+    if (combineLayer) {
+      this.props.createLayerGroup(
+        sourceLayer.getId(),
+        combineLayer.getId()
+      );
+      return;
+    }
+
+    if (!newRightSiblingLayer) {
+      return;
+    }
+
+    this.props.setLayerParent(sourceLayer.getId(), newRightSiblingLayer.getParent());
     this.props.moveLayerToLeftOfTarget(
-      sourceLayerId,
-      this.props.layerList[newRightSiblingIndex].getId()
+      sourceLayer.getId(),
+      newRightSiblingLayer.getId()
     );
   };
 
@@ -114,7 +189,7 @@ export class LayerTOC extends Component<Props> {
     }
 
     return (
-      <EuiDragDropContext onDragEnd={this._onDragEnd}>
+      <EuiDragDropContext onDragUpdate={this._onDragUpdate} onDragEnd={this._onDragEnd}>
         <EuiDroppable
           droppableId="mapLayerTOC"
           spacing="none"
