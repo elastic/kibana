@@ -9,8 +9,8 @@ import moment from 'moment';
 import { Page } from '@elastic/synthetics';
 import { Locator, byTestId } from './utils';
 
-const DEFAULT_ABS_START_UTC_DATE = '2022-05-22T19:00:00.000Z';
-const DEFAULT_ABS_END_UTC_DATE = '2022-05-22T20:00:00.000Z';
+export const DEFAULT_ABS_START_UTC_DATE = '2020-05-18T11:51:00.000Z';
+export const DEFAULT_ABS_END_UTC_DATE = '2022-05-22T20:00:00.000Z';
 const MOMENT_DATE_INPUT_FORMAT = 'MMM DD, YYYY @ HH:mm:ss:SSS';
 
 export class UXDashboardDatePicker {
@@ -35,7 +35,7 @@ export class UXDashboardDatePicker {
   }
 
   async setAbsoluteStartDate(dateStr: string) {
-    await this.dateStarButton.first().click({ timeout: 3 * 60 * 1000 });
+    await this.dateStarButton.first().click();
     await this.datePopupAbsoluteTab.first().click();
     await this.dateAbsoluteInput.first().click({ clickCount: 3 }); // clear input
     await this.dateAbsoluteInput.first().type(dateStr);

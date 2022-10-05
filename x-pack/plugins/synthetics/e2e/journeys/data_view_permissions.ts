@@ -51,3 +51,5 @@ journey('DataViewPermissions', async ({ page, params }) => {
 
 const permissionError =
   "Unable to create Data View. You don't have the required permission, please contact your admin.";
+
+// To trigger Synthetics e2e tests
