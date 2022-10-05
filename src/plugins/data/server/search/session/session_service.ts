@@ -8,67 +8,48 @@
 
 import { notFound } from '@hapi/boom';
 import { debounce } from 'lodash';
-import { nodeBuilder, fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import {
   CoreSetup,
   CoreStart,
   KibanaRequest,
-  SavedObjectsClientContract,
   Logger,
   SavedObject,
-  SavedObjectsFindOptions,
+  SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
+  SavedObjectsFindOptions,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import {
+  ENHANCED_ES_SEARCH_STRATEGY,
   IKibanaSearchRequest,
   ISearchOptions,
-  ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
-  SearchSessionStatus,
+  SearchSessionsFindResponse,
+  SearchSessionStatusResponse,
 } from '../../../common';
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
-import {
-  registerSearchSessionsTask,
-  scheduleSearchSessionsTask,
-  unscheduleSearchSessionsTask,
-} from './setup_task';
-import { SearchStatus } from './types';
-import {
-  checkPersistedSessionsProgress,
-  SEARCH_SESSIONS_TASK_ID,
-  SEARCH_SESSIONS_TASK_TYPE,
-} from './check_persisted_sessions';
-import {
-  SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
-  checkNonPersistedSessions,
-  SEARCH_SESSIONS_CLEANUP_TASK_ID,
-} from './check_non_persisted_sessions';
-import {
-  SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
-  SEARCH_SESSIONS_EXPIRE_TASK_ID,
-  checkPersistedCompletedSessionExpiration,
-} from './expire_persisted_sessions';
+import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+export interface SearchSessionStatusDependencies extends SearchSessionDependencies {
+  internalElasticsearchClient: ElasticsearchClient;
+}
+
 interface SetupDependencies {
-  taskManager: TaskManagerSetupContract;
   security?: SecurityPluginSetup;
 }
 
-interface StartDependencies {
-  taskManager: TaskManagerStartContract;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface StartDependencies {}
 
 const DEBOUNCE_UPDATE_OR_CREATE_WAIT = 1000;
 const DEBOUNCE_UPDATE_OR_CREATE_MAX_WAIT = 5000;
@@ -101,82 +82,16 @@ export class SearchSessionService implements ISearchSessionService {
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
     this.security = deps.security;
-    const taskDeps = {
-      config: this.config,
-      taskManager: deps.taskManager,
-      logger: this.logger,
-    };
-
-    registerSearchSessionsTask(
-      core,
-      taskDeps,
-      SEARCH_SESSIONS_TASK_TYPE,
-      'persisted session progress',
-      checkPersistedSessionsProgress
-    );
-
-    registerSearchSessionsTask(
-      core,
-      taskDeps,
-      SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
-      'non persisted session cleanup',
-      checkNonPersistedSessions
-    );
-
-    registerSearchSessionsTask(
-      core,
-      taskDeps,
-      SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
-      'complete session expiration',
-      checkPersistedCompletedSessionExpiration
-    );
 
     this.setupCompleted = true;
   }
 
-  public async start(core: CoreStart, deps: StartDependencies) {
+  public start(core: CoreStart, deps: StartDependencies) {
     if (!this.setupCompleted)
       throw new Error('SearchSessionService setup() must be called before start()');
-
-    return this.setupMonitoring(core, deps);
   }
 
   public stop() {}
-
-  private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
-    const taskDeps = {
-      config: this.config,
-      taskManager: deps.taskManager,
-      logger: this.logger,
-    };
-
-    if (this.sessionConfig.enabled) {
-      scheduleSearchSessionsTask(
-        taskDeps,
-        SEARCH_SESSIONS_TASK_ID,
-        SEARCH_SESSIONS_TASK_TYPE,
-        this.sessionConfig.trackingInterval
-      );
-
-      scheduleSearchSessionsTask(
-        taskDeps,
-        SEARCH_SESSIONS_CLEANUP_TASK_ID,
-        SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
-        this.sessionConfig.cleanupInterval
-      );
-
-      scheduleSearchSessionsTask(
-        taskDeps,
-        SEARCH_SESSIONS_EXPIRE_TASK_ID,
-        SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
-        this.sessionConfig.expireInterval
-      );
-    } else {
-      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_TASK_ID);
-      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_CLEANUP_TASK_ID);
-      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_EXPIRE_TASK_ID);
-    }
-  };
 
   private processUpdateOrCreateBatchQueue = debounce(
     () => {
@@ -304,7 +219,6 @@ export class SearchSessionService implements ISearchSessionService {
       locatorId,
       initialState,
       restoreState,
-      persisted: true,
     });
   };
 
@@ -324,14 +238,11 @@ export class SearchSessionService implements ISearchSessionService {
       SEARCH_SESSION_TYPE,
       {
         sessionId,
-        status: SearchSessionStatus.IN_PROGRESS,
         expires: new Date(
           Date.now() + this.sessionConfig.defaultExpiration.asMilliseconds()
         ).toISOString(),
         created: new Date().toISOString(),
-        touched: new Date().toISOString(),
         idMapping: {},
-        persisted: false,
         version: this.version,
         realmType,
         realmName,
@@ -353,14 +264,15 @@ export class SearchSessionService implements ISearchSessionService {
       sessionId
     );
     this.throwOnUserConflict(user, session);
+
     return session;
   };
 
-  public find = (
-    { savedObjectsClient }: SearchSessionDependencies,
+  public find = async (
+    { savedObjectsClient, internalElasticsearchClient }: SearchSessionStatusDependencies,
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
-  ) => {
+  ): Promise<SearchSessionsFindResponse> => {
     const userFilters =
       user === null
         ? []
@@ -378,11 +290,31 @@ export class SearchSessionService implements ISearchSessionService {
     const filterKueryNode =
       typeof options.filter === 'string' ? fromKueryExpression(options.filter) : options.filter;
     const filter = nodeBuilder.and(userFilters.concat(filterKueryNode ?? []));
-    return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
+    const findResponse = await savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,
       filter,
       type: SEARCH_SESSION_TYPE,
     });
+
+    const sessionStatuses = await Promise.all(
+      findResponse.saved_objects.map(async (so) => {
+        const sessionStatus = await getSessionStatus(
+          { internalClient: internalElasticsearchClient },
+          so.attributes,
+          this.sessionConfig
+        );
+
+        return sessionStatus;
+      })
+    );
+
+    return {
+      ...findResponse,
+      statuses: sessionStatuses.reduce((res, status, index) => {
+        res[findResponse.saved_objects[index].id] = { status };
+        return res;
+      }, {} as Record<string, SearchSessionStatusResponse>),
+    };
   };
 
   public update = async (
@@ -399,7 +331,6 @@ export class SearchSessionService implements ISearchSessionService {
       sessionId,
       {
         ...attributes,
-        touched: new Date().toISOString(),
       }
     );
   };
@@ -419,9 +350,9 @@ export class SearchSessionService implements ISearchSessionService {
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
-    this.logger.debug(`delete | ${sessionId}`);
+    this.logger.debug(`cancel | ${sessionId}`);
     return this.update(deps, user, sessionId, {
-      status: SearchSessionStatus.CANCELLED,
+      isCanceled: true,
     });
   };
 
@@ -445,8 +376,9 @@ export class SearchSessionService implements ISearchSessionService {
     user: AuthenticatedUser | null,
     searchRequest: IKibanaSearchRequest,
     searchId: string,
-    { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY }: ISearchOptions
+    options: ISearchOptions
   ) => {
+    const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY } = options;
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
 
@@ -454,10 +386,9 @@ export class SearchSessionService implements ISearchSessionService {
 
     if (searchRequest.params) {
       const requestHash = createRequestHash(searchRequest.params);
-      const searchInfo = {
+      const searchInfo: SearchSessionRequestInfo = {
         id: searchId,
         strategy,
-        status: SearchStatus.IN_PROGRESS,
       };
       idMapping = { [requestHash]: searchInfo };
     }
@@ -471,11 +402,29 @@ export class SearchSessionService implements ISearchSessionService {
     sessionId: string
   ) {
     const searchSession = await this.get(deps, user, sessionId);
+
     const searchIdMapping = new Map<string, string>();
     Object.values(searchSession.attributes.idMapping).forEach((requestInfo) => {
       searchIdMapping.set(requestInfo.id, requestInfo.strategy);
     });
     return searchIdMapping;
+  }
+
+  public async status(
+    deps: SearchSessionStatusDependencies,
+    user: AuthenticatedUser | null,
+    sessionId: string
+  ): Promise<SearchSessionStatusResponse> {
+    this.logger.debug(`status | ${sessionId}`);
+    const session = await this.get(deps, user, sessionId);
+
+    const sessionStatus = await getSessionStatus(
+      { internalClient: deps.internalElasticsearchClient },
+      session.attributes,
+      this.sessionConfig
+    );
+
+    return { status: sessionStatus };
   }
 
   /**
@@ -510,13 +459,15 @@ export class SearchSessionService implements ISearchSessionService {
     return session.attributes.idMapping[requestHash].id;
   };
 
-  public asScopedProvider = ({ savedObjects }: CoreStart) => {
+  public asScopedProvider = ({ savedObjects, elasticsearch }: CoreStart) => {
     return (request: KibanaRequest) => {
       const user = this.security?.authc.getCurrentUser(request) ?? null;
       const savedObjectsClient = savedObjects.getScopedClient(request, {
         includedHiddenTypes: [SEARCH_SESSION_TYPE],
       });
-      const deps = { savedObjectsClient };
+
+      const internalElasticsearchClient = elasticsearch.client.asScoped(request).asInternalUser;
+      const deps = { savedObjectsClient, internalElasticsearchClient };
       return {
         getId: this.getId.bind(this, deps, user),
         trackId: this.trackId.bind(this, deps, user),
@@ -528,6 +479,7 @@ export class SearchSessionService implements ISearchSessionService {
         extend: this.extend.bind(this, deps, user),
         cancel: this.cancel.bind(this, deps, user),
         delete: this.delete.bind(this, deps, user),
+        status: this.status.bind(this, deps, user),
         getConfig: () => this.config.search.sessions,
       };
     };

@@ -23,7 +23,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import moment from 'moment';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -118,7 +117,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       this.initializerContext,
       getStartServices,
       this.sessionsClient,
-      nowProvider
+      nowProvider,
+      this.usageCollector
     );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -256,9 +256,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               application,
               basePath: http.basePath,
               storage: new Storage(window.localStorage),
-              disableSaveAfterSessionCompletesTimeout: moment
-                .duration(config.search.sessions.notTouchedTimeout)
-                .asMilliseconds(),
               usageCollector: this.usageCollector,
               tourDisabled: screenshotMode.isScreenshotMode(),
             })

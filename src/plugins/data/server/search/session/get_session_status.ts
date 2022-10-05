@@ -7,25 +7,40 @@
  */
 
 import moment from 'moment';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import { SearchStatus } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
+import { getSearchStatus } from './get_search_status';
 
-export function getSessionStatus(
+export async function getSessionStatus(
+  deps: { internalClient: ElasticsearchClient },
   session: SearchSessionSavedObjectAttributes,
   config: SearchSessionsConfigSchema
-): SearchSessionStatus {
-  const searchStatuses = Object.values(session.idMapping);
-  const curTime = moment();
+): Promise<SearchSessionStatus> {
+  if (session.isCanceled === true) {
+    return SearchSessionStatus.CANCELLED;
+  }
+
+  const now = moment();
+
+  if (moment(session.expires).isBefore(now)) {
+    return SearchSessionStatus.EXPIRED;
+  }
+
+  const searches = Object.values(session.idMapping);
+  const searchStatuses = await Promise.all(
+    searches.map(async (s) => {
+      const status = await getSearchStatus(deps.internalClient, s.id);
+      return {
+        ...s,
+        ...status,
+      };
+    })
+  );
+
   if (searchStatuses.some((item) => item.status === SearchStatus.ERROR)) {
     return SearchSessionStatus.ERROR;
-  } else if (
-    searchStatuses.length === 0 &&
-    curTime.diff(moment(session.touched), 'ms') >
-      moment.duration(config.notTouchedInProgressTimeout).asMilliseconds()
-  ) {
-    // Expire empty sessions that weren't touched for a minute
-    return SearchSessionStatus.EXPIRED;
   } else if (
     searchStatuses.length > 0 &&
     searchStatuses.every((item) => item.status === SearchStatus.COMPLETE)
