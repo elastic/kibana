@@ -19,7 +19,7 @@ export type FilterItem = Filter | FilterItem[];
 /**
  * @public
  */
-export interface OrFilterMeta extends FilterMeta {
+export interface CombinedFilterMeta extends FilterMeta {
   type: typeof FILTERS.OR;
   params: FilterItem[];
 }
@@ -27,24 +27,24 @@ export interface OrFilterMeta extends FilterMeta {
 /**
  * @public
  */
-export interface OrFilter extends Filter {
-  meta: OrFilterMeta;
+export interface CombinedFilter extends Filter {
+  meta: CombinedFilterMeta;
 }
 
 /**
  * @public
  */
-export function isOrFilter(filter: Filter): filter is OrFilter {
+export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
   return filter?.meta?.type === FILTERS.OR;
 }
 
 /**
  * Builds an OR filter. An OR filter is a filter with multiple sub-filters. Each sub-filter (FilterItem) represents a
  * condition.
- * @param filters An array of OrFilterItem
+ * @param filters An array of CombinedFilterItem
  * @public
  */
-export function buildOrFilter(filters: FilterItem[]): OrFilter {
+export function buildCombinedFilter(filters: FilterItem[]): CombinedFilter {
   const filter = buildEmptyFilter(false);
   return {
     ...filter,

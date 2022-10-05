@@ -9,7 +9,7 @@
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter, FilterItem } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import { buildOrFilter, isOrFilter } from '@kbn/es-query';
+import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
 import { ConditionTypes, getConditionalOperationType } from '../utils';
 import type { Operator } from '../filter_bar/filter_editor';
 
@@ -66,8 +66,8 @@ export const normalizeFilters = (filters: FilterItem[]) => {
   const doRecursive = (f: FilterItem, parent: FilterItem) => {
     if (Array.isArray(f)) {
       return normalizeArray(f, parent);
-    } else if (isOrFilter(f)) {
-      return normalizeOr(f);
+    } else if (isCombinedFilter(f)) {
+      return normalizeCombined(f);
     }
     return f;
   };
@@ -92,17 +92,17 @@ export const normalizeFilters = (filters: FilterItem[]) => {
     return Array.isArray(parent) ? partiallyNormalized.flat() : partiallyNormalized;
   };
 
-  const normalizeOr = (orFilter: Filter): FilterItem => {
-    const orFilters = getGroupedFilters(orFilter);
-    if (orFilters.length < 2) {
-      return orFilters[0];
+  const normalizeCombined = (combinedFilter: Filter): FilterItem => {
+    const combinedFilters = getGroupedFilters(combinedFilter);
+    if (combinedFilters.length < 2) {
+      return combinedFilters[0];
     }
 
     return {
-      ...orFilter,
+      ...combinedFilter,
       meta: {
-        ...orFilter.meta,
-        params: doRecursive(orFilters, orFilter),
+        ...combinedFilter.meta,
+        params: doRecursive(combinedFilters, combinedFilter),
       },
     };
   };
@@ -138,7 +138,7 @@ export const addFilter = (
 
   if (parentConditionType !== conditionalType) {
     if (conditionalType === ConditionTypes.OR) {
-      targetArray.splice(selector, 1, buildOrFilter([targetArray[selector], filter]));
+      targetArray.splice(selector, 1, buildCombinedFilter([targetArray[selector], filter]));
     }
     if (conditionalType === ConditionTypes.AND) {
       targetArray.splice(selector, 1, [targetArray[selector], filter]);

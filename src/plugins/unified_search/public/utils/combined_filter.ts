@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isOrFilter, FilterItem } from '@kbn/es-query';
+import { isCombinedFilter, FilterItem } from '@kbn/es-query';
 
 export enum ConditionTypes {
   OR = 'OR',
@@ -20,7 +20,7 @@ export enum ConditionTypes {
 export const getConditionalOperationType = (filter: FilterItem) => {
   if (Array.isArray(filter)) {
     return ConditionTypes.AND;
-  } else if (isOrFilter(filter)) {
+  } else if (isCombinedFilter(filter)) {
     return ConditionTypes.OR;
   }
 };
