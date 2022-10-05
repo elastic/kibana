@@ -13,6 +13,7 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
+import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { deleteConnectorById } from '../../lib/connectors/delete_connector';
 
@@ -28,6 +29,7 @@ import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_i
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
+import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import {
@@ -293,9 +295,15 @@ export function registerIndexRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
-      const pipelines = await getCustomPipelines(indexName, client);
+      const [defaultPipeline, customPipelines] = await Promise.all([
+        getPipeline(DEFAULT_PIPELINE_NAME, client),
+        getCustomPipelines(indexName, client),
+      ]);
       return response.ok({
-        body: pipelines,
+        body: {
+          ...defaultPipeline,
+          ...customPipelines,
+        },
         headers: { 'content-type': 'application/json' },
       });
     })

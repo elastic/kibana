@@ -79,7 +79,7 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       state.status = action.payload;
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
-      state.statusError = serializeHttpFetchError(action.payload);
+      state.statusError = action.payload;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.statusError = null;

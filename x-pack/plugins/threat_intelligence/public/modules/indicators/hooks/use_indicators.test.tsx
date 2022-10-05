@@ -105,6 +105,7 @@ describe('useIndicators()', () => {
 
       expect(hookResult.result.current).toMatchInlineSnapshot(`
         Object {
+          "dataUpdatedAt": 0,
           "handleRefresh": [Function],
           "indicatorCount": 0,
           "indicators": Array [],
