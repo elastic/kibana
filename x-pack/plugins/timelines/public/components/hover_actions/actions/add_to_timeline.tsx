@@ -11,6 +11,7 @@ import { DraggableId } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash';
 
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { DataProvider, TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
@@ -44,6 +45,17 @@ const useGetHandleStartDragToTimeline = ({
   }, [startDragToTimeline]);
 
   return handleStartDragToTimeline;
+};
+
+const ToastAddSuccess: React.FC<{
+  addSuccess: string;
+  timelineType: 'default' | 'template';
+}> = ({ addSuccess, timelineType }) => {
+  const message = i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(
+    addSuccess,
+    timelineType === 'default'
+  );
+  return <span className="eui-textBreakWord">{message}</span>;
 };
 
 export interface AddToTimelineButtonProps extends HoverActionComponentProps {
@@ -88,9 +100,11 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
                 dataProvider: provider,
               })
             );
-            addSuccess(
-              i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(provider.name, timelineType === 'default')
-            );
+            addSuccess({
+              title: toMountPoint(
+                <ToastAddSuccess addSuccess={provider.name} timelineType={timelineType} />
+              ),
+            });
           }
         });
       }
