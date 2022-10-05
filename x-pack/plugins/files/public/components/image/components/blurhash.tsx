@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import React, { useRef, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { boxDimensions } from '../../common/blurhash';
+import { boxDimensions } from '../../common/image_metadata';
 
 interface Props {
   visible: boolean;

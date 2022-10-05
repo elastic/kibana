@@ -537,8 +537,21 @@ export interface FilesMetrics {
   countByExtension: Record<string, number>;
 }
 
+/**
+ * Set of metadata captured for every image uploaded via the file services'
+ * public components.
+ */
 export interface FileImageMetadata {
+  /**
+   * The blurhash that can be displayed while the image is loading
+   */
   blurhash?: string;
+  /**
+   * Width, in px, of the original image
+   */
   width: number;
+  /**
+   * Height, in px, of the original image
+   */
   height: number;
 }
