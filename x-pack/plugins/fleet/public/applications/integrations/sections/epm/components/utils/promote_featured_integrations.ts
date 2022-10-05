@@ -29,7 +29,7 @@ export function _promoteFeaturedIntegrations(
   // now return the integrations in the order they are defined in
   const orderedFeatured = featuredIntegrationNames
     .map((integrationName) => featuredIntegrations.find(({ name }) => name === integrationName))
-    .filter((v) => v);
+    .filter((v) => v) as PackageListGridProps['list'];
 
   return [...orderedFeatured, ...other];
 }
