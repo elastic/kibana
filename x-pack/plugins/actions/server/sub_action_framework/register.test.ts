@@ -18,7 +18,9 @@ import {
 import { register } from './register';
 
 describe('Registration', () => {
-  const renderParameterTemplates = jest.fn();
+  const renderedVariables = { body: '' };
+  const mockRenderParameterTemplates = jest.fn().mockReturnValue(renderedVariables);
+
   const connector = {
     id: '.test',
     name: 'Test',
@@ -29,7 +31,7 @@ describe('Registration', () => {
       secrets: TestSecretsSchema,
     },
     Service: TestSubActionConnector,
-    renderParameterTemplates,
+    renderParameterTemplates: mockRenderParameterTemplates,
   };
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -37,7 +39,6 @@ describe('Registration', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.clearAllMocks();
   });
 
@@ -72,9 +73,11 @@ describe('Registration', () => {
     const params = {};
     const variables = {};
     const actionId = 'action-id';
-    const registerParam = actionTypeRegistry.register.mock.calls[0][0];
-    registerParam.renderParameterTemplates?.(params, variables, actionId);
 
-    expect(renderParameterTemplates).toHaveBeenCalledWith(params, variables, actionId);
+    const { renderParameterTemplates } = actionTypeRegistry.register.mock.calls[0][0];
+    const rendered = renderParameterTemplates?.(params, variables, actionId);
+
+    expect(mockRenderParameterTemplates).toHaveBeenCalledWith(params, variables, actionId);
+    expect(rendered).toBe(renderedVariables);
   });
 });
