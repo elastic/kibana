@@ -76,10 +76,7 @@ export class BaseValidator {
 
   protected async validateHasPrivilege(privilege: keyof EndpointAuthz): Promise<void> {
     if (!(await this.endpointAuthzPromise)[privilege]) {
-      throw new EndpointArtifactExceptionValidationError(
-        'Missing right privileges for this action',
-        403
-      );
+      throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 403);
     }
   }
 
