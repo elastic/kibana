@@ -14,6 +14,7 @@ const { clamp } = require('./clamp');
 const { cos } = require('./cos');
 const { count } = require('./count');
 const { cube } = require('./cube');
+const { defaults } = require('./defaults');
 const { degtorad } = require('./degtorad');
 const { divide } = require('./divide');
 const { exp } = require('./exp');
@@ -57,6 +58,7 @@ module.exports = {
     count,
     cube,
     degtorad,
+    defaults,
     divide,
     exp,
     first,

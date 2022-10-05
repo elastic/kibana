@@ -553,6 +553,27 @@ Example: Find the minimum between two fields averages
     `,
     }),
   },
+  defaults: {
+    section: 'math',
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.defaultValue', { defaultMessage: 'default' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    help: i18n.translate('xpack.lens.formula.defaultFunction.markdown', {
+      defaultMessage: `
+Returns a default numeric value when value is null.
+
+Example: Return -1 when a field has no data
+\`defaults(average(bytes), -1)\`
+`,
+    }),
+  },
   lt: {
     section: 'comparison',
     positionalArguments: [

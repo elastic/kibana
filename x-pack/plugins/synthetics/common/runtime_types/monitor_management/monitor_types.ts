@@ -86,6 +86,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.PROJECT_ID]: t.string,
     [ConfigKey.ORIGINAL_SPACE]: t.string,
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+    [ConfigKey.ID]: t.string,
   }),
 ]);
 
@@ -97,6 +98,9 @@ export const TCPSimpleFieldsCodec = t.intersection([
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.HOSTS]: t.string,
     [ConfigKey.PORT]: t.union([t.number, t.null]),
+  }),
+  t.partial({
+    [ConfigKey.URLS]: t.string,
   }),
   CommonFieldsCodec,
 ]);
