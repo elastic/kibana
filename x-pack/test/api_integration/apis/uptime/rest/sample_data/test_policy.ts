@@ -73,6 +73,8 @@ export const getTestSyntheticsPolicy = (
             config_id: { value: id, type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { value: 'ui', type: 'text' },
+            'monitor.project.id': { type: 'text', value: null },
+            'monitor.project.name': { type: 'text', value: null },
           },
           id: 'synthetics/http-http-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
@@ -158,6 +160,8 @@ export const getTestSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
           id: 'synthetics/tcp-tcp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         },
@@ -188,6 +192,8 @@ export const getTestSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
           id: 'synthetics/icmp-icmp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         },
@@ -302,11 +308,11 @@ export const getTestProjectSyntheticsPolicy = (
     configId: string;
     id: string;
   } = {
-      name: 'check if title is present-Test private location 0',
-      inputs: {},
-      configId: '',
-      id: '',
-    }
+    name: 'check if title is present-Test private location 0',
+    inputs: {},
+    configId: '',
+    id: '',
+  }
 ): PackagePolicy => ({
   id: '4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
   version: 'WzEzMDksMV0=',
@@ -359,6 +365,8 @@ export const getTestProjectSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
           id: 'synthetics/http-http-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
         },
@@ -398,6 +406,8 @@ export const getTestProjectSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
           id: 'synthetics/tcp-tcp-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
         },
@@ -428,6 +438,8 @@ export const getTestProjectSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
           id: 'synthetics/icmp-icmp-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
         },
