@@ -29,11 +29,13 @@ export const searchForExceptionList = (searchText: string) => {
 };
 
 export const deleteExceptionListWithoutRuleReference = () => {
+  cy.get('[data-test-subj="exceptionsListCardOverflowActions"]').first().click();
   cy.get(EXCEPTIONS_TABLE_DELETE_BTN).first().click();
   cy.get(EXCEPTIONS_TABLE_MODAL).should('not.exist');
 };
 
 export const deleteExceptionListWithRuleReference = () => {
+  cy.get('[data-test-subj="exceptionsListCardOverflowActions"]').first().click();
   cy.get(EXCEPTIONS_TABLE_DELETE_BTN).first().click();
   cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
   cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
@@ -41,6 +43,7 @@ export const deleteExceptionListWithRuleReference = () => {
 };
 
 export const exportExceptionList = () => {
+  cy.get('[data-test-subj="exceptionsListCardOverflowActions"]').first().click();
   cy.get(EXCEPTIONS_TABLE_EXPORT_BTN).first().click();
 };
 

@@ -62,7 +62,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
     const onClosePopover = () => setIsPopoverOpen(false);
 
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj="exceptionsListCard">
         <EuiFlexItem>
           <EuiPanel>
             {
@@ -77,6 +77,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                               <EuiFlexItem grow={false}>
                                 <EuiButtonEmpty
                                   flush={'left'}
+                                  data-test-subj="exception-list-name"
                                 >{`${exceptionsList.name}`}</EuiButtonEmpty>
                               </EuiFlexItem>
                               <EuiFlexItem grow={false}>
@@ -106,6 +107,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   </StyledFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiPopover
+                      data-test-subj="exceptionsListCardOverflowActions"
                       button={
                         <EuiButtonIcon
                           isDisabled={false}
@@ -141,6 +143,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                           <EuiContextMenuItem
                             key={'export'}
                             icon={'exportAction'}
+                            data-test-subj="exceptionsTableExportButton"
                             onClick={() => {
                               onClosePopover();
                               handleExport({
