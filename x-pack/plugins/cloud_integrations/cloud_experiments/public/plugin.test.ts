@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { ldClientMock } from './plugin.test.mock';
 import { CloudExperimentsPlugin } from './plugin';
 import { FEATURE_FLAG_NAMES } from '../common/constants';
@@ -61,13 +62,12 @@ describe('Cloud Experiments public plugin', () => {
       plugin = new CloudExperimentsPlugin(initializerContext);
     });
 
-    test('returns the contract', () => {
-      const setupContract = plugin.setup(coreMock.createSetup());
-      expect(setupContract).toStrictEqual(
-        expect.objectContaining({
-          identifyUser: expect.any(Function),
+    test('returns no contract', () => {
+      expect(
+        plugin.setup(coreMock.createSetup(), {
+          cloud: cloudMock.createSetup(),
         })
-      );
+      ).toBeUndefined();
     });
 
     describe('identifyUser', () => {
@@ -76,44 +76,29 @@ describe('Cloud Experiments public plugin', () => {
           flag_overrides: { my_flag: '1234' },
         });
         const customPlugin = new CloudExperimentsPlugin(initializerContext);
-        const setupContract = customPlugin.setup(coreMock.createSetup());
         expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
-        setupContract.identifyUser('user-id', {});
+        customPlugin.setup(coreMock.createSetup(), {
+          cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+        });
         expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
       });
 
-      test('it initializes the LaunchDarkly client', () => {
-        const setupContract = plugin.setup(coreMock.createSetup());
+      test('it skips creating the client if cloud is not enabled', () => {
         expect(plugin).toHaveProperty('launchDarklyClient', undefined);
-        setupContract.identifyUser('user-id', {});
-        expect(plugin).toHaveProperty('launchDarklyClient', ldClientMock);
-        expect(ldClientMock.identify).not.toHaveBeenCalled();
+        plugin.setup(coreMock.createSetup(), {
+          cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
+        });
+        expect(plugin).toHaveProperty('launchDarklyClient', undefined);
       });
 
-      test('it calls identify if the client already exists', () => {
-        const setupContract = plugin.setup(coreMock.createSetup());
+      test('it initializes the LaunchDarkly client', async () => {
         expect(plugin).toHaveProperty('launchDarklyClient', undefined);
-        setupContract.identifyUser('user-id', {});
-        expect(plugin).toHaveProperty('launchDarklyClient', ldClientMock);
-        expect(ldClientMock.identify).not.toHaveBeenCalled();
-        ldClientMock.identify.mockResolvedValue({}); // ensure it's a promise
-        setupContract.identifyUser('user-id', {});
-        expect(ldClientMock.identify).toHaveBeenCalledTimes(1);
-      });
-
-      test('it handles identify rejections', async () => {
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-        const setupContract = plugin.setup(coreMock.createSetup());
-        expect(plugin).toHaveProperty('launchDarklyClient', undefined);
-        setupContract.identifyUser('user-id', {});
-        expect(plugin).toHaveProperty('launchDarklyClient', ldClientMock);
-        expect(ldClientMock.identify).not.toHaveBeenCalled();
-        const error = new Error('Something went terribly wrong');
-        ldClientMock.identify.mockRejectedValue(error);
-        setupContract.identifyUser('user-id', {});
-        expect(ldClientMock.identify).toHaveBeenCalledTimes(1);
+        plugin.setup(coreMock.createSetup(), {
+          cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+        });
+        // await the lazy import
         await new Promise((resolve) => process.nextTick(resolve));
-        expect(consoleWarnSpy).toHaveBeenCalledWith(error);
+        expect(plugin).toHaveProperty('launchDarklyClient', ldClientMock);
       });
     });
   });
@@ -132,7 +117,7 @@ describe('Cloud Experiments public plugin', () => {
     });
 
     test('returns the contract', () => {
-      plugin.setup(coreMock.createSetup());
+      plugin.setup(coreMock.createSetup(), { cloud: cloudMock.createSetup() });
       const startContract = plugin.start(coreMock.createStart());
       expect(startContract).toStrictEqual(
         expect.objectContaining({
@@ -145,8 +130,9 @@ describe('Cloud Experiments public plugin', () => {
     describe('getVariation', () => {
       describe('with the user identified', () => {
         beforeEach(() => {
-          const setupContract = plugin.setup(coreMock.createSetup());
-          setupContract.identifyUser('user-id', {});
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+          });
         });
 
         test('uses the flag overrides to respond early', async () => {
@@ -175,7 +161,9 @@ describe('Cloud Experiments public plugin', () => {
 
       describe('with the user not identified', () => {
         beforeEach(() => {
-          plugin.setup(coreMock.createSetup());
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
+          });
         });
 
         test('uses the flag overrides to respond early', async () => {
@@ -202,8 +190,9 @@ describe('Cloud Experiments public plugin', () => {
     describe('reportMetric', () => {
       describe('with the user identified', () => {
         beforeEach(() => {
-          const setupContract = plugin.setup(coreMock.createSetup());
-          setupContract.identifyUser('user-id', {});
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+          });
         });
 
         test('calls the track API', () => {
@@ -224,7 +213,9 @@ describe('Cloud Experiments public plugin', () => {
 
       describe('with the user not identified', () => {
         beforeEach(() => {
-          plugin.setup(coreMock.createSetup());
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
+          });
         });
 
         test('calls the track API', () => {
@@ -250,8 +241,9 @@ describe('Cloud Experiments public plugin', () => {
         flag_overrides: { my_flag: '1234' },
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
-      const setupContract = plugin.setup(coreMock.createSetup());
-      setupContract.identifyUser('user-id', {});
+      plugin.setup(coreMock.createSetup(), {
+        cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+      });
       plugin.start(coreMock.createStart());
     });
 
