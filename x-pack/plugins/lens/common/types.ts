@@ -20,6 +20,8 @@ import {
   PieChartTypes,
 } from './constants';
 
+export type { OriginalColumn } from './expressions/map_to_columns';
+
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export interface ExistingFields {

@@ -8,6 +8,7 @@
 
 import type { OpsMetrics } from '@kbn/core-metrics-server';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
+import { sampleEsClientMetrics } from '@kbn/core-metrics-server-mocks';
 import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 
 function createBaseOpsMetrics(): OpsMetrics {
@@ -24,6 +25,7 @@ function createBaseOpsMetrics(): OpsMetrics {
       memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
       uptime_in_millis: 1,
     },
+    elasticsearch_client: sampleEsClientMetrics,
     response_times: { avg_in_millis: 1, max_in_millis: 1 },
     requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },
     concurrent_connections: 1,

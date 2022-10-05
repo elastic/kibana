@@ -20,7 +20,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
   POLICIES_PATH,
-  ACTION_HISTORY_PATH,
+  RESPONSE_ACTIONS_HISTORY_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -36,7 +36,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
-  ACTION_HISTORY,
+  RESPONSE_ACTIONS_HISTORY,
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
@@ -77,7 +77,7 @@ const categories = [
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
-      SecurityPageName.actionHistory,
+      SecurityPageName.responseActionsHistory,
     ],
   },
   ...cloudSecurityPostureCategories,
@@ -212,13 +212,13 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
-      id: SecurityPageName.actionHistory,
-      title: ACTION_HISTORY,
+      id: SecurityPageName.responseActionsHistory,
+      title: RESPONSE_ACTIONS_HISTORY,
       description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
         defaultMessage: 'View the history of response actions performed on hosts.',
       }),
       landingIcon: IconActionHistory,
-      path: ACTION_HISTORY_PATH,
+      path: RESPONSE_ACTIONS_HISTORY_PATH,
       skipUrlState: true,
       hideTimeline: true,
     },
@@ -226,7 +226,7 @@ export const links: LinkItem = {
   ],
 };
 
-const getFilteredLinks = (linkIds: SecurityPageName[]) => ({
+const excludeLinks = (linkIds: SecurityPageName[]) => ({
   ...links,
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
@@ -249,19 +249,26 @@ export const getManagementFilteredLinks = async (
         )
       : getEndpointAuthzInitialState();
     if (!privileges.canAccessEndpointManagement) {
-      return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+      return excludeLinks([
+        SecurityPageName.hostIsolationExceptions,
+        SecurityPageName.responseActionsHistory,
+      ]);
     }
-    if (!privileges.canIsolateHost) {
+    if (!privileges.canIsolateHost || !privileges.canReadActionsLogManagement) {
       const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
         core.http
       );
       const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
       if (!summaryResponse.total) {
-        return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+        return excludeLinks([
+          SecurityPageName.hostIsolationExceptions,
+          SecurityPageName.responseActionsHistory,
+        ]);
       }
+      return excludeLinks([SecurityPageName.responseActionsHistory]);
     }
   } catch {
-    return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+    return excludeLinks([SecurityPageName.hostIsolationExceptions]);
   }
 
   return links;
