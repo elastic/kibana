@@ -251,6 +251,7 @@ describe('AlertsTableState', () => {
   describe('field browser', () => {
     const browserFields: BrowserFields = {
       kibana: {
+        name: 'kibana',
         fields: {
           [AlertsField.uuid]: {
             category: 'kibana',

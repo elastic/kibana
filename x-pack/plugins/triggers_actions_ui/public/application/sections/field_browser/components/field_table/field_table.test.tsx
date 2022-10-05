@@ -91,7 +91,9 @@ describe('FieldTable', () => {
   it('should render field table with unchecked field', () => {
     const result = renderComponent({
       selectedCategoryIds: ['base'],
-      filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+      filteredBrowserFields: {
+        base: { fields: { [timestampFieldId]: timestampField }, name: 'base' },
+      },
     });
 
     const checkbox = result.getByTestId(`field-${timestampFieldId}-checkbox`);
@@ -102,7 +104,9 @@ describe('FieldTable', () => {
     const result = renderComponent({
       selectedCategoryIds: ['base'],
       columnIds,
-      filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+      filteredBrowserFields: {
+        base: { fields: { [timestampFieldId]: timestampField }, name: 'base' },
+      },
     });
 
     const checkbox = result.getByTestId(`field-${timestampFieldId}-checkbox`);
@@ -114,7 +118,9 @@ describe('FieldTable', () => {
       const result = renderComponent({
         selectedCategoryIds: ['base'],
         columnIds,
-        filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        filteredBrowserFields: {
+          base: { fields: { [timestampFieldId]: timestampField }, name: 'base' },
+        },
       });
 
       result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
@@ -126,7 +132,9 @@ describe('FieldTable', () => {
     it('should call onToggleColumn callback when field checked', () => {
       const result = renderComponent({
         selectedCategoryIds: ['base'],
-        filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        filteredBrowserFields: {
+          base: { fields: { [timestampFieldId]: timestampField }, name: 'base' },
+        },
       });
 
       result.getByTestId(`field-${timestampFieldId}-checkbox`).click();

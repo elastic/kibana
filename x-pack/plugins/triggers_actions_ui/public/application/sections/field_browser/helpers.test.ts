@@ -18,12 +18,13 @@ import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 describe('helpers', () => {
   describe('categoryHasFields', () => {
     test('it returns false if the category fields property is empty', () => {
-      expect(categoryHasFields({ fields: {} })).toBe(false);
+      expect(categoryHasFields({ fields: {}, name: '' })).toBe(false);
     });
 
     test('it returns true if the category has one field', () => {
       expect(
         categoryHasFields({
+          name: '',
           fields: {
             'auditd.data.a0': {
               aggregatable: true,
@@ -44,6 +45,7 @@ describe('helpers', () => {
     test('it returns true if the category has multiple fields', () => {
       expect(
         categoryHasFields({
+          name: '',
           fields: {
             'agent.ephemeral_id': {
               aggregatable: true,
@@ -76,12 +78,13 @@ describe('helpers', () => {
 
   describe('getFieldCount', () => {
     test('it returns 0 if the category fields property is empty', () => {
-      expect(getFieldCount({ fields: {} })).toEqual(0);
+      expect(getFieldCount({ fields: {}, name: '' })).toEqual(0);
     });
 
     test('it returns 1 if the category has one field', () => {
       expect(
         getFieldCount({
+          name: '',
           fields: {
             'auditd.data.a0': {
               aggregatable: true,
@@ -102,6 +105,7 @@ describe('helpers', () => {
     test('it returns the correct count when category has multiple fields', () => {
       expect(
         getFieldCount({
+          name: '',
           fields: {
             'agent.ephemeral_id': {
               aggregatable: true,
@@ -164,6 +168,7 @@ describe('helpers', () => {
     test('it returns (only) non-empty categories, where each category contains only the fields matching the substring', () => {
       const filtered: BrowserFields = {
         agent: {
+          name: 'agent',
           fields: {
             'agent.ephemeral_id': {
               aggregatable: true,
@@ -192,6 +197,7 @@ describe('helpers', () => {
           },
         },
         base: {
+          name: 'base',
           fields: {
             _id: {
               category: 'base',
@@ -206,6 +212,7 @@ describe('helpers', () => {
           },
         },
         cloud: {
+          name: 'cloud',
           fields: {
             'cloud.account.id': {
               aggregatable: true,
@@ -222,6 +229,7 @@ describe('helpers', () => {
           },
         },
         container: {
+          name: 'container',
           fields: {
             'container.id': {
               aggregatable: true,
@@ -270,6 +278,7 @@ describe('helpers', () => {
     test('it returns (only) non-empty categories, where each category contains only the fields matching the substring', () => {
       const filtered: BrowserFields = {
         agent: {
+          name: 'agent',
           fields: {
             'agent.ephemeral_id': {
               aggregatable: true,
@@ -298,6 +307,7 @@ describe('helpers', () => {
           },
         },
         container: {
+          name: 'container',
           fields: {
             'container.id': {
               aggregatable: true,

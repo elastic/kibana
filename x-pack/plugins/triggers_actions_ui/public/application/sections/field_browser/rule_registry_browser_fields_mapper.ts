@@ -22,6 +22,7 @@ export const ruleRegistryBrowserFieldsMapper = (
         fields: browserFields[category].fields as {
           [fieldName: string]: TriggersActionsUiBrowserField;
         },
+        name: category,
       };
 
       return acc;

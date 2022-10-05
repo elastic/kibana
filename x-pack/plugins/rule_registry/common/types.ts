@@ -314,6 +314,7 @@ export type BrowserField = FieldSpec & {
 };
 
 export interface BrowserFieldCategory {
+  name: string;
   fields: { [fieldName: string]: BrowserField };
 }
 
