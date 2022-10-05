@@ -97,8 +97,8 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
 
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
-export const ExpandableEvent = React.memo<Props>((props) => {
-  const {
+export const ExpandableEvent = React.memo<Props>(
+  ({
     browserFields,
     event,
     timelineId,
@@ -111,36 +111,36 @@ export const ExpandableEvent = React.memo<Props>((props) => {
     rawEventData,
     handleOnEventClosed,
     isReadOnly,
-  } = props;
+  }) => {
+    if (!event.eventId) {
+      return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
+    }
 
-  if (!event.eventId) {
-    return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
+    if (loading) {
+      return <EuiLoadingContent lines={10} />;
+    }
+
+    return (
+      <StyledFlexGroup direction="column" gutterSize="none">
+        <StyledEuiFlexItem grow={true}>
+          <EventDetails
+            browserFields={browserFields}
+            data={detailsData ?? []}
+            detailsEcsData={detailsEcsData}
+            id={event.eventId}
+            isAlert={isAlert}
+            indexName={event.indexName}
+            isDraggable={isDraggable}
+            rawEventData={rawEventData}
+            timelineId={timelineId}
+            timelineTabType={timelineTabType}
+            handleOnEventClosed={handleOnEventClosed}
+            isReadOnly={isReadOnly}
+          />
+        </StyledEuiFlexItem>
+      </StyledFlexGroup>
+    );
   }
-
-  if (loading) {
-    return <EuiLoadingContent lines={10} />;
-  }
-
-  return (
-    <StyledFlexGroup direction="column" gutterSize="none">
-      <StyledEuiFlexItem grow={true}>
-        <EventDetails
-          browserFields={browserFields}
-          data={detailsData ?? []}
-          detailsEcsData={detailsEcsData}
-          id={event.eventId}
-          isAlert={isAlert}
-          indexName={event.indexName}
-          isDraggable={isDraggable}
-          rawEventData={rawEventData}
-          timelineId={timelineId}
-          timelineTabType={timelineTabType}
-          handleOnEventClosed={handleOnEventClosed}
-          isReadOnly={isReadOnly}
-        />
-      </StyledEuiFlexItem>
-    </StyledFlexGroup>
-  );
-});
+);
 
 ExpandableEvent.displayName = 'ExpandableEvent';

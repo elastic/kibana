@@ -208,27 +208,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
       ariaRowindex === 1,
     [isTourShown, ariaRowindex, eventType, timelineId]
   );
-  //
-  // const expandedDetail = useDeepEqualSelector((state) => {
-  //   return (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).expandedDetail;
-  // });
-  // const bumpTourStep = useCallback(() => {
-  //   if (
-  //     isTourShown &&
-  //     isTourAnchor &&
-  //     expandedDetail.query &&
-  //     Object.keys(expandedDetail.query).length &&
-  //     activeStep === 2
-  //   ) {
-  //     console.log('incrementStep.', expandedDetail.query);
-  //     incrementStep();
-  //   }
-  // }, [activeStep, expandedDetail.query, incrementStep, isTourAnchor, isTourShown]);
-  //
-  // useEffect(() => {
-  //   bumpTourStep();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [expandedDetail]);
 
   return (
     <ActionsContainer>

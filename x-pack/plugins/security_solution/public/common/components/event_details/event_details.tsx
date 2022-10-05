@@ -125,21 +125,20 @@ const RendererContainer = styled.div`
   }
 `;
 
-const EventDetailsComponent: React.FC<Props> = (props) => {
-  const {
-    browserFields,
-    data,
-    detailsEcsData,
-    id,
-    indexName,
-    isAlert,
-    isDraggable,
-    rawEventData,
-    timelineId,
-    timelineTabType,
-    handleOnEventClosed,
-    isReadOnly,
-  } = props;
+const EventDetailsComponent: React.FC<Props> = ({
+  browserFields,
+  data,
+  detailsEcsData,
+  id,
+  indexName,
+  isAlert,
+  isDraggable,
+  rawEventData,
+  timelineId,
+  timelineTabType,
+  handleOnEventClosed,
+  isReadOnly,
+}) => {
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
