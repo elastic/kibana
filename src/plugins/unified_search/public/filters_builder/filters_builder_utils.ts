@@ -7,10 +7,10 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, FilterItem } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import { ConditionTypes, getConditionalOperationType, isOrFilter, buildOrFilter } from '../utils';
-import type { FilterItem } from '../utils';
+import { buildOrFilter, isOrFilter } from '@kbn/es-query';
+import { ConditionTypes, getConditionalOperationType } from '../utils';
 import type { Operator } from '../filter_bar/filter_editor';
 
 const PATH_SEPARATOR = '.';
