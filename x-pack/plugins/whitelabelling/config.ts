@@ -9,10 +9,10 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   theme: schema.object({
-    logo: schema.string(),
-    pageTitle: schema.string(),
-    welcomeMessage: schema.string(),
-    mark: schema.string(),
+    logo: schema.maybe(schema.string()),
+    pageTitle: schema.maybe(schema.string()),
+    welcomeMessage: schema.maybe(schema.string()),
+    mark: schema.maybe(schema.string()),
   }),
 });
 
