@@ -5,52 +5,13 @@
  * 2.0.
  */
 
-import type { RiskScoreEntity } from '../../screens/entity_analytics';
-import { getRiskScoreTagName } from '../../screens/entity_analytics';
-import { RISK_SCORE_SAVED_OBJECTS_URL, SAVED_OBJECTS_URL } from '../../urls/risk_score';
+import { RiskScoreEntity } from './common';
 
-export const deleteSavedObjects = (
-  templateName: `${RiskScoreEntity}RiskScoreDashboards`,
-  deleteAll: boolean
-) => {
-  return cy.request({
-    method: 'post',
-    url: `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_delete/${templateName}`,
-    failOnStatusCode: false,
-    body: {
-      deleteAll,
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
-};
+const HOST_RISK_SCORE = 'Host Risk Score';
+const USER_RISK_SCORE = 'User Risk Score';
 
-export const createSavedObjects = (templateName: `${RiskScoreEntity}RiskScoreDashboards`) => {
-  return cy.request({
-    method: 'post',
-    url: `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_create/${templateName}`,
-    failOnStatusCode: false,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
-};
+const getRiskScore = (riskScoreEntity: RiskScoreEntity) =>
+  riskScoreEntity === RiskScoreEntity.user ? USER_RISK_SCORE : HOST_RISK_SCORE;
 
-export const findSavedObjects = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') => {
-  const search = getRiskScoreTagName(riskScoreEntity, spaceId);
-
-  const getReference = (tagId: string) => encodeURIComponent(`[{"type":"tag","id":"${tagId}"}]`);
-
-  return cy
-    .request({
-      method: 'get',
-      url: `${SAVED_OBJECTS_URL}/_find?fields=id&type=tag&sort_field=updated_at&search=${search}&search_fields=name`,
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    })
-    .then((res) =>
-      cy.request({
-        method: 'get',
-        url: `${SAVED_OBJECTS_URL}/_find?fields=id&type=index-pattern&type=tag&type=visualization&type=dashboard&type=lens&sort_field=updated_at&has_reference=${getReference(
-          res.body.saved_objects[0].id
-        )}`,
-        headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-      })
-    );
-};
+export const getRiskScoreTagName = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+  `${getRiskScore(riskScoreEntity)} ${spaceId}`;

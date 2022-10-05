@@ -9,23 +9,25 @@ import { getNewRule } from '../../objects/rule';
 import {
   ENABLE_HOST_RISK_SCORE_BUTTON,
   ENABLE_USER_RISK_SCORE_BUTTON,
-  getRiskScoreLatestTransformId,
-  getRiskScorePivotTransformId,
-  RiskScoreEntity,
   RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST,
   RISK_SCORE_INSTALLATION_SUCCESS_TOAST,
 } from '../../screens/entity_analytics';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
-import { login, visit } from '../../tasks/login';
 import {
-  clickEnableRiskScore,
   deleteRiskScore,
   intercepInstallRiskScoreModule,
   waitForInstallRiskScoreModule,
-} from '../../tasks/risk_scores';
-import { findSavedObjects } from '../../tasks/risk_scores/saved_objects';
-import { getTransformState } from '../../tasks/risk_scores/transforms';
+} from '../../tasks/api_calls/risk_scores';
+import { findSavedObjects } from '../../tasks/api_calls/risk_scores/saved_objects';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { cleanKibana } from '../../tasks/common';
+import { login, visit } from '../../tasks/login';
+import { clickEnableRiskScore } from '../../tasks/risk_scores';
+import { RiskScoreEntity } from '../../tasks/risk_scores/common';
+import {
+  getRiskScoreLatestTransformId,
+  getRiskScorePivotTransformId,
+  getTransformState,
+} from '../../tasks/risk_scores/transforms';
 import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
 
 const spaceId = 'default';

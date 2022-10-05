@@ -5,42 +5,92 @@
  * 2.0.
  */
 
-import type { RiskScoreEntity } from '../../screens/entity_analytics';
-import { getLatestTransformIndex, getPivotTransformIndex } from '../../screens/entity_analytics';
-import { INDICES_URL } from '../../urls/risk_score';
+import type { RiskScoreEntity } from './common';
 
-export const createIndex = (options: {
-  index: string;
-  mappings: string | Record<string, unknown>;
+export const getPivotTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+  `ml_${riskScoreEntity}_risk_score_${spaceId}`;
+
+export const getLatestTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+  `ml_${riskScoreEntity}_risk_score_latest_${spaceId}`;
+
+export const getCreateLegacyRiskScoreIndicesOptions = ({
+  spaceId = 'default',
+  riskScoreEntity,
+}: {
+  spaceId?: string;
+  riskScoreEntity: RiskScoreEntity;
 }) => {
-  return cy.request({
-    method: 'put',
-    url: `${INDICES_URL}/create`,
-    body: options,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
+  const mappings = {
+    properties: {
+      [`${riskScoreEntity}.name`]: {
+        type: 'keyword',
+      },
+      '@timestamp': {
+        type: 'date',
+      },
+      ingest_timestamp: {
+        type: 'date',
+      },
+      risk: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+      },
+      risk_stats: {
+        properties: {
+          risk_score: {
+            type: 'float',
+          },
+        },
+      },
+    },
+  };
+  return {
+    index: getPivotTransformIndex(riskScoreEntity, spaceId),
+    mappings,
+  };
 };
 
-export const deleteRiskScoreIndicies = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') => {
-  return cy
-    .request({
-      method: 'post',
-      url: `${INDICES_URL}/delete`,
-      body: {
-        indices: [getPivotTransformIndex(riskScoreEntity, spaceId)],
+export const getCreateLegacyRiskScoreLatestIndicesOptions = ({
+  spaceId = 'default',
+  riskScoreEntity,
+}: {
+  spaceId?: string;
+  riskScoreEntity: RiskScoreEntity;
+}) => {
+  const mappings = {
+    properties: {
+      [`${riskScoreEntity}.name`]: {
+        type: 'keyword',
       },
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-      failOnStatusCode: false,
-    })
-    .then(() => {
-      return cy.request({
-        method: 'post',
-        url: `${INDICES_URL}/delete`,
-        body: {
-          indices: [getLatestTransformIndex(riskScoreEntity, spaceId)],
+      '@timestamp': {
+        type: 'date',
+      },
+      ingest_timestamp: {
+        type: 'date',
+      },
+      risk: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
         },
-        headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-        failOnStatusCode: false,
-      });
-    });
+      },
+      risk_stats: {
+        properties: {
+          risk_score: {
+            type: 'float',
+          },
+        },
+      },
+    },
+  };
+  return {
+    index: getLatestTransformIndex(riskScoreEntity, spaceId),
+    mappings,
+  };
 };

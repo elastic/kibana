@@ -5,22 +5,41 @@
  * 2.0.
  */
 
-import { INGEST_PIPELINES_URL } from '../../urls/risk_score';
+import type { RiskScoreEntity } from './common';
+import { getLegacyRiskScoreLevelScriptId } from './stored_scripts';
 
-export const createIngestPipeline = (options: { name: string; processors: Array<{}> }) => {
-  return cy.request({
-    method: 'post',
-    url: `${INGEST_PIPELINES_URL}`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    body: options,
-  });
-};
+export const getIngestPipelineName = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+  `ml_${riskScoreEntity}riskscore_ingest_pipeline_${spaceId}`;
 
-export const deleteRiskScoreIngestPipelines = (names: string[]) => {
-  return cy.request({
-    method: 'delete',
-    url: `${INGEST_PIPELINES_URL}/${names.join(',')}`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    failOnStatusCode: false,
-  });
+export const getLegacyIngestPipelineName = (riskScoreEntity: RiskScoreEntity) =>
+  `ml_${riskScoreEntity}riskscore_ingest_pipeline`;
+
+export const getLegacyRiskScoreIngestPipelineOptions = (riskScoreEntity: RiskScoreEntity) => {
+  const processors = [
+    {
+      set: {
+        field: 'ingest_timestamp',
+        value: '{{_ingest.timestamp}}',
+      },
+    },
+    {
+      fingerprint: {
+        fields: ['@timestamp', '_id'],
+        method: 'SHA-256',
+        target_field: '_id',
+      },
+    },
+    {
+      script: {
+        id: getLegacyRiskScoreLevelScriptId(riskScoreEntity),
+        params: {
+          risk_score: 'risk_stats.risk_score',
+        },
+      },
+    },
+  ];
+  return {
+    name: getLegacyIngestPipelineName(riskScoreEntity),
+    processors,
+  };
 };

@@ -7,9 +7,6 @@
 
 import { getNewRule } from '../../objects/rule';
 import {
-  getRiskScoreLatestTransformId,
-  getRiskScorePivotTransformId,
-  RiskScoreEntity,
   RISK_SCORE_INSTALLATION_SUCCESS_TOAST,
   UPGRADE_HOST_RISK_SCORE_BUTTON,
   UPGRADE_USER_RISK_SCORE_BUTTON,
@@ -17,20 +14,26 @@ import {
   UPGRADE_CONFIRMARION_MODAL,
   RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST,
 } from '../../screens/entity_analytics';
+import {
+  deleteRiskScore,
+  installLegacyRiskScoreModule,
+  interceptUpgradeRiskScoreModule,
+} from '../../tasks/api_calls/risk_scores';
+import { findSavedObjects } from '../../tasks/api_calls/risk_scores/saved_objects';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import {
   clickUpgradeRiskScore,
-  clickUpgradeRiskScoreCancel,
   clickUpgradeRiskScoreConfirmed,
-  deleteRiskScore,
-  installLegacyRiskScoreModule,
-  interceptUpgradeRiskScoreModule,
   waitForUpgradeRiskScoreModule,
 } from '../../tasks/risk_scores';
-import { findSavedObjects } from '../../tasks/risk_scores/saved_objects';
-import { getTransformState } from '../../tasks/risk_scores/transforms';
+import { RiskScoreEntity } from '../../tasks/risk_scores/common';
+import {
+  getRiskScoreLatestTransformId,
+  getRiskScorePivotTransformId,
+  getTransformState,
+} from '../../tasks/risk_scores/transforms';
 import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
 
 const spaceId = 'default';
@@ -62,7 +65,6 @@ describe('Upgrade risk scores', () => {
   it('should show a confirmation modal for upgrading host risk score', () => {
     clickUpgradeRiskScore(RiskScoreEntity.host);
     cy.get(UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.host)).should('exist');
-    clickUpgradeRiskScoreCancel();
   });
 
   it('display a link to host risk score Elastic doc', () => {
@@ -75,8 +77,6 @@ describe('Upgrade risk scores', () => {
           `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.host}-risk-score.html`
         );
       });
-
-    clickUpgradeRiskScoreCancel();
   });
 
   it('should upgrade host risk score successfully', () => {
@@ -120,7 +120,6 @@ describe('Upgrade risk scores', () => {
   it('should show a confirmation modal for upgrading user risk score', () => {
     clickUpgradeRiskScore(RiskScoreEntity.user);
     cy.get(UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.user)).should('exist');
-    clickUpgradeRiskScoreCancel();
   });
 
   it('display a link to user risk score Elastic doc', () => {
@@ -133,8 +132,6 @@ describe('Upgrade risk scores', () => {
           `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.user}-risk-score.html`
         );
       });
-
-    clickUpgradeRiskScoreCancel();
   });
 
   it('should upgrade user risk score successfully', () => {

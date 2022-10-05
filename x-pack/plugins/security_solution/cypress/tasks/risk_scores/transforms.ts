@@ -6,6 +6,27 @@
  */
 
 import { TRANSFORMS_URL } from '../../urls/risk_score';
+import { RiskScoreEntity } from './common';
+import { getLatestTransformIndex, getPivotTransformIndex } from './indices';
+import { getLegacyIngestPipelineName } from './ingest_pipelines';
+import {
+  getLegacyRiskScoreInitScriptId,
+  getLegacyRiskScoreMapScriptId,
+  getLegacyRiskScoreReduceScriptId,
+} from './stored_scripts';
+
+const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
+export const getAlertsIndex = (spaceId = 'default') => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+
+export const getRiskScorePivotTransformId = (
+  riskScoreEntity: RiskScoreEntity,
+  spaceId = 'default'
+) => `ml_${riskScoreEntity}riskscore_pivot_transform_${spaceId}`;
+
+export const getRiskScoreLatestTransformId = (
+  riskScoreEntity: RiskScoreEntity,
+  spaceId = 'default'
+) => `ml_${riskScoreEntity}riskscore_latest_transform_${spaceId}`;
 
 export const getTransformState = (transformId: string) => {
   return cy.request<{ transforms: Array<{ id: string; state: string }>; count: number }>({
@@ -86,4 +107,201 @@ export const deleteTransforms = (transformIds: string[]) => {
       });
 
   transformIds.map((transformId) => deleteSingleTransform(transformId));
+};
+
+export const getCreateLegacyMLHostPivotTransformOptions = ({
+  spaceId = 'default',
+}: {
+  spaceId?: string;
+}) => {
+  const options = {
+    dest: {
+      index: getPivotTransformIndex(RiskScoreEntity.host, spaceId),
+      pipeline: getLegacyIngestPipelineName(RiskScoreEntity.host),
+    },
+    frequency: '1h',
+    pivot: {
+      aggregations: {
+        '@timestamp': {
+          max: {
+            field: '@timestamp',
+          },
+        },
+        risk_stats: {
+          scripted_metric: {
+            combine_script: 'return state',
+            init_script: {
+              id: getLegacyRiskScoreInitScriptId(RiskScoreEntity.host),
+            },
+            map_script: {
+              id: getLegacyRiskScoreMapScriptId(RiskScoreEntity.host),
+            },
+            params: {
+              lookback_time: 72,
+              max_risk: 100,
+              p: 1.5,
+              server_multiplier: 1.5,
+              tactic_base_multiplier: 0.25,
+              tactic_weights: {
+                TA0001: 1,
+                TA0002: 2,
+                TA0003: 3,
+                TA0004: 4,
+                TA0005: 4,
+                TA0006: 4,
+                TA0007: 4,
+                TA0008: 5,
+                TA0009: 6,
+                TA0010: 7,
+                TA0011: 6,
+                TA0040: 8,
+                TA0042: 1,
+                TA0043: 1,
+              },
+              time_decay_constant: 6,
+              zeta_constant: 2.612,
+            },
+            reduce_script: {
+              id: getLegacyRiskScoreReduceScriptId(RiskScoreEntity.host),
+            },
+          },
+        },
+      },
+      group_by: {
+        [`${RiskScoreEntity.host}.name`]: {
+          terms: {
+            field: `${RiskScoreEntity.host}.name`,
+          },
+        },
+      },
+    },
+    source: {
+      index: [getAlertsIndex(spaceId)],
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-5d',
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    sync: {
+      time: {
+        delay: '120s',
+        field: '@timestamp',
+      },
+    },
+  };
+
+  return options;
+};
+
+export const getCreateLegacyMLUserPivotTransformOptions = ({
+  spaceId = 'default',
+}: {
+  spaceId?: string;
+}) => {
+  const options = {
+    dest: {
+      index: getPivotTransformIndex(RiskScoreEntity.user, spaceId),
+      pipeline: getLegacyIngestPipelineName(RiskScoreEntity.user),
+    },
+    frequency: '1h',
+    pivot: {
+      aggregations: {
+        '@timestamp': {
+          max: {
+            field: '@timestamp',
+          },
+        },
+        risk_stats: {
+          scripted_metric: {
+            combine_script: 'return state',
+            init_script: 'state.rule_risk_stats = new HashMap();',
+            map_script: {
+              id: getLegacyRiskScoreMapScriptId(RiskScoreEntity.user),
+            },
+            params: {
+              max_risk: 100,
+              p: 1.5,
+              zeta_constant: 2.612,
+            },
+            reduce_script: {
+              id: getLegacyRiskScoreReduceScriptId(RiskScoreEntity.user),
+            },
+          },
+        },
+      },
+      group_by: {
+        'user.name': {
+          terms: {
+            field: 'user.name',
+          },
+        },
+      },
+    },
+    source: {
+      index: [getAlertsIndex(spaceId)],
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-90d',
+                },
+              },
+            },
+            {
+              match: {
+                'signal.status': 'open',
+              },
+            },
+          ],
+        },
+      },
+    },
+    sync: {
+      time: {
+        delay: '120s',
+        field: '@timestamp',
+      },
+    },
+  };
+  return options;
+};
+
+export const getCreateLegacyLatestTransformOptions = ({
+  spaceId = 'default',
+  riskScoreEntity,
+}: {
+  spaceId?: string;
+  riskScoreEntity: RiskScoreEntity;
+}) => {
+  const options = {
+    dest: {
+      index: getLatestTransformIndex(riskScoreEntity, spaceId),
+    },
+    frequency: '1h',
+    latest: {
+      sort: '@timestamp',
+      unique_key: [`${riskScoreEntity}.name`],
+    },
+    source: {
+      index: [getPivotTransformIndex(riskScoreEntity, spaceId)],
+    },
+    sync: {
+      time: {
+        delay: '2s',
+        field: 'ingest_timestamp',
+      },
+    },
+  };
+  return options;
 };
