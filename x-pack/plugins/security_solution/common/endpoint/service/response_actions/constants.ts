@@ -43,6 +43,7 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'kill-process',
   'suspend-process',
   'processes',
+  'get-file',
 ] as const;
 
 export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];
