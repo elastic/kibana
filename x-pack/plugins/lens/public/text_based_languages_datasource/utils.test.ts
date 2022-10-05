@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -14,7 +14,9 @@ import {
   getIndexPatternFromTextBasedQuery,
   loadIndexPatternRefs,
   getStateFromAggregateQuery,
+  getAllColumns,
 } from './utils';
+import type { TextBasedLanguagesLayerColumn } from './types';
 import { type AggregateQuery } from '@kbn/es-query';
 
 jest.mock('./fetch_data_from_aggregate_query', () => ({
@@ -70,6 +72,74 @@ describe('Text based languages utils', () => {
     it('should return a list of sorted indexpattern refs', async () => {
       const refs = await loadIndexPatternRefs(mockDataViewsService() as DataViewsPublicPluginStart);
       expect(refs[0].title < refs[1].title).toBeTruthy();
+    });
+  });
+
+  describe('getAllColumns', () => {
+    it('should remove columns that do not exist on the query and remove duplicates', async () => {
+      const existingOnLayer = [
+        {
+          fieldName: 'time',
+          columnId: 'time',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          fieldName: 'bytes',
+          columnId: 'bytes',
+          meta: {
+            type: 'number',
+          },
+        },
+      ] as TextBasedLanguagesLayerColumn[];
+      const columnsFromQuery = [
+        {
+          name: 'timestamp',
+          id: 'timestamp',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          name: 'bytes',
+          id: 'bytes',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          name: 'memory',
+          id: 'memory',
+          meta: {
+            type: 'number',
+          },
+        },
+      ] as DatatableColumn[];
+      const allColumns = getAllColumns(existingOnLayer, columnsFromQuery);
+      expect(allColumns).toStrictEqual([
+        {
+          fieldName: 'bytes',
+          columnId: 'bytes',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          fieldName: 'timestamp',
+          columnId: 'timestamp',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          fieldName: 'memory',
+          columnId: 'memory',
+          meta: {
+            type: 'number',
+          },
+        },
+      ]);
     });
   });
 

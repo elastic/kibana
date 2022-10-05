@@ -360,7 +360,7 @@ export function getTextBasedLanguagesDatasource({
         customLabel = selectedField?.fieldName;
       }
 
-      const columnExists = props.state.fieldList.some((f) => f.name === selectedField?.fieldName);
+      const columnExists = props.state.fieldList.some((f) => f.name === customLabel);
 
       render(
         <EuiButtonEmpty
