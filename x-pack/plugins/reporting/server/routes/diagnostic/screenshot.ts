@@ -5,96 +5,274 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import os from 'os';
+import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import { lastValueFrom } from 'rxjs';
-import { APP_WRAPPER_CLASS } from '@kbn/core/server';
+import {
+  getMetrics,
+  Metrics,
+} from '@kbn/screenshotting-plugin/server/browsers/chromium/driver_factory/metrics';
+import { getDefaultChromiumSandboxDisabled } from '@kbn/screenshotting-plugin/server/config/default_chromium_sandbox_disabled';
+import { getChromiumPackage, paths } from '@kbn/screenshotting-plugin/server/utils';
+import { getDataPath } from '@kbn/utils';
+import fs from 'fs';
+import path from 'path';
+import puppeteer from 'puppeteer';
+import { ReplaySubject, toArray } from 'rxjs';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { generatePngObservable } from '../../export_types/common';
-import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { DiagnosticResponse } from '.';
-import { incrementApiUsageCounter } from '..';
 
-const path = `${API_DIAGNOSE_URL}/screenshot`;
+const chromiumPath = path.resolve('x-pack/plugins/screenshotting/chromium');
+const DEFAULT_QUERY_VIEWPORT = '2400,2000,2';
+const queryValidation = {
+  query: schema.maybe(
+    schema.object({
+      viewport: schema.maybe(
+        schema.string({
+          validate: (_input) => {
+            return;
+          },
+        })
+      ),
+    })
+  ),
+};
+const getTime = () => new Date(Date.now()).valueOf();
+const getTiming = ({ start, end }: { start?: number; end?: number }) => {
+  if (end && start) {
+    return end - start;
+  }
+  return null;
+};
 
-export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
+interface DiagnoseTimingMetric {
+  start?: number;
+  end?: number;
+}
+interface DiagnoseTimings {
+  launch: DiagnoseTimingMetric;
+  open: DiagnoseTimingMetric;
+  render: DiagnoseTimingMetric;
+  capture: DiagnoseTimingMetric;
+  metrics: DiagnoseTimingMetric;
+  cleanup: DiagnoseTimingMetric;
+}
+
+export const registerDiagnoseScreenshot = (reporting: ReportingCore, loggerContext: Logger) => {
+  const logger = loggerContext.get('diagnose-screenshot');
+  const headlessLogger = logger.get('headless-console');
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  router.post(
-    { path, validate: {} },
-    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
-      incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+  router.post<void, { viewport?: string } | undefined, void>(
+    {
+      path: `${API_DIAGNOSE_URL}/screenshot`,
+      validate: queryValidation,
+    },
+    authorizedUserPreRouting(reporting, async (_user, context, req, res) => {
+      if (context.reporting == null) {
+        return res.custom({ statusCode: 503 });
+      }
 
-      const config = reporting.getConfig();
-      const [basePath, protocol, hostname, port] = [
-        config.kbnConfig.get('server', 'basePath'),
-        config.get('kibanaServer', 'protocol'),
-        config.get('kibanaServer', 'hostname'),
-        config.get('kibanaServer', 'port'),
-      ] as string[];
+      // width,height,deviceScaleFactor
+      const queryViewport = req.query?.viewport ?? DEFAULT_QUERY_VIEWPORT;
 
-      const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
-      const hashUrl = getAbsoluteUrl({ path: '/', hash: '', search: '' });
+      let browser: puppeteer.Browser | null = null;
+      let page: puppeteer.Page | null = null;
+      let devTools: puppeteer.CDPSession | null = null;
+      let startMetrics: Metrics | null = null;
+      const error$ = new ReplaySubject<Error>();
+      const log$ = new ReplaySubject<string>();
 
-      // Hack the layout to make the base/login page work
-      const layout = {
-        dimensions: {
-          width: 1440,
-          height: 2024,
-        },
-        selectors: {
-          screenshot: `.${APP_WRAPPER_CLASS}`,
-          renderComplete: `.${APP_WRAPPER_CLASS}`,
-          itemsCountAttribute: 'data-test-subj="kibanaChrome"',
-          timefilterDurationAttribute: 'data-test-subj="kibanaChrome"',
-        },
+      const timings: DiagnoseTimings = {
+        launch: {},
+        open: {},
+        render: {},
+        capture: {},
+        metrics: {},
+        cleanup: {},
       };
 
-      return lastValueFrom(
-        generatePngObservable(reporting, logger, {
-          layout,
-          request: req,
-          browserTimezone: 'America/Los_Angeles',
-          urls: [hashUrl],
-        })
-          // Pipe is required to ensure that we can subscribe to it
-          .pipe()
-      )
-        .then((screenshot) => {
-          // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
-          if (screenshot.warnings.length) {
-            return res.ok({
-              body: {
-                success: false,
-                help: [],
-                logs: screenshot.warnings,
-              },
-            });
-          }
-          return res.ok({
-            body: {
-              success: true,
-              help: [],
-              logs: '',
-            } as DiagnosticResponse,
+      const realLog = (message: string, realLogger = logger) => {
+        log$.next(message);
+        realLogger.info(message);
+      };
+
+      try {
+        // 1. Setup
+        const packageInfo = getChromiumPackage();
+        const executablePath = paths.getBinaryPath(packageInfo, chromiumPath);
+        const dataDir = getDataPath();
+        fs.mkdirSync(dataDir, { recursive: true });
+        const userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
+        const { os: sandboxOs, disableSandbox } = await getDefaultChromiumSandboxDisabled();
+
+        realLog(`sandbox disabled: ${disableSandbox}`);
+        realLog(`os / distro: ${JSON.stringify(sandboxOs)}`);
+        realLog(`architecture: ${os.arch()}`);
+        realLog(`chromium path: ${chromiumPath}`);
+        realLog(`binary path: ${executablePath}`);
+        realLog(`viewport (width,height,deviceScaleFactor): ${queryViewport}`);
+        realLog(`user data: ${userDataDir}`);
+
+        const args = [
+          `--disable-background-networking`,
+          `--disable-default-apps`,
+          `--disable-extensions`,
+          `--disable-gpu`,
+          `--disable-sync`,
+          `--disable-translate`,
+          `--headless`,
+          `--hide-scrollbars`,
+          `--mainFrameClipsContent=false`,
+          `--metrics-recording-only`,
+          `--mute-audio`,
+          `--no-first-run`,
+          `--safebrowsing-disable-auto-update`,
+          `--user-data-dir=${userDataDir}`,
+          `--window-size=1950,1200`,
+          `--enable-logging`,
+          `--v=1`,
+        ];
+        if (disableSandbox) {
+          args.push('--no-sandbox');
+        }
+
+        // 2. Launch
+        timings.launch.start = getTime();
+        browser = await puppeteer.launch({ executablePath, userDataDir, args });
+        page = await browser.newPage();
+
+        // 3. ADD LISTENERS
+        page.on('console', (msg) => {
+          const [text, type] = [msg.text(), msg.type()];
+          realLog(`console-${type}: ${text}`, headlessLogger);
+        });
+        page.on('error', (err) => {
+          headlessLogger.error(err);
+          error$.next(err);
+        });
+
+        // 4. START METRICS, GET VERSION
+        devTools = await page.target().createCDPSession();
+        await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
+        startMetrics = await devTools.send('Performance.getMetrics');
+
+        const versionInfo = await devTools.send('Browser.getVersion');
+        realLog(`browser version: ${JSON.stringify(versionInfo)}`);
+        timings.launch.end = getTime();
+
+        // 5. GO TO PAGE
+        timings.open.start = getTime();
+        await page.goto('https://webglsamples.org/aquarium/aquarium.html', {
+          waitUntil: 'load',
+        });
+        await page.evaluate(() => {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Navigating URL with viewport size: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+          );
+          window.addEventListener('resize', () => {
+            // eslint-disable-next-line no-console
+            console.log(
+              `Detected a viewport resize: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+            );
           });
-        })
-        .catch((error) =>
-          res.ok({
-            body: {
-              success: false,
-              help: [
-                i18n.translate('xpack.reporting.diagnostic.screenshotFailureMessage', {
-                  defaultMessage: `We couldn't screenshot your Kibana install.`,
-                }),
-              ],
-              logs: error.message,
-            } as DiagnosticResponse,
-          })
-        );
+        });
+        timings.open.end = getTime();
+      } catch (err) {
+        error$.next(err);
+        logger.error(err);
+      }
+
+      const [width, height, deviceScaleFactor] = queryViewport
+        .split(',')
+        .map((part) => parseInt(part, 10));
+      const viewport: puppeteer.Viewport = { width, height, deviceScaleFactor };
+
+      let capture: string | null = null;
+      if (page != null && browser != null) {
+        // 5. INITIAL SIZE
+        timings.render.start = getTime();
+        await page.setViewport(viewport);
+
+        // 6. WAIT FOR RENDER
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        try {
+          // 7. RESIZE BEFORE CAPTURE
+          // rendering may have changed the dimensions we need to capture.
+          // set device scale factor: affects the blurriness / clarity of the numbers
+          await page.setViewport(viewport);
+          timings.render.end = getTime();
+
+          // 8. CAPTURE
+          timings.capture.start = getTime();
+          realLog(`Capturing screenshot...`);
+          const screenshot = await page.screenshot({
+            clip: { x: 0, y: 0, width: viewport.width, height: viewport.height },
+            captureBeyondViewport: false,
+          });
+          timings.capture.end = getTime();
+
+          // 9. REPORT METRICS
+          if (devTools != null && startMetrics != null) {
+            timings.metrics.start = getTime();
+            const endMetrics = await devTools.send('Performance.getMetrics');
+            const metrics = getMetrics(startMetrics, endMetrics);
+            const { cpuInPercentage, memoryInMegabytes } = metrics;
+            realLog(`Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`);
+            timings.metrics.end = getTime();
+          }
+
+          // 10. CLEANUP
+          timings.cleanup.start = getTime();
+          realLog(`Closing the browser...`);
+          await browser.close();
+
+          if (Buffer.isBuffer(screenshot)) {
+            realLog(`Preparing the screenshot for response...`);
+            capture = screenshot.toString('base64');
+          } else {
+            capture = screenshot;
+          }
+          timings.cleanup.end = getTime();
+        } catch (err) {
+          logger.error(err);
+          error$.next(err);
+        }
+      }
+
+      let errors: string[] | undefined;
+      let logs: string[] | undefined;
+      error$.pipe(toArray()).subscribe((errs) => {
+        errors = errs.map((e) => e.toString() + '\n');
+      });
+      log$.pipe(toArray()).subscribe((ls) => {
+        logs = ls.map((l) => l + '\n');
+      });
+
+      realLog(`Done`);
+      error$.complete();
+      log$.complete();
+
+      return res.ok({
+        body: {
+          timings: {
+            launch: getTiming(timings.launch),
+            open: getTiming(timings.open),
+            render: getTiming(timings.render),
+            capture: getTiming(timings.capture),
+            metrics: getTiming(timings.metrics),
+            cleanup: getTiming(timings.cleanup),
+          },
+          success: capture != null,
+          help: errors,
+          logs,
+          capture,
+        },
+      });
     })
   );
 };

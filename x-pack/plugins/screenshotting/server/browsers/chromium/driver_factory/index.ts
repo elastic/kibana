@@ -293,7 +293,7 @@ export class HeadlessChromiumDriverFactory {
    */
   private async getErrorMessage(message: ConsoleMessage): Promise<undefined | string> {
     for (const arg of message.args()) {
-      const errorMessage = await arg.executionContext().evaluate((_arg: unknown) => {
+      const errorMessage = await arg.evaluate((_arg: unknown) => {
         /* !! We are now in the browser context !! */
         if (_arg instanceof Error) {
           return _arg.message;

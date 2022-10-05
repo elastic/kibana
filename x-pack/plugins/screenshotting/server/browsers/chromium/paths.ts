@@ -57,7 +57,7 @@ export class ChromiumArchivePaths {
       architecture: 'arm64',
       archiveFilename: 'chrome-mac.zip',
       archiveChecksum: '5afc0d49865d55b69ea1ff65b9cc5794',
-      binaryChecksum: '27ab9da01ef5c0a7f03656a88ed189c4',
+      binaryChecksum: '4a7a663b2656d66ce975b00a30df3ab4',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
       location: 'common',
       archivePath: 'Mac_Arm',
