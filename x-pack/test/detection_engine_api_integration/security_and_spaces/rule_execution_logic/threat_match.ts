@@ -1287,8 +1287,8 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(10);
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
+        expect(previewAlerts.length).equal(88);
         const fullSource = previewAlerts.find(
           (signal) =>
             (signal._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
