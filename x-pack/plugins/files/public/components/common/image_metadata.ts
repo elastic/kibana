@@ -6,8 +6,9 @@
  */
 
 import * as bh from 'blurhash';
+import type { FileImageMetadata } from '../../../common';
 
-function isImage(file: Blob | File): boolean {
+export function isImage(file: Blob | File): boolean {
   return file.type?.startsWith('image/');
 }
 
@@ -46,8 +47,10 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-export async function createBlurhash(file: File | Blob): Promise<undefined | string> {
-  if (!isImage(file)) return;
+/**
+ * Extract image metadata, assumes that file or blob as an image!
+ */
+export async function getImageMetadata(file: File | Blob): Promise<undefined | FileImageMetadata> {
   const imgUrl = window.URL.createObjectURL(file);
   try {
     const image = await loadImage(imgUrl);
@@ -59,10 +62,14 @@ export async function createBlurhash(file: File | Blob): Promise<undefined | str
     if (!ctx) throw new Error('Could not get 2d canvas context!');
     ctx.drawImage(image, 0, 0, width, height);
     const imgData = ctx.getImageData(0, 0, width, height);
-    return bh.encode(imgData.data, imgData.width, imgData.height, 4, 3);
+    return {
+      blurhash: bh.encode(imgData.data, imgData.width, imgData.height, 4, 3),
+      width,
+      height,
+    };
   } finally {
     window.URL.revokeObjectURL(imgUrl);
   }
 }
 
-export type BlurhashFactory = typeof createBlurhash;
+export type ImageMetadataFactory = typeof getImageMetadata;
