@@ -83,7 +83,7 @@ async function mountComponent({
         },
     onEditVisualization: onEditVisualization || undefined,
     onResetChartHeight: jest.fn(),
-    onHideChartChange: jest.fn(),
+    onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
   };
 

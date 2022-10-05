@@ -49,7 +49,9 @@ export const useDiscoverHistogram = ({
   const [canVisualize, setCanVisualize] = useState(false);
 
   useEffect(() => {
-    if (!timeField) return;
+    if (!timeField) {
+      return;
+    }
     getVisualizeInformation(timeField, dataView, savedSearch.columns || []).then((info) => {
       setCanVisualize(Boolean(info));
     });
@@ -71,7 +73,7 @@ export const useDiscoverHistogram = ({
     return storedHeight ? Number(storedHeight) : undefined;
   });
 
-  const storeTopPanelHeight = useCallback(
+  const onTopPanelHeightChange = useCallback(
     (newTopPanelHeight: number | undefined) => {
       storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
       setTopPanelHeight(newTopPanelHeight);
@@ -79,24 +81,14 @@ export const useDiscoverHistogram = ({
     [storage]
   );
 
-  const onResetTopPanelHeight = useCallback(
-    () => storeTopPanelHeight(undefined),
-    [storeTopPanelHeight]
-  );
-
-  const onTopPanelHeightChange = useCallback(
-    (newTopPanelHeight: number) => storeTopPanelHeight(newTopPanelHeight),
-    [storeTopPanelHeight]
-  );
-
   /**
-   * Other actions
+   * Other callbacks
    */
 
-  const onHideChartChange = useCallback(
-    (newHideChart: boolean) => {
-      storage.set(CHART_HIDDEN_KEY, newHideChart);
-      stateContainer.setAppState({ hideChart: newHideChart });
+  const onChartHiddenChange = useCallback(
+    (chartHidden: boolean) => {
+      storage.set(CHART_HIDDEN_KEY, chartHidden);
+      stateContainer.setAppState({ hideChart: chartHidden });
     },
     [stateContainer, storage]
   );
@@ -166,9 +158,8 @@ export const useDiscoverHistogram = ({
     hits,
     chart,
     onEditVisualization: canVisualize ? onEditVisualization : undefined,
-    onResetTopPanelHeight,
     onTopPanelHeightChange,
-    onHideChartChange,
+    onChartHiddenChange,
     onTimeIntervalChange,
   };
 };

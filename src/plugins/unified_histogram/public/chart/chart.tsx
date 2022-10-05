@@ -39,7 +39,7 @@ export interface ChartProps {
   appendHistogram?: ReactElement;
   onEditVisualization?: () => void;
   onResetChartHeight?: () => void;
-  onHideChartChange?: (hideChart: boolean) => void;
+  onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
 }
 
@@ -54,7 +54,7 @@ export function Chart({
   appendHistogram,
   onEditVisualization,
   onResetChartHeight,
-  onHideChartChange,
+  onChartHiddenChange,
   onTimeIntervalChange,
 }: ChartProps) {
   const { data } = services;
@@ -80,10 +80,10 @@ export function Chart({
   }, [chart?.hidden]);
 
   const toggleHideChart = useCallback(() => {
-    const newHideChart = !chart?.hidden;
-    chartRef.current.moveFocus = !newHideChart;
-    onHideChartChange?.(newHideChart);
-  }, [chart?.hidden, onHideChartChange]);
+    const chartHidden = !chart?.hidden;
+    chartRef.current.moveFocus = !chartHidden;
+    onChartHiddenChange?.(chartHidden);
+  }, [chart?.hidden, onChartHiddenChange]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {

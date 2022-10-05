@@ -14,6 +14,14 @@ import { buildPointSeriesData } from './build_point_series_data';
 import { getChartAggConfigs } from './get_chart_agg_configs';
 import { getDimensions } from './get_dimensions';
 
+// @ts-ignore
+type UnifiedHistogramChartContext = import('../types').UnifiedHistogramChartContext;
+
+/**
+ * Convert the response from the chart request into a format that can be used
+ * by the unified histogram chart. The returned object should be used to update
+ * {@link UnifiedHistogramChartContext.bucketInterval} and {@link UnifiedHistogramChartContext.data}.
+ */
 export const buildChartData = ({
   data,
   dataView,

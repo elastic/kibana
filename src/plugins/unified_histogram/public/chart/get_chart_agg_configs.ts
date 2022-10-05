@@ -10,8 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 /**
- * Helper function to apply or remove aggregations to a given search source used for gaining data
- * for Discover's histogram vis
+ * Helper function to get the agg configs required for the unified histogram chart request
  */
 export function getChartAggConfigs(
   dataView: DataView,

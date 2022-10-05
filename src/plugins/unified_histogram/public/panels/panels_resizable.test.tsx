@@ -45,7 +45,7 @@ describe('Panels resizable', () => {
     topPanel?: ReactElement;
     mainPanel?: ReactElement;
     attachTo?: HTMLElement;
-    onTopPanelHeightChange?: (height: number) => void;
+    onTopPanelHeightChange?: (topPanelHeight: number) => void;
   }) => {
     return mount(
       <PanelsResizable

@@ -26,7 +26,7 @@ export interface PanelsProps {
   minMainPanelHeight: number;
   topPanel: ReactElement;
   mainPanel: ReactElement;
-  onTopPanelHeightChange?: (height: number) => void;
+  onTopPanelHeightChange?: (topPanelHeight: number) => void;
 }
 
 const fixedModes = [PANELS_MODE.SINGLE, PANELS_MODE.FIXED];

@@ -23,7 +23,7 @@ export function useChartPanels({
 }: {
   chart?: UnifiedHistogramChartContext;
   toggleHideChart: () => void;
-  onTimeIntervalChange: (value: string) => void;
+  onTimeIntervalChange: (timeInterval: string) => void;
   closePopover: () => void;
   onResetChartHeight?: () => void;
 }) {

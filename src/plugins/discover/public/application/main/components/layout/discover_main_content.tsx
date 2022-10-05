@@ -90,8 +90,7 @@ export const DiscoverMainContent = ({
     chart,
     onEditVisualization,
     onTopPanelHeightChange,
-    onResetTopPanelHeight,
-    onHideChartChange,
+    onChartHiddenChange,
     onTimeIntervalChange,
   } = useDiscoverHistogram({
     stateContainer,
@@ -133,8 +132,7 @@ export const DiscoverMainContent = ({
       }
       onTopPanelHeightChange={onTopPanelHeightChange}
       onEditVisualization={onEditVisualization}
-      onResetChartHeight={onResetTopPanelHeight}
-      onHideChartChange={onHideChartChange}
+      onChartHiddenChange={onChartHiddenChange}
       onTimeIntervalChange={onTimeIntervalChange}
     >
       <EuiFlexGroup

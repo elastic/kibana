@@ -14,6 +14,10 @@ export type { UnifiedHistogramLayoutProps } from './layout';
 
 const LazyUnifiedHistogramLayout = lazy(() => import('./layout'));
 
+/**
+ * A resizable layout component with two panels that renders a histogram with a hits
+ * counter in the top panel, and a main display (data table, etc.) in the bottom panel
+ */
 export const UnifiedHistogramLayout = withSuspense(
   LazyUnifiedHistogramLayout,
   <EuiDelayRender delay={300}>

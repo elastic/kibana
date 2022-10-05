@@ -14,6 +14,9 @@ import type { Duration, Moment } from 'moment';
 import type { Unit } from '@kbn/datemath';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
+/**
+ * The fetch status of a unified histogram request
+ */
 export type UnifiedHistogramFetchStatus =
   | 'uninitialized'
   | 'loading'
@@ -21,6 +24,9 @@ export type UnifiedHistogramFetchStatus =
   | 'complete'
   | 'error';
 
+/**
+ * The services required by the unified histogram components
+ */
 export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
   theme: Theme;
@@ -76,6 +82,14 @@ export interface Dimensions {
   y: Dimension;
 }
 
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/naming-convention
+type buildChartData = typeof import('./chart/build_chart_data').buildChartData;
+
+/**
+ * The chartData object returned by {@link buildChartData} that
+ * should be used to set {@link UnifiedHistogramChartContext.data}
+ */
 export interface UnifiedHistogramChartData {
   values: Array<{
     x: number;
@@ -89,22 +103,56 @@ export interface UnifiedHistogramChartData {
   ordered: Ordered;
 }
 
+/**
+ * The bucketInterval object returned by {@link buildChartData} that
+ * should be used to set {@link UnifiedHistogramChartContext.bucketInterval}
+ */
 export interface UnifiedHistogramBucketInterval {
   scaled?: boolean;
   description?: string;
   scale?: number;
 }
 
+/**
+ * Context object for the hits count
+ */
 export interface UnifiedHistogramHitsContext {
+  /**
+   * The fetch status of the hits count request
+   */
   status: UnifiedHistogramFetchStatus;
+  /**
+   * The total number of hits
+   */
   number?: number;
 }
 
+/**
+ * Context object for the chart
+ */
 export interface UnifiedHistogramChartContext {
+  /**
+   * The fetch status of the chart request
+   */
   status: UnifiedHistogramFetchStatus;
+  /**
+   * Controls whether or not the chart is hidden
+   */
   hidden?: boolean;
+  /**
+   * Controls the time interval of the chart
+   */
   timeInterval?: string;
+  /**
+   * The bucketInterval object returned by {@link buildChartData}
+   */
   bucketInterval?: UnifiedHistogramBucketInterval;
+  /**
+   * The chartData object returned by {@link buildChartData}
+   */
   data?: UnifiedHistogramChartData;
+  /**
+   * Error from failed chart request
+   */
   error?: Error;
 }
