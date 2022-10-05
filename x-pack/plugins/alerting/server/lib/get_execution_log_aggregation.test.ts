@@ -779,12 +779,13 @@ describe('formatExecutionLogResult', () => {
                           _id: 'S4wIZX8B8TGQpG7XQZns',
                           _score: 1.0,
                           fields: {
-                            'rule.id': 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
-                            'rule.name': 'rule_name',
-                            'kibana.version': '8.2.0',
-                            'kibana.alerting.outcome': 'success',
-                            message:
+                            'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                            'rule.name': ['rule_name'],
+                            'kibana.version': ['8.2.0'],
+                            'kibana.alerting.outcome': ['success'],
+                            message: [
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                            ],
                           },
                         },
                       ],
@@ -860,12 +861,13 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           fields: {
-                            'rule.id': 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
-                            'rule.name': 'rule_name',
-                            'kibana.version': '8.2.0',
-                            'kibana.alerting.outcome': 'success',
-                            message:
+                            'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                            'rule.name': ['rule_name'],
+                            'kibana.version': ['8.2.0'],
+                            'kibana.alerting.outcome': ['success'],
+                            message: [
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                            ],
                           },
                         },
                       ],
@@ -1013,13 +1015,14 @@ describe('formatExecutionLogResult', () => {
                           _id: 'S4wIZX8B8TGQpG7XQZns',
                           _score: 1.0,
                           fields: {
-                            'rule.id': 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
-                            'rule.name': 'rule_name',
-                            'kibana.version': '8.2.0',
-                            'kibana.alerting.outcome': 'failure',
-                            message:
+                            'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                            'rule.name': ['rule_name'],
+                            'kibana.version': ['8.2.0'],
+                            'kibana.alerting.outcome': ['failure'],
+                            message: [
                               "rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
-                            'error.message': 'I am erroring in rule execution!!',
+                            ],
+                            'error.message': ['I am erroring in rule execution!!'],
                           },
                         },
                       ],
@@ -1095,12 +1098,13 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           fields: {
-                            'rule.id': 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
-                            'rule.name': 'rule_name',
-                            'kibana.version': '8.2.0',
-                            'kibana.alerting.outcome': 'success',
-                            message:
+                            'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                            'rule.name': ['rule_name'],
+                            'kibana.version': ['8.2.0'],
+                            'kibana.alerting.outcome': ['success'],
+                            message: [
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                            ],
                           },
                         },
                       ],
@@ -1248,12 +1252,13 @@ describe('formatExecutionLogResult', () => {
                           _id: 'dJkWa38B1ylB1EvsAckB',
                           _score: 1.0,
                           fields: {
-                            'rule.id': 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
-                            'rule.name': 'rule_name',
-                            'kibana.version': '8.2.0',
-                            'kibana.alerting.outcome': 'success',
-                            message:
+                            'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                            'rule.name': ['rule_name'],
+                            'kibana.version': ['8.2.0'],
+                            'kibana.alerting.outcome': ['success'],
+                            message: [
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                            ],
                           },
                         },
                       ],
@@ -1324,12 +1329,13 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           fields: {
-                            'rule.id': 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
-                            'rule.name': 'rule_name',
-                            'kibana.version': '8.2.0',
-                            'kibana.alerting.outcome': 'success',
-                            message:
+                            'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                            'rule.name': ['rule_name'],
+                            'kibana.version': ['8.2.0'],
+                            'kibana.alerting.outcome': ['success'],
+                            message: [
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                            ],
                           },
                         },
                       ],
@@ -1477,12 +1483,13 @@ describe('formatExecutionLogResult', () => {
                           _id: '7xKcb38BcntAq5ycFwiu',
                           _score: 1.0,
                           fields: {
-                            'rule.id': 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
-                            'rule.name': 'rule_name',
-                            'kibana.version': '8.2.0',
-                            'kibana.alerting.outcome': 'success',
-                            message:
+                            'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                            'rule.name': ['rule_name'],
+                            'kibana.version': ['8.2.0'],
+                            'kibana.alerting.outcome': ['success'],
+                            message: [
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                            ],
                           },
                         },
                       ],
@@ -1558,12 +1565,13 @@ describe('formatExecutionLogResult', () => {
                           _id: 'zRKbb38BcntAq5ycOwgk',
                           _score: 1.0,
                           fields: {
-                            'rule.id': 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
-                            'rule.name': 'rule_name',
-                            'kibana.version': '8.2.0',
-                            'kibana.alerting.outcome': 'success',
-                            message:
+                            'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                            'rule.name': ['rule_name'],
+                            'kibana.version': ['8.2.0'],
+                            'kibana.alerting.outcome': ['success'],
+                            message: [
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                            ],
                           },
                         },
                       ],

@@ -20,7 +20,10 @@ import { SavedObject } from '@kbn/core/server';
 import { RawRule } from '../../types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
-import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';
+import {
+  getExecutionLogAggregation,
+  getExecutionLogRuntimeMappings,
+} from '../../lib/get_execution_log_aggregation';
 import { fromKueryExpression } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();
@@ -142,22 +145,15 @@ const aggregateResults = {
                       _index: '.kibana-event-log-8.2.0-000001',
                       _id: 'S4wIZX8B8TGQpG7XQZns',
                       _score: 1.0,
-                      _source: {
-                        rule: {
-                          id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
-                          name: 'rule-name',
-                        },
-                        event: {
-                          outcome: 'success',
-                        },
-                        kibana: {
-                          version: '8.2.0',
-                          alerting: {
-                            outcome: 'success',
-                          },
-                        },
-                        message:
+                      fields: {
+                        'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                        'rule.name': ['rule-name'],
+                        'event.outcome': ['success'],
+                        'kibana.version': ['8.2.0'],
+                        'kibana.alerting.outcome': ['success'],
+                        message: [
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                        ],
                       },
                     },
                   ],
@@ -191,8 +187,8 @@ const aggregateResults = {
                       _index: '.kibana-event-log-8.2.0-000001',
                       _id: 'S4wIZX8B8TGQpG7XQZns',
                       _score: 1.0,
-                      _source: {
-                        rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                      fields: {
+                        'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
                       },
                     },
                   ],
@@ -251,19 +247,15 @@ const aggregateResults = {
                       _index: '.kibana-event-log-8.2.0-000001',
                       _id: 'a4wIZX8B8TGQpG7Xwpnz',
                       _score: 1.0,
-                      _source: {
-                        rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule-name' },
-                        event: {
-                          outcome: 'success',
-                        },
-                        kibana: {
-                          version: '8.2.0',
-                          alerting: {
-                            outcome: 'success',
-                          },
-                        },
-                        message:
+                      fields: {
+                        'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
+                        'rule.name': ['rule-name'],
+                        'event.outcome': ['success'],
+                        'kibana.version': ['8.2.0'],
+                        'kibana.alerting.outcome': ['success'],
+                        message: [
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                        ],
                       },
                     },
                   ],
@@ -297,8 +289,8 @@ const aggregateResults = {
                       _index: '.kibana-event-log-8.2.0-000001',
                       _id: 'S4wIZX8B8TGQpG7XQZns',
                       _score: 1.0,
-                      _source: {
-                        rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                      fields: {
+                        'rule.id': ['a348a740-9e2c-11ec-bd64-774ed95c43ef'],
                       },
                     },
                   ],
@@ -437,6 +429,7 @@ describe('getExecutionLogForRule()', () => {
         start: '2019-02-12T20:01:22.479Z',
       },
       undefined,
+      getExecutionLogRuntimeMappings(),
     ]);
   });
 
@@ -463,6 +456,7 @@ describe('getExecutionLogForRule()', () => {
         start: '2019-02-12T20:01:22.479Z',
       },
       ['99999'],
+      getExecutionLogRuntimeMappings(),
     ]);
   });
 
@@ -489,6 +483,7 @@ describe('getExecutionLogForRule()', () => {
         start: '2019-02-12T20:01:22.479Z',
       },
       undefined,
+      getExecutionLogRuntimeMappings(),
     ]);
   });
 
@@ -516,6 +511,7 @@ describe('getExecutionLogForRule()', () => {
         start: '2019-02-12T20:01:22.479Z',
       },
       undefined,
+      getExecutionLogRuntimeMappings(),
     ]);
   });
 
