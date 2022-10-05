@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isBlurhashValid } from 'blurhash';
 import type { FileJSON, FileKind } from '../../../common/types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import type { FileKindRouter } from './types';
@@ -21,15 +20,6 @@ const rt = {
     alt: commonSchemas.fileAlt,
     meta: commonSchemas.fileMeta,
     mimeType: schema.maybe(schema.string()),
-    blurhash: schema.maybe(
-      schema.string({
-        validate: (v) => {
-          if (!isBlurhashValid(String(v))) {
-            return 'Not a valid blurhash';
-          }
-        },
-      })
-    ),
   }),
 };
 
@@ -38,11 +28,11 @@ export type Endpoint = CreateRouteDefinition<typeof rt, { file: FileJSON }>;
 export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req, res) => {
   const { fileService } = await files;
   const {
-    body: { name, alt, meta, mimeType, blurhash },
+    body: { name, alt, meta, mimeType },
   } = req;
   const file = await fileService
     .asCurrentUser()
-    .create({ fileKind, name, alt, meta, mime: mimeType, blurhash });
+    .create({ fileKind, name, alt, meta, mime: mimeType });
   const body: Endpoint['output'] = {
     file: file.toJSON(),
   };

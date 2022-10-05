@@ -12,18 +12,15 @@ describe('getDownloadHeadersForFile', () => {
   function expectHeaders({
     contentDisposition,
     contentType,
-    blurhash,
   }: {
     contentDisposition: string;
     contentType: string;
-    blurhash?: string;
   }) {
     return {
       'content-type': contentType,
       'content-disposition': `attachment; filename="${contentDisposition}"`,
       'cache-control': 'max-age=31536000, immutable',
       'x-content-type-options': 'nosniff',
-      ...(blurhash ? { 'x-kbn-blurhash': blurhash } : undefined),
     };
   }
 

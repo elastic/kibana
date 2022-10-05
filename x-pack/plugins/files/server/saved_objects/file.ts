@@ -42,10 +42,6 @@ const properties: Properties = {
   FileKind: {
     type: 'keyword',
   },
-  Blurhash: {
-    type: 'keyword',
-    index: false,
-  },
 };
 
 export const fileObjectType: SavedObjectsType<FileMetadata> = {

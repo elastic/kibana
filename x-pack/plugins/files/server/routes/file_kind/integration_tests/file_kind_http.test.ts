@@ -29,13 +29,12 @@ describe('File kind HTTP API', () => {
   });
 
   test('create a file and return the expected payload', async () => {
-    expect(await createFile({ blurhash: 'blurhash' })).toEqual({
+    expect(await createFile()).toEqual({
       id: expect.any(String),
       created: expect.any(String),
       updated: expect.any(String),
       name: 'myFile',
       fileKind,
-      blurhash: 'blurhash',
       status: 'AWAITING_UPLOAD',
       mimeType: 'image/png',
       extension: 'png',
