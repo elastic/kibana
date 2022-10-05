@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Method } from 'axios';
 import { elasticsearchSpan, httpExitSpan } from '../../lib/apm/span';
 import { BaseSpan } from '../../lib/apm/base_span';
 import { Instance } from '../../lib/apm/instance';
@@ -106,21 +107,47 @@ export class DistributedTrace {
     this.childSpans.push(span);
   }
 
+  external({
+    name,
+    url,
+    method,
+    statusCode,
+    duration,
+    timestamp = this.timestamp,
+  }: {
+    name: string;
+    url: string;
+    method?: Method;
+    statusCode?: number;
+    duration: number;
+    timestamp?: number;
+  }) {
+    const startTime = timestamp;
+    const endTime = startTime + duration;
+    this.spanEndTimes.push(endTime);
+
+    const span = this.serviceInstance
+      .span(httpExitSpan({ spanName: name, destinationUrl: url, method, statusCode }))
+      .timestamp(startTime)
+      .duration(duration)
+      .success();
+
+    this.childSpans.push(span);
+  }
+
   db({
     duration,
     type, // TODO: implement handling of db type, eg. 'elasticsearch', 'sql' etc
     dbStatement,
     timestamp = this.timestamp,
-    latency = 0,
   }: {
     duration: number;
     type: 'elasticsearch';
     dbStatement?: string;
     timestamp?: number;
-    latency?: number;
   }) {
-    const startTime = timestamp + latency / 2;
-    const endTime = startTime + duration + latency / 2;
+    const startTime = timestamp;
+    const endTime = startTime + duration;
     this.spanEndTimes.push(endTime);
 
     const span = this.serviceInstance

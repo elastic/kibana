@@ -63,12 +63,21 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                     serviceInstance: opbeansGo,
                     transactionName: 'GET /go',
                     children: (_) => {
-                      _.service({ serviceInstance: opbeansJava, transactionName: 'GET /java' });
+                      _.service({
+                        serviceInstance: opbeansJava,
+                        transactionName: 'GET /java',
+                        children: (_) => {
+                          _.external({
+                            name: 'GET telemetry.elastic.co',
+                            url: 'https://telemetry.elastic.co/ping',
+                            duration: 50,
+                          });
+                        },
+                      });
                     },
                   });
-                  _.db({ latency: 50, type: 'elasticsearch', duration: 400 });
-                  _.db({ latency: 50, type: 'elasticsearch', duration: 500 });
-                  _.db({ latency: 50, type: 'elasticsearch', duration: 900 });
+                  _.db({ type: 'elasticsearch', duration: 400 });
+                  _.db({ type: 'elasticsearch', duration: 500 });
                 },
               });
 

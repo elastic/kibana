@@ -53,19 +53,46 @@ describe('DistributedTrace', () => {
         };
       });
 
-      expect(formattedDocs).toEqual([
-        { duration: 400, name: 'Dashboard', processorEvent: 'transaction', timestamp: 0 },
-        { duration: 400, name: 'GET /nodejs/products', processorEvent: 'span', timestamp: 0 },
-        {
-          duration: 400,
-          name: 'GET /nodejs/products',
-          processorEvent: 'transaction',
-          timestamp: 0,
-        },
-        { duration: 0, name: 'GET /gogo', processorEvent: 'span', timestamp: 0 },
-        { duration: 0, name: 'GET /gogo', processorEvent: 'transaction', timestamp: 0 },
-        { duration: 400, name: 'GET apm-*/_search', processorEvent: 'span', timestamp: 0 },
-      ]);
+      expect(formattedDocs).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "duration": 400,
+            "name": "Dashboard",
+            "processorEvent": "transaction",
+            "timestamp": 0,
+          },
+          Object {
+            "duration": 400,
+            "name": "GET /nodejs/products",
+            "processorEvent": "span",
+            "timestamp": 0,
+          },
+          Object {
+            "duration": 400,
+            "name": "GET /nodejs/products",
+            "processorEvent": "transaction",
+            "timestamp": 0,
+          },
+          Object {
+            "duration": 0,
+            "name": "GET /gogo",
+            "processorEvent": "span",
+            "timestamp": 0,
+          },
+          Object {
+            "duration": 0,
+            "name": "GET /gogo",
+            "processorEvent": "transaction",
+            "timestamp": 0,
+          },
+          Object {
+            "duration": 400,
+            "name": "GET apm-*/_search",
+            "processorEvent": "span",
+            "timestamp": 0,
+          },
+        ]
+      `);
     });
   });
 
@@ -73,13 +100,31 @@ describe('DistributedTrace', () => {
     it('should add latency', () => {
       const traceDocs = getSimpleScenario({ latency: 500 });
       const timestamps = traceDocs.map((f) => f['@timestamp']);
-      expect(timestamps).toEqual([0, 0, 250, 250]);
+      expect(timestamps).toMatchInlineSnapshot(`
+        Array [
+          0,
+          0,
+          250,
+          250,
+          250,
+          250,
+        ]
+      `);
     });
 
     it('should not add latency', () => {
       const traceDocs = getSimpleScenario();
       const timestamps = traceDocs.map((f) => f['@timestamp']);
-      expect(timestamps).toEqual([0, 0, 0, 0]);
+      expect(timestamps).toMatchInlineSnapshot(`
+        Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ]
+      `);
     });
   });
 
@@ -89,7 +134,16 @@ describe('DistributedTrace', () => {
       const durations = traceDocs.map(
         (f) => (f['transaction.duration.us'] ?? f['span.duration.us'])! / 1000
       );
-      expect(durations).toEqual([3000, 3000, 3000, 400]);
+      expect(durations).toMatchInlineSnapshot(`
+        Array [
+          3000,
+          3000,
+          3000,
+          300,
+          400,
+          500,
+        ]
+      `);
     });
 
     it('should not add duration', () => {
@@ -97,7 +151,52 @@ describe('DistributedTrace', () => {
       const durations = traceDocs.map(
         (f) => (f['transaction.duration.us'] ?? f['span.duration.us'])! / 1000
       );
-      expect(durations).toEqual([400, 400, 400, 400]);
+      expect(durations).toMatchInlineSnapshot(`
+        Array [
+          500,
+          500,
+          500,
+          300,
+          400,
+          500,
+        ]
+      `);
+    });
+  });
+
+  describe('sequential', () => {
+    it('should db calls in parallel', () => {
+      const traceDocs = getSimpleScenario({ sequential: false });
+      const durations = traceDocs.map(
+        (f) => (f['transaction.duration.us'] ?? f['span.duration.us'])! / 1000
+      );
+      expect(durations).toMatchInlineSnapshot(`
+        Array [
+          500,
+          500,
+          500,
+          300,
+          400,
+          500,
+        ]
+      `);
+    });
+
+    it('should run db calls sequentially', () => {
+      const traceDocs = getSimpleScenario({ sequential: true });
+      const durations = traceDocs.map(
+        (f) => (f['transaction.duration.us'] ?? f['span.duration.us'])! / 1000
+      );
+      expect(durations).toMatchInlineSnapshot(`
+        Array [
+          500,
+          500,
+          500,
+          300,
+          400,
+          500,
+        ]
+      `);
     });
   });
 });
@@ -112,7 +211,15 @@ function getTraceDocs(transaction: BaseSpan): ApmFields[] {
   return [transaction.fields];
 }
 
-function getSimpleScenario({ duration, latency }: { duration?: number; latency?: number } = {}) {
+function getSimpleScenario({
+  duration,
+  latency,
+  sequential,
+}: {
+  duration?: number;
+  latency?: number;
+  sequential?: boolean;
+} = {}) {
   const dt = new DistributedTrace({
     serviceInstance: opbeansRum,
     transactionName: 'Dashboard',
@@ -125,7 +232,9 @@ function getSimpleScenario({ duration, latency }: { duration?: number; latency?:
         latency,
 
         children: (_) => {
+          _.db({ type: 'elasticsearch', duration: 300 });
           _.db({ type: 'elasticsearch', duration: 400 });
+          _.db({ type: 'elasticsearch', duration: 500 });
         },
       });
     },
