@@ -7,7 +7,6 @@
 
 import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import rison from 'rison-node';
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
@@ -50,11 +49,7 @@ export class JobsListView extends Component {
       blockingJobIds: [],
       jobsAwaitingNodeCount: 0,
     };
-    console.log(
-      rison.decode(
-        "(description:'',filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'27d65f90-3e80-11ed-b9ed-17495ca61787',key:region,negate:!f,params:(query:us-east-1),type:phrase),query:(match_phrase:(region:us-east-1)))),fullScreenMode:!f,options:(hidePanelTitles:!f,syncColors:!f,syncTooltips:!f,useMargins:!t),panels:!((embeddableConfig:(attributes:(references:!((id:'27d65f90-3e80-11ed-b9ed-17495ca61787',name:indexpattern-datasource-layer-56b90a1e-57a5-4551-ab8e-19d50f121bab,type:index-pattern)),state:(adHocDataViews:(),datasourceStates:(indexpattern:(layers:('56b90a1e-57a5-4551-ab8e-19d50f121bab':(columnOrder:!('9d91151e-1e3c-4186-bfa8-66965b8b5322','6df147cf-ec69-4d99-ae8c-99ac23302dab'),columns:('6df147cf-ec69-4d99-ae8c-99ac23302dab':(dataType:number,isBucketed:!f,label:'Median%20of%20CPUUtilization',operationType:median,params:(emptyAsNull:!t),scale:ratio,sourceField:CPUUtilization),'9d91151e-1e3c-4186-bfa8-66965b8b5322':(dataType:date,isBucketed:!t,label:'@timestamp',operationType:date_histogram,params:(dropPartials:!f,includeEmptyRows:!t,interval:auto),scale:interval,sourceField:'@timestamp')),incompleteColumns:()))),textBasedLanguages:(layers:())),filters:!(),internalReferences:!(),query:(language:kuery,query:''),visualization:(axisTitlesVisibilitySettings:(x:!t,yLeft:!t,yRight:!t),fittingFunction:None,gridlinesVisibilitySettings:(x:!t,yLeft:!t,yRight:!t),labelsOrientation:(x:0,yLeft:0,yRight:0),layers:!((accessors:!('6df147cf-ec69-4d99-ae8c-99ac23302dab'),layerId:'56b90a1e-57a5-4551-ab8e-19d50f121bab',layerType:data,position:top,seriesType:bar_stacked,showGridlines:!f,xAccessor:'9d91151e-1e3c-4186-bfa8-66965b8b5322')),legend:(isVisible:!t,position:right),preferredSeriesType:bar_stacked,tickLabelsVisibilitySettings:(x:!t,yLeft:!t,yRight:!t),valueLabels:hide)),title:'',type:lens,visualizationType:lnsXY),enhancements:()),gridData:(h:15,i:'9413fa54-27ba-4a31-8944-f5cb0aa98a88',w:24,x:0,y:0),panelIndex:'9413fa54-27ba-4a31-8944-f5cb0aa98a88',type:lens,version:'8.6.0')),query:(language:kuery,query:'region%20:%20us-east-1'),savedObjectId:ff3d8030-3e80-11ed-b9ed-17495ca61787,tags:!(),timeRestore:!f,title:ds,viewMode:view)"
-      )
-    );
+
     this.updateFunctions = {};
 
     this.showEditJobFlyout = () => {};
