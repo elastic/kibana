@@ -48,13 +48,23 @@ const triggersActionsUiStartMock = {
   },
 };
 
+const data = {
+  createStart() {
+    return {
+      dataViews: {
+        create: jest.fn(),
+      },
+    };
+  },
+};
+
 export const observabilityPublicPluginsStartMock = {
   createStart() {
     return {
       cases: mockCasesContract(),
       embeddable: embeddableStartMock.createStart(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
-      data: null,
+      data: data.createStart(),
       lens: null,
       discover: null,
     };
