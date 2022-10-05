@@ -1463,24 +1463,5 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('Module set up');
       return module;
     },
-
-    async deleteMlJobs(jobIds: string[]) {
-      log.debug(`Deleting ml jobs ids [${jobIds.join(',')}]`);
-      const { body, status } = await kbnSupertest
-        .post('/api/ml/jobs/delete_jobs')
-        .set(COMMON_REQUEST_HEADERS)
-        .send({ jobIds });
-      this.assertResponseStatusCode(200, status, body);
-
-      log.debug('> ml jobs deleted');
-    },
-
-    async syncMlJobs() {
-      log.debug('Syncing ml jobs');
-      const { body, status } = await kbnSupertest.get('/api/ml/saved_objects/sync');
-      this.assertResponseStatusCode(200, status, body);
-
-      log.debug('> ml jobs synced');
-    },
   };
 }

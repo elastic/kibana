@@ -30,7 +30,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   function deleteJobs(jobIds: string[]) {
-    return ml.deleteMlJobs(jobIds);
+    return Promise.allSettled(jobIds.map(jobId => ml.deleteAnomalyDetectionJobES(jobId)));
   }
 
   registry.when('ML jobs', { config: 'trial', archives: [] }, () => {
