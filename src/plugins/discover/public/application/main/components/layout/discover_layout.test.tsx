@@ -39,7 +39,7 @@ import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import type { UnifiedHistogramChartData } from '@kbn/unified-histogram-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('@kbn/unified-histogram-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');

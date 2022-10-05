@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { unitOfTime } from 'moment';
-import moment from 'moment-timezone';
+import moment, { unitOfTime } from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,

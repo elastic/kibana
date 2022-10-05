@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { buildChartData } from '@kbn/unified-histogram-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
-import { SavedSearchData } from '../../hooks/use_saved_search';
-import { AppState, GetStateReturn } from '../../services/discover_state';
+import type { SavedSearchData } from '../../hooks/use_saved_search';
+import type { AppState, GetStateReturn } from '../../services/discover_state';
 import {
   getVisualizeInformation,
   triggerVisualizeActions,

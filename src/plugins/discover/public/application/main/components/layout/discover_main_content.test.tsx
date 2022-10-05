@@ -40,7 +40,7 @@ import {
   UnifiedHistogramLayout,
 } from '@kbn/unified-histogram-plugin/public';
 import { HISTOGRAM_HEIGHT_KEY } from './use_discover_histogram';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('@kbn/unified-histogram-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');

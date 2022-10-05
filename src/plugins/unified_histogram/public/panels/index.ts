@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { PanelsProps } from './panels';
 export { Panels, PANELS_MODE } from './panels';
