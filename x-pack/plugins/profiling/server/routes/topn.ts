@@ -15,6 +15,7 @@ import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
@@ -193,15 +194,8 @@ export function queryTopNCommon({
             kuery,
           }),
         });
-      } catch (e) {
-        logger.error(e);
-
-        return response.customError({
-          statusCode: e.statusCode ?? 500,
-          body: {
-            message: 'Profiling TopN request failed: ' + e.message + '; full error ' + e.toString(),
-          },
-        });
+      } catch (error) {
+        return handleRouteHandlerError({ error, logger, response });
       }
     }
   );

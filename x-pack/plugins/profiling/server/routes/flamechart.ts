@@ -10,6 +10,7 @@ import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createCalleeTree } from '../../common/callee';
 import { createFlameGraph } from '../../common/flamegraph';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
@@ -96,14 +97,8 @@ export function registerFlameChartSearchRoute({
         logger.info('returning payload response to client');
 
         return response.ok({ body: flamegraph });
-      } catch (e) {
-        logger.error(e);
-        return response.customError({
-          statusCode: e.statusCode ?? 500,
-          body: {
-            message: e.message,
-          },
-        });
+      } catch (error) {
+        return handleRouteHandlerError({ error, logger, response });
       }
     }
   );

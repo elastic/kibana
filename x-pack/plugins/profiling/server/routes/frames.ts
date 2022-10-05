@@ -17,6 +17,7 @@ import {
 } from '../../common/profiling';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { mgetStackFrames, mgetExecutables } from './stacktrace';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 
 async function getFrameInformation({
   frameID,
@@ -93,13 +94,7 @@ export function registerFrameInformationRoute(params: RouteRegisterParameters) {
 
         return response.ok({ body: frame });
       } catch (error: any) {
-        logger.error(error);
-        return response.custom({
-          statusCode: error.statusCode ?? 500,
-          body: {
-            message: error.message ?? 'An internal server error occured',
-          },
-        });
+        return handleRouteHandlerError({ error, logger, response });
       }
     }
   );

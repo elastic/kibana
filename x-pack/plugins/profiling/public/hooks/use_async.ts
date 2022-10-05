@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpFetchOptions, HttpHandler, HttpStart, isHttpFetchError } from '@kbn/core-http-browser';
+import { HttpFetchOptions, HttpHandler, HttpStart } from '@kbn/core-http-browser';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useEffect, useRef, useState } from 'react';
 import { Overwrite, ValuesType } from 'utility-types';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export enum AsyncStatus {
