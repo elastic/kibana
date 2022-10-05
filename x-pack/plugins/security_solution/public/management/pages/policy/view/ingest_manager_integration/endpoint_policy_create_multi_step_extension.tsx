@@ -99,8 +99,6 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
     </EuiText>
   );
 
-  const marginSize = `calc(${size.m} + ${size.l})`;
-
   return (
     <EuiPanel hasShadow={false} paddingSize="l">
       <EuiSpacer size="xl" />
@@ -109,8 +107,7 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
 
       <EuiFlexGroup
         css={css`
-          margin-bottom: ${marginSize};
-          margin-top: ${marginSize};
+          padding: ${size.xxxl} 0;
         `}
       >
         <CenteredEuiFlexItem grow={false}>{securityLogo}</CenteredEuiFlexItem>
