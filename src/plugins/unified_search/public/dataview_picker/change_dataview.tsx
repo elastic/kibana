@@ -172,7 +172,6 @@ export function ChangeDataView({
       </EuiButton>
     );
   };
-  dataViewEditor.userPermissions.editDataView();
 
   const getPanelItems = () => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
