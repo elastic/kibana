@@ -240,6 +240,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
         >
           <EuiSelect
             id="selectIntegrationTypeId"
+            data-test-subj="selectIntegrationTypeId"
             options={environmentOptions}
             value={selectedEnvironment}
             onChange={onChangeEnvironment}
