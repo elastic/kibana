@@ -13,6 +13,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const browser = getService('browser');
 
+  const configs = [
+    { jobId: 'fq_001', spaceId: undefined },
+    { jobId: 'fq_002', spaceId: 'space1' },
+  ];
+
   describe('Notifications list', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -21,10 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Prepare jobs to generate notifications
       await Promise.all(
-        [
-          { jobId: 'fq_001', spaceId: undefined },
-          { jobId: 'fq_002', spaceId: 'space1' },
-        ].map(async (v) => {
+        configs.map(async (v) => {
           const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(v.jobId);
 
           await ml.api.createAnomalyDetectionJob(
@@ -44,7 +46,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await ml.api.cleanMlIndices();
+      for (const { jobId } of configs) {
+        await ml.api.deleteAnomalyDetectionJobES(jobId);
+      }
       await ml.testResources.cleanMLSavedObjects();
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
