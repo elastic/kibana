@@ -29,7 +29,7 @@ import {
 } from 'rxjs';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
-import { BlurhashFactory, createBlurhash } from '../common';
+import { ImageMetadataFactory, getImageMetadata, isImage } from '../common';
 import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
@@ -70,7 +70,7 @@ export class UploadState {
     private readonly fileKind: FileKind,
     private readonly client: FilesClient,
     private readonly opts: UploadOptions = { allowRepeatedUploads: false },
-    private readonly blurhashFactory: BlurhashFactory = createBlurhash
+    private readonly loadImageMetadata: ImageMetadataFactory = getImageMetadata
   ) {
     const latestFiles$ = this.files$$.pipe(switchMap((files$) => combineLatest(files$)));
     this.subscriptions = [
@@ -173,15 +173,15 @@ export class UploadState {
 
     const { name } = parseFileName(file.name);
     const mime = file.type || undefined;
+    const _meta = meta as Record<string, unknown>;
 
-    return from(this.blurhashFactory(file)).pipe(
-      mergeMap((blurhash) =>
+    return from(isImage(file) ? this.loadImageMetadata(file) : of(undefined)).pipe(
+      mergeMap((imageMetadata) =>
         this.client.create({
           kind: this.fileKind.id,
           name,
           mimeType: mime,
-          meta: meta as Record<string, unknown>,
-          blurhash,
+          meta: imageMetadata ? { ...imageMetadata, ..._meta } : _meta,
         })
       ),
       mergeMap((result) => {
@@ -244,12 +244,12 @@ export class UploadState {
 export const createUploadState = ({
   fileKind,
   client,
-  blurhashFactory,
+  imageMetadataFactory,
   ...options
 }: {
   fileKind: FileKind;
   client: FilesClient;
-  blurhashFactory?: BlurhashFactory;
+  imageMetadataFactory?: ImageMetadataFactory;
 } & UploadOptions) => {
-  return new UploadState(fileKind, client, options, blurhashFactory);
+  return new UploadState(fileKind, client, options, imageMetadataFactory);
 };

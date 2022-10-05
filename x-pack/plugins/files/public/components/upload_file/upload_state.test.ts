@@ -11,7 +11,7 @@ import { TestScheduler } from 'rxjs/testing';
 import type { FileKind, FileJSON } from '../../../common';
 import { createMockFilesClient } from '../../mocks';
 import type { FilesClient } from '../../types';
-import { BlurhashFactory } from '../common/blurhash';
+import { ImageMetadataFactory } from '../common/image_metadata';
 
 import { UploadState } from './upload_state';
 
@@ -22,7 +22,7 @@ describe('UploadState', () => {
   let filesClient: DeeplyMockedKeys<FilesClient>;
   let uploadState: UploadState;
   let testScheduler: TestScheduler;
-  const blurhashFactory = (() => of(undefined)) as unknown as BlurhashFactory;
+  const imageMetadataFactory = (() => of(undefined)) as unknown as ImageMetadataFactory;
 
   beforeEach(() => {
     filesClient = createMockFilesClient();
@@ -32,7 +32,7 @@ describe('UploadState', () => {
       { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
       filesClient,
       {},
-      blurhashFactory
+      imageMetadataFactory
     );
     testScheduler = getTestScheduler();
   });
@@ -194,7 +194,7 @@ describe('UploadState', () => {
         { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
         filesClient,
         { allowRepeatedUploads: true },
-        blurhashFactory
+        imageMetadataFactory
       );
       const file1 = { name: 'test' } as File;
       const file2 = { name: 'test 2.png' } as File;

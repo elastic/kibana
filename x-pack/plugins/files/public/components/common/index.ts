@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createBlurhash, BlurhashFactory } from './blurhash';
+export { getImageMetadata, isImage, ImageMetadataFactory } from './image_metadata';
