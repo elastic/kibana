@@ -131,7 +131,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
       [partitionField]: {
         terms: {
           field: partitionField,
-          size: 25, // 25 is arbitrary and only used to keep the number of buckets to a manageable level in the event that the user choose a high cardinality partition field.
+          size: 25, // 25 is arbitratry and only used to keep the number of buckets to a managable level in the event that the user choose a high cardinality partition field.
         },
         aggregations: {
           ...innerAggregation,
