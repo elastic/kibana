@@ -33,11 +33,11 @@ import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
-import type { SessionValue } from '../session_management';
 import {
   SessionExpiredError,
   SessionMissingError,
   SessionUnexpectedError,
+  type SessionValue,
 } from '../session_management';
 import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';

@@ -24,8 +24,13 @@ import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } fro
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { Session, SessionValue } from '../session_management';
-import { SessionError, SessionExpiredError, SessionUnexpectedError } from '../session_management';
+import {
+  type Session,
+  SessionError,
+  SessionExpiredError,
+  SessionUnexpectedError,
+  type SessionValue,
+} from '../session_management';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';

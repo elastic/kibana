@@ -24,8 +24,7 @@ import type {
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { CheckUserProfilesPrivilegesResponse } from '../authorization/types';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import type { Session } from '../session_management';
-import { getPrintableSessionId } from '../session_management';
+import { getPrintableSessionId, type Session } from '../session_management';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
