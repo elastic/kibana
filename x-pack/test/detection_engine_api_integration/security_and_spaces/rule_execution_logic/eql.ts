@@ -256,7 +256,7 @@ export default ({ getService }: FtrProviderContext) => {
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       expect(previewAlerts.length).eql(3);
 
-      const createdAtHits = previewAlerts.map((hit) => hit._source?.created_at);
+      const createdAtHits = previewAlerts.map((hit) => hit._source?.created_at).sort();
       expect(createdAtHits).to.eql([1622676785, 1622676790, 1622676795]);
     });
 
