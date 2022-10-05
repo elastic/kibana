@@ -907,8 +907,8 @@
                 "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.tsx"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
                 "plugin": "telemetry",
@@ -979,44 +979,44 @@
                 "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -15374,7 +15374,11 @@
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "SavedObjectsFindOptionsReference",
+          " | ",
+          "SavedObjectsFindOptionsReference",
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-saved-objects-api-browser/index.d.ts",
         "deprecated": false,
@@ -19658,8 +19662,8 @@
                 "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.tsx"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
                 "plugin": "telemetry",
@@ -19730,44 +19734,44 @@
                 "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -21813,13 +21817,7 @@
               "<",
               "RequestHandlerContext",
               "> & { resources: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               "; }"
             ],
             "path": "src/core/server/index.ts",
@@ -25938,7 +25936,10 @@
         "description": [
           "\nHttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.\nProvides API allowing plug-ins to respond with:\n- a pre-configured HTML page bootstrapping Kibana client app\n- custom HTML page\n- custom JS script file."
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "signature": [
+          "HttpResources"
+        ],
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -25959,16 +25960,10 @@
               ">(route: ",
               "RouteConfig",
               "<P, Q, B, \"get\">, handler: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResourcesRequestHandler",
-                "text": "HttpResourcesRequestHandler"
-              },
+              "HttpResourcesRequestHandler",
               "<P, Q, B, Context>) => void"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -25983,7 +25978,7 @@
                   "RouteConfig",
                   "<P, Q, B, \"get\">"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -25996,16 +25991,10 @@
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.HttpResourcesRequestHandler",
-                    "text": "HttpResourcesRequestHandler"
-                  },
+                  "HttpResourcesRequestHandler",
                   "<P, Q, B, Context>"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -26025,7 +26014,10 @@
         "description": [
           "\nAllows to configure HTTP response parameters"
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "signature": [
+          "HttpResourcesRenderOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26042,7 +26034,7 @@
               "ResponseHeaders",
               " | undefined"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -26058,7 +26050,10 @@
         "description": [
           "\nExtended set of {@link KibanaResponseFactory} helpers used to respond with HTML or JS resource."
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "signature": [
+          "HttpResourcesServiceToolkit"
+        ],
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26073,18 +26068,12 @@
             ],
             "signature": [
               "(options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
               "IKibanaResponse",
               "<any>>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26096,16 +26085,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.HttpResourcesRenderOptions",
-                    "text": "HttpResourcesRenderOptions"
-                  },
+                  "HttpResourcesRenderOptions",
                   " | undefined"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -26124,18 +26107,12 @@
             ],
             "signature": [
               "(options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
               "IKibanaResponse",
               "<any>>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26147,16 +26124,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.HttpResourcesRenderOptions",
-                    "text": "HttpResourcesRenderOptions"
-                  },
+                  "HttpResourcesRenderOptions",
                   " | undefined"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -26180,7 +26151,7 @@
               "IKibanaResponse",
               "<any>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26194,7 +26165,7 @@
                 "signature": [
                   "HttpResponseOptions"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -26218,7 +26189,7 @@
               "IKibanaResponse",
               "<any>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26232,7 +26203,7 @@
                 "signature": [
                   "HttpResponseOptions"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -29379,36 +29350,6 @@
               "{ 50: number; 75: number; 95: number; 99: number; }"
             ],
             "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.IRenderOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "IRenderOptions",
-        "description": [],
-        "path": "src/core/server/rendering/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IRenderOptions.isAnonymousPage",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isAnonymousPage",
-            "description": [
-              "\nSet whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata.\n`false` by default."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/core/server/rendering/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -36906,6 +36847,22 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.OpsMetrics.elasticsearch_client",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch_client",
+            "description": [
+              "\nMetrics related to the elasticsearch client"
+            ],
+            "signature": [
+              "ElasticsearchClientsMetrics"
+            ],
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.OpsMetrics.process",
             "type": "Object",
             "tags": [
@@ -44330,6 +44287,41 @@
             "label": "hasReferenceOperator",
             "description": [
               "\nThe operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`"
+            ],
+            "signature": [
+              "\"AND\" | \"OR\" | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsFindOptions.hasNoReference",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReference",
+            "description": [
+              "\nSearch for documents *not* having a reference to the specified objects.\nUse `hasNoReferenceOperator` to specify the operator to use when searching for multiple references."
+            ],
+            "signature": [
+              "SavedObjectsFindOptionsReference",
+              " | ",
+              "SavedObjectsFindOptionsReference",
+              "[] | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsFindOptions.hasNoReferenceOperator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReferenceOperator",
+            "description": [
+              "\nThe operator to use when searching by multiple references using the `hasNoReference` option. Defaults to `OR`"
             ],
             "signature": [
               "\"AND\" | \"OR\" | undefined"
@@ -51918,20 +51910,14 @@
           "<T>): ",
           "IKibanaResponse",
           "<any>; } & ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.HttpResourcesServiceToolkit",
-            "text": "HttpResourcesServiceToolkit"
-          },
+          "HttpResourcesServiceToolkit",
           ") => ",
           "IKibanaResponse",
           "<any> | Promise<",
           "IKibanaResponse",
           "<any>>"
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -52000,7 +51986,7 @@
         "signature": [
           "HttpResponseOptions"
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -53721,7 +53707,11 @@
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "SavedObjectsFindOptionsReference",
+          " | ",
+          "SavedObjectsFindOptionsReference",
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
         "deprecated": false,

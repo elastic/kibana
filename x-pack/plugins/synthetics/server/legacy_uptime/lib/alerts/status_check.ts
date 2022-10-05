@@ -36,7 +36,7 @@ import {
 } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
-import { UMServerLibs, UptimeESClient, createUptimeESClient } from '../lib';
+import { UMServerLibs, UptimeEsClient, createUptimeESClient } from '../lib';
 import {
   ALERT_REASON_MSG,
   MESSAGE,
@@ -115,7 +115,7 @@ export const generateFilterDSL = async (
 };
 
 export const formatFilterString = async (
-  uptimeEsClient: UptimeESClient,
+  uptimeEsClient: UptimeEsClient,
   filters: StatusCheckFilters,
   search: string,
   libs?: UMServerLibs

@@ -7,31 +7,26 @@ set -euo pipefail
 source "$(dirname "$0")/../../common/util.sh"
 source .buildkite/scripts/steps/artifacts/env.sh
 
-echo "--- Build and publish Cloud image"
+echo "--- Push docker image"
 mkdir -p target
 
-download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-cloud-$FULL_VERSION-docker-image.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+docker load < "target/kibana-cloud-$FULL_VERSION-docker-image.tar.gz"
 
 TAG="$FULL_VERSION-$GIT_COMMIT"
+KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION"
 KIBANA_TEST_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$TAG"
+
+# docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION -> :$FULL_VERSION-$GIT_COMMIT
+docker tag "$KIBANA_BASE_IMAGE" "$KIBANA_TEST_IMAGE"
 
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
 
 if  docker manifest inspect $KIBANA_TEST_IMAGE &> /dev/null; then
-  echo "Distribution already exists, skipping build"
+  echo "Cloud image already exists, skipping docker push"
 else
-  node scripts/build \
-    --skip-initialize \
-    --skip-generic-folders \
-    --skip-platform-folders \
-    --skip-archives \
-    --docker-images \
-    --docker-tag-qualifier="$GIT_COMMIT" \
-    --docker-push \
-    --skip-docker-ubi \
-    --skip-docker-ubuntu \
-    --skip-docker-contexts
+  docker image push "$KIBANA_TEST_IMAGE"
 fi
 
 docker logout docker.elastic.co
