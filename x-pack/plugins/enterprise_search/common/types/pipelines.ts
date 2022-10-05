@@ -25,3 +25,12 @@ export enum TrainedModelState {
 export interface MlInferencePipeline extends IngestPipeline {
   version?: number;
 }
+
+export interface MlInferenceHistoryItem {
+  docCount: number;
+  pipeline: string;
+}
+
+export interface MlInferenceHistoryResponse {
+  history: MlInferenceHistoryItem[];
+}
