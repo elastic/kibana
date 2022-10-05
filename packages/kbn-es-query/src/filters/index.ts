@@ -34,6 +34,8 @@ export {
 export {
   isExistsFilter,
   isMatchAllFilter,
+  buildOrFilter,
+  isOrFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
@@ -75,6 +77,9 @@ export type {
   CustomFilter,
   RangeFilterParams,
   QueryStringFilter,
+  OrFilter,
+  OrFilterMeta,
+  FilterItem,
 } from './build_filters';
 
 export { FilterStateStore, FILTERS } from './build_filters/types';

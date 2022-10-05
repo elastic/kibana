@@ -6,19 +6,12 @@
  * Side Public License, v 1.
  */
 
-// Methods from this file will be removed after they are moved to the package
-import { buildEmptyFilter, Filter } from '@kbn/es-query';
+import { isOrFilter, FilterItem } from '@kbn/es-query';
 
 export enum ConditionTypes {
   OR = 'OR',
   AND = 'AND',
 }
-
-/** @internal **/
-export type FilterItem = Filter | FilterItem[];
-
-/** to: @kbn/es-query **/
-export const isOrFilter = (filter: Filter) => Boolean(filter?.meta?.type === 'OR');
 
 /**
  * Defines a conditional operation type (AND/OR) from the filter otherwise returns undefined.
@@ -30,18 +23,4 @@ export const getConditionalOperationType = (filter: FilterItem) => {
   } else if (isOrFilter(filter)) {
     return ConditionTypes.OR;
   }
-};
-
-/** to: @kbn/es-query **/
-export const buildOrFilter = (filters: FilterItem) => {
-  const filter = buildEmptyFilter(false);
-
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      type: 'OR',
-      params: filters,
-    },
-  };
 };
