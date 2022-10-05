@@ -9,7 +9,15 @@ import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 
 import type { MarkdownProps } from '@kbn/shared-ux-markdown-types';
 
-type PropArguments = Pick<MarkdownProps, 'readOnly' | 'placeholder' | 'openLinksInNewTab' | 'markdownContent' | 'height' | 'ariaLabelContent'>;
+type PropArguments = Pick<
+  MarkdownProps,
+  | 'readOnly'
+  | 'placeholder'
+  | 'openLinksInNewTab'
+  | 'markdownContent'
+  | 'height'
+  | 'ariaLabelContent'
+>;
 
 export type Params = Record<keyof PropArguments, any>;
 
@@ -18,9 +26,11 @@ export type Params = Record<keyof PropArguments, any>;
  */
 
 export class MarkdownStorybookMock extends AbstractStorybookMock<
-  MarkdownProps, {}, PropArguments, {}
+  MarkdownProps,
+  {},
+  PropArguments,
+  {}
 > {
-
   propArguments = {
     readOnly: {
       control: 'boolean',
@@ -33,29 +43,29 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
       defaultValue: '',
     },
     openLinksInNewTab: {
-        control: 'boolean',
-        defaultValue: true,
+      control: 'boolean',
+      defaultValue: true,
     },
     markdownContent: {
-        control: {
-            type: 'text',
-        },
-        defaultValue: '',
+      control: {
+        type: 'text',
+      },
+      defaultValue: '',
     },
     ariaLabelContent: {
-        control: {
-            type: 'text',
-        },
-        defaultValue: 'markdown component'
+      control: {
+        type: 'text',
+      },
+      defaultValue: 'markdown component',
     },
     height: {
-        control: {
-            type: 'select',
-            defaultValue: 'full',
-            label: 'height',
-            options: [ 0, 20, 'full'],
-        }
-    }
+      control: {
+        type: 'select',
+        defaultValue: 'full',
+        label: 'height',
+        options: [0, 20, 'full'],
+      },
+    },
   };
 
   serviceArguments = {};
