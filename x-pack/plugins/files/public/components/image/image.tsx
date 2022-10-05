@@ -7,8 +7,10 @@
 import React, { HTMLAttributes } from 'react';
 import { type ImgHTMLAttributes, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
+import type { FileImageMetadata } from '../../../common';
 import { useViewportObserver } from './use_viewport_observer';
 import { MyImage, MyImageProps, Blurhash } from './components';
+import { sizes } from './styles';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -16,7 +18,8 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   /**
    * A [blurhash](https://blurha.sh/) to be rendered while the image is downloading.
    */
-  blurhash?: string;
+  meta?: FileImageMetadata;
+
   size?: MyImageProps['size'];
   /**
    * Props to pass to the wrapper element
@@ -39,27 +42,41 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
  * ```
  */
 export const Image = React.forwardRef<HTMLImageElement, Props>(
-  ({ src, alt, onFirstVisible, onLoad, onError, blurhash, wrapperProps, ...rest }, ref) => {
+  ({ src, alt, onFirstVisible, onLoad, onError, meta, wrapperProps, size, ...rest }, ref) => {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [blurDelayExpired, setBlurDelayExpired] = useState(false);
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
 
     useEffect(() => {
-      const id = window.setTimeout(() => setBlurDelayExpired(true), 400);
+      const id = window.setTimeout(() => setBlurDelayExpired(true), 200);
       return () => window.clearTimeout(id);
     }, []);
 
+    const knownSize = size ? sizes[size] : undefined;
+
     return (
       <div
-        css={css`
-          display: inline-block;
-          position: relative;
-        `}
+        css={[
+          css`
+            position: relative;
+            display: inline-block;
+          `,
+          knownSize,
+        ]}
         {...wrapperProps}
       >
-        {blurDelayExpired && blurhash && <Blurhash visible={!isLoaded} hash={blurhash} />}
+        {blurDelayExpired && meta?.blurhash && (
+          <Blurhash
+            visible={!isLoaded}
+            hash={meta.blurhash}
+            isFullWidth={size !== 'original' && size !== undefined}
+            width={meta.width}
+            height={meta.height}
+          />
+        )}
         <MyImage
           observerRef={observerRef}
+          size={size}
           hidden={!isVisible}
           ref={ref}
           src={isVisible ? src : undefined}

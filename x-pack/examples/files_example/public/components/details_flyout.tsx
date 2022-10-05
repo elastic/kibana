@@ -48,7 +48,7 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
           `}
         >
           <Image
-            size="original"
+            size="l"
             alt={file.alt ?? 'unknown'}
             src={files.example.getDownloadHref(file)}
             meta={file.meta}

@@ -7,29 +7,9 @@
 import React from 'react';
 import type { ImgHTMLAttributes, MutableRefObject } from 'react';
 import type { EuiImageSize } from '@elastic/eui/src/components/image/image_types';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
-// Values taken from @elastic/eui/src/components/image
-const sizes = {
-  s: css`
-    width: 100px;
-  `,
-  m: css`
-    width: 200px;
-  `,
-  l: css`
-    width: 360px;
-  `,
-  xl: css`
-    width: 600px;
-  `,
-  original: css`
-    width: auto;
-  `,
-  fullWidth: css`
-    width: 100%;
-  `,
-};
+import { sizes } from '../styles';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   hidden: boolean;
@@ -38,7 +18,11 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
 }
 export const MyImage = React.forwardRef<HTMLImageElement, Props>(
   ({ observerRef, src, hidden, size, ...rest }, ref) => {
+    const { euiTheme } = useEuiTheme();
     const styles = [
+      css`
+        transition: opacity ${euiTheme.animation.extraFast};
+      `,
       hidden
         ? css`
             visibility: hidden;
