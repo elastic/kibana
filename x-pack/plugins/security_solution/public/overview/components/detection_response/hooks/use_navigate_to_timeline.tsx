@@ -39,14 +39,14 @@ export const useNavigateToTimeline = () => {
     timelineType: TimelineType.default,
   });
 
-  const navigateToTimeline = (dataProvider: DataProvider) => {
+  const navigateToTimeline = (dataProviders: DataProvider[]) => {
     // Reset the current timeline
     clearTimeline();
     // Update the timeline's providers to match the current prevalence field query
     dispatch(
       updateProviders({
         id: TimelineId.active,
-        providers: [dataProvider],
+        providers: dataProviders,
       })
     );
 
@@ -59,21 +59,32 @@ export const useNavigateToTimeline = () => {
     );
   };
 
-  const openEntityInTimeline = (entityFilters: [Filter, ...Filter[]]) => {
-    const mainFilter = entityFilters.shift();
+  /** *
+   * Open a timeline with the given filters prepopulated.
+   * It accepts an array of Filter[]s where each item represents a set of AND queries, and each top level comma represents an OR.
+   *
+   * [[filter1 & filter2] OR [filter3 & filter4]]
+   *
+   */
+  const openTimelineWithFilters = (filters: Array<[...Filter[]]>) => {
+    const dataProviders = [];
 
-    if (mainFilter) {
-      const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+    for (const orFilterGroup of filters) {
+      const mainFilter = orFilterGroup[0];
 
-      for (const filter of entityFilters) {
-        dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+      if (mainFilter) {
+        const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+
+        for (const filter of orFilterGroup.slice(1)) {
+          dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+        }
+        dataProviders.push(dataProvider);
       }
-
-      navigateToTimeline(dataProvider);
     }
+    navigateToTimeline(dataProviders);
   };
 
-  // TODO: Replace the usage of functions with openEntityInTimeline
+  // TODO: Replace the usage of functions with openTimelineWithFilters
 
   const openHostInTimeline = ({ hostName, severity }: { hostName: string; severity?: string }) => {
     const dataProvider = getDataProvider('host.name', '', hostName);
@@ -82,7 +93,7 @@ export const useNavigateToTimeline = () => {
       dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
     }
 
-    navigateToTimeline(dataProvider);
+    navigateToTimeline([dataProvider]);
   };
 
   const openUserInTimeline = ({ userName, severity }: { userName: string; severity?: string }) => {
@@ -91,17 +102,17 @@ export const useNavigateToTimeline = () => {
     if (severity) {
       dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
     }
-    navigateToTimeline(dataProvider);
+    navigateToTimeline([dataProvider]);
   };
 
   const openRuleInTimeline = (ruleName: string) => {
     const dataProvider = getDataProvider('kibana.alert.rule.name', '', ruleName);
 
-    navigateToTimeline(dataProvider);
+    navigateToTimeline([dataProvider]);
   };
 
   return {
-    openEntityInTimeline,
+    openTimelineWithFilters,
     openHostInTimeline,
     openRuleInTimeline,
     openUserInTimeline,
