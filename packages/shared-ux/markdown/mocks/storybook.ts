@@ -7,7 +7,7 @@
  */
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 
-import type { MarkdownProps } from '@kbn/shared-ux-markdown';
+import type { MarkdownProps } from '@kbn/shared-ux-markdown-types';
 
 type PropArguments = Pick<MarkdownProps, 'readOnly' | 'placeholder' | 'openLinksInNewTab' | 'markdownContent' | 'height' | 'ariaLabelContent'>;
 

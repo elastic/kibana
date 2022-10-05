@@ -67,9 +67,9 @@ TYPES_DEPS = [
   "@npm//@storybook/addon-actions",
   "@npm//@types/jest",
   "@npm//@types/node",
+  # "//packages/shared-ux/markdown/impl:npm_module_types",
   "//packages/shared-ux/storybook/mock:npm_module_types",
   "//packages/shared-ux/markdown/types:npm_module_types",
-  "//packages/shared-ux/markdown/impl:npm_module_types",
 
 ]
 

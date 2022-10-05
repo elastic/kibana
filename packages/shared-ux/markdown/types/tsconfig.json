@@ -7,13 +7,11 @@
     "outDir": "target_types",
     "stripInternal": false,
     "types": [
-      "jest",
-      "node",
-      "react"
+      "rxjs",
+      "@types/react",
     ]
   },
   "include": [
-    "**/*.ts",
-      "**/*.tsx",
+    "*.d.ts"
   ]
 }
