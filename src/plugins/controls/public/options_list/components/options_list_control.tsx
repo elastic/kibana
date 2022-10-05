@@ -14,10 +14,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import {
   EuiFilterButton,
   EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPopover,
-  EuiText,
   EuiTextColor,
   useResizeObserver,
 } from '@elastic/eui';
@@ -54,7 +51,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const id = select((state) => state.explicitInput.id);
 
   const loading = select((state) => state.output.loading);
-  const exclude = select((state) => state.explicitInput.exclude);
+  const negate = select((state) => state.explicitInput.negate);
 
   // debounce loading state so loading doesn't flash when user types
   const [buttonLoading, setButtonLoading] = useState(true);
@@ -85,6 +82,11 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       validSelectionsCount: validSelections?.length,
       selectionDisplayNode: (
         <>
+          {negate && (
+            <EuiTextColor color="danger">
+              <b>{OptionsListStrings.control.getNegate()}</b>{' '}
+            </EuiTextColor>
+          )}
           {validSelections && (
             <span>{validSelections?.join(OptionsListStrings.control.getSeparator())}</span>
           )}
@@ -96,7 +98,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         </>
       ),
     };
-  }, [validSelections, invalidSelections]);
+  }, [negate, validSelections, invalidSelections]);
 
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
@@ -113,11 +115,6 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         numActiveFilters={validSelectionsCount}
         hasActiveFilters={Boolean(validSelectionsCount)}
       >
-        {exclude && hasSelections && (
-          <EuiTextColor color="danger">
-            <b>{OptionsListStrings.control.getNegate()}</b>{' '}
-          </EuiTextColor>
-        )}
         {hasSelections ? selectionDisplayNode : OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
     </div>

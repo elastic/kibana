@@ -41,11 +41,11 @@ export interface OptionsListPopoverProps {
 const aggregationToggleButtons = [
   {
     id: 'optionsList__includeResults',
-    label: 'Include',
+    label: OptionsListStrings.popover.getIncludeLabel(),
   },
   {
     id: 'optionsList__excludeResults',
-    label: 'Exclude',
+    label: OptionsListStrings.popover.getExcludeLabel(),
   },
 ];
 
@@ -54,7 +54,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { selectOption, deselectOption, clearSelections, replaceSelection, setExclude },
+    actions: { selectOption, deselectOption, clearSelections, replaceSelection, setNegate },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
@@ -71,7 +71,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const title = select((state) => state.explicitInput.title);
 
   const loading = select((state) => state.output.loading);
-  const excludeResults = select((state) => state.explicitInput.exclude);
+  const negate = select((state) => state.explicitInput.negate);
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
@@ -81,14 +81,6 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   );
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
-  const [aggregationSelected, setAggregationSelected] = useState(
-    excludeResults ? 'optionsList__excludeResults' : 'optionsList__includeResults'
-  );
-
-  const onChangeAggregation = (optionId: string) => {
-    setAggregationSelected(optionId);
-    dispatch(setExclude(optionId === 'optionsList__excludeResults' ? true : false));
-  };
 
   return (
     <>
@@ -257,6 +249,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
           </>
         )}
       </div>
+
       <EuiPopoverFooter
         paddingSize="s"
         css={css`
@@ -266,11 +259,12 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
         <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
-              name="coarsness"
-              legend="This is a basic group"
+              legend={OptionsListStrings.popover.getNegationLegend()}
               options={aggregationToggleButtons}
-              idSelected={aggregationSelected}
-              onChange={(id) => onChangeAggregation(id)}
+              idSelected={negate ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+              onChange={(optionId) =>
+                dispatch(setNegate(optionId === 'optionsList__excludeResults'))
+              }
               buttonSize="compressed"
             />
           </EuiFlexItem>

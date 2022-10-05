@@ -70,7 +70,7 @@ export class OptionsListEmbeddableFactory
 
   public getDefaultInput(): Partial<OptionsListEmbeddableInput> {
     return {
-      exclude: false,
+      negate: false,
     };
   }
 

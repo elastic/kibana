@@ -18,11 +18,6 @@ export const getDefaultComponentState = (): OptionsListReduxState['componentStat
   searchString: { value: '', valid: true },
 });
 
-export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
-  searchString: '',
-  exclude: false,
-});
-
 export const optionsListReducers = {
   deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     if (!state.explicitInput.selectedOptions) return;
@@ -90,20 +85,15 @@ export const optionsListReducers = {
   ) => {
     state.componentState.field = action.payload;
   },
-  setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
-    state.explicitInput.exclude = action.payload;
-    state.componentState.exclude = action.payload;
+  setNegate: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
+    state.explicitInput.negate = action.payload;
   },
   updateQueryResults: (
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<
       Pick<
         OptionsListComponentState,
-        | 'availableOptions'
-        | 'invalidSelections'
-        | 'validSelections'
-        | 'totalCardinality'
-        | 'exclude'
+        'availableOptions' | 'invalidSelections' | 'validSelections' | 'totalCardinality'
       >
     >
   ) => {

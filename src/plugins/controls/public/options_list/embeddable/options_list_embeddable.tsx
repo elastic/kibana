@@ -35,7 +35,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
-import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
+import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
@@ -105,7 +105,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     >({
       embeddable: this,
       reducers: optionsListReducers,
-      initialComponentState: getDefaultComponentState(),
     });
 
     this.initialize();
@@ -135,7 +134,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         timeslice: newInput.timeslice,
         filters: newInput.filters,
         query: newInput.query,
-        exclude: newInput.exclude,
+        negate: newInput.negate,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );
@@ -157,21 +156,21 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       this.getInput$()
         .pipe(
           distinctUntilChanged(
-            (a, b) => isEqual(a.selectedOptions, b.selectedOptions) && a.exclude === b.exclude
+            (a, b) => isEqual(a.selectedOptions, b.selectedOptions) && a.negate === b.negate
           )
         )
-        .subscribe(async ({ selectedOptions: newSelectedOptions, exclude }) => {
+        .subscribe(async ({ selectedOptions: newSelectedOptions, negate }) => {
           const {
             actions: {
               clearValidAndInvalidSelections,
               setValidAndInvalidSelections,
               publishFilters,
-              setExclude,
+              setNegate,
             },
             dispatch,
           } = this.reduxEmbeddableTools;
 
-          dispatch(setExclude(exclude));
+          dispatch(setNegate(negate));
           if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
             dispatch(clearValidAndInvalidSelections({}));
           } else {
@@ -294,7 +293,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         query,
         timeRange: globalTimeRange,
         timeslice,
-        exclude,
       } = this.getInput();
 
       if (this.abortController) this.abortController.abort();
@@ -332,7 +330,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             invalidSelections: undefined,
             validSelections: selectedOptions,
             totalCardinality,
-            exclude,
           })
         );
       } else {
@@ -349,7 +346,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             invalidSelections: invalid,
             validSelections: valid,
             totalCardinality,
-            exclude,
           })
         );
       }
@@ -374,7 +370,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private buildFilter = async () => {
     const { getState } = this.reduxEmbeddableTools;
-    const { validSelections, exclude } = getState().componentState ?? {};
+    const { validSelections } = getState().componentState ?? {};
+    const { negate } = this.getInput();
 
     if (!validSelections || isEmpty(validSelections)) {
       return [];
@@ -390,8 +387,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     newFilter.meta.key = field?.name;
-    if (exclude) newFilter.meta.negate = true;
-    // console.log(newFilter);
+    if (negate) newFilter.meta.negate = true;
     return [newFilter];
   };
 
