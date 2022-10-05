@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { registerGainSightRoute, registerGainSightStyleRoute, registerGainSightWidgetRoute } from './gainsight';
+export {
+  registerGainSightRoute,
+  registerGainSightStyleRoute,
+  registerGainSightWidgetRoute,
+} from './gainsight';

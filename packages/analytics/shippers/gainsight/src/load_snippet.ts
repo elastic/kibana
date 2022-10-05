@@ -21,8 +21,7 @@ export interface GainSightSnippetConfig {
    */
   scriptUrl?: string;
   cssFileEndpoint?: string;
-  widgetFileEndpoint?: string
-
+  widgetFileEndpoint?: string;
 }
 export function loadSnippet({
   gainSightOrgId,
@@ -53,7 +52,7 @@ export function loadSnippet({
     c.parentNode.insertBefore(r, c);
   })(window, document, scriptUrl, gainSightOrgId, {
     cssFileEndpoint,
-    widgetFileEndpoint
+    widgetFileEndpoint,
   });
 
   const gainSightApi = window['aptrinsic'];

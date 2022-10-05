@@ -24,5 +24,5 @@ export const config: PluginConfigDescriptor<CloudGainSightConfigType> = {
   exposeToBrowser: {
     org_id: true,
   },
-  schema: configSchema
+  schema: configSchema,
 };

@@ -21,13 +21,13 @@ export const GAINSIGHT_WIDGET_PATH = path.join(__dirname, '..', 'assets', 'gains
 export const GAINSIGHT_STYLE_PATH = path.join(__dirname, '..', 'assets', 'gainsight_style.css');
 
 /** @internal exported for testing */
-export const renderGainSightLibraryFactory = (dist = true, path = GAINSIGHT_LIBRARY_PATH) =>
+export const renderGainSightLibraryFactory = (dist = true, filePath = GAINSIGHT_LIBRARY_PATH) =>
   once(
     async (): Promise<{
       body: Buffer;
       headers: HttpResponseOptions['headers'];
     }> => {
-      const srcBuffer = await fs.readFile(path);
+      const srcBuffer = await fs.readFile(filePath);
       const hash = createHash('sha1');
       hash.update(srcBuffer);
       const hashDigest = hash.digest('hex');
@@ -49,7 +49,10 @@ export const registerGainSightRoute = ({
   httpResources: HttpResources;
   packageInfo: Readonly<PackageInfo>;
 }) => {
-  const renderGainSightLibrary = renderGainSightLibraryFactory(packageInfo.dist, GAINSIGHT_LIBRARY_PATH);
+  const renderGainSightLibrary = renderGainSightLibraryFactory(
+    packageInfo.dist,
+    GAINSIGHT_LIBRARY_PATH
+  );
 
   /**
    * Register a custom JS endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
@@ -83,7 +86,10 @@ export const registerGainSightStyleRoute = ({
   httpResources: HttpResources;
   packageInfo: Readonly<PackageInfo>;
 }) => {
-  const renderGainSightLibrary = renderGainSightLibraryFactory(packageInfo.dist, GAINSIGHT_STYLE_PATH);
+  const renderGainSightLibrary = renderGainSightLibraryFactory(
+    packageInfo.dist,
+    GAINSIGHT_STYLE_PATH
+  );
 
   /**
    * Register a custom JS endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
@@ -110,7 +116,6 @@ export const registerGainSightStyleRoute = ({
   );
 };
 
-
 export const registerGainSightWidgetRoute = ({
   httpResources,
   packageInfo,
@@ -118,7 +123,10 @@ export const registerGainSightWidgetRoute = ({
   httpResources: HttpResources;
   packageInfo: Readonly<PackageInfo>;
 }) => {
-  const renderGainSightLibrary = renderGainSightLibraryFactory(packageInfo.dist, GAINSIGHT_WIDGET_PATH);
+  const renderGainSightLibrary = renderGainSightLibraryFactory(
+    packageInfo.dist,
+    GAINSIGHT_WIDGET_PATH
+  );
 
   /**
    * Register a custom JS endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
