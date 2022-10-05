@@ -255,14 +255,14 @@ export class MonitoringPlugin
     }
   }
 
-  stop() {
+  async stop() {
     if (this.cluster && this.cluster.close) {
       this.cluster.close();
     }
     if (this.licenseService && this.licenseService.stop) {
       this.licenseService.stop();
     }
-    this.bulkUploader?.stop();
+    await this.bulkUploader?.stop();
   }
 
   registerPluginInUI(plugins: PluginsSetup) {

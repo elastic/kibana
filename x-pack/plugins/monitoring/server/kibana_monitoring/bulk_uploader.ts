@@ -70,6 +70,7 @@ export class BulkUploader implements IBulkUploader {
   private _timer: NodeJS.Timer | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
+  private _currentFetchAndUpload?: Promise<void>;
 
   constructor({
     log,
@@ -111,11 +112,11 @@ export class BulkUploader implements IBulkUploader {
     if (this._timer) {
       clearInterval(this._timer);
     } else {
-      this._fetchAndUpload(esClient); // initial fetch
+      this._currentFetchAndUpload = this._fetchAndUpload(esClient); // initial fetch
     }
 
     this._timer = setInterval(() => {
-      this._fetchAndUpload(esClient);
+      this._currentFetchAndUpload = this._fetchAndUpload(esClient);
     }, this._interval);
   }
 
@@ -124,11 +125,15 @@ export class BulkUploader implements IBulkUploader {
    * xpackMainPlugin license changes
    * @param {String} logPrefix help give context to the reason for stopping
    */
-  public stop(logPrefix?: string) {
+  public async stop(logPrefix?: string) {
     if (this._timer) clearInterval(this._timer);
     this._timer = null;
 
     this.kibanaStatusSubscription?.unsubscribe();
+
+    if (this._currentFetchAndUpload) {
+      await this._currentFetchAndUpload;
+    }
 
     const prefix = logPrefix ? logPrefix + ':' : '';
     this._log.info(prefix + 'Monitoring stats collection is stopped');
