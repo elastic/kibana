@@ -11,6 +11,10 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overvi
   defaultMessage: 'Overview',
 });
 
+export const DATA_QUALITY = i18n.translate('xpack.securitySolution.navigation.dataQuality', {
+  defaultMessage: 'Data Quality',
+});
+
 export const DETECTION_RESPONSE = i18n.translate(
   'xpack.securitySolution.navigation.detectionResponse',
   {

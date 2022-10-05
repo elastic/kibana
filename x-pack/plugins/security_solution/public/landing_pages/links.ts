@@ -14,7 +14,12 @@ import {
 } from '../../common/constants';
 import { DASHBOARDS, EXPLORE } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
-import { overviewLinks, detectionResponseLinks, entityAnalyticsLinks } from '../overview/links';
+import {
+  dataQualityLinks,
+  detectionResponseLinks,
+  entityAnalyticsLinks,
+  overviewLinks,
+} from '../overview/links';
 import { links as hostsLinks } from '../hosts/links';
 import { links as networkLinks } from '../network/links';
 import { links as usersLinks } from '../users/links';
@@ -38,6 +43,7 @@ export const dashboardsLandingLinks: LinkItem = {
     kubernetesLinks,
     cloudSecurityPostureLinks,
     entityAnalyticsLinks,
+    dataQualityLinks,
   ],
   skipUrlState: true,
 };

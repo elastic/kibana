@@ -448,6 +448,7 @@
 # Security Solution sub teams
 
 ## Security Solution sub teams - Threat Hunting Investigations
+/x-pack/plugins/data_quality @elastic/security-threat-hunting-investigations
 /x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/common/search_strategy/timeline @elastic/security-threat-hunting-investigations
@@ -466,6 +467,7 @@
 /x-pack/plugins/security_solution/public/detections/components/alerts_kpis @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_table @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_info @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/overview/components/data_quality @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/resolver @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/timelines @elastic/security-threat-hunting-investigations
 
