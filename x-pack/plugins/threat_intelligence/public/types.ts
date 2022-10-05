@@ -17,7 +17,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
-import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import { Store } from 'redux';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
