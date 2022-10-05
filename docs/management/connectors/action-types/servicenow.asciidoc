@@ -6,7 +6,7 @@
 
 The {sn-itsm} connector uses the
 https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[import set API]
-to create {sn} incidents.
+to create {sn} incidents. You can use the connector for rule actions and cases.
 
 [float]
 [[servicenow-itsm-connector-prerequisites]]

@@ -23,14 +23,17 @@ const DEFAULT_PIPELINE_VALUES = {
 const DEFAULT_VALUES = {
   canSetPipeline: true,
   canUseMlInferencePipeline: false,
+  customPipelineData: undefined,
   defaultPipelineValues: DEFAULT_PIPELINE_VALUES,
   defaultPipelineValuesData: undefined,
-  index: undefined,
-  mlInferencePipelineProcessors: undefined,
-  pipelineState: DEFAULT_PIPELINE_VALUES,
-  showModal: false,
-  showAddMlInferencePipelineModal: false,
   hasIndexIngestionPipeline: false,
+  index: undefined,
+  indexName: '',
+  mlInferencePipelineProcessors: undefined,
+  pipelineName: DEFAULT_PIPELINE_VALUES.name,
+  pipelineState: DEFAULT_PIPELINE_VALUES,
+  showAddMlInferencePipelineModal: false,
+  showModal: false,
 };
 
 describe('PipelinesLogic', () => {
@@ -69,6 +72,7 @@ describe('PipelinesLogic', () => {
           ...connectorIndex,
           connector: { ...connectorIndex.connector },
         },
+        indexName: 'connector',
       });
       expect(flashSuccessToast).toHaveBeenCalled();
       expect(PipelinesLogic.actions.fetchIndexApiSuccess).toHaveBeenCalledWith({
@@ -86,8 +90,9 @@ describe('PipelinesLogic', () => {
       });
       expect(PipelinesLogic.values).toEqual({
         ...DEFAULT_VALUES,
-        pipelineState: { ...DEFAULT_PIPELINE_VALUES, name: 'new_pipeline_name' },
         hasIndexIngestionPipeline: true,
+        pipelineName: 'new_pipeline_name',
+        pipelineState: { ...DEFAULT_PIPELINE_VALUES, name: 'new_pipeline_name' },
       });
     });
     describe('makeRequest', () => {
@@ -152,12 +157,14 @@ describe('PipelinesLogic', () => {
         expect(PipelinesLogic.values).toEqual({
           ...DEFAULT_VALUES,
           canUseMlInferencePipeline: true,
+          hasIndexIngestionPipeline: true,
           index: {
             ...connectorIndex,
             connector: { ...connectorIndex.connector, pipeline: newPipeline },
           },
+          indexName: 'connector',
+          pipelineName: 'new_pipeline_name',
           pipelineState: newPipeline,
-          hasIndexIngestionPipeline: true,
         });
       });
       it('should not set configState if modal is open', () => {
@@ -172,6 +179,7 @@ describe('PipelinesLogic', () => {
             ...connectorIndex,
             connector: { ...connectorIndex.connector, pipeline: newPipeline },
           },
+          indexName: 'connector',
           showModal: true,
         });
       });
