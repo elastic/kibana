@@ -29,6 +29,10 @@ export const convertToColumnInPercentageMode = (
   columnConverterArgs: ExtendedColumnConverterArgs<METRIC_TYPES>,
   minMax: MinMax | {}
 ) => {
+  if (columnConverterArgs.agg.aggType === METRIC_TYPES.TOP_HITS) {
+    return null;
+  }
+
   const formula = getFormulaForAgg(columnConverterArgs);
   if (formula === null) {
     return null;
