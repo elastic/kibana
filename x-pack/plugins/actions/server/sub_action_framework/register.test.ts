@@ -18,6 +18,7 @@ import {
 import { register } from './register';
 
 describe('Registration', () => {
+  const renderParameterTemplates = jest.fn();
   const connector = {
     id: '.test',
     name: 'Test',
@@ -28,7 +29,7 @@ describe('Registration', () => {
       secrets: TestSecretsSchema,
     },
     Service: TestSubActionConnector,
-    renderParameterTemplates: jest.fn(),
+    renderParameterTemplates,
   };
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -56,7 +57,7 @@ describe('Registration', () => {
       supportedFeatureIds: connector.supportedFeatureIds,
       validate: expect.anything(),
       executor: expect.anything(),
-      renderParameterTemplates: expect.anything(),
+      renderParameterTemplates,
     });
   });
 });
