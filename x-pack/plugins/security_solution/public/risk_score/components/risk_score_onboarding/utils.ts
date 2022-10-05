@@ -17,7 +17,8 @@ import {
   bulkDeletePrebuiltSavedObjects,
   installRiskScore,
   bulkCreatePrebuiltSavedObjects,
-  restartTransforms,
+  stopTransforms,
+  startTransforms,
 } from '../../containers/onboarding/api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
@@ -303,18 +304,32 @@ export const restartRiskScoreTransforms = async ({
   refetch,
   renderDocLink,
   riskScoreEntity,
+  spaceId,
 }: {
   http: HttpSetup;
   notifications?: NotificationsStart;
   refetch?: inputsModel.Refetch;
   renderDocLink?: (message: string) => React.ReactNode;
   riskScoreEntity: RiskScoreEntity;
+  spaceId?: string;
 }) => {
-  const res = await restartTransforms({
+  const transformIds = [
+    utils.getRiskScorePivotTransformId(riskScoreEntity, spaceId),
+    utils.getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
+  ];
+
+  await stopTransforms({
     http,
     notifications,
     renderDocLink,
-    riskScoreEntity,
+    transformIds,
+  });
+
+  const res = await startTransforms({
+    http,
+    notifications,
+    renderDocLink,
+    transformIds,
   });
 
   if (refetch) {

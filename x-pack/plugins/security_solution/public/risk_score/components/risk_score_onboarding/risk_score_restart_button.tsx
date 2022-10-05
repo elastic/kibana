@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useKibana } from '../../../common/lib/kibana';
 import type { inputsModel } from '../../../common/store';
 import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
@@ -27,6 +28,7 @@ const RiskScoreRestartButtonComponent = ({
     REQUEST_NAMES.REFRESH_RISK_SCORE,
     restartRiskScoreTransforms
   );
+  const spaceId = useSpaceId();
 
   const { renderDocLink } = useRiskScoreToastContent(riskScoreEntity);
   const { http, notifications } = useKibana().services;
@@ -38,8 +40,9 @@ const RiskScoreRestartButtonComponent = ({
       refetch,
       renderDocLink,
       riskScoreEntity,
+      spaceId,
     });
-  }, [fetch, http, notifications, refetch, renderDocLink, riskScoreEntity]);
+  }, [fetch, http, notifications, refetch, renderDocLink, riskScoreEntity, spaceId]);
 
   return (
     <EuiButton

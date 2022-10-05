@@ -134,6 +134,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
         http: mockHttp,
         refetch: mockRefetch,
         riskScoreEntity,
+        spaceId: mockSpaceId,
       });
     });
 
@@ -141,10 +142,16 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
       jest.clearAllMocks();
     });
 
-    it('Restart Transforms', () => {
-      expect((api.restartTransforms as jest.Mock).mock.calls[0][0].riskScoreEntity).toEqual(
-        riskScoreEntity
-      );
+    it('Restart Transforms with correct Ids', () => {
+      expect((api.stopTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
+        getRiskScorePivotTransformId(riskScoreEntity, mockSpaceId),
+        getRiskScoreLatestTransformId(riskScoreEntity, mockSpaceId),
+      ]);
+
+      expect((api.startTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
+        getRiskScorePivotTransformId(riskScoreEntity, mockSpaceId),
+        getRiskScoreLatestTransformId(riskScoreEntity, mockSpaceId),
+      ]);
     });
 
     it('Refresh module', () => {
