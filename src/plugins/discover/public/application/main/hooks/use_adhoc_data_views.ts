@@ -7,30 +7,37 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { getUiActions } from '../../../kibana_services';
-import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { GetStateReturn } from '../services/discover_state';
+import { useFiltersValidation } from './use_filters_validation';
 
 export const useAdHocDataViews = ({
   dataView,
   savedSearch,
   stateContainer,
   setUrlTracking,
+  filterManager,
+  dataViews,
+  toastNotifications,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
   stateContainer: GetStateReturn;
   setUrlTracking: (dataView: DataView) => void;
+  dataViews: DataViewsContract;
+  filterManager: FilterManager;
+  toastNotifications: ToastsStart;
 }) => {
-  const { dataViews, filterManager } = useDiscoverServices();
   const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
     !dataView.isPersisted() ? [dataView] : []
   );
@@ -43,6 +50,11 @@ export const useAdHocDataViews = ({
       });
     }
   }, [dataView]);
+
+  /**
+   * Takes care of checking data view id references in filters
+   */
+  useFiltersValidation({ savedSearch, filterManager, toastNotifications });
 
   /**
    * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view

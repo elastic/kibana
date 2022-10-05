@@ -30,7 +30,6 @@ import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { useAdHocDataViews } from './use_adhoc_data_views';
-import { useFiltersValidation } from './use_filters_validation';
 
 export function useDiscoverState({
   services,
@@ -45,7 +44,7 @@ export function useDiscoverState({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   dataViewList: DataViewListItem[];
 }) {
-  const { uiSettings, data, filterManager, dataViews } = services;
+  const { uiSettings, data, filterManager, dataViews, toastNotifications } = services;
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
@@ -123,11 +122,6 @@ export function useDiscoverState({
   );
 
   /**
-   * Takes care of checking data view id references in filters
-   */
-  useFiltersValidation({ stateContainer });
-
-  /**
    * Adhoc data views functionality
    */
   const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
@@ -135,6 +129,9 @@ export function useDiscoverState({
     stateContainer,
     savedSearch,
     setUrlTracking,
+    dataViews,
+    toastNotifications,
+    filterManager,
   });
 
   /**

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IToasts } from '@kbn/core/public';
+import { IToasts, ToastsStart } from '@kbn/core/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useEffect } from 'react';
 import { debounceTime } from 'rxjs';
-import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { GetStateReturn } from '../services/discover_state';
 
 const addInvalidFiltersWarn = (toastNotifications: IToasts) => {
   const warningTitle = i18n.translate('discover.invalidFiltersWarnToast.title', {
@@ -27,22 +27,30 @@ const addInvalidFiltersWarn = (toastNotifications: IToasts) => {
   });
 };
 
-export const useFiltersValidation = ({ stateContainer }: { stateContainer: GetStateReturn }) => {
-  const { filterManager, toastNotifications } = useDiscoverServices();
+export const useFiltersValidation = ({
+  savedSearch,
+  filterManager,
+  toastNotifications,
+}: {
+  savedSearch: SavedSearch;
+  filterManager: FilterManager;
+  toastNotifications: ToastsStart;
+}) => {
   useEffect(() => {
     const subscription = filterManager
       .getUpdates$()
       .pipe(debounceTime(500))
       .subscribe(() => {
         const currentFilters = filterManager.getFilters();
-        const { index: currentDataViewId } = stateContainer.appStateContainer.getState();
+        const dataView = savedSearch.searchSource.getField('index');
         const areFiltersInvalid =
-          currentDataViewId &&
-          !currentFilters.every((current) => current.meta.index === currentDataViewId);
+          dataView &&
+          !dataView.isPersisted() &&
+          !currentFilters.every((current) => current.meta.index === dataView.id);
         if (areFiltersInvalid) {
           addInvalidFiltersWarn(toastNotifications);
         }
       });
     return () => subscription.unsubscribe();
-  }, [filterManager, stateContainer.appStateContainer, toastNotifications]);
+  }, [filterManager, savedSearch.searchSource, toastNotifications]);
 };
