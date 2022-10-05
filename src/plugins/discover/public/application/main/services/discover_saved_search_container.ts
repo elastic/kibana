@@ -93,9 +93,8 @@ export function getSavedSearchContainer({
       }),
       services.uiSettings
     );
-    console.log(newAppState);
-    appStateContainer.update(newAppState);
-    await appStateContainer.replace(newAppState);
+    // appStateContainer.update(newAppState);
+    await appStateContainer.replace(newAppState, false);
     return nextSavedSearch;
   };
 

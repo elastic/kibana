@@ -30,7 +30,7 @@ export interface AppStateContainer extends ReduxLikeStateContainer<AppState> {
   getPrevious: () => AppState;
   syncState: () => ISyncStateRef;
   update: (newPartial: AppState, replace?: boolean) => void;
-  replace: (newPartial: AppState) => Promise<void>;
+  replace: (newPartial: AppState, merge: boolean) => Promise<void>;
   push: (newPartial: AppState) => Promise<void>;
   reset: (savedSearch: SavedSearch) => void;
 }
@@ -101,8 +101,8 @@ export const getDiscoverAppStateContainer = (
   let previousAppState: AppState = {};
   const initialState = getInitialState(stateStorage, savedSearch, services);
   const appStateContainer = createStateContainer<AppState>(initialState);
-  const replaceUrlState = async (newPartial: AppState) => {
-    const state = { ...appStateContainer.getState(), ...newPartial };
+  const replaceUrlState = async (newPartial: AppState, merge = true) => {
+    const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
   const pushUrlState = async (newPartial: AppState) => {
@@ -114,7 +114,6 @@ export const getDiscoverAppStateContainer = (
     ...appStateContainer,
     reset: (nextSavedSearch: SavedSearch) => {
       const resetState = getInitialState(stateStorage, nextSavedSearch, services);
-      console.log({ resetState });
       appStateContainer.set(resetState);
     },
     set: (value: AppState | null) => {
