@@ -45,7 +45,7 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     const res = await this.request({
       method: 'post',
       url: this.concatPathToURL('v2/alerts'),
-      data: { ...params, alias: OpsgenieConnector.createAlias(params.alias) },
+      data: { ...params, ...OpsgenieConnector.createAliasObj(params.alias) },
       headers: this.createHeaders(),
       responseSchema: Response,
     });
@@ -53,18 +53,22 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     return res.data;
   }
 
-  private static createAlias(alias?: string) {
+  private static createAliasObj(alias?: string) {
+    if (!alias) {
+      return {};
+    }
+
     // opsgenie v2 requires that the alias length be no more than 512 characters
     // see their docs for more details https://docs.opsgenie.com/docs/alert-api#create-alert
-    if (!alias || alias.length <= 512) {
-      return alias;
+    if (alias.length <= 512) {
+      return { alias };
     }
 
     // To give preference to avoiding collisions we're using sha256 over of md5 but we are compromising on speed a bit here
     const hasher = crypto.createHash('sha256');
     const sha256Hash = hasher.update(alias);
 
-    return sha256Hash.digest('hex');
+    return { alias: sha256Hash.digest('hex') };
   }
 
   private createHeaders() {
@@ -75,10 +79,12 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     const fullURL = new URL(`v2/alerts/${params.alias}/close`, this.config.apiUrl);
     fullURL.searchParams.set('identifierType', 'alias');
 
+    const { alias, ...paramsWithoutAlias } = params;
+
     const res = await this.request({
       method: 'post',
       url: fullURL.toString(),
-      data: params,
+      data: paramsWithoutAlias,
       headers: this.createHeaders(),
       responseSchema: Response,
     });

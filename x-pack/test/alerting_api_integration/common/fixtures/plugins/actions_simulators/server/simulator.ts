@@ -55,7 +55,7 @@ export abstract class Simulator {
   private baseHandler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
     const data = await getDataFromPostRequest(request);
     this._requestData = data;
-    this._requestUrl = request.url;
+    this._requestUrl = new URL(request.url ?? '', `http://${request.headers.host}`).toString();
 
     return this.handler(request, response, data);
   };
