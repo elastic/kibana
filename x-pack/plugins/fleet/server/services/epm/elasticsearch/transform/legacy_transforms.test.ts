@@ -37,7 +37,7 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { getAsset } from './common';
 import { installTransforms } from './install';
 
-describe('test transform install', () => {
+describe('test transform install with legacy schema', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
