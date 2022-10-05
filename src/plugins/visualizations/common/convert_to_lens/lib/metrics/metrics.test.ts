@@ -19,6 +19,7 @@ const mockConvertToSiblingPipelineColumns = jest.fn();
 const mockConvertToStdDeviationFormulaColumns = jest.fn();
 const mockConvertToLastValueColumn = jest.fn();
 const mockConvertToCumulativeSumAggColumn = jest.fn();
+const mockConvertToColumnInPercentageMode = jest.fn();
 
 jest.mock('../convert', () => ({
   convertMetricAggregationColumnWithoutSpecialParams: jest.fn(() =>
@@ -33,6 +34,7 @@ jest.mock('../convert', () => ({
   convertToStdDeviationFormulaColumns: jest.fn(() => mockConvertToStdDeviationFormulaColumns()),
   convertToLastValueColumn: jest.fn(() => mockConvertToLastValueColumn()),
   convertToCumulativeSumAggColumn: jest.fn(() => mockConvertToCumulativeSumAggColumn()),
+  convertToColumnInPercentageMode: jest.fn(() => mockConvertToColumnInPercentageMode()),
 }));
 
 describe('convertMetricToColumns invalid cases', () => {
@@ -344,6 +346,7 @@ describe('convertMetricToColumns valid cases', () => {
     mockConvertToStdDeviationFormulaColumns.mockReturnValue(result);
     mockConvertToLastValueColumn.mockReturnValue(result);
     mockConvertToCumulativeSumAggColumn.mockReturnValue(result);
+    mockConvertToColumnInPercentageMode.mockReturnValue(result);
   });
 
   test.each<[string, Parameters<typeof convertMetricToColumns>, Array<{}>, jest.Mock]>([
@@ -588,6 +591,28 @@ describe('convertMetricToColumns valid cases', () => {
       ],
       result,
       mockConvertToSiblingPipelineColumns,
+    ],
+    [
+      'column in percentage mode without range if percentageMode is enabled ',
+      [
+        { aggType: METRIC_TYPES.AVG_BUCKET } as SchemaConfig<METRIC_TYPES>,
+        dataView,
+        [],
+        { isPercentageColumn: true },
+      ],
+      result,
+      mockConvertToColumnInPercentageMode,
+    ],
+    [
+      'column in percentage mode with range if percentageMode is enabled ',
+      [
+        { aggType: METRIC_TYPES.AVG_BUCKET } as SchemaConfig<METRIC_TYPES>,
+        dataView,
+        [],
+        { isPercentageColumn: true, min: 0, max: 100 },
+      ],
+      result,
+      mockConvertToColumnInPercentageMode,
     ],
   ])('should return %s', (_, input, expected, mock) => {
     expect(convertMetricToColumns(...input)).toEqual(expected.map(expect.objectContaining));
