@@ -132,6 +132,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, loggerConte
           `--safebrowsing-disable-auto-update`,
           `--user-data-dir=${userDataDir}`,
           `--window-size=1950,1200`,
+          `--enable-logging`,
+          `--v=1`,
         ];
         if (disableSandbox) {
           args.push('--no-sandbox');
