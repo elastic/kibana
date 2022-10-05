@@ -39,7 +39,6 @@ import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { capitalize } from 'lodash';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import { fetchSyntheticsMonitor } from '../../../../state/monitor_summary/api';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ActionsPopover } from './actions_popover';
@@ -47,6 +46,7 @@ import { selectOverviewState } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { EncryptedSyntheticsMonitor, MonitorOverviewItem, SyntheticsMonitor } from '../types';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
 
 interface Props {
   id: string;
