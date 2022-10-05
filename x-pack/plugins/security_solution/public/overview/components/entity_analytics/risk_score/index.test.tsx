@@ -11,12 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import type { SeverityCount } from '../../../../common/components/severity/types';
-import {
-  useHostRiskScore,
-  useHostRiskScoreKpi,
-  useUserRiskScore,
-  useUserRiskScoreKpi,
-} from '../../../../risk_score/containers';
+import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
 
 const mockSeverityCount: SeverityCount = {
   [RiskSeverity.low]: 1,
@@ -40,32 +35,26 @@ const defaultProps = {
   refetch: () => {},
   isModuleEnabled: true,
   isLicenseValid: true,
+  loading: false,
 };
-const mockUseHostRiskScore = useHostRiskScore as jest.Mock;
-const mockUseHostRiskScoreKpi = useHostRiskScoreKpi as jest.Mock;
-const mockUseUserRiskScore = useUserRiskScore as jest.Mock;
-const mockUseUserRiskScoreKpi = useUserRiskScoreKpi as jest.Mock;
+const mockUseRiskScore = useRiskScore as jest.Mock;
+const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
 jest.mock('../../../../risk_score/containers');
 
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'EntityAnalyticsRiskScores entityType: %s',
   (riskEntity) => {
-    const entity =
-      riskEntity === RiskScoreEntity.host
-        ? { mockUseRiskScoreKpi: mockUseHostRiskScoreKpi, mockUseRiskScore: mockUseHostRiskScore }
-        : { mockUseRiskScoreKpi: mockUseUserRiskScoreKpi, mockUseRiskScore: mockUseUserRiskScore };
-
     beforeEach(() => {
       jest.clearAllMocks();
-      entity.mockUseRiskScoreKpi.mockReturnValue({
+      mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,
         loading: false,
       });
-      entity.mockUseRiskScore.mockReturnValue([false, defaultProps]);
+      mockUseRiskScore.mockReturnValue(defaultProps);
     });
 
     it('renders enable button when module is disable', () => {
-      entity.mockUseRiskScore.mockReturnValue([false, { ...defaultProps, isModuleEnabled: false }]);
+      mockUseRiskScore.mockReturnValue({ ...defaultProps, isModuleEnabled: false });
       const { getByTestId } = render(
         <TestProviders>
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />
@@ -93,7 +82,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         </TestProviders>
       );
 
-      expect(entity.mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
+      expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
     });
 
     it('skips query when toggleStatus is false', () => {
@@ -103,7 +92,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />
         </TestProviders>
       );
-      expect(entity.mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
+      expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
     });
 
     it('renders components when toggleStatus is true', () => {

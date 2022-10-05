@@ -9,12 +9,11 @@ import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 're
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
-import { get, isEmpty, map } from 'lodash';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { get, isEmpty, map, omit } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
-import { useFormContext } from '../../shared_imports';
+import { useFormContext, useFormData } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
@@ -50,19 +49,25 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   ResponseActionValidatorRef,
   OsqueryResponseActionsParamsFormProps
 >(({ item }, ref) => {
+  const { updateFieldValues } = useFormContext();
+  const [data] = useFormData({ watch: [item.path] });
+  const { params: defaultParams } = get(data, item.path);
   const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
-    defaultValues: {
-      ecs_mapping: {},
-      id: uniqueId,
-    },
+    defaultValues: defaultParams
+      ? {
+          ...omit(defaultParams, ['ecsMapping', 'packId']),
+          ecs_mapping: defaultParams.ecsMapping ?? {},
+          packId: [defaultParams.packId] ?? [],
+        }
+      : {
+          ecs_mapping: {},
+          id: uniqueId,
+        },
   });
 
-  const { watch, setValue, register, clearErrors, formState, handleSubmit } = hooksForm;
+  const { watch, register, formState, handleSubmit, reset } = hooksForm;
   const { errors, isValid } = formState;
-  const context = useFormContext();
-  const data = context.getFormData();
-  const { params: defaultParams } = get(data, item.path);
 
   const watchedValues = watch();
   const { data: packData } = usePack({
@@ -72,51 +77,37 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   const [queryType, setQueryType] = useState<string>(
     !isEmpty(defaultParams?.queries) ? 'pack' : 'query'
   );
-  const onSubmit = useCallback(async () => {
-    try {
-      if (queryType === 'pack') {
-        context.updateFieldValues({
-          [item.path]: {
-            actionTypeId: OSQUERY_TYPE,
-            params: {
-              id: watchedValues.id,
-              packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
-              queries: packData
-                ? map(packData.queries, (query, queryId: string) => ({
-                    ...query,
-                    id: queryId,
-                  }))
-                : watchedValues.queries,
-            },
-          },
-        });
-      } else {
-        context.updateFieldValues({
-          [item.path]: {
-            actionTypeId: OSQUERY_TYPE,
-            params: {
-              id: watchedValues.id,
-              savedQueryId: watchedValues.savedQueryId,
-              query: watchedValues.query,
-              ecsMapping: watchedValues.ecs_mapping,
-            },
-          },
-        });
-      }
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }, [
-    context,
-    item.path,
-    packData,
-    queryType,
-    watchedValues.ecs_mapping,
-    watchedValues.id,
-    watchedValues?.packId,
-    watchedValues.queries,
-    watchedValues.query,
-    watchedValues.savedQueryId,
-  ]);
+  const onSubmit = useCallback(
+    async (formData) => {
+      updateFieldValues({
+        [item.path]:
+          queryType === 'pack'
+            ? {
+                actionTypeId: OSQUERY_TYPE,
+                params: {
+                  id: formData.id,
+                  packId: formData?.packId?.length ? formData?.packId[0] : undefined,
+                  queries: packData
+                    ? map(packData.queries, (query, queryId: string) => ({
+                        ...query,
+                        id: queryId,
+                      }))
+                    : formData.queries,
+                },
+              }
+            : {
+                actionTypeId: OSQUERY_TYPE,
+                params: {
+                  id: formData.id,
+                  savedQueryId: formData.savedQueryId,
+                  query: formData.query,
+                  ecsMapping: formData.ecs_mapping,
+                },
+              },
+      });
+    },
+    [updateFieldValues, item.path, packData, queryType]
+  );
 
   useEffect(() => {
     // @ts-expect-error update types
@@ -135,41 +126,20 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
     register('id');
   }, [register]);
 
+  useEffect(() => {
+    const subscription = watch(() => handleSubmit(onSubmit)());
+
+    return () => subscription.unsubscribe();
+  }, [handleSubmit, onSubmit, watch]);
+
   const permissions = useKibana().services.application.capabilities.osquery;
-
-  useEffectOnce(() => {
-    if (defaultParams && defaultParams.id) {
-      const { packId, ecsMapping, ...restParams } = defaultParams;
-      // TODO change map into forEach, and type defaultParams
-      map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
-        if (!isEmpty(value)) {
-          setValue(key, value);
-        }
-      });
-
-      if (!isEmpty(ecsMapping)) {
-        setValue('ecs_mapping', ecsMapping);
-      }
-
-      if (!isEmpty(packId)) {
-        setValue('packId', [packId]);
-      }
-    }
-  });
-
-  const resetFormFields = useCallback(() => {
-    setValue('packId', []);
-    setValue('savedQueryId', '');
-    setValue('query', '');
-    setValue('ecs_mapping', {});
-    clearErrors();
-  }, [clearErrors, setValue]);
 
   const canRunPacks = useMemo(
     () =>
       !!((permissions.runSavedQueries || permissions.writeLiveQueries) && permissions.readPacks),
     [permissions]
   );
+
   const canRunSingleQuery = useMemo(
     () =>
       !!(
@@ -196,7 +166,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
           setQueryType={setQueryType}
           canRunPacks={canRunPacks}
           canRunSingleQuery={canRunSingleQuery}
-          resetFormFields={resetFormFields}
+          resetFormFields={reset}
         />
         <EuiSpacer size="m" />
         {queryType === 'query' && <LiveQueryQueryField />}
