@@ -25,6 +25,10 @@ right after ingesting it.
 You can save the {data-source} later
 if you create a search or visualization that you want to share.
 
+[role="screenshot"]
+image::images/highlights-data-view.png[Create data view form showing Use without saving button]
+
+
 [discrete]
 [[highlights-8.5-discover]]
 === Discover
@@ -146,6 +150,18 @@ result of each last value from hosts without displaying the detailed reporting d
 image::images/highlights-vis-time.png[Visualization showing a red line that indicates the current time]
 
 [discrete]
+[[highlights-8.5-maps]]
+=== Maps
+
+Tooltips display when you hover over a document or cluster in a map.
+Don't want to show them? Turn them off with
+the new *Show tooltips* in *Layer settings*.
+
+[role="screenshot"]
+image::images/highlights-maps.png[Show tooltips control in Layer settings]
+
+
+[discrete]
 [[highlights-8.5-machine-learning]]
 === Machine Learning
 
@@ -198,13 +214,13 @@ for which you do not specify an access agreement.
 
 [discrete]
 [[highlights-8.5-collaboration]]
-=== Cases collaboration
+=== Collaboration with Cases
 
 [discrete]
 ==== Case assignment
 
-This release adds the ability to assign a {kibana-ref}/cases.html[Case] to users.
-You can do so either while creating a new Case or in an existing by using
+This release adds the ability to assign a {kibana-ref}/cases.html[case] to users.
+You can do so either while creating a case or in an existing case by using
 the “assignees” UI in Observability, Elastic Security, and Stack Management.
 
 [role="screenshot"]
@@ -212,13 +228,13 @@ image::images/highlights-cases-assignees.png[Collaborate with Cases UI]
 
 You can assign one or more users (and unassign as needed).
 The UI builds on previous releases, which introduced the ability for users
-to customize their avatars, by selecting an image or color.
+to customize their avatars by selecting an image or color.
 Avatars add visual help in easily identifying and disambiguating users.
 
-The assignees and their avatars show up in each Case.
+The assignees and their avatars show up in each case.
 They also now appear in the central Cases view that lists all existing
-Cases in Observability, Elastic Security, and Stack Management.
-On this view, you can easily filter through the Cases assigned to you and all other users.
+cases in Observability, Elastic Security, and Stack Management.
+On this view, you can easily filter through the cases assigned to you and all other users.
 
 [role="screenshot"]
 image::images/highlights-cases-view.png[Cases view listing that lists all assigned users]
