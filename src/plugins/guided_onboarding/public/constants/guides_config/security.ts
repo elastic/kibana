@@ -21,6 +21,11 @@ export const securityConfig: GuideConfig = {
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
+      integration: 'endpoint',
+      location: {
+        appID: 'integrations',
+        path: '/browse/security',
+      },
     },
     {
       id: 'rules',
