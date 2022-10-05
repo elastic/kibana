@@ -6,13 +6,7 @@
  */
 
 import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
-import {
-  INGEST_PIPELINES_URL,
-  RISK_SCORE_SAVED_OBJECTS_URL,
-  RISK_SCORE_URL,
-  STORED_SCRIPTS_URL,
-  TRANSFORMS_URL,
-} from '../../../urls/risk_score';
+import { RISK_SCORE_URL } from '../../../urls/risk_score';
 import { visit } from '../../login';
 import { RiskScoreEntity } from '../../risk_scores/common';
 import {
