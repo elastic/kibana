@@ -982,7 +982,8 @@ export class RulesClient {
             perPage,
             sort,
           }),
-        }
+        },
+        getExecutionLogRuntimeMappings()
       );
 
       return formatExecutionLogResult(aggResult);
@@ -1113,7 +1114,8 @@ export class RulesClient {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionKPIAggregation(filter),
-        }
+        },
+        getExecutionLogRuntimeMappings()
       );
 
       return formatExecutionKPIResult(aggResult);

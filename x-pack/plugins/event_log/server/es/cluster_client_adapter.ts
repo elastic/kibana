@@ -56,6 +56,7 @@ export interface AggregateEventsWithAuthFilter {
   type: string;
   authFilter: KueryNode;
   aggregateOptions: AggregateOptionsType;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }
 
 export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
@@ -429,7 +430,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async aggregateEventsWithAuthFilter(
     queryOptions: AggregateEventsWithAuthFilter
   ): Promise<AggregateEventsBySavedObjectResult> {
-    const { index, type, aggregateOptions } = queryOptions;
+    const { index, type, aggregateOptions, runtimeMappings } = queryOptions;
     const { aggs } = aggregateOptions;
 
     const esClient = await this.elasticsearchClientPromise;
@@ -442,6 +443,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
     const body: estypes.SearchRequest['body'] = {
       size: 0,
+      runtime_mappings: runtimeMappings,
       query,
       aggs,
     };

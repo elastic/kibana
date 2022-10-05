@@ -665,6 +665,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   expect(event?.event?.outcome).to.equal(outcome);
+  expect(event?.kibana?.alerting?.outcome).to.equal(outcome);
 
   for (const savedObject of savedObjects) {
     expect(

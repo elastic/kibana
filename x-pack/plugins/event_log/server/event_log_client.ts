@@ -144,7 +144,8 @@ export class EventLogClient implements IEventLogClient {
   public async aggregateEventsWithAuthFilter(
     type: string,
     authFilter: KueryNode,
-    options?: AggregateOptionsType
+    options?: AggregateOptionsType,
+    runtimeMappings?: estypes.MappingRuntimeFields
   ) {
     if (!authFilter) {
       throw new Error('No authorization filter defined!');
@@ -164,6 +165,7 @@ export class EventLogClient implements IEventLogClient {
       type,
       authFilter,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
+      runtimeMappings: runtimeMappings ? runtimeMappings : {},
     });
   }
 

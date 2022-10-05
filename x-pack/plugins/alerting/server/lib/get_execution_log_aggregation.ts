@@ -8,7 +8,7 @@
 import { KueryNode } from '@kbn/core-saved-objects-api-server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
-import { flatMap, get } from 'lodash';
+import { flatMap, get, head } from 'lodash';
 import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
@@ -428,12 +428,14 @@ export function getExecutionLogRuntimeMappings(): estypes.MappingRuntimeFields {
       type: 'keyword',
       script: {
         source: `
-          if (params._source['kibana'].alerting != null && params._source['kibana'].alerting.outcome == null) {
-            if (params._source['event'].outcome != null)
-              emit(params._source['event'].outcome);
+          def kibana = params._source['kibana'];
+          if (kibana.alerting == null || (kibana.alerting != null && kibana.alerting.outcome == null)) {
+            def event = params._source['event'];
+            if (event.outcome != null)
+              emit(event.outcome);
           } else {
-            if (params._source['kibana'].alerting != null && params._source['kibana'].alerting.outcome != null) {
-              emit(params._source['kibana'].alerting.outcome)
+            if (kibana.alerting != null && params._source['kibana'].alerting.outcome != null) {
+              emit(kibana.alerting.outcome)
             }
           }`,
       },
@@ -485,15 +487,15 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
   const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?.fields ?? {};
-  const status = outcomeAndMessage['kibana.alerting.outcome'] ?? '';
+  const status: string = head(outcomeAndMessage['kibana.alerting.outcome']) ?? '';
+  const outcomeMessage: string = head(outcomeAndMessage.message) ?? '';
+  const outcomeErrorMessage: string = head(outcomeAndMessage['error.message']) ?? '';
   const message =
-    status === 'failure'
-      ? `${outcomeAndMessage.message ?? ''} - ${outcomeAndMessage['error.message'] ?? ''}`
-      : outcomeAndMessage.message ?? '';
-  const version = outcomeAndMessage['kibana.version'] ?? '';
+    status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
+  const version: string = head(outcomeAndMessage['kibana.version']) ?? '';
 
-  const ruleId = outcomeAndMessage['rule.id'] ?? '';
-  const ruleName = outcomeAndMessage['rule.name'] ?? '';
+  const ruleId: string = head(outcomeAndMessage['rule.id']) ?? '';
+  const ruleName: string = head(outcomeAndMessage['rule.name']) ?? '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
