@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { getTourAnchor } from '../../../common/components/guided_onboarding/tour_config';
 import { useResponderActionItem } from '../endpoint_responder';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TAKE_ACTION } from '../alerts_table/additional_filters_action/translations';
@@ -248,6 +249,7 @@ export const TakeActionDropdown = React.memo(
     const takeActionButton = useMemo(() => {
       return (
         <EuiButton
+          tour-step={getTourAnchor(4)}
           data-test-subj="take-action-dropdown-btn"
           fill
           iconSide="right"

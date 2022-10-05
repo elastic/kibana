@@ -16,10 +16,11 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import { useTourContext } from '../guided_onboarding';
 import { getTourAnchor } from '../guided_onboarding/tour_config';
 import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
@@ -124,20 +125,21 @@ const RendererContainer = styled.div`
   }
 `;
 
-const EventDetailsComponent: React.FC<Props> = ({
-  browserFields,
-  data,
-  detailsEcsData,
-  id,
-  indexName,
-  isAlert,
-  isDraggable,
-  rawEventData,
-  timelineId,
-  timelineTabType,
-  handleOnEventClosed,
-  isReadOnly,
-}) => {
+const EventDetailsComponent: React.FC<Props> = (props) => {
+  const {
+    browserFields,
+    data,
+    detailsEcsData,
+    id,
+    indexName,
+    isAlert,
+    isDraggable,
+    rawEventData,
+    timelineId,
+    timelineTabType,
+    handleOnEventClosed,
+    isReadOnly,
+  } = props;
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
@@ -180,6 +182,23 @@ const EventDetailsComponent: React.FC<Props> = ({
         : null,
     [detailsEcsData]
   );
+  const { activeStep, incrementStep, isTourShown } = useTourContext();
+
+  const anchorTarget = useMemo(
+    () => (timelineId === TimelineId.detectionsPage && isTourShown ? getTourAnchor(3) : ''),
+    [isTourShown, timelineId]
+  );
+
+  useEffect(() => {
+    // yes this is strange
+    // however, step 3 is in this flyout and therefore cannot be detected by
+    // the EuiTourStep anchor prop before it is mounted
+    // At mount, we can tell the tour to continue to step 3
+    if (activeStep === 2 && isTourShown) {
+      incrementStep(3);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
@@ -188,6 +207,7 @@ const EventDetailsComponent: React.FC<Props> = ({
             id: EventsViewType.summaryView,
             name: i18n.OVERVIEW,
             'data-test-subj': 'overviewTab',
+            ...(anchorTarget.length > 0 ? { 'tour-step': anchorTarget } : {}),
             content: (
               <>
                 <EuiSpacer size="m" />
@@ -267,6 +287,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         : undefined,
     [
       allEnrichments,
+      anchorTarget,
       browserFields,
       data,
       detailsEcsData,
@@ -398,20 +419,15 @@ const EventDetailsComponent: React.FC<Props> = ({
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
     [tabs, selectedTabId]
   );
-  const anchorTarget = useMemo(
-    () => (timelineId === TimelineId.detectionsPage ? getTourAnchor(3) : ''),
-    [timelineId]
-  );
+
   return (
-    <span data-test-subj={anchorTarget}>
-      <StyledEuiTabbedContent
-        data-test-subj="eventDetails"
-        tabs={tabs}
-        selectedTab={selectedTab}
-        onTabClick={handleTabClick}
-        key="event-summary-tabs"
-      />
-    </span>
+    <StyledEuiTabbedContent
+      data-test-subj="eventDetails"
+      tabs={tabs}
+      selectedTab={selectedTab}
+      onTabClick={handleTabClick}
+      key="event-summary-tabs"
+    />
   );
 };
 EventDetailsComponent.displayName = 'EventDetailsComponent';

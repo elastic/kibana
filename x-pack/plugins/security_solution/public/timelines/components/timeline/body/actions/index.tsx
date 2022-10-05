@@ -12,8 +12,8 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { getTourAnchor } from '../../../../../common/components/guided_onboarding/tour_config';
 import { useTourContext } from '../../../../../common/components/guided_onboarding';
+import { getTourAnchor } from '../../../../../common/components/guided_onboarding/tour_config';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
@@ -198,19 +198,37 @@ const ActionsComponent: React.FC<ActionProps> = ({
     setGlobalFullScreen,
   ]);
 
-  const { incrementStep, isTourShown } = useTourContext();
+  const { isTourShown } = useTourContext();
 
   const isTourAnchor = useMemo(
-    () => eventType === 'signal' && timelineId === TimelineId.detectionsPage && ariaRowindex === 1,
-    [ariaRowindex, eventType, timelineId]
+    () =>
+      isTourShown &&
+      eventType === 'signal' &&
+      timelineId === TimelineId.detectionsPage &&
+      ariaRowindex === 1,
+    [isTourShown, ariaRowindex, eventType, timelineId]
   );
-
-  const expandEventHandler = useCallback(() => {
-    onEventDetailsPanelOpened();
-    if (isTourShown && isTourAnchor) {
-      incrementStep();
-    }
-  }, [incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
+  //
+  // const expandedDetail = useDeepEqualSelector((state) => {
+  //   return (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).expandedDetail;
+  // });
+  // const bumpTourStep = useCallback(() => {
+  //   if (
+  //     isTourShown &&
+  //     isTourAnchor &&
+  //     expandedDetail.query &&
+  //     Object.keys(expandedDetail.query).length &&
+  //     activeStep === 2
+  //   ) {
+  //     console.log('incrementStep.', expandedDetail.query);
+  //     incrementStep();
+  //   }
+  // }, [activeStep, expandedDetail.query, incrementStep, isTourAnchor, isTourShown]);
+  //
+  // useEffect(() => {
+  //   bumpTourStep();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [expandedDetail]);
 
   return (
     <ActionsContainer>
@@ -231,14 +249,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </EventsTdContent>
         </div>
       )}
-      <div key="expand-event" data-test-subj={isTourAnchor ? getTourAnchor(2) : ''}>
+      <div key="expand-event" tour-step={isTourAnchor ? getTourAnchor(2) : ''}>
         <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
             <EuiButtonIcon
               aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
               data-test-subj="expand-event"
               iconType="expand"
-              onClick={expandEventHandler}
+              onClick={onEventDetailsPanelOpened}
               size="s"
             />
           </EuiToolTip>

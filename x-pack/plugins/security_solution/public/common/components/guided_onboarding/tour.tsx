@@ -6,7 +6,7 @@
  */
 
 import type { ReactChild } from 'react';
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 
 import type { EuiTourStepProps } from '@elastic/eui';
 import {
@@ -107,9 +107,9 @@ const getSteps = ({
   return tourConfig.map((stepConfig: StepConfig, i: number) => {
     const { content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = stepConfig;
     if (stepConfig.step === activeStep) {
-      console.log('isStepOpen', stepConfig);
+      console.log('active step', stepConfig);
     }
-    return (
+    return stepConfig.step === activeStep ? (
       <EuiTourStep
         {...rest}
         minWidth={minWidth}
@@ -139,17 +139,19 @@ const getSteps = ({
           activeStep === tourConfig.length ? lastStepFooter : footerAction(hideNextButton)
         }
       />
-    );
+    ) : null;
   });
 };
 
 export interface TourContextValue {
+  activeStep: number;
   isTourShown: boolean;
   endTour: () => void;
-  incrementStep: () => void;
+  incrementStep: (step?: number) => void;
 }
 
 const TourContext = createContext<TourContextValue>({
+  activeStep: 1,
   isTourShown: false,
   endTour: () => {},
   incrementStep: () => {},
@@ -178,9 +180,9 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
 
   const [activeStep, _setActiveStep] = useState<number>(getTourStepFromLocalStorage());
 
-  const incrementStep = useCallback(() => {
+  const incrementStep = useCallback((step?: number) => {
     _setActiveStep((prevState) => {
-      const nextStep = (prevState >= tourConfig.length ? 0 : prevState) + 1;
+      const nextStep = step != null ? step : (prevState >= tourConfig.length ? 0 : prevState) + 1;
       saveTourStepToLocalStorage(nextStep);
       return nextStep;
     });
@@ -198,21 +200,23 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
 
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
   const showTour = isTourActive && !isSmallScreen;
-  const context: TourContextValue = { isTourShown: showTour, endTour: resetTour, incrementStep };
-  if (isPrimaryTourActive) {
-    console.log('Provider', {
-      tourActiveGuideState,
-      isGuidedOnboardingActive,
-      showTour,
-      isTourActive,
-      isPrimaryTourActive,
-    });
-  }
+  const context: TourContextValue = {
+    isTourShown: showTour,
+    endTour: resetTour,
+    incrementStep,
+    activeStep,
+  };
+
+  const steps = useMemo(
+    () => getSteps({ activeStep, incrementStep, resetTour }),
+    [activeStep, incrementStep, resetTour]
+  );
+
   return (
     <TourContext.Provider value={context}>
       <>
         {children}
-        {showTour && <>{getSteps({ activeStep, incrementStep, resetTour })}</>}
+        {showTour && <>{steps}</>}
       </>
     </TourContext.Provider>
   );

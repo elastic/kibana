@@ -7,21 +7,19 @@
 
 import type { EuiTourStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import alertsGif from '../../images/onboarding_tour_step_alerts.gif';
-import casesGif from '../../images/onboarding_tour_step_cases.gif';
+import type { ElementTarget } from '@elastic/eui/src/services/findElement';
 
 export type StepConfig = Pick<
   EuiTourStepProps,
-  'step' | 'content' | 'anchorPosition' | 'title' | 'initialFocus'
+  'step' | 'content' | 'anchorPosition' | 'title' | 'initialFocus' | 'anchor'
 > & {
-  anchor: string;
+  anchor: ElementTarget;
   dataTestSubj: string;
   hideNextButton?: boolean;
   imageConfig?: {
     altText: string;
     src: string;
   };
-  primaryTourStep: { guideId: string; stepId: string };
 };
 
 type TourConfig = StepConfig[];
@@ -41,10 +39,9 @@ export const tourConfig: TourConfig = [
           'To help you practice triaging alerts, we enabled a rule to create your first alert.',
       }
     ),
-    anchor: `[data-test-subj="${getTourAnchor(1)}"]`,
+    anchor: `[tour-step="${getTourAnchor(1)}"]`,
     anchorPosition: 'downCenter',
-    dataTestSubj: '8.6-tourStep-alerts-1',
-    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
+    dataTestSubj: 'tourStep-alerts-1',
   },
   {
     step: 2,
@@ -58,12 +55,11 @@ export const tourConfig: TourConfig = [
           'We show minimal information in the table. You can see more details in the flyout. Click the icon to open the flyout.',
       }
     ),
-    anchor: `[data-test-subj="${getTourAnchor(2)}"]`,
+    anchor: `[tour-step="${getTourAnchor(2)}"]`,
     anchorPosition: 'rightUp',
-    initialFocus: `[data-test-subj="8.6-tourStepAnchor-alerts-2"]`,
-    dataTestSubj: '8.6-tourStep-alerts-2',
+    initialFocus: `[tour-step="${getTourAnchor(2)}"]`,
+    dataTestSubj: 'tourStep-alerts-2',
     hideNextButton: true,
-    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
   },
   {
     step: 3,
@@ -80,54 +76,36 @@ export const tourConfig: TourConfig = [
           'This alert was created by a rule we automatically enabled in the previous step so that we can show you how to triage alerts.',
       }
     ),
-    anchor: `[data-test-subj="${getTourAnchor(3)}"]`,
+    anchor: `[tour-step="${getTourAnchor(3)}"]`,
     anchorPosition: 'leftUp',
-    imageConfig: {
-      src: alertsGif,
-      altText: i18n.translate(
-        'xpack.securitySolution.guided_onboarding.tour.alertsStep.imageAltText',
-        {
-          defaultMessage: 'Alerts demonstration',
-        }
-      ),
-    },
-    dataTestSubj: 'alertsStep',
-    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
+    dataTestSubj: 'tourStep-alerts-3',
   },
   {
     step: 4,
-    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.casesStep.tourTitle', {
-      defaultMessage: 'Create a case to track your investigation',
+    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.addToCase.tourTitle', {
+      defaultMessage: 'Create a case',
     }),
-    content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.casesStep.tourContent', {
-      defaultMessage:
-        'Collect evidence, add more collaborators, and even push case details to third-party case management systems.',
+    content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.addToCase.tourContent', {
+      defaultMessage: 'Click the button and select add to a new case',
     }),
-    anchor: `[data-test-subj="${getTourAnchor(4)}"]`,
-    anchorPosition: 'rightUp',
-    imageConfig: {
-      src: casesGif,
-      altText: i18n.translate(
-        'xpack.securitySolution.guided_onboarding.tour.casesStep.imageAltText',
-        {
-          defaultMessage: 'Cases demonstration',
-        }
-      ),
-    },
-    dataTestSubj: 'casesStep',
-    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
+    anchor: `[tour-step="${getTourAnchor(4)}"]`,
+    anchorPosition: 'upRight',
+    dataTestSubj: 'tourStep-alerts-4',
+    hideNextButton: true,
   },
   {
     step: 5,
-    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.dataStep.tourTitle', {
-      defaultMessage: `Start gathering your data!`,
+    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.createCase.tourTitle', {
+      defaultMessage: `Complete the case details`,
     }),
-    content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.dataStep.tourContent', {
-      defaultMessage: `Collect data from your endpoints using the Elastic Agent and a variety of third-party integrations.`,
-    }),
-    anchor: `[data-test-subj="${getTourAnchor(5)}"]`,
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'dataStep',
-    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
+    content: i18n.translate(
+      'xpack.securitySolution.guided_onboarding.tour.createCase.tourContent',
+      {
+        defaultMessage: `The alert will be added to the case...`,
+      }
+    ),
+    anchor: `[data-test-subj="caseTitle"]`,
+    anchorPosition: 'leftUp',
+    dataTestSubj: 'tourStep-alerts-5',
   },
 ];

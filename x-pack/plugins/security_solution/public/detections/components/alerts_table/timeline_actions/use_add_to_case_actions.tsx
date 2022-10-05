@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { useTourContext } from '../../../../common/components/guided_onboarding';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
@@ -61,12 +62,17 @@ export const useAddToCaseActions = ({
     onClose: onMenuItemClick,
     onRowClick: onSuccess,
   });
-
+  const { activeStep, incrementStep, isTourShown } = useTourContext();
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
     createCaseFlyout.open({ attachments: caseAttachments });
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
+    if (isTourShown && activeStep === 4) {
+      setTimeout(() => {
+        incrementStep(5);
+      }, 3000);
+    }
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments, isTourShown, activeStep, incrementStep]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`

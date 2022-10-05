@@ -54,7 +54,7 @@ export const RenderCellValue: React.FC<
   );
 
   return (
-    <span data-test-subj={anchorTarget}>
+    <span tour-step={anchorTarget}>
       <DefaultCellRenderer
         browserFields={browserFields}
         columnId={columnId}
