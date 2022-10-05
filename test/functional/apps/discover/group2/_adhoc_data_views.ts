@@ -72,6 +72,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate back correctly from to surrounding and single views', async () => {
       await PageObjects.discover.createAdHocDataView('logstash', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const first = await getCurrentDataViewId();
+
+      await addRuntimeField('_bytes-runtimefield', `emit(doc["bytes"].value.toString())`);
+      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
 
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -79,8 +83,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await surrDocs.click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
+      // trigger data view id update
+      await dataGrid.clickEditField('_bytes-runtimefield');
+      await fieldEditor.setName('_bytes-runtimefield-edited', true);
+      await fieldEditor.save();
+      await fieldEditor.confirmSave();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
       await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const second = await getCurrentDataViewId();
+      expect(first).not.to.equal(second);
 
       expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
 
@@ -184,6 +198,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const second = await secondSearchCell.getVisibleText();
 
       expect(+second).to.equal(+first * 2);
+    });
+
+    it('should ope saved search by navigation to context from embeddable', async () => {
+      // navigate to context view
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
+      await surrDocs.click();
+
+      // close popup
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+      // open saved search
+      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const savedSearch = await find.byCssSelector(`[data-test-subj="breadcrumb last"]`);
+      const savedSearchName = await savedSearch.getVisibleText();
+      expect(savedSearchName).to.be.equal('logst*-ss-_bytes-runtimefield');
+
+      // test the header now
+      const header = await dataGrid.getHeaderFields();
+      expect(header.join(' ')).to.have.string('_bytes-runtimefield');
     });
   });
 }
