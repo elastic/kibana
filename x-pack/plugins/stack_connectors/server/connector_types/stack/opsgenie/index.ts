@@ -18,6 +18,7 @@ import {
 import { OpsgenieConnector } from './connector';
 import { ConfigSchema, SecretsSchema } from './schema';
 import { Config, Secrets } from './types';
+import * as i18n from './translations';
 
 export const OpsgenieId = '.opsgenie';
 
@@ -25,7 +26,7 @@ export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secre
   return {
     Service: OpsgenieConnector,
     minimumLicenseRequired: 'platinum',
-    name: 'Opsgenie Connector',
+    name: i18n.OPSGENIE_NAME,
     id: OpsgenieId,
     schema: { config: ConfigSchema, secrets: SecretsSchema },
     validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') }],

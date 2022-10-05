@@ -10,6 +10,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError } from 'axios';
 import { CloseAlertParamsSchema, CreateAlertParamsSchema, Response } from './schema';
 import { CloseAlertParams, Config, CreateAlertParams, Secrets } from './types';
+import * as i18n from './translations';
 
 interface ErrorSchema {
   message?: string;
@@ -37,7 +38,7 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
 
   public getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
     return `Message: ${
-      error.response?.data.errors?.message ?? error.response?.data.message ?? 'unknown error'
+      error.response?.data.errors?.message ?? error.response?.data.message ?? i18n.UNKNOWN_ERROR
     }.`;
   }
 
