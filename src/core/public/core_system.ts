@@ -37,7 +37,6 @@ import {
   type InternalApplicationSetup,
   type InternalApplicationStart,
 } from '@kbn/core-application-browser-internal';
-import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
@@ -104,7 +103,6 @@ export class CoreSystem {
   private readonly plugins: PluginsService;
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
-  private readonly rendering: RenderingService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreAppsService;
   private readonly deprecations: DeprecationsService;
@@ -139,12 +137,11 @@ export class CoreSystem {
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
-    this.docLinks = new DocLinksService();
-    this.rendering = new RenderingService();
     this.chrome = new ChromeService({
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
     });
+    this.docLinks = new DocLinksService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();

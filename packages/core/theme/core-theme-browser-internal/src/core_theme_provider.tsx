@@ -43,9 +43,6 @@ export const CoreThemeProvider: FC<CoreThemeProviderProps> = ({
   children,
   globalStyles,
 }) => {
-  const primaryOverrides = {
-    icon: 'logoKibana',
-  };
   const coreTheme = useObservable(theme$, defaultTheme);
   const euiTheme = useMemo(() => convertCoreTheme(coreTheme), [coreTheme]);
   const includeGlobalStyles = globalStyles === false ? false : undefined;
@@ -55,7 +52,6 @@ export const CoreThemeProvider: FC<CoreThemeProviderProps> = ({
       utilityClasses={includeGlobalStyles}
       colorMode={euiTheme.colorMode}
       theme={euiTheme.euiThemeSystem}
-      modify={primaryOverrides}
       cache={{ default: emotionCache, global: globalCache }}
     >
       {children}
