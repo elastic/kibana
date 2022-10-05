@@ -62,9 +62,12 @@ interface EcsError {
   type?: string;
 }
 
-interface EndpointActionFields<TOutputContent extends object = object> {
+interface EndpointActionFields<
+  TParameters extends EndpointActionDataParameterTypes = never,
+  TOutputContent extends object = object
+> {
   action_id: string;
-  data: EndpointActionData<undefined, TOutputContent>;
+  data: EndpointActionData<TParameters, TOutputContent>;
 }
 
 interface ActionRequestFields {
@@ -98,12 +101,15 @@ export interface LogsEndpointAction {
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
  */
-export interface LogsEndpointActionResponse<TOutputContent extends object = object> {
+export interface LogsEndpointActionResponse<
+  TParameters extends EndpointActionDataParameterTypes = never,
+  TOutputContent extends object = object
+> {
   '@timestamp': string;
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields<TOutputContent> & ActionResponseFields;
+  EndpointActions: EndpointActionFields<TParameters, TOutputContent> & ActionResponseFields;
   error?: EcsError;
 }
 
@@ -121,9 +127,14 @@ export type ResponseActionParametersWithPidOrEntityId =
   | ResponseActionParametersWithPid
   | ResponseActionParametersWithEntityId;
 
+export interface ResponseActionGetFileParameters {
+  file: string;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
-  | ResponseActionParametersWithPidOrEntityId;
+  | ResponseActionParametersWithPidOrEntityId
+  | ResponseActionGetFileParameters;
 
 export interface EndpointActionData<
   T extends EndpointActionDataParameterTypes = never,

@@ -8,11 +8,14 @@
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { UploadedFile } from '../../../common/endpoint/types/file_storage';
 import { sendEndpointMetadataUpdate } from '../common/endpoint_metadata_services';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINTS_ACTION_LIST_ROUTE,
+  FILE_STORAGE_DATA_INDEX,
+  FILE_STORAGE_METADATA_INDEX,
 } from '../../../common/endpoint/constants';
 import type {
   ActionDetails,
@@ -142,6 +145,40 @@ export const sendEndpointActionResponse = async (
         },
       });
     }
+  }
+
+  // For `get-file`, upload a file to ES
+  if (action.command === 'get-file' && !endpointResponse.error) {
+    // Add the file's metadata
+    const fileMeta = await esClient.index<UploadedFile>({
+      index: FILE_STORAGE_METADATA_INDEX,
+      id: `${action.id}.${action.hosts[0]}`,
+      body: {
+        file: {
+          created: new Date().toISOString(),
+          extension: 'zip',
+          path: '/some/path/bad_file.txt',
+          type: 'file',
+          size: 221,
+          name: 'bad_file.txt.zip',
+          mime_type: 'application/zip',
+          Status: 'READY',
+          ChunkSize: 4194304,
+        },
+      },
+      refresh: 'wait_for',
+    });
+
+    await esClient.index({
+      index: FILE_STORAGE_DATA_INDEX,
+      id: `${fileMeta._id}.0`,
+      body: {
+        bid: fileMeta._id,
+        last: true,
+        data: 'UEsDBBQACAAIAFVeRFUAAAAAAAAAABMAAAAMACAAYmFkX2ZpbGUudHh0VVQNAAdTVjxjU1Y8Y1NWPGN1eAsAAQT1AQAABBQAAAArycgsVgCiRIWkxBSFtMycVC4AUEsHCKkCwMsTAAAAEwAAAFBLAQIUAxQACAAIAFVeRFWpAsDLEwAAABMAAAAMACAAAAAAAAAAAACkgQAAAABiYWRfZmlsZS50eHRVVA0AB1NWPGNTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFoAAABtAAAAAAA=',
+      },
+      refresh: 'wait_for',
+    });
   }
 
   return endpointResponse;
