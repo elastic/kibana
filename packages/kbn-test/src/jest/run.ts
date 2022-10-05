@@ -28,7 +28,6 @@ import { map } from 'lodash';
 import { deprecationEntries } from 'jest-config';
 import { validateCLIOptions } from 'jest-validate';
 import type { Config } from '@jest/types';
-// @ts-expect-error
 import yargs from 'yargs';
 import * as args from './args';
 
@@ -42,7 +41,7 @@ export const buildArgv = (maybeArgv?: string[]): Config.Argv => {
     .alias('help', 'h')
     .options(args.options)
     .epilogue(args.docs)
-    .check(args.check).argv;
+    .check(args.check).argv as Config.Argv;
 
   validateCLIOptions(
     argv,
@@ -64,23 +63,6 @@ export const buildArgv = (maybeArgv?: string[]): Config.Argv => {
     { $0: argv.$0, _: argv._ }
   );
 };
-
-// yarn test:jest src/core/server/saved_objects
-// yarn test:jest src/core/public/core_system.test.ts
-// :kibana/src/core/server/saved_objects yarn test:jest
-
-// Patch node 16 types to be compatible with jest 26
-// https://github.com/facebook/jest/issues/11640#issuecomment-893867514
-// /* eslint-disable @typescript-eslint/no-namespace,@typescript-eslint/no-empty-interface,no-console */
-// declare global {
-//   namespace NodeJS {
-//     interface Global {}
-//     interface InspectOptions {}
-
-//     interface ConsoleConstructor extends console.ConsoleConstructor {}
-//   }
-// }
-// /* eslint-enable */
 
 export function runJest(configName = 'jest.config.js') {
   const argv = buildArgv(process.argv);
