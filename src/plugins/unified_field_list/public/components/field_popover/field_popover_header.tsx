@@ -97,7 +97,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
               data-test-subj={`fieldPopoverHeader_addField-${field.name}`}
               aria-label={addFieldToWorkspaceTooltip}
               {...(buttonAddFieldToWorkspaceProps || {})}
-              iconType="plusInCircleFilled"
+              iconType="plusInCircle"
               onClick={() => {
                 closePopover();
                 onAddFieldToWorkspace(field);
