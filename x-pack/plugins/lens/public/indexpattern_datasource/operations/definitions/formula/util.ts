@@ -724,8 +724,8 @@ Example: \`gte(average(bytes), 1000)\`
       defaultMessage: `
 Returns a value depending on whether the element of condition is true or false.
 
-Example: Compare two fields average and return the highest
-\`ifelse( average(memory) >= average(bytes), average(memory), average(bytes))\`
+Example: Average revenue per customer but in some cases customer id is not provided which counts as additional customer
+\`sum(total)/(cardinality(customer_id) + ifelse(count() > count(filter=customer_id:*), 1, 0)\`
     `,
     }),
   },
