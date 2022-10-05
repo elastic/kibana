@@ -125,6 +125,7 @@ import {
   formatExecutionKPIResult,
   getExecutionLogAggregation,
   getExecutionKPIAggregation,
+  getExecutionLogRuntimeMappings,
 } from '../lib/get_execution_log_aggregation';
 import { IExecutionLogResult, IExecutionErrorsResult } from '../../common';
 import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
@@ -911,7 +912,8 @@ export class RulesClient {
             sort,
           }),
         },
-        rule.legacyId !== null ? [rule.legacyId] : undefined
+        rule.legacyId !== null ? [rule.legacyId] : undefined,
+        getExecutionLogRuntimeMappings()
       );
 
       return formatExecutionLogResult(aggResult);
@@ -1169,7 +1171,8 @@ export class RulesClient {
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionKPIAggregation(filter),
         },
-        rule.legacyId !== null ? [rule.legacyId] : undefined
+        rule.legacyId !== null ? [rule.legacyId] : undefined,
+        getExecutionLogRuntimeMappings()
       );
 
       return formatExecutionKPIResult(aggResult);

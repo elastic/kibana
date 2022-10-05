@@ -685,6 +685,7 @@ describe('aggregateEventsBySavedObject', () => {
       type: 'saved-object-type',
       ids: ['saved-object-id'],
       aggregateOptions: DEFAULT_OPTIONS as AggregateOptionsType,
+      runtimeMappings: {},
     };
     const result = await clusterClientAdapter.aggregateEventsBySavedObjects(options);
 

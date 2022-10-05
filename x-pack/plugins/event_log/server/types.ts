@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from '@kbn/core/server';
 import { KueryNode } from '@kbn/es-query';
+import { estypes } from '@elastic/elasticsearch';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
@@ -61,7 +62,8 @@ export interface IEventLogClient {
     type: string,
     ids: string[],
     options?: Partial<AggregateOptionsType>,
-    legacyIds?: string[]
+    legacyIds?: string[],
+    runtimeMappings?: estypes.MappingRuntimeFields
   ): Promise<AggregateEventsBySavedObjectResult>;
   aggregateEventsWithAuthFilter(
     type: string,

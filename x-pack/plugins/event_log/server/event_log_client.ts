@@ -116,7 +116,8 @@ export class EventLogClient implements IEventLogClient {
     type: string,
     ids: string[],
     options?: AggregateOptionsType,
-    legacyIds?: string[]
+    legacyIds?: string[],
+    runtimeMappings?: estypes.MappingRuntimeFields
   ) {
     const aggs = options?.aggs;
     if (!aggs) {
@@ -135,6 +136,7 @@ export class EventLogClient implements IEventLogClient {
       type,
       ids,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
+      runtimeMappings: runtimeMappings ? runtimeMappings : {},
       legacyIds,
     });
   }

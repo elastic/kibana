@@ -387,16 +387,15 @@ export function getExecutionLogAggregation({
                 outcomeAndMessage: {
                   top_hits: {
                     size: 1,
-                    _source: {
-                      includes: [
-                        OUTCOME_FIELD,
-                        MESSAGE_FIELD,
-                        ERROR_MESSAGE_FIELD,
-                        VERSION_FIELD,
-                        RULE_ID_FIELD,
-                        RULE_NAME_FIELD,
-                      ],
-                    },
+                    _source: false,
+                    fields: [
+                      OUTCOME_FIELD,
+                      MESSAGE_FIELD,
+                      ERROR_MESSAGE_FIELD,
+                      VERSION_FIELD,
+                      RULE_ID_FIELD,
+                      RULE_NAME_FIELD,
+                    ],
                   },
                 },
               },
@@ -418,6 +417,25 @@ export function getExecutionLogAggregation({
             },
           },
         },
+      },
+    },
+  };
+}
+
+export function getExecutionLogRuntimeMappings(): estypes.MappingRuntimeFields {
+  return {
+    'kibana.alerting.outcome': {
+      type: 'keyword',
+      script: {
+        source: `
+          if (params._source['kibana'].alerting != null && params._source['kibana'].alerting.outcome == null) {
+            if (params._source['event'].outcome != null)
+              emit(params._source['event'].outcome);
+          } else {
+            if (params._source['kibana'].alerting != null && params._source['kibana'].alerting.outcome != null) {
+              emit(params._source['kibana'].alerting.outcome)
+            }
+          }`,
       },
     },
   };
@@ -466,16 +484,16 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const actionExecutionError =
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
-  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source;
-  const status = outcomeAndMessage ? outcomeAndMessage?.kibana?.alerting?.outcome ?? '' : '';
+  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?.fields ?? {};
+  const status = outcomeAndMessage['kibana.alerting.outcome'] ?? '';
   const message =
     status === 'failure'
-      ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
-      : outcomeAndMessage?.message ?? '';
-  const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
+      ? `${outcomeAndMessage.message ?? ''} - ${outcomeAndMessage['error.message'] ?? ''}`
+      : outcomeAndMessage.message ?? '';
+  const version = outcomeAndMessage['kibana.version'] ?? '';
 
-  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
-  const ruleName = outcomeAndMessage ? outcomeAndMessage?.rule?.name ?? '' : '';
+  const ruleId = outcomeAndMessage['rule.id'] ?? '';
+  const ruleName = outcomeAndMessage['rule.name'] ?? '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
