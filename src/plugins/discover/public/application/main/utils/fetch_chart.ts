@@ -23,9 +23,9 @@ export function fetchChart(
   searchSource: ISearchSource,
   { abortController, appStateContainer, data, inspectorAdapters, searchSessionId }: FetchDeps
 ): Promise<Result> {
-  const interval = appStateContainer.getState().interval ?? 'auto';
+  const timeInterval = appStateContainer.getState().interval ?? 'auto';
 
-  updateSearchSource(searchSource, interval, data);
+  updateSearchSource(searchSource, timeInterval, data);
 
   const executionContext = {
     description: 'fetch chart data and total hits',
@@ -60,14 +60,14 @@ export function fetchChart(
 
 export function updateSearchSource(
   searchSource: ISearchSource,
-  interval: string,
+  timeInterval: string,
   data: DataPublicPluginStart
 ) {
   const dataView = searchSource.getField('index')!;
   searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
   searchSource.setField('size', 0);
   searchSource.setField('trackTotalHits', true);
-  const chartAggConfigs = getChartAggConfigs(dataView, interval, data);
+  const chartAggConfigs = getChartAggConfigs({ dataView, timeInterval, data });
   searchSource.setField('aggs', chartAggConfigs.toDsl());
   searchSource.removeField('sort');
   searchSource.removeField('fields');

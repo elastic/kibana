@@ -21,7 +21,7 @@ test('getDimensions', () => {
   dataMock.query.timefilter.timefilter.calculateBounds = (timeRange) => {
     return calculateBounds(timeRange);
   };
-  const aggsConfig = getChartAggConfigs(dataView, 'auto', dataMock);
+  const aggsConfig = getChartAggConfigs({ dataView, timeInterval: 'auto', data: dataMock });
   const actual = getDimensions(aggsConfig!, dataMock);
   expect(actual).toMatchInlineSnapshot(`
     Object {

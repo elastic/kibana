@@ -37,7 +37,7 @@ export const buildChartData = ({
     return {};
   }
 
-  const chartAggConfigs = getChartAggConfigs(dataView, timeInterval, data);
+  const chartAggConfigs = getChartAggConfigs({ dataView, timeInterval, data });
   const bucketAggConfig = chartAggConfigs.aggs[1];
   const tabifiedData = tabifyAggResponse(chartAggConfigs, response);
   const dimensions = getDimensions(chartAggConfigs, data);

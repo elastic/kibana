@@ -14,7 +14,7 @@ describe('getChartAggConfigs', () => {
   test('is working', () => {
     const dataView = dataViewWithTimefieldMock;
     const dataMock = dataPluginMock.createStartContract();
-    const aggsConfig = getChartAggConfigs(dataView, 'auto', dataMock);
+    const aggsConfig = getChartAggConfigs({ dataView, timeInterval: 'auto', data: dataMock });
 
     expect(aggsConfig!.aggs).toMatchInlineSnapshot(`
       Array [

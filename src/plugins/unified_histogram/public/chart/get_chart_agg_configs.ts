@@ -12,11 +12,15 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 /**
  * Helper function to get the agg configs required for the unified histogram chart request
  */
-export function getChartAggConfigs(
-  dataView: DataView,
-  timeInterval: string,
-  data: DataPublicPluginStart
-) {
+export function getChartAggConfigs({
+  dataView,
+  timeInterval,
+  data,
+}: {
+  dataView: DataView;
+  timeInterval: string;
+  data: DataPublicPluginStart;
+}) {
   const visStateAggs = [
     {
       type: 'count',
