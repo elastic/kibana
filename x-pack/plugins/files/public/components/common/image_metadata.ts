@@ -64,8 +64,8 @@ export async function getImageMetadata(file: File | Blob): Promise<undefined | F
     const imgData = ctx.getImageData(0, 0, width, height);
     return {
       blurhash: bh.encode(imgData.data, imgData.width, imgData.height, 4, 3),
-      width,
-      height,
+      width: image.width,
+      height: image.height,
     };
   } finally {
     window.URL.revokeObjectURL(imgUrl);
