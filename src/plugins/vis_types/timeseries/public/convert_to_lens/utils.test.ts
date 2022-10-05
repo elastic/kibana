@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Column, DateHistogramColumn, TermsColumn } from '../lib/convert';
+import { Column, DateHistogramColumn, TermsColumn } from './lib/convert';
 import { getUniqueBuckets } from './utils';
 
 describe('getUniqueBuckets', () => {

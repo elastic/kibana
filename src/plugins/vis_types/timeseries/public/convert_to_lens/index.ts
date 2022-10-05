@@ -25,6 +25,10 @@ const getConvertFnByType = (type: PANEL_TYPES) => {
       const { convertToLens } = await import('./metric');
       return convertToLens;
     },
+    [PANEL_TYPES.GAUGE]: async () => {
+      const { convertToLens } = await import('./gauge');
+      return convertToLens;
+    },
   };
 
   return convertionFns[type]?.();

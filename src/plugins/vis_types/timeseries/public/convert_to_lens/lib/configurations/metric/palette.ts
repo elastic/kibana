@@ -22,15 +22,61 @@ type ColorStopsWithMinMax = Pick<
   'colorStops' | 'stops' | 'steps' | 'rangeMax' | 'rangeMin' | 'continuity'
 >;
 
+type MetricColorRules = Exclude<Panel['background_color_rules'], undefined>;
+type GaugeColorRules = Exclude<Panel['gauge_color_rules'], undefined>;
+
+type MetricColorRule = MetricColorRules[number];
+type GaugeColorRule = GaugeColorRules[number];
+
+type ValidMetricColorRule = Omit<MetricColorRule, 'background_color' | 'color'> &
+  (
+    | {
+        background_color: Exclude<MetricColorRule['background_color'], undefined>;
+        color: MetricColorRule['color'];
+      }
+    | {
+        background_color: MetricColorRule['background_color'];
+        color: Exclude<MetricColorRule['color'], undefined>;
+      }
+  );
+
+type ValidGaugeColorRule = Omit<GaugeColorRule, 'gauge'> & {
+  gauge: Exclude<GaugeColorRule['gauge'], undefined>;
+};
+
+const isValidColorRule = (
+  rule: MetricColorRule | GaugeColorRule
+): rule is ValidMetricColorRule | ValidGaugeColorRule => {
+  const { background_color: bColor, color: textColor } = rule as MetricColorRule;
+  const { gauge } = rule as GaugeColorRule;
+
+  return rule.operator && (bColor ?? textColor ?? gauge) && rule.value !== undefined ? true : false;
+};
+
+const isMetricColorRule = (
+  rule: ValidMetricColorRule | ValidGaugeColorRule
+): rule is ValidMetricColorRule => {
+  const metricRule = rule as ValidMetricColorRule;
+  return metricRule.background_color ?? metricRule.color ? true : false;
+};
+
+const getColor = (rule: ValidMetricColorRule | ValidGaugeColorRule) => {
+  if (isMetricColorRule(rule)) {
+    return rule.background_color ?? rule.color;
+  }
+  return rule.gauge;
+};
+
 const getColorStopsWithMinMaxForAllGteOrWithLte = (
-  rules: Exclude<Panel['background_color_rules'], undefined>,
-  tailOperator: string
+  rules: Array<ValidMetricColorRule | ValidGaugeColorRule>,
+  tailOperator: string,
+  baseColor?: string
 ): ColorStopsWithMinMax => {
   const lastRule = rules[rules.length - 1];
-  const lastRuleColor = (lastRule.background_color ?? lastRule.color)!;
-
+  const lastRuleColor = getColor(lastRule);
+  const initRules = baseColor ? [{ stop: -Infinity, color: baseColor }] : [];
   const colorStops = rules.reduce<ColorStop[]>((colors, rule, index, rulesArr) => {
-    const rgbColor = (rule.background_color ?? rule.color)!;
+    const rgbColor = getColor(rule);
     if (index === rulesArr.length - 1 && tailOperator === Operators.LTE) {
       return colors;
     }
@@ -51,7 +97,7 @@ const getColorStopsWithMinMaxForAllGteOrWithLte = (
         stop: rule.value!,
       },
     ];
-  }, []);
+  }, initRules);
 
   const stops = colorStops.reduce<ColorStop[]>((prevStops, colorStop, index, colorStopsArr) => {
     if (index === colorStopsArr.length - 1) {
@@ -68,24 +114,25 @@ const getColorStopsWithMinMaxForAllGteOrWithLte = (
 
   const [rule] = rules;
   return {
-    rangeMin: rule.value,
+    rangeMin: baseColor ? -Infinity : rule.value,
     rangeMax: tailOperator === Operators.LTE ? lastRule.value : Infinity,
     colorStops,
     stops,
     steps: colorStops.length,
-    continuity: tailOperator === Operators.LTE ? 'none' : 'above',
+    continuity:
+      tailOperator === Operators.LTE ? (baseColor ? 'below' : 'none') : baseColor ? 'all' : 'above',
   };
 };
 
 const getColorStopsWithMinMaxForLtWithLte = (
-  rules: Exclude<Panel['background_color_rules'], undefined>
+  rules: Array<ValidMetricColorRule | ValidGaugeColorRule>
 ): ColorStopsWithMinMax => {
   const lastRule = rules[rules.length - 1];
   const colorStops = rules.reduce<ColorStop[]>((colors, rule, index, rulesArr) => {
     if (index === 0) {
-      return [{ color: color((rule.background_color ?? rule.color)!).hex(), stop: -Infinity }];
+      return [{ color: color(getColor(rule)).hex(), stop: -Infinity }];
     }
-    const rgbColor = (rule.background_color ?? rule.color)!;
+    const rgbColor = getColor(rule);
     return [
       ...colors,
       {
@@ -119,10 +166,10 @@ const getColorStopsWithMinMaxForLtWithLte = (
 };
 
 const getColorStopWithMinMaxForLte = (
-  rule: Exclude<Panel['background_color_rules'], undefined>[number]
+  rule: ValidMetricColorRule | ValidGaugeColorRule
 ): ColorStopsWithMinMax => {
   const colorStop = {
-    color: color((rule.background_color ?? rule.color)!).hex(),
+    color: color(getColor(rule)).hex(),
     stop: rule.value!,
   };
   return {
@@ -132,6 +179,27 @@ const getColorStopWithMinMaxForLte = (
     stops: [colorStop],
     steps: 1,
     continuity: 'below',
+  };
+};
+
+const getColorStopWithMinMaxForGte = (
+  rule: ValidMetricColorRule | ValidGaugeColorRule,
+  baseColor?: string
+): ColorStopsWithMinMax => {
+  const colorStop = {
+    color: color(getColor(rule)).hex(),
+    stop: rule.value!,
+  };
+  return {
+    colorStops: [...(baseColor ? [{ color: baseColor, stop: -Infinity }] : []), colorStop],
+    continuity: baseColor ? 'all' : 'above',
+    rangeMax: Infinity,
+    rangeMin: baseColor ? -Infinity : colorStop.stop,
+    steps: 2,
+    stops: [
+      ...(baseColor ? [{ color: baseColor, stop: colorStop.stop }] : []),
+      { color: colorStop.color, stop: Infinity },
+    ],
   };
 };
 
@@ -156,13 +224,12 @@ const getCustomPalette = (
 };
 
 export const getPalette = (
-  rules: Exclude<Panel['background_color_rules'], undefined>
+  rules: MetricColorRules | GaugeColorRules,
+  baseColor?: string
 ): PaletteOutput<CustomPaletteParams> | null | undefined => {
-  const validRules =
-    rules.filter(
-      ({ operator, color: textColor, value, background_color: bColor }) =>
-        operator && (bColor ?? textColor) && value !== undefined
-    ) ?? [];
+  const validRules = (rules as Array<MetricColorRule | GaugeColorRule>).filter<
+    ValidMetricColorRule | ValidGaugeColorRule
+  >((rule): rule is ValidMetricColorRule | ValidGaugeColorRule => isValidColorRule(rule));
 
   validRules.sort((rule1, rule2) => {
     return rule1.value! - rule2.value!;
@@ -176,10 +243,14 @@ export const getPalette = (
 
   // lnsMetric is supporting lte only, if one rule is defined
   if (validRules.length === 1) {
-    if (validRules[0].operator !== Operators.LTE) {
-      return;
+    if (validRules[0].operator === Operators.LTE) {
+      return getCustomPalette(getColorStopWithMinMaxForLte(validRules[0]));
     }
-    return getCustomPalette(getColorStopWithMinMaxForLte(validRules[0]));
+
+    if (validRules[0].operator === Operators.GTE) {
+      return getCustomPalette(getColorStopWithMinMaxForGte(validRules[0], baseColor));
+    }
+    return;
   }
 
   const headRules = validRules.slice(0, -1);
@@ -208,7 +279,7 @@ export const getPalette = (
 
   if (rule.operator === Operators.GTE) {
     return getCustomPalette(
-      getColorStopsWithMinMaxForAllGteOrWithLte(validRules, tailRule.operator!)
+      getColorStopsWithMinMaxForAllGteOrWithLte(validRules, tailRule.operator!, baseColor)
     );
   }
 };

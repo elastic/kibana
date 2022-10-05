@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
+import uuid from 'uuid';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { FormulaParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import {
+  FormulaParams,
+  FormulaColumn as BaseFormulaColumn,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { CommonColumnConverterArgs, CommonColumnsConverterArgs, FormulaColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
@@ -36,6 +40,19 @@ export const createFormulaColumn = (
     references: [],
     ...createColumn(series, metric),
     params: { ...params, ...getFormat(series) },
+  };
+};
+
+export const createFormulaColumnWithoutMeta = (formula: string): BaseFormulaColumn => {
+  const params = convertToFormulaParams(formula);
+  return {
+    columnId: uuid(),
+    operationType: 'formula',
+    references: [],
+    dataType: 'string',
+    isSplit: false,
+    isBucketed: false,
+    params: { ...params },
   };
 };
 

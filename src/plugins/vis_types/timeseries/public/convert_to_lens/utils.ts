@@ -9,7 +9,14 @@
 import { uniqWith } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import { Layer, Operations, TermsColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { Layer as ExtendedLayer, excludeMetaFromColumn, ColumnsWithoutMeta } from '../lib/convert';
+import {
+  Layer as ExtendedLayer,
+  excludeMetaFromColumn,
+  ColumnsWithoutMeta,
+  Column,
+} from './lib/convert';
+import { getSeriesAgg } from './lib/series';
+import { Metric, Series } from '../../common/types';
 
 export const excludeMetaFromLayers = (
   layers: Record<string, ExtendedLayer>
@@ -63,3 +70,20 @@ export const getUniqueBuckets = (buckets: ColumnsWithoutMeta[]) =>
 
     return deepEqual(bucketWithoutColumnIds1, bucketWithoutColumnIds2);
   });
+
+export const getMetricWithCollapseFn = (series: Series | undefined) => {
+  if (!series) {
+    return;
+  }
+  const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
+  const visibleMetric = metrics[metrics.length - 1];
+  return { metric: visibleMetric, collapseFn: seriesAgg };
+};
+
+export const findMetricColumn = (metric: Metric | undefined, columns: Column[]) => {
+  if (!metric) {
+    return;
+  }
+
+  return columns.find((column) => 'meta' in column && column.meta.metricId === metric.id);
+};
