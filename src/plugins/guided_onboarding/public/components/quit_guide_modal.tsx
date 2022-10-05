@@ -70,7 +70,7 @@ export const QuitGuideModal = ({
         <EuiText>
           <p>
             {i18n.translate('guidedOnboarding.quitGuideModal.modalDescription', {
-              defaultMessage: 'You can restart anytime, just click Setup guide on the homepage.',
+              defaultMessage: 'You can restart anytime by opening the Setup guide from the Help menu.',
             })}
           </p>
         </EuiText>
