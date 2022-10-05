@@ -344,8 +344,8 @@ export interface PrePackagedRulesStatusResponse {
 }
 
 export interface FindRulesReferencedByExceptionsListProp {
-  id: string;
-  listId: string;
+  id?: string;
+  listId?: string;
   namespaceType: NamespaceType;
 }
 

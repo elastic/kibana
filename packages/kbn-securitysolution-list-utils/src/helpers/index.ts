@@ -138,13 +138,13 @@ export const getNewExceptionItem = ({
   namespaceType,
   ruleName,
 }: {
-  listId: string;
-  namespaceType: NamespaceType;
+  listId: string | undefined;
+  namespaceType: NamespaceType | undefined;
   ruleName: string;
 }): CreateExceptionListItemBuilderSchema => {
   return {
     comments: [],
-    description: `${ruleName} - exception list item`,
+    description: 'Exception list item',
     entries: addIdToEntries([
       {
         field: '',

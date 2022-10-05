@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -13,6 +15,7 @@ import {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { RuleReferencesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -66,10 +69,46 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      expect(references).to.eql({ references: [{ i_exist: [] }] });
+      const {
+        _version,
+        id,
+        created_at,
+        created_by,
+        tie_breaker_id,
+        updated_at,
+        updated_by,
+        ...referencesWithoutServerValues
+      } = references.references[0].i_exist;
+
+      expect({
+        references: [
+          {
+            i_exist: {
+              ...referencesWithoutServerValues,
+            },
+          },
+        ],
+      }).to.eql({
+        references: [
+          {
+            i_exist: {
+              description: 'some description',
+              immutable: false,
+              list_id: 'i_exist',
+              name: 'some name',
+              namespace_type: 'single',
+              os_types: [],
+              tags: [],
+              type: 'detection',
+              version: 1,
+              referenced_rules: [],
+            },
+          },
+        ],
+      });
     });
 
-    it('returns empty array per list_id if  list does not exist', async () => {
+    it('returns empty array per list_id if list does not exist', async () => {
       // create rule
       await createRule(supertest, log, getSimpleRule('rule-1'));
 
@@ -83,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      expect(references).to.eql({ references: [{ i_dont_exist: [] }] });
+      expect(references).to.eql({ references: [] });
     });
 
     it('returns found references', async () => {
@@ -101,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // create rule
-      const rule = await createRule(supertest, log, {
+      await createRule(supertest, log, {
         ...getSimpleRule('rule-2'),
         exceptions_list: [
           {
@@ -129,56 +168,54 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      expect(references).to.eql({
-        references: [
+      const refs = references.references.flatMap((ref: RuleReferencesSchema) => Object.keys(ref));
+
+      expect(refs.sort()).to.eql(['i_exist', 'i_exist_2'].sort());
+    });
+
+    it('returns found references for all existing exception lists if no list id/list_id passed in', async () => {
+      // create exception list
+      const newExceptionList: CreateExceptionListSchema = {
+        ...getCreateExceptionListMinimalSchemaMock(),
+        list_id: 'i_exist',
+        namespace_type: 'single',
+        type: ExceptionListTypeEnum.DETECTION,
+      };
+      const exceptionList = await createExceptionList(supertest, log, newExceptionList);
+      const exceptionList2 = await createExceptionList(supertest, log, {
+        ...newExceptionList,
+        list_id: 'i_exist_2',
+      });
+
+      // create rule
+      await createRule(supertest, log, {
+        ...getSimpleRule('rule-2'),
+        exceptions_list: [
           {
-            i_exist: [
-              {
-                exception_lists: [
-                  {
-                    id: references.references[0].i_exist[0].exception_lists[0].id,
-                    list_id: 'i_exist',
-                    namespace_type: 'single',
-                    type: 'detection',
-                  },
-                  {
-                    id: references.references[0].i_exist[0].exception_lists[1].id,
-                    list_id: 'i_exist_2',
-                    namespace_type: 'single',
-                    type: 'detection',
-                  },
-                ],
-                id: rule.id,
-                name: 'Simple Rule Query',
-                rule_id: 'rule-2',
-              },
-            ],
+            id: `${exceptionList.id}`,
+            list_id: `${exceptionList.list_id}`,
+            namespace_type: `${exceptionList.namespace_type}`,
+            type: `${exceptionList.type}`,
           },
           {
-            i_exist_2: [
-              {
-                exception_lists: [
-                  {
-                    id: references.references[1].i_exist_2[0].exception_lists[0].id,
-                    list_id: 'i_exist',
-                    namespace_type: 'single',
-                    type: 'detection',
-                  },
-                  {
-                    id: references.references[1].i_exist_2[0].exception_lists[1].id,
-                    list_id: 'i_exist_2',
-                    namespace_type: 'single',
-                    type: 'detection',
-                  },
-                ],
-                id: rule.id,
-                name: 'Simple Rule Query',
-                rule_id: 'rule-2',
-              },
-            ],
+            id: `${exceptionList2.id}`,
+            list_id: `${exceptionList2.list_id}`,
+            namespace_type: `${exceptionList2.namespace_type}`,
+            type: `${exceptionList2.type}`,
           },
         ],
       });
+
+      const { body: references } = await supertest
+        .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
+        .set('kbn-xsrf', 'true')
+        .query({
+          namespace_types: `${exceptionList.namespace_type},${exceptionList2.namespace_type}`,
+        })
+        .expect(200);
+
+      const refs = references.references.flatMap((ref: RuleReferencesSchema) => Object.keys(ref));
+      expect(refs.sort()).to.eql(['i_exist', 'i_exist_2', 'endpoint_list'].sort());
     });
   });
 };

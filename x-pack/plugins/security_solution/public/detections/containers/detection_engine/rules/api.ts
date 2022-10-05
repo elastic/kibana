@@ -386,16 +386,23 @@ export const fetchInstalledIntegrations = async ({
 export const findRuleExceptionReferences = async ({
   lists,
   signal,
-}: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> =>
-  KibanaServices.get().http.fetch<RulesReferencedByExceptionListsSchema>(
-    DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
-    {
-      method: 'GET',
-      query: {
+}: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> => {
+  const idsUndefined = lists.some(({ id }) => id === undefined);
+  const query = idsUndefined
+    ? {
+        namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
+      }
+    : {
         ids: lists.map(({ id }) => id).join(','),
         list_ids: lists.map(({ listId }) => listId).join(','),
         namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
-      },
+      };
+  return KibanaServices.get().http.fetch<RulesReferencedByExceptionListsSchema>(
+    DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
+    {
+      method: 'GET',
+      query,
       signal,
     }
   );
+};
