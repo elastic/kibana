@@ -104,8 +104,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
 
       const esArchiver = getService('esArchiver');
       const logger = getService('log');
-
-      const supertest = getService('legacySupertestAsApmWriteUser');
+      const ml = getService('ml');
 
       const logWithTimer = () => {
         const start = process.hrtime();
@@ -148,7 +147,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
                 );
 
                 // sync jobs from .ml-config to .kibana SOs
-                await supertest.get('/api/ml/saved_objects/sync').set('kbn-xsrf', 'foo');
+                await ml.syncMlJobs();
               }
               if (condition.archives.length) {
                 log('Loaded all archives');
