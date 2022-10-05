@@ -16,8 +16,6 @@ import { omit } from 'lodash';
 import React from 'react';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import {
-  isJavaAgentName,
-  isJRubyAgent,
   isMobileAgentName,
   isRumAgentName,
   isServerlessAgent,
@@ -150,24 +148,7 @@ export function isMetricsTabHidden({
     return !isAwsLambdaEnabled;
   }
   return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isJavaAgentName(agentName) ||
-    isMobileAgentName(agentName) ||
-    isJRubyAgent(agentName, runtimeName)
-  );
-}
-
-export function isMetricsJVMsTabHidden({
-  agentName,
-  runtimeName,
-}: {
-  agentName?: string;
-  runtimeName?: string;
-}) {
-  return (
-    !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) ||
-    isServerlessAgent(runtimeName)
+    !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName)
   );
 }
 
@@ -275,17 +256,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         runtimeName,
         isAwsLambdaEnabled,
       }),
-    },
-    {
-      key: 'nodes',
-      href: router.link('/services/{serviceName}/nodes', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'Metrics',
-      }),
-      hidden: isMetricsJVMsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'infrastructure',
