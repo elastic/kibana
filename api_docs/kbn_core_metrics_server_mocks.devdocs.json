@@ -133,6 +133,144 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-metrics-server-mocks",
+        "id": "def-server.sampleEsClientMetrics",
+        "type": "Object",
+        "tags": [],
+        "label": "sampleEsClientMetrics",
+        "description": [],
+        "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.protocol",
+            "type": "string",
+            "tags": [],
+            "label": "protocol",
+            "description": [],
+            "signature": [
+              "\"https\""
+            ],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.connectedNodes",
+            "type": "number",
+            "tags": [],
+            "label": "connectedNodes",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.nodesWithActiveSockets",
+            "type": "number",
+            "tags": [],
+            "label": "nodesWithActiveSockets",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.nodesWithIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "nodesWithIdleSockets",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.totalActiveSockets",
+            "type": "number",
+            "tags": [],
+            "label": "totalActiveSockets",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.totalIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "totalIdleSockets",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.totalQueuedRequests",
+            "type": "number",
+            "tags": [],
+            "label": "totalQueuedRequests",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.mostActiveNodeSockets",
+            "type": "number",
+            "tags": [],
+            "label": "mostActiveNodeSockets",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.averageActiveSocketsPerNode",
+            "type": "number",
+            "tags": [],
+            "label": "averageActiveSocketsPerNode",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.mostIdleNodeSockets",
+            "type": "number",
+            "tags": [],
+            "label": "mostIdleNodeSockets",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-mocks",
+            "id": "def-server.sampleEsClientMetrics.averageIdleSocketsPerNode",
+            "type": "number",
+            "tags": [],
+            "label": "averageIdleSocketsPerNode",
+            "description": [],
+            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ]
   },

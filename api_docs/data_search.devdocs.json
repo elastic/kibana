@@ -2802,7 +2802,11 @@
                   "SavedObjectsFindOptionsReference",
                   " | ",
                   "SavedObjectsFindOptionsReference",
-                  "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; pit?: ",
+                  "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+                  "SavedObjectsFindOptionsReference",
+                  " | ",
+                  "SavedObjectsFindOptionsReference",
+                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; pit?: ",
                   "SavedObjectsPitParams",
                   " | undefined; }"
                 ],

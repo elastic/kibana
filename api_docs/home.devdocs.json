@@ -1314,10 +1314,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "cloud",
-              "path": "x-pack/plugins/cloud/public/plugin.tsx"
-            },
-            {
               "plugin": "apm",
               "path": "x-pack/plugins/apm/public/plugin.ts"
             }
