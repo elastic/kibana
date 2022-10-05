@@ -11,7 +11,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { OpsgenieId } from '.';
+import { OpsgenieConnectorTypeId } from '.';
 import { OpsgenieConnector } from './connector';
 
 describe('OpsgenieConnector', () => {
@@ -42,7 +42,7 @@ describe('OpsgenieConnector', () => {
     connector = new OpsgenieConnector({
       configurationUtilities: mockedActionsConfig,
       config: { apiUrl: 'https://example.com' },
-      connector: { id: '1', type: OpsgenieId },
+      connector: { id: '1', type: OpsgenieConnectorTypeId },
       secrets: { apiKey: '123' },
       logger,
       services,
