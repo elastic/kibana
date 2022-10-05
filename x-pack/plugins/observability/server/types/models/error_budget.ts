@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export * from './slo';
-export * from './indicators';
-export * from './error_budget';
+import * as t from 'io-ts';
+import { errorBudgetSchema } from '../schema';
+
+type ErrorBudget = t.TypeOf<typeof errorBudgetSchema>;
+
+export type { ErrorBudget };

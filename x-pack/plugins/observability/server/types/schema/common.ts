@@ -23,4 +23,10 @@ const dateType = new t.Type<Date, string, unknown>(
   (date: Date): string => date.toISOString()
 );
 
-export { allOrAnyString, ALL_VALUE, dateType };
+const errorBudgetSchema = t.type({
+  initial: t.number,
+  consumed: t.number,
+  remaining: t.number,
+});
+
+export { allOrAnyString, ALL_VALUE, dateType, errorBudgetSchema };
