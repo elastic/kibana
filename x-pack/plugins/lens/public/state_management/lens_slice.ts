@@ -1288,7 +1288,7 @@ function syncLinkedDimensions(
       setState: (s) => {
         datasourceState = s;
       },
-      dimensionGroups: getDimensionGroups(),
+      targetLayerDimensionGroups: getDimensionGroups(),
       dropType,
       indexPatterns,
     });

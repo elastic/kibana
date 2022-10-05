@@ -84,7 +84,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
       target: mockedDndOperations.notFiltering,
       state,
       setState,
-      dimensionGroups: [],
+      targetLayerDimensionGroups: [],
       indexPatterns: mockDataViews(),
     };
 
@@ -281,7 +281,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
       onDrop({
         ...defaultProps,
         source: mockedDraggedField,
-        dimensionGroups,
+        targetLayerDimensionGroups: dimensionGroups,
         dropType: 'field_add',
         target: {
           ...defaultProps.target,
@@ -875,7 +875,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           },
           source: mockedDndOperations.bucket,
           state: testState,
-          dimensionGroups,
+          targetLayerDimensionGroups: dimensionGroups,
           dropType: 'move_compatible',
         });
 
@@ -914,7 +914,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           },
           source: mockedDndOperations.bucket,
           state: testState,
-          dimensionGroups,
+          targetLayerDimensionGroups: dimensionGroups,
           dropType: 'duplicate_compatible',
         });
 
@@ -953,7 +953,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           },
           source: mockedDndOperations.bucket2,
           state: testState,
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1024,7 +1024,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
               },
             },
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1081,7 +1081,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             columnId: 'col1',
             groupId: 'a',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1124,7 +1124,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             columnId: 'newCol',
             groupId: 'b',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1167,7 +1167,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           },
           source: mockedDndOperations.metric,
           state: testState,
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1210,7 +1210,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             groupId: 'a',
             filterOperations: (op: OperationMetadata) => op.dataType === 'number',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             // a and b are ordered in reverse visually, but nesting order keeps them in place for column order
             { ...dimensionGroups[1], nestingOrder: 1 },
             { ...dimensionGroups[0], nestingOrder: 0 },
@@ -1260,7 +1260,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             columnId: 'newCol',
             groupId: 'a',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1307,7 +1307,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             columnId: 'newCol',
             groupId: 'a',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1355,7 +1355,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             columnId: 'col2',
             groupId: 'b',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1412,7 +1412,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           source: mockedDndOperations.metricC,
           dropType: 'swap_compatible',
           state: testState,
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1455,7 +1455,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           dropType: 'swap_incompatible',
           source: mockedDndOperations.metricC,
           state: testState,
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1571,7 +1571,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
               layerId: 'second',
               indexPatternId: 'indexPattern1',
             },
-            dimensionGroups: defaultDimensionGroups,
+            targetLayerDimensionGroups: defaultDimensionGroups,
             dropType: 'move_compatible',
           };
           jest.clearAllMocks();
@@ -2090,7 +2090,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
         let props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>;
         beforeEach(() => {
           props = {
-            dimensionGroups: defaultDimensionGroups,
+            targetLayerDimensionGroups: defaultDimensionGroups,
             setState: jest.fn(),
             dropType: 'move_compatible',
 

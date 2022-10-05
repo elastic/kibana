@@ -620,7 +620,7 @@ export interface DatasourceDimensionDropProps<T> {
       forceRender?: boolean;
     }
   >;
-  dimensionGroups: VisualizationDimensionGroupConfig[];
+  targetLayerDimensionGroups: VisualizationDimensionGroupConfig[];
 }
 
 export type DatasourceDimensionDropHandlerProps<S> = DatasourceDimensionDropProps<S> & {

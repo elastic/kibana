@@ -192,7 +192,7 @@ export function LayerPanel(
                 dimensionGroups.find(({ groupId: gId }) => gId === target.groupId)
                   ?.filterOperations || Boolean,
             },
-            dimensionGroups,
+            targetLayerDimensionGroups: dimensionGroups,
             dropType,
             indexPatterns: framePublicAPI.dataViews.indexPatterns,
           })
