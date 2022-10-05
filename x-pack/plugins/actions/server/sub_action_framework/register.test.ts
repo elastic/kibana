@@ -28,6 +28,7 @@ describe('Registration', () => {
       secrets: TestSecretsSchema,
     },
     Service: TestSubActionConnector,
+    renderParameterTemplates: jest.fn(),
   };
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -55,6 +56,7 @@ describe('Registration', () => {
       supportedFeatureIds: connector.supportedFeatureIds,
       validate: expect.anything(),
       executor: expect.anything(),
+      renderParameterTemplates: expect.anything(),
     });
   });
 });
