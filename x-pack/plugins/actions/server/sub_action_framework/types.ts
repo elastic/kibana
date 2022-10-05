@@ -6,12 +6,18 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeParams, Services, ValidatorType as ValidationSchema } from '../types';
-import { SubActionConnector } from './sub_action_connector';
+import type { Method, AxiosRequestConfig } from 'axios';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type {
+  ActionTypeParams,
+  RenderParameterTemplates,
+  Services,
+  ValidatorType as ValidationSchema,
+} from '../types';
+import type { SubActionConnector } from './sub_action_connector';
 
 export interface ServiceParams<Config, Secrets> {
   /**
@@ -25,6 +31,12 @@ export interface ServiceParams<Config, Secrets> {
   secrets: Secrets;
   services: Services;
 }
+
+export type SubActionRequestParams<R> = {
+  url: string;
+  responseSchema: Type<R>;
+  method?: Method;
+} & AxiosRequestConfig;
 
 export type IService<Config, Secrets> = new (
   params: ServiceParams<Config, Secrets>
@@ -68,6 +80,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   };
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   Service: IService<Config, Secrets>;
+  renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
 }
 
 export interface ExecutorParams extends ActionTypeParams {

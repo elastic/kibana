@@ -8,16 +8,9 @@
 import { isPlainObject, isEmpty } from 'lodash';
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  Method,
-  AxiosError,
-  AxiosRequestHeaders,
-} from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestHeaders } from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { SubAction } from './types';
+import { SubAction, SubActionRequestParams } from './types';
 import { ServiceParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
@@ -123,11 +116,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     responseSchema,
     headers,
     ...config
-  }: {
-    url: string;
-    responseSchema: Type<R>;
-    method?: Method;
-  } & AxiosRequestConfig): Promise<AxiosResponse<R>> {
+  }: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
     try {
       this.assertURL(url);
       this.ensureUriAllowed(url);
