@@ -6,3 +6,4 @@
  */
 
 export * from './slo';
+export * from './indicators';
