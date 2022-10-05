@@ -26,8 +26,12 @@ import type { inputsModel } from '../../../common/store';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
-export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore> {
-  data: undefined | StrategyResponseType<T>['data'];
+export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {
+  data:
+    | undefined
+    | StrategyResponseType<
+        T extends RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore
+      >['data'];
   inspect: InspectResponse;
   isInspected: boolean;
   refetch: inputsModel.Refetch;
@@ -35,6 +39,7 @@ export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueri
   isModuleEnabled: boolean;
   isLicenseValid: boolean;
   isDeprecated: boolean;
+  loading: boolean;
 }
 
 export interface UseRiskScoreParams {
@@ -63,28 +68,7 @@ export const initialResult: Omit<
   data: undefined,
 };
 
-// use this function instead of directly using useRiskScore
-// typescript is happy with the type specific hooks
-export const useHostRiskScore = (
-  params?: UseRiskScoreParams
-): [boolean, RiskScoreState<RiskQueries.hostsRiskScore>] => {
-  return useRiskScore({
-    ...params,
-    riskEntity: RiskScoreEntity.host,
-  });
-};
-
-// use this function instead of directly using useRiskScore
-// typescript is happy with the type specific hooks
-export const useUserRiskScore = (
-  params?: UseRiskScoreParams
-): [boolean, RiskScoreState<RiskQueries.usersRiskScore>] =>
-  useRiskScore({
-    ...params,
-    riskEntity: RiskScoreEntity.user,
-  });
-
-const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
+export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
   timerange,
   onlyLatest = true,
   filterQuery,
@@ -92,10 +76,7 @@ const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
   skip = false,
   pagination,
   riskEntity,
-}: UseRiskScore<T>): [
-  boolean,
-  RiskScoreState<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>
-] => {
+}: UseRiskScore<T>): RiskScoreState<T> => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId
     ? riskEntity === RiskScoreEntity.host
@@ -230,5 +211,5 @@ const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
     skip,
   ]);
 
-  return [loading || isDeprecatedLoading, riskScoreResponse];
+  return { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
 };

@@ -24,7 +24,7 @@ import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import type { EndpointPrivileges } from '../../../common/endpoint/types';
-import { useHostRiskScore } from '../../risk_score/containers';
+import { useRiskScore } from '../../risk_score/containers';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
 
@@ -99,8 +99,8 @@ const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
 useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
 jest.mock('../../risk_score/containers');
-const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
-useHostRiskScoreMock.mockReturnValue([false, { data: [], isModuleEnabled: false }]);
+const useRiskScoreMock = useRiskScore as jest.Mock;
+useRiskScoreMock.mockReturnValue({ loading: false, data: [], isModuleEnabled: false });
 
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;

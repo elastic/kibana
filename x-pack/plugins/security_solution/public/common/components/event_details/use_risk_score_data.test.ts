@@ -8,14 +8,14 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../mock';
 import { ONLY_FIRST_ITEM_PAGINATION, useRiskScoreData } from './use_risk_score_data';
-import { useUserRiskScore, useHostRiskScore } from '../../../risk_score/containers';
+import { useRiskScore } from '../../../risk_score/containers';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 
-const mockUseUserRiskScore = useUserRiskScore as jest.Mock;
-const mockUseHostRiskScore = useHostRiskScore as jest.Mock;
-const mockUseBasicDataFromDetailsData = useBasicDataFromDetailsData as jest.Mock;
 jest.mock('../../../risk_score/containers');
 jest.mock('../../../timelines/components/side_panel/event_details/helpers');
+const mockUseRiskScore = useRiskScore as jest.Mock;
+const mockUseBasicDataFromDetailsData = useBasicDataFromDetailsData as jest.Mock;
 const defaultResult = {
   data: [],
   inspect: {},
@@ -24,6 +24,7 @@ const defaultResult = {
   isModuleEnabled: true,
   refetch: () => {},
   totalCount: 0,
+  loading: false,
 };
 const defaultRisk = {
   loading: false,
@@ -41,8 +42,7 @@ const defaultArgs = [
 describe('useRiskScoreData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseUserRiskScore.mockReturnValue([false, defaultResult]);
-    mockUseHostRiskScore.mockReturnValue([false, defaultResult]);
+    mockUseRiskScore.mockReturnValue(defaultResult);
     mockUseBasicDataFromDetailsData.mockReturnValue({
       hostName: 'host',
       userName: 'user',
@@ -63,15 +63,17 @@ describe('useRiskScoreData', () => {
     renderHook(() => useRiskScoreData(defaultArgs), {
       wrapper: TestProviders,
     });
-    expect(mockUseUserRiskScore).toHaveBeenCalledWith({
+    expect(mockUseRiskScore).toHaveBeenCalledWith({
       filterQuery: { terms: { 'user.name': ['user'] } },
       pagination: ONLY_FIRST_ITEM_PAGINATION,
       skip: false,
+      riskEntity: RiskScoreEntity.user,
     });
-    expect(mockUseHostRiskScore).toHaveBeenCalledWith({
+    expect(mockUseRiskScore).toHaveBeenCalledWith({
       filterQuery: { terms: { 'host.name': ['host'] } },
       pagination: ONLY_FIRST_ITEM_PAGINATION,
       skip: false,
+      riskEntity: RiskScoreEntity.host,
     });
   });
 
@@ -80,15 +82,17 @@ describe('useRiskScoreData', () => {
     renderHook(() => useRiskScoreData(defaultArgs), {
       wrapper: TestProviders,
     });
-    expect(mockUseUserRiskScore).toHaveBeenCalledWith({
+    expect(mockUseRiskScore).toHaveBeenCalledWith({
       filterQuery: undefined,
       pagination: ONLY_FIRST_ITEM_PAGINATION,
       skip: true,
+      riskEntity: RiskScoreEntity.user,
     });
-    expect(mockUseHostRiskScore).toHaveBeenCalledWith({
+    expect(mockUseRiskScore).toHaveBeenCalledWith({
       filterQuery: undefined,
       pagination: ONLY_FIRST_ITEM_PAGINATION,
       skip: true,
+      riskEntity: RiskScoreEntity.host,
     });
   });
 });

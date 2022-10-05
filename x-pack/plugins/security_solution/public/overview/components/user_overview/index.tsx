@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -33,10 +33,10 @@ import { DescriptionListStyled, OverviewWrapper } from '../../../common/componen
 import * as i18n from './translations';
 
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useUserRiskScore } from '../../../risk_score/containers';
+import { useRiskScore } from '../../../risk_score/containers';
 import { RiskScore } from '../../../common/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
-import { RiskScoreHeaderTitle } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import { RiskScoreHeaderTitle } from '../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -93,10 +93,11 @@ export const UserOverview = React.memo<UserSummaryProps>(
       [from, to]
     );
 
-    const [_, { data: userRisk, isLicenseValid }] = useUserRiskScore({
+    const { data: userRisk, isLicenseValid } = useRiskScore({
       filterQuery,
       skip: userName == null,
       timerange,
+      riskEntity: RiskScoreEntity.user,
     });
 
     const getDefaultRenderer = useCallback(
