@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { FAAS_BILLED_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
 import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { getLatencyTimeseries } from '../../../transactions/get_latency_charts';
@@ -123,8 +124,23 @@ export async function getServerlessFunctionLatency({
     getServerlessLantecySeries({ ...options, searchAggregatedTransactions }),
   ]);
 
+  const [series] = billedDurationMetrics.series;
+  const data = series.data.map(({ x, y }) => ({
+    x,
+    // Billed duration is stored in ms, convert it to microseconds so it uses the same unit as the other chart
+    y: isFiniteNumber(y) ? y * 1000 : y,
+  }));
+
   return {
     ...billedDurationMetrics,
-    series: [...billedDurationMetrics.series, ...serverlessDurationSeries],
+    series: [
+      {
+        ...series,
+        // Billed duration is stored in ms, convert it to microseconds
+        overallValue: series.overallValue * 1000,
+        data,
+      },
+      ...serverlessDurationSeries,
+    ],
   };
 }
