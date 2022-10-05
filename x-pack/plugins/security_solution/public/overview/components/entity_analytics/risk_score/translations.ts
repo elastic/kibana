@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getRiskEntityTranslation } from '../../../../common/components/risk_score/translations';
+import { getRiskEntityTranslation } from '../../../../risk_score/components/translations';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-export * from '../../../../common/components/risk_score/translations';
+export * from '../../../../risk_score/components/translations';
 
 export const ENTITY_RISK_TOOLTIP = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskToolTip', {
