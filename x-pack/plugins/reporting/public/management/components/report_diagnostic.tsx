@@ -127,10 +127,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || chromeStatus === 'complete'}
-            onClick={apiWrapper(async () => {
-              const verify = await apiClient.verifyBrowser();
-              return verify;
-            }, statuses.chromeStatus)}
+            onClick={apiWrapper(() => apiClient.verifyBrowser(), statuses.chromeStatus)}
             isLoading={isBusy && chromeStatus === 'incomplete'}
             iconType={chromeStatus === 'complete' ? 'check' : undefined}
           >
