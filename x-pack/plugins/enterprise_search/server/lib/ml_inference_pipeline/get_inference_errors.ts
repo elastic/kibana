@@ -7,7 +7,7 @@
 
 import {
   AggregationsMultiBucketAggregateBase,
-  AggregationsStringRareTermsBucketKeys
+  AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchClient } from '@kbn/core/server';
@@ -38,7 +38,7 @@ export const getMlInferenceErrors = async (
   const searchResult = await esClient.search<
     unknown,
     {
-      errors: AggregationsMultiBucketAggregateBase<ErrorAggregationBucket>
+      errors: AggregationsMultiBucketAggregateBase<ErrorAggregationBucket>;
     }
   >({
     index: indexName,
@@ -48,21 +48,21 @@ export const getMlInferenceErrors = async (
           terms: {
             field: '_ingest.inference_errors.message.enum',
             order: {
-              max_error_timestamp: 'desc'
+              max_error_timestamp: 'desc',
             },
-            size: 20
+            size: 20,
           },
           aggs: {
             max_error_timestamp: {
               max: {
-                field: '_ingest.inference_errors.timestamp'
-              }
-            }
-          }
-        }
+                field: '_ingest.inference_errors.timestamp',
+              },
+            },
+          },
+        },
       },
-      size: 0
-    }
+      size: 0,
+    },
   });
 
   const errorBuckets = searchResult.aggregations?.errors.buckets;
@@ -71,13 +71,11 @@ export const getMlInferenceErrors = async (
   }
 
   // Buckets are either in an array or in a Record, we transform them to an array
-  const buckets = Array.isArray(errorBuckets)
-    ? errorBuckets
-    : Object.values(errorBuckets);
+  const buckets = Array.isArray(errorBuckets) ? errorBuckets : Object.values(errorBuckets);
 
   return buckets.map((bucket) => ({
     message: bucket.key,
     doc_count: bucket.doc_count,
     timestamp: bucket.max_error_timestamp?.value_as_string,
   }));
-}
+};

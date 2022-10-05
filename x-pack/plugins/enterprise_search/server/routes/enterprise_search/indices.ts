@@ -7,7 +7,7 @@
 
 import {
   IngestPutPipelineRequest,
-  IngestSimulateRequest
+  IngestSimulateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { schema } from '@kbn/config-schema';
@@ -28,6 +28,7 @@ import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
+import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
@@ -43,7 +44,6 @@ import {
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
 import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_inference_pipeline_utils';
-import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
 
 export function registerIndexRoutes({
   router,
@@ -543,7 +543,7 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: {
-          errors
+          errors,
         },
         headers: { 'content-type': 'application/json' },
       });
