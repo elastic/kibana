@@ -64,6 +64,80 @@ const DEFAULT_CURRENT_DURATION_CHART_TO = 'now';
 const DEFAULT_PREVIOUS_DURATION_CHART_FROM = 'now-24h';
 const DEFAULT_PREVIOUS_DURATION_CHART_TO = 'now-12h';
 
+function DetailFlyoutDurationChart({
+  id,
+  location,
+  currentDurationChartFrom,
+  currentDurationChartTo,
+  previousDurationChartFrom,
+  previousDurationChartTo,
+}: Pick<
+  Props,
+  | 'id'
+  | 'location'
+  | 'currentDurationChartFrom'
+  | 'currentDurationChartTo'
+  | 'previousDurationChartFrom'
+  | 'previousDurationChartTo'
+>) {
+  const theme = useEuiTheme();
+  const { observability } = useKibana<ClientPluginsStart>().services;
+  const { ExploratoryViewEmbeddable } = observability;
+  return (
+    <ExploratoryViewEmbeddable
+      customHeight="200px"
+      reportType="kpi-over-time"
+      axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
+      legendIsVisible={true}
+      legendPosition="bottom"
+      attributes={[
+        {
+          seriesType: 'area',
+          color: theme.euiTheme.colors.success,
+          time: {
+            from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
+            to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
+          },
+          reportDefinitions: {
+            'monitor.id': [id],
+            'observer.geo.name': [location],
+          },
+          filters: [
+            {
+              field: 'observer.geo.name',
+              values: [location],
+            },
+          ],
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor.duration.us',
+          name: 'All monitors response duration',
+        },
+        {
+          seriesType: 'line',
+          color: '#ddaf84',
+          time: {
+            from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
+            to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
+          },
+          reportDefinitions: {
+            'monitor.id': [id],
+            'observer.geo.name': [location],
+          },
+          filters: [
+            {
+              field: 'observer.geo.name',
+              values: [location],
+            },
+          ],
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor.duration.us',
+          name: 'Previous period',
+        },
+      ]}
+    />
+  );
+}
+
 function LocationSelect({
   locationData,
   currentLocation,
@@ -145,13 +219,7 @@ function LocationSelect({
 }
 
 export function MonitorDetailFlyout(props: Props) {
-  const {
-    id,
-    currentDurationChartFrom,
-    currentDurationChartTo,
-    previousDurationChartFrom,
-    previousDurationChartTo,
-  } = props;
+  const { id } = props;
   const state = useSelector(selectOverviewState);
 
   const monitor: MonitorOverviewItem | null = useMemo(() => {
@@ -164,13 +232,10 @@ export function MonitorDetailFlyout(props: Props) {
     return null;
   }, [id, state.data]);
 
-  const theme = useEuiTheme();
   const [location, setLocation] = useState<string>(props.location);
-  const { observability } = useKibana<ClientPluginsStart>().services;
   const detailLink = useMonitorDetailLocator({
     monitorId: id,
   });
-  const { ExploratoryViewEmbeddable } = observability;
   const {
     data: monitorSavedObject,
     error,
@@ -224,57 +289,7 @@ export function MonitorDetailFlyout(props: Props) {
             <EuiTitle size="xs">
               <h3>{DURATION_HEADER_TEXT}</h3>
             </EuiTitle>
-            <ExploratoryViewEmbeddable
-              customHeight="200px"
-              reportType="kpi-over-time"
-              axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
-              legendIsVisible={true}
-              legendPosition="bottom"
-              attributes={[
-                {
-                  seriesType: 'area',
-                  color: theme.euiTheme.colors.success,
-                  time: {
-                    from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
-                    to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
-                  },
-                  reportDefinitions: {
-                    'monitor.id': [id],
-                    'observer.geo.name': [location],
-                  },
-                  filters: [
-                    {
-                      field: 'observer.geo.name',
-                      values: [location],
-                    },
-                  ],
-                  dataType: 'synthetics',
-                  selectedMetricField: 'monitor.duration.us',
-                  name: 'All monitors response duration',
-                },
-                {
-                  seriesType: 'line',
-                  color: '#ddaf84',
-                  time: {
-                    from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
-                    to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
-                  },
-                  reportDefinitions: {
-                    'monitor.id': [id],
-                    'observer.geo.name': [location],
-                  },
-                  filters: [
-                    {
-                      field: 'observer.geo.name',
-                      values: [location],
-                    },
-                  ],
-                  dataType: 'synthetics',
-                  selectedMetricField: 'monitor.duration.us',
-                  name: 'Previous period',
-                },
-              ]}
-            />
+            <DetailFlyoutDurationChart {...props} />
             <EuiSpacer />
             <EuiTitle size="xs">
               <h3>{MONITOR_DETAILS_HEADER_TEXT}</h3>
