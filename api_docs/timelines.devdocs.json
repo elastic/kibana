@@ -265,6 +265,39 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-public.combineQueries",
+        "type": "Function",
+        "tags": [],
+        "label": "combineQueries",
+        "description": [],
+        "signature": [
+          "({ config, dataProviders, indexPattern, browserFields, filters, kqlQuery, kqlMode, }: CombineQueries) => { filterQuery: string | undefined; kqlError: Error | undefined; } | null"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.combineQueries.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  config,\n  dataProviders,\n  indexPattern,\n  browserFields,\n  filters = [],\n  kqlQuery,\n  kqlMode,\n}",
+            "description": [],
+            "signature": [
+              "CombineQueries"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-public.convertKueryToDslFilter",
         "type": "Function",
         "tags": [],
@@ -377,7 +410,7 @@
           "EsQueryConfig",
           "; indexPattern: ",
           "DataViewBase",
-          "; queries: ",
+          " | undefined; queries: ",
           "Query",
           "[]; filters: ",
           "Filter",
@@ -425,9 +458,8 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "{ fields: ",
-                  "DataViewFieldBase",
-                  "[]; id?: string | undefined; title: string; }"
+                  "DataViewBase",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
                 "deprecated": false,
@@ -823,7 +855,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -857,7 +889,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -2560,7 +2592,7 @@
               "EuiDataGridColumn",
               ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
               "EuiDataGridColumn",
-              ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+              ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
               "TGridCellAction",
               "[] | undefined; category?: string | undefined; columnHeaderType: ",
               {
@@ -3146,7 +3178,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -3160,7 +3192,7 @@
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
           "Filter",
-          "[] | undefined; dataViewId: string | null; sort: ",
+          "[] | undefined; dataViewId: string | null; savedObjectId: string | null; sort: ",
           "SortColumnTimeline",
           "[]; version: string | null; filterManager?: ",
           {
@@ -3174,7 +3206,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -3186,7 +3218,7 @@
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; isLoading: boolean; dataProviders: ",
+          " | undefined; type?: string | undefined; })[]; isLoading: boolean; dataProviders: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4348,7 +4380,7 @@
                     "signature": [
                       "Pick<",
                       "EuiDataGridColumn",
-                      ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+                      ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
                       "TGridCellAction",
                       "[] | undefined; category?: string | undefined; columnHeaderType: ",
                       {
@@ -5567,7 +5599,7 @@
             "label": "renderRow",
             "description": [],
             "signature": [
-              "({ data, isDraggable, timelineId, }: { data: ",
+              "({ contextId, data, isDraggable, timelineId, }: { contextId?: string | undefined; data: ",
               "Ecs",
               "; isDraggable: boolean; timelineId: string; }) => React.ReactNode"
             ],
@@ -5580,12 +5612,26 @@
                 "id": "def-common.RowRenderer.renderRow.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    data,\n    isDraggable,\n    timelineId,\n  }",
+                "label": "{\n    contextId,\n    data,\n    isDraggable,\n    timelineId,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
+                  {
+                    "parentPluginId": "timelines",
+                    "id": "def-common.RowRenderer.renderRow.$1.contextId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "contextId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
                   {
                     "parentPluginId": "timelines",
                     "id": "def-common.RowRenderer.renderRow.$1.data",
@@ -6027,7 +6073,7 @@
             "label": "language",
             "description": [],
             "signature": [
-              "\"eql\" | \"kuery\" | \"lucene\""
+              "\"eql\" | \"lucene\" | \"kuery\""
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
@@ -7076,7 +7122,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -7152,7 +7198,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ type?: ",
+          "{ name: string; type?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -7160,7 +7206,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",

@@ -178,6 +178,7 @@ const DEV_PATTERNS = [
   'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
   'x-pack/plugins/*/server/scripts/**/*',
   'x-pack/plugins/fleet/cypress',
+  'x-pack/performance/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -593,7 +594,6 @@ module.exports = {
         'test/*/config_open.ts',
         'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
-        'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
@@ -898,7 +898,14 @@ module.exports = {
         ],
       },
     },
-
+    // Profiling
+    {
+      files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^(useAsync)$' }],
+      },
+    },
     {
       // disable imports from legacy uptime plugin
       files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
@@ -1315,7 +1322,7 @@ module.exports = {
     },
     {
       // typescript only for back end
-      files: ['x-pack/plugins/triggers_actions_ui/server/**/*.ts'],
+      files: ['x-pack/plugins/{stack_connectors,triggers_actions_ui}/server/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },

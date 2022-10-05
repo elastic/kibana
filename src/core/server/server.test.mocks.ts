@@ -51,10 +51,10 @@ jest.doMock('@kbn/core-http-context-server-internal', () => ({
   ContextService: jest.fn(() => mockContextService),
 }));
 
-import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 
 export const mockUiSettingsService = uiSettingsServiceMock.create();
-jest.doMock('./ui_settings/ui_settings_service', () => ({
+jest.doMock('@kbn/core-ui-settings-server-internal', () => ({
   UiSettingsService: jest.fn(() => mockUiSettingsService),
 }));
 
@@ -63,10 +63,12 @@ jest.doMock('@kbn/core-config-server-internal', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
 
-import { RenderingService, mockRenderingService } from './rendering/__mocks__/rendering_service';
+import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 
-export { mockRenderingService };
-jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
+export const mockRenderingService = renderingServiceMock.create();
+jest.doMock('@kbn/core-rendering-server-internal', () => ({
+  RenderingService: jest.fn(() => mockRenderingService),
+}));
 
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 

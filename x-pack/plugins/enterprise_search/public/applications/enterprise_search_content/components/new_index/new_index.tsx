@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { TECHNICAL_PREVIEW_LABEL } from '../../../shared/constants';
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
@@ -39,12 +40,18 @@ export const enum IngestionMethodId {
   native_connector = 'native_connector',
 }
 
+const technicalPreviewBadge = (
+  <EuiBadge iconType="beaker">
+    <EuiText size="xs">{TECHNICAL_PREVIEW_LABEL}</EuiText>
+  </EuiBadge>
+);
+
 const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
   {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
       {
-        defaultMessage: 'Discover, extract, index, and sync of all your website content',
+        defaultMessage: 'Discover, extract, index, and sync all of your website content',
       }
     ),
     footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.footer', {
@@ -57,10 +64,12 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
     }),
   },
   {
+    badge: technicalPreviewBadge,
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.description',
       {
-        defaultMessage: 'Use our built-in connectors to connect to your data sources.',
+        defaultMessage:
+          'Configure a connector to extract, index, and sync all of your content from supported data sources ',
       }
     ),
     footer: i18n.translate(
@@ -95,11 +104,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
     }),
   },
   {
-    badge: (
-      <EuiBadge iconType="beaker">
-        <EuiText size="xs">Technical Preview</EuiText>
-      </EuiBadge>
-    ),
+    badge: technicalPreviewBadge,
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
       {

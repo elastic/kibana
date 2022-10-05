@@ -13,11 +13,15 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
+import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type {
   Visualization,
   OperationMetadata,
   AccessorConfig,
   VisualizationDimensionGroupConfig,
+  Suggestion,
+  VisualizeEditorContext,
 } from '../../types';
 import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
 import { CategoryDisplay, layerTypes, LegendDisplay, NumberDisplay } from '../../../common';
@@ -26,6 +30,17 @@ import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { PieChartTypes, PieLayerState, PieVisualizationState } from '../../../common';
+import { IndexPatternLayer } from '../..';
+
+interface DatatableDatasourceState {
+  [prop: string]: unknown;
+  layers: IndexPatternLayer[];
+}
+
+export interface PartitionSuggestion extends Suggestion {
+  datasourceState: DatatableDatasourceState;
+  visualizationState: PieVisualizationState;
+}
 
 function newLayerState(layerId: string): PieLayerState {
   return {
@@ -41,22 +56,38 @@ function newLayerState(layerId: string): PieLayerState {
   };
 }
 
+function isPartitionVisConfiguration(
+  context: VisualizeEditorContext
+): context is VisualizeEditorContext<PartitionVisConfiguration> {
+  return context.type === 'lnsPie';
+}
+
 const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number' && !op.isStaticValue;
 
+export const isCollapsed = (columnId: string, layer: PieLayerState) =>
+  Boolean(layer.collapseFns?.[columnId]);
+
 const applyPaletteToColumnConfig = (
   columns: AccessorConfig[],
-  { palette }: PieVisualizationState,
+  layer: PieLayerState,
+  palette: PieVisualizationState['palette'],
   paletteService: PaletteRegistry
 ) => {
-  columns[0] = {
-    columnId: columns[0].columnId,
-    triggerIcon: 'colorBy',
-    palette: paletteService
-      .get(palette?.name || 'default')
-      .getCategoricalColors(10, palette?.params),
-  };
+  const firstNonCollapsedColumnIdx = columns.findIndex(
+    (column) => !isCollapsed(column.columnId, layer)
+  );
+
+  if (firstNonCollapsedColumnIdx > -1) {
+    columns[firstNonCollapsedColumnIdx] = {
+      columnId: columns[firstNonCollapsedColumnIdx].columnId,
+      triggerIcon: 'colorBy',
+      palette: paletteService
+        .get(palette?.name || 'default')
+        .getCategoricalColors(10, palette?.params),
+    };
+  }
 };
 
 export const getPieVisualization = ({
@@ -129,19 +160,25 @@ export const getPieVisualization = ({
       // When we add a column it could be empty, and therefore have no order
       const accessors: AccessorConfig[] = originalOrder.map((accessor) => ({
         columnId: accessor,
+        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
       }));
 
       if (accessors.length) {
-        applyPaletteToColumnConfig(accessors, state, paletteService);
+        applyPaletteToColumnConfig(accessors, layer, state.palette, paletteService);
       }
 
       const primaryGroupConfigBaseProps = {
-        required: true,
+        requiredMinDimensionCount: 1,
         groupId: 'primaryGroups',
         accessors,
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
       };
+
+      const totalNonCollapsedAccessors = accessors.reduce(
+        (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
+        0
+      );
 
       switch (state.shape) {
         case 'donut':
@@ -154,7 +191,8 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
               defaultMessage: 'Slice',
             }),
-            supportsMoreColumns: accessors.length < PartitionChartsMeta.pie.maxBuckets,
+            supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
+            dimensionsTooMany: totalNonCollapsedAccessors - PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
           };
         case 'mosaic':
@@ -166,7 +204,8 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.verticalAxisDimensionLabel', {
               defaultMessage: 'Vertical axis',
             }),
-            supportsMoreColumns: accessors.length === 0,
+            supportsMoreColumns: totalNonCollapsedAccessors === 0,
+            dimensionsTooMany: totalNonCollapsedAccessors - 1,
             dataTestSubj: 'lnsPie_verticalAxisDimensionPanel',
           };
         default:
@@ -178,7 +217,10 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.treemapDimensionGroupLabel', {
               defaultMessage: 'Group',
             }),
-            supportsMoreColumns: accessors.length < PartitionChartsMeta[state.shape].maxBuckets,
+            supportsMoreColumns:
+              totalNonCollapsedAccessors < PartitionChartsMeta[state.shape].maxBuckets,
+            dimensionsTooMany:
+              totalNonCollapsedAccessors - PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
           };
       }
@@ -188,6 +230,7 @@ export const getPieVisualization = ({
       const originalSecondaryOrder = getSortedGroups(datasource, layer, 'secondaryGroups');
       const accessors = originalSecondaryOrder.map((accessor) => ({
         columnId: accessor,
+        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
       }));
 
       const secondaryGroupConfigBaseProps = {
@@ -197,6 +240,11 @@ export const getPieVisualization = ({
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
       };
+
+      const totalNonCollapsedAccessors = accessors.reduce(
+        (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
+        0
+      );
 
       switch (state.shape) {
         case 'mosaic':
@@ -211,7 +259,8 @@ export const getPieVisualization = ({
                 defaultMessage: 'Horizontal axis',
               }
             ),
-            supportsMoreColumns: accessors.length === 0,
+            supportsMoreColumns: totalNonCollapsedAccessors === 0,
+            dimensionsTooMany: totalNonCollapsedAccessors - 1,
             dataTestSubj: 'lnsPie_horizontalAxisDimensionPanel',
           };
         default:
@@ -235,7 +284,7 @@ export const getPieVisualization = ({
       accessors: layer.metric ? [{ columnId: layer.metric }] : [],
       supportsMoreColumns: !layer.metric,
       filterOperations: numberMetricOperations,
-      required: true,
+      requiredMinDimensionCount: 1,
       dataTestSubj: 'lnsPie_sizeByDimensionPanel',
     });
 
@@ -280,13 +329,21 @@ export const getPieVisualization = ({
           return l;
         }
 
-        if (l.metric === columnId) {
-          return { ...l, metric: undefined };
+        const newLayer = { ...l };
+
+        if (l.collapseFns?.[columnId]) {
+          const newCollapseFns = { ...l.collapseFns };
+          delete newCollapseFns[columnId];
+          newLayer.collapseFns = newCollapseFns;
+        }
+
+        if (newLayer.metric === columnId) {
+          return { ...newLayer, metric: undefined };
         }
         return {
-          ...l,
-          primaryGroups: l.primaryGroups.filter((c) => c !== columnId),
-          secondaryGroups: l.secondaryGroups?.filter((c) => c !== columnId) ?? undefined,
+          ...newLayer,
+          primaryGroups: newLayer.primaryGroups.filter((c) => c !== columnId),
+          secondaryGroups: newLayer.secondaryGroups?.filter((c) => c !== columnId) ?? undefined,
         };
       }),
     };
@@ -385,8 +442,59 @@ export const getPieVisualization = ({
     return warningMessages;
   },
 
+  getSuggestionFromConvertToLensContext(props) {
+    const context = props.context;
+    if (!isPartitionVisConfiguration(context)) {
+      return;
+    }
+    if (!props.suggestions.length) {
+      return;
+    }
+    const suggestionByShape = (props.suggestions as PartitionSuggestion[]).find(
+      (suggestion) => suggestion.visualizationState.shape === context.configuration.shape
+    );
+    if (!suggestionByShape) {
+      return;
+    }
+    return {
+      ...suggestionByShape,
+      visualizationState: {
+        ...suggestionByShape.visualizationState,
+        ...context.configuration,
+      },
+    };
+  },
+
   getErrorMessages(state) {
-    // not possible to break it?
-    return undefined;
+    const hasTooManyBucketDimensions = state.layers
+      .map(
+        (layer) =>
+          Array.from(new Set([...layer.primaryGroups, ...(layer.secondaryGroups ?? [])])).filter(
+            (columnId) => !isCollapsed(columnId, layer)
+          ).length > PartitionChartsMeta[state.shape].maxBuckets
+      )
+      .some(Boolean);
+
+    return hasTooManyBucketDimensions
+      ? [
+          {
+            shortMessage: i18n.translate('xpack.lens.pie.tooManyDimensions', {
+              defaultMessage: 'Your visualization has too many dimensions.',
+            }),
+            longMessage: (
+              <span>
+                {i18n.translate('xpack.lens.pie.tooManyDimensionsLong', {
+                  defaultMessage:
+                    'Your visualization has too many dimensions. Please follow the instructions in the layer panel.',
+                })}
+                <EuiSpacer size="s" />
+                {i18n.translate('xpack.lens.pie.collapsedDimensionsDontCount', {
+                  defaultMessage: "(Collapsed dimensions don't count toward this limit.)",
+                })}
+              </span>
+            ),
+          },
+        ]
+      : [];
   },
 });

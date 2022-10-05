@@ -18,7 +18,6 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiLink,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiButton,
   EuiSpacer,
   EuiTextColor,
@@ -79,6 +78,7 @@ import {
   selectChangesApplied,
   VisualizationState,
   DatasourceStates,
+  DataViewsState,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
@@ -178,7 +178,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization: VisualizationState;
     visualizationMap: VisualizationMap;
     datasourceLayers: DatasourceLayers;
+    dataViews: DataViewsState;
   }>();
+
+  const { dataViews } = framePublicAPI;
 
   renderDeps.current = {
     datasourceMap,
@@ -186,18 +189,21 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization,
     visualizationMap,
     datasourceLayers,
+    dataViews,
   };
 
-  const { dataViews } = framePublicAPI;
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
-        (acc, datasource) => [
-          ...acc,
-          ...(datasource.getRenderEventCounters?.(
-            renderDeps.current!.datasourceStates[datasource.id].state
-          ) ?? []),
-        ],
+        (acc, datasource) => {
+          if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
+          return [
+            ...acc,
+            ...(datasource.getRenderEventCounters?.(
+              renderDeps.current!.datasourceStates[datasource.id]?.state
+            ) ?? []),
+          ];
+        },
         []
       );
       let visualizationEvents: string[] = [];
@@ -207,8 +213,16 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             renderDeps.current.visualization.activeId
           ].getRenderEventCounters?.(renderDeps.current.visualization.state) ?? [];
       }
+      const events = ['vis_editor', ...datasourceEvents, ...visualizationEvents];
 
-      trackUiCounterEvents(['vis_editor', ...datasourceEvents, ...visualizationEvents]);
+      const adHocDataViews = Object.values(renderDeps.current.dataViews.indexPatterns || {}).filter(
+        (indexPattern) => !indexPattern.isPersisted
+      );
+      adHocDataViews.forEach(() => {
+        events.push('ad_hoc_data_view');
+      });
+
+      trackUiCounterEvents(events);
     }
   }, []);
 
@@ -574,7 +588,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       dragDropContext.dragging
         ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer!(
             datasourceStates[activeDatasourceId].state,
-            dragDropContext.dragging
+            dragDropContext.dragging,
+            dataViews.indexPatterns
           )
         : undefined;
 
@@ -602,9 +617,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {renderWorkspaceContents()}
-        </EuiPageContentBody>
+        <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
       </DragDrop>
     );
   };

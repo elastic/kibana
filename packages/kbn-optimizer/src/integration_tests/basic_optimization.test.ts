@@ -164,8 +164,8 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/_other_styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8dark.scss,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8light.scss,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/styles/core_app/_globals_v8dark.scss,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/styles/core_app/_globals_v8light.scss,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
     ]
   `);

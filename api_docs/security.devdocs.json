@@ -125,6 +125,22 @@
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthenticatedUser.profile_uid",
+            "type": "string",
+            "tags": [],
+            "label": "profile_uid",
+            "description": [
+              "\nUser profile ID of this user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -517,6 +533,19 @@
             "label": "allowSubFeaturePrivileges",
             "description": [
               "\nIndicates whether we allow sub-feature privileges."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.SecurityLicenseFeatures.allowUserProfileCollaboration",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowUserProfileCollaboration",
+            "description": [
+              "\nIndicates whether we allow user profile collaboration features (suggest and privileges checks APIs)."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
             "deprecated": false,
@@ -1505,6 +1534,22 @@
             "label": "elastic_cloud_user",
             "description": [
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
+            ],
+            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuthenticatedUser.profile_uid",
+            "type": "string",
+            "tags": [],
+            "label": "profile_uid",
+            "description": [
+              "\nUser profile ID of this user."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false,
@@ -2505,10 +2550,6 @@
               "path": "src/plugins/data/server/search/session/session_service.ts"
             },
             {
-              "plugin": "cloud",
-              "path": "x-pack/plugins/cloud/server/routes/chat.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
@@ -2543,6 +2584,10 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/preview_rules_route.ts"
+            },
+            {
+              "plugin": "cloudChat",
+              "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.ts"
             },
             {
               "plugin": "securitySolution",
@@ -2675,24 +2720,6 @@
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "security",
-          "id": "def-server.SecurityPluginSetup.setIsElasticCloudDeployment",
-          "type": "Function",
-          "tags": [],
-          "label": "setIsElasticCloudDeployment",
-          "description": [
-            "\nSets the flag to indicate that Kibana is running inside an Elastic Cloud deployment. This flag is supposed to be\nset by the Cloud plugin and can be only once."
-          ],
-          "signature": [
-            "() => void"
-          ],
-          "path": "x-pack/plugins/security/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -3060,6 +3087,22 @@
             "label": "elastic_cloud_user",
             "description": [
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
+            ],
+            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.AuthenticatedUser.profile_uid",
+            "type": "string",
+            "tags": [],
+            "label": "profile_uid",
+            "description": [
+              "\nUser profile ID of this user."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false,
@@ -3961,6 +4004,19 @@
             "label": "allowSubFeaturePrivileges",
             "description": [
               "\nIndicates whether we allow sub-feature privileges."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowUserProfileCollaboration",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowUserProfileCollaboration",
+            "description": [
+              "\nIndicates whether we allow user profile collaboration features (suggest and privileges checks APIs)."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
             "deprecated": false,

@@ -24,13 +24,11 @@ import {
   BaseIndexPatternColumn,
   ValueFormatConfig,
 } from './column_types';
-import {
-  adjustTimeScaleLabelSuffix,
-  adjustTimeScaleOnOtherColumnChange,
-} from '../time_scale_utils';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
@@ -62,6 +60,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   hideZeroOption,
   aggConfigParams,
   documentationDescription,
+  quickFunctionDocumentation,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -73,6 +72,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   hideZeroOption?: boolean;
   aggConfigParams?: Record<string, string | number | boolean>;
   documentationDescription?: string;
+  quickFunctionDocumentation?: string;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -117,10 +117,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    onOtherColumnChanged: (layer, thisColumnId) =>
-      optionalTimeScaling
-        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId) as T)
-        : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
@@ -205,6 +201,14 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         ...aggConfigParams,
       }).toAst();
     },
+    getGroupByKey: (agg) => {
+      return getGroupByKey(
+        agg,
+        [typeToFn[type]],
+        [{ name: 'field' }, { name: 'emptyAsNull', transformer: (val) => String(Boolean(val)) }]
+      );
+    },
+
     getErrorMessage: (layer, columnId, indexPattern) =>
       combineErrorMessages([
         getInvalidFieldMessage(
@@ -238,6 +242,7 @@ Example: Get the {metric} of price for orders from the UK:
           },
         }),
     },
+    quickFunctionDocumentation,
     shiftable: true,
   } as OperationDefinition<T, 'field', {}, true>;
 }
@@ -263,6 +268,12 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the minimum value among the numeric values extracted from the aggregated documents.',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.min.quickFunctionDescription',
+    {
+      defaultMessage: 'The minimum value of a number field.',
+    }
+  ),
   supportsDate: true,
 });
 
@@ -280,6 +291,12 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the maximum value among the numeric values extracted from the aggregated documents.',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.max.quickFunctionDescription',
+    {
+      defaultMessage: 'The maximum value of a number field.',
+    }
+  ),
   supportsDate: true,
 });
 
@@ -298,6 +315,12 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
     defaultMessage:
       'A single-value metric aggregation that computes the average of numeric values that are extracted from the aggregated documents',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.avg.quickFunctionDescription',
+    {
+      defaultMessage: 'The average value of a number field.',
+    }
+  ),
 });
 
 export const standardDeviationOperation = buildMetricOperation<StandardDeviationIndexPatternColumn>(
@@ -332,6 +355,13 @@ To get the variance of price for orders from the UK, use \`square(standard_devia
       `,
       }
     ),
+    quickFunctionDocumentation: i18n.translate(
+      'xpack.lens.indexPattern.standardDeviation.quickFunctionDescription',
+      {
+        defaultMessage:
+          'The standard deviation of the values of a number field which is the amount of variation of the fields values.',
+      }
+    ),
   }
 );
 
@@ -352,6 +382,12 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
       'A single-value metrics aggregation that sums up numeric values that are extracted from the aggregated documents.',
   }),
   hideZeroOption: true,
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.sum.quickFunctionDescription',
+    {
+      defaultMessage: 'The total amount of the values of a number field.',
+    }
+  ),
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
@@ -369,4 +405,10 @@ export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that computes the median value that are extracted from the aggregated documents.',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.median.quickFunctionDescription',
+    {
+      defaultMessage: 'The median value of a number field.',
+    }
+  ),
 });

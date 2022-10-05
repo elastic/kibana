@@ -22,8 +22,7 @@ import {
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
-import type { DataView, DataViewAttributes, DataViewField } from '@kbn/data-views-plugin/public';
-import { SavedObject } from '@kbn/core/types';
+import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -51,7 +50,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * List of available data views
    */
-  dataViewList: Array<SavedObject<DataViewAttributes>>;
+  dataViewList: DataViewListItem[];
   /**
    * Has been toggled closed
    */
@@ -63,7 +62,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
    * Callback function when changing an data view
    */

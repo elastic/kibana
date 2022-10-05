@@ -14,6 +14,13 @@ import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
 import { EventsQueryTabBody, ALERTS_EVENTS_HISTOGRAM_ID } from './events_query_tab_body';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import * as tGridActions from '@kbn/timelines-plugin/public/store/t_grid/actions';
+import { licenseService } from '../../hooks/use_license';
+import { mockHistory } from '../../mock/router';
+
+const mockGetDefaultControlColumn = jest.fn();
+jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
+  getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
+}));
 
 jest.mock('../../lib/kibana', () => {
   const original = jest.requireActual('../../lib/kibana');
@@ -33,6 +40,11 @@ jest.mock('../../lib/kibana', () => {
   };
 });
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => mockHistory,
+}));
+
 const FakeStatefulEventsViewer = ({ additionalFilters }: { additionalFilters: JSX.Element }) => (
   <div>
     {additionalFilters}
@@ -46,6 +58,19 @@ jest.mock('../../containers/use_full_screen', () => ({
     globalFullScreen: false,
   }),
 }));
+
+jest.mock('../../hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+    isEnterprise: jest.fn(() => false),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('EventsQueryTabBody', () => {
   const commonProps: EventsQueryTabBodyComponentProps = {
@@ -69,6 +94,7 @@ describe('EventsQueryTabBody', () => {
     );
 
     expect(queryByText('MockedStatefulEventsViewer')).toBeInTheDocument();
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
   });
 
   it('renders the matrix histogram when globalFullScreen is false', () => {
@@ -146,5 +172,29 @@ describe('EventsQueryTabBody', () => {
     );
 
     expect(spy).toHaveBeenCalled();
+  });
+
+  it('only have 4 columns on Action bar for non-Enterprise user', () => {
+    render(
+      <TestProviders>
+        <EventsQueryTabBody {...commonProps} />
+      </TestProviders>
+    );
+
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
+  });
+
+  it('shows 5 columns on Action bar for Enterprise user', () => {
+    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+    licenseServiceMock.isEnterprise.mockReturnValue(true);
+
+    render(
+      <TestProviders>
+        <EventsQueryTabBody {...commonProps} />
+      </TestProviders>
+    );
+
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
   });
 });

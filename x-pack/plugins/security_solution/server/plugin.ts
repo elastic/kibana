@@ -75,7 +75,10 @@ import previewPolicy from './lib/detection_engine/routes/index/preview_policy.js
 import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
-import type { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
+import type {
+  CreateRuleOptions,
+  CreateQueryRuleAdditionalOptions,
+} from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
 // eslint-disable-next-line no-restricted-imports
@@ -97,6 +100,8 @@ import type {
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
+import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
+import { artifactService } from './lib/telemetry/artifact';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -149,6 +154,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
+
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      licensing: plugins.licensing,
+      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+    };
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -247,12 +257,20 @@ export class Plugin implements ISecuritySolutionPlugin {
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
-    plugins.alerting.registerType(securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(
+        createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+      )
+    );
     plugins.alerting.registerType(
       securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
-    plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(
+        createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+      )
+    );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
 
@@ -289,7 +307,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       NEW_TERMS_RULE_TYPE_ID,
     ];
 
-    plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
+    plugins.features.registerKibanaFeature(
+      getKibanaPrivilegesFeaturePrivileges(ruleTypes, experimentalFeatures)
+    );
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     if (plugins.alerting != null) {
@@ -330,6 +350,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         securitySolutionSearchStrategy
       );
     });
+
+    setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
 
     this.telemetryEventsSender.setup(
       this.telemetryReceiver,
@@ -451,6 +473,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
+      experimentalFeatures: config.experimentalFeatures,
     });
 
     this.telemetryReceiver.start(
@@ -461,6 +484,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.endpointAppContextService,
       exceptionListClient
     );
+
+    artifactService.start(this.telemetryReceiver);
 
     this.telemetryEventsSender.start(
       plugins.telemetry,

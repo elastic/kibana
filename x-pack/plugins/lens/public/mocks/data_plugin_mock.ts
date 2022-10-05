@@ -129,11 +129,15 @@ export function mockDataPlugin(
       get: jest.fn().mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true })),
     },
     dataViews: {
-      get: jest
-        .fn()
-        .mockImplementation((id) =>
-          Promise.resolve({ id, isTimeBased: () => true, isPersisted: () => true })
-        ),
+      getIds: jest.fn().mockImplementation(jest.fn(async () => [])),
+      get: jest.fn().mockImplementation((id) =>
+        Promise.resolve({
+          id,
+          isTimeBased: () => true,
+          isPersisted: () => true,
+          toSpec: () => ({}),
+        })
+      ),
     },
     search: createMockSearchService(),
     nowProvider: {
