@@ -28,7 +28,7 @@ export const convertMetricToColumns = (
   agg: SchemaConfig<METRIC_TYPES>,
   dataView: DataView,
   aggs: Array<SchemaConfig<METRIC_TYPES>>,
-  percentageModeConfig: PercentageModeConfig
+  percentageModeConfig: PercentageModeConfig = { isPercentageColumn: false }
 ): AggBasedColumn[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
   if (!supportedAgg) {
