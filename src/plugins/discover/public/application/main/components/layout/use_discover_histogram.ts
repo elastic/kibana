@@ -104,16 +104,16 @@ export const useDiscoverHistogram = ({
    * Data
    */
 
-  const { fetchStatus: hitsFetchStatus, result: hitsNumber } = useDataState(
+  const { fetchStatus: hitsFetchStatus, result: hitsTotal } = useDataState(
     savedSearchData$.totalHits$
   );
 
   const hits = useMemo(
     () => ({
       status: hitsFetchStatus,
-      number: hitsNumber,
+      total: hitsTotal,
     }),
-    [hitsFetchStatus, hitsNumber]
+    [hitsFetchStatus, hitsTotal]
   );
 
   const { fetchStatus: chartFetchStatus, response, error } = useDataState(savedSearchData$.charts$);

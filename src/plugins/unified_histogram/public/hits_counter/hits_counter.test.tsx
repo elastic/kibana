@@ -22,7 +22,7 @@ describe('hits counter', function () {
     props = {
       hits: {
         status: 'complete',
-        number: 2,
+        total: 2,
       },
     };
   });
@@ -51,7 +51,7 @@ describe('hits counter', function () {
 
   it('expect to render 1,899 hits if 1899 hits given', function () {
     component = mountWithIntl(
-      <HitsCounter {...props} hits={{ status: 'complete', number: 1899 }} />
+      <HitsCounter {...props} hits={{ status: 'complete', total: 1899 }} />
     );
     const hits = findTestSubject(component, 'unifiedHistogramQueryHits');
     expect(hits.text()).toBe('1,899');
@@ -64,12 +64,12 @@ describe('hits counter', function () {
   });
 
   it('should render a EuiLoadingSpinner when status is partial', () => {
-    component = mountWithIntl(<HitsCounter {...props} hits={{ status: 'partial', number: 2 }} />);
+    component = mountWithIntl(<HitsCounter {...props} hits={{ status: 'partial', total: 2 }} />);
     expect(component.find(EuiLoadingSpinner).length).toBe(1);
   });
 
   it('should render unifiedHistogramQueryHitsPartial when status is partial', () => {
-    component = mountWithIntl(<HitsCounter {...props} hits={{ status: 'partial', number: 2 }} />);
+    component = mountWithIntl(<HitsCounter {...props} hits={{ status: 'partial', total: 2 }} />);
     expect(component.find('[data-test-subj="unifiedHistogramQueryHitsPartial"]').length).toBe(1);
   });
 

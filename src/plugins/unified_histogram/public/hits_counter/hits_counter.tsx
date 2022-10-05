@@ -20,7 +20,7 @@ export interface HitsCounterProps {
 }
 
 export function HitsCounter({ hits, append }: HitsCounterProps) {
-  if (!hits.number && hits.status === 'loading') {
+  if (!hits.total && hits.status === 'loading') {
     return null;
   }
 
@@ -30,7 +30,7 @@ export function HitsCounter({ hits, append }: HitsCounterProps) {
         hits.status === 'partial' ? 'unifiedHistogramQueryHitsPartial' : 'unifiedHistogramQueryHits'
       }
     >
-      <FormattedNumber value={hits.number ?? 0} />
+      <FormattedNumber value={hits.total ?? 0} />
     </strong>
   );
 
@@ -52,14 +52,14 @@ export function HitsCounter({ hits, append }: HitsCounterProps) {
             <FormattedMessage
               id="unifiedHistogram.partialHits"
               defaultMessage="≥{formattedHits} {hits, plural, one {hit} other {hits}}"
-              values={{ hits: hits.number, formattedHits }}
+              values={{ hits: hits.total, formattedHits }}
             />
           )}
           {hits.status !== 'partial' && (
             <FormattedMessage
               id="unifiedHistogram.hitsPluralTitle"
               defaultMessage="{formattedHits} {hits, plural, one {hit} other {hits}}"
-              values={{ hits: hits.number, formattedHits }}
+              values={{ hits: hits.total, formattedHits }}
             />
           )}
         </EuiText>

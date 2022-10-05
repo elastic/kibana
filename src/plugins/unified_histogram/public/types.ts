@@ -124,7 +124,7 @@ export interface UnifiedHistogramHitsContext {
   /**
    * The total number of hits
    */
-  number?: number;
+  total?: number;
 }
 
 /**
