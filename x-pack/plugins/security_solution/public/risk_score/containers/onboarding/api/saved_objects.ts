@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  HttpSetup,
-  NotificationsStart,
-  SavedObject,
-  SavedObjectAttributes,
-  ThemeServiceStart,
-} from '@kbn/core/public';
+import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../../../constants';
@@ -30,8 +24,10 @@ import {
 
 const toastLifeTimeMs = 600000;
 
+type DashboardsSavedObjectTemplate = `${RiskScoreEntity}RiskScoreDashboards`;
+
 interface Options {
-  templateName: string;
+  templateName: DashboardsSavedObjectTemplate;
 }
 
 export const bulkCreatePrebuiltSavedObjects = async ({
@@ -58,20 +54,24 @@ export const bulkCreatePrebuiltSavedObjects = async ({
   theme?: ThemeServiceStart;
 }) => {
   const res = await http
-    .post<{ saved_objects: Array<SavedObject<SavedObjectAttributes>> }>(
-      prebuiltSavedObjectsBulkCreateUrl(options.templateName)
-    )
+    .post<
+      Record<
+        DashboardsSavedObjectTemplate,
+        {
+          success?: boolean;
+          error: Error;
+          body?: Array<{ type: string; title: string; id: string; name: string }>;
+        }
+      >
+    >(prebuiltSavedObjectsBulkCreateUrl(options.templateName))
     .then((result) => {
-      const errors = result.saved_objects.reduce<string[]>((acc, o) => {
-        return o.error != null ? [...acc, `${o.id}: ${o.error.message}`] : acc;
-      }, []);
+      const response = result[options.templateName];
+      const error = response?.error?.message;
 
-      if (errors.length > 0) {
+      if (error) {
         notifications?.toasts?.addError(new Error(errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE), {
           title: errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE,
-          toastMessage: renderDocLink
-            ? (renderDocLink(errors.join(', ')) as unknown as string)
-            : errors.join(', '),
+          toastMessage: renderDocLink ? (renderDocLink(error) as unknown as string) : error,
           toastLifeTimeMs,
         });
       } else {
@@ -80,8 +80,8 @@ export const bulkCreatePrebuiltSavedObjects = async ({
             ? RISKY_USERS_DASHBOARD_TITLE
             : RISKY_HOSTS_DASHBOARD_TITLE;
 
-        const targetDashboard = result.saved_objects.find(
-          (obj) => obj.type === 'dashboard' && obj?.attributes?.title === dashboardTitle
+        const targetDashboard = response?.body?.find(
+          (obj) => obj.type === 'dashboard' && obj?.title === dashboardTitle
         );
 
         let targetUrl;
@@ -95,12 +95,15 @@ export const bulkCreatePrebuiltSavedObjects = async ({
           });
         }
 
-        const successMessage = result.saved_objects
-          .map((o) => o?.attributes?.title ?? o?.attributes?.name)
-          .join(', ');
+        const successMessage = response?.body?.map((o) => o?.title ?? o?.name).join(', ');
+
+        if (successMessage == null || response?.body?.length == null) {
+          return;
+        }
 
         notifications?.toasts?.addSuccess({
-          title: IMPORT_SAVED_OBJECTS_SUCCESS(result.saved_objects.length),
+          'data-test-subj': `${options.templateName}SuccessToast`,
+          title: IMPORT_SAVED_OBJECTS_SUCCESS(response?.body?.length),
           text: toMountPoint(
             renderDashboardLink && targetUrl
               ? renderDashboardLink(successMessage, targetUrl)
@@ -109,6 +112,7 @@ export const bulkCreatePrebuiltSavedObjects = async ({
               theme$: theme?.theme$,
             }
           ),
+          toastLifeTimeMs,
         });
       }
     })

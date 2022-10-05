@@ -281,6 +281,7 @@ export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
 export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
+export const RISK_SCORE_RESTART_TRANSFORMS = `${INTERNAL_RISK_SCORE_URL}/transforms/restart`;
 export const DEV_TOOL_PREBUILT_CONTENT =
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
 export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
@@ -295,7 +296,6 @@ export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/creat
 export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
 export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
 export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
-
 /**
  * Internal detection engine routes
  */

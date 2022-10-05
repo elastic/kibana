@@ -80,6 +80,12 @@ export const START_TRANSFORMS_ERROR_MESSAGE = (totalCount: number) =>
     defaultMessage: `Failed to start {totalCount, plural, =1 {Transform} other {Transforms}}`,
   });
 
+export const RESTART_TRANSFORMS_ERROR_MESSAGE = (totalCount?: number) =>
+  i18n.translate('xpack.securitySolution.riskScore.api.transforms.start.errorMessageTitle', {
+    values: { totalCount },
+    defaultMessage: `Failed to start {totalCount, plural, =1 {Transform} other {Transforms}}`,
+  });
+
 export const STOP_TRANSFORMS_ERROR_MESSAGE = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.riskScore.api.transforms.stop.errorMessageTitle', {
     values: { totalCount },
@@ -119,3 +125,23 @@ export const DELETE_SAVED_OBJECTS_FAILURE = i18n.translate(
     defaultMessage: `Failed to delete saved objects`,
   }
 );
+
+export const HOST_RISK_SCORES_ENABLED_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.hostRiskScoresEnabledTitle',
+  {
+    defaultMessage: `Host Risk Scores enabled`,
+  }
+);
+
+export const USER_RISK_SCORES_ENABLED_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.userRiskScoresEnabledTitle',
+  {
+    defaultMessage: `User Risk Scores enabled`,
+  }
+);
+
+export const RISK_SCORES_ENABLED_TEXT = (items: string) =>
+  i18n.translate('xpack.securitySolution.riskScore.savedObjects.enableRiskScoreSuccessTitle', {
+    values: { items },
+    defaultMessage: `{items} imported successfully`,
+  });
