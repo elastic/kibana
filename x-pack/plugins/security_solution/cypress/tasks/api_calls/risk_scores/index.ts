@@ -294,18 +294,3 @@ export const intercepInstallRiskScoreModule = () => {
 export const waitForInstallRiskScoreModule = () => {
   cy.wait(['@install'], { requestTimeout: 50000 });
 };
-
-export const interceptUpgradeRiskScoreModule = (riskScoreEntity: RiskScoreEntity) => {
-  cy.intercept(
-    `POST`,
-    `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_delete/${riskScoreEntity}RiskScoreDashboards`
-  ).as('deleteDashboards');
-  cy.intercept(`POST`, `${TRANSFORMS_URL}/stop_transforms`).as('stopTransforms');
-  cy.intercept(`POST`, `${TRANSFORMS_URL}/delete_transforms`).as('deleteTransforms');
-  cy.intercept(
-    `DELETE`,
-    `${INGEST_PIPELINES_URL}/${getLegacyIngestPipelineName(riskScoreEntity)}`
-  ).as('deleteIngestPipelines');
-  cy.intercept(`DELETE`, `${STORED_SCRIPTS_URL}/delete`).as('deleteScripts');
-  intercepInstallRiskScoreModule();
-};

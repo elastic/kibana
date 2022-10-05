@@ -8,13 +8,35 @@
 import {
   ENABLE_HOST_RISK_SCORE_BUTTON,
   ENABLE_USER_RISK_SCORE_BUTTON,
-  UPGRADE_CANCELLATION_BUTTON,
   UPGRADE_CONFIRMATION_BUTTON,
   UPGRADE_HOST_RISK_SCORE_BUTTON,
   UPGRADE_USER_RISK_SCORE_BUTTON,
 } from '../../screens/entity_analytics';
+import {
+  INGEST_PIPELINES_URL,
+  RISK_SCORE_SAVED_OBJECTS_URL,
+  STORED_SCRIPTS_URL,
+  TRANSFORMS_URL,
+} from '../../urls/risk_score';
+import { intercepInstallRiskScoreModule } from '../api_calls/risk_scores';
 
 import { RiskScoreEntity } from './common';
+import { getLegacyIngestPipelineName } from './ingest_pipelines';
+
+export const interceptUpgradeRiskScoreModule = (riskScoreEntity: RiskScoreEntity) => {
+  cy.intercept(
+    `POST`,
+    `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_delete/${riskScoreEntity}RiskScoreDashboards`
+  ).as('deleteDashboards');
+  cy.intercept(`POST`, `${TRANSFORMS_URL}/stop_transforms`).as('stopTransforms');
+  cy.intercept(`POST`, `${TRANSFORMS_URL}/delete_transforms`).as('deleteTransforms');
+  cy.intercept(
+    `DELETE`,
+    `${INGEST_PIPELINES_URL}/${getLegacyIngestPipelineName(riskScoreEntity)}`
+  ).as('deleteIngestPipelines');
+  cy.intercept(`DELETE`, `${STORED_SCRIPTS_URL}/delete`).as('deleteScripts');
+  intercepInstallRiskScoreModule();
+};
 
 export const waitForUpgradeRiskScoreModule = () => {
   cy.wait(
