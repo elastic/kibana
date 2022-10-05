@@ -34,7 +34,11 @@ import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
 import type { SessionValue } from '../session_management';
-import { SessionMissingError } from '../session_management';
+import {
+  SessionExpiredError,
+  SessionMissingError,
+  SessionUnexpectedError,
+} from '../session_management';
 import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
@@ -1310,6 +1314,59 @@ describe('Authenticator', () => {
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
       expectAuditEvents({ action: 'user_login', outcome: 'failure' });
+    });
+
+    // TODO: Is it realistic that all providers choose not to handle it?
+    it('fails if session is unhandled by all providers and getting the current session results in an SessionExpiredError for redirectable requests.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const failureReason = new SessionExpiredError();
+
+      mockOptions.session.get.mockResolvedValue(failureReason);
+
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    it('fails if session is unhandled by all providers and getting the current session results in an SessionExpiredError for non-redirectable requests.', async () => {
+      const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+      const failureReason = new SessionExpiredError();
+
+      mockOptions.session.get.mockResolvedValue(failureReason);
+
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason, {
+          authResponseHeaders: { 'kbn-session-error-reason': 'SESSION_EXPIRED' },
+        })
+      );
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    it('fails if session is unhandled by all providers and getting the current session results in an SessionUnexpectedError for redirectable requests.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const failureReason = new SessionUnexpectedError();
+
+      mockOptions.session.get.mockResolvedValue(failureReason);
+
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    it('fails if session is unhandled by all providers and getting the current session results in an SessionUnexpectedError for non-redirectable requests.', async () => {
+      const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+      const failureReason = new SessionUnexpectedError();
+
+      mockOptions.session.get.mockResolvedValue(failureReason);
+
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason, {
+          authResponseHeaders: { 'kbn-session-error-reason': 'UNEXPECTED_SESSION_ERROR' },
+        })
+      );
+      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('returns user that authentication provider returns.', async () => {
