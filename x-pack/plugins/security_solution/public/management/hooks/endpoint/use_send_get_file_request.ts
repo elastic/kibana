@@ -9,7 +9,7 @@ import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-quer
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMutation } from '@tanstack/react-query';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
-import type { GetFileRequestRequestBody } from '../../../../common/endpoint/schema/actions';
+import type { ResponseActionGetFileRequestBody } from '../../../../common/endpoint/schema/actions';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { GET_FILE_ROUTE } from '../../../../common/endpoint/constants';
 
@@ -17,10 +17,14 @@ export const useSendGetFileRequest = (
   customOptions?: UseMutationOptions<
     ResponseActionApiResponse,
     IHttpFetchError,
-    GetFileRequestRequestBody
+    ResponseActionGetFileRequestBody
   >
-): UseMutationResult<ResponseActionApiResponse, IHttpFetchError, GetFileRequestRequestBody> => {
-  return useMutation<ResponseActionApiResponse, IHttpFetchError, GetFileRequestRequestBody>(
+): UseMutationResult<
+  ResponseActionApiResponse,
+  IHttpFetchError,
+  ResponseActionGetFileRequestBody
+> => {
+  return useMutation<ResponseActionApiResponse, IHttpFetchError, ResponseActionGetFileRequestBody>(
     (reqBody) => {
       return KibanaServices.get().http.post<ResponseActionApiResponse>(GET_FILE_ROUTE, {
         body: JSON.stringify(reqBody),

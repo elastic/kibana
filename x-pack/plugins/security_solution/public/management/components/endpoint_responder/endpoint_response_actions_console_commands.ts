@@ -400,7 +400,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 3,
-      helpDisabled: doesEndpointSupportCommand('processes') === false,
+      helpDisabled: doesEndpointSupportCommand('get-file') === false,
     },
   ];
 };
