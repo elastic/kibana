@@ -53,7 +53,6 @@ export async function getStateFromAggregateQuery(
   const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
   let allColumns: TextBasedLanguagesLayerColumn[] = [];
-  let columns = state.layers[newLayerId].columns ?? [];
   let timeFieldName;
   try {
     const table = await fetchDataFromAggregateQuery(query, dataViews, data, expressions);
@@ -66,11 +65,6 @@ export async function getStateFromAggregateQuery(
       ...existingColumns,
       ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
     ];
-
-    columns = state.layers[newLayerId].columns.filter((c) => {
-      const columnExists = columnsFromQuery.some((f) => f.name === c?.fieldName);
-      if (columnExists) return c;
-    });
   } catch (e) {
     errors.push(e);
   }
@@ -80,7 +74,7 @@ export async function getStateFromAggregateQuery(
       [newLayerId]: {
         index,
         query,
-        columns,
+        columns: state.layers[newLayerId].columns ?? [],
         allColumns,
         timeField: timeFieldName,
         errors,
