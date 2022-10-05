@@ -17,6 +17,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
@@ -40,7 +41,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
@@ -88,12 +88,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const { signalIndexName } = useSignalIndex();
 
   const capabilities = useMlCapabilities();
-  const kibana = useKibana();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
   const hostDetailsPageFilters: Filter[] = useMemo(
     () => getHostDetailsPageFilters(detailName),
     [detailName]
   );
-  const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
@@ -119,14 +121,31 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: getFilters(),
-  });
 
-  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
+  const [rawFilteredQuery, kqlError] = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          indexPattern,
+          [query],
+          [...hostDetailsPageFilters, ...filters],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (e) {
+      return [undefined, e];
+    }
+  }, [filters, indexPattern, query, uiSettings, hostDetailsPageFilters]);
+
+  const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
+  useInvalidFilterQuery({
+    id: ID,
+    filterQuery: stringifiedAdditionalFilters,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   useEffect(() => {
     dispatch(setHostDetailsTablesActivePageToZero());
@@ -206,12 +225,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                       <AlertsByStatus
                         signalIndexName={signalIndexName}
                         entityFilter={entityFilter}
+                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
                         entityFilter={entityFilter}
                         signalIndexName={signalIndexName}
+                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -241,7 +262,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               detailName={detailName}
               type={type}
               setQuery={setQuery}
-              filterQuery={filterQuery}
+              filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={indexPattern}
             />
