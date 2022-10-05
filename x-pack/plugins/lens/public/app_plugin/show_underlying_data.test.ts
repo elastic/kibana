@@ -130,6 +130,7 @@ describe('getLayerMetaInfo', () => {
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
       isTextBasedLanguage: jest.fn(() => false),
+      hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     // both capabilities should be enabled to enable discover
