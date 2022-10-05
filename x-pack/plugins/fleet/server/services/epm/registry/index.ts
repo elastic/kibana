@@ -289,7 +289,7 @@ export async function getRegistryPackage(
     archiveBuffer,
     archivePath,
     verificationResult: latestVerificationResult,
-  } = await withPackageSpan('Fetch package archive from registry', () =>
+  } = await withPackageSpan('Fetch package archive from archive buffer', () =>
     fetchArchiveBuffer({
       pkgName: name,
       pkgVersion: version,
@@ -297,6 +297,7 @@ export async function getRegistryPackage(
       ignoreUnverified: options?.ignoreUnverified,
     })
   );
+
   if (latestVerificationResult) {
     verificationResult = latestVerificationResult;
     setVerificationResult({ name, version }, latestVerificationResult);
