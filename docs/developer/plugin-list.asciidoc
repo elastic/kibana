@@ -71,7 +71,7 @@ as uiSettings within the code.
 
 |{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
 |The data views API provides a consistent method of structuring and formatting documents
-and field lists across the various Kibana apps. Its typically used in conjunction with
+and field lists across the various Kibana apps. It's typically used in conjunction with
 <DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
 
 
