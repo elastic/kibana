@@ -31,7 +31,6 @@ import {
 import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
 
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
-import { checkIsStalePing } from '../../../utils/monitor_test_result/check_pings';
 import { selectPingsLoading, selectMonitorRecentPings, selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
@@ -56,8 +55,6 @@ export const LastTenTestRuns = () => {
   const { monitor } = useSelectedMonitor();
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
-  const hasStalePings = checkIsStalePing(monitor, pings?.[0]);
-  const loading = hasStalePings || pingsLoading;
 
   const sorting: EuiTableSortingType<Ping> = {
     sort: {
@@ -146,12 +143,12 @@ export const LastTenTestRuns = () => {
       </EuiFlexGroup>
       <EuiBasicTable
         compressed={false}
-        loading={loading}
+        loading={pingsLoading}
         columns={columns}
         error={pingsError?.body?.message}
-        items={hasStalePings ? [] : sortedPings}
+        items={sortedPings}
         noItemsMessage={
-          loading
+          pingsLoading
             ? i18n.translate('xpack.synthetics.monitorDetails.loadingTestRuns', {
                 defaultMessage: 'Loading test runs...',
               })
