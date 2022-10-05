@@ -10,7 +10,11 @@ import moment from 'moment';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { sendAlertToTimelineAction, determineToAndFrom } from './actions';
+import {
+  sendAlertToTimelineAction,
+  sendBulkEventsToTimelineAction,
+  determineToAndFrom,
+} from './actions';
 import {
   defaultTimelineProps,
   getThresholdDetectionAlertAADMock,
@@ -19,6 +23,7 @@ import {
   mockTimelineResult,
   mockAADEcsDataWithAlert,
   mockGetOneTimelineResult,
+  mockTimelineData,
 } from '../../../common/mock';
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
 import type { Ecs } from '../../../../common/ecs';
@@ -92,6 +97,7 @@ describe('alert actions', () => {
   let mockGetExceptionFilter: jest.Mock;
   let fetchMock: jest.Mock;
   let toastMock: jest.Mock;
+  const mockEcsData = mockTimelineData.map((item) => item.ecs);
 
   const ecsDataMockWithNoTemplateTimeline = getThresholdDetectionAlertAADMock({
     ...mockAADEcsDataWithAlert,
@@ -1030,6 +1036,29 @@ describe('alert actions', () => {
         expect(createTimeline).toHaveBeenCalledWith(timelineProps);
         expect(toastMock).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('sendBulkEventsToTimelineAction', () => {
+    test('send multiple events to timeline ', () => {
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsData);
+      expect(1).toBe(2);
+    });
+
+    test('send single event to timeline', () => {
+      expect(1).toBe(2);
+    });
+
+    test('send multiple events to timeline with dataprovider preference', () => {
+      expect(1).toBe(2);
+    });
+
+    test('send multiple events to timeline with filter preference without label', () => {
+      expect(1).toBe(2);
+    });
+
+    test('send multiple events to timeline with filter preference with label', () => {
+      expect(1).toBe(2);
     });
   });
 });

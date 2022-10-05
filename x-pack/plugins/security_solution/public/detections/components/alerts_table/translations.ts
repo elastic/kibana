@@ -280,3 +280,10 @@ export const ADD_TO_CASE_DISABLED = i18n.translate(
     defaultMessage: 'Add to case is not supported for this selection',
   }
 );
+
+export const ADD_BULK_TO_TIMELINE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
+  {
+    defaultMessage: 'Add To timeline',
+  }
+);

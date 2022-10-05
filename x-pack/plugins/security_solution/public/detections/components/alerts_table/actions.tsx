@@ -44,6 +44,7 @@ import type {
   UpdateAlertStatusActionProps,
   CreateTimelineProps,
   GetExceptionFilter,
+  CreateTimeline,
 } from './types';
 import type { Ecs } from '../../../../common/ecs';
 import type {
@@ -284,7 +285,8 @@ export const isNewTermsAlert = (ecsData: Ecs): boolean => {
 
 export const buildAlertsKqlFilter = (
   key: '_id' | 'signal.group.id' | 'kibana.alert.group.id',
-  alertIds: string[]
+  alertIds: string[],
+  label: string = 'Alert Ids'
 ): Filter[] => {
   return [
     {
@@ -298,7 +300,7 @@ export const buildAlertsKqlFilter = (
         },
       },
       meta: {
-        alias: 'Alert Ids',
+        alias: label,
         negate: false,
         disabled: false,
         type: 'phrases',
@@ -315,11 +317,14 @@ export const buildAlertsKqlFilter = (
 
 const buildTimelineDataProviderOrFilter = (
   alertIds: string[],
-  _id: string
+  _id: string,
+  // prefer: 'dataProvider' | 'KqlFilter' = 'dataProvider',
+  label?: string
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
+  // TODO: Add prefer is when `is one of` operator for data provider is complete
   if (!isEmpty(alertIds) && Array.isArray(alertIds) && alertIds.length > 1) {
     return {
-      filters: buildAlertsKqlFilter('_id', alertIds),
+      filters: buildAlertsKqlFilter('_id', alertIds, label),
       dataProviders: [],
     };
   } else {
@@ -659,6 +664,45 @@ const createNewTermsTimeline = async (
       to,
     });
   }
+};
+
+export const sendBulkEventsToTimelineAction = (createTimeline: CreateTimeline, ecs: Ecs[]) => {
+  const eventIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
+
+  const { to, from } = determineToAndFrom({ ecs });
+
+  const { dataProviders, filters } = buildTimelineDataProviderOrFilter(
+    eventIds,
+    '',
+    `${ecs.length} event IDs`
+  );
+
+  createTimeline({
+    from,
+    notes: null,
+    timeline: {
+      ...timelineDefaults,
+      dataProviders,
+      id: TimelineId.active,
+      indexNames: [],
+      dateRange: {
+        start: from,
+        end: to,
+      },
+      eventType: 'all',
+      filters,
+      kqlQuery: {
+        filterQuery: {
+          kuery: {
+            kind: 'kuery',
+            expression: '',
+          },
+          serializedQuery: '',
+        },
+      },
+    },
+    to,
+  });
 };
 
 export const sendAlertToTimelineAction = async ({
