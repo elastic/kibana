@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   CountIndexPatternColumn,
@@ -16,6 +16,8 @@ import {
 } from '@kbn/lens-plugin/public';
 import { EuiText } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import uuid from 'uuid';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import {
   PROCESSOR_EVENT,
@@ -36,7 +38,7 @@ interface LensAttributes {
   metric: VisitorBreakdownMetric;
   uiFilters: UxUIFilters;
   urlQuery?: string;
-  dataView: string;
+  dataView: DataView;
 }
 
 type Props = {
@@ -56,6 +58,7 @@ export function VisitorBreakdownChart({
 }: Props) {
   const kibana = useKibanaServices();
   const LensEmbeddableComponent = kibana.lens.EmbeddableComponent;
+  const [localDataViewId] = useState<string>(uuid.v4());
 
   const lensAttributes = useMemo(
     () =>
@@ -64,8 +67,11 @@ export function VisitorBreakdownChart({
         urlQuery,
         metric,
         dataView,
+        start,
+        end,
+        localDataViewId,
       }),
-    [uiFilters, urlQuery, metric, dataView]
+    [uiFilters, urlQuery, metric, dataView, start, end, localDataViewId]
   );
 
   const filterHandler = useCallback(
@@ -118,7 +124,17 @@ export function getVisitorBreakdownLensAttributes({
   urlQuery,
   metric,
   dataView,
-}: LensAttributes): TypedLensByValueInput['attributes'] {
+  start,
+  end,
+  localDataViewId,
+}: LensAttributes & {
+  start: string;
+  end: string;
+  localDataViewId: string;
+}): TypedLensByValueInput['attributes'] {
+  const localDataView = dataView.toSpec(false);
+  localDataView.id = localDataViewId;
+
   const dataLayer: PersistedIndexPatternLayer = {
     incompleteColumns: {},
     columnOrder: ['col1', 'col2'],
@@ -160,19 +176,23 @@ export function getVisitorBreakdownLensAttributes({
   return {
     visualizationType: 'lnsPie',
     title: `ux-visitor-breakdown-${metric}`,
-    references: [
-      {
-        id: dataView,
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: dataView,
-        name: 'indexpattern-datasource-layer-layer1',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     state: {
+      internalReferences: [
+        {
+          id: localDataView.id,
+          name: 'indexpattern-datasource-current-indexpattern',
+          type: 'index-pattern',
+        },
+        {
+          id: localDataView.id,
+          name: 'indexpattern-datasource-layer-layer1',
+          type: 'index-pattern',
+        },
+      ],
+      adHocDataViews: {
+        [localDataView.id]: localDataView,
+      },
       datasourceStates: {
         indexpattern: {
           layers: {
@@ -207,6 +227,15 @@ export function getVisitorBreakdownLensAttributes({
                       },
                     ]
                   : []),
+                {
+                  range: {
+                    [localDataView.timeFieldName ?? '@timestamp']: {
+                      format: 'strict_date_optional_time',
+                      gte: start,
+                      lte: end,
+                    },
+                  },
+                },
               ],
               must_not: [...getEsFilter(uiFilters, true)],
             },
