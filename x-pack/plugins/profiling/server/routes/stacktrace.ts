@@ -122,6 +122,17 @@ export function runLengthDecode(input: Buffer, outputSize?: number): number[] {
     }
   }
 
+  // Due to truncation of the frame types for stacktraces longer than 255,
+  // the expected output size and the actual decoded size can be different.
+  // Ordinarily, these two values should be the same.
+  //
+  // We have decided to fill in the remainder of the output array with zeroes
+  // as a reasonable default. Without this step, the output array would have
+  // undefined values.
+  for (let i = idx; i < size; i++) {
+    output[i] = 0;
+  }
+
   return output;
 }
 

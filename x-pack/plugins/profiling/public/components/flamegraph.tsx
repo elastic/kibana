@@ -12,10 +12,8 @@ import { Maybe } from '@kbn/observability-plugin/common/typings';
 import { isNumber } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../common/flamegraph';
-import { useAsync } from '../hooks/use_async';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { getFlamegraphModel } from '../utils/get_flamegraph_model';
-import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlamegraphInformationWindow } from './flame_graphs_view/flamegraph_information_window';
 
 function TooltipRow({
@@ -162,10 +160,6 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 }) => {
   const theme = useEuiTheme();
 
-  const {
-    services: { fetchFrameInformation },
-  } = useProfilingDependencies();
-
   const columnarData = useMemo(() => {
     return getFlamegraphModel({
       primaryFlamegraph,
@@ -193,38 +187,13 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
   const [highlightedVmIndex, setHighlightedVmIndex] = useState<number | undefined>(undefined);
 
-  const highlightedFrameQueryParams = useMemo(() => {
-    if (!primaryFlamegraph || highlightedVmIndex === undefined || highlightedVmIndex === 0) {
-      return undefined;
-    }
-
-    const frameID = primaryFlamegraph.FrameID[highlightedVmIndex];
-    const executableID = primaryFlamegraph.ExecutableID[highlightedVmIndex];
-
-    return {
-      frameID,
-      executableID,
-    };
-  }, [primaryFlamegraph, highlightedVmIndex]);
-
-  const { data: highlightedFrame, status: highlightedFrameStatus } = useAsync(() => {
-    if (!highlightedFrameQueryParams) {
-      return Promise.resolve(undefined);
-    }
-
-    return fetchFrameInformation({
-      frameID: highlightedFrameQueryParams.frameID,
-      executableID: highlightedFrameQueryParams.executableID,
-    });
-  }, [highlightedFrameQueryParams, fetchFrameInformation]);
-
   const selected: undefined | React.ComponentProps<typeof FlamegraphInformationWindow>['frame'] =
-    primaryFlamegraph && highlightedFrame && highlightedVmIndex !== undefined
+    primaryFlamegraph && highlightedVmIndex !== undefined
       ? {
-          exeFileName: highlightedFrame.ExeFileName,
-          sourceFileName: highlightedFrame.SourceFilename,
-          functionName: highlightedFrame.FunctionName,
-          countInclusive: primaryFlamegraph.Samples[highlightedVmIndex],
+          exeFileName: primaryFlamegraph.ExeFilename[highlightedVmIndex],
+          sourceFileName: primaryFlamegraph.SourceFilename[highlightedVmIndex],
+          functionName: primaryFlamegraph.FunctionName[highlightedVmIndex],
+          countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],
           countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
         }
       : undefined;
@@ -271,7 +240,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
                       const valueIndex = props.values[0].valueAccessor as number;
                       const label = primaryFlamegraph.Label[valueIndex];
-                      const samples = primaryFlamegraph.Samples[valueIndex];
+                      const samples = primaryFlamegraph.CountInclusive[valueIndex];
                       const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
                       const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
                       const nodeID = primaryFlamegraph.ID[valueIndex];
@@ -287,8 +256,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                           comparisonCountInclusive={comparisonNode?.CountInclusive}
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
                           totalSamples={totalSamples}
-                          comparisonTotalSamples={comparisonFlamegraph?.Samples[0]}
-                          comparisonSamples={comparisonNode?.Samples}
+                          comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
+                          comparisonSamples={comparisonNode?.CountInclusive}
                         />
                       );
                     },
@@ -309,7 +278,6 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
             <EuiFlexItem grow={false}>
               <FlamegraphInformationWindow
                 frame={selected}
-                status={highlightedFrameStatus}
                 totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
                 totalSamples={totalSamples}
                 onClose={() => {

@@ -210,7 +210,7 @@
     },
     {
       "groupName": "Profiling",
-      "matchPackageNames": ["fnv-plus", "peggy", "@types/dagre", "@types/fnv-plus"],
+      "matchPackageNames": ["peggy", "@types/dagre"],
       "reviewers": ["team:profiling-ui"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip"],
