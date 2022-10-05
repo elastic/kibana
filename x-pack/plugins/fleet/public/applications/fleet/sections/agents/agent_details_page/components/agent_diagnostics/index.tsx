@@ -22,15 +22,17 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 import {
   sendGetAgentUploads,
   sendPostRequestDiagnostics,
   useStartServices,
+  sendGetActionStatus,
 } from '../../../../../hooks';
 import type { AgentDiagnostics, Agent } from '../../../../../../../../common/types/models';
+import type { ActionStatus } from '../../../../../types';
 
 const FlexStartEuiFlexItem = styled(EuiFlexItem)`
   align-self: flex-start;
@@ -40,22 +42,59 @@ export interface AgentDiagnosticsProps {
   agent: Agent;
 }
 
+export interface DiagnosticsEntry {
+  id: string;
+  name: string;
+  filePath?: string;
+  status: string;
+  createTime: string;
+}
+
 export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps> = ({ agent }) => {
-  const [currentDiagnostics, setCurrentDiagnostics] = useState<AgentDiagnostics[]>([]);
   const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [diagnosticsEntries, setDiagnosticEntries] = useState<DiagnosticsEntry[]>([]);
+
+  const createDiagnosticEntries = (
+    currentDiagnostics: AgentDiagnostics[],
+    currentActions: ActionStatus[]
+  ) => {
+    const requestDiagnosticsActions = currentActions.filter(
+      (action) => action.type === 'REQUEST_DIAGNOSTICS'
+    );
+
+    return requestDiagnosticsActions.map((action) => {
+      const upload = currentDiagnostics.find((diag) => diag.actionId === action.actionId);
+      const fileName =
+        upload?.name ?? `${moment(action.creationTime).format('YYYY-MM-DD HH:mm:ss')}.zip`;
+      const filePath = upload?.filePath ?? `/api/files/files/${action.actionId}/blob/${fileName}`; // TODO mock value
+      return {
+        id: action.actionId,
+        status: action.status,
+        createTime: action.creationTime,
+        filePath,
+        name: fileName,
+      };
+    });
+  };
 
   const loadData = useCallback(async () => {
     try {
-      const { data, error } = await sendGetAgentUploads(agent.id);
+      const [uploadsResponse, actionStatusResponse] = await Promise.all([
+        sendGetAgentUploads(agent.id),
+        sendGetActionStatus(),
+      ]);
+      const error = uploadsResponse.error || actionStatusResponse.error;
       if (error) {
         throw error;
       }
-      if (!data) {
+      if (!uploadsResponse.data || !actionStatusResponse.data) {
         throw new Error('No data');
       }
-      setCurrentDiagnostics(data.items);
+      setDiagnosticEntries(
+        createDiagnosticEntries(uploadsResponse.data.items, actionStatusResponse.data.items)
+      );
       setIsLoading(false);
     } catch (err) {
       notifications.toasts.addError(err, {
@@ -84,19 +123,27 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     return cleanup;
   }, [loadData]);
 
-  const columns: Array<EuiTableFieldDataColumnType<AgentDiagnostics>> = [
+  const columns: Array<EuiTableFieldDataColumnType<DiagnosticsEntry>> = [
     {
       field: 'id',
       name: 'File',
       render: (id: string) => {
-        const currentItem = currentDiagnostics.find((item) => item.id === id);
-        return currentItem?.status === 'READY' ? (
+        const currentItem = diagnosticsEntries.find((item) => item.id === id);
+        return currentItem?.status === 'COMPLETE' ? (
           <EuiLink href={currentItem?.filePath} download target="_blank">
             <EuiIcon type="download" /> &nbsp; {currentItem?.name}
           </EuiLink>
-        ) : (
+        ) : currentItem?.status === 'IN_PROGRESS' ? (
           <EuiText color="subdued">
             <EuiLoadingSpinner /> &nbsp;{' '}
+            <FormattedMessage
+              id="xpack.fleet.requestDiagnostics.generatingText"
+              defaultMessage="Generating diagnostics file..."
+            />
+          </EuiText>
+        ) : (
+          <EuiText color="subdued">
+            <EuiIcon type="alert" color="red" /> &nbsp;{' '}
             <FormattedMessage
               id="xpack.fleet.requestDiagnostics.generatingText"
               defaultMessage="Generating diagnostics file..."
@@ -110,9 +157,9 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       name: 'Date',
       dataType: 'date',
       render: (id: string) => {
-        const currentItem = currentDiagnostics.find((item) => item.id === id);
+        const currentItem = diagnosticsEntries.find((item) => item.id === id);
         return (
-          <EuiText color={currentItem?.status === 'READY' ? 'default' : 'subdued'}>
+          <EuiText color={currentItem?.status === 'COMPLETE' ? 'default' : 'subdued'}>
             {formatDate(currentItem?.createTime, 'll')}
           </EuiText>
         );
@@ -178,11 +225,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         {isLoading ? (
           <EuiLoadingContent lines={3} />
         ) : (
-          <EuiBasicTable<AgentDiagnostics>
-            items={currentDiagnostics}
-            rowHeader="firstName"
-            columns={columns}
-          />
+          <EuiBasicTable<DiagnosticsEntry> items={diagnosticsEntries} columns={columns} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

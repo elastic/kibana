@@ -146,6 +146,7 @@ export interface AgentDiagnostics {
   createTime: string;
   filePath: string;
   status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED';
+  actionId: string;
 }
 
 // Generated from FleetServer schema.json
