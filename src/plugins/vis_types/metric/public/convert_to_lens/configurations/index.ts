@@ -13,11 +13,11 @@ import { getPalette } from './palette';
 
 export const getPercentageModeConfig = (params: VisParams): PercentageModeConfig => {
   if (!params.metric.percentageMode || params.metric.metricColorMode === 'None') {
-    return { isPercentageColumn: params.metric.percentageMode };
+    return { isPercentageMode: params.metric.percentageMode };
   }
   const { colorsRange } = params.metric;
   return {
-    isPercentageColumn: true,
+    isPercentageMode: true,
     min: colorsRange[0].from,
     max: colorsRange[colorsRange.length - 1].to,
   };

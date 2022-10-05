@@ -28,15 +28,15 @@ export const convertMetricToColumns = (
   agg: SchemaConfig<METRIC_TYPES>,
   dataView: DataView,
   aggs: Array<SchemaConfig<METRIC_TYPES>>,
-  percentageModeConfig: PercentageModeConfig = { isPercentageColumn: false }
+  percentageModeConfig: PercentageModeConfig = { isPercentageMode: false }
 ): AggBasedColumn[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
   if (!supportedAgg) {
     return null;
   }
 
-  if (percentageModeConfig.isPercentageColumn) {
-    const { isPercentageColumn, ...minMax } = percentageModeConfig;
+  if (percentageModeConfig.isPercentageMode) {
+    const { isPercentageMode, ...minMax } = percentageModeConfig;
 
     const formulaColumn = convertToColumnInPercentageMode({ agg, dataView, aggs }, minMax);
     return getValidColumns(formulaColumn);

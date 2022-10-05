@@ -52,5 +52,5 @@ export interface MinMax {
 }
 
 export type PercentageModeConfig =
-  | ({ isPercentageColumn: true } & MinMax)
-  | { isPercentageColumn: boolean };
+  | ({ isPercentageMode: true } & MinMax)
+  | { isPercentageMode: boolean };

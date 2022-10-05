@@ -49,7 +49,7 @@ export const getColumnsFromVis = <T>(
   } & (PercentageModeConfig | void)
 ) => {
   const { dropEmptyRowsInDateHistogram, ...percentageModeConfig } = config ?? {
-    isPercentageColumn: false,
+    isPercentageMode: false,
   };
   const visSchemas = getVisSchemas(vis, {
     timefilter,
