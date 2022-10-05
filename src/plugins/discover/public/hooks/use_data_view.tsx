@@ -23,10 +23,8 @@ export const useDataView = ({
   useEffect(() => {
     async function loadDataView() {
       try {
-        const persistedDataViews = await dataViews.getIdsWithTitle();
-        const isPersisted = persistedDataViews.find((current) => current.id === dataViewSpec?.id);
         let item: DataView;
-        if (dataViewSpec && !isPersisted && dataViewSpec.id === dataViewId) {
+        if (dataViewSpec && dataViewSpec.id === dataViewId) {
           item = await dataViews.create(dataViewSpec);
         } else {
           item = await dataViews.get(dataViewId);

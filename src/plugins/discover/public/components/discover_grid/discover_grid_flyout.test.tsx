@@ -71,30 +71,6 @@ describe('Discover flyout', function () {
     return { component, props };
   };
 
-  it('should be rendered correctly using an data view without timefield', async () => {
-    const { component, props } = mountComponent({});
-
-    const url = findTestSubject(component, 'docTableRowAction').prop('href');
-    expect(url).toMatchInlineSnapshot(`"/base/app/discover#/doc/the-data-view-id/i?id=1"`);
-    findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
-    expect(props.onClose).toHaveBeenCalled();
-  });
-
-  it('should be rendered correctly using an data view with timefield', async () => {
-    const { component, props } = mountComponent({ dataView: dataViewWithTimefieldMock });
-
-    const actions = findTestSubject(component, 'docTableRowAction');
-    expect(actions.length).toBe(2);
-    expect(actions.first().prop('href')).toMatchInlineSnapshot(
-      `"/base/app/discover#/doc/index-pattern-with-timefield-id/i?id=1"`
-    );
-    expect(actions.last().prop('href')).toMatchInlineSnapshot(
-      `"/base/app/discover#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
-    );
-    findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
-    expect(props.onClose).toHaveBeenCalled();
-  });
-
   it('displays document navigation when there is more than 1 doc available', async () => {
     const { component } = mountComponent({ dataView: dataViewWithTimefieldMock });
     const docNav = findTestSubject(component, 'dscDocNavigation');

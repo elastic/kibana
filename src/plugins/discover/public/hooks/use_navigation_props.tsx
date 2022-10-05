@@ -51,7 +51,7 @@ export const useNavigationProps = ({
 
     let appliedFilters: Filter[] = [];
     if (!isEmbeddableView) {
-      // applied from discover main
+      // applied from discover main and context app
       appliedFilters = [
         ...services.filterManager.getGlobalFilters(),
         ...services.filterManager.getAppFilters(),
