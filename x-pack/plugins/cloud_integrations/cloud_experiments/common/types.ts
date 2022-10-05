@@ -8,27 +8,6 @@
 import { FEATURE_FLAG_NAMES, METRIC_NAMES } from './constants';
 
 /**
- * The contract of the setup lifecycle method.
- *
- * @public
- */
-export interface CloudExperimentsPluginSetup {
-  /**
-   * Identifies the user in the A/B testing service.
-   * For now, we only rely on the user ID. In the future, we may request further details for more targeted experiments.
-   * @param userId The unique identifier of the user in the experiment.
-   * @param userMetadata Additional attributes to the user. Take care to ensure these values do not contain PII.
-   *
-   * @deprecated This API will become internal as soon as we reduce the dependency graph of the `cloud` plugin,
-   * and this plugin depends on it to fetch the data.
-   */
-  identifyUser: (
-    userId: string,
-    userMetadata?: Record<string, string | boolean | number | Array<string | boolean | number>>
-  ) => void;
-}
-
-/**
  * The names of the feature flags declared in Kibana.
  * Valid keys are defined in {@link FEATURE_FLAG_NAMES}. When using a new feature flag, add the name to the list.
  *
