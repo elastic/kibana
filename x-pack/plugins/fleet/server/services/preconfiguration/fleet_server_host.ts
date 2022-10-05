@@ -78,8 +78,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
           existingHost.is_default !== preconfiguredFleetServerHost.is_default ||
           existingHost.name !== preconfiguredFleetServerHost.name ||
           !isEqual(existingHost?.host_urls, preconfiguredFleetServerHost.host_urls));
-      console.log('isCreate', isCreate);
-      console.log('isUpdateWithNewData', isUpdateWithNewData);
+
       if (isCreate) {
         await createFleetServerHost(
           soClient,

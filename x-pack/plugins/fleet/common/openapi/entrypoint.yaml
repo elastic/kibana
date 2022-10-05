@@ -128,7 +128,7 @@ paths:
   /fleet_server_hosts:
     $ref: paths/fleet_server_hosts.yaml
   /fleet_server_hosts/{itemId}:
-    $ref: paths/fleet_server_hosts@{itemId}.yaml
+    $ref: paths/fleet_server_hosts@{item_id}.yaml
 components:
   securitySchemes:
     basicAuth:
