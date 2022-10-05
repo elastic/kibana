@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MonitorSelector } from './monitor_selector/monitor_selector';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { getMonitorRecentPingsAction, selectLatestPing, selectPingsLoading } from '../../state';
@@ -34,7 +35,14 @@ export const MonitorDetailsPageTitle = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem>{monitor?.name}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}> {monitor?.name}</EuiFlexItem>
+          <EuiFlexItem>
+            <MonitorSelector />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {pingsLoading || (latestPing && latestPing.monitor.id !== monitorId) ? (
           <EuiLoadingContent data-test-subj="monitorDetailsPageTitleLoading" lines={1} />
