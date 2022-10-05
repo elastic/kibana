@@ -367,9 +367,11 @@ export const getActionStatusHandler: RequestHandler<
 export const getAgentUploadsHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const body: GetAgentUploadsResponse = {
-      items: await AgentService.getAgentUploads(request.params.agentId),
+      items: await AgentService.getAgentUploads(esClient, request.params.agentId),
     };
 
     return response.ok({ body });

@@ -27,6 +27,9 @@
     { "path": "../licensing/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
+    {
+      "path": "../files/tsconfig.json"
+    },
 
     // optionalPlugins from ./kibana.json
     { "path": "../security/tsconfig.json" },
