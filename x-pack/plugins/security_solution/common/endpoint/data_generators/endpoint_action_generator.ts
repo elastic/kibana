@@ -20,6 +20,8 @@ import type {
   ProcessesEntry,
   EndpointActionDataParameterTypes,
   ActionResponseOutput,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
@@ -85,7 +87,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     if (command === 'get-file') {
       if (!parameters) {
         parameters = {
-          file: '/some/path/bad_file.txt',
+          path: '/some/path/bad_file.txt',
         };
       }
 
@@ -135,34 +137,69 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     });
   }
 
-  generateActionDetails(overrides: DeepPartial<ActionDetails> = {}): ActionDetails {
-    const details: ActionDetails = {
-      agents: ['agent-a'],
-      command: 'isolate',
-      completedAt: '2022-04-30T16:08:47.449Z',
-      hosts: { 'agent-a': { name: 'Host-agent-a' } },
-      id: '123',
-      isCompleted: true,
-      isExpired: false,
-      wasSuccessful: true,
-      errors: undefined,
-      startedAt: '2022-04-27T16:08:47.449Z',
-      status: 'successful',
-      comment: 'thisisacomment',
-      createdBy: 'auserid',
-      parameters: undefined,
-      outputs: {},
-      agentState: {
-        'agent-a': {
-          errors: undefined,
-          isCompleted: true,
-          completedAt: '2022-04-30T16:08:47.449Z',
-          wasSuccessful: true,
+  generateActionDetails<
+    TOutputType extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = never
+  >(
+    overrides: Partial<ActionDetails<TOutputType, TParameters>> = {}
+  ): ActionDetails<TOutputType, TParameters> {
+    const details: ActionDetails = merge(
+      {
+        agents: ['agent-a'],
+        command: 'isolate',
+        completedAt: '2022-04-30T16:08:47.449Z',
+        hosts: { 'agent-a': { name: 'Host-agent-a' } },
+        id: '123',
+        isCompleted: true,
+        isExpired: false,
+        wasSuccessful: true,
+        errors: undefined,
+        startedAt: '2022-04-27T16:08:47.449Z',
+        status: 'successful',
+        comment: 'thisisacomment',
+        createdBy: 'auserid',
+        parameters: undefined,
+        outputs: {},
+        agentState: {
+          'agent-a': {
+            errors: undefined,
+            isCompleted: true,
+            completedAt: '2022-04-30T16:08:47.449Z',
+            wasSuccessful: true,
+          },
         },
       },
-    };
+      overrides
+    );
 
-    return merge(details, overrides);
+    if (details.command === 'get-file') {
+      if (!details.parameters) {
+        (
+          details as ActionDetails<
+            ResponseActionGetFileOutputContent,
+            ResponseActionGetFileParameters
+          >
+        ).parameters = {
+          path: '/some/file.txt',
+        };
+      }
+
+      if (!details.outputs || Object.keys(details.outputs).length === 0) {
+        details.outputs = {
+          [details.agents[0]]: {
+            type: 'json',
+            content: {
+              code: 'ra_get-file_success',
+              path: '/some/file/txt',
+              size: 1234,
+              zip_size: 123,
+            },
+          },
+        };
+      }
+    }
+
+    return details as unknown as ActionDetails<TOutputType, TParameters>;
   }
 
   generateActivityLogAction(

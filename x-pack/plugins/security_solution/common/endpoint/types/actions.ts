@@ -50,6 +50,13 @@ export interface KillProcessActionOutputContent {
   entity_id?: string;
 }
 
+export interface ResponseActionGetFileOutputContent {
+  code: string;
+  path: string;
+  size: number;
+  zip_size: number;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -131,7 +138,7 @@ export type ResponseActionParametersWithPidOrEntityId =
   | ResponseActionParametersWithEntityId;
 
 export interface ResponseActionGetFileParameters {
-  file: string;
+  path: string;
 }
 
 export type EndpointActionDataParameterTypes =
@@ -268,7 +275,10 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
-export interface ActionDetails<TOutputContent extends object = object> {
+export interface ActionDetails<
+  TOutputContent extends object = object,
+  TParameters extends EndpointActionDataParameterTypes = never
+> {
   /** The action id */
   id: string;
   /**
@@ -323,11 +333,14 @@ export interface ActionDetails<TOutputContent extends object = object> {
   /** comment submitted with action */
   comment?: string;
   /** parameters submitted with action */
-  parameters?: EndpointActionDataParameterTypes;
+  parameters?: TParameters;
 }
 
-export interface ActionDetailsApiResponse<TOutputType extends object = object> {
-  data: ActionDetails<TOutputType>;
+export interface ActionDetailsApiResponse<
+  TOutputType extends object = object,
+  TParameters extends EndpointActionDataParameterTypes = never
+> {
+  data: ActionDetails<TOutputType, TParameters>;
 }
 export interface ActionListApiResponse {
   page: number | undefined;

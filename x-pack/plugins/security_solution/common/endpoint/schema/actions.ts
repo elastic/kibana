@@ -126,4 +126,4 @@ export const EndpointActionGetFileSchema = {
   }),
 };
 
-export type GetFileRequestRequestBody = TypeOf<typeof EndpointActionGetFileSchema.body>;
+export type ResponseActionGetFileRequestBody = TypeOf<typeof EndpointActionGetFileSchema.body>;
