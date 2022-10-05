@@ -20,6 +20,7 @@ export function cancelEsRequestOnAbort<T extends Promise<any>>(
 ): T {
   const subscription = request.events.aborted$.subscribe(() => {
     controller.abort();
+    console.log('Aborted ES request');
   });
 
   return promise.finally(() => subscription.unsubscribe()) as T;

@@ -147,7 +147,6 @@ function FlameGraphTooltip({
 
 export interface FlameGraphProps {
   id: string;
-  height: number | string;
   comparisonMode: FlameGraphComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
@@ -155,7 +154,6 @@ export interface FlameGraphProps {
 
 export const FlameGraph: React.FC<FlameGraphProps> = ({
   id,
-  height,
   comparisonMode,
   primaryFlamegraph,
   comparisonFlamegraph,
@@ -207,16 +205,20 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
     };
   }, [primaryFlamegraph, highlightedVmIndex]);
 
-  const { data: highlightedFrame, status: highlightedFrameStatus } = useAsync(() => {
-    if (!highlightedFrameQueryParams) {
-      return Promise.resolve(undefined);
-    }
+  const { data: highlightedFrame, status: highlightedFrameStatus } = useAsync(
+    ({ http }) => {
+      if (!highlightedFrameQueryParams) {
+        return Promise.resolve(undefined);
+      }
 
-    return fetchFrameInformation({
-      frameID: highlightedFrameQueryParams.frameID,
-      executableID: highlightedFrameQueryParams.executableID,
-    });
-  }, [highlightedFrameQueryParams, fetchFrameInformation]);
+      return fetchFrameInformation({
+        http,
+        frameID: highlightedFrameQueryParams.frameID,
+        executableID: highlightedFrameQueryParams.executableID,
+      });
+    },
+    [highlightedFrameQueryParams, fetchFrameInformation]
+  );
 
   const selected: undefined | React.ComponentProps<typeof FlamegraphInformationWindow>['frame'] =
     primaryFlamegraph && highlightedFrame && highlightedVmIndex !== undefined
