@@ -712,7 +712,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(task.enabled).to.eql(true);
         console.log(`enabled task - ${JSON.stringify(scheduledTask)}`);
-        expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(scheduledTask.scheduledAt));
+        expect(task.scheduledAt).to.eql(scheduledTask.scheduledAt);
       });
     });
 
