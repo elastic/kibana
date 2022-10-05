@@ -44,7 +44,7 @@ import type {
   LogsEndpointActionResponse,
   ResponseActionParametersWithPidOrEntityId,
 } from '../../../../common/endpoint/types';
-import type { ResponseActions } from '../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -174,7 +174,7 @@ export function registerResponseActionRoutes(
   );
 }
 
-const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
+const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
   ['isolate', 'HOST_ISOLATION'],
   ['unisolate', 'HOST_ISOLATION'],
   ['kill-process', 'KILL_PROCESS'],
@@ -183,11 +183,11 @@ const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
   ['get-file', 'GET_FILE'],
 ]);
 
-const returnActionIdCommands: ResponseActions[] = ['isolate', 'unisolate'];
+const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
   endpointContext: EndpointAppContext,
-  command: ResponseActions
+  command: ResponseActionsApiCommandNames
 ): RequestHandler<
   unknown,
   unknown,

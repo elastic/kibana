@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type {
-  ResponderCapabilities,
-  ResponderCommands,
+  EndpointCapabilities,
+  ConsoleResponseActionCommands,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
@@ -45,7 +45,7 @@ const pidValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-const commandToCapabilitiesMap = new Map<ResponderCommands, ResponderCapabilities>([
+const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, EndpointCapabilities>([
   ['isolate', 'isolation'],
   ['release', 'isolation'],
   ['kill-process', 'kill_process'],
@@ -54,9 +54,9 @@ const commandToCapabilitiesMap = new Map<ResponderCommands, ResponderCapabilitie
 ]);
 
 const capabilitiesValidator = (command: Command): true | string => {
-  const endpointCapabilities: ResponderCapabilities[] = command.commandDefinition.meta.capabilities;
+  const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
   const responderCapability = commandToCapabilitiesMap.get(
-    command.commandDefinition.name as ResponderCommands
+    command.commandDefinition.name as ConsoleResponseActionCommands
   );
   if (responderCapability) {
     if (endpointCapabilities.includes(responderCapability)) {
@@ -97,7 +97,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
   endpointAgentId: string;
   endpointCapabilities: ImmutableArray<string>;
 }): CommandDefinition[] => {
-  const doesEndpointSupportCommand = (commandName: ResponderCommands) => {
+  const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);

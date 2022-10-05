@@ -17,12 +17,12 @@ import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_m
 import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { getDeferred } from '../../../mocks/utils';
-import type { ResponderCapabilities } from '../../../../../common/endpoint/service/response_actions/constants';
-import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { EndpointCapabilities } from '../../../../../common/endpoint/service/response_actions/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using isolate action from response actions console', () => {
   let render: (
-    capabilities?: ResponderCapabilities[]
+    capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
@@ -35,7 +35,7 @@ describe('When using isolate action from response actions console', () => {
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
-    render = async (capabilities: ResponderCapabilities[] = [...RESPONDER_CAPABILITIES]) => {
+    render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {

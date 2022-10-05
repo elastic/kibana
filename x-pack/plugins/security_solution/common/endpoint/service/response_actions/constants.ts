@@ -7,7 +7,10 @@
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
 export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 
-export const RESPONSE_ACTION_COMMANDS = [
+/**
+ * The Command names that are used in the API payload for the `{ command: '' }` attribute
+ */
+export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'isolate',
   'unisolate',
   'kill-process',
@@ -15,22 +18,26 @@ export const RESPONSE_ACTION_COMMANDS = [
   'running-processes',
   'get-file',
 ] as const;
-export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
+
+export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
  */
-export const RESPONDER_CAPABILITIES = [
+export const ENDPOINT_CAPABILITIES = [
   'isolation',
   'kill_process',
   'suspend_process',
   'running_processes',
 ] as const;
 
-export type ResponderCapabilities = typeof RESPONDER_CAPABILITIES[number];
+export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
 
-/** The list of possible responder command names **/
-export const RESPONDER_COMMANDS = [
+/**
+ * The list of possible console command names that generate a Response Action to be dispatched
+ * to the Endpoint. (FYI: not all console commands are response actions)
+ */
+export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'isolate',
   'release',
   'kill-process',
@@ -38,4 +45,4 @@ export const RESPONDER_COMMANDS = [
   'processes',
 ] as const;
 
-export type ResponderCommands = typeof RESPONDER_COMMANDS[number];
+export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];

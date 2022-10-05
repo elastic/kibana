@@ -22,7 +22,7 @@ import type {
   ActionResponseOutput,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
-import { RESPONSE_ACTION_COMMANDS } from '../service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -245,6 +245,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   protected randomResponseActionCommand() {
-    return this.randomChoice(RESPONSE_ACTION_COMMANDS);
+    return this.randomChoice(RESPONSE_ACTION_API_COMMANDS_NAMES);
   }
 }

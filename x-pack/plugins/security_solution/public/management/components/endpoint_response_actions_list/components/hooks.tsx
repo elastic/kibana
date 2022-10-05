@@ -11,11 +11,11 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import type {
-  ResponseActions,
+  ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
-  RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
@@ -131,8 +131,11 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
  * running-processes -> processes
  */
 export const getUiCommand = (
-  command: ResponseActions
-): Exclude<ResponseActions, 'unisolate' | 'running-processes'> | 'release' | 'processes' => {
+  command: ResponseActionsApiCommandNames
+):
+  | Exclude<ResponseActionsApiCommandNames, 'unisolate' | 'running-processes'>
+  | 'release'
+  | 'processes' => {
   if (command === 'unisolate') {
     return 'release';
   } else if (command === 'running-processes') {
@@ -148,8 +151,11 @@ export const getUiCommand = (
  * processes -> running-processes
  */
 export const getCommandKey = (
-  uiCommand: Exclude<ResponseActions, 'unisolate' | 'running-processes'> | 'release' | 'processes'
-): ResponseActions => {
+  uiCommand:
+    | Exclude<ResponseActionsApiCommandNames, 'unisolate' | 'running-processes'>
+    | 'release'
+    | 'processes'
+): ResponseActionsApiCommandNames => {
   if (uiCommand === 'release') {
     return 'unisolate';
   } else if (uiCommand === 'processes') {
@@ -231,7 +237,7 @@ export const useActionsLogFilter = ({
         }))
       : isHostsFilter
       ? []
-      : RESPONSE_ACTION_COMMANDS.map((commandName) => ({
+      : RESPONSE_ACTION_API_COMMANDS_NAMES.map((commandName) => ({
           key: commandName,
           label: getUiCommand(commandName),
           checked:
