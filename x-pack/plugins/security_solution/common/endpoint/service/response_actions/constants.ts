@@ -29,6 +29,7 @@ export const ENDPOINT_CAPABILITIES = [
   'kill_process',
   'suspend_process',
   'running_processes',
+  'get_file',
 ] as const;
 
 export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
