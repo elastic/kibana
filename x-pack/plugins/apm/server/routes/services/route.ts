@@ -15,6 +15,7 @@ import {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
 } from '@kbn/ml-plugin/server';
+import os from 'os';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
@@ -272,7 +273,9 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<
-    import('./get_service_metadata_details').ServiceMetadataDetails
+    import('./get_service_metadata_details').ServiceMetadataDetails & {
+      cpus: any[];
+    }
   > => {
     const setup = await setupRequest(resources);
     const infraMetricsClient = createInfraMetricsClient(resources);
@@ -307,7 +310,10 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
       return mergeWith(serviceMetadataDetails, containerMetadata);
     }
 
-    return serviceMetadataDetails;
+    return {
+      ...serviceMetadataDetails,
+      cpus: os.cpus(),
+    };
   },
 });
 
