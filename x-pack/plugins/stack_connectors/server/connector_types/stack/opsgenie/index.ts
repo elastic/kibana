@@ -24,8 +24,7 @@ export const OpsgenieId = '.opsgenie';
 export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secrets> => {
   return {
     Service: OpsgenieConnector,
-    // TODO: determine license requirement
-    minimumLicenseRequired: 'gold',
+    minimumLicenseRequired: 'platinum',
     name: 'Opsgenie Connector',
     id: OpsgenieId,
     schema: { config: ConfigSchema, secrets: SecretsSchema },
