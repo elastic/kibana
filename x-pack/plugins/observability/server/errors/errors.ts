@@ -15,3 +15,4 @@ export class ObservabilityError extends Error {
 }
 
 export class SLONotFound extends ObservabilityError {}
+export class InternalQueryError extends ObservabilityError {}
