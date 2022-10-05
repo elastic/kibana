@@ -17,6 +17,7 @@ export class WhitelabellingPlugin implements Plugin {
 
   start(core: CoreStart) {
     const { http, chrome } = core;
+    chrome.registerWhitelabellingPlugin('whitelabelling');
     getThemingInfo(http).then(({ theming }) => {
       chrome.setCustomLogo(theming.logo);
     });

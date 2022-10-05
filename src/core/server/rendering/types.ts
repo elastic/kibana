@@ -30,6 +30,7 @@ export interface RenderingMetadata {
   themeVersion: ThemeVersion;
   stylesheetPaths: string[];
   injectedMetadata: InjectedMetadata;
+  title?: string;
 }
 
 /** @internal */

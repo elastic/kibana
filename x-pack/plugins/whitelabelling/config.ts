@@ -10,6 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const configSchema = schema.object({
   theme: schema.object({
     logo: schema.string(),
+    pageTitle: schema.string(),
   }),
 });
 

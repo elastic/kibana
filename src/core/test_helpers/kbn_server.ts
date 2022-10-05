@@ -41,6 +41,9 @@ const DEFAULTS_SETTINGS = {
   },
   plugins: {},
   migrations: { skip: false },
+  whitelabelling: {
+    theme: {},
+  },
 };
 
 export function createRootWithSettings(

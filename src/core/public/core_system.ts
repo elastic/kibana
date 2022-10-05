@@ -139,12 +139,12 @@ export class CoreSystem {
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
+    this.docLinks = new DocLinksService();
+    this.rendering = new RenderingService();
     this.chrome = new ChromeService({
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
     });
-    this.docLinks = new DocLinksService();
-    this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();

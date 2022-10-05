@@ -113,6 +113,7 @@ export class ChromeService {
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
     const customLogo$ = new BehaviorSubject<string | undefined>(undefined);
+    let whitelabellingRegistered: string | null = null;
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -284,8 +285,17 @@ export class ChromeService {
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
 
+      registerWhitelabellingPlugin: (pluginName) => {
+        if (whitelabellingRegistered) {
+          throw new Error('Another plugin already registered');
+        }
+        whitelabellingRegistered = pluginName;
+      },
+
       setCustomLogo: (logo: string) => {
-        customLogo$.next(logo);
+        if (whitelabellingRegistered && whitelabellingRegistered === 'whitelabelling') {
+          customLogo$.next(logo);
+        }
       },
     };
   }

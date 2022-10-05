@@ -19,6 +19,7 @@ import {
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import type {
@@ -48,6 +49,7 @@ interface Props {
   fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;
   sameSiteCookies?: ConfigType['sameSiteCookies'];
+  customLogo$?: Observable<string>;
 }
 
 interface State {
@@ -84,11 +86,11 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
 
 export class LoginPage extends Component<Props, State> {
   state = { loginState: null } as State;
+  private customLogoSubscription?: Subscription;
 
   public async componentDidMount() {
     const loadingCount$ = new BehaviorSubject(1);
     this.props.http.addLoadingCountSource(loadingCount$.asObservable());
-
     try {
       this.setState({ loginState: await this.props.http.get('/internal/security/login_state') });
     } catch (err) {
@@ -97,6 +99,13 @@ export class LoginPage extends Component<Props, State> {
 
     loadingCount$.next(0);
     loadingCount$.complete();
+  }
+
+  public componentWillUnmount() {
+    if (this.customLogoSubscription) {
+      this.customLogoSubscription.unsubscribe();
+      this.customLogoSubscription = undefined;
+    }
   }
 
   public render() {
@@ -122,14 +131,14 @@ export class LoginPage extends Component<Props, State> {
       ['loginWelcome__contentDisabledForm']: !loginIsSupported,
     });
 
+    const logo = <EuiIcon type="logoElastic" size="xxl" />;
+
     return (
       <div className="loginWelcome login-form">
         <header className="loginWelcome__header">
           <div className={contentHeaderClasses}>
             <EuiSpacer size="xxl" />
-            <span className="loginWelcome__logo">
-              <EuiIcon type="logoElastic" size="xxl" />
-            </span>
+            <span className="loginWelcome__logo">{logo}</span>
             <EuiTitle size="m" className="loginWelcome__title">
               <h1>
                 <FormattedMessage

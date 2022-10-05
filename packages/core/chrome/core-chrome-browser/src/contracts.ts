@@ -139,4 +139,6 @@ export interface ChromeStart {
   hasHeaderBanner$(): Observable<boolean>;
 
   setCustomLogo(customLogo: string): void;
+
+  registerWhitelabellingPlugin(pluginName: string): void;
 }
