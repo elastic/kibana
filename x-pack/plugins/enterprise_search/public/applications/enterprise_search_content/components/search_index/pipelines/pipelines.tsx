@@ -33,12 +33,8 @@ import { PipelinesJSONConfigurations } from './pipelines_json_configurations';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const SearchIndexPipelines: React.FC = () => {
-  const {
-    showAddMlInferencePipelineModal,
-    hasIndexIngestionPipeline,
-    index,
-    pipelineState: { name: pipelineName },
-  } = useValues(PipelinesLogic);
+  const { showAddMlInferencePipelineModal, hasIndexIngestionPipeline, index, pipelineName } =
+    useValues(PipelinesLogic);
   const { closeAddMlInferencePipelineModal, openAddMlInferencePipelineModal } =
     useActions(PipelinesLogic);
   const apiIndex = isApiIndex(index);
@@ -133,7 +129,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.subtitleAPIindex',
                     {
                       defaultMessage:
-                        "Inference pipelines will be run as processors from the Enterprise Search Ingest Pipeline. In order to use these pipeline on API-based indices you'll need to reference the {pipelineName} pipeline in your API requests.",
+                        "Inference pipelines will be run as processors from the Enterprise Search Ingest Pipeline. In order to use these pipelines on API-based indices you'll need to reference the {pipelineName} pipeline in your API requests.",
                       values: {
                         pipelineName,
                       },
