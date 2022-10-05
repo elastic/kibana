@@ -14,6 +14,7 @@ export type {
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
+export { FieldList, type FieldListProps, type FieldListGroups } from './components/field_list';
 export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
 export { FieldStats } from './components/field_stats';
 export { loadFieldStats } from './services/field_stats';

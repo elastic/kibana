@@ -32,6 +32,11 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import {
+  FieldList,
+  type FieldListProps,
+  type FieldListGroups,
+} from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
   DatasourceDataPanelProps,
@@ -45,9 +50,9 @@ import type { IndexPatternPrivateState } from './types';
 import { Loader } from '../loader';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { getFieldType } from './pure_utils';
-import { FieldGroups, FieldList } from './field_list';
 import { fieldContainsData, fieldExists } from '../shared_components';
 import { IndexPatternServiceAPI } from '../data_views_service/service';
+import { FieldItem } from './field_item';
 
 export type Props = Omit<
   DatasourceDataPanelProps<IndexPatternPrivateState>,
@@ -331,7 +336,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
 
-  const unfilteredFieldGroups: FieldGroups = useMemo(() => {
+  const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
       const overallField = currentIndexPattern?.getFieldByName(field.name);
       return (
@@ -360,7 +365,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
     const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
 
-    const fieldGroupDefinitions: FieldGroups = {
+    const fieldGroupDefinitions: FieldListGroups = {
       SpecialFields: {
         fields: groupedFields.specialFields,
         fieldCount: 1,
@@ -452,7 +457,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     existingFieldsForIndexPattern,
   ]);
 
-  const fieldGroups: FieldGroups = useMemo(() => {
+  // TODO: fix DataViewField vs IndexPatternField types
+  const fieldGroups: FieldListGroups = useMemo(() => {
     const filterFieldGroup = (fieldGroup: IndexPatternField[]) =>
       fieldGroup.filter((field) => {
         if (
@@ -586,21 +592,32 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ]
   );
 
-  const fieldProps = useMemo(
-    () => ({
-      core,
-      data,
-      fieldFormats,
-      indexPattern: currentIndexPattern,
-      highlight: localState.nameFilter.toLowerCase(),
-      dateRange,
-      query,
-      filters,
-      chartsThemeService: charts.theme,
-    }),
+  const renderFieldItem: FieldListProps['renderFieldItem'] = useCallback(
+    ({ field, itemIndex, groupIndex, hideDetails }) => (
+      <FieldItem
+        key={field.name}
+        field={field}
+        exists={checkFieldExists(field)}
+        hideDetails={hideDetails}
+        itemIndex={itemIndex}
+        groupIndex={groupIndex}
+        dropOntoWorkspace={dropOntoWorkspace}
+        hasSuggestionForField={hasSuggestionForField}
+        editField={editField}
+        removeField={removeField}
+        uiActions={uiActions}
+        core={core}
+        fieldFormats={fieldFormats}
+        indexPattern={currentIndexPattern}
+        highlight={localState.nameFilter.toLowerCase()}
+        dateRange={dateRange}
+        query={query}
+        filters={filters}
+        chartsThemeService={charts.theme}
+      />
+    ),
     [
       core,
-      data,
       fieldFormats,
       currentIndexPattern,
       dateRange,
@@ -608,38 +625,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       filters,
       localState.nameFilter,
       charts.theme,
+      checkFieldExists,
+      dropOntoWorkspace,
+      hasSuggestionForField,
+      editField,
+      removeField,
+      uiActions,
     ]
   );
-
-  // const renderField = useCallback(
-  //   (field: IndexPatternField, index) => (
-  //     <FieldItem
-  //       {...fieldProps}
-  //       key={field.name}
-  //       field={field}
-  //       exists={exists(field)}
-  //       hideDetails={hideDetails}
-  //       itemIndex={index}
-  //       groupIndex={groupIndex}
-  //       dropOntoWorkspace={dropOntoWorkspace}
-  //       hasSuggestionForField={hasSuggestionForField}
-  //       editField={editField}
-  //       removeField={removeField}
-  //       uiActions={uiActions}
-  //     />
-  //   ),
-  //   [
-  //     fieldProps,
-  //     exists,
-  //     hideDetails,
-  //     dropOntoWorkspace,
-  //     hasSuggestionForField,
-  //     groupIndex,
-  //     editField,
-  //     removeField,
-  //     uiActions,
-  //   ]
-  // );
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -759,20 +752,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         </EuiScreenReaderOnly>
         <EuiFlexItem>
           <FieldList
-            exists={checkFieldExists}
-            fieldProps={fieldProps}
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={!!existingFieldsForIndexPattern}
             filter={filter}
-            currentIndexPatternId={currentIndexPatternId}
+            dataViewId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
             existenceFetchTimeout={existenceFetchTimeout}
             existFieldsInIndex={!!allFields.length}
-            dropOntoWorkspace={dropOntoWorkspace}
-            hasSuggestionForField={hasSuggestionForField}
-            editField={editField}
-            removeField={removeField}
-            uiActions={uiActions}
+            renderFieldItem={renderFieldItem}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -1,25 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import './field_list.scss';
 import { partition, throttle } from 'lodash';
 import React, { useState, Fragment, useCallback, useMemo, useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldItem } from './field_item';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
-import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
-import type { DatasourceDataPanelProps, IndexPatternField } from '../types';
+import { FieldsAccordion, type FieldsAccordionProps } from './fields_accordion';
+import './field_list.scss';
+
 const PAGINATION_SIZE = 50;
 
-export type FieldGroups = Record<
+export type FieldListGroups = Record<
   string,
   {
-    fields: IndexPatternField[];
+    fields: DataViewField[];
     fieldCount: number;
     showInAccordion: boolean;
     isInitiallyOpen: boolean;
@@ -33,7 +33,7 @@ export type FieldGroups = Record<
 >;
 
 function getDisplayedFieldsLength(
-  fieldGroups: FieldGroups,
+  fieldGroups: FieldListGroups,
   accordionState: Partial<Record<string, boolean>>
 ) {
   return Object.entries(fieldGroups)
@@ -41,25 +41,8 @@ function getDisplayedFieldsLength(
     .reduce((allFieldCount, [, { fields }]) => allFieldCount + fields.length, 0);
 }
 
-export const FieldList = React.memo(function FieldList({
-  exists,
-  fieldGroups,
-  existenceFetchFailed,
-  existenceFetchTimeout,
-  fieldProps,
-  hasSyncedExistingFields,
-  filter,
-  currentIndexPatternId,
-  existFieldsInIndex,
-  dropOntoWorkspace,
-  hasSuggestionForField,
-  editField,
-  removeField,
-  uiActions,
-}: {
-  exists: (field: IndexPatternField) => boolean;
-  fieldGroups: FieldGroups;
-  fieldProps: FieldItemSharedProps;
+export interface FieldListProps {
+  fieldGroups: FieldListGroups;
   hasSyncedExistingFields: boolean;
   existenceFetchFailed?: boolean;
   existenceFetchTimeout?: boolean;
@@ -67,15 +50,22 @@ export const FieldList = React.memo(function FieldList({
     nameFilter: string;
     typeFilter: string[];
   };
-  currentIndexPatternId: string;
+  dataViewId: string;
   existFieldsInIndex: boolean;
-  dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
-  hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
-  editField?: (name: string) => void;
-  removeField?: (name: string) => void;
-  uiActions: UiActionsStart;
+  renderFieldItem: FieldsAccordionProps['renderFieldItem'];
+}
+
+export const FieldList: React.FC<FieldListProps> = React.memo(function FieldList({
+  fieldGroups,
+  existenceFetchFailed,
+  existenceFetchTimeout,
+  hasSyncedExistingFields,
+  filter,
+  dataViewId,
+  existFieldsInIndex,
+  renderFieldItem,
 }) {
-  const [fieldGroupsToShow, fieldFroupsToCollapse] = partition(
+  const [fieldGroupsToShow, fieldGroupsToCollapse] = partition(
     Object.entries(fieldGroups),
     ([, { showInAccordion }]) => showInAccordion
   );
@@ -93,7 +83,7 @@ export const FieldList = React.memo(function FieldList({
       scrollContainer.scrollTop = 0;
       setPageSize(PAGINATION_SIZE);
     }
-  }, [filter.nameFilter, filter.typeFilter, currentIndexPatternId, scrollContainer]);
+  }, [filter.nameFilter, filter.typeFilter, dataViewId, scrollContainer]);
 
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {
@@ -130,7 +120,7 @@ export const FieldList = React.memo(function FieldList({
 
   return (
     <div
-      className="lnsIndexPatternFieldList"
+      className="unifiedFieldList__fieldList"
       ref={(el) => {
         if (el && !el.dataset.dynamicScroll) {
           el.dataset.dynamicScroll = 'true';
@@ -139,47 +129,28 @@ export const FieldList = React.memo(function FieldList({
       }}
       onScroll={throttle(lazyScroll, 100)}
     >
-      <div className="lnsIndexPatternFieldList__accordionContainer">
+      <div className="unifiedFieldList__fieldList__accordionContainer">
         <ul>
-          {fieldFroupsToCollapse.flatMap(([, { fields }]) =>
-            fields.map((field, index) => (
-              <FieldItem
-                {...fieldProps}
-                exists={exists(field)}
-                field={field}
-                editField={editField}
-                removeField={removeField}
-                hideDetails={true}
-                key={field.name}
-                itemIndex={index}
-                groupIndex={0}
-                dropOntoWorkspace={dropOntoWorkspace}
-                hasSuggestionForField={hasSuggestionForField}
-                uiActions={uiActions}
-              />
-            ))
+          {fieldGroupsToCollapse.flatMap(([, { fields }]) =>
+            fields.map((field, index) =>
+              renderFieldItem({ field, itemIndex: index, groupIndex: 0, hideDetails: true })
+            )
           )}
         </ul>
         <EuiSpacer size="s" />
         {fieldGroupsToShow.map(([key, fieldGroup], index) => (
           <Fragment key={key}>
             <FieldsAccordion
-              dropOntoWorkspace={dropOntoWorkspace}
-              hasSuggestionForField={hasSuggestionForField}
               initialIsOpen={Boolean(accordionState[key])}
               key={key}
-              id={`lnsIndexPattern${key}`}
+              id={`fieldList${key}`}
               label={fieldGroup.title}
               helpTooltip={fieldGroup.helpText}
-              exists={exists}
-              editField={editField}
-              removeField={removeField}
               hideDetails={fieldGroup.hideDetails}
               hasLoaded={!!hasSyncedExistingFields}
               fieldsCount={fieldGroup.fields.length}
               isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
               paginatedFields={paginatedFields[key]}
-              fieldProps={fieldProps}
               groupIndex={index + 1}
               onToggle={(open) => {
                 setAccordionState((s) => ({
@@ -196,7 +167,7 @@ export const FieldList = React.memo(function FieldList({
               }}
               showExistenceFetchError={existenceFetchFailed}
               showExistenceFetchTimeout={existenceFetchTimeout}
-              renderCallout={
+              renderCallout={() => (
                 <NoFieldsCallout
                   isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
                   isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
@@ -204,8 +175,8 @@ export const FieldList = React.memo(function FieldList({
                   existFieldsInIndex={!!existFieldsInIndex}
                   defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
                 />
-              }
-              uiActions={uiActions}
+              )}
+              renderFieldItem={renderFieldItem}
             />
             <EuiSpacer size="m" />
           </Fragment>

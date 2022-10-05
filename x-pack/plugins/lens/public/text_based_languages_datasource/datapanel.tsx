@@ -127,10 +127,11 @@ export function TextBasedLanguagesDataPanel({
             </EuiFormControlLayout>
           </EuiFlexItem>
           <EuiFlexItem>
-            <div className="lnsIndexPatternFieldList">
-              <div className="lnsIndexPatternFieldList__accordionContainer">
+            {/* TODO: Refactor to use shared components from UnifiedFieldList instead of their classes */}
+            <div className="unifiedFieldList__fieldList">
+              <div className="unifiedFieldList__fieldList__accordionContainer">
                 <ul
-                  className="lnsInnerIndexPatternDataPanel__fieldItems"
+                  className="unifiedFieldList__fieldsAccordion__fieldItems"
                   data-test-subj="lnsTextBasedLanguagesPanelFields"
                 >
                   {filteredFields.length > 0 &&

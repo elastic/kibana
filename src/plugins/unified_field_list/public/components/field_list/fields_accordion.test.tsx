@@ -20,6 +20,7 @@ describe('Fields Accordion', () => {
     defaultProps = {
       initialIsOpen: true,
       onToggle: jest.fn(),
+      groupIndex: 0,
       id: 'id',
       label: 'label-test',
       hasLoaded: true,
@@ -27,7 +28,7 @@ describe('Fields Accordion', () => {
       isFiltered: false,
       paginatedFields,
       renderCallout: () => <div id="lens-test-callout">Callout</div>,
-      renderFieldItem: (field) => <EuiText key={field.name}>{field.name}</EuiText>,
+      renderFieldItem: ({ field }) => <EuiText key={field.name}>{field.name}</EuiText>,
     };
   });
 

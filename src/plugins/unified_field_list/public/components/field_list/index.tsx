@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { FieldsAccordion, type FieldsAccordionProps } from './fields_accordion';
+export { FieldList, type FieldListProps, type FieldListGroups } from './field_list';

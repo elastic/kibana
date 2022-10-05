@@ -28,9 +28,16 @@ export interface FieldsAccordionProps {
   helpTooltip?: string;
   hasLoaded: boolean;
   fieldsCount: number;
+  hideDetails?: boolean;
   isFiltered: boolean;
+  groupIndex: number;
   paginatedFields: DataViewField[];
-  renderFieldItem: (field: DataViewField) => JSX.Element;
+  renderFieldItem: (params: {
+    field: DataViewField;
+    hideDetails?: boolean;
+    itemIndex: number;
+    groupIndex: number;
+  }) => JSX.Element;
   renderCallout: () => JSX.Element;
   showExistenceFetchError?: boolean;
   showExistenceFetchTimeout?: boolean;
@@ -44,7 +51,9 @@ export const FieldsAccordion: React.FC<FieldsAccordionProps> = memo(function Inn
   helpTooltip,
   hasLoaded,
   fieldsCount,
+  hideDetails,
   isFiltered,
+  groupIndex,
   paginatedFields,
   renderFieldItem,
   renderCallout,
@@ -130,7 +139,10 @@ export const FieldsAccordion: React.FC<FieldsAccordionProps> = memo(function Inn
       {hasLoaded &&
         (!!fieldsCount ? (
           <ul className="unifiedFieldList__fieldsAccordion__fieldItems">
-            {paginatedFields && paginatedFields.map(renderFieldItem)}
+            {paginatedFields &&
+              paginatedFields.map((field, index) =>
+                renderFieldItem({ field, itemIndex: index, groupIndex, hideDetails })
+              )}
           </ul>
         ) : (
           renderCallout()
