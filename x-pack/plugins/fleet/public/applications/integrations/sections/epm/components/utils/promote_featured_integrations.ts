@@ -22,16 +22,16 @@ export function _promoteFeaturedIntegrations(
 
   if (!featuredIntegrationNames) return packageList;
 
-  const [featuredIntegrations, other] = partition(packageList, (card) =>
+  const [featuredIntegrations, otherIntegrations] = partition(packageList, (card) =>
     featuredIntegrationNames.includes(card.name)
   );
 
   // now return the integrations in the order they are defined in
-  const orderedFeatured = featuredIntegrationNames
+  const orderedFeaturedIntegrations = featuredIntegrationNames
     .map((integrationName) => featuredIntegrations.find(({ name }) => name === integrationName))
     .filter((v) => v) as PackageListGridProps['list'];
 
-  return [...orderedFeatured, ...other];
+  return [...orderedFeaturedIntegrations, ...otherIntegrations];
 }
 
 export const promoteFeaturedIntegrations = _promoteFeaturedIntegrations.bind(
