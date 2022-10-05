@@ -50,6 +50,11 @@ export class LayerTOC extends Component<Props> {
       return;
     }
 
+    // Dragged item to same location, nothing to update
+    if (source.index === destination.index) {
+      return 0;
+    }
+
     const sourceIndex = this._reverseIndex(source.index);
     const destinationIndex = this._reverseIndex(destination.index);
 
