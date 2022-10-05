@@ -17,14 +17,52 @@
 //
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
+import * as path from 'path';
 import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
-import { run } from 'jest';
-import { buildArgv } from 'jest-cli/build/cli';
+import { getVersion, run } from 'jest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
 import { map } from 'lodash';
+import { deprecationEntries } from 'jest-config';
+import { validateCLIOptions } from 'jest-validate';
+import type { Config } from '@jest/types';
+import yargs from 'yargs';
+import * as args from './args';
+
+export const buildArgv = (maybeArgv?: string[]): Config.Argv => {
+  const version = getVersion() + (__dirname.includes(`packages${path.sep}jest-cli`) ? '-dev' : '');
+
+  const rawArgv: Config.Argv | string[] = maybeArgv || process.argv.slice(2);
+  const argv: Config.Argv = yargs(rawArgv)
+    .usage(args.usage)
+    .version(version)
+    .alias('help', 'h')
+    .options(args.options)
+    .epilogue(args.docs)
+    .check(args.check).argv;
+
+  validateCLIOptions(
+    argv,
+    { ...args.options, deprecationEntries },
+    // strip leading dashes
+    Array.isArray(rawArgv)
+      ? rawArgv.map((rawArg) => rawArg.replace(/^--?/, ''))
+      : Object.keys(rawArgv)
+  );
+
+  // strip dashed args
+  return Object.keys(argv).reduce<Config.Argv>(
+    (result, key) => {
+      if (!key.includes('-')) {
+        result[key] = argv[key];
+      }
+      return result;
+    },
+    { $0: argv.$0, _: argv._ }
+  );
+};
 
 // yarn test:jest src/core/server/saved_objects
 // yarn test:jest src/core/public/core_system.test.ts
