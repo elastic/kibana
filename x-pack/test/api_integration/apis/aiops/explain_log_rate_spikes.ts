@@ -222,9 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
       const errorActions = data.filter((d) => d.type === expected.errorFilter);
       expect(errorActions.length).to.be(1);
 
-      expect(errorActions[0].payload).to.be(
-        'ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [does_not_exist]'
-      );
+      expect(errorActions[0].payload).to.be('Failed to fetch field candidates.');
     });
   });
 };
