@@ -111,8 +111,6 @@ export class AutocompleteInfo {
     });
   }
 
-  // Move fetching autocomplete to client-side to avoid browser event loop blocking
-
   private retrieveSettings<T>(
     settingsKey: SettingsKey,
     settingsToRetrieve: SettingsToRetrieve
