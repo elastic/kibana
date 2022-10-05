@@ -56,8 +56,25 @@ describe('Registration', () => {
       minimumLicenseRequired: connector.minimumLicenseRequired,
       supportedFeatureIds: connector.supportedFeatureIds,
       validate: expect.anything(),
-      executor: expect.anything(),
-      renderParameterTemplates,
+      executor: expect.any(Function),
+      renderParameterTemplates: expect.any(Function),
     });
+  });
+
+  it('registers the renderParameterTemplates correctly', async () => {
+    register<TestConfig, TestSecrets>({
+      actionTypeRegistry,
+      connector,
+      configurationUtilities: mockedActionsConfig,
+      logger,
+    });
+
+    const params = {};
+    const variables = {};
+    const actionId = 'action-id';
+    const registerParam = actionTypeRegistry.register.mock.calls[0][0];
+    registerParam.renderParameterTemplates?.(params, variables, actionId);
+
+    expect(renderParameterTemplates).toHaveBeenCalledWith(params, variables, actionId);
   });
 });
