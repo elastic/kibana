@@ -54,7 +54,7 @@ describe('AllCasesSelectorModal', () => {
     expect(res.queryByTestId('all-cases-modal')).toBeFalsy();
   });
 
-  it('should hide bulk actions and row actions', async () => {
+  it('should not show bulk actions and row actions on the modal', async () => {
     const res = appMockRenderer.render(<AllCasesSelectorModal {...defaultProps} />);
     await waitFor(() => {
       expect(res.getByTestId('cases-table')).toBeInTheDocument();

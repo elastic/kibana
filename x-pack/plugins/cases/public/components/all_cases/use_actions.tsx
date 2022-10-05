@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -49,9 +49,9 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
 
-  const getPanels = useCallback((): EuiContextMenuPanelDescriptor[] => {
+  const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
-    const panels: EuiContextMenuPanelDescriptor[] = [
+    const panelsToBuild: EuiContextMenuPanelDescriptor[] = [
       { id: 0, items: mainPanelItems, title: i18n.ACTIONS },
     ];
 
@@ -89,14 +89,14 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
     }
 
     if (canUpdate) {
-      panels.push({
+      panelsToBuild.push({
         id: 1,
         title: i18n.STATUS,
         items: statusAction.getActions([theCase]),
       });
     }
 
-    return panels;
+    return panelsToBuild;
   }, [canDelete, canUpdate, deleteAction, statusAction, theCase]);
 
   return (
@@ -121,11 +121,7 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={getPanels()}
-          key={`case-action-menu-${theCase.id}`}
-        />
+        <EuiContextMenu initialPanelId={0} panels={panels} key={`case-action-menu-${theCase.id}`} />
       </EuiPopover>
       {deleteAction.isModalVisible ? (
         <ConfirmDeleteCaseModal

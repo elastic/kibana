@@ -912,11 +912,26 @@ describe('AllCasesListGeneric', () => {
         });
       });
 
-      it('should disable row actions when bulk selecting cases', async () => {
+      it('should disable row actions when bulk selecting all cases', async () => {
         const res = appMockRenderer.render(<AllCasesList />);
 
         act(() => {
           userEvent.click(res.getByTestId('checkboxSelectAll'));
+        });
+
+        await waitFor(() => {
+          for (const theCase of defaultGetCases.data.cases) {
+            expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeDisabled();
+          }
+        });
+      });
+
+      it('should disable row actions when selecting a case', async () => {
+        const res = appMockRenderer.render(<AllCasesList />);
+        const caseToSelect = defaultGetCases.data.cases[0];
+
+        act(() => {
+          userEvent.click(res.getByTestId(`checkboxSelectRow-${caseToSelect.id}`));
         });
 
         await waitFor(() => {
