@@ -390,6 +390,9 @@ export const getEndpointResponseActionsConsoleCommands = ({
               defaultMessage: 'The full file path to be retrieved',
             }
           ),
+          validate: (argData) => {
+            return emptyArgumentValidator(argData);
+          },
         },
         comment: {
           required: false,
