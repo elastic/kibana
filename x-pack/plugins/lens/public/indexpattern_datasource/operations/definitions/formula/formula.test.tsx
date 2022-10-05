@@ -1658,19 +1658,6 @@ invalid: "
             );
           }
         );
-        it(`[${fn}] returns an error if the condition argument is of the wrong type`, () => {
-          const [firstArg] = tinymathFunctions[fn].positionalArguments;
-          expect(
-            formulaOperation.getErrorMessage!(
-              getNewLayerWithFormula(`${fn}(1, 2, 3)`),
-              'col1',
-              indexPattern,
-              operationDefinitionMap
-            )
-          ).toEqual([
-            `The ${firstArg.name} argument for the operation ${fn} in the Formula is of the wrong type: number instead of ${firstArg.type}`,
-          ]);
-        });
       }
     }
 
