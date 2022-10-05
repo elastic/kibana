@@ -858,6 +858,41 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.urlAllowListValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "urlAllowListValidator",
+        "description": [],
+        "signature": [
+          "<T>(urlKey: string) => (obj: T, validatorServices: ",
+          "ValidatorServices",
+          ") => void"
+        ],
+        "path": "x-pack/plugins/actions/server/sub_action_framework/helpers/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.urlAllowListValidator.$1",
+            "type": "string",
+            "tags": [],
+            "label": "urlKey",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/helpers/validators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1191,7 +1226,13 @@
             "label": "validate",
             "description": [],
             "signature": [
-              "{ params?: ValidatorType<Params> | undefined; config?: ValidatorType<Config> | undefined; secrets?: ValidatorType<Secrets> | undefined; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; } | undefined"
+              "{ params?: ",
+              "ValidatorType",
+              "<Params> | undefined; config?: ",
+              "ValidatorType",
+              "<Config> | undefined; secrets?: ",
+              "ValidatorType",
+              "<Secrets> | undefined; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
