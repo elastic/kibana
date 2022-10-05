@@ -85,7 +85,7 @@ export const IngestPipelinesCard: React.FC = () => {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <h4>{pipelineState.name}</h4>
+                    <h4>{pipelineName}</h4>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
