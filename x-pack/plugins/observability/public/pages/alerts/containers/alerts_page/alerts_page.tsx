@@ -8,17 +8,15 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutSize } from '@elastic/eui';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers, AlertStatus } from '@kbn/rule-data-utils';
+import { observabilityAlertFeatureIds } from '../../../../config';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
@@ -38,7 +36,6 @@ import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
   BASE_ALERT_REGEX,
-  NO_INDEX_PATTERNS,
 } from './constants';
 import { RuleStatsState } from './types';
 
@@ -52,7 +49,6 @@ function AlertsPage() {
     useAlertsPageStateContainer();
   const {
     cases,
-    dataViews,
     docLinks,
     http,
     notifications: { toasts },
@@ -84,7 +80,6 @@ function AlertsPage() {
       }),
     },
   ]);
-  const indexNames = useAlertIndexNames();
 
   async function loadRuleStats() {
     setRuleStatsLoading(true);
@@ -127,23 +122,6 @@ function AlertsPage() {
   }, []);
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
-
-  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
-    if (indexNames.length === 0) {
-      return [];
-    }
-
-    return [
-      {
-        id: 'dynamic-observability-alerts-table-index-pattern',
-        title: indexNames.join(','),
-        fields: await dataViews.getFieldsForWildcard({
-          pattern: indexNames.join(','),
-          allowNoIndex: true,
-        }),
-      },
-    ];
-  }, [indexNames]);
 
   const onRefresh = () => {
     setRefreshNow(new Date().getTime());
@@ -227,7 +205,7 @@ function AlertsPage() {
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <AlertsSearchBar
-            dynamicIndexPatterns={dynamicIndexPatternsAsyncState.value ?? NO_INDEX_PATTERNS}
+            featureIds={observabilityAlertFeatureIds}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             query={kuery}
@@ -254,12 +232,7 @@ function AlertsPage() {
               configurationId={AlertConsumers.OBSERVABILITY}
               id={ALERTS_TABLE_ID}
               flyoutSize={'s' as EuiFlyoutSize}
-              featureIds={[
-                AlertConsumers.APM,
-                AlertConsumers.INFRASTRUCTURE,
-                AlertConsumers.LOGS,
-                AlertConsumers.UPTIME,
-              ]}
+              featureIds={observabilityAlertFeatureIds}
               query={buildEsQuery(
                 {
                   to: rangeTo,
