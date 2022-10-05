@@ -16,7 +16,7 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
   /**
-   * A [blurhash](https://blurha.sh/) to be rendered while the image is downloading.
+   * Image metadata
    */
   meta?: FileImageMetadata;
 
