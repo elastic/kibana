@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { DropResult, EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { TOCEntry } from './toc_entry';
+import { isLayerGroup } from '../../../../classes/layers/layer_group';
 import { ILayer } from '../../../../classes/layers/layer';
 
 export interface Props {
@@ -71,37 +72,37 @@ export class LayerTOC extends Component<Props> {
   }
 
   _onDragUpdate = ({ combine, destination, source }: DropResult) => {
+    const sourceIndex = this._reverseIndex(source.index);
+    const sourceLayer = this.props.layerList[sourceIndex];
+
     if (combine) {
-      const sourceLayer = this.props.layerList[this._reverseIndex(source.index)];
-      const combineLayer = this.props.layerList.find((findLayer) => {
+      const combineIndex = this.props.layerList.findIndex((findLayer) => {
         return findLayer.getId() === combine.draggableId;
       });
+      const combineLayer = combineIndex !== -1 ? this.props.layerList[combineIndex] : null;
+
+      const newRightSiblingIndex = combineIndex - 1;
+      const newRightSiblingLayer =
+        newRightSiblingIndex < 0 ? null : this.props.layerList[newRightSiblingIndex];
+
       const forebearers = combineLayer ? this._getForebearers(combineLayer) : [];
+
       this.setState({
         combineLayer,
-        newRightSiblingLayer: null,
+        newRightSiblingLayer,
         sourceLayer,
         isOwnAncestor: forebearers.includes(sourceLayer.getId()),
       });
       return;
     }
 
-    // Dragging item out of EuiDroppable results in destination of null
     if (!destination) {
       this.setState({ ...CLEAR_DND_STATE });
       return;
     }
 
-    // Dragged item to same location, nothing to update
-    if (source.index === destination.index) {
-      this.setState({ ...CLEAR_DND_STATE });
-      return;
-    }
-
-    const sourceIndex = this._reverseIndex(source.index);
-    const sourceLayer = this.props.layerList[sourceIndex];
-
     const destinationIndex = this._reverseIndex(destination.index);
+
     const newRightSiblingIndex =
       sourceIndex > destinationIndex
         ? // When layer is moved to the right, new right sibling is layer to the right of destination
@@ -110,6 +111,7 @@ export class LayerTOC extends Component<Props> {
           destinationIndex;
     const newRightSiblingLayer =
       newRightSiblingIndex < 0 ? null : this.props.layerList[newRightSiblingIndex];
+
     const forebearers = newRightSiblingLayer ? this._getForebearers(newRightSiblingLayer) : [];
 
     this.setState({
@@ -129,6 +131,14 @@ export class LayerTOC extends Component<Props> {
     }
 
     if (combineLayer) {
+      // add source to combine when combine is layer group
+      if (isLayerGroup(combineLayer) && newRightSiblingLayer) {
+        this.props.setLayerParent(sourceLayer.getId(), combineLayer.getId());
+        this.props.moveLayerToLeftOfTarget(sourceLayer.getId(), newRightSiblingLayer.getId());
+        return;
+      }
+
+      // creage layer group that contains source and combine
       this.props.createLayerGroup(sourceLayer.getId(), combineLayer.getId());
       return;
     }
