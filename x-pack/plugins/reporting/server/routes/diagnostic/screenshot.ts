@@ -24,7 +24,7 @@ import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 
 const chromiumPath = path.resolve('x-pack/plugins/screenshotting/chromium');
-const DEFAULT_QUERY_VIEWPORT = '1200,3000,2';
+const DEFAULT_QUERY_VIEWPORT = '2400,2000,2';
 const queryValidation = {
   query: schema.maybe(
     schema.object({
