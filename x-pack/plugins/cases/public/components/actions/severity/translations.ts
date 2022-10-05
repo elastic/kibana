@@ -21,7 +21,7 @@ const SET_SEVERITY = ({
   i18n.translate('xpack.cases.containers.markInProgressCases', {
     values: { caseTitle, totalCases, severity },
     defaultMessage:
-      'Set {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} to {severity}',
+      'Severity was set to {severity} for {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
   });
 
 export const SET_SEVERITY_LOW = ({
