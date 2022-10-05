@@ -357,10 +357,14 @@ export const LensTopNavMenu = ({
   ]);
 
   useEffect(() => {
-    if (indexPatterns.length > 0) {
-      setCurrentIndexPattern(indexPatterns[0]);
+    if (activeDatasourceId && datasourceStates[activeDatasourceId].state) {
+      const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
+        datasourceStates[activeDatasourceId].state
+      );
+      const dataView = dataViewsList.find((pattern) => pattern.id === dataViewId);
+      setCurrentIndexPattern(dataView ?? indexPatterns[0]);
     }
-  }, [indexPatterns]);
+  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns, dataViewsList]);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -579,7 +583,7 @@ export const LensTopNavMenu = ({
             dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
-            query: newQuery,
+            query: isOnTextBasedMode ? query : newQuery,
             columns: meta.columns,
           });
         },
@@ -622,6 +626,7 @@ export const LensTopNavMenu = ({
     indexPatterns,
     dataViews.indexPatterns,
     data.query.timefilter.timefilter,
+    isOnTextBasedMode,
     lensStore,
     theme$,
   ]);
