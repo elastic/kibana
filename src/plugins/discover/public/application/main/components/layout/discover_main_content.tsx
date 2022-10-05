@@ -67,7 +67,7 @@ export const DiscoverMainContent = ({
   resizeRef,
 }: DiscoverMainContentProps) => {
   const services = useDiscoverServices();
-  const { trackUiMetric, storage } = services;
+  const { trackUiMetric } = services;
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -94,7 +94,6 @@ export const DiscoverMainContent = ({
     onHideChartChange,
     onIntervalChange,
   } = useDiscoverHistogram({
-    storage,
     stateContainer,
     state,
     savedSearchData$,

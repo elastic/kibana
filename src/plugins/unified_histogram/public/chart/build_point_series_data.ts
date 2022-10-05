@@ -7,13 +7,16 @@
  */
 
 import { uniq } from 'lodash';
-import type { ChartData, Dimensions, Table } from '../types';
+import type { UnifiedHistogramChartData, Dimensions, Table } from '../types';
 
-export const buildPointSeriesData = (table: Table, dimensions: Dimensions): ChartData => {
+export const buildPointSeriesData = (
+  table: Table,
+  dimensions: Dimensions
+): UnifiedHistogramChartData => {
   const { x, y } = dimensions;
   const xAccessor = table.columns[x.accessor].id;
   const yAccessor = table.columns[y.accessor].id;
-  const chart = {} as ChartData;
+  const chart = {} as UnifiedHistogramChartData;
 
   chart.xAxisOrderedValues = uniq(table.rows.map((r) => r[xAccessor] as number));
   chart.xAxisFormat = x.format;

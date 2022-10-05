@@ -31,13 +31,13 @@ import {
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import type { UnifiedHistogramChartData } from '@kbn/unified-histogram-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 setHeaderActionMenuMounter(jest.fn());
@@ -129,7 +129,7 @@ function mountComponent(
       { x: 1625004000000, y: 137 },
       { x: 1625090400000, y: 66 },
     ],
-  } as unknown as Chart;
+  } as unknown as UnifiedHistogramChartData;
 
   const charts$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,

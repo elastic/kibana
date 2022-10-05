@@ -11,6 +11,7 @@ import { SearchSource } from '@kbn/data-plugin/common';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
+import type { UnifiedHistogramChartData } from '@kbn/unified-histogram-plugin/public';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
@@ -22,7 +23,6 @@ import {
 } from '../../../hooks/use_saved_search';
 import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
 import { esHits } from '../../../../../__mocks__/es_hits';
-import { Chart } from '../../chart/point_series';
 import { SavedSearch } from '../../../../..';
 import { DiscoverLayoutProps } from '../types';
 import { GetStateReturn } from '../../../services/discover_state';
@@ -64,7 +64,7 @@ const chartData = {
     { x: 1625004000000, y: 137 },
     { x: 1625090400000, y: 66 },
   ],
-} as unknown as Chart;
+} as unknown as UnifiedHistogramChartData;
 
 const documentObservables = {
   main$: new BehaviorSubject({

@@ -9,7 +9,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { ChartData, UnifiedHistogramFetchStatus } from '../types';
+import type { UnifiedHistogramChartData, UnifiedHistogramFetchStatus } from '../types';
 import { Chart } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -60,7 +60,7 @@ async function mountComponent({
       { x: 1625004000000, y: 137 },
       { x: 1625090400000, y: 66 },
     ],
-  } as unknown as ChartData;
+  } as unknown as UnifiedHistogramChartData;
 
   const props = {
     services: unifiedHistogramServicesMock,

@@ -23,7 +23,6 @@ import {
 } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { Chart } from '../chart/point_series';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import {
@@ -42,6 +41,7 @@ import { ReactWrapper } from 'enzyme';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
+import type { UnifiedHistogramChartData } from '@kbn/unified-histogram-plugin/public';
 
 const mountComponent = async ({
   isPlainRecord = false,
@@ -121,7 +121,7 @@ const mountComponent = async ({
       { x: 1625004000000, y: 137 },
       { x: 1625090400000, y: 66 },
     ],
-  } as unknown as Chart;
+  } as unknown as UnifiedHistogramChartData;
 
   const charts$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,

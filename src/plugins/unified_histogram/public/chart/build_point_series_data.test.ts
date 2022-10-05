@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildPointSeriesData } from './point_series';
+import { buildPointSeriesData } from './build_point_series_data';
 import moment from 'moment';
 import type { Unit } from '@kbn/datemath';
 

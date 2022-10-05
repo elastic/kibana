@@ -5,26 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getDimensions } from './get_dimensions';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { ISearchSource, calculateBounds } from '@kbn/data-plugin/public';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { calculateBounds } from '@kbn/data-plugin/public';
 import { getChartAggConfigs } from './get_chart_agg_configs';
 
 test('getDimensions', () => {
   const dataView = dataViewWithTimefieldMock;
-  const setField = jest.fn();
-  const searchSource = {
-    setField,
-    removeField: jest.fn(),
-    getField: (name: string) => {
-      if (name === 'index') {
-        return dataView;
-      }
-    },
-  } as unknown as ISearchSource;
-
   const dataMock = dataPluginMock.createStartContract();
   dataMock.query.timefilter.timefilter.getTime = () => {
     return { from: '1991-03-29T08:04:00.694Z', to: '2021-03-29T07:04:00.695Z' };
@@ -32,8 +21,7 @@ test('getDimensions', () => {
   dataMock.query.timefilter.timefilter.calculateBounds = (timeRange) => {
     return calculateBounds(timeRange);
   };
-
-  const aggsConfig = getChartAggConfigs(searchSource, 'auto', dataMock);
+  const aggsConfig = getChartAggConfigs(dataView, 'auto', dataMock);
   const actual = getDimensions(aggsConfig!, dataMock);
   expect(actual).toMatchInlineSnapshot(`
     Object {

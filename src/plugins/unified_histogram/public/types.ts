@@ -37,20 +37,6 @@ interface Row {
   [key: string]: number | 'NaN';
 }
 
-interface HistogramParamsBounds {
-  min: Moment;
-  max: Moment;
-}
-
-interface HistogramParams {
-  date: true;
-  interval: Duration;
-  intervalESValue: number;
-  intervalESUnit: Unit;
-  format: string;
-  bounds: HistogramParamsBounds;
-}
-
 interface Dimension {
   accessor: 0 | 1;
   format: SerializedFieldFormat<{ pattern: string }>;
@@ -66,6 +52,20 @@ interface Ordered {
   max: Moment;
 }
 
+interface HistogramParams {
+  date: true;
+  interval: Duration;
+  intervalESValue: number;
+  intervalESUnit: Unit;
+  format: string;
+  bounds: HistogramParamsBounds;
+}
+
+export interface HistogramParamsBounds {
+  min: Moment;
+  max: Moment;
+}
+
 export interface Table {
   columns: Column[];
   rows: Row[];
@@ -76,7 +76,7 @@ export interface Dimensions {
   y: Dimension;
 }
 
-export interface ChartData {
+export interface UnifiedHistogramChartData {
   values: Array<{
     x: number;
     y: number;
@@ -89,7 +89,7 @@ export interface ChartData {
   ordered: Ordered;
 }
 
-export interface TimechartBucketInterval {
+export interface UnifiedHistogramBucketInterval {
   scaled?: boolean;
   description?: string;
   scale?: number;
@@ -104,7 +104,7 @@ export interface UnifiedHistogramChartContext {
   status: UnifiedHistogramFetchStatus;
   hidden?: boolean;
   timeInterval?: string;
-  bucketInterval?: TimechartBucketInterval;
-  data?: ChartData;
+  bucketInterval?: UnifiedHistogramBucketInterval;
+  data?: UnifiedHistogramChartData;
   error?: Error;
 }

@@ -10,10 +10,13 @@ import { UnifiedHistogramPublicPlugin } from './plugin';
 
 export type { UnifiedHistogramLayoutProps } from './layout';
 export { UnifiedHistogramLayout } from './layout';
+export { getChartAggConfigs, buildChartData } from './chart';
 export type {
-  UnifiedHistogramFetchStatus,
   UnifiedHistogramServices,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramHitsContext,
   UnifiedHistogramChartContext,
+  UnifiedHistogramChartData,
 } from './types';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();

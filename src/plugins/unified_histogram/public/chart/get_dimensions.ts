@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import moment from 'moment';
 import dateMath from '@kbn/datemath';
 import { DataPublicPluginStart, search, IAggConfigs } from '@kbn/data-plugin/public';
-import { Dimensions, HistogramParamsBounds } from '../components/chart/point_series';
+import type { Dimensions, HistogramParamsBounds } from '../types';
 
 export function getDimensions(
   aggs: IAggConfigs,

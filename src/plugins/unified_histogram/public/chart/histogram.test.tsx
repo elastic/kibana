@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ChartData, UnifiedHistogramFetchStatus } from '../types';
+import type { UnifiedHistogramChartData, UnifiedHistogramFetchStatus } from '../types';
 import { Histogram } from './histogram';
 import React from 'react';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -48,11 +48,11 @@ const chartData = {
     { x: 1625004000000, y: 137 },
     { x: 1625090400000, y: 66 },
   ],
-} as unknown as ChartData;
+} as unknown as UnifiedHistogramChartData;
 
 function mountComponent(
   status: UnifiedHistogramFetchStatus,
-  data: ChartData | null = chartData,
+  data: UnifiedHistogramChartData | null = chartData,
   error?: Error
 ) {
   const services = unifiedHistogramServicesMock;

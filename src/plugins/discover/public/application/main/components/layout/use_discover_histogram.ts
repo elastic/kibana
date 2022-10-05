@@ -7,9 +7,10 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { buildChartData } from '@kbn/unified-histogram-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchData } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
@@ -22,7 +23,6 @@ export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
 
 export const useDiscoverHistogram = ({
-  storage,
   stateContainer,
   state,
   savedSearchData$,
@@ -30,7 +30,6 @@ export const useDiscoverHistogram = ({
   savedSearch,
   isTimeBased,
 }: {
-  storage: Storage;
   stateContainer: GetStateReturn;
   state: AppState;
   savedSearchData$: SavedSearchData;
@@ -38,6 +37,8 @@ export const useDiscoverHistogram = ({
   savedSearch: SavedSearch;
   isTimeBased: boolean;
 }) => {
+  const { storage, data } = useDiscoverServices();
+
   /**
    * Visualize
    */
@@ -109,16 +110,9 @@ export const useDiscoverHistogram = ({
    * Data
    */
 
-  const { result: hitsNumber, fetchStatus: hitsFetchStatus } = useDataState(
+  const { fetchStatus: hitsFetchStatus, result: hitsNumber } = useDataState(
     savedSearchData$.totalHits$
   );
-
-  const {
-    chartData,
-    bucketInterval,
-    fetchStatus: chartFetchStatus,
-    error,
-  } = useDataState(savedSearchData$.charts$);
 
   const hits = useMemo(
     () => ({
@@ -127,6 +121,15 @@ export const useDiscoverHistogram = ({
     }),
     [hitsFetchStatus, hitsNumber]
   );
+
+  const { fetchStatus: chartFetchStatus, response, error } = useDataState(savedSearchData$.charts$);
+
+  const { bucketInterval, chartData } = buildChartData({
+    data,
+    dataView,
+    timeInterval: state.interval,
+    response,
+  });
 
   const chart = useMemo(
     () => ({
