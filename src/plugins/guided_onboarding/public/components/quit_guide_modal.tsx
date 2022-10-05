@@ -62,7 +62,7 @@ export const QuitGuideModal = ({
         <EuiTitle size="m">
           <h2>
             {i18n.translate('guidedOnboarding.quitGuideModal.modalTitle', {
-              defaultMessage: 'Quit this setup guide and discard progress?',
+              defaultMessage: 'Quit this guide and discard progress?',
             })}
           </h2>
         </EuiTitle>
