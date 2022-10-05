@@ -29,13 +29,8 @@ export default {
   ],
 } as ComponentMeta<typeof Image>;
 
-const baseStyle = css`
-  width: 400px;
-  height: 200px;
-`;
-
-const Template: ComponentStory<typeof Image> = (props: Props, { loaded: { blurhash } }) => (
-  <Image css={baseStyle} {...props} blurhash={blurhash} ref={action('ref')} />
+const Template: ComponentStory<typeof Image> = (props: Props, { loaded: { meta } }) => (
+  <Image size="original" {...props} meta={meta} ref={action('ref')} />
 );
 
 export const Basic = Template.bind({});
@@ -47,7 +42,7 @@ WithBlurhash.args = {
 };
 WithBlurhash.loaders = [
   async () => ({
-    blurhash: await getImageMetadata(getBlob()),
+    meta: await getImageMetadata(getBlob()),
   }),
 ];
 WithBlurhash.decorators = [

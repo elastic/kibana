@@ -15,8 +15,7 @@ interface Props {
   hash: string;
   width: number;
   height: number;
-  // This will stretch the blur to fill the container
-  isFullWidth: boolean;
+  isContainerWidth: boolean;
 }
 
 export const Blurhash: FunctionComponent<Props> = ({
@@ -24,7 +23,7 @@ export const Blurhash: FunctionComponent<Props> = ({
   hash,
   width,
   height,
-  isFullWidth,
+  isContainerWidth,
 }) => {
   const ref = useRef<null | HTMLCanvasElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -43,7 +42,7 @@ export const Blurhash: FunctionComponent<Props> = ({
     <canvas
       css={css`
         top: 0;
-        width: ${isFullWidth ? '100%' : width + 'px'};
+        width: ${isContainerWidth ? '100%' : width + 'px'};
         z-index: -1;
 
         position: ${visible ? 'unset' : 'absolute'};

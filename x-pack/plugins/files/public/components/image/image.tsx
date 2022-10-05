@@ -20,6 +20,9 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
    */
   meta?: FileImageMetadata;
 
+  /**
+   * @default original
+   */
   size?: MyImageProps['size'];
   /**
    * Props to pass to the wrapper element
@@ -42,7 +45,10 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
  * ```
  */
 export const Image = React.forwardRef<HTMLImageElement, Props>(
-  ({ src, alt, onFirstVisible, onLoad, onError, meta, wrapperProps, size, ...rest }, ref) => {
+  (
+    { src, alt, onFirstVisible, onLoad, onError, meta, wrapperProps, size = 'original', ...rest },
+    ref
+  ) => {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [blurDelayExpired, setBlurDelayExpired] = useState(false);
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
@@ -69,7 +75,7 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
           <Blurhash
             visible={!isLoaded}
             hash={meta.blurhash}
-            isFullWidth={size !== 'original' && size !== undefined}
+            isContainerWidth={size !== 'original' && size !== undefined}
             width={meta.width}
             height={meta.height}
           />
