@@ -16,9 +16,9 @@
  * @throws `'Missing a value'` if `a` is not provided
  * @throws `'Missing b value'` if `b` is not provided
  * @example
- * ifelse( 5 > 6, 1, 0) // returns 0
- * ifelse( 1 == 1, [1, 2, 3], 5) // returns [1, 2, 3]
- * ifelse( 1 < 2, [1, 2, 3], [2, 3, 4]) // returns [1, 2, 3]
+ * ifelse(5 > 6, 1, 0) // returns 0
+ * ifelse(1 == 1, [1, 2, 3], 5) // returns [1, 2, 3]
+ * ifelse(1 < 2, [1, 2, 3], [2, 3, 4]) // returns [1, 2, 3]
  */
 
 function ifelse(cond, a, b) {
