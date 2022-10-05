@@ -16,6 +16,10 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 import { SecurityPageName } from '../../../../common/constants';
 import type { Filter } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import { useNavigateToTimeline } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
+import {
+  SIGNAL_RULE_NAME_FIELD_NAME,
+  SIGNAL_STATUS_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { FormattedCount } from '../formatted_number';
 import { HeaderSection } from '../header_section';
@@ -47,8 +51,6 @@ type GetTableColumns = (
   openRuleInTimelineWithAdditionalFields: (ruleName: string) => void
 ) => Array<EuiBasicTableColumn<AlertCountByRuleByStatusItem>>;
 
-const KIBANA_RULE_ALERT_FIELD = 'kibana.alert.rule.name';
-const KIBANA_WORKFLOW_STATUS = 'kibana.alert.workflow_status';
 const STATUSES = ['open', 'acknowledged', 'closed'] as const;
 const ALERT_COUNT_BY_RULE_BY_STATUS = 'alerts-by-status-by-rule';
 const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
@@ -87,9 +89,9 @@ export const AlertCountByRuleByStatus = React.memo(
         for (const status of selectedStatusesByField[field]) {
           timelineFilters.push([
             entityFilter,
-            { field: KIBANA_RULE_ALERT_FIELD, value: ruleName },
+            { field: SIGNAL_RULE_NAME_FIELD_NAME, value: ruleName },
             {
-              field: KIBANA_WORKFLOW_STATUS,
+              field: SIGNAL_STATUS_FIELD_NAME,
               value: status,
             },
           ]);
