@@ -111,15 +111,16 @@ export interface LogsEndpointAction {
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
  */
-export interface LogsEndpointActionResponse<
-  TParameters extends EndpointActionDataParameterTypes = never,
-  TOutputContent extends object = object
-> {
+export interface LogsEndpointActionResponse<TOutputContent extends object = object> {
   '@timestamp': string;
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields<TParameters, TOutputContent> & ActionResponseFields;
+  EndpointActions: ActionResponseFields & {
+    action_id: string;
+    // Endpoint Response documents do not have `parameters` in the `data`
+    data: Pick<EndpointActionData<never, TOutputContent>, 'comment' | 'command' | 'output'>;
+  };
   error?: EcsError;
 }
 
@@ -147,12 +148,12 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters;
 
 export interface EndpointActionData<
-  T extends EndpointActionDataParameterTypes = never,
+  TParameters extends EndpointActionDataParameterTypes = never,
   TOutputContent extends object = object
 > {
   command: ResponseActionsApiCommandNames;
   comment?: string;
-  parameters?: T;
+  parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
 }
 
