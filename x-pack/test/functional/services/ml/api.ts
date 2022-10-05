@@ -1464,7 +1464,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return module;
     },
 
-    async deleteMlJobs(jobIds: string []) {
+    async deleteMlJobs(jobIds: string[]) {
       log.debug(`Deleting ml jobs ids [${jobIds.join(',')}]`);
       const { body, status } = await kbnSupertest
         .post('/api/ml/jobs/delete_jobs')
@@ -1477,8 +1477,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async syncMlJobs() {
       log.debug('Syncing ml jobs');
-      const { body, status } = await kbnSupertest
-        .get('/api/ml/saved_objects/sync');
+      const { body, status } = await kbnSupertest.get('/api/ml/saved_objects/sync');
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> ml jobs synced');

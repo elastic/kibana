@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../common/ftr_provider_context';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { FtrProviderContext } from '../common/ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const apmApiClient = getService("apmApiClient");
+  const apmApiClient = getService('apmApiClient');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
@@ -42,24 +42,27 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     onExpectationFail?: () => Promise<any>;
   }
 
-  function createAgent(body: APIClientRequestParamsOf<'PUT /api/apm/settings/agent-configuration'>['params']['body']) {
+  function createAgent(
+    body: APIClientRequestParamsOf<'PUT /api/apm/settings/agent-configuration'>['params']['body']
+  ) {
     return apmApiClient.writeUser({
       endpoint: 'PUT /api/apm/settings/agent-configuration',
       params: {
         body,
-      }
+      },
     });
-  };
+  }
 
-  function deleteAgent(body: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration'>['params']['body']) {
+  function deleteAgent(
+    body: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration'>['params']['body']
+  ) {
     return apmApiClient.writeUser({
       endpoint: 'DELETE /api/apm/settings/agent-configuration',
       params: {
         body,
-      }
+      },
     });
-  };
-
+  }
 
   const endpoints: Endpoint[] = [
     {
