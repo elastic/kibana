@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -22,14 +21,16 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHealth,
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
-  EuiSelect,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { SavedObject } from '@kbn/core/public';
+import { FetcherResult } from '@kbn/observability-plugin/public/hooks/use_fetcher';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
@@ -37,7 +38,6 @@ import moment from 'moment';
 import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { capitalize } from 'lodash';
-import styled from 'styled-components';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { fetchSyntheticsMonitor } from '../../../../state/monitor_summary/api';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
@@ -45,31 +45,8 @@ import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enab
 import { ActionsPopover } from './actions_popover';
 import { selectOverviewState } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
-import { EncryptedSyntheticsMonitor, MonitorOverviewItem } from '../types';
+import { EncryptedSyntheticsMonitor, MonitorOverviewItem, SyntheticsMonitor } from '../types';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
-import { logCategorizationIndexOrSearchRouteFactory } from '@kbn/ml-plugin/public/application/routing/routes';
-
-// supplying `any` here because we're not doing anything prop-specific as it
-// relates to the `EuiBasicTable` component, and typescript requires a generic arg here
-const FlyoutHeadingTable = styled<any>(EuiBasicTable)`
-  .euiTableRowCell {
-    border-bottom: 1px solid transparent;
-    border-top: 1px solid transparent;
-  }
-  .euiTable {
-    width: inherit;
-  }
-  thead {
-    .euiTableCellContent {
-      padding-bottom: 0px;
-    }
-  }
-  tbody {
-    .euiTableCellContent {
-      padding-top: 0px;
-    }
-  }
-`;
 
 interface Props {
   id: string;
@@ -102,54 +79,68 @@ function LocationSelect({
   onEnabledChange: () => void;
   setCurrentLocation: React.Dispatch<string>;
 }) {
-  const [isOpen, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const { locations } = locationData;
+  const isDown = !!locations.find((l) => l.observer?.geo?.name === currentLocation)?.summary?.down;
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiDescriptionList>
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem grow={2}>
+        <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>{ENABLED_ITEM_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             <MonitorEnabled id={id} monitor={monitor} reloadPage={onEnabledChange} />
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiDescriptionList>
+      <EuiFlexItem grow={4}>
+        <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>{LOCATION_TITLE_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             {currentLocation}
-            <EuiButtonIcon
-              onClick={() => {
-                throw Error('not implemented');
-              }}
-              color="primary"
-              iconType="arrowDown"
-            />
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  onClick={() => setIsOpen(true)}
+                  color="primary"
+                  iconType="arrowDown"
+                />
+              }
+              isOpen={isOpen}
+              closePopover={() => setIsOpen(false)}
+              panelPaddingSize="none"
+            >
+              <EuiContextMenu
+                initialPanelId={0}
+                size="s"
+                panels={[
+                  {
+                    id: 0,
+                    title: GO_TO_LOCATIONS_LABEL,
+                    items: locations.map((l) => ({
+                      name: l.observer?.geo?.name,
+                      icon: <EuiHealth color={isDown ? 'danger' : 'success'} />,
+                      disabled: !!l.observer?.geo?.name,
+                      onClick: () => {
+                        if (l.observer?.geo?.name && currentLocation !== l.observer.geo.name)
+                          setCurrentLocation(l.observer?.geo?.name);
+                      },
+                    })),
+                  },
+                ]}
+              />
+            </EuiPopover>
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiDescriptionList>
+      <EuiFlexItem grow={2}>
+        <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>{STATUS_TITLE_TEXT}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription></EuiDescriptionListDescription>
+          <EuiDescriptionListDescription>
+            <EuiBadge color={isDown ? 'danger' : 'success'}>{isDown ? 'Down' : 'Up'}</EuiBadge>
+          </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
     </EuiFlexGroup>
-    // <EuiFlexGroup>
-    //   <EuiFlexItem>{currentLocation}</EuiFlexItem>
-    //   <EuiFlexItem>
-    //     <EuiPopover
-    //       button={<EuiButtonIcon iconType="arrowDown" onClick={() => setOpen(!isOpen)} />}
-    //       isOpen={isOpen}
-    //       closePopover={() => setOpen(false)}
-    //     >
-    //       {/* <EuiContextMenu initialPanelId={0} panels={[]} */}
-    //       {locationData.locations.map((l) => (
-    //         <div>{l.observer?.geo?.name}</div>
-    //       ))}
-    //     </EuiPopover>
-    //   </EuiFlexItem>
-    // </EuiFlexGroup>
   );
 }
 
@@ -184,7 +175,10 @@ export function MonitorDetailFlyout(props: Props) {
     data: monitorSavedObject,
     error,
     status,
-  } = useFetcher(() => fetchSyntheticsMonitor(id), [id]);
+  }: FetcherResult<SavedObject<SyntheticsMonitor>> = useFetcher(
+    () => fetchSyntheticsMonitor(id),
+    [id]
+  );
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const monitorDetail = useMonitorDetail(id, location);
@@ -225,56 +219,6 @@ export function MonitorDetailFlyout(props: Props) {
               monitor={monitorSavedObject.attributes}
               onEnabledChange={props.onEnabledChange}
             />
-
-            {/* <FlyoutHeadingTable
-              columns={[
-                {
-                  name: ENABLED_ITEM_TEXT,
-                  field: '@timestamp',
-                  outerWidth: '100px',
-                  render: () => (
-                    <MonitorEnabled
-                      id={id}
-                      monitor={monitorSavedObject.attributes}
-                      reloadPage={props.onEnabledChange}
-                    />
-                  ),
-                },
-                {
-                  name: LOCATION_COLUMN_NAME,
-                  field: 'observer.geo.name',
-                  render: () => (
-                    <LocationSelect
-                      currentLocation={location}
-                      locationData={{ locations }}
-                      setCurrentLocation={setLocation}
-                    />
-                    // <EuiSelect
-                    //   compressed
-                    //   value={location}
-                    //   onChange={(e) => setLocation(e.target.value)}
-                    //   options={
-                    //     locations.map((l) => ({
-                    //       value: l.observer?.geo?.name,
-                    //       text: l.observer?.geo?.name,
-                    //     })) ?? []
-                    //   }
-                    // />
-                  ),
-                },
-                {
-                  name: STATUS_COLUMN_NAME,
-                  field: 'monitor.status',
-                  render: (statusString: string) => (
-                    <EuiBadge color={statusString === 'up' ? 'success' : 'danger'}>
-                      {capitalize(statusString)}
-                    </EuiBadge>
-                  ),
-                },
-              ]}
-              items={monitorDetail.data ? [monitorDetail.data] : []}
-              loading={monitorDetail.loading}
-            /> */}
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiTitle size="xs">
@@ -338,7 +282,7 @@ export function MonitorDetailFlyout(props: Props) {
             <EuiSpacer size="m" />
             <EuiDescriptionList
               type="column"
-              compressed={true}
+              compressed
               listItems={[
                 {
                   title: LAST_RUN_HEADER_TEXT,
@@ -536,3 +480,10 @@ const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyo
 const GO_TO_MONITOR_LINK_TEXT = i18n.translate('xpack.synthetics.monitorList.goToMonitorLinkText', {
   defaultMessage: 'Go to monitor',
 });
+
+const GO_TO_LOCATIONS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.flyoutHeader.goToLocations',
+  {
+    defaultMessage: 'Go to location',
+  }
+);
