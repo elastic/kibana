@@ -51,12 +51,12 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             serviceInstance: opbeansRum,
             transactionName: rootTransactionName,
             timestamp,
-            children: (s) => {
-              s.service({
+            children: (_) => {
+              _.service({
+                repeat: 10,
                 serviceInstance: opbeansNode,
                 transactionName: 'GET /nodejs/products',
                 latency: 100,
-                duration: 2000,
 
                 children: (_) => {
                   _.service({
@@ -64,6 +64,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                     transactionName: 'GET /go',
                     children: (_) => {
                       _.service({
+                        repeat: 20,
                         serviceInstance: opbeansJava,
                         transactionName: 'GET /java',
                         children: (_) => {
@@ -76,15 +77,17 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                       });
                     },
                   });
-                  _.db({ type: 'elasticsearch', duration: 400 });
-                  _.db({ type: 'elasticsearch', duration: 500 });
+                  _.db({ name: 'GET apm-*/_search', type: 'elasticsearch', duration: 400 });
+                  _.db({ name: 'GET', type: 'redis', duration: 500 });
+                  _.db({ name: 'SELECT * FROM users', type: 'sqlite', duration: 600 });
                 },
               });
 
-              s.service({
+              _.service({
                 serviceInstance: opbeansNode,
                 transactionName: 'GET /nodejs/users',
                 latency: 100,
+                repeat: 10,
                 children: (_) => {
                   _.service({
                     serviceInstance: opbeansGo,
@@ -92,14 +95,27 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                     latency: 50,
                     children: (_) => {
                       _.service({
+                        repeat: 10,
                         serviceInstance: opbeansDotnet,
                         transactionName: 'GET /dotnet/cases/4',
                         latency: 50,
                         children: (_) =>
                           _.db({
+                            name: 'GET apm-*/_search',
                             type: 'elasticsearch',
                             duration: 600,
-                            dbStatement: 'last statement',
+                            statement: JSON.stringify(
+                              {
+                                query: {
+                                  query_string: {
+                                    query: '(new york city) OR (big apple)',
+                                    default_field: 'content',
+                                  },
+                                },
+                              },
+                              null,
+                              2
+                            ),
                           }),
                       });
                     },

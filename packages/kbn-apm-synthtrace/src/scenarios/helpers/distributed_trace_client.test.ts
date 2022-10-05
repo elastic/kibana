@@ -37,7 +37,7 @@ describe('DistributedTrace', () => {
 
             children: (_) => {
               _.service({ serviceInstance: opbeansGo, transactionName: 'GET /gogo' });
-              _.db({ type: 'elasticsearch', duration: 400 });
+              _.db({ name: 'GET apm-*/_search', type: 'elasticsearch', duration: 400 });
             },
           });
         },
@@ -164,39 +164,15 @@ describe('DistributedTrace', () => {
     });
   });
 
-  describe('sequential', () => {
-    it('should db calls in parallel', () => {
-      const traceDocs = getSimpleScenario({ sequential: false });
-      const durations = traceDocs.map(
-        (f) => (f['transaction.duration.us'] ?? f['span.duration.us'])! / 1000
-      );
-      expect(durations).toMatchInlineSnapshot(`
-        Array [
-          500,
-          500,
-          500,
-          300,
-          400,
-          500,
-        ]
-      `);
+  describe('repeat', () => {
+    it('produces few trace documents when "repeat" is disabled', () => {
+      const traceDocs = getSimpleScenario({ repeat: undefined });
+      expect(traceDocs.length).toBe(6);
     });
 
-    it('should run db calls sequentially', () => {
-      const traceDocs = getSimpleScenario({ sequential: true });
-      const durations = traceDocs.map(
-        (f) => (f['transaction.duration.us'] ?? f['span.duration.us'])! / 1000
-      );
-      expect(durations).toMatchInlineSnapshot(`
-        Array [
-          500,
-          500,
-          500,
-          300,
-          400,
-          500,
-        ]
-      `);
+    it('produces more trace documents when "repeat" is enabled', () => {
+      const traceDocs = getSimpleScenario({ repeat: 20 });
+      expect(traceDocs.length).toBe(101);
     });
   });
 });
@@ -214,11 +190,11 @@ function getTraceDocs(transaction: BaseSpan): ApmFields[] {
 function getSimpleScenario({
   duration,
   latency,
-  sequential,
+  repeat,
 }: {
   duration?: number;
   latency?: number;
-  sequential?: boolean;
+  repeat?: number;
 } = {}) {
   const dt = new DistributedTrace({
     serviceInstance: opbeansRum,
@@ -230,11 +206,12 @@ function getSimpleScenario({
         transactionName: 'GET /nodejs/products',
         duration,
         latency,
+        repeat,
 
         children: (_) => {
-          _.db({ type: 'elasticsearch', duration: 300 });
-          _.db({ type: 'elasticsearch', duration: 400 });
-          _.db({ type: 'elasticsearch', duration: 500 });
+          _.db({ name: 'GET apm-*/_search', type: 'elasticsearch', duration: 300 });
+          _.db({ name: 'GET apm-*/_search', type: 'elasticsearch', duration: 400 });
+          _.db({ name: 'GET apm-*/_search', type: 'elasticsearch', duration: 500 });
         },
       });
     },
