@@ -22,20 +22,10 @@ export {
 } from './resilient';
 export type { ActionParamsType as ResilientActionParams } from './resilient';
 
-export {
-  getServiceNowITSMConnectorType,
-  getServiceNowSIRConnectorType,
-  getServiceNowITOMConnectorType,
-  ServiceNowITSMConnectorTypeId,
-  ServiceNowSIRConnectorTypeId,
-  ServiceNowITOMConnectorTypeId,
-} from './servicenow';
-export type { ActionParamsType as ServiceNowActionParams } from './servicenow';
+export { getServiceNowITSMConnectorType, ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
+import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
+export { getServiceNowSIRConnectorType, ServiceNowSIRConnectorTypeId } from './servicenow_sir';
+import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
+export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
-
-export {
-  getConnectorType as getXmattersConnectorType,
-  ConnectorTypeId as XmattersConnectorTypeId,
-} from './xmatters';
-export type { ActionParamsType as XmattersActionParams } from './xmatters';
