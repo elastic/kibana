@@ -9,9 +9,10 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { EuiLink, EuiButton } from '@elastic/eui';
 
+import '../../../utils/testing/__mocks__/ut_router_history.mock';
+
 import { ReactRouterEuiLink, ReactRouterEuiButton } from './link_for_eui';
 import { mockHistory } from '../../../utils/testing/__mocks__/ut_router_history.mock';
-import '../../../utils/testing/__mocks__/ut_router_history.mock';
 
 describe('EUI & React Router Component Helpers', () => {
   beforeEach(() => {

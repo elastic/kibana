@@ -241,7 +241,7 @@ export class LensAttributes {
       params: {
         orderBy: isFormulaColumn
           ? { type: 'custom' }
-          : { type: 'column', columnId: `y-axis-column-${layerId}` },
+          : { type: 'column', columnId: `y-axis-column-${layerId}-0` },
         size: 10,
         orderDirection: 'desc',
         otherBucket: true,
