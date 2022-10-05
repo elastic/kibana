@@ -19,9 +19,6 @@ export const statuses: Statuses = {
     label: i18n.OPEN,
     icon: 'folderOpen' as const,
     actions: {
-      bulk: {
-        title: i18n.BULK_ACTION_OPEN_SELECTED,
-      },
       single: {
         title: i18n.OPEN_CASE,
       },
@@ -41,9 +38,6 @@ export const statuses: Statuses = {
     label: i18n.IN_PROGRESS,
     icon: 'folderExclamation' as const,
     actions: {
-      bulk: {
-        title: i18n.BULK_ACTION_MARK_IN_PROGRESS,
-      },
       single: {
         title: i18n.MARK_CASE_IN_PROGRESS,
       },
@@ -63,9 +57,6 @@ export const statuses: Statuses = {
     label: i18n.CLOSED,
     icon: 'folderCheck' as const,
     actions: {
-      bulk: {
-        title: i18n.BULK_ACTION_CLOSE_SELECTED,
-      },
       single: {
         title: i18n.CLOSE_CASE,
       },

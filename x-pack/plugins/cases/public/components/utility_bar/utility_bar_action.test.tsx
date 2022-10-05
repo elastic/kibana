@@ -5,32 +5,38 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { UtilityBarAction } from '.';
 
 describe('UtilityBarAction', () => {
+  let appMockRenderer: AppMockRenderer;
+  const dataTestSubj = 'test-bar-action';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appMockRenderer = createAppMockRenderer();
+  });
+
   test('it renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <UtilityBarAction iconType="alert">{'Test action'}</UtilityBarAction>
-      </TestProviders>
+    const res = appMockRenderer.render(
+      <UtilityBarAction iconType="alert" dataTestSubj={dataTestSubj}>
+        {'Test action'}
+      </UtilityBarAction>
     );
 
-    expect(wrapper.find('UtilityBarAction')).toMatchSnapshot();
+    expect(res.getByTestId(dataTestSubj)).toBeInTheDocument();
+    expect(res.getByText('Test action')).toBeInTheDocument();
   });
 
   test('it renders a popover', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <UtilityBarAction iconType="alert" popoverContent={() => <p>{'Test popover'}</p>}>
-          {'Test action'}
-        </UtilityBarAction>
-      </TestProviders>
+    const res = appMockRenderer.render(
+      <UtilityBarAction iconType="alert" dataTestSubj={dataTestSubj}>
+        {'Test action'}
+      </UtilityBarAction>
     );
 
-    expect(wrapper.find('.euiPopover').first().exists()).toBe(true);
+    expect(res.getByTestId(`${dataTestSubj}-link-icon`)).toBeInTheDocument();
   });
 });

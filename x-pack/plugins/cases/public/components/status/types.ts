@@ -18,9 +18,6 @@ export type Statuses = Record<
     label: string;
     icon: EuiIconType;
     actions: {
-      bulk: {
-        title: string;
-      };
       single: {
         title: string;
         description?: string;

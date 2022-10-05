@@ -68,7 +68,11 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
             />
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton color="text" onClick={closeModal}>
+            <EuiButton
+              color="text"
+              onClick={closeModal}
+              data-test-subj="all-cases-modal-cancel-button"
+            >
               {i18n.CANCEL}
             </EuiButton>
           </EuiModalFooter>

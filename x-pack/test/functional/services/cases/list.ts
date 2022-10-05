@@ -23,6 +23,12 @@ export function CasesTableServiceProvider(
   const retry = getService('retry');
   const config = getService('config');
 
+  const assertCaseExists = (index: number, totalCases: number) => {
+    if (index > totalCases - 1) {
+      throw new Error('Cannot get case from table. Index is greater than the length of all rows');
+    }
+  };
+
   return {
     /**
      * Goes to the first case listed on the table.
@@ -40,11 +46,10 @@ export function CasesTableServiceProvider(
       });
     },
 
-    async deleteFirstListedCase() {
-      await testSubjects.existOrFail('action-delete', {
-        timeout: config.get('timeouts.waitFor'),
-      });
-      await testSubjects.click('action-delete');
+    async deleteCase(index: number = 0) {
+      this.openRowActions(index);
+      await testSubjects.existOrFail('cases-bulk-action-delete');
+      await testSubjects.click('cases-bulk-action-delete');
       await testSubjects.existOrFail('confirmModalConfirmButton', {
         timeout: config.get('timeouts.waitFor'),
       });
@@ -55,10 +60,13 @@ export function CasesTableServiceProvider(
     },
 
     async bulkDeleteAllCases() {
-      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
-      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
-      await button.click();
-      await testSubjects.click('cases-bulk-delete-button');
+      await this.selectAllCasesAndOpenBulkActions();
+
+      await testSubjects.existOrFail('cases-bulk-action-delete');
+      await testSubjects.click('cases-bulk-action-delete');
+      await testSubjects.existOrFail('confirmModalConfirmButton', {
+        timeout: config.get('timeouts.waitFor'),
+      });
       await testSubjects.click('confirmModalConfirmButton');
     },
 
@@ -109,9 +117,7 @@ export function CasesTableServiceProvider(
     async getCaseFromTable(index: number) {
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
 
-      if (index > rows.length) {
-        throw new Error('Cannot get case from table. Index is greater than the length of all rows');
-      }
+      assertCaseExists(index, rows.length);
 
       return rows[index] ?? null;
     },
@@ -154,6 +160,56 @@ export function CasesTableServiceProvider(
 
     async refreshTable() {
       await testSubjects.click('all-cases-refresh');
+    },
+
+    async openRowActions(index: number) {
+      const rows = await find.allByCssSelector(
+        '[data-test-subj*="case-action-popover-button-"',
+        100
+      );
+
+      assertCaseExists(index, rows.length);
+
+      const row = rows[index];
+      await row.click();
+      await find.existsByCssSelector('[data-test-subj*="case-action-popover-"');
+    },
+
+    async selectAllCasesAndOpenBulkActions() {
+      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
+      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
+      await button.click();
+    },
+
+    async changeStatus(status: CaseStatuses, index: number) {
+      await this.openRowActions(index);
+
+      await testSubjects.existOrFail('cases-bulk-action-delete');
+
+      await find.existsByCssSelector('[data-test-subj*="case-action-status-panel-"');
+      const statusButton = await find.byCssSelector('[data-test-subj*="case-action-status-panel-"');
+
+      statusButton.click();
+
+      await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
+      await testSubjects.click(`cases-bulk-action-status-${status}`);
+    },
+
+    async bulkChangeStatusCases(status: CaseStatuses) {
+      await this.selectAllCasesAndOpenBulkActions();
+
+      await testSubjects.existOrFail('case-bulk-action-status');
+      await testSubjects.click('case-bulk-action-status');
+      await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
+      await testSubjects.click(`cases-bulk-action-status-${status}`);
+    },
+
+    async selectAndChangeStatusOfAllCases(status: CaseStatuses) {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+      await this.bulkChangeStatusCases(status);
     },
   };
 }

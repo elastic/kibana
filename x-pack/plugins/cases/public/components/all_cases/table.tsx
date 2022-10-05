@@ -19,7 +19,7 @@ import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
-import { Cases, Case, FilterOptions } from '../../../common/ui/types';
+import { Cases, Case } from '../../../common/ui/types';
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -27,7 +27,6 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 interface CasesTableProps {
   columns: EuiBasicTableProps<Case>['columns'];
   data: Cases;
-  filterOptions: FilterOptions;
   goToCreateCase?: () => void;
   isCasesLoading: boolean;
   isCommentUpdating: boolean;
@@ -37,7 +36,6 @@ interface CasesTableProps {
   pagination: Pagination;
   selectedCases: Case[];
   selection: EuiTableSelectionType<Case>;
-  showActions: boolean;
   sorting: EuiBasicTableProps<Case>['sorting'];
   tableRef: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
@@ -51,7 +49,6 @@ const Div = styled.div`
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
   columns,
   data,
-  filterOptions,
   goToCreateCase,
   isCasesLoading,
   isCommentUpdating,
@@ -61,7 +58,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   pagination,
   selectedCases,
   selection,
-  showActions,
   sorting,
   tableRef,
   tableRowProps,
@@ -88,9 +84,8 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   ) : (
     <Div data-test-subj={isCasesLoading ? 'cases-table-loading' : null}>
       <CasesTableUtilityBar
-        data={data}
-        enableBulkActions={showActions}
-        filterOptions={filterOptions}
+        isSelectorView={isSelectorView}
+        totalCases={data.total ?? 0}
         selectedCases={selectedCases}
         deselectCases={deselectCases}
       />
@@ -98,7 +93,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         className={classnames({ isSelectorView })}
         columns={columns}
         data-test-subj="cases-table"
-        isSelectable={showActions}
+        isSelectable={!isSelectorView}
         itemId="id"
         items={data.cases}
         loading={isCommentUpdating}
@@ -128,8 +123,9 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         pagination={pagination}
         ref={tableRef}
         rowProps={tableRowProps}
-        selection={showActions ? selection : undefined}
+        selection={!isSelectorView ? selection : undefined}
         sorting={sorting}
+        hasActions={false}
       />
     </Div>
   );
