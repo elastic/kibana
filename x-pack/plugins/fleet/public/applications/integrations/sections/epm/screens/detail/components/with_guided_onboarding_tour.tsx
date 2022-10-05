@@ -23,6 +23,22 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
       }),
     };
   }
+
+  if (packageKey.startsWith('kubernetes') && tourType === 'addIntegrationButton') {
+    return {
+      title: i18n.translate('xpack.fleet.guidedOnboardingTour.kubernetesButton.tourTitle', {
+        defaultMessage: 'Add Kubernetes',
+      }),
+      description: i18n.translate(
+        'xpack.fleet.guidedOnboardingTour.kubernetesButton.tourDescription',
+        {
+          defaultMessage:
+            'In just a few steps, configure your data with our recommended defaults. You can change this later.',
+        }
+      ),
+    };
+  }
+
   return null;
 };
 export const WithGuidedOnboardingTour: FunctionComponent<{

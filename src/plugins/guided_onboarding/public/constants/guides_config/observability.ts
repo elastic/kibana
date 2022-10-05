@@ -20,6 +20,7 @@ export const observabilityConfig: GuideConfig = {
     {
       id: 'add_data',
       title: 'Add data',
+      integration: 'kubernetes',
       descriptionList: [
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
