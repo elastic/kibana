@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useState, useCallback } from 'react';
+import React, { type FC, useState, useCallback, useMemo } from 'react';
 import { uniqBy } from 'lodash';
 import { EuiFilterButton, EuiPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,22 +16,25 @@ import { MlEntitySelector, MlEntitySelectorProps } from './ml_entity_selector';
  * Custom filter component to use with {@link EuiInMemoryTable}
  */
 export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const hasActiveFilters = query.hasOrFieldClause('job_id') || query.hasSimpleFieldClause('job_id');
-  const fieldClauses = query.getOrFieldClause('job_id');
-
-  const numActiveFilters = Array.isArray(fieldClauses?.value)
-    ? fieldClauses!.value.length
-    : !!fieldClauses?.value
-    ? 1
-    : 0;
+  const orFieldClause = query.getOrFieldClause('job_id');
+  const simpleFieldClause = query.getSimpleFieldClause('job_id');
 
   const closePopover = setIsOpen.bind(null, false);
 
-  const selectedOptions = (
-    Array.isArray(fieldClauses?.value) ? fieldClauses!.value : []
-  ) as MlEntitySelectorProps['selectedOptions'];
+  const selectedOptions = useMemo(() => {
+    let options: MlEntitySelectorProps['selectedOptions'] = [];
+
+    if (orFieldClause && Array.isArray(orFieldClause.value)) {
+      options = orFieldClause.value as string[];
+    }
+    if (simpleFieldClause && simpleFieldClause.value) {
+      options.push(simpleFieldClause.value as string);
+    }
+    return options;
+  }, [orFieldClause, simpleFieldClause]);
 
   const onSelectionChange = useCallback<
     Exclude<MlEntitySelectorProps['onSelectionChange'], undefined>
@@ -58,7 +61,7 @@ export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onCha
       iconSide="right"
       onClick={setIsOpen.bind(null, (prev) => !prev)}
       hasActiveFilters={hasActiveFilters}
-      numActiveFilters={hasActiveFilters ? numActiveFilters : undefined}
+      numActiveFilters={hasActiveFilters ? selectedOptions.length : undefined}
       grow
     >
       <FormattedMessage id="xpack.ml.notifications.entityFilter" defaultMessage="Entity" />
