@@ -100,6 +100,7 @@ import {
   mapSortField,
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
+  retryIfBulkDeleteConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
 } from './lib';
@@ -1705,7 +1706,13 @@ export class RulesClient {
     }
   };
 
-  public bulkDeleteRules = async ({ filter, ids }: { filter?: string; ids?: string[] }) => {
+  public bulkDeleteRules = async ({
+    filter,
+    ids,
+  }: {
+    filter?: string | KueryNode;
+    ids?: string[];
+  }) => {
     if (ids && filter) {
       throw Boom.badRequest(
         "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
@@ -1742,14 +1749,14 @@ export class RulesClient {
 
     if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
       throw Boom.badRequest(
-        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk edit`
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk delete`
       );
     }
 
     const buckets = aggregations?.alertTypeId.buckets;
 
     if (buckets === undefined) {
-      throw Error('No rules found for bulk edit');
+      throw Error('No rules found for bulk delete');
     }
 
     await pMap(
@@ -1777,7 +1784,28 @@ export class RulesClient {
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
 
-    // add retry if configs
+    const { apiKeysToInvalidate, taskIdsToDelete } = await retryIfBulkDeleteConflicts(
+      this.logger,
+      (filterKueryNode: KueryNode | null) => this.bulkDeleteWithOCC({ filter: filterKueryNode }),
+      kueryNodeFilterWithAuth
+    );
+
+    // TODO: add audit logs
+
+    if (taskIdsToDelete) {
+      this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
+    }
+
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: apiKeysToInvalidate },
+      this.logger,
+      this.unsecuredSavedObjectsClient
+    );
+
+    return;
+  };
+
+  private bulkDeleteWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
     const rulesFinder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
         {
@@ -1790,20 +1818,22 @@ export class RulesClient {
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const apiKeysToInvalidate: string[] = [];
-    const taskIds: string[] = [];
+    const taskIdsToDelete: string[] = [];
+    const errors: BulkEditError[] = [];
+    const apiKeyToRuleIdMapping: Record<string, string> = {};
+    const taskIdToRuleIdMapping: Record<string, string> = {};
 
     for await (const response of rulesFinder.find()) {
-      await pMap(
+      pMap(
         response.saved_objects,
-        async (rule) => {
+        (rule) => {
           if (rule.attributes.apiKey) {
-            apiKeysToInvalidate.push(rule.attributes.apiKey);
+            apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
           }
           rules.push(rule);
 
-          // populate task ids for task manager cleaning
           if (rule.attributes.scheduledTaskId) {
-            taskIds.push(rule.attributes.scheduledTaskId);
+            taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
           }
         },
         { concurrency: API_KEY_GENERATE_CONCURRENCY }
@@ -1811,16 +1841,13 @@ export class RulesClient {
     }
     const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules, {}); // do we need force/refresh options here?
 
-    if (taskIds) {
-      this.taskManager.bulkRemoveIfExist(taskIds);
-    }
-
-    await bulkMarkApiKeysForInvalidation(
-      { apiKeys: apiKeysToInvalidate },
-      this.logger,
-      this.unsecuredSavedObjectsClient
-    );
-    return result;
+    result.statuses.forEach((status) => {
+      if (Boolean(status.error)) {
+        apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
+        taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
+      }
+    });
+    return { apiKeysToInvalidate, result, errors, rules, taskIdsToDelete };
   };
 
   public async bulkEdit<Params extends RuleTypeParams>(
