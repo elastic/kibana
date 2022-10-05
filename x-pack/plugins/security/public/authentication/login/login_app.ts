@@ -45,6 +45,7 @@ export const loginApp = Object.freeze({
             fatalErrors: coreStart.fatalErrors,
             loginAssistanceMessage: config.loginAssistanceMessage,
             sameSiteCookies: config.sameSiteCookies,
+            customLogo$: coreStart.chrome.getCustomLogo$(),
           }
         );
       },

@@ -19,6 +19,12 @@ import type { InternalStatusServiceSetup } from '@kbn/core-status-server-interna
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { UiPlugins } from '../plugins';
 
+export interface ThemingInfo {
+  pageTitle?: string;
+  logo?: string;
+  welcomeMessage?: string;
+}
+
 /** @internal */
 export interface RenderingMetadata {
   strictCsp: ICspConfig['strict'];
@@ -30,7 +36,7 @@ export interface RenderingMetadata {
   themeVersion: ThemeVersion;
   stylesheetPaths: string[];
   injectedMetadata: InjectedMetadata;
-  title?: string;
+  theming?: ThemingInfo;
 }
 
 /** @internal */

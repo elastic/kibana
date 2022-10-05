@@ -96,7 +96,6 @@ export class AuthenticationService {
 
   setup({ config, http, license, buildNumber, elasticsearch }: AuthenticationServiceSetupParams) {
     this.license = license;
-
     // If we cannot automatically authenticate users we should redirect them straight to the login
     // page if possible, so that they can try other methods to log in. If not possible, we should
     // render a dedicated `Unauthenticated` page from which users can explicitly trigger a new

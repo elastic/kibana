@@ -297,6 +297,8 @@ export class ChromeService {
           customLogo$.next(logo);
         }
       },
+
+      getCustomLogo$: () => customLogo$.pipe(takeUntil(this.stop$)),
     };
   }
 

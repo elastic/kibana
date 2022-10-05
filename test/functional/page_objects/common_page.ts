@@ -55,7 +55,6 @@ export class CommonPageObject extends FtrService {
     await this.testSubjects.find('kibanaChrome', 6 * this.defaultFindTimeout); // 60 sec waiting
     const loginPage = currentUrl.includes('/login');
     const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
-
     if (loginPage && !wantedLoginPage) {
       this.log.debug('Found login page');
       if (this.config.get('security.disableTestUser')) {

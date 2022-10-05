@@ -50,12 +50,6 @@ export class LoadingIndicator extends React.Component<
         });
       }, 250);
     });
-    /*  if (this.props.customLogo$) {
-      this.customLogoSubscription = this.props.customLogo$.subscribe((customLogo) => {
-        debugger;
-        this.setState({ ...this.state, customLogo });
-      });
-    }*/
   }
 
   componentWillUnmount() {
@@ -64,10 +58,6 @@ export class LoadingIndicator extends React.Component<
       this.loadingCountSubscription.unsubscribe();
       this.loadingCountSubscription = undefined;
     }
-    /* if (this.customLogoSubscription) {
-      this.customLogoSubscription.unsubscribe();
-      this.customLogoSubscription = undefined;
-    }*/
   }
 
   render() {

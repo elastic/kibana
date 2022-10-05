@@ -22,10 +22,6 @@ export const registerInfoRoute = (router: WhitelabellingRouter, config: ConfigSc
     async (ctx, req, res) => {
       const allowed = isValidLicense((await ctx.licensing).license);
 
-      if (!req.auth.isAuthenticated) {
-        return res.forbidden();
-      }
-
       return res.ok({
         body: {
           allowed,

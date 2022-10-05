@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiImage,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -54,6 +55,7 @@ interface Props {
 
 interface State {
   loginState: LoginState | null;
+  customLogo: string | undefined;
 }
 
 const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['message']>> = {
@@ -85,7 +87,7 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
 };
 
 export class LoginPage extends Component<Props, State> {
-  state = { loginState: null } as State;
+  state = { loginState: null, customLogo: undefined } as State;
   private customLogoSubscription?: Subscription;
 
   public async componentDidMount() {
@@ -96,7 +98,14 @@ export class LoginPage extends Component<Props, State> {
     } catch (err) {
       this.props.fatalErrors.add(err as Error);
     }
-
+    if (this.props.customLogo$) {
+      this.customLogoSubscription = this.props.customLogo$.subscribe((customLogo) => {
+        this.setState({
+          ...this.state,
+          customLogo,
+        });
+      });
+    }
     loadingCount$.next(0);
     loadingCount$.complete();
   }
@@ -131,7 +140,11 @@ export class LoginPage extends Component<Props, State> {
       ['loginWelcome__contentDisabledForm']: !loginIsSupported,
     });
 
-    const logo = <EuiIcon type="logoElastic" size="xxl" />;
+    const logo = this.state.customLogo ? (
+      <EuiImage src={this.state.customLogo} size="xxl" alt="logo image" />
+    ) : (
+      <EuiIcon type="logoElastic" size="xxl" />
+    );
 
     return (
       <div className="loginWelcome login-form">

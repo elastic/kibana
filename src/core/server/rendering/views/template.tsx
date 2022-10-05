@@ -28,7 +28,7 @@ export const Template: FunctionComponent<Props> = ({
     i18n,
     bootstrapScriptUrl,
     strictCsp,
-    title,
+    theming,
   },
 }) => {
   return (
@@ -37,7 +37,7 @@ export const Template: FunctionComponent<Props> = ({
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>{title ? title : 'Elastic'}</title>
+        <title>{theming && theming.pageTitle ? theming.pageTitle : 'Elastic'}</title>
         <Fonts url={uiPublicUrl} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
@@ -64,7 +64,11 @@ export const Template: FunctionComponent<Props> = ({
           data-test-subj="kbnLoadingMessage"
         >
           <div className="kbnLoaderWrap">
-            <Logo />
+            {theming && theming.logo ? (
+              <img src={theming.logo} width="48px" height="48px" alt="logo" />
+            ) : (
+              <Logo />
+            )}
             <div
               className="kbnWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
@@ -72,14 +76,20 @@ export const Template: FunctionComponent<Props> = ({
                   'Elastic did not load properly. Check the server output for more information.',
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
+              {theming && theming.welcomeMessage
+                ? theming.welcomeMessage
+                : i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
             </div>
             <div className="kbnProgress" />
           </div>
         </div>
 
         <div className="kbnWelcomeView" id="kbn_legacy_browser_error" style={{ display: 'none' }}>
-          <Logo />
+          {theming && theming.logo ? (
+            <img src={theming.logo} width="48px" height="48px" alt="logo" />
+          ) : (
+            <Logo />
+          )}
 
           <h2 className="kbnWelcomeTitle">
             {i18n('core.ui.legacyBrowserTitle', {

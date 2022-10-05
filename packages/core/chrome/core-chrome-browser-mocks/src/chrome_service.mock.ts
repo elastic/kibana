@@ -61,6 +61,7 @@ const createStartContractMock = () => {
     getBodyClasses$: jest.fn(),
     setCustomLogo: jest.fn(),
     registerWhitelabellingPlugin: jest.fn(),
+    getCustomLogo$: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));

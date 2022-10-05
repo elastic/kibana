@@ -11,6 +11,7 @@ export const configSchema = schema.object({
   theme: schema.object({
     logo: schema.string(),
     pageTitle: schema.string(),
+    welcomeMessage: schema.string(),
   }),
 });
 
