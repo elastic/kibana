@@ -179,6 +179,14 @@ export class DashboardPanelActionsService extends FtrService {
     return searchSessionId;
   }
 
+  async getSearchResponseByTitle(title: string) {
+    await this.openInspectorByTitle(title);
+    await this.inspector.openInspectorRequestsView();
+    const response = await this.inspector.getResponse();
+    await this.inspector.close();
+    return response;
+  }
+
   async openInspector(parent?: WebElementWrapper) {
     await this.openContextMenu(parent);
     const exists = await this.testSubjects.exists(OPEN_INSPECTOR_TEST_SUBJ);
