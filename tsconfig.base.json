@@ -445,6 +445,8 @@
       "@kbn/ux-plugin/*": ["x-pack/plugins/ux/*"],
       "@kbn/watcher-plugin": ["x-pack/plugins/watcher"],
       "@kbn/watcher-plugin/*": ["x-pack/plugins/watcher/*"],
+      "@kbn/whitelabelling-plugin": ["x-pack/plugins/whitelabelling"],
+      "@kbn/whitelabelling-plugin/*": ["x-pack/plugins/whitelabelling/*"],
       "@kbn/alerting-fixture-plugin": ["x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts"],
       "@kbn/alerting-fixture-plugin/*": ["x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/*"],
       "@kbn/cases-fixture-plugin": ["x-pack/test/functional_with_es_ssl/fixtures/plugins/cases"],
