@@ -18,6 +18,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.placeholder', {
         defaultMessage: 'Any',
       }),
+    getNegate: () =>
+      i18n.translate('controls.optionsList.control.negate', {
+        defaultMessage: 'NOT',
+      }),
   },
   editor: {
     getAllowMultiselectTitle: () =>

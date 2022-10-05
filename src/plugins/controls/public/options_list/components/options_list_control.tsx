@@ -11,7 +11,16 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiText,
+  EuiTextColor,
+  useResizeObserver,
+} from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListStrings } from './options_list_strings';
@@ -45,6 +54,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const id = select((state) => state.explicitInput.id);
 
   const loading = select((state) => state.output.loading);
+  const exclude = select((state) => state.explicitInput.exclude);
 
   // debounce loading state so loading doesn't flash when user types
   const [buttonLoading, setButtonLoading] = useState(true);
@@ -103,6 +113,11 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         numActiveFilters={validSelectionsCount}
         hasActiveFilters={Boolean(validSelectionsCount)}
       >
+        {exclude && hasSelections && (
+          <EuiTextColor color="danger">
+            <b>{OptionsListStrings.control.getNegate()}</b>{' '}
+          </EuiTextColor>
+        )}
         {hasSelections ? selectionDisplayNode : OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
     </div>
