@@ -88,6 +88,15 @@ export const OUTPUT_API_ROUTES = {
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 
+// Fleet server API routes
+export const FLEET_SERVER_HOST_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/fleet_server_hosts`,
+  CREATE_PATTERN: `${API_ROOT}/fleet_server_hosts`,
+  INFO_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
+  UPDATE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
+  DELETE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
+};
+
 // Settings API routes
 export const SETTINGS_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/settings`,
