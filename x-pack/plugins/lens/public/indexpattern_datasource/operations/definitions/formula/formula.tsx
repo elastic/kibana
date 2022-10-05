@@ -55,7 +55,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       }),
     },
     canReduceTimeRange: {
-      helpMessage: i18n.translate('xpack.lens.indexPattern.formulaFilterableHelpText', {
+      helpMessage: i18n.translate('xpack.lens.indexPattern.formulaCanReduceTimeRangeHelpText', {
         defaultMessage: 'The provided reduced time range will be applied to the entire formula.',
       }),
     },
