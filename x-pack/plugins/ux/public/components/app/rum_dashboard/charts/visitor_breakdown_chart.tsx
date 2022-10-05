@@ -67,11 +67,9 @@ export function VisitorBreakdownChart({
         urlQuery,
         metric,
         dataView,
-        start,
-        end,
         localDataViewId,
       }),
-    [uiFilters, urlQuery, metric, dataView, start, end, localDataViewId]
+    [uiFilters, urlQuery, metric, dataView, localDataViewId]
   );
 
   const filterHandler = useCallback(
@@ -124,12 +122,8 @@ export function getVisitorBreakdownLensAttributes({
   urlQuery,
   metric,
   dataView,
-  start,
-  end,
   localDataViewId,
 }: LensAttributes & {
-  start: string;
-  end: string;
   localDataViewId: string;
 }): TypedLensByValueInput['attributes'] {
   const localDataView = dataView.toSpec(false);

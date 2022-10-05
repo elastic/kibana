@@ -13,8 +13,18 @@ import {
   VisitorBreakdownMetric,
 } from './visitor_breakdown_chart';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 jest.mock('../../../../hooks/use_kibana_services');
+
+const mockDataView = {
+  id: 'mock-id',
+  title: 'mock-title',
+  timeFieldName: 'mock-time-field-name',
+  isPersisted: () => false,
+  getName: () => 'mock-data-view',
+  toSpec: () => ({}),
+} as DataView;
 
 describe('VisitorBreakdownChart', () => {
   describe('getVisitorBreakdownLensAttributes', () => {
@@ -25,7 +35,8 @@ describe('VisitorBreakdownChart', () => {
           environment: 'ENVIRONMENT_ALL',
         },
         urlQuery: 'elastic.co',
-        dataView: 'Required',
+        dataView: mockDataView,
+        localDataViewId: 'xxxx-xxxxxxxxxxx-xxxx',
       };
 
       expect(getVisitorBreakdownLensAttributes(props)).toMatchSnapshot();
@@ -53,7 +64,8 @@ describe('VisitorBreakdownChart', () => {
           environment: 'ENVIRONMENT_ALL',
         },
         urlQuery: 'elastic.co',
-        dataView: 'Required',
+        dataView: mockDataView,
+        localDataViewId: 'xxxx-xxxxxxxxxxx-xxxx',
         onFilter: (_m: VisitorBreakdownMetric, _e: any) => {},
       };
 
