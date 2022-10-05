@@ -6,11 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { EuiDelayRender, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { lazy } from 'react';
+import React, { lazy } from 'react';
 
 export type { UnifiedHistogramLayoutProps } from './layout';
 
 const LazyUnifiedHistogramLayout = lazy(() => import('./layout'));
 
-export const UnifiedHistogramLayout = withSuspense(LazyUnifiedHistogramLayout);
+export const UnifiedHistogramLayout = withSuspense(
+  LazyUnifiedHistogramLayout,
+  <EuiDelayRender delay={300}>
+    <EuiFlexGroup
+      className="eui-fullHeight"
+      alignItems="center"
+      justifyContent="center"
+      gutterSize="none"
+      responsive={false}
+    >
+      <EuiLoadingSpinner size="l" />
+    </EuiFlexGroup>
+  </EuiDelayRender>
+);
