@@ -8,12 +8,20 @@
 
 import { Agent as HttpAgent, type AgentOptions } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import { type ConnectionOptions } from '@elastic/elasticsearch';
+import type { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 
 const HTTPS = 'https:';
 
 export type NetworkAgent = HttpAgent | HttpsAgent;
 export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
+
+export interface AgentFactoryProvider {
+  getAgentFactory(agentOptions?: HttpAgentOptions): AgentFactory;
+}
+
+export interface AgentStore {
+  getAgents(): Set<NetworkAgent>;
+}
 
 /**
  * Allows obtaining Agent factories, which can then be fed into elasticsearch-js's Client class.
@@ -26,15 +34,11 @@ export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
  * exposes methods that can modify the underlying pools, effectively impacting the connections of other Clients.
  * @internal
  **/
-export class AgentManager {
-  // Stores Https Agent instances
-  private httpsStore: Set<HttpsAgent>;
-  // Stores Http Agent instances
-  private httpStore: Set<HttpAgent>;
+export class AgentManager implements AgentFactoryProvider, AgentStore {
+  private agents: Set<HttpAgent>;
 
   constructor() {
-    this.httpsStore = new Set();
-    this.httpStore = new Set();
+    this.agents = new Set();
   }
 
   public getAgentFactory(agentOptions?: AgentOptions): AgentFactory {
@@ -48,8 +52,8 @@ export class AgentManager {
         if (!httpsAgent) {
           const config = Object.assign({}, agentOptions, connectionOpts.tls);
           httpsAgent = new HttpsAgent(config);
-          this.httpsStore.add(httpsAgent);
-          dereferenceOnDestroy(this.httpsStore, httpsAgent);
+          this.agents.add(httpsAgent);
+          dereferenceOnDestroy(this.agents, httpsAgent);
         }
 
         return httpsAgent;
@@ -57,19 +61,23 @@ export class AgentManager {
 
       if (!httpAgent) {
         httpAgent = new HttpAgent(agentOptions);
-        this.httpStore.add(httpAgent);
-        dereferenceOnDestroy(this.httpStore, httpAgent);
+        this.agents.add(httpAgent);
+        dereferenceOnDestroy(this.agents, httpAgent);
       }
 
       return httpAgent;
     };
   }
+
+  public getAgents(): Set<NetworkAgent> {
+    return this.agents;
+  }
 }
 
-const dereferenceOnDestroy = (protocolStore: Set<NetworkAgent>, agent: NetworkAgent) => {
+const dereferenceOnDestroy = (store: Set<NetworkAgent>, agent: NetworkAgent) => {
   const doDestroy = agent.destroy.bind(agent);
   agent.destroy = () => {
-    protocolStore.delete(agent);
+    store.delete(agent);
     doDestroy();
   };
 };

@@ -29,7 +29,6 @@ import {
   DEFAULT_TTY_ROWS,
   DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
-  TTY_LINES_PER_FRAME,
   TTY_LINES_PRE_SEEK,
 } from '../../../common/constants';
 
@@ -226,6 +225,7 @@ export const useXtermPlayer = ({
 
       if (clear) {
         linesToPrint = lines.slice(Math.max(0, lineNumber - TTY_LINES_PRE_SEEK), lineNumber + 1);
+
         try {
           terminal.reset();
           terminal.clear();
@@ -234,7 +234,7 @@ export const useXtermPlayer = ({
           // there is some random race condition with the jump to feature that causes these calls to error out.
         }
       } else {
-        linesToPrint = lines.slice(lineNumber, lineNumber + TTY_LINES_PER_FRAME);
+        linesToPrint = lines.slice(lineNumber, lineNumber + 1);
       }
 
       linesToPrint.forEach((line, index) => {
@@ -243,7 +243,7 @@ export const useXtermPlayer = ({
         }
       });
     },
-    [terminal, lines]
+    [lines, terminal]
   );
 
   useEffect(() => {
@@ -284,9 +284,9 @@ export const useXtermPlayer = ({
         if (!hasNextPage && currentLine === lines.length - 1) {
           setIsPlaying(false);
         } else {
-          const nextLine = Math.min(lines.length - 1, currentLine + TTY_LINES_PER_FRAME);
-          setCurrentLine(nextLine);
+          const nextLine = Math.min(lines.length - 1, currentLine + 1);
           render(nextLine, false);
+          setCurrentLine(nextLine);
         }
       }, playSpeed);
 

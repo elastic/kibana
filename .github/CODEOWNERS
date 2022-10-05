@@ -504,6 +504,11 @@ x-pack/examples/files_example @elastic/kibana-app-services
 
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/fleet @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/create_rule_exceptions_route* @elastic/security-solution-platform
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/find_rule_exceptions_route* @elastic/security-solution-platform
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/import_rules_route* @elastic/security-solution-platform
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/preview_rules_route* @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils @elastic/security-solution-platform
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/tags @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules @elastic/security-detections-response-rules
@@ -745,6 +750,9 @@ packages/core/http/core-http-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
 packages/core/http/core-http-request-handler-context-server @elastic/kibana-core
 packages/core/http/core-http-request-handler-context-server-internal @elastic/kibana-core
+packages/core/http/core-http-resources-server @elastic/kibana-core
+packages/core/http/core-http-resources-server-internal @elastic/kibana-core
+packages/core/http/core-http-resources-server-mocks @elastic/kibana-core
 packages/core/http/core-http-router-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server @elastic/kibana-core
