@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ROLES } from '../../../common/test';
-import { getExceptionList, expectedExportedExceptionList } from '../../objects/exception';
-import { getNewRule } from '../../objects/rule';
+import { ROLES } from '../../../../common/test';
+import { getExceptionList, expectedExportedExceptionList } from '../../../objects/exception';
+import { getNewRule } from '../../../objects/rule';
 
-import { createCustomRule } from '../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
+import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../tasks/login';
 
-import { EXCEPTIONS_URL } from '../../urls/navigation';
+import { EXCEPTIONS_URL } from '../../../urls/navigation';
 import {
   deleteExceptionListWithRuleReference,
   deleteExceptionListWithoutRuleReference,
@@ -20,15 +20,15 @@ import {
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
   clearSearchSelection,
-} from '../../tasks/exceptions_table';
+} from '../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_TABLE_DELETE_BTN,
   EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
-} from '../../screens/exceptions';
-import { createExceptionList } from '../../tasks/api_calls/exceptions';
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
-import { TOASTER } from '../../screens/alerts_detection_rules';
+} from '../../../screens/exceptions';
+import { createExceptionList } from '../../../tasks/api_calls/exceptions';
+import { esArchiverResetKibana } from '../../../tasks/es_archiver';
+import { TOASTER } from '../../../screens/alerts_detection_rules';
 
 const getExceptionList1 = () => ({
   ...getExceptionList(),

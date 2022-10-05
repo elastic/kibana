@@ -58,9 +58,9 @@ export const EXCEPTION_ITEM_CONTAINER = '[data-test-subj="exceptionEntriesContai
 export const EXCEPTION_FIELD_LIST =
   '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
 
-export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exception-flyout-title"]';
+export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exceptionFlyoutTitle"]';
 
-export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="edit-exception-confirm-button"]';
+export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="editExceptionConfirmButton"]';
 
 export const EXCEPTION_FLYOUT_VERSION_CONFLICT =
   '[data-test-subj="exceptionsFlyoutVersionConflict"]';
@@ -83,6 +83,11 @@ export const NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT =
   '[data-test-subj="exceptionItemViewerEmptyPrompts-emptySearch"]';
 
 export const EXCEPTION_ITEM_VIEWER_SEARCH = 'input[data-test-subj="exceptionsViewerSearchBar"]';
+
+export const EXCEPTION_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeader-title"]';
+
+export const EXCEPTION_CARD_ITEM_CONDITIONS =
+  '[data-test-subj="exceptionItemCardConditions-condition"]';
 
 // Exception flyout components
 export const EXCEPTION_ITEM_NAME_INPUT = 'input[data-test-subj="exceptionFlyoutNameInput"]';

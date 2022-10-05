@@ -35,7 +35,6 @@ import { createExceptionItemsReducer } from './reducer';
 import { ExceptionsLinkedToLists } from '../flyout_components/linked_to_list';
 import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
-import { ExceptionsFlyoutComments } from '../flyout_components/item_comments';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 import {
@@ -49,6 +48,7 @@ import { entrichExceptionItemsForUpdate } from '../flyout_components/utils';
 import { useEditExceptionItems } from './use_edit_exception';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
+import { ExceptionItemComments } from '../item_comments';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
@@ -230,7 +230,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         selectedOs: itemToEdit.os_types,
         items: exceptionItems,
       });
-
+      console.log({items, exceptionItems})
       await submitEditExceptionItems({
         itemsToUpdate: items,
       });
@@ -332,10 +332,10 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           </>
         )}
         <EuiHorizontalRule />
-        <ExceptionsFlyoutComments
-          existingComments={itemToEdit.comments}
-          newComment={newComment}
-          onCommentChange={setComment}
+        <ExceptionItemComments
+          exceptionItemComments={itemToEdit.comments}
+          newCommentValue={newComment}
+          newCommentOnChange={setComment}
         />
         {showAlertCloseOptions && (
           <>

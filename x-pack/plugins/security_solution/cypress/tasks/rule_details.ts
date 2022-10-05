@@ -10,20 +10,8 @@ import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
   ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER,
-  ADD_TO_RULE_RADIO_LABEL,
-  ADD_TO_SHARED_LIST_RADIO_LABEL,
-  CLOSE_ALERTS_CHECKBOX,
-  CLOSE_SINGLE_ALERT_CHECKBOX,
-  CONFIRM_BTN,
-  EXCEPTION_ITEM_NAME_INPUT,
   EXCEPTION_ITEM_VIEWER_SEARCH,
   FIELD_INPUT,
-  LOADING_SPINNER,
-  OPERATOR_INPUT,
-  OS_INPUT,
-  OS_SELECTION_SECTION,
-  SHARED_LIST_CHECKBOX,
-  VALUES_INPUT,
 } from '../screens/exceptions';
 import {
   ALERTS_TAB,
@@ -41,6 +29,12 @@ import {
   EDIT_EXCEPTION_BTN,
   ENDPOINT_EXCEPTIONS_TAB,
 } from '../screens/rule_details';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
+  selectBulkCloseAlerts,
+  submitNewExceptionItem,
+} from './exceptions';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
 export const enablesRule = () => {
@@ -51,21 +45,6 @@ export const enablesRule = () => {
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
   });
-};
-
-export const addsException = (exception: Exception) => {
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('exist');
-  cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
-  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
-  });
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
-  cy.get(CONFIRM_BTN).click();
-  cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-  cy.get(CONFIRM_BTN).should('not.exist');
 };
 
 export const addsFieldsToTimeline = (search: string, fields: string[]) => {
@@ -100,40 +79,6 @@ export const addExceptionFlyoutFromViewerHeader = () => {
       return $el.find(FIELD_INPUT);
     })
     .should('be.visible');
-};
-
-export const addExceptionFlyoutItemName = (name: string) => {
-  cy.root()
-    .pipe(($el) => {
-      return $el.find(EXCEPTION_ITEM_NAME_INPUT);
-    })
-    .type(`${name}{enter}`)
-    .should('have.value', name);
-};
-
-export const selectBulkCloseAlerts = () => {
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
-};
-
-export const selectCloseSingleAlerts = () => {
-  cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).click({ force: true });
-};
-
-export const addExceptionConditions = (exception: Exception) => {
-  cy.root()
-    .pipe(($el) => {
-      return $el.find(FIELD_INPUT);
-    })
-    .type(`${exception.field}{downArrow}{enter}`);
-  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
-  });
-};
-
-export const submitNewExceptionItem = () => {
-  cy.get(CONFIRM_BTN).click();
-  cy.get(CONFIRM_BTN).should('not.exist');
 };
 
 export const addExceptionFromRuleDetails = (exception: Exception) => {
@@ -199,23 +144,4 @@ export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
   });
-};
-
-export const selectAddToRuleRadio = (numListsToCheck = 1) => {
-  cy.get(ADD_TO_RULE_RADIO_LABEL).click();
-};
-
-export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
-  cy.get(ADD_TO_SHARED_LIST_RADIO_LABEL).click();
-  for (let i = 0; i < numListsToCheck; i++) {
-    cy.get(SHARED_LIST_CHECKBOX)
-      .eq(i)
-      .pipe(($el) => $el.trigger('click'))
-      .should('be.checked');
-  }
-};
-
-export const selectOs = (os: string) => {
-  cy.get(OS_SELECTION_SECTION).should('exist');
-  cy.get(OS_INPUT).type(`${os}{downArrow}{enter}`);
 };

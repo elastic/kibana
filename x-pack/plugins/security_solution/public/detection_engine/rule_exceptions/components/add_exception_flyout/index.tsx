@@ -45,13 +45,19 @@ import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
-import { ExceptionsFlyoutComments } from '../flyout_components/item_comments';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
 import { entrichNewExceptionItems } from '../flyout_components/utils';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
+import { ExceptionItemComments } from '../item_comments';
+
+const SectionHeader = styled(EuiTitle)`
+  ${() => css`
+    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
+  `}
+`;
 
 export interface AddExceptionFlyoutProps {
   rules: Rule[] | null;
@@ -470,7 +476,15 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             </>
           )}
           <EuiHorizontalRule />
-          <ExceptionsFlyoutComments newComment={newComment} onCommentChange={setComment} />
+          <ExceptionItemComments
+            accordionTitle={
+              <SectionHeader size="xs">
+                <h3>{i18n.COMMENTS_SECTION_TITLE(0)}</h3>
+              </SectionHeader>
+            }
+            newCommentValue={newComment}
+            newCommentOnChange={setComment}
+          />
           {showAlertCloseOptions && (
             <>
               <EuiHorizontalRule />

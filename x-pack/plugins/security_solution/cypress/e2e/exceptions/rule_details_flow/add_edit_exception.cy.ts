@@ -19,21 +19,26 @@ import {
 } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
-  addExceptionConditions,
   addExceptionFlyoutFromViewerHeader,
-  addExceptionFlyoutItemName,
   goToAlertsTab,
   goToExceptionsTab,
+  openEditException,
   openExceptionFlyoutFromEmptyViewerPrompt,
   removeException,
   searchForExceptionItem,
+  waitForTheRuleToBeExecuted,
+} from '../../../tasks/rule_details';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
+  editException,
+  editExceptionFlyoutItemName,
   selectAddToRuleRadio,
   selectBulkCloseAlerts,
   selectSharedListToAddExceptionTo,
+  submitEditedExceptionItem,
   submitNewExceptionItem,
-  waitForTheRuleToBeExecuted,
-} from '../../../tasks/rule_details';
-
+} from '../../../tasks/exceptions';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
@@ -43,6 +48,11 @@ import {
   CLOSE_ALERTS_CHECKBOX,
   CONFIRM_BTN,
   ADD_TO_SHARED_LIST_RADIO_INPUT,
+  EXCEPTION_ITEM_CONTAINER,
+  FIELD_INPUT,
+  VALUES_MATCH_ANY_INPUT,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
 } from '../../../screens/exceptions';
 import {
   createExceptionList,
@@ -51,8 +61,10 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
-describe('Add exception from rule details', () => {
+describe('Add/edit exception from rule details', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
+  const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
+  const ITEM_FIELD = 'unique_value.test';
 
   before(() => {
     esArchiverResetKibana();
@@ -64,7 +76,7 @@ describe('Add exception from rule details', () => {
     esArchiverUnload('exceptions');
   });
 
-  describe('rule with existing shared exceptions', () => {
+  describe('existing list and items', () => {
     const exceptionList = getExceptionList();
     beforeEach(() => {
       deleteAlertsAndRules();
@@ -92,29 +104,12 @@ describe('Add exception from rule details', () => {
           item_id: 'simple_list_item',
           tags: [],
           type: 'simple',
-          description: 'Test exception item',
-          name: 'Sample Exception List Item',
-          namespace_type: 'single',
-          entries: [
-            {
-              field: 'user.name',
-              operator: 'included',
-              type: 'match_any',
-              value: ['bar'],
-            },
-          ],
-        });
-        createExceptionListItem(exceptionList.list_id, {
-          list_id: exceptionList.list_id,
-          item_id: 'simple_list_item_2',
-          tags: [],
-          type: 'simple',
           description: 'Test exception item 2',
           name: 'Sample Exception List Item 2',
           namespace_type: 'single',
           entries: [
             {
-              field: 'unique_value.test',
+              field: ITEM_FIELD,
               operator: 'included',
               type: 'match_any',
               value: ['foo'],
@@ -128,85 +123,125 @@ describe('Add exception from rule details', () => {
       goToExceptionsTab();
     });
 
-    it('Creates an exception item to add to shared list', () => {
+    it('Edits an exception item', () => {
+      const NEW_ITEM_NAME = 'Exception item-EDITED';
+      const ITEM_NAME = 'Sample Exception List Item 2';
+
       // displays existing exception items
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME);
+      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' unique_value.testis one of foo');
 
-      // open add exception modal
-      addExceptionFlyoutFromViewerHeader();
+      // open edit exception modal
+      openEditException();
 
-      // add exception item conditions
-      addExceptionConditions(getException());
+      // edit exception item name
+      editExceptionFlyoutItemName(NEW_ITEM_NAME);
 
-      // Name is required so want to check that submit is still disabled
-      cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+      // check that the existing item's field is being populated
+      cy.get(EXCEPTION_ITEM_CONTAINER)
+        .eq(0)
+        .find(FIELD_INPUT)
+        .eq(0)
+        .should('have.text', ITEM_FIELD);
+      cy.get(VALUES_MATCH_ANY_INPUT).should('have.text', 'bar');
 
-      // add exception item name
-      addExceptionFlyoutItemName('My item name');
-
-      // select to add exception item to a shared list
-      selectSharedListToAddExceptionTo(1);
-
-      // not testing close alert functionality here, just ensuring that the options appear as expected
-      cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
-      cy.get(CLOSE_ALERTS_CHECKBOX).should('not.have.attr', 'disabled');
+      // edit conditions
+      editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
 
       // submit
-      submitNewExceptionItem();
-
-      // new exception item displays
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 3);
-    });
-
-    it('Creates an exception item to add to rule only', () => {
-      // displays existing exception items
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
-      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
-
-      // open add exception modal
-      addExceptionFlyoutFromViewerHeader();
-
-      // add exception item conditions
-      addExceptionConditions(getException());
-
-      // Name is required so want to check that submit is still disabled
-      cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-
-      // add exception item name
-      addExceptionFlyoutItemName('My item name');
-
-      // select to add exception item to rule only
-      selectAddToRuleRadio();
-
-      // not testing close alert functionality here, just ensuring that the options appear as expected
-      cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
-      cy.get(CLOSE_ALERTS_CHECKBOX).should('not.have.attr', 'disabled');
-
-      // submit
-      submitNewExceptionItem();
-
-      // new exception item displays
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 3);
-    });
-
-    // Trying to figure out with EUI why the search won't trigger
-    it('Can search for items', () => {
-      // displays existing exception items
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
-      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
-
-      // can search for an exception value
-      searchForExceptionItem('foo');
+      submitEditedExceptionItem();
 
       // new exception item displays
       cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
 
-      // displays empty search result view if no matches found
-      searchForExceptionItem('abc');
+      // check that updates stuck
+      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
+      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS bar');
+    });
 
-      // new exception item displays
-      cy.get(NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT).should('exist');
+    describe('rule with existing shared exceptions', () => {
+      it('Creates an exception item to add to shared list', () => {
+        // displays existing exception items
+        cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+        cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+
+        // open add exception modal
+        addExceptionFlyoutFromViewerHeader();
+
+        // add exception item conditions
+        addExceptionConditions(getException());
+
+        // Name is required so want to check that submit is still disabled
+        cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+
+        // add exception item name
+        addExceptionFlyoutItemName('My item name');
+
+        // select to add exception item to a shared list
+        selectSharedListToAddExceptionTo(1);
+
+        // not testing close alert functionality here, just ensuring that the options appear as expected
+        cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
+        cy.get(CLOSE_ALERTS_CHECKBOX).should('not.have.attr', 'disabled');
+
+        // submit
+        submitNewExceptionItem();
+
+        // new exception item displays
+        cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+      });
+
+      it('Creates an exception item to add to rule only', () => {
+        // displays existing exception items
+        cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+        cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+
+        // open add exception modal
+        addExceptionFlyoutFromViewerHeader();
+
+        // add exception item conditions
+        addExceptionConditions(getException());
+
+        // Name is required so want to check that submit is still disabled
+        cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+
+        // add exception item name
+        addExceptionFlyoutItemName('My item name');
+
+        // select to add exception item to rule only
+        selectAddToRuleRadio();
+
+        // not testing close alert functionality here, just ensuring that the options appear as expected
+        cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
+        cy.get(CLOSE_ALERTS_CHECKBOX).should('not.have.attr', 'disabled');
+
+        // submit
+        submitNewExceptionItem();
+
+        // new exception item displays
+        cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+      });
+
+      // Trying to figure out with EUI why the search won't trigger
+      it('Can search for items', () => {
+        // displays existing exception items
+        cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+        cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+
+        // can search for an exception value
+        searchForExceptionItem('foo');
+
+        // new exception item displays
+        cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+        // displays empty search result view if no matches found
+        searchForExceptionItem('abc');
+
+        // new exception item displays
+        cy.get(NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT).should('exist');
+      });
     });
   });
 

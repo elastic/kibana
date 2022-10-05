@@ -41,7 +41,7 @@ export const useEditExceptionItems = (): ReturnUseEditExceptionItems => {
       try {
         setIsLoading(true);
 
-        await updateExceptions({ items: itemsToUpdate });
+        await updateExceptions(itemsToUpdate);
 
         addSuccess({
           title: i18n.EDIT_RULE_EXCEPTION_SUCCESS_TITLE,

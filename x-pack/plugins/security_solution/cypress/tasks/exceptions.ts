@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Exception } from '../objects/exception';
 import {
   FIELD_INPUT,
   OPERATOR_INPUT,
@@ -14,6 +15,16 @@ import {
   VALUES_INPUT,
   VALUES_MATCH_ANY_INPUT,
   EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
+  LOADING_SPINNER,
+  CLOSE_ALERTS_CHECKBOX,
+  CONFIRM_BTN,
+  EXCEPTION_ITEM_NAME_INPUT,
+  CLOSE_SINGLE_ALERT_CHECKBOX,
+  ADD_TO_RULE_RADIO_LABEL,
+  ADD_TO_SHARED_LIST_RADIO_LABEL,
+  SHARED_LIST_CHECKBOX,
+  OS_SELECTION_SECTION,
+  OS_INPUT,
 } from '../screens/exceptions';
 
 export const addExceptionEntryFieldValueOfItemX = (
@@ -56,8 +67,92 @@ export const closeExceptionBuilderFlyout = () => {
 export const editException = (updatedField: string, itemIndex = 0, fieldIndex = 0) => {
   addExceptionEntryFieldValueOfItemX(`${updatedField}{downarrow}{enter}`, itemIndex, fieldIndex);
   addExceptionEntryFieldValueValue('foo', itemIndex);
+};
 
+export const addsException = (exception: Exception) => {
+  cy.get(LOADING_SPINNER).should('exist');
+  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(FIELD_INPUT).should('exist');
+  cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
+  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
+  exception.values.forEach((value) => {
+    cy.get(VALUES_INPUT).type(`${value}{enter}`);
+  });
+  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
+  cy.get(CONFIRM_BTN).click();
+  cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+  cy.get(CONFIRM_BTN).should('not.exist');
+};
+
+export const addExceptionFlyoutItemName = (name: string) => {
+  cy.root()
+    .pipe(($el) => {
+      return $el.find(EXCEPTION_ITEM_NAME_INPUT);
+    })
+    .type(`${name}{enter}`)
+    .should('have.value', name);
+};
+
+export const editExceptionFlyoutItemName = (name: string) => {
+  cy.root()
+    .pipe(($el) => {
+      return $el.find(EXCEPTION_ITEM_NAME_INPUT);
+    })
+    .clear()
+    .type(`${name}{enter}`)
+    .should('have.value', name);
+};
+
+export const selectBulkCloseAlerts = () => {
+  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
+};
+
+export const selectCloseSingleAlerts = () => {
+  cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).click({ force: true });
+};
+
+export const addExceptionConditions = (exception: Exception) => {
+  cy.root()
+    .pipe(($el) => {
+      return $el.find(FIELD_INPUT);
+    })
+    .type(`${exception.field}{downArrow}{enter}`);
+  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
+  exception.values.forEach((value) => {
+    cy.get(VALUES_INPUT).type(`${value}{enter}`);
+  });
+};
+
+export const submitNewExceptionItem = () => {
+  cy.get(CONFIRM_BTN).click();
+  cy.get(CONFIRM_BTN).should('not.exist');
+};
+
+export const submitEditedExceptionItem = () => {
   cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click();
-  cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('have.attr', 'disabled');
   cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('not.exist');
+};
+
+export const selectAddToRuleRadio = (numListsToCheck = 1) => {
+  cy.get(ADD_TO_RULE_RADIO_LABEL).click();
+};
+
+export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
+  cy.get(ADD_TO_SHARED_LIST_RADIO_LABEL).click();
+  for (let i = 0; i < numListsToCheck; i++) {
+    cy.get(SHARED_LIST_CHECKBOX)
+      .eq(i)
+      .pipe(($el) => $el.trigger('click'))
+      .should('be.checked');
+  }
+};
+
+export const selectOs = (os: string) => {
+  cy.get(OS_SELECTION_SECTION).should('exist');
+  cy.get(OS_INPUT).type(`${os}{downArrow}{enter}`);
+};
+
+export const addDefaultExceptionItem = (os: string) => {
+  cy.get(OS_SELECTION_SECTION).should('exist');
+  cy.get(OS_INPUT).type(`${os}{downArrow}{enter}`);
 };
