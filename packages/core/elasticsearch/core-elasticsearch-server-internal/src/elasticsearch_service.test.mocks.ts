@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+
 export const MockClusterClient = jest.fn();
-export const MockAgentManager = jest.fn();
+export const MockAgentManager: jest.MockedClass<typeof AgentManager> = jest.fn().mockReturnValue({
+  getAgents: jest.fn(),
+  getAgentFactory: jest.fn(),
+});
+
 jest.mock('@kbn/core-elasticsearch-client-server-internal', () => ({
   ClusterClient: MockClusterClient,
   AgentManager: MockAgentManager,

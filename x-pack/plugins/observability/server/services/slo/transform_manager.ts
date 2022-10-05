@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { SLO, SLITypes } from '../../types/models';
+import { SLO, IndicatorTypes } from '../../types/models';
 import { retryTransientEsErrors } from '../../utils/retry';
 import { TransformGenerator } from './transform_generators';
 
@@ -22,7 +22,7 @@ export interface TransformManager {
 
 export class DefaultTransformManager implements TransformManager {
   constructor(
-    private generators: Record<SLITypes, TransformGenerator>,
+    private generators: Record<IndicatorTypes, TransformGenerator>,
     private esClient: ElasticsearchClient,
     private logger: Logger
   ) {}

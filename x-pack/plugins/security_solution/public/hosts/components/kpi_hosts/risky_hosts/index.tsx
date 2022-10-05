@@ -19,6 +19,10 @@ import React from 'react';
 import styled from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 import {
+  RiskInformationButtonIcon,
+  HOST_RISK_INFO_BUTTON_CLASS,
+} from '../../../../risk_score/components/risk_information';
+import {
   InspectButton,
   BUTTON_CLASS as INPECT_BUTTON_CLASS,
 } from '../../../../common/components/inspect';
@@ -28,13 +32,9 @@ import * as i18n from './translations';
 import { useInspectQuery } from '../../../../common/hooks/use_inspect_query';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 
-import {
-  HostRiskInformationButtonIcon,
-  HOST_RISK_INFO_BUTTON_CLASS,
-} from '../../host_risk_information';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import type { KpiRiskScoreStrategyResponse } from '../../../../../common/search_strategy';
-import { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../../common/components/severity/common';
 
 const KpiBaseComponentLoader: React.FC = () => (
@@ -94,7 +94,7 @@ const RiskyHostsComponent: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <HostRiskInformationButtonIcon />
+                <RiskInformationButtonIcon riskEntity={RiskScoreEntity.host} />
               </EuiFlexItem>
               {data?.inspect && (
                 <EuiFlexItem>
