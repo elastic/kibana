@@ -18,6 +18,7 @@ export interface Props {
   openTOCDetails: string[];
   createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) => void;
   setLayerParent: (layerId: string, parent: string | undefined) => void;
+  moveLayerToBottom: (moveLayerId: string) => void;
   moveLayerToLeftOfTarget: (moveLayerId: string, targetLayerId: string) => void;
 }
 
@@ -143,12 +144,13 @@ export class LayerTOC extends Component<Props> {
       return;
     }
 
-    if (!newRightSiblingLayer) {
+    if (newRightSiblingLayer) {
+      this.props.setLayerParent(sourceLayer.getId(), newRightSiblingLayer.getParent());
+      this.props.moveLayerToLeftOfTarget(sourceLayer.getId(), newRightSiblingLayer.getId());
       return;
     }
 
-    this.props.setLayerParent(sourceLayer.getId(), newRightSiblingLayer.getParent());
-    this.props.moveLayerToLeftOfTarget(sourceLayer.getId(), newRightSiblingLayer.getId());
+    this.props.moveLayerToBottom(sourceLayer.getId());
   };
 
   _getDepth(layer: ILayer, depth: number): { depth: number; showInTOC: boolean } {

@@ -899,3 +899,32 @@ export function moveLayerToLeftOfTarget(moveLayerId: string, targetLayerId: stri
     }
   };
 }
+
+export function moveLayerToBottom(moveLayerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layers = getLayerList(getState());
+    const moveLayerIndex = layers.findIndex((layer) => layer.getId() === moveLayerId);
+    if (moveLayerIndex === -1) {
+      return;
+    }
+    const moveLayer = layers[moveLayerIndex];
+
+    const newIndex = 0;
+    const newOrder = [];
+    for (let i = 0; i < layers.length; i++) {
+      newOrder.push(i);
+    }
+    newOrder.splice(moveLayerIndex, 1);
+    newOrder.splice(newIndex, 0, moveLayerIndex);
+    dispatch(updateLayerOrder(newOrder));
+
+    if (isLayerGroup(moveLayer)) {
+      (moveLayer as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(moveLayerToBottom(childLayer.getId()));
+      });
+    }
+  };
+}

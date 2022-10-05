@@ -40,6 +40,7 @@ const defaultProps = {
   layerList: mockLayers,
   isReadOnly: false,
   openTOCDetails: [],
+  moveLayerToBottom: () => {},
   moveLayerToLeftOfTarget: () => {},
   setLayerParent: () => {},
   createLayerGroup: () => {},
