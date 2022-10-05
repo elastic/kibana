@@ -54,7 +54,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { selectOption, deselectOption, clearSelections, replaceSelection },
+    actions: { selectOption, deselectOption, clearSelections, replaceSelection, setExclude },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
@@ -71,6 +71,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const title = select((state) => state.explicitInput.title);
 
   const loading = select((state) => state.output.loading);
+  const excludeResults = select((state) => state.explicitInput.exclude);
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
@@ -80,10 +81,13 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   );
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
-  const [aggregationSelected, setAggregationSelected] = useState('optionsList__includeResults');
+  const [aggregationSelected, setAggregationSelected] = useState(
+    excludeResults ? 'optionsList__excludeResults' : 'optionsList__includeResults'
+  );
 
   const onChangeAggregation = (optionId: string) => {
     setAggregationSelected(optionId);
+    dispatch(setExclude(optionId === 'optionsList__excludeResults' ? true : false));
   };
 
   return (

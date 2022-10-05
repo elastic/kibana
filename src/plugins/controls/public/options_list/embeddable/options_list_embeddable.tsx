@@ -113,6 +113,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
+    // console.log('initial input', this.getInput());
     if (!initialSelectedOptions) this.setInitializationFinished();
     this.runOptionsListQuery().then(async () => {
       if (initialSelectedOptions) {
@@ -134,6 +135,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         timeslice: newInput.timeslice,
         filters: newInput.filters,
         query: newInput.query,
+        exclude: newInput.exclude,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );
@@ -153,17 +155,23 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
      **/
     this.subscriptions.add(
       this.getInput$()
-        .pipe(distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)))
-        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
+        .pipe(
+          distinctUntilChanged(
+            (a, b) => isEqual(a.selectedOptions, b.selectedOptions) && a.exclude === b.exclude
+          )
+        )
+        .subscribe(async ({ selectedOptions: newSelectedOptions, exclude }) => {
           const {
             actions: {
               clearValidAndInvalidSelections,
               setValidAndInvalidSelections,
               publishFilters,
+              setExclude,
             },
             dispatch,
           } = this.reduxEmbeddableTools;
 
+          dispatch(setExclude(exclude));
           if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
             dispatch(clearValidAndInvalidSelections({}));
           } else {
@@ -286,6 +294,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         query,
         timeRange: globalTimeRange,
         timeslice,
+        exclude,
       } = this.getInput();
 
       if (this.abortController) this.abortController.abort();
@@ -323,6 +332,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             invalidSelections: undefined,
             validSelections: selectedOptions,
             totalCardinality,
+            exclude,
           })
         );
       } else {
@@ -339,6 +349,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             invalidSelections: invalid,
             validSelections: valid,
             totalCardinality,
+            exclude,
           })
         );
       }
@@ -363,7 +374,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private buildFilter = async () => {
     const { getState } = this.reduxEmbeddableTools;
-    const { validSelections } = getState().componentState ?? {};
+    const { validSelections, exclude } = getState().componentState ?? {};
 
     if (!validSelections || isEmpty(validSelections)) {
       return [];
@@ -379,6 +390,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     newFilter.meta.key = field?.name;
+    if (exclude) newFilter.meta.negate = true;
+    // console.log(newFilter);
     return [newFilter];
   };
 
