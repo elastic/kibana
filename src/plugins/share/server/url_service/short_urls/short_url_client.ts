@@ -154,7 +154,7 @@ export class ServerShortUrlClient implements IShortUrlClient {
    * Access field updates are executed in the background as we don't need to
    * wait for them and confirm that they were successful.
    */
-  protected updateAccessFields(record: ShortUrlRecord) {
+   protected updateAccessFields(record: ShortUrlRecord) {
     const { storage } = this.dependencies;
     const { id, ...attributes } = record.data;
     storage.update(id, {
