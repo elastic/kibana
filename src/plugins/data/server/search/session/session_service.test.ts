@@ -11,17 +11,16 @@ import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClientMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { nodeBuilder } from '@kbn/es-query';
 import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ConfigSchema } from '../../../config';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const MAX_UPDATE_RETRIES = 3;
 
@@ -29,8 +28,8 @@ const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let elasticsearchClient: ElasticsearchClientMock;
   let service: SearchSessionService;
-  let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
 
   const MOCK_STRATEGY = 'ese';
 
@@ -67,19 +66,14 @@ describe('SearchSessionService', () => {
   describe('Feature disabled', () => {
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
+      elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
       const config: ConfigSchema = {
         search: {
           sessions: {
             enabled: false,
-            pageSize: 10000,
-            notTouchedInProgressTimeout: moment.duration(1, 'm'),
             notTouchedTimeout: moment.duration(2, 'm'),
             maxUpdateRetries: MAX_UPDATE_RETRIES,
             defaultExpiration: moment.duration(7, 'd'),
-            monitoringTaskTimeout: moment.duration(5, 'm'),
-            cleanupInterval: moment.duration(10, 's'),
-            trackingInterval: moment.duration(10, 's'),
-            expireInterval: moment.duration(10, 'm'),
             management: {} as any,
           },
         },
@@ -90,21 +84,12 @@ describe('SearchSessionService', () => {
         error: jest.fn(),
       };
       service = new SearchSessionService(mockLogger, config, '8.0.0');
-      service.setup(coreMock.createSetup(), { taskManager: taskManagerMock.createSetup() });
-      const coreStart = coreMock.createStart();
-      mockTaskManager = taskManagerMock.createStart();
+      service.setup(coreMock.createSetup(), {});
       await flushPromises();
-      await service.start(coreStart, {
-        taskManager: mockTaskManager,
-      });
     });
 
     afterEach(() => {
       service.stop();
-    });
-
-    it('task is cleared, if exists', async () => {
-      expect(mockTaskManager.removeIfExists).toHaveBeenCalled();
     });
 
     it('trackId ignores', async () => {
@@ -148,19 +133,15 @@ describe('SearchSessionService', () => {
   describe('Feature enabled', () => {
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
+      elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
       const config: ConfigSchema = {
         search: {
           sessions: {
             enabled: true,
             pageSize: 10000,
-            notTouchedInProgressTimeout: moment.duration(1, 'm'),
             notTouchedTimeout: moment.duration(2, 'm'),
             maxUpdateRetries: MAX_UPDATE_RETRIES,
             defaultExpiration: moment.duration(7, 'd'),
-            trackingInterval: moment.duration(10, 's'),
-            expireInterval: moment.duration(10, 'm'),
-            monitoringTaskTimeout: moment.duration(5, 'm'),
-            cleanupInterval: moment.duration(10, 's'),
             management: {} as any,
           },
         },
@@ -171,22 +152,15 @@ describe('SearchSessionService', () => {
         error: jest.fn(),
       };
       service = new SearchSessionService(mockLogger, config, '8.0.0');
-      service.setup(coreMock.createSetup(), { taskManager: taskManagerMock.createSetup() });
+      service.setup(coreMock.createSetup(), {});
       const coreStart = coreMock.createStart();
-      mockTaskManager = taskManagerMock.createStart();
+
       await flushPromises();
-      await service.start(coreStart, {
-        taskManager: mockTaskManager,
-      });
+      await service.start(coreStart, {});
     });
 
     afterEach(() => {
       service.stop();
-    });
-
-    it('task is cleared and re-created', async () => {
-      expect(mockTaskManager.removeIfExists).toHaveBeenCalled();
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalled();
     });
 
     describe('save', () => {
@@ -198,7 +172,9 @@ describe('SearchSessionService', () => {
 
       it('throws if `appId` is not provided', () => {
         expect(
-          service.save({ savedObjectsClient }, mockUser1, sessionId, { name: 'banana' })
+          service.save({ savedObjectsClient }, mockUser1, sessionId, {
+            name: 'banana',
+          })
         ).rejects.toMatchInlineSnapshot(`[Error: AppId is required]`);
       });
 
@@ -232,8 +208,6 @@ describe('SearchSessionService', () => {
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
         expect(callAttributes).not.toHaveProperty('idMapping');
-        expect(callAttributes).toHaveProperty('touched');
-        expect(callAttributes).toHaveProperty('persisted', true);
         expect(callAttributes).toHaveProperty('name', 'banana');
         expect(callAttributes).toHaveProperty('appId', 'nanana');
         expect(callAttributes).toHaveProperty('locatorId', 'panama');
@@ -265,10 +239,8 @@ describe('SearchSessionService', () => {
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(options?.id).toBe(sessionId);
         expect(callAttributes).toHaveProperty('idMapping', {});
-        expect(callAttributes).toHaveProperty('touched');
         expect(callAttributes).toHaveProperty('expires');
         expect(callAttributes).toHaveProperty('created');
-        expect(callAttributes).toHaveProperty('persisted', true);
         expect(callAttributes).toHaveProperty('name', 'banana');
         expect(callAttributes).toHaveProperty('appId', 'nanana');
         expect(callAttributes).toHaveProperty('locatorId', 'panama');
@@ -343,13 +315,20 @@ describe('SearchSessionService', () => {
           total: 1,
           per_page: 1,
           page: 0,
+          statuses: {
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+          },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
 
         const options = { page: 0, perPage: 5 };
-        const response = await service.find({ savedObjectsClient }, mockUser1, options);
+        const response = await service.find(
+          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          mockUser1,
+          options
+        );
 
-        expect(response).toBe(mockResponse);
+        expect(response).toEqual(mockResponse);
         const [[findOptions]] = savedObjectsClient.find.mock.calls;
         expect(findOptions).toMatchInlineSnapshot(`
           Object {
@@ -424,17 +403,28 @@ describe('SearchSessionService', () => {
           total: 1,
           per_page: 1,
           page: 0,
+          statuses: {
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+          },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
 
         const options1 = { filter: 'foobar' };
-        const response1 = await service.find({ savedObjectsClient }, mockUser1, options1);
+        const response1 = await service.find(
+          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          mockUser1,
+          options1
+        );
 
         const options2 = { filter: nodeBuilder.is('foo', 'bar') };
-        const response2 = await service.find({ savedObjectsClient }, mockUser1, options2);
+        const response2 = await service.find(
+          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          mockUser1,
+          options2
+        );
 
-        expect(response1).toBe(mockResponse);
-        expect(response2).toBe(mockResponse);
+        expect(response1).toEqual(mockResponse);
+        expect(response2).toEqual(mockResponse);
 
         const [[findOptions1], [findOptions2]] = savedObjectsClient.find.mock.calls;
         expect(findOptions1).toMatchInlineSnapshot(`
@@ -599,13 +589,20 @@ describe('SearchSessionService', () => {
           total: 1,
           per_page: 1,
           page: 0,
+          statuses: {
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+          },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
 
         const options = { page: 0, perPage: 5 };
-        const response = await service.find({ savedObjectsClient }, null, options);
+        const response = await service.find(
+          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          null,
+          options
+        );
 
-        expect(response).toBe(mockResponse);
+        expect(response).toEqual(mockResponse);
         const [[findOptions]] = savedObjectsClient.find.mock.calls;
         expect(findOptions).toMatchInlineSnapshot(`
           Object {
@@ -642,7 +639,6 @@ describe('SearchSessionService', () => {
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
         expect(callAttributes).toHaveProperty('name', attributes.name);
-        expect(callAttributes).toHaveProperty('touched');
       });
 
       it('throws if user conflicts', () => {
@@ -675,7 +671,6 @@ describe('SearchSessionService', () => {
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
         expect(callAttributes).toHaveProperty('name', 'new_name');
-        expect(callAttributes).toHaveProperty('touched');
       });
     });
 
@@ -688,8 +683,7 @@ describe('SearchSessionService', () => {
 
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
-        expect(callAttributes).toHaveProperty('status', SearchSessionStatus.CANCELLED);
-        expect(callAttributes).toHaveProperty('touched');
+        expect(callAttributes).toHaveProperty('isCanceled', true);
       });
 
       it('throws if user conflicts', () => {
@@ -709,8 +703,7 @@ describe('SearchSessionService', () => {
 
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
-        expect(callAttributes).toHaveProperty('status', SearchSessionStatus.CANCELLED);
-        expect(callAttributes).toHaveProperty('touched');
+        expect(callAttributes).toHaveProperty('isCanceled', true);
       });
     });
 
@@ -740,11 +733,9 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('idMapping', {
           [requestHash]: {
             id: searchId,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
         });
-        expect(callAttributes).toHaveProperty('touched');
       });
 
       it('retries updating the saved object if there was a ES conflict 409', async () => {
@@ -827,15 +818,12 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('idMapping', {
           [requestHash]: {
             id: searchId,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
         });
         expect(callAttributes).toHaveProperty('expires');
         expect(callAttributes).toHaveProperty('created');
-        expect(callAttributes).toHaveProperty('touched');
         expect(callAttributes).toHaveProperty('sessionId', sessionId);
-        expect(callAttributes).toHaveProperty('persisted', false);
       });
 
       it('retries updating if update returned 404 and then update returned conflict 409 (first create race condition)', async () => {
@@ -939,16 +927,13 @@ describe('SearchSessionService', () => {
         expect(callAttributes1).toHaveProperty('idMapping', {
           [requestHash1]: {
             id: searchId1,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
           [requestHash2]: {
             id: searchId2,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
         });
-        expect(callAttributes1).toHaveProperty('touched');
 
         const [type2, id2, callAttributes2] = savedObjectsClient.update.mock.calls[1];
         expect(type2).toBe(SEARCH_SESSION_TYPE);
@@ -956,11 +941,9 @@ describe('SearchSessionService', () => {
         expect(callAttributes2).toHaveProperty('idMapping', {
           [requestHash3]: {
             id: searchId3,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
         });
-        expect(callAttributes2).toHaveProperty('touched');
       });
     });
 

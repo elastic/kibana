@@ -72,6 +72,7 @@ export function ChangeDataView({
   onTextLangQuerySubmit,
   textBasedLanguage,
   isDisabled,
+  onEditDataView,
   onCreateDefaultAdHocDataView,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
@@ -88,7 +89,7 @@ export function ChangeDataView({
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { application, data, storage } = kibana.services;
+  const { application, data, storage, dataViews, dataViewEditor } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
@@ -193,11 +194,21 @@ export function ChangeDataView({
           key="manage"
           icon="indexSettings"
           data-test-subj="indexPattern-manage-field"
-          onClick={() => {
+          onClick={async () => {
+            if (onEditDataView) {
+              const dataView = await dataViews.get(currentDataViewId!);
+              dataViewEditor.openEditor({
+                editData: dataView,
+                onSave: (updatedDataView) => {
+                  onEditDataView(updatedDataView);
+                },
+              });
+            } else {
+              application.navigateToApp('management', {
+                path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
+              });
+            }
             setPopoverIsOpen(false);
-            application.navigateToApp('management', {
-              path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
-            });
           }}
         >
           {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
