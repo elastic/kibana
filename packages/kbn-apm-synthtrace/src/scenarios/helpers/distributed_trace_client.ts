@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Method } from 'axios';
 import { times } from 'lodash';
-import { elasticsearchSpan, httpExitSpan, redisSpan, sqliteSpan } from '../../lib/apm/span';
+import {
+  elasticsearchSpan,
+  httpExitSpan,
+  HttpMethod,
+  redisSpan,
+  sqliteSpan,
+} from '../../lib/apm/span';
 import { BaseSpan } from '../../lib/apm/base_span';
 import { Instance, SpanParams } from '../../lib/apm/instance';
 import { Transaction } from '../../lib/apm/transaction';
@@ -123,7 +128,7 @@ export class DistributedTrace {
   }: {
     name: string;
     url: string;
-    method?: Method;
+    method?: HttpMethod;
     statusCode?: number;
     duration: number;
     timestamp?: number;

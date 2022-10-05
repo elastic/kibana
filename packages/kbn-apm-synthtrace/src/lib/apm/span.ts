@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Method } from 'axios';
 import url from 'url';
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
@@ -34,6 +33,8 @@ export class Span extends BaseSpan {
   }
 }
 
+export type HttpMethod = 'GET' | 'POST' | 'DELETE' | 'PUT';
+
 export function httpExitSpan({
   spanName,
   destinationUrl,
@@ -42,7 +43,7 @@ export function httpExitSpan({
 }: {
   spanName: string;
   destinationUrl: string;
-  method?: Method;
+  method?: HttpMethod;
   statusCode?: number;
 }): SpanParams {
   // origin: 'http://opbeans-go:3000',
