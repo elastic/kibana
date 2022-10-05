@@ -479,13 +479,15 @@ export const commonMigrateMetricIds = (
 export const commonMigrateIndexPatternDatasource = (
   attributes: LensDocShape850<unknown>
 ): LensDocShape860<unknown> => {
+  const datasourceStates = {
+    ...attributes.state.datasourceStates,
+    formBased: attributes.state.datasourceStates.indexpattern,
+  };
   const newAttrs = {
     ...attributes,
     state: {
       ...attributes.state,
-      datasourceStates: {
-        formBased: attributes.state.datasourceStates.indexpattern,
-      },
+      datasourceStates,
     },
   };
 
