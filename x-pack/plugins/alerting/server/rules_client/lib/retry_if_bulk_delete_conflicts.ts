@@ -13,15 +13,7 @@ import type { SavedObjectsBulkDeleteResponse } from '@kbn/core-saved-objects-api
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkEditError } from '../rules_client';
 import { RawRule } from '../../types';
-
-// number of times to retry when conflicts occur
-export const RetryForConflictsAttempts = 2;
-
-// milliseconds to wait before retrying when conflicts occur
-// note: we considered making this random, to help avoid a stampede, but
-// with 1 retry it probably doesn't matter, and adding randomness could
-// make it harder to diagnose issues
-const RetryForConflictsDelay = 250;
+import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTES } from './wait_before_next_retry';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;
@@ -42,8 +34,8 @@ interface ReturnRetry {
 }
 
 /**
- * Retries BulkEdit requests
- * If in response are presents conflicted savedObjects(409 statusCode), this util constructs filter with failed SO ids and retries bulkEdit operation until
+ * Retries BulkDelete requests
+ * If in response are presents conflicted savedObjects(409 statusCode), this util constructs filter with failed SO ids and retries bulkDelete operation until
  * all SO updated or number of retries exceeded
  * @param logger
  * @param bulkEditOperation
@@ -59,7 +51,7 @@ export const retryIfBulkDeleteConflicts = async (
   logger: Logger,
   bulkDeleteOperation: BulkDeleteOperation,
   filter: KueryNode | null,
-  retries: number = RetryForConflictsAttempts,
+  retries: number = RETRY_IF_CONFLICTS_ATTEMPTES,
   accApiKeysToInvalidate: string[] = [],
   accErrors: BulkEditError[] = [],
   accTaskIdsToDelete: string[] = []
@@ -157,13 +149,3 @@ export const retryIfBulkDeleteConflicts = async (
     throw err;
   }
 };
-
-// exponential delay before retry with adding random delay
-async function waitBeforeNextRetry(retries: number): Promise<void> {
-  const exponentialDelayMultiplier = 1 + (RetryForConflictsAttempts - retries) ** 2;
-  const randomDelayMs = Math.floor(Math.random() * 100);
-
-  await new Promise((resolve) =>
-    setTimeout(resolve, RetryForConflictsDelay * exponentialDelayMultiplier + randomDelayMs)
-  );
-}
