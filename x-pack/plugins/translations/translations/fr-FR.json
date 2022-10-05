@@ -17418,7 +17418,6 @@
     "xpack.lens.app.showUnderlyingDataMultipleLayers": "Impossible d’afficher les données sous-jacentes pour les visualisations avec plusieurs calques.",
     "xpack.lens.app.showUnderlyingDataNoData": "La visualisation ne comprend aucune donnée disponible à afficher.",
     "xpack.lens.app.showUnderlyingDataTimeShifts": "Impossible d’afficher les données sous-jacentes lorsqu’un décalage temporel est configuré.",
-    "xpack.lens.app.showUnderlyingDataUnsupportedDatasource": "Les données sous-jacentes sont incompatibles avec la source de données actuelle.",
     "xpack.lens.app.unsavedFilename": "non enregistré",
     "xpack.lens.app.unsavedWorkConfirmBtn": "Abandonner les modifications",
     "xpack.lens.app.unsavedWorkMessage": "Quitter Lens avec un travail non enregistré ?",
