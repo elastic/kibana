@@ -973,7 +973,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
         action: AuditAction.OPEN_POINT_IN_TIME,
-        error: new Error('unauthorized'),
+        error: new Error('User is unauthorized for any requested types/spaces.'),
       });
     });
 
@@ -1175,7 +1175,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
         action: AuditAction.FIND,
-        error: new Error('unauthorized'),
+        error: new Error('User is unauthorized for any requested types/spaces.'),
       });
     });
   });

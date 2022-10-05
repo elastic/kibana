@@ -30,7 +30,7 @@ describe('#getCurrentNamespace', () => {
   test('throws an error when the namespace parameter is truthy', () => {
     const { spacesExtension } = setup();
     expect(() => spacesExtension.getCurrentNamespace('some-namespace')).toThrowError(
-      'Spaces currently determines the namespaces'
+      'Namespace cannot be specified by the caller when the spaces extension is enabled. Spaces currently determines the namespace.'
     );
   });
 
