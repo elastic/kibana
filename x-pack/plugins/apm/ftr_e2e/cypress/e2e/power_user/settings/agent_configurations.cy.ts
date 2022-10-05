@@ -90,7 +90,7 @@ describe('Agent configuration', () => {
       '/api/apm/settings/agent-configuration/environments?*'
     ).as('serviceEnvironmentApi');
     cy.contains('Create configuration').click();
-    cy.get('[data-test-subj="serviceNameComboBox"]')
+    cy.getByTestSubj('serviceNameComboBox')
       .click()
       .type('opbeans-node')
       .type('{enter}');
@@ -98,7 +98,7 @@ describe('Agent configuration', () => {
     cy.contains('opbeans-node').realClick();
     cy.wait('@serviceEnvironmentApi');
 
-    cy.get('[data-test-subj="serviceEnviromentComboBox"]')
+    cy.getByTestSubj('serviceEnviromentComboBox')
       .click({ force: true })
       .type('prod')
       .type('{enter}');
@@ -115,14 +115,11 @@ describe('Agent configuration', () => {
       '/api/apm/settings/agent-configuration/environments'
     ).as('serviceEnvironmentApi');
     cy.contains('Create configuration').click();
-    cy.get('[data-test-subj="serviceNameComboBox"]')
-      .click()
-      .type('All')
-      .type('{enter}');
+    cy.getByTestSubj('serviceNameComboBox').click().type('All').type('{enter}');
     cy.contains('All').realClick();
     cy.wait('@serviceEnvironmentApi');
 
-    cy.get('[data-test-subj="serviceEnviromentComboBox"]')
+    cy.getByTestSubj('serviceEnviromentComboBox')
       .click({ force: true })
       .type('All');
 

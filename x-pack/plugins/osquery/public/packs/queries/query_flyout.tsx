@@ -62,9 +62,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     formState: { isSubmitting },
     resetField,
   } = hooksForm;
-  const onSubmit = (payload: PackQueryFormData) => {
+  const onSubmit = async (payload: PackQueryFormData) => {
     const serializedData: PackSOQueryFormData = serializer(payload);
-    onSave(serializedData);
+    await onSave(serializedData);
     onClose();
   };
 
