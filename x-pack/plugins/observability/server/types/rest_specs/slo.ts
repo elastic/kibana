@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { dateType, indicatorSchema } from '../schema';
+import { dateType, errorBudgetSchema, indicatorSchema } from '../schema';
 import { budgetingMethodSchema, objectiveSchema, rollingTimeWindowSchema } from '../schema/slo';
 
 const createSLOParamsSchema = t.type({
@@ -44,6 +44,10 @@ const getSLOResponseSchema = t.type({
   time_window: rollingTimeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
+  stats: t.type({
+    current_sli: t.number,
+    error_budget: errorBudgetSchema,
+  }),
   revision: t.number,
   created_at: dateType,
   updated_at: dateType,
