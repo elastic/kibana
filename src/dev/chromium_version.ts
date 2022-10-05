@@ -25,6 +25,9 @@ const forkCompatibilityMap: Record<string, PuppeteerRelease> = {
   '5.4.1-patch.1': '5.4.1',
 };
 
+/**
+ * Get the currently installed version of puppeteer
+ */
 async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   // open node_modules/puppeteer/package.json
   const puppeteerPackageJson = JSON.parse(
@@ -42,6 +45,9 @@ async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   return puppeteerRelease;
 }
 
+/**
+ * Get the chromium revision for a puppeteer version
+ */
 async function getChromiumRevision(
   kibanaPuppeteerVersion: PuppeteerRelease,
   log: ToolingLog
@@ -80,6 +86,9 @@ async function getChromiumRevision(
   return revision;
 }
 
+/**
+ * Get the git commit tied to the chromium revision
+ */
 async function getChromiumCommit(
   revision: ChromiumRevision,
   log: ToolingLog
@@ -103,8 +112,27 @@ async function getChromiumCommit(
     throw new Error(`Could not find a Chromium commit! Check ${url} in a browser.`);
   }
 
-  log.info(`Found Chromium commit ${commit} from revision ${revision}.`);
+  log.debug(`Found Chromium commit ${commit} from revision ${revision}.`);
   return commit;
+}
+
+/**
+ * Get the Chrome release from git commit
+ */
+async function getChromiumRelease(commit: ChromiumCommit, log: ToolingLog) {
+  const url =
+    `https://storage.googleapis.com/chromium-find-releases-static/` +
+    `${commit.substring(0, 3)}.html#${commit}`;
+
+  log.info(`Fetching ${url}`);
+  const response = await fetch(url);
+  const pageText = await response.text();
+  const commitIndex = pageText.indexOf(commit);
+  if (commitIndex > 0) {
+    const substr = pageText.substring(commitIndex, commitIndex + 100);
+    const releaseVersion = substr.replace(/^.*"([\d\.]+)".*$/, '$1');
+    log.info(`Release version: ${releaseVersion}` + `\nCommit:          ${commit}`);
+  }
 }
 
 run(
@@ -123,7 +151,8 @@ run(
       }
 
       const chromiumRevision = await getChromiumRevision(puppeteerVersion, log);
-      await getChromiumCommit(chromiumRevision, log);
+      const commit = await getChromiumCommit(chromiumRevision, log);
+      await getChromiumRelease(commit, log);
     } catch (err) {
       log.error(err);
     }
@@ -134,8 +163,6 @@ run(
 
       -  node scripts/chromium_version 5.5.0  {dim # gets the Chromium commit for Puppeteer v5.5.0}
       -  node scripts/chromium_version       {dim  # gets the Chromium commit for the Kibana dependency version of Puppeteer}
-
-      You can use https://omahaproxy.appspot.com/ to look up the Chromium release that first shipped with that commit.
     `,
   }
 );
