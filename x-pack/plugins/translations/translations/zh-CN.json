@@ -17426,7 +17426,6 @@
     "xpack.lens.app.showUnderlyingDataMultipleLayers": "无法显示具有多个图层的可视化的底层数据",
     "xpack.lens.app.showUnderlyingDataNoData": "可视化没有可显示的可用数据",
     "xpack.lens.app.showUnderlyingDataTimeShifts": "配置了时间偏移时无法显示底层数据",
-    "xpack.lens.app.showUnderlyingDataUnsupportedDatasource": "底层数据不支持当前数据源",
     "xpack.lens.app.unsavedFilename": "未保存",
     "xpack.lens.app.unsavedWorkConfirmBtn": "放弃更改",
     "xpack.lens.app.unsavedWorkMessage": "离开有未保存工作的 Lens？",

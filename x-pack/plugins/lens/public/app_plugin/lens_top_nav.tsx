@@ -583,7 +583,7 @@ export const LensTopNavMenu = ({
             dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
-            query: newQuery,
+            query: isOnTextBasedMode ? query : newQuery,
             columns: meta.columns,
           });
         },
@@ -626,6 +626,7 @@ export const LensTopNavMenu = ({
     indexPatterns,
     dataViews.indexPatterns,
     data.query.timefilter.timefilter,
+    isOnTextBasedMode,
     lensStore,
     theme$,
   ]);
