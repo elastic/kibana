@@ -15,7 +15,7 @@ export interface GainSightApi {
 }
 
 interface Mapping {
-  identify: (userId: string, userVars?: Record<string, unknown>) => void;
+  identify: (id: string, userVars?: Record<string, unknown>) => void;
   track: (event: string, data?: any) => void;
   set: (event: string, data?: any) => void;
   reset: () => void;

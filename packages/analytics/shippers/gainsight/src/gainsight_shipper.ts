@@ -51,10 +51,16 @@ export class GainSightShipper implements IShipper {
     const { userId } = newContext;
 
     // Call it only when the userId changes
-    if (userId && userId !== this.lastUserId) {
+    if (userId && newContext.cluster_uuid && userId !== this.lastUserId) {
       this.initContext.logger.debug(`Calling identify with userId ${userId}`);
       // We need to call the API for every new userId (restarting the session).
-      this.gainSightApi.aptrinsic('identify', userId);
+      this.gainSightApi.aptrinsic('identify', {
+        id: newContext.cluster_uuid,
+        userType: 'deployment',
+      });
+      this.gainSightApi.aptrinsic('set', 'globalContext', {
+        kibanaUserId: userId,
+      });
       this.lastUserId = userId;
     }
   }
