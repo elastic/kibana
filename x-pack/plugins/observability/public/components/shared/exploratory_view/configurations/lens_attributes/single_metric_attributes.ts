@@ -43,56 +43,63 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.columnId = 'layer-0-column-1';
 
     this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
-    this.layers = this.getSingleMetricLayer();
+    this.layers = this.getSingleMetricLayer()!;
   }
 
   getSingleMetricLayer() {
     const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
 
-    const { columnFilter, columnField, columnLabel, columnType, formula, metricStateOptions } =
-      parseCustomFieldName(seriesConfig, selectedMetricField);
+    const metricOption = parseCustomFieldName(seriesConfig, selectedMetricField);
 
-    this.metricStateOptions = metricStateOptions;
+    if (!Array.isArray(metricOption)) {
+      const { columnFilter, columnField, columnLabel, columnType, formula, metricStateOptions } =
+        metricOption;
 
-    if (columnType === FORMULA_COLUMN && formula) {
-      return this.getFormulaLayer({ formula, label: columnLabel, dataView: indexPattern });
-    }
+      this.metricStateOptions = metricStateOptions;
 
-    const getSourceField = () => {
-      if (selectedMetricField.startsWith('Records') || selectedMetricField.startsWith('records')) {
-        return 'Records';
+      if (columnType === FORMULA_COLUMN && formula) {
+        return this.getFormulaLayer({ formula, label: columnLabel, dataView: indexPattern });
       }
-      return columnField || selectedMetricField;
-    };
 
-    const sourceField = getSourceField();
+      const getSourceField = () => {
+        if (
+          selectedMetricField.startsWith('Records') ||
+          selectedMetricField.startsWith('records')
+        ) {
+          return 'Records';
+        }
+        return columnField || selectedMetricField;
+      };
 
-    const isPercentileColumn = operationType?.includes('th');
+      const sourceField = getSourceField();
 
-    if (isPercentileColumn) {
-      return this.getPercentileLayer({
-        sourceField,
-        operationType,
-        seriesConfig,
-        columnLabel,
-        columnFilter,
-      });
-    }
+      const isPercentileColumn = operationType?.includes('th');
 
-    return {
-      layer0: {
-        columns: {
-          [this.columnId]: {
-            ...buildNumberColumn(sourceField),
-            label: columnLabel ?? '',
-            operationType: sourceField === 'Records' ? 'count' : operationType || 'median',
-            filter: columnFilter,
+      if (isPercentileColumn) {
+        return this.getPercentileLayer({
+          sourceField,
+          operationType,
+          seriesConfig,
+          columnLabel,
+          columnFilter,
+        });
+      }
+
+      return {
+        layer0: {
+          columns: {
+            [this.columnId]: {
+              ...buildNumberColumn(sourceField),
+              label: columnLabel ?? '',
+              operationType: sourceField === 'Records' ? 'count' : operationType || 'median',
+              filter: columnFilter,
+            },
           },
+          columnOrder: [this.columnId],
+          incompleteColumns: {},
         },
-        columnOrder: [this.columnId],
-        incompleteColumns: {},
-      },
-    };
+      };
+    }
   }
 
   getFormulaLayer({

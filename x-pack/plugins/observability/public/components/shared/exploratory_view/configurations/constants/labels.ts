@@ -86,6 +86,13 @@ export const CLS_LABEL = i18n.translate('xpack.observability.expView.fieldLabels
   defaultMessage: 'Cumulative layout shift',
 });
 
+export const NETWORK_TIMINGS_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.networkTimings',
+  {
+    defaultMessage: 'Network timings',
+  }
+);
+
 export const DCL_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.dcl', {
   defaultMessage: 'DOM content loaded',
 });

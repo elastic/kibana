@@ -27,7 +27,7 @@ export const sampleAttributeCoreWebVital = {
           layer0: {
             columnOrder: [
               'x-axis-column-layer0',
-              'y-axis-column-layer0',
+              'y-axis-column-layer0-0',
               'y-axis-column-1',
               'y-axis-column-2',
             ],
@@ -75,7 +75,7 @@ export const sampleAttributeCoreWebVital = {
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
               },
-              'y-axis-column-layer0': {
+              'y-axis-column-layer0-0': {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -115,7 +115,7 @@ export const sampleAttributeCoreWebVital = {
       },
       layers: [
         {
-          accessors: ['y-axis-column-layer0', 'y-axis-column-1', 'y-axis-column-2'],
+          accessors: ['y-axis-column-layer0-0', 'y-axis-column-1', 'y-axis-column-2'],
           layerId: 'layer0',
           layerType: 'data',
           palette: undefined,

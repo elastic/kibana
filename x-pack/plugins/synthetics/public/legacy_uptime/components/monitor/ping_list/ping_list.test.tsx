@@ -32,6 +32,7 @@ describe('PingList component', () => {
         name: '',
         status: 'down',
         type: 'tcp',
+        check_group: 'test-group',
       },
     },
     {
@@ -47,6 +48,7 @@ describe('PingList component', () => {
         name: '',
         status: 'down',
         type: 'tcp',
+        check_group: 'test-group',
       },
     },
   ];

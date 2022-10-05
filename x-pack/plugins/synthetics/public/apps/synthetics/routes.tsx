@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { StepTitle } from './components/step_details_page/step_title';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { MonitorDetailsPageHeader } from './components/monitor_details/monitor_details_page_header';
@@ -37,9 +38,12 @@ import {
   OVERVIEW_ROUTE,
   GETTING_STARTED_ROUTE,
   MONITOR_ROUTE,
+  STEP_DETAIL_ROUTE,
 } from '../../../common/constants';
 import { MonitorPage } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
+import { StepDetailPage } from './components/step_details_page/step_detail_page';
+import { StepDetailPageRightSideItem } from './components/step_details_page/step_nav';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -236,6 +240,24 @@ const getRoutes = (
           />
         ),
         rightSideItems: [<OutPortal node={MonitorTypePortalNode} />],
+        breadcrumbs: [
+          {
+            text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
+          },
+        ],
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.stepDetailsRoute.title', {
+        defaultMessage: 'Step details | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: STEP_DETAIL_ROUTE,
+      component: () => <StepDetailPage />,
+      dataTestSubj: 'syntheticsMonitorEditPage',
+      pageHeader: {
+        pageTitle: <StepTitle />,
+        rightSideItems: [<StepDetailPageRightSideItem />],
         breadcrumbs: [
           {
             text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
