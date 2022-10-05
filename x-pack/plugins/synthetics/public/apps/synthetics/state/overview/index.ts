@@ -7,13 +7,15 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { MonitorOverviewResult } from '../../../../../common/runtime_types';
+import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import { MonitorOverviewPageState } from './models';
 import {
+  clearOverviewStatusErrorAction,
   fetchMonitorOverviewAction,
+  fetchOverviewStatusAction,
   quietFetchOverviewAction,
   setOverviewPerPageAction,
 } from './actions';
@@ -24,6 +26,8 @@ export interface MonitorOverviewState {
   loading: boolean;
   loaded: boolean;
   error: IHttpSerializedFetchError | null;
+  status: OverviewStatus | null;
+  statusError: IHttpSerializedFetchError | null;
 }
 
 const initialState: MonitorOverviewState = {
@@ -38,6 +42,8 @@ const initialState: MonitorOverviewState = {
   loading: false,
   loaded: false,
   error: null,
+  status: null,
+  statusError: null,
 };
 
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
@@ -54,13 +60,13 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchMonitorOverviewAction.fail, (state, action) => {
       state.loading = false;
-      state.error = serializeHttpFetchError(action.payload);
+      state.error = action.payload;
     })
     .addCase(quietFetchOverviewAction.success, (state, action) => {
       state.data = action.payload;
     })
     .addCase(quietFetchOverviewAction.fail, (state, action) => {
-      state.error = serializeHttpFetchError(action.payload);
+      state.error = action.payload;
     })
     .addCase(setOverviewPerPageAction, (state, action) => {
       state.pageState = {
@@ -68,6 +74,15 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         perPage: action.payload,
       };
       state.loaded = false;
+    })
+    .addCase(fetchOverviewStatusAction.success, (state, action) => {
+      state.status = action.payload;
+    })
+    .addCase(fetchOverviewStatusAction.fail, (state, action) => {
+      state.statusError = action.payload;
+    })
+    .addCase(clearOverviewStatusErrorAction, (state) => {
+      state.statusError = null;
     });
 });
 
