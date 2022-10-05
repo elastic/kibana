@@ -18,8 +18,7 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/142564
-  describe.skip('runSoon', () => {
+  describe('runSoon', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -36,7 +35,7 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
 
     it('should successfully run rule where scheduled task id is different than rule id', async () => {
       await retry.try(async () => {
-        // Sometimes the rule may already be running. Try until it isn't
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
         const response = await supertest
           .post(`${getUrlPrefix(``)}/internal/alerting/rule/${LOADED_RULE_ID}/_run_soon`)
           .set('kbn-xsrf', 'foo');
@@ -53,10 +52,13 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       objectRemover.add('default', response.body.id, 'rule', 'alerting');
 
-      const runSoonResponse = await supertest
-        .post(`${getUrlPrefix(``)}/internal/alerting/rule/${response.body.id}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoonResponse.status).to.eql(204);
+      await retry.try(async () => {
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        const runSoonResponse = await supertest
+          .post(`${getUrlPrefix(``)}/internal/alerting/rule/${response.body.id}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(runSoonResponse.status).to.eql(204);
+      });
     });
 
     it('should return message when task does not exist for rule', async () => {
