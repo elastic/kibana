@@ -33,7 +33,7 @@ export const StepDetailPage = () => {
 
   return (
     <>
-      {data.details?.journey && (
+      {data?.details?.journey && (
         <MonitorDetailsLinkPortal
           id={data.details.journey.monitor.id}
           name={data.details.journey.monitor.name!}
