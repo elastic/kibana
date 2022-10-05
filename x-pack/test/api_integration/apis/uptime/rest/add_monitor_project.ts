@@ -19,7 +19,8 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { comparePolicies, getTestProjectSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('AddProjectMonitors', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/142110
+  describe.skip('AddProjectMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -193,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'browser',
             'url.port': null,
             urls: '',
+            id: '',
           });
         }
       } finally {
@@ -306,6 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'http',
             urls: Array.isArray(monitor.urls) ? monitor.urls?.[0] : monitor.urls,
             'url.port': null,
+            id: '',
           });
         }
       } finally {
@@ -405,6 +408,8 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'tcp',
             hosts: Array.isArray(monitor.hosts) ? monitor.hosts?.[0] : monitor.hosts,
             'url.port': null,
+            urls: '',
+            id: '',
           });
         }
       } finally {
@@ -506,6 +511,7 @@ export default function ({ getService }: FtrProviderContext) {
               monitor.wait?.slice(-1) === 's'
                 ? monitor.wait?.slice(0, -1)
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
+            id: '',
           });
         }
       } finally {
