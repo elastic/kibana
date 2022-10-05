@@ -341,6 +341,7 @@ export class QuickJobCreator {
 
   private async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
     if (dashboard === undefined) {
+      // embeddable may have not been in a dashboard
       return null;
     }
 
