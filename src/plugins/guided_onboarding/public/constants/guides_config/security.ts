@@ -9,17 +9,15 @@
 import type { GuideConfig } from '../../types';
 
 export const securityConfig: GuideConfig = {
-  title: 'Get started with SIEM',
-  description:
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+  title: 'Elastic Security guided setup',
+  description: `We'll help you set up quickly, using Elastic's out-of-the-box integrations.`,
   steps: [
     {
       id: 'add_data',
-      title: 'Add and view your data',
+      title: 'Add data with Elastic Defend',
       descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+        'Select your integrations & start sending data.',
+        'Make sure your data looks good.',
       ],
       integration: 'endpoint',
       location: {
@@ -30,29 +28,12 @@ export const securityConfig: GuideConfig = {
     {
       id: 'rules',
       title: 'Turn on rules',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
+      descriptionList: ['Load prebuilt rules.', 'Select rules relevant to you.'],
     },
     {
-      id: 'alerts',
-      title: 'View Alerts',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
-    },
-    {
-      id: 'cases',
-      title: 'Cases and investigations',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
+      id: 'alertsCases',
+      title: 'Alerts and cases',
+      descriptionList: ['View and triage alerts.', 'Create cases.'],
     },
   ],
 };
