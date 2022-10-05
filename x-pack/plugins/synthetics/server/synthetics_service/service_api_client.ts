@@ -160,12 +160,11 @@ export class ServiceAPIClient {
             stack_version: this.kibanaVersion,
             is_edit: isEdit,
           },
-          headers:
-            process.env.NODE_ENV !== 'production' && this.authorization
-              ? {
-                  Authorization: this.authorization,
-                }
-              : undefined,
+          headers: this.authorization
+            ? {
+                Authorization: this.authorization,
+              }
+            : undefined,
           httpsAgent: this.getHttpsAgent(url),
         })
       );
