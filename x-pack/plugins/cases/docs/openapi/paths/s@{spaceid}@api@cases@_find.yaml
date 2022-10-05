@@ -138,9 +138,7 @@ get:
               cases:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    $ref: '../components/schemas/case_response_properties.yaml'
+                  $ref: '../components/schemas/case_response_properties.yaml'
               count_closed_cases:
                 type: integer
               count_in_progress_cases:
