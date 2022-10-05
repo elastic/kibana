@@ -227,15 +227,6 @@ export function getVisitorBreakdownLensAttributes({
                       },
                     ]
                   : []),
-                {
-                  range: {
-                    [localDataView.timeFieldName ?? '@timestamp']: {
-                      format: 'strict_date_optional_time',
-                      gte: start,
-                      lte: end,
-                    },
-                  },
-                },
               ],
               must_not: [...getEsFilter(uiFilters, true)],
             },
