@@ -211,7 +211,7 @@ describe('GaugeComponent', function () {
   });
 
   describe('ticks and color bands', () => {
-    it('sets proper color bands for values smaller than maximum', () => {
+    it('sets proper color bands and ticks on color bands for values smaller than maximum', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -236,6 +236,7 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('ticks')).toEqual([0, 1, 2, 3, 4, 10]);
       expect(goal.prop('bands')).toEqual([0, 1, 2, 3, 4, 10]);
     });
     it('sets proper color bands if palette steps are smaller than minimum', () => {

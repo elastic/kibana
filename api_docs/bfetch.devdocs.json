@@ -370,7 +370,9 @@
             "IRouter",
             "<",
             "RequestHandlerContext",
-            "> | undefined) => void"
+            "> | undefined, options?: ",
+            "RouteConfigOptions",
+            "<\"get\" | \"post\" | \"put\" | \"delete\"> | undefined) => void"
           ],
           "path": "src/plugins/bfetch/server/plugin.ts",
           "deprecated": false,
@@ -445,6 +447,22 @@
                 "<",
                 "RequestHandlerContext",
                 "> | undefined"
+              ],
+              "path": "src/plugins/bfetch/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            },
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-server.BfetchServerSetup.addStreamingResponseRoute.$5",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "RouteConfigOptions",
+                "<\"get\" | \"post\" | \"put\" | \"delete\"> | undefined"
               ],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,

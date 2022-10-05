@@ -17,7 +17,7 @@ import {
   PushToServiceApiParamsITSM as ServiceNowITSMPushToServiceApiParams,
   PushToServiceApiParamsSIR as ServiceNowSIRPushToServiceApiParams,
   ServiceNowITSMIncident,
-} from '@kbn/stack-connectors-plugin/server/connector_types/cases/servicenow/types';
+} from '@kbn/stack-connectors-plugin/server/connector_types/lib/servicenow/types';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { CaseResponse, ConnectorMappingsAttributes } from '../../../common/api';
 
