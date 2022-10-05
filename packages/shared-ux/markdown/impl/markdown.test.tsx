@@ -12,9 +12,7 @@ import { render } from 'enzyme';
 
 describe('shared ux markdown component', () => {
   it('renders', () => {
-    const component = render(
-      <Markdown placeholder={''} ariaLabelContent={''} readOnly={false} />
-    );
+    const component = render(<Markdown placeholder={''} ariaLabelContent={''} readOnly={false} />);
     expect(component).toMatchSnapshot();
   });
 });
