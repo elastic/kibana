@@ -230,7 +230,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         selectedOs: itemToEdit.os_types,
         items: exceptionItems,
       });
-      console.log({items, exceptionItems})
+      console.log({ items, exceptionItems });
       await submitEditExceptionItems({
         itemsToUpdate: items,
       });
