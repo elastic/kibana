@@ -91,7 +91,7 @@ export type ExecutorType<Config, Secrets, Params, ResultData> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-interface ValidatorType<Type> {
+export interface ValidatorType<Type> {
   schema: {
     validate(value: unknown): Type;
   };
