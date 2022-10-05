@@ -611,6 +611,36 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ]
   );
 
+  // const renderField = useCallback(
+  //   (field: IndexPatternField, index) => (
+  //     <FieldItem
+  //       {...fieldProps}
+  //       key={field.name}
+  //       field={field}
+  //       exists={exists(field)}
+  //       hideDetails={hideDetails}
+  //       itemIndex={index}
+  //       groupIndex={groupIndex}
+  //       dropOntoWorkspace={dropOntoWorkspace}
+  //       hasSuggestionForField={hasSuggestionForField}
+  //       editField={editField}
+  //       removeField={removeField}
+  //       uiActions={uiActions}
+  //     />
+  //   ),
+  //   [
+  //     fieldProps,
+  //     exists,
+  //     hideDetails,
+  //     dropOntoWorkspace,
+  //     hasSuggestionForField,
+  //     groupIndex,
+  //     editField,
+  //     removeField,
+  //     uiActions,
+  //   ]
+  // );
+
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup

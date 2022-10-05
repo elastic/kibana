@@ -793,6 +793,20 @@ describe('IndexPattern Data Panel', () => {
       expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
     });
 
+    // TODO: refactor these tests
+    // it('renders correct number of Field Items', () => {
+    //   const wrapper = mountWithIntl(
+    //     <FieldsAccordion {...defaultProps} exists={(field) => field.name === 'timestamp'} />
+    //   );
+    //   expect(wrapper.find(FieldItem).at(0).prop('exists')).toEqual(true);
+    //   expect(wrapper.find(FieldItem).at(1).prop('exists')).toEqual(false);
+    // });
+    //
+    // it('passed correct exists flag to each field', () => {
+    //   const wrapper = mountWithIntl(<FieldsAccordion {...defaultProps} />);
+    //   expect(wrapper.find(FieldItem).length).toEqual(2);
+    // });
+
     it('should not allow field details when error', () => {
       const wrapper = mountWithIntl(
         <InnerIndexPatternDataPanel
