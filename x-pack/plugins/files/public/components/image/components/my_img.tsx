@@ -9,12 +9,6 @@ import type { ImgHTMLAttributes, MutableRefObject } from 'react';
 import type { EuiImageSize } from '@elastic/eui/src/components/image/image_types';
 import { css } from '@emotion/react';
 
-export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
-  hidden: boolean;
-  size?: EuiImageSize;
-  observerRef: (el: null | HTMLImageElement) => void;
-}
-
 // Values taken from @elastic/eui/src/components/image
 const sizes = {
   s: css`
@@ -37,6 +31,11 @@ const sizes = {
   `,
 };
 
+export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
+  hidden: boolean;
+  size?: EuiImageSize;
+  observerRef: (el: null | HTMLImageElement) => void;
+}
 export const MyImage = React.forwardRef<HTMLImageElement, Props>(
   ({ observerRef, src, hidden, size, ...rest }, ref) => {
     const styles = [

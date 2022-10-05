@@ -10,7 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
 
 import { FilesContext } from '../context';
-import { createBlurhash } from '../common';
+import { getImageMetadata } from '../common';
 import { Image, Props } from './image';
 import { getImageData as getBlob, base64dLogo } from './image.constants.stories';
 
@@ -47,7 +47,7 @@ WithBlurhash.args = {
 };
 WithBlurhash.loaders = [
   async () => ({
-    blurhash: await createBlurhash(getBlob()),
+    blurhash: await getImageMetadata(getBlob()),
   }),
 ];
 WithBlurhash.decorators = [
@@ -75,7 +75,7 @@ WithBlurhashAndBrokenSrc.args = {
 };
 WithBlurhashAndBrokenSrc.loaders = [
   async () => ({
-    blurhash: await createBlurhash(getBlob()),
+    blurhash: await getImageMetadata(getBlob()),
   }),
 ];
 
