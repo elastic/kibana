@@ -91,7 +91,7 @@ function buildEuiGridColumn({
   const columnDisplayName =
     columnName === '_source'
       ? i18n.translate('discover.grid.documentHeader', {
-          defaultMessage: 'Document',
+          defaultMessage: 'Record',
         })
       : dataViewField?.displayName || columnName;
 

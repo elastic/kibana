@@ -103,15 +103,15 @@ export interface DiscoverGridProps {
    */
   onSetColumns: (columns: string[], hideTimeColumn: boolean) => void;
   /**
-   * function to change sorting of the documents, skipped when isSortEnabled is set to false
+   * function to change sorting of the records, skipped when isSortEnabled is set to false
    */
   onSort?: (sort: string[][]) => void;
   /**
-   * Array of documents provided by Elasticsearch
+   * Array of records provided by Elasticsearch
    */
   rows?: DataTableRecord[];
   /**
-   * The max size of the documents returned by Elasticsearch
+   * The max size of the records returned by Elasticsearch
    */
   sampleSize: number;
   /**
@@ -575,7 +575,7 @@ export const DiscoverGrid = ({
           <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
             <FormattedMessage
               id="discover.gridSampleSize.description"
-              defaultMessage="You're viewing the first {sampleSize} documents that match your search. To change this value, go to {advancedSettingsLink}."
+              defaultMessage="You're viewing the first {sampleSize} records that match your search. To change this value, go to {advancedSettingsLink}."
               values={{
                 sampleSize,
                 advancedSettingsLink: (

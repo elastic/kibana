@@ -160,7 +160,7 @@ describe('Discover flyout', function () {
     expect(props.setExpandedDoc.mock.calls[0][0].raw._id).toBe('4');
   });
 
-  it('allows navigating with arrow keys through documents', () => {
+  it('allows navigating with arrow keys through records', () => {
     const { component, props } = mountComponent({});
     findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::2::' }));
@@ -169,7 +169,7 @@ describe('Discover flyout', function () {
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::1::' }));
   });
 
-  it('should not navigate with keypresses when already at the border of documents', () => {
+  it('should not navigate with keypresses when already at the border of records', () => {
     const { component, props } = mountComponent({});
     findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
     expect(props.setExpandedDoc).not.toHaveBeenCalled();

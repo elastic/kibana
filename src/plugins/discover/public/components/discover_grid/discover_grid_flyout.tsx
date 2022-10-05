@@ -195,7 +195,7 @@ export function DiscoverGridFlyout({
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
                 <EuiPagination
                   aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
-                    defaultMessage: 'Document navigation',
+                    defaultMessage: 'Record navigation',
                   })}
                   pageCount={pageCount}
                   activePage={activePage}

@@ -124,7 +124,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     content: (
       <FormattedMessage
         id="discover.dscTour.stepExpand.description"
-        defaultMessage="Click {expandIcon} to view, compare, and filter documents."
+        defaultMessage="Click {expandIcon} to view, compare, and filter records."
         values={{
           expandIcon: (
             <EuiIcon
