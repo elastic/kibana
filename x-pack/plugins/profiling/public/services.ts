@@ -6,9 +6,8 @@
  */
 import { HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
-import { ElasticFlameGraph } from '../common/flamegraph';
+import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
-import { StackFrameMetadata } from '../common/profiling';
 import { TopNResponse } from '../common/topn';
 import { AutoAbortedHttpService } from './hooks/use_async';
 
@@ -34,11 +33,6 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
-  fetchFrameInformation: (params: {
-    http: AutoAbortedHttpService;
-    frameID: string;
-    executableID: string;
-  }) => Promise<StackFrameMetadata>;
 }
 
 export function getServices(): Services {
@@ -80,18 +74,8 @@ export function getServices(): Services {
           timeTo,
           kuery,
         };
-        return await http.get(paths.Flamechart, { query });
-      } catch (e) {
-        return e;
-      }
-    },
-    fetchFrameInformation: async ({ http, frameID, executableID }) => {
-      try {
-        const query: HttpFetchQuery = {
-          frameID,
-          executableID,
-        };
-        return await http.get(paths.FrameInformation, { query });
+        const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
+        return createFlameGraph(baseFlamegraph);
       } catch (e) {
         return e;
       }
