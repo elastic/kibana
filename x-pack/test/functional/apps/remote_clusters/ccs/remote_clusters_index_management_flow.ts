@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'remoteClusters', 'indexManagement']);
+  const pageObjects = getPageObjects(['common', 'remoteClusters', 'indexManagement', 'crossClusterReplication']);
   const security = getService('security');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -43,11 +43,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Index Mangement', function () {
+    describe('Cross Cluster Replication', function () {
       before(async () => {
-        // await remoteEs.
-        await pageObjects.common.navigateToApp('indexManagement');
+        await remoteEs.indices.create({
+          index: 'my-index',
+          body: {
+            settings: { number_of_shards: 1, soft_deletes: { enabled: true } }
+          }
+        })
+        await pageObjects.common.navigateToApp('crossClusterReplication');
+        await retry.waitFor('indices table to be visible', async () => {
+          return await testSubjects.isDisplayed('createFollowerIndexButton');
+        });
       });
+
+      after(async () => {
+        await remoteEs.indices.delete({
+          index: 'my-index'
+        });
+      })
+
+      it('Create Follower Index', async () => {
+        await pageObjects.crossClusterReplication.clickCreateFollowerIndexButton();
+        await pageObjects.crossClusterReplication.createFollowerIndex('my-index', 'my-follower');
+      })
+
+      // await retry.waitFor('indices table to be visible', async () => {
+      //   return await testSubjects.isDisplayed('indicesList');
+      // });
     });
   });
 };

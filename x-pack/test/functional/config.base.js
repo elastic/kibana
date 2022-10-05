@@ -500,6 +500,12 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        follower_index_user: {
+          elasticsearch: {
+            cluster: ['manage_follow_index', 'manage', 'manage_ccr'],
+          },
+        },
+
         manage_ilm: {
           elasticsearch: {
             cluster: ['manage_ilm'],
