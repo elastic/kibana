@@ -8,6 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
@@ -92,9 +93,9 @@ interface MLInferenceProcessorsValues {
   addInferencePipelineModal: AddInferencePipelineModal;
   createErrors: string[];
   formErrors: AddInferencePipelineFormErrors;
+  index: FetchIndexApiResponse;
   isLoading: boolean;
   isPipelineDataValid: boolean;
-  index: FetchIndexApiResponse;
   mappingData: typeof MappingsApiLogic.values.data;
   mappingStatus: Status;
   mlInferencePipeline?: MlInferencePipeline;
@@ -102,7 +103,7 @@ interface MLInferenceProcessorsValues {
   mlModelsStatus: typeof MLModelsApiLogic.values.apiStatus;
   simulatePipelineData: typeof SimulateMlInterfacePipelineApiLogic.values.data;
   simulatePipelineErrors: string[];
-  simulatePipelineResult: unknown; // TODO type
+  simulatePipelineResult: IngestSimulateResponse;
   simulatePipelineStatus: typeof SimulateMlInterfacePipelineApiLogic.values.status;
   sourceFields: string[] | undefined;
   supportedMLModels: typeof MLModelsApiLogic.values.data;
@@ -288,10 +289,8 @@ export const MLInferenceLogic = kea<
     ],
     simulatePipelineResult: [
       () => [selectors.simulatePipelineStatus, selectors.simulatePipelineData],
-      (status: Status, simulateResult: unknown) => {
-        // TODO type
-
-        if (status !== Status.SUCCESS) return '';
+      (status: Status, simulateResult: IngestSimulateResponse | undefined) => {
+        if (status !== Status.SUCCESS) return undefined;
         return simulateResult;
       },
     ],

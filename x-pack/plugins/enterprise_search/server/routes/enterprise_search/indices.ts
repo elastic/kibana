@@ -8,6 +8,7 @@
 import {
   IngestPutPipelineRequest,
   IngestSimulateRequest,
+  IngestSimulateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { schema } from '@kbn/config-schema';
@@ -518,7 +519,9 @@ export function registerIndexRoutes({
         pipeline: { description: defaultDescription, ...pipeline },
       };
 
-      const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+      const simulateResult: IngestSimulateResponse = await client.asCurrentUser.ingest.simulate(
+        simulateRequest
+      );
 
       return response.ok({
         body: simulateResult,

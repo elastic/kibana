@@ -76,7 +76,7 @@ export const TestPipeline: React.FC = () => {
                 <EuiCodeBlock language="json" isCopyable style={{ height: 250 }}>
                   {simulatePipelineErrors.length > 0
                     ? JSON.stringify(simulatePipelineErrors, null, 2)
-                    : JSON.stringify(simulatePipelineResult, null, 2)}
+                    : JSON.stringify(simulatePipelineResult || '', null, 2)}
                 </EuiCodeBlock>
               </EuiResizablePanel>
             </>
