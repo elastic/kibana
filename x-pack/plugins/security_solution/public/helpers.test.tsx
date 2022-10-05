@@ -10,19 +10,14 @@ import type { Capabilities } from '@kbn/core/public';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { mockEcsDataWithAlert } from './common/mock';
 import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import {
-  parseRoute,
-  isSubPluginAvailable,
-  getSubPluginRoutesByCapabilities,
-  RedirectRoute,
-  getField,
-} from './helpers';
+import { isSubPluginAvailable, RedirectRoute, getField } from './helpers';
 import type { StartedSubPlugins } from './types';
 import {
   allCasesCapabilities,
   noCasesCapabilities,
   readCasesCapabilities,
 } from './cases_test_utils';
+import { getSubPluginRoutesByCapabilities, parseRoute } from './lazy_helpers_for_routes';
 
 describe('public helpers parseRoute', () => {
   it('should properly parse hash route', () => {
