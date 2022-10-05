@@ -6,6 +6,8 @@
  */
 
 import {
+  ENABLE_HOST_RISK_SCORE_BUTTON,
+  ENABLE_USER_RISK_SCORE_BUTTON,
   getAlertsIndex,
   getIngestPipelineName,
   getLatestTransformIndex,
@@ -22,6 +24,10 @@ import {
   getRiskScorePivotTransformId,
   getRiskScoreReduceScriptId,
   RiskScoreEntity,
+  UPGRADE_CANCELLATION_BUTTON,
+  UPGRADE_CONFIRMATION_BUTTON,
+  UPGRADE_HOST_RISK_SCORE_BUTTON,
+  UPGRADE_USER_RISK_SCORE_BUTTON,
 } from '../../screens/entity_analytics';
 import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
 import {
@@ -697,4 +703,30 @@ export const waitForUpgradeRiskScoreModule = () => {
     ],
     { requestTimeout: 50000 }
   );
+};
+
+export const clickEnableRiskScore = (riskScoreEntity: RiskScoreEntity) => {
+  const button =
+    riskScoreEntity === RiskScoreEntity.user
+      ? ENABLE_USER_RISK_SCORE_BUTTON
+      : ENABLE_HOST_RISK_SCORE_BUTTON;
+
+  cy.get(button).click();
+};
+
+export const clickUpgradeRiskScore = (riskScoreEntity: RiskScoreEntity) => {
+  const button =
+    riskScoreEntity === RiskScoreEntity.user
+      ? UPGRADE_USER_RISK_SCORE_BUTTON
+      : UPGRADE_HOST_RISK_SCORE_BUTTON;
+
+  cy.get(button).click();
+};
+
+export const clickUpgradeRiskScoreConfirmed = () => {
+  cy.get(UPGRADE_CONFIRMATION_BUTTON).click();
+};
+
+export const clickUpgradeRiskScoreCancel = () => {
+  cy.get(UPGRADE_CANCELLATION_BUTTON).click();
 };

@@ -19,6 +19,7 @@ import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import {
+  clickEnableRiskScore,
   deleteRiskScore,
   intercepInstallRiskScoreModule,
   waitForInstallRiskScoreModule,
@@ -34,29 +35,30 @@ describe('Enable risk scores', () => {
     cleanKibana();
     login();
     createCustomRuleEnabled(getNewRule(), 'rule1');
+  });
+
+  beforeEach(() => {
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
-
     visit(ENTITY_ANALYTICS_URL);
   });
 
-  after(() => {
+  afterEach(() => {
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
   });
 
   it('shows enable host risk button', () => {
     cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('exist');
-    intercepInstallRiskScoreModule();
-    cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).click();
-    waitForInstallRiskScoreModule();
-  });
-
-  it('starts installing host risk score', () => {
-    cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('be.disabled');
   });
 
   it('should install host risk score successfully', () => {
+    intercepInstallRiskScoreModule();
+    clickEnableRiskScore(RiskScoreEntity.host);
+    waitForInstallRiskScoreModule();
+
+    cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('be.disabled');
+
     cy.get(RISK_SCORE_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.host)).should('exist');
     cy.get(RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.host)).should('exist');
     cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('not.exist');
@@ -82,16 +84,15 @@ describe('Enable risk scores', () => {
 
   it('shows enable user risk button', () => {
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('exist');
-    intercepInstallRiskScoreModule();
-    cy.get(ENABLE_USER_RISK_SCORE_BUTTON).click();
-    waitForInstallRiskScoreModule();
-  });
-
-  it('starts installing user risk score', () => {
-    cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('be.disabled');
   });
 
   it('should install user risk score successfully', () => {
+    intercepInstallRiskScoreModule();
+    clickEnableRiskScore(RiskScoreEntity.user);
+    waitForInstallRiskScoreModule();
+
+    cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('be.disabled');
+
     cy.get(RISK_SCORE_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.user)).should('exist');
 
     cy.get(RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.user)).should('exist');

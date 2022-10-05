@@ -15,13 +15,15 @@ import {
   UPGRADE_USER_RISK_SCORE_BUTTON,
   UPGRADE_CANCELLATION_BUTTON,
   UPGRADE_CONFIRMARION_MODAL,
-  UPGRADE_CONFIRMATION_BUTTON,
   RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST,
 } from '../../screens/entity_analytics';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import {
+  clickUpgradeRiskScore,
+  clickUpgradeRiskScoreCancel,
+  clickUpgradeRiskScoreConfirmed,
   deleteRiskScore,
   installLegacyRiskScoreModule,
   interceptUpgradeRiskScoreModule,
@@ -38,6 +40,9 @@ describe('Upgrade risk scores', () => {
     cleanKibana();
     login();
     createCustomRuleEnabled(getNewRule(), 'rule1');
+  });
+
+  beforeEach(() => {
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
     installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
@@ -45,21 +50,24 @@ describe('Upgrade risk scores', () => {
     visit(ENTITY_ANALYTICS_URL);
   });
 
-  after(() => {
+  afterEach(() => {
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
   });
 
   it('shows upgrade host risk button', () => {
     cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.visible');
-    cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).click();
   });
 
   it('should show a confirmation modal for upgrading host risk score', () => {
+    clickUpgradeRiskScore(RiskScoreEntity.host);
     cy.get(UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.host)).should('exist');
+    clickUpgradeRiskScoreCancel();
   });
 
   it('display a link to host risk score Elastic doc', () => {
+    clickUpgradeRiskScore(RiskScoreEntity.host);
+
     cy.get(UPGRADE_CANCELLATION_BUTTON)
       .get(`${UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.host)} a`)
       .then((link) => {
@@ -67,18 +75,20 @@ describe('Upgrade risk scores', () => {
           `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.host}-risk-score.html`
         );
       });
-  });
 
-  it('starts upgrading host risk score', () => {
-    interceptUpgradeRiskScoreModule(RiskScoreEntity.host);
-
-    cy.get(UPGRADE_CONFIRMATION_BUTTON).click();
-    waitForUpgradeRiskScoreModule();
-
-    cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.disabled');
+    clickUpgradeRiskScoreCancel();
   });
 
   it('should upgrade host risk score successfully', () => {
+    clickUpgradeRiskScore(RiskScoreEntity.host);
+
+    interceptUpgradeRiskScoreModule(RiskScoreEntity.host);
+
+    clickUpgradeRiskScoreConfirmed();
+    waitForUpgradeRiskScoreModule();
+
+    cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.disabled');
+
     cy.get(RISK_SCORE_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.host)).should('exist');
     cy.get(RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.host)).should('exist');
 
@@ -105,14 +115,17 @@ describe('Upgrade risk scores', () => {
 
   it('shows upgrade user risk button', () => {
     cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.visible');
-    cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).click();
   });
 
   it('should show a confirmation modal for upgrading user risk score', () => {
+    clickUpgradeRiskScore(RiskScoreEntity.user);
     cy.get(UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.user)).should('exist');
+    clickUpgradeRiskScoreCancel();
   });
 
   it('display a link to user risk score Elastic doc', () => {
+    clickUpgradeRiskScore(RiskScoreEntity.user);
+
     cy.get(UPGRADE_CANCELLATION_BUTTON)
       .get(`${UPGRADE_CONFIRMARION_MODAL(RiskScoreEntity.user)} a`)
       .then((link) => {
@@ -120,16 +133,17 @@ describe('Upgrade risk scores', () => {
           `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.user}-risk-score.html`
         );
       });
-  });
 
-  it('starts upgrading user risk score', () => {
-    interceptUpgradeRiskScoreModule(RiskScoreEntity.user);
-    cy.get(UPGRADE_CONFIRMATION_BUTTON).click();
-    waitForUpgradeRiskScoreModule();
-    cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.disabled');
+    clickUpgradeRiskScoreCancel();
   });
 
   it('should upgrade user risk score successfully', () => {
+    clickUpgradeRiskScore(RiskScoreEntity.user);
+    interceptUpgradeRiskScoreModule(RiskScoreEntity.user);
+    clickUpgradeRiskScoreConfirmed();
+    waitForUpgradeRiskScoreModule();
+    cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.disabled');
+
     cy.get(RISK_SCORE_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.user)).should('exist');
     cy.get(RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.user)).should('exist');
 
