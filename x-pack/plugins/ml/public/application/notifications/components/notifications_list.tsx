@@ -22,6 +22,7 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import { EntityFilter } from './entity_filter';
 import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
 import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
@@ -276,6 +277,10 @@ export const NotificationsList: FC = () => {
             }),
           },
         ],
+      },
+      {
+        type: 'custom_component',
+        component: EntityFilter,
       },
     ];
   }, []);
