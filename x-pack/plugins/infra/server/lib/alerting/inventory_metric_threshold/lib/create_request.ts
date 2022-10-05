@@ -61,10 +61,10 @@ export const createRequest = (
         size: 1,
         _source: {
           includes: ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*', 'container.*'],
-          excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*']
-        }
-      }
-    }
+          excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*'],
+        },
+      },
+    },
   };
 
   const request: ESSearchRequest = {

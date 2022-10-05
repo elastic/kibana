@@ -24,11 +24,14 @@ interface BucketKey {
   node: string;
 }
 
-type Response = Record<string, { 
-  value: number | null;
-  warn: boolean;
-  trigger: boolean;
-} & AdditionalContext>;
+type Response = Record<
+  string,
+  {
+    value: number | null;
+    warn: boolean;
+    trigger: boolean;
+  } & AdditionalContext
+>;
 
 type Metric = Record<string, { value: number | null }>;
 
@@ -68,13 +71,14 @@ export const getData = async (
     for (const bucket of nodes.buckets) {
       const metricId = customMetric && customMetric.field ? customMetric.id : metric;
       const bucketHits = bucket.additionalContext?.hits?.hits;
-      const additionalContextSource = bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+      const additionalContextSource =
+        bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
 
       previous[bucket.key.node] = {
         value: bucket?.[metricId]?.value ?? null,
         warn: bucket?.shouldWarn.value > 0 ?? false,
         trigger: bucket?.shouldTrigger.value > 0 ?? false,
-        ...additionalContextSource
+        ...additionalContextSource,
       };
     }
     if (nextAfterKey) {
