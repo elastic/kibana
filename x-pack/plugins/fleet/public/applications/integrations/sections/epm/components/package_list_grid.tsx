@@ -34,6 +34,8 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models'
 
 import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
+import { promoteFeaturedIntegrations } from './utils';
+
 import { PackageCard } from './package_card';
 
 export interface Props {
@@ -116,7 +118,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   } else {
     gridContent = (
       <GridColumn
-        list={filteredList}
+        list={promoteFeaturedIntegrations(filteredList, selectedCategory)}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
         showCardLabels={showCardLabels}
       />
