@@ -88,7 +88,11 @@ export function createOperationDefinitionMock(
         })),
       onFieldChange: jest.fn(),
       toEsAggsFn: jest.fn(),
-      getPossibleOperation: jest.fn(),
+      getPossibleOperation: jest.fn(() => ({
+        scale: 'ratio',
+        dataType: 'number',
+        isBucketed: false,
+      })),
       requiredReferences: [
         {
           input: ['field', 'managedReference'],
