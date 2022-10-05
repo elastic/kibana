@@ -36,7 +36,7 @@ jest.mock('../../../pages/detection_engine/rules/all/actions');
 const executeRulesBulkActionMock = executeRulesBulkAction as jest.Mock;
 const bulkExportRulesMock = bulkExportRules as jest.Mock;
 
-const flushPromises = () => new Promise(setImmediate);
+const flushPromises = () => new Promise(process.nextTick);
 
 describe('RuleActionsOverflow', () => {
   afterEach(() => {

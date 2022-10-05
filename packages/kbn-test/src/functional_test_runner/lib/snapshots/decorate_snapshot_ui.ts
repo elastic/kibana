@@ -159,8 +159,11 @@ function getSnapshotState(file: string, updateSnapshot: SnapshotUpdateState) {
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
     {
       updateSnapshot,
+      rootDir: '',
       prettierPath: '',
-      snapshotFormat: {},
+      snapshotFormat: {
+        printBasicPrototype: true,
+      },
     }
   );
 
@@ -205,7 +208,9 @@ function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) 
   const matcher = toMatchSnapshot.bind(snapshotContext as any);
   const result = matcher(received);
 
+  // @ts-expect-error
   if (!result.pass) {
+    // @ts-expect-error
     throw new Error(result.message());
   }
 }
@@ -219,7 +224,9 @@ function expectToMatchInlineSnapshot(
 
   const result = arguments.length === 2 ? matcher(received) : matcher(received, _actual);
 
+  // @ts-expect-error
   if (!result.pass) {
+    // @ts-expect-error
     throw new Error(result.message());
   }
 }

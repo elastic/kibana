@@ -11,7 +11,7 @@ import { useDebouncedValue } from './use_debounced_value';
 
 describe('useDebouncedValue', () => {
   beforeEach(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
   });
 
   afterEach(() => {

@@ -146,4 +146,13 @@ module.exports = {
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/preserve_symlinks_resolver.js',
 
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
+
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
+  },
+
+  fakeTimers: {
+    enableGlobally: true,
+  },
 };

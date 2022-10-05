@@ -62,7 +62,7 @@ jest.mock('react-redux', () => {
 });
 const mockOnHide = jest.fn();
 
-const runAllPromises = () => new Promise(setImmediate);
+const runAllPromises = () => new Promise(process.nextTick);
 
 // helper function to render the hook
 const renderUseFieldBrowserOptions = (props: Partial<UseFieldBrowserOptionsProps> = {}) =>

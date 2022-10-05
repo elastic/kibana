@@ -334,7 +334,7 @@ describe('CollapsedItemActions', () => {
   });
 
   test('renders snooze text correctly if the rule is snoozed', async () => {
-    jest.useFakeTimers('modern').setSystemTime(moment('1990-01-01').toDate());
+    jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
     await setup();
     const wrapper = mountWithIntl(
       <CollapsedItemActions

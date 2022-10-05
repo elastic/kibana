@@ -22,7 +22,7 @@ yarn jest --config src/plugins/discover/jest.config.js
 In order to write those tests there are two main things you need to be aware of.
 The first one is the different between `jest.mock` and `jest.doMock` 
 and the second one our `jest mocks file pattern`. As we are running `js` and `ts`
-test files with `babel-jest` both techniques are needed
+test files with `ts-jest` both techniques are needed
 specially for the tests implemented on Typescript in order to benefit from the 
 auto-inference types feature.
 
@@ -42,7 +42,7 @@ section where we'll talk about our jest mock files pattern.
 Specially on typescript it is pretty common to have in unit tests 
 `jest.doMock` calls which reference for example imported types. Any error 
 will thrown from doing that however the test will fail. The reason behind that
-is because despite the `jest.doMock` isn't being hoisted by `babel-jest` the 
+is because despite the `jest.doMock` isn't being hoisted by `ts-jest` the 
 import with the types we are referencing will be hoisted to the top and at the 
 time we'll call the function that variable would not be defined.
 
