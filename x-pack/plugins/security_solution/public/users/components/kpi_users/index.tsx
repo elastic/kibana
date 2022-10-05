@@ -14,8 +14,8 @@ import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
-import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
-import { getUserRiskIndex, RiskQueries, RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreDocLink } from '../../../risk_score/components/risk_score_onboarding/risk_score_doc_link';
+import { getUserRiskIndex, RiskScoreEntity } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useRiskScoreFeatureStatus } from '../../../risk_score/containers/feature_status';
 
@@ -24,7 +24,7 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
     const spaceId = useSpaceId();
     const defaultIndex = spaceId ? getUserRiskIndex(spaceId) : undefined;
     const { isEnabled, isLicenseValid, isLoading } = useRiskScoreFeatureStatus(
-      RiskQueries.usersRiskScore,
+      RiskScoreEntity.user,
       defaultIndex
     );
 
