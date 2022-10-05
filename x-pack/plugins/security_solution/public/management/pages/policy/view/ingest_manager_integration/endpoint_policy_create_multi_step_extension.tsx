@@ -65,7 +65,7 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
           <p>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.feature"
-              defaultMessage="Windows, Mac, and Linux event collection"
+              defaultMessage="Windows, macOS, and Linux event collection"
             />
           </p>
         </EuiText>
@@ -78,23 +78,19 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
       <p>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.details"
-          defaultMessage="You can change this later by editing the Endpoint Security integration agent policy.
-      Read more about Endpoint security configuration in our {docsPage}."
-          values={{
-            docsPage: (
-              <EuiLink
-                href={docLinks.links.securitySolution.configureEndpointIntegrationPolicy}
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.docsPage"
-                  defaultMessage="documentation"
-                />
-              </EuiLink>
-            ),
-          }}
+          defaultMessage="You can edit these settings later in the Elastic Defend integration policy."
         />
+        &nbsp;
+        <EuiLink
+          href={docLinks.links.securitySolution.configureEndpointIntegrationPolicy}
+          target="_blank"
+          external
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.multiStepOnboarding.learnMore"
+            defaultMessage="Learn more"
+          />
+        </EuiLink>
       </p>
     </EuiText>
   );
