@@ -7,6 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../../common/constants';
@@ -105,11 +106,14 @@ type PipelinesActions = Pick<
 interface PipelinesValues {
   canSetPipeline: boolean;
   canUseMlInferencePipeline: boolean;
+  customPipelineData: Record<string, IngestPipeline | undefined>;
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
   hasIndexIngestionPipeline: boolean;
   index: FetchIndexApiResponse;
+  indexName: string;
   mlInferencePipelineProcessors: InferencePipeline[];
+  pipelineName: string;
   pipelineState: IngestPipelineParams;
   showAddMlInferencePipelineModal: boolean;
   showModal: boolean;
@@ -155,6 +159,8 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ],
     ],
     values: [
+      FetchCustomPipelineApiLogic,
+      ['data as customPipelineData'],
       FetchDefaultPipelineApiLogic,
       ['data as defaultPipelineValuesData'],
       FetchIndexApiLogic,
@@ -212,7 +218,10 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     createMlInferencePipelineSuccess: () => {
+      // Re-fetch processors to ensure we display newly added ml processor
       actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     deleteMlPipelineError: (error) => flashAPIErrors(error),
     deleteMlPipelineSuccess: (value) => {
@@ -229,7 +238,10 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
           )
         );
       }
+      // Re-fetch processors to ensure we display newly removed ml processor
       actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     fetchIndexApiSuccess: (index) => {
       if (!values.showModal) {
@@ -290,15 +302,6 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       () => [selectors.index],
       (index: ElasticsearchIndexWithIngestion) => !isApiIndex(index),
     ],
-    defaultPipelineValues: [
-      () => [selectors.defaultPipelineValuesData],
-      (pipeline: IngestPipelineParams | null) => pipeline ?? DEFAULT_PIPELINE_VALUES,
-    ],
-    hasIndexIngestionPipeline: [
-      () => [selectors.pipelineState, selectors.defaultPipelineValues],
-      (pipelineState: IngestPipelineParams, defaultPipelineValues: IngestPipelineParams) =>
-        pipelineState.name !== defaultPipelineValues.name,
-    ],
     canUseMlInferencePipeline: [
       () => [
         selectors.canSetPipeline,
@@ -310,6 +313,24 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         hasIndexIngestionPipeline: boolean,
         pipelineState: IngestPipelineParams
       ) => canSetPipeline && hasIndexIngestionPipeline && pipelineState.run_ml_inference,
+    ],
+    defaultPipelineValues: [
+      () => [selectors.defaultPipelineValuesData],
+      (pipeline: IngestPipelineParams | null) => pipeline ?? DEFAULT_PIPELINE_VALUES,
+    ],
+    hasIndexIngestionPipeline: [
+      () => [selectors.pipelineName, selectors.defaultPipelineValues],
+      (pipelineName: string, defaultPipelineValues: IngestPipelineParams) =>
+        pipelineName !== defaultPipelineValues.name,
+    ],
+    indexName: [
+      () => [selectors.index],
+      (index?: ElasticsearchIndexWithIngestion) => index?.name ?? '',
+    ],
+    pipelineName: [
+      () => [selectors.pipelineState, selectors.customPipelineData, selectors.indexName],
+      (pipelineState, customPipelineData, indexName) =>
+        customPipelineData && customPipelineData[indexName] ? indexName : pipelineState.name,
     ],
   }),
 });
