@@ -32,15 +32,14 @@ export class LayerTOC extends Component<Props> {
 
   _updateDebounced = _.debounce(this.forceUpdate, 100);
 
-  _onDragEnd = ({ combine, destination, source }: DropResult) => {
-    // Layer list is displayed in reverse order so index needs to reversed to get back to original reference.
-    const reverseIndex = (index: number) => {
-      return this.props.layerList.length - index - 1;
-    };
+  _reverseIndex(index: number) {
+    return this.props.layerList.length - index - 1;
+  }
 
+  _onDragEnd = ({ combine, destination, source }: DropResult) => {
     if (combine) {
       this.props.createLayerGroup(
-        this.props.layerList[reverseIndex(source.index)].getId(),
+        this.props.layerList[this._reverseIndex(source.index)].getId(),
         combine.draggableId
       );
       return;
@@ -51,8 +50,8 @@ export class LayerTOC extends Component<Props> {
       return;
     }
 
-    const sourceIndex = reverseIndex(source.index);
-    const destinationIndex = reverseIndex(destination.index);
+    const sourceIndex = this._reverseIndex(source.index);
+    const destinationIndex = this._reverseIndex(destination.index);
 
     const sourceLayerId = this.props.layerList[sourceIndex].getId();
     const newRightSiblingIndex =
@@ -89,9 +88,10 @@ export class LayerTOC extends Component<Props> {
 
   _renderLayers() {
     const tocEntryList = this.props.layerList
-      .map((layer) => {
+      .map((layer, index) => {
         return {
           ...this._getDepth(layer, 0),
+          draggableIndex: this._reverseIndex(index),
           layer,
         };
       })
@@ -116,11 +116,11 @@ export class LayerTOC extends Component<Props> {
           isCombineEnabled={!this.props.isReadOnly}
         >
           {(droppableProvided, snapshot) => {
-            const tocEntries = tocEntryList.map(({ depth, layer }, idx: number) => (
+            const tocEntries = tocEntryList.map(({ draggableIndex, depth, layer }) => (
               <EuiDraggable
                 spacing="none"
                 key={layer.getId()}
-                index={idx}
+                index={draggableIndex}
                 draggableId={layer.getId()}
                 customDragHandle={true}
                 disableInteractiveElementBlocking // Allows button to be drag handle
