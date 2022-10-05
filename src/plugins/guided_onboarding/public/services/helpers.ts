@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { GuideId, GuideState, GuideStepIds } from '../../common/types';
 import { guidesConfig } from '../constants/guides_config';
-import { GuideConfig, StepConfig, UseCase } from '../types';
+import { GuideConfig, StepConfig } from '../types';
 
 export const getGuideConfig = (guideID?: string): GuideConfig | undefined => {
   if (guideID && Object.keys(guidesConfig).includes(guideID)) {
-    return guidesConfig[guideID as UseCase];
+    return guidesConfig[guideID as GuideId];
   }
 };
 
@@ -33,10 +34,25 @@ export const isLastStep = (guideID: string, stepID: string): boolean => {
   return false;
 };
 
-export const getNextStep = (guideID: string, stepID: string): string | undefined => {
-  const guide = getGuideConfig(guideID);
-  const activeStepIndex = getStepIndex(guideID, stepID);
-  if (activeStepIndex > -1 && guide?.steps[activeStepIndex + 1]) {
-    return guide?.steps[activeStepIndex + 1].id;
+export const getInProgressStepId = (state: GuideState): GuideStepIds | undefined => {
+  const inProgressStep = state.steps.find((step) => step.status === 'in_progress');
+  return inProgressStep ? inProgressStep.id : undefined;
+};
+
+const getInProgressStepConfig = (state: GuideState): StepConfig | undefined => {
+  const inProgressStepId = getInProgressStepId(state);
+  if (inProgressStepId) {
+    const config = getGuideConfig(state.guideId);
+    if (config) {
+      return config.steps.find((step) => step.id === inProgressStepId);
+    }
   }
+};
+
+export const isIntegrationInGuideStep = (state: GuideState, integration?: string): boolean => {
+  if (state.isActive) {
+    const stepConfig = getInProgressStepConfig(state);
+    return stepConfig ? stepConfig.integration === integration : false;
+  }
+  return false;
 };
