@@ -39,7 +39,7 @@ export enum ENTITIES {
   DATA_STREAMS = 'dataStreams',
 }
 
-type SettingsToRetrieve = DevToolsSettings['autocomplete'] & {
+export type SettingsToRetrieve = DevToolsSettings['autocomplete'] & {
   indexTemplates: boolean;
   componentTemplates: boolean;
   legacyTemplates: boolean;
