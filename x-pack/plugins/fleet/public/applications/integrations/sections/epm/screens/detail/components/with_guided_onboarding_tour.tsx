@@ -18,7 +18,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
         defaultMessage: 'Add Elastic Defend',
       }),
       description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointButton.description', {
-        defaultMessage: 'In the next steps we’ll help you get setup with some sensible defaults.',
+        defaultMessage: 'In just a few steps, configure your data with our recommended defaults. You can change this later.',
       }),
     };
   }
