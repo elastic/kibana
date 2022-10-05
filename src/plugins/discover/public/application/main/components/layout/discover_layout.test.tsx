@@ -39,9 +39,10 @@ import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import type { UnifiedHistogramChartData } from '@kbn/unified-histogram-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
-setHeaderActionMenuMounter(jest.fn());
-
+jest.mock('@kbn/unified-histogram-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');
 function getAppStateContainer() {
   const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
   appStateContainer.set({
@@ -50,6 +51,61 @@ function getAppStateContainer() {
   });
   return appStateContainer;
 }
+
+
+  const chartData = {
+    xAxisOrderedValues: [
+      1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
+      1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
+      1624917600000, 1625004000000, 1625090400000,
+    ],
+    xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
+    xAxisLabel: 'order_date per day',
+    yAxisFormat: { id: 'number' },
+    ordered: {
+      date: true,
+      interval: {
+        asMilliseconds: jest.fn(),
+      },
+      intervalESUnit: 'd',
+      intervalESValue: 1,
+      min: '2021-03-18T08:28:56.411Z',
+      max: '2021-07-01T07:28:56.411Z',
+    },
+    yAxisLabel: 'Count',
+    values: [
+      { x: 1623880800000, y: 134 },
+      { x: 1623967200000, y: 152 },
+      { x: 1624053600000, y: 141 },
+      { x: 1624140000000, y: 138 },
+      { x: 1624226400000, y: 142 },
+      { x: 1624312800000, y: 157 },
+      { x: 1624399200000, y: 149 },
+      { x: 1624485600000, y: 146 },
+      { x: 1624572000000, y: 170 },
+      { x: 1624658400000, y: 137 },
+      { x: 1624744800000, y: 150 },
+      { x: 1624831200000, y: 144 },
+      { x: 1624917600000, y: 147 },
+      { x: 1625004000000, y: 137 },
+      { x: 1625090400000, y: 66 },
+    ],
+  } as unknown as UnifiedHistogramChartData;
+
+  return {
+    ...originalModule,
+    buildChartData: jest.fn().mockImplementation(() => ({
+      chartData,
+      bucketInterval: {
+        scaled: true,
+        description: 'test',
+        scale: 2,
+      },
+    })),
+  };
+});
+
+setHeaderActionMenuMounter(jest.fn());
 
 function mountComponent(
   dataView: DataView,
@@ -92,53 +148,9 @@ function mountComponent(
     result: Number(esHits.length),
   }) as DataTotalHits$;
 
-  const chartData = {
-    xAxisOrderedValues: [
-      1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
-      1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
-      1624917600000, 1625004000000, 1625090400000,
-    ],
-    xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
-    xAxisLabel: 'order_date per day',
-    yAxisFormat: { id: 'number' },
-    ordered: {
-      date: true,
-      interval: {
-        asMilliseconds: jest.fn(),
-      },
-      intervalESUnit: 'd',
-      intervalESValue: 1,
-      min: '2021-03-18T08:28:56.411Z',
-      max: '2021-07-01T07:28:56.411Z',
-    },
-    yAxisLabel: 'Count',
-    values: [
-      { x: 1623880800000, y: 134 },
-      { x: 1623967200000, y: 152 },
-      { x: 1624053600000, y: 141 },
-      { x: 1624140000000, y: 138 },
-      { x: 1624226400000, y: 142 },
-      { x: 1624312800000, y: 157 },
-      { x: 1624399200000, y: 149 },
-      { x: 1624485600000, y: 146 },
-      { x: 1624572000000, y: 170 },
-      { x: 1624658400000, y: 137 },
-      { x: 1624744800000, y: 150 },
-      { x: 1624831200000, y: 144 },
-      { x: 1624917600000, y: 147 },
-      { x: 1625004000000, y: 137 },
-      { x: 1625090400000, y: 66 },
-    ],
-  } as unknown as UnifiedHistogramChartData;
-
   const charts$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    chartData,
-    bucketInterval: {
-      scaled: true,
-      description: 'test',
-      scale: 2,
-    },
+    response: {} as unknown as SearchResponse,
   }) as DataCharts$;
 
   const savedSearchData$ = {
@@ -190,13 +202,17 @@ describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', () => {
     const container = document.createElement('div');
     mountComponent(dataViewMock, undefined, { attachTo: container });
-    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
+    expect(
+      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
+    ).toBeNull();
   });
 
   test('selected data view with time field displays chart toggle', () => {
     const container = document.createElement('div');
     mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
-    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).not.toBeNull();
+    expect(
+      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
+    ).not.toBeNull();
   });
 
   test('sql query displays no chart toggle', () => {
@@ -208,7 +224,9 @@ describe('Discover component', () => {
       { sql: 'SELECT * FROM test' },
       true
     );
-    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
+    expect(
+      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
+    ).toBeNull();
   });
 
   test('the saved search title h1 gains focus on navigate', () => {

@@ -29,6 +29,7 @@ export const useDiscoverHistogram = ({
   dataView,
   savedSearch,
   isTimeBased,
+  isPlainRecord,
 }: {
   stateContainer: GetStateReturn;
   state: AppState;
@@ -36,6 +37,7 @@ export const useDiscoverHistogram = ({
   dataView: DataView;
   savedSearch: SavedSearch;
   isTimeBased: boolean;
+  isPlainRecord: boolean;
 }) => {
   const { storage, data } = useDiscoverServices();
 
@@ -124,27 +126,35 @@ export const useDiscoverHistogram = ({
 
   const { fetchStatus: chartFetchStatus, response, error } = useDataState(savedSearchData$.charts$);
 
-  const { bucketInterval, chartData } = buildChartData({
-    data,
-    dataView,
-    timeInterval: state.interval,
-    response,
-  });
+  const { bucketInterval, chartData } = useMemo(
+    () =>
+      buildChartData({
+        data,
+        dataView,
+        timeInterval: state.interval,
+        response,
+      }),
+    [data, dataView, response, state.interval]
+  );
 
   const chart = useMemo(
-    () => ({
-      status: chartFetchStatus,
-      hidden: state.hideChart || !isTimeBased,
-      timeInterval: state.interval,
-      bucketInterval,
-      data: chartData,
-      error,
-    }),
+    () =>
+      isPlainRecord
+        ? undefined
+        : {
+            status: chartFetchStatus,
+            hidden: state.hideChart || !isTimeBased,
+            timeInterval: state.interval,
+            bucketInterval,
+            data: chartData,
+            error,
+          },
     [
       bucketInterval,
       chartData,
       chartFetchStatus,
       error,
+      isPlainRecord,
       isTimeBased,
       state.hideChart,
       state.interval,

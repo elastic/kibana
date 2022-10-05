@@ -71,4 +71,5 @@ export function updateSearchSource(
   searchSource.setField('aggs', chartAggConfigs.toDsl());
   searchSource.removeField('sort');
   searchSource.removeField('fields');
+  return chartAggConfigs;
 }

@@ -100,6 +100,7 @@ export const DiscoverMainContent = ({
     dataView,
     savedSearch,
     isTimeBased,
+    isPlainRecord,
   });
 
   return (
