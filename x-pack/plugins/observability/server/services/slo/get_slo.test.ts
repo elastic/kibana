@@ -53,8 +53,8 @@ describe('GetSLO', () => {
           duration: '7d',
           is_rolling: true,
         },
-        stats: {
-          current_sli: 0.9999,
+        summary: {
+          sli_value: 0.9999,
           error_budget: {
             initial: 0.001,
             consumed: 0.1,

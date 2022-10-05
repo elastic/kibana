@@ -31,8 +31,8 @@ export class GetSLO {
       time_window: slo.time_window,
       budgeting_method: slo.budgeting_method,
       objective: slo.objective,
-      stats: {
-        current_sli: sliValue,
+      summary: {
+        sli_value: sliValue,
         error_budget: {
           ...errorBudget,
         },

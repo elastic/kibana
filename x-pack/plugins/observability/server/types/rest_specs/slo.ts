@@ -44,8 +44,8 @@ const getSLOResponseSchema = t.type({
   time_window: rollingTimeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
-  stats: t.type({
-    current_sli: t.number,
+  summary: t.type({
+    sli_value: t.number,
     error_budget: errorBudgetSchema,
   }),
   revision: t.number,

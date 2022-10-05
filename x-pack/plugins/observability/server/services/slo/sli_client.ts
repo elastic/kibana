@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
-import { InternalQueryError } from '../../errors';
+import { InternalQueryError, NotSupportedError } from '../../errors';
 import { IndicatorData, SLO } from '../../types/models';
 
 export interface SLIClient {
@@ -18,6 +18,10 @@ export class DefaultSLIClient implements SLIClient {
   constructor(private esClient: ElasticsearchClient) {}
 
   async fetchDataForSLOTimeWindow(slo: SLO): Promise<IndicatorData> {
+    if (slo.budgeting_method !== 'occurrences') {
+      throw new NotSupportedError(`Budgeting method: ${slo.budgeting_method}`);
+    }
+
     const result = await this.esClient.search({
       size: 0,
       index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -55,7 +59,7 @@ export class DefaultSLIClient implements SLIClient {
 
 function fromSLOTimeWindowToRange(slo: SLO): { from: string; to: string } {
   if (!slo.time_window.is_rolling) {
-    throw new Error('Not supported yet');
+    throw new NotSupportedError(`Time window: ${slo.time_window.is_rolling}`);
   }
 
   return {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+const SIX_DIGITS = 1000000;
+
 export function toHighPrecision(value: number): number {
-  return Math.round(value * 1000000) / 1000000;
+  return Math.round(value * SIX_DIGITS) / SIX_DIGITS;
 }
