@@ -16,7 +16,6 @@ import {
   EuiAccordion,
   EuiCommentList,
   EuiText,
-  EuiSpacer,
 } from '@elastic/eui';
 import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
@@ -26,7 +25,7 @@ import { getFormattedComments } from '../../utils/helpers';
 interface ExceptionItemCommentsProps {
   exceptionItemComments?: Comment[];
   newCommentValue: string;
-  expandComments?: boolean;
+  accordionTitle?: JSX.Element;
   newCommentOnChange: (value: string) => void;
 }
 
@@ -50,7 +49,7 @@ const CommentAccordion = styled(EuiAccordion)`
 export const ExceptionItemComments = memo(function ExceptionItemComments({
   exceptionItemComments,
   newCommentValue,
-  expandComments = false,
+  accordionTitle,
   newCommentOnChange,
 }: ExceptionItemCommentsProps) {
   const [shouldShowComments, setShouldShowComments] = useState(false);
@@ -111,17 +110,11 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
 
   return (
     <div>
-      {exceptionItemsExist && expandComments && (
-        <>
-          <EuiCommentList comments={formattedComments} data-test-subj="exceptionItemComments" />
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {exceptionItemsExist && !expandComments && (
+      {exceptionItemsExist && (
         <CommentAccordion
           id={'add-exception-comments-accordion'}
           buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
-          buttonContent={commentsAccordionTitle}
+          buttonContent={accordionTitle ?? commentsAccordionTitle}
           data-test-subj="exceptionItemCommentsAccordion"
           onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
         >

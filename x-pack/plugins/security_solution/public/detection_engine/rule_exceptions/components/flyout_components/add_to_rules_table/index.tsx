@@ -23,7 +23,7 @@ interface ExceptionsAddToRulesComponentProps {
 const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponentProps> = ({
   initiallySelectedRules,
   onRuleSelectionChange,
-}): JSX.Element => {
+}) => {
   const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
     isInMemorySorting: true,
     filterOptions: {

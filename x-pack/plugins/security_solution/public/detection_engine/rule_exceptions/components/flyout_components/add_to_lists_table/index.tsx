@@ -11,6 +11,7 @@ import { EuiText, EuiSpacer, EuiInMemoryTable, EuiPanel, EuiLoadingContent } fro
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { FindRulesReferencedByExceptionsListProp } from '../../../../../detections/containers/detection_engine/rules';
 import * as i18n from './translations';
 import { getSharedListsTableColumns } from '../utils';
 import { useFindExceptionListReferences } from '../../../logic/use_find_references';
@@ -49,7 +50,7 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
 
   useEffect(() => {
     if (fetchReferences != null) {
-      const listsToQuery = !listsToFetch.length
+      const listsToQuery: FindRulesReferencedByExceptionsListProp[] = !listsToFetch.length
         ? [{ namespaceType: 'single' }, { namespaceType: 'agnostic' }]
         : listsToFetch.map(({ id, list_id: listId, namespace_type: namespaceType }) => ({
             id,
@@ -61,27 +62,40 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
   }, [listsToFetch, fetchReferences]);
 
   useEffect(() => {
-    if (referenceFetchError) {
-      setError(i18n.REFERENCES_FETCH_ERROR);
-    } else if (isLoadingReferences) {
-      setMessage(<EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />);
-    } else if (ruleReferences != null) {
-      const lists: ExceptionListRuleReferencesSchema[] = [];
-      for (const [_, value] of Object.entries(ruleReferences)) {
-        if (value.type === ExceptionListTypeEnum.DETECTION) {
-          lists.push(value);
-        }
-      }
-
-      setMessage(undefined);
-      setListsToDisplay(lists);
+    if (referenceFetchError) return setError(i18n.REFERENCES_FETCH_ERROR);
+    if (isLoadingReferences) {
+      return setMessage(
+        <EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />
+      );
     }
+    if (!ruleReferences) return;
+    const lists: ExceptionListRuleReferencesSchema[] = [];
+    for (const [_, value] of Object.entries(ruleReferences))
+      if (value.type === ExceptionListTypeEnum.DETECTION) lists.push(value);
+
+    setMessage(undefined);
+    setListsToDisplay(lists);
   }, [isLoadingReferences, referenceFetchError, ruleReferences, showAllSharedLists]);
 
   const selectionValue = {
     onSelectionChange: (selection: ExceptionListRuleReferencesSchema[]) => {
       if (onListSelectionChange != null) {
-        onListSelectionChange(selection.map(({ referenced_rules: _, ...rest }) => ({ ...rest })));
+        onListSelectionChange(
+          selection.map(
+            ({
+              referenced_rules: _,
+              namespace_type: namespaceType,
+              os_types: osTypes,
+              tags,
+              ...rest
+            }) => ({
+              ...rest,
+              namespace_type: namespaceType ?? 'single',
+              os_types: osTypes ?? [],
+              tags: tags ?? [],
+            })
+          )
+        );
       }
     },
     initialSelected: [],

@@ -112,10 +112,10 @@ export const ExceptionBuilderComponent = ({
   listId,
   listNamespaceType,
   listType,
-  exceptionItemName,
   listTypeSpecificIndexPatternFilter,
   onChange,
   ruleName,
+  exceptionItemName,
   isDisabled = false,
   osTypes,
   operatorsList,
@@ -290,7 +290,7 @@ export const ExceptionBuilderComponent = ({
     // would then be arbitrary, decided to just create a new exception list item
     const newException = getNewExceptionItem({
       listId,
-      name: exceptionItemName ?? `${ruleName} - Exception item`,
+      name: exceptionItemName ?? `${ruleName ?? 'Rule'} - Exception item`,
       namespaceType: listNamespaceType,
     });
 

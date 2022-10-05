@@ -9,6 +9,8 @@ import * as t from 'io-ts';
 import { NonEmptyStringArray } from '@kbn/securitysolution-io-ts-types';
 import { DefaultNamespaceArray } from '@kbn/securitysolution-io-ts-list-types';
 
+// If ids and list_ids are undefined, route will fetch all lists matching the
+// specified namespace type
 export const findExceptionReferencesOnRuleSchema = t.intersection([
   t.exact(
     t.type({
