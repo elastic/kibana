@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -17,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../common';
-import { AsyncStatus } from '../../hooks/use_async';
 import { getImpactRows } from './get_impact_rows';
 
 interface Props {
@@ -31,7 +29,6 @@ interface Props {
   totalSamples: number;
   totalSeconds: number;
   onClose: () => void;
-  status: AsyncStatus;
 }
 
 function KeyValueList({ rows }: { rows: Array<{ label: string; value: React.ReactNode }> }) {
@@ -61,11 +58,9 @@ function KeyValueList({ rows }: { rows: Array<{ label: string; value: React.Reac
 function FlamegraphFrameInformationPanel({
   children,
   onClose,
-  status,
 }: {
   children: React.ReactNode;
   onClose: () => void;
-  status: AsyncStatus;
 }) {
   return (
     <EuiPanel style={{ width: 400, maxHeight: '100%', overflow: 'auto' }} hasBorder>
@@ -83,11 +78,6 @@ function FlamegraphFrameInformationPanel({
                     </h2>
                   </EuiTitle>
                 </EuiFlexItem>
-                {status === AsyncStatus.Loading ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner />
-                  </EuiFlexItem>
-                ) : undefined}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -101,16 +91,10 @@ function FlamegraphFrameInformationPanel({
   );
 }
 
-export function FlamegraphInformationWindow({
-  onClose,
-  frame,
-  totalSamples,
-  totalSeconds,
-  status,
-}: Props) {
+export function FlamegraphInformationWindow({ onClose, frame, totalSamples, totalSeconds }: Props) {
   if (!frame) {
     return (
-      <FlamegraphFrameInformationPanel status={status} onClose={onClose}>
+      <FlamegraphFrameInformationPanel onClose={onClose}>
         <EuiText>
           {i18n.translate('xpack.profiling.flamegraphInformationWindow.selectFrame', {
             defaultMessage: 'Click on a frame to display more information',
@@ -130,7 +114,7 @@ export function FlamegraphInformationWindow({
   });
 
   return (
-    <FlamegraphFrameInformationPanel status={status} onClose={onClose}>
+    <FlamegraphFrameInformationPanel onClose={onClose}>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <KeyValueList
