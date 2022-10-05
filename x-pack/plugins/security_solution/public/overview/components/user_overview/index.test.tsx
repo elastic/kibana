@@ -12,7 +12,7 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useUserRiskScore } from '../../../risk_score/containers/all';
+import { useRiskScore } from '../../../risk_score/containers/all';
 import type { UserSummaryProps } from '.';
 import { UserOverview } from '.';
 
@@ -22,11 +22,12 @@ const defaultProps = {
   refetch: () => {},
   isModuleEnabled: true,
   isLicenseValid: true,
+  loading: false,
 };
 
 jest.mock('../../../risk_score/containers/all');
 
-const mockUseUserRiskScore = useUserRiskScore as jest.Mock;
+const mockRiskScore = useRiskScore as jest.Mock;
 
 describe('User Summary Component', () => {
   const mockProps: UserSummaryProps = {
@@ -58,7 +59,7 @@ describe('User Summary Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseUserRiskScore.mockReturnValue([true, { ...defaultProps, isModuleEnabled: false }]);
+    mockRiskScore.mockReturnValue({ ...defaultProps, loading: true, isModuleEnabled: false });
   });
 
   test('it renders the default User Summary', () => {
@@ -94,24 +95,21 @@ describe('User Summary Component', () => {
     const risk = 'very high hos risk';
     const riskScore = 9999999;
 
-    mockUseUserRiskScore.mockReturnValue([
-      false,
-      {
-        ...defaultProps,
-        data: [
-          {
-            user: {
-              name: 'testUsermame',
-              risk: {
-                rule_risks: [],
-                calculated_level: risk,
-                calculated_score_norm: riskScore,
-              },
+    mockRiskScore.mockReturnValue({
+      ...defaultProps,
+      data: [
+        {
+          user: {
+            name: 'testUsermame',
+            risk: {
+              rule_risks: [],
+              calculated_level: risk,
+              calculated_score_norm: riskScore,
             },
           },
-        ],
-      },
-    ]);
+        },
+      ],
+    });
 
     const { getByTestId } = render(
       <TestProviders>
