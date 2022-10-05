@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { ProfilingESField } from '../../common/elasticsearch';
@@ -14,8 +14,9 @@ import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/hist
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
+import { ProfilingRequestHandlerContext } from '../types';
+import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
@@ -155,18 +156,13 @@ export async function topNElasticSearchQuery({
   };
 }
 
-export function queryTopNCommon({
-  logger,
-  router,
-  services: { createProfilingEsClient },
-  pathName,
-  searchField,
-  highCardinality,
-}: RouteRegisterParameters & {
-  pathName: string;
-  searchField: string;
-  highCardinality: boolean;
-}) {
+export function queryTopNCommon(
+  router: IRouter<ProfilingRequestHandlerContext>,
+  logger: Logger,
+  pathName: string,
+  searchField: string,
+  highCardinality: boolean
+) {
   router.get(
     {
       path: pathName,
@@ -201,52 +197,72 @@ export function queryTopNCommon({
   );
 }
 
-export function registerTraceEventsTopNContainersSearchRoute(parameters: RouteRegisterParameters) {
+export function registerTraceEventsTopNContainersSearchRoute({
+  router,
+  logger,
+}: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon({
-    ...parameters,
-    pathName: paths.TopNContainers,
-    searchField: getFieldNameForTopNType(TopNType.Containers),
-    highCardinality: false,
-  });
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNContainers,
+    getFieldNameForTopNType(TopNType.Containers),
+    false
+  );
 }
 
-export function registerTraceEventsTopNDeploymentsSearchRoute(parameters: RouteRegisterParameters) {
+export function registerTraceEventsTopNDeploymentsSearchRoute({
+  router,
+  logger,
+}: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon({
-    ...parameters,
-    pathName: paths.TopNDeployments,
-    searchField: getFieldNameForTopNType(TopNType.Deployments),
-    highCardinality: false,
-  });
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNDeployments,
+    getFieldNameForTopNType(TopNType.Deployments),
+    false
+  );
 }
 
-export function registerTraceEventsTopNHostsSearchRoute(parameters: RouteRegisterParameters) {
+export function registerTraceEventsTopNHostsSearchRoute({
+  router,
+  logger,
+}: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon({
-    ...parameters,
-    pathName: paths.TopNHosts,
-    searchField: getFieldNameForTopNType(TopNType.Hosts),
-    highCardinality: false,
-  });
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNHosts,
+    getFieldNameForTopNType(TopNType.Hosts),
+    false
+  );
 }
 
-export function registerTraceEventsTopNStackTracesSearchRoute(parameters: RouteRegisterParameters) {
+export function registerTraceEventsTopNStackTracesSearchRoute({
+  router,
+  logger,
+}: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon({
-    ...parameters,
-    pathName: paths.TopNTraces,
-    searchField: getFieldNameForTopNType(TopNType.Traces),
-    highCardinality: false,
-  });
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNTraces,
+    getFieldNameForTopNType(TopNType.Traces),
+    false
+  );
 }
 
-export function registerTraceEventsTopNThreadsSearchRoute(parameters: RouteRegisterParameters) {
+export function registerTraceEventsTopNThreadsSearchRoute({
+  router,
+  logger,
+}: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon({
-    ...parameters,
-    pathName: paths.TopNThreads,
-    searchField: getFieldNameForTopNType(TopNType.Threads),
-    highCardinality: true,
-  });
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNThreads,
+    getFieldNameForTopNType(TopNType.Threads),
+    true
+  );
 }

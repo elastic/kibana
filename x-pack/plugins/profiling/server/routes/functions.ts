@@ -10,6 +10,7 @@ import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createTopNFunctions } from '../../common/functions';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
+import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
@@ -25,11 +26,7 @@ const querySchema = schema.object({
 
 type QuerySchemaType = TypeOf<typeof querySchema>;
 
-export function registerTopNFunctionsSearchRoute({
-  router,
-  logger,
-  services: { createProfilingEsClient },
-}: RouteRegisterParameters) {
+export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
     {

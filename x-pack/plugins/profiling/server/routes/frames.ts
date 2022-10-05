@@ -15,7 +15,7 @@ import {
   StackFrame,
   StackFrameMetadata,
 } from '../../common/profiling';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
 import { mgetStackFrames, mgetExecutables } from './stacktrace';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 
@@ -58,11 +58,7 @@ async function getFrameInformation({
 }
 
 export function registerFrameInformationRoute(params: RouteRegisterParameters) {
-  const {
-    logger,
-    router,
-    services: { createProfilingEsClient },
-  } = params;
+  const { logger, router } = params;
 
   const routePaths = getRoutePaths();
 
