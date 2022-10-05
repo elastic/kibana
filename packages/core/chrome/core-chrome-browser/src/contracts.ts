@@ -143,4 +143,6 @@ export interface ChromeStart {
   registerWhitelabellingPlugin(pluginName: string): void;
 
   getCustomLogo$(): Observable<string | undefined>;
+
+  setCustomMark(custoMark: string): void;
 }

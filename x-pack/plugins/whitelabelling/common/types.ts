@@ -6,7 +6,8 @@
  */
 
 export interface ThemingSchema {
-  logo: string;
+  logo?: string;
+  mark?: string;
 }
 
 export interface WhitelabellingInfoResponse {

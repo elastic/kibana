@@ -19,7 +19,12 @@ export class WhitelabellingPlugin implements Plugin {
     const { http, chrome } = core;
     chrome.registerWhitelabellingPlugin('whitelabelling');
     getThemingInfo(http).then(({ theming }) => {
-      chrome.setCustomLogo(theming.logo);
+      if (theming.logo) {
+        chrome.setCustomLogo(theming.logo);
+      }
+      if (theming.mark) {
+        chrome.setCustomMark(theming.mark);
+      }
     });
 
     return {};

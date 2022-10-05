@@ -113,6 +113,7 @@ export class ChromeService {
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
     const customLogo$ = new BehaviorSubject<string | undefined>(undefined);
+    const customMark$ = new BehaviorSubject<string | undefined>(undefined);
     let whitelabellingRegistered: string | null = null;
 
     const getKbnVersionClass = () => {
@@ -229,6 +230,7 @@ export class ChromeService {
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           customLogo$={customLogo$.pipe(takeUntil(this.stop$))}
+          customMark$={customMark$.pipe(takeUntil(this.stop$))}
         />
       ),
 
@@ -295,6 +297,12 @@ export class ChromeService {
       setCustomLogo: (logo: string) => {
         if (whitelabellingRegistered && whitelabellingRegistered === 'whitelabelling') {
           customLogo$.next(logo);
+        }
+      },
+
+      setCustomMark: (mark: string) => {
+        if (whitelabellingRegistered && whitelabellingRegistered === 'whitelabelling') {
+          customMark$.next(mark);
         }
       },
 

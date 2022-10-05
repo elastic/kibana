@@ -71,6 +71,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   customLogo$: Observable<string | undefined>;
+  customMark$: Observable<string | undefined>;
 }
 
 export function Header({
@@ -85,6 +86,7 @@ export function Header({
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
   const customLogo = useObservable(observables.customLogo$, undefined);
+  const customMark = useObservable(observables.customMark$, undefined);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
@@ -126,6 +128,7 @@ export function Header({
                     navigateToApp={application.navigateToApp}
                     loadingCount$={observables.loadingCount$}
                     customLogo={customLogo}
+                    customMark={customMark}
                   />,
                 ],
                 borders: 'none',
