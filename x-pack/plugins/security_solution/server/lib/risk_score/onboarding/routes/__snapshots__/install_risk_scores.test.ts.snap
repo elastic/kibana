@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`installRiskScoreModule - host Create Index: ml_host_risk_score_customSpace 1`] = `
+exports[`installRiskScoresRoute - host Create Index: ml_host_risk_score_latest_mockSpaceId 1`] = `
 Object {
-  "index": "ml_host_risk_score_customSpace",
+  "index": "ml_host_risk_score_latest_default",
   "mappings": Object {
     "properties": Object {
       "@timestamp": Object {
@@ -54,9 +54,9 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - host Create Index: ml_host_risk_score_latest_customSpace 1`] = `
+exports[`installRiskScoresRoute - host Create Index: ml_host_risk_score_mockSpaceId 1`] = `
 Object {
-  "index": "ml_host_risk_score_latest_customSpace",
+  "index": "ml_host_risk_score_default",
   "mappings": Object {
     "properties": Object {
       "@timestamp": Object {
@@ -108,9 +108,9 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - host Create IngestPipeline: ml_hostriskscore_ingest_pipeline_customSpace 1`] = `
+exports[`installRiskScoresRoute - host Create IngestPipeline: ml_hostriskscore_ingest_pipeline_mockSpaceId 1`] = `
 Object {
-  "name": "ml_hostriskscore_ingest_pipeline_customSpace",
+  "name": "ml_hostriskscore_ingest_pipeline_default",
   "processors": Array [
     Object {
       "set": Object {
@@ -130,7 +130,7 @@ Object {
     },
     Object {
       "script": Object {
-        "id": "ml_hostriskscore_levels_script_customSpace",
+        "id": "ml_hostriskscore_levels_script_default",
         "params": Object {
           "risk_score": "host.risk.calculated_score_norm",
         },
@@ -140,10 +140,10 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - host Create Transform: ml_hostriskscore_latest_transform_customSpace 1`] = `
+exports[`installRiskScoresRoute - host Create and start Transform: ml_hostriskscore_latest_transform_mockSpaceId 1`] = `
 Object {
   "dest": Object {
-    "index": "ml_host_risk_score_latest_customSpace",
+    "index": "ml_host_risk_score_latest_default",
   },
   "frequency": "1h",
   "latest": Object {
@@ -154,7 +154,7 @@ Object {
   },
   "source": Object {
     "index": Array [
-      "ml_host_risk_score_customSpace",
+      "ml_host_risk_score_default",
     ],
   },
   "sync": Object {
@@ -166,11 +166,11 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - host Create Transform: ml_hostriskscore_pivot_transform_customSpace 1`] = `
+exports[`installRiskScoresRoute - host Create and start Transform: ml_hostriskscore_pivot_transform_mockSpaceId 1`] = `
 Object {
   "dest": Object {
-    "index": "ml_host_risk_score_customSpace",
-    "pipeline": "ml_hostriskscore_ingest_pipeline_customSpace",
+    "index": "ml_host_risk_score_default",
+    "pipeline": "ml_hostriskscore_ingest_pipeline_default",
   },
   "frequency": "1h",
   "pivot": Object {
@@ -184,10 +184,10 @@ Object {
         "scripted_metric": Object {
           "combine_script": "return state",
           "init_script": Object {
-            "id": "ml_hostriskscore_init_script_customSpace",
+            "id": "ml_hostriskscore_init_script_default",
           },
           "map_script": Object {
-            "id": "ml_hostriskscore_map_script_customSpace",
+            "id": "ml_hostriskscore_map_script_default",
           },
           "params": Object {
             "lookback_time": 72,
@@ -215,7 +215,7 @@ Object {
             "zeta_constant": 2.612,
           },
           "reduce_script": Object {
-            "id": "ml_hostriskscore_reduce_script_customSpace",
+            "id": "ml_hostriskscore_reduce_script_default",
           },
         },
       },
@@ -230,7 +230,7 @@ Object {
   },
   "source": Object {
     "index": Array [
-      ".alerts-security.alerts-customSpace",
+      ".alerts-security.alerts-default",
     ],
     "query": Object {
       "bool": Object {
@@ -255,9 +255,9 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - host Create script: ml_hostriskscore_init_script_customSpace 1`] = `
+exports[`installRiskScoresRoute - host Create script: ml_hostriskscore_init_script_mockSpaceId 1`] = `
 Object {
-  "id": "ml_hostriskscore_init_script_customSpace",
+  "id": "ml_hostriskscore_init_script_default",
   "script": Object {
     "lang": "painless",
     "source": "state.rule_risk_stats = new HashMap();
@@ -268,9 +268,9 @@ state.tactic_ids = new HashSet();",
 }
 `;
 
-exports[`installRiskScoreModule - host Create script: ml_hostriskscore_levels_script_customSpace 1`] = `
+exports[`installRiskScoresRoute - host Create script: ml_hostriskscore_levels_script_mockSpaceId 1`] = `
 Object {
-  "id": "ml_hostriskscore_levels_script_customSpace",
+  "id": "ml_hostriskscore_levels_script_default",
   "script": Object {
     "lang": "painless",
     "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
@@ -293,9 +293,9 @@ else if (risk_score >= 90) {
 }
 `;
 
-exports[`installRiskScoreModule - host Create script: ml_hostriskscore_map_script_customSpace 1`] = `
+exports[`installRiskScoresRoute - host Create script: ml_hostriskscore_map_script_mockSpaceId 1`] = `
 Object {
-  "id": "ml_hostriskscore_map_script_customSpace",
+  "id": "ml_hostriskscore_map_script_default",
   "script": Object {
     "lang": "painless",
     "source": "// Get the host variant
@@ -324,9 +324,9 @@ state.rule_risk_stats.put(rule_name, stats);",
 }
 `;
 
-exports[`installRiskScoreModule - host Create script: ml_hostriskscore_reduce_script_customSpace 1`] = `
+exports[`installRiskScoresRoute - host Create script: ml_hostriskscore_reduce_script_mockSpaceId 1`] = `
 Object {
-  "id": "ml_hostriskscore_reduce_script_customSpace",
+  "id": "ml_hostriskscore_reduce_script_default",
   "script": Object {
     "lang": "painless",
     "source": "// Consolidating time decayed risks and tactics from across all shards
@@ -407,16 +407,9 @@ return [\\"calculated_score_norm\\": final_risk, \\"rule_risks\\": rule_stats, \
 }
 `;
 
-exports[`installRiskScoreModule - host Start Transforms 1`] = `
-Array [
-  "ml_hostriskscore_pivot_transform_customSpace",
-  "ml_hostriskscore_latest_transform_customSpace",
-]
-`;
-
-exports[`installRiskScoreModule - user Create Index: ml_user_risk_score_customSpace 1`] = `
+exports[`installRiskScoresRoute - user Create Index: ml_user_risk_score_latest_mockSpaceId 1`] = `
 Object {
-  "index": "ml_user_risk_score_customSpace",
+  "index": "ml_user_risk_score_latest_default",
   "mappings": Object {
     "properties": Object {
       "@timestamp": Object {
@@ -468,9 +461,9 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - user Create Index: ml_user_risk_score_latest_customSpace 1`] = `
+exports[`installRiskScoresRoute - user Create Index: ml_user_risk_score_mockSpaceId 1`] = `
 Object {
-  "index": "ml_user_risk_score_latest_customSpace",
+  "index": "ml_user_risk_score_default",
   "mappings": Object {
     "properties": Object {
       "@timestamp": Object {
@@ -522,9 +515,9 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - user Create IngestPipeline: ml_userriskscore_ingest_pipeline_customSpace 1`] = `
+exports[`installRiskScoresRoute - user Create IngestPipeline: ml_userriskscore_ingest_pipeline_mockSpaceId 1`] = `
 Object {
-  "name": "ml_userriskscore_ingest_pipeline_customSpace",
+  "name": "ml_userriskscore_ingest_pipeline_default",
   "processors": Array [
     Object {
       "set": Object {
@@ -544,7 +537,7 @@ Object {
     },
     Object {
       "script": Object {
-        "id": "ml_userriskscore_levels_script_customSpace",
+        "id": "ml_userriskscore_levels_script_default",
         "params": Object {
           "risk_score": "user.risk.calculated_score_norm",
         },
@@ -554,10 +547,10 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - user Create Transform: ml_userriskscore_latest_transform_customSpace 1`] = `
+exports[`installRiskScoresRoute - user Create Transform: ml_userriskscore_latest_transform_mockSpaceId 1`] = `
 Object {
   "dest": Object {
-    "index": "ml_user_risk_score_latest_customSpace",
+    "index": "ml_user_risk_score_latest_default",
   },
   "frequency": "1h",
   "latest": Object {
@@ -568,7 +561,7 @@ Object {
   },
   "source": Object {
     "index": Array [
-      "ml_user_risk_score_customSpace",
+      "ml_user_risk_score_default",
     ],
   },
   "sync": Object {
@@ -580,11 +573,11 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - user Create Transform: ml_userriskscore_pivot_transform_customSpace 1`] = `
+exports[`installRiskScoresRoute - user Create Transform: ml_userriskscore_pivot_transform_mockSpaceId 1`] = `
 Object {
   "dest": Object {
-    "index": "ml_user_risk_score_customSpace",
-    "pipeline": "ml_userriskscore_ingest_pipeline_customSpace",
+    "index": "ml_user_risk_score_default",
+    "pipeline": "ml_userriskscore_ingest_pipeline_default",
   },
   "frequency": "1h",
   "pivot": Object {
@@ -599,7 +592,7 @@ Object {
           "combine_script": "return state",
           "init_script": "state.rule_risk_stats = new HashMap();",
           "map_script": Object {
-            "id": "ml_userriskscore_map_script_customSpace",
+            "id": "ml_userriskscore_map_script_default",
           },
           "params": Object {
             "max_risk": 100,
@@ -607,7 +600,7 @@ Object {
             "zeta_constant": 2.612,
           },
           "reduce_script": Object {
-            "id": "ml_userriskscore_reduce_script_customSpace",
+            "id": "ml_userriskscore_reduce_script_default",
           },
         },
       },
@@ -622,7 +615,7 @@ Object {
   },
   "source": Object {
     "index": Array [
-      ".alerts-security.alerts-customSpace",
+      ".alerts-security.alerts-default",
     ],
     "query": Object {
       "bool": Object {
@@ -652,9 +645,9 @@ Object {
 }
 `;
 
-exports[`installRiskScoreModule - user Create script: ml_userriskscore_levels_script_customSpace 1`] = `
+exports[`installRiskScoresRoute - user Create script: ml_userriskscore_levels_script_mockSpaceId 1`] = `
 Object {
-  "id": "ml_userriskscore_levels_script_customSpace",
+  "id": "ml_userriskscore_levels_script_default",
   "script": Object {
     "lang": "painless",
     "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
@@ -677,9 +670,9 @@ else if (risk_score >= 90) {
 }
 `;
 
-exports[`installRiskScoreModule - user Create script: ml_userriskscore_map_script_customSpace 1`] = `
+exports[`installRiskScoresRoute - user Create script: ml_userriskscore_map_script_mockSpaceId 1`] = `
 Object {
-  "id": "ml_userriskscore_map_script_customSpace",
+  "id": "ml_userriskscore_map_script_default",
   "script": Object {
     "lang": "painless",
     "source": "// Get running sum of risk score per rule name per shard\\\\\\\\
@@ -691,9 +684,9 @@ state.rule_risk_stats.put(rule_name, stats);",
 }
 `;
 
-exports[`installRiskScoreModule - user Create script: ml_userriskscore_reduce_script_customSpace 1`] = `
+exports[`installRiskScoresRoute - user Create script: ml_userriskscore_reduce_script_mockSpaceId 1`] = `
 Object {
-  "id": "ml_userriskscore_reduce_script_customSpace",
+  "id": "ml_userriskscore_reduce_script_default",
   "script": Object {
     "lang": "painless",
     "source": "// Consolidating time decayed risks from across all shards
@@ -740,11 +733,4 @@ for (key in total_risk_stats.keySet()) {
 return [\\"calculated_score_norm\\": total_norm_risk, \\"rule_risks\\": rule_stats];",
   },
 }
-`;
-
-exports[`installRiskScoreModule - user Start Transforms 1`] = `
-Array [
-  "ml_userriskscore_pivot_transform_customSpace",
-  "ml_userriskscore_latest_transform_customSpace",
-]
 `;
