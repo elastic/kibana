@@ -20,6 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import { getTourAnchor } from '../guided_onboarding/tour_config';
 import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
@@ -47,6 +48,7 @@ import { useRiskScoreData } from './use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { TimelineId } from '../../../../common/types/timeline';
 
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
@@ -396,15 +398,20 @@ const EventDetailsComponent: React.FC<Props> = ({
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
     [tabs, selectedTabId]
   );
-
+  const anchorTarget = useMemo(
+    () => (timelineId === TimelineId.detectionsPage ? getTourAnchor(3) : ''),
+    [timelineId]
+  );
   return (
-    <StyledEuiTabbedContent
-      data-test-subj="eventDetails"
-      tabs={tabs}
-      selectedTab={selectedTab}
-      onTabClick={handleTabClick}
-      key="event-summary-tabs"
-    />
+    <span data-test-subj={anchorTarget}>
+      <StyledEuiTabbedContent
+        data-test-subj="eventDetails"
+        tabs={tabs}
+        selectedTab={selectedTab}
+        onTabClick={handleTabClick}
+        key="event-summary-tabs"
+      />
+    </span>
   );
 };
 EventDetailsComponent.displayName = 'EventDetailsComponent';

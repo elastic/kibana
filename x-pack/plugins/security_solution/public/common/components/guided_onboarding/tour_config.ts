@@ -10,64 +10,78 @@ import { i18n } from '@kbn/i18n';
 import alertsGif from '../../images/onboarding_tour_step_alerts.gif';
 import casesGif from '../../images/onboarding_tour_step_cases.gif';
 
-export type StepConfig = Pick<EuiTourStepProps, 'step' | 'content' | 'anchorPosition' | 'title'> & {
+export type StepConfig = Pick<
+  EuiTourStepProps,
+  'step' | 'content' | 'anchorPosition' | 'title' | 'initialFocus'
+> & {
   anchor: string;
   dataTestSubj: string;
+  hideNextButton?: boolean;
   imageConfig?: {
     altText: string;
     src: string;
   };
+  primaryTourStep: { guideId: string; stepId: string };
 };
 
 type TourConfig = StepConfig[];
 
+export const getTourAnchor = (step: number) => `tourStepAnchor-alerts-${step}`;
+
 export const tourConfig: TourConfig = [
   {
     step: 1,
-    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.overviewStep.tourTitle', {
-      defaultMessage: 'Welcome to Elastic Security',
+    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourTitle', {
+      defaultMessage: 'Test alert for practice',
     }),
     content: i18n.translate(
-      'xpack.securitySolution.guided_onboarding.tour.overviewStep.tourContent',
+      'xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourContent',
       {
         defaultMessage:
-          'Take a quick tour to explore a unified workflow for investigating suspicious activity.',
+          'To help you practice triaging alerts, we enabled a rule to create your first alert.',
       }
     ),
-    anchor: `[id^="SolutionNav"]`,
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'welcomeStep',
+    anchor: `[data-test-subj="${getTourAnchor(1)}"]`,
+    anchorPosition: 'downCenter',
+    dataTestSubj: '8.6-tourStep-alerts-1',
+    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
   },
   {
     step: 2,
-    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.manageStep.tourTitle', {
-      defaultMessage: 'Protect your ecosystem',
+    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.openFlyout.tourTitle', {
+      defaultMessage: 'Open the flyout',
     }),
     content: i18n.translate(
-      'xpack.securitySolution.guided_onboarding.tour.manageStep.tourContent',
+      'xpack.securitySolution.guided_onboarding.tour.openFlyout.tourContent',
       {
         defaultMessage:
-          'Decide what matters to you and your environment and create rules to detect and prevent malicious activity. ',
+          'We show minimal information in the table. You can see more details in the flyout. Click the icon to open the flyout.',
       }
     ),
-    anchor: `[data-test-subj="groupedNavItemLink-administration"]`,
+    anchor: `[data-test-subj="${getTourAnchor(2)}"]`,
     anchorPosition: 'rightUp',
-    dataTestSubj: 'manageStep',
+    initialFocus: `[data-test-subj="8.6-tourStepAnchor-alerts-2"]`,
+    dataTestSubj: '8.6-tourStep-alerts-2',
+    hideNextButton: true,
+    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
   },
   {
     step: 3,
-    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.alertsStep.tourTitle', {
-      defaultMessage: 'Get notified when something changes',
-    }),
-    content: i18n.translate(
-      'xpack.securitySolution.guided_onboarding.tour.alertsStep.tourContent',
+    title: i18n.translate(
+      'xpack.securitySolution.guided_onboarding.tour.flyoutOverview.tourTitle',
       {
-        defaultMessage:
-          "Know when a rule's conditions are met, so you can start your investigation right away. Set up notifications with third-party platforms like Slack, PagerDuty, and ServiceNow.",
+        defaultMessage: 'Flyout overview',
       }
     ),
-    anchor: `[data-test-subj="groupedNavItemLink-alerts"]`,
-    anchorPosition: 'rightUp',
+    content: i18n.translate(
+      'xpack.securitySolution.guided_onboarding.tour.flyoutOverview.tourContent',
+      {
+        defaultMessage:
+          'This alert was created by a rule we automatically enabled in the previous step so that we can show you how to triage alerts.',
+      }
+    ),
+    anchor: `[data-test-subj="${getTourAnchor(3)}"]`,
+    anchorPosition: 'leftUp',
     imageConfig: {
       src: alertsGif,
       altText: i18n.translate(
@@ -78,6 +92,7 @@ export const tourConfig: TourConfig = [
       ),
     },
     dataTestSubj: 'alertsStep',
+    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
   },
   {
     step: 4,
@@ -88,7 +103,7 @@ export const tourConfig: TourConfig = [
       defaultMessage:
         'Collect evidence, add more collaborators, and even push case details to third-party case management systems.',
     }),
-    anchor: `[data-test-subj="groupedNavItemLink-cases"]`,
+    anchor: `[data-test-subj="${getTourAnchor(4)}"]`,
     anchorPosition: 'rightUp',
     imageConfig: {
       src: casesGif,
@@ -100,6 +115,7 @@ export const tourConfig: TourConfig = [
       ),
     },
     dataTestSubj: 'casesStep',
+    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
   },
   {
     step: 5,
@@ -109,8 +125,9 @@ export const tourConfig: TourConfig = [
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.dataStep.tourContent', {
       defaultMessage: `Collect data from your endpoints using the Elastic Agent and a variety of third-party integrations.`,
     }),
-    anchor: `[data-test-subj="add-data"]`,
+    anchor: `[data-test-subj="${getTourAnchor(5)}"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'dataStep',
+    primaryTourStep: { guideId: 'security', stepId: 'alerts' },
   },
 ];

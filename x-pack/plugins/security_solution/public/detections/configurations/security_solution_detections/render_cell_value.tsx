@@ -7,7 +7,7 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { TourWrapper } from '../../../common/components/guided_onboarding/tour_wrapper';
+import { getTourAnchor } from '../../../common/components/guided_onboarding/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { TimelineId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
@@ -43,18 +43,18 @@ export const RenderCellValue: React.FC<
   timelineId,
   truncate,
 }) => {
-  const Wrapper = useMemo(
+  const anchorTarget = useMemo(
     () =>
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
       timelineId === TimelineId.detectionsPage &&
       rowIndex === 0
-        ? TourWrapper
-        : React.Fragment,
+        ? getTourAnchor(1)
+        : '',
     [columnId, rowIndex, timelineId]
   );
 
   return (
-    <Wrapper>
+    <span data-test-subj={anchorTarget}>
       <DefaultCellRenderer
         browserFields={browserFields}
         columnId={columnId}
@@ -75,7 +75,7 @@ export const RenderCellValue: React.FC<
         timelineId={timelineId}
         truncate={truncate}
       />
-    </Wrapper>
+    </span>
   );
 };
 

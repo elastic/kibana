@@ -6,7 +6,7 @@
  */
 
 import type { ReactChild } from 'react';
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
 import type { EuiTourStepProps } from '@elastic/eui';
 import {
@@ -22,8 +22,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { StepConfig } from './tour_config';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
+import { useKibana } from '../../lib/kibana';
 import { tourConfig } from './tour_config';
+import type { StepConfig } from './tour_config';
 
 export const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
 export const SECURITY_TOUR_STEP_KEY = 'guidedOnboarding.security.tourStep';
@@ -44,16 +47,19 @@ const saveTourStepToLocalStorage = (step: number): void => {
 
 const minWidth: EuiTourStepProps['minWidth'] = 360;
 const maxWidth: EuiTourStepProps['maxWidth'] = 360;
-const offset: EuiTourStepProps['offset'] = 20;
+const offset: EuiTourStepProps['offset'] = 2;
 const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = true;
 
-const getSteps = (tourControls: {
+const getSteps = ({
+  activeStep,
+  incrementStep,
+  resetTour,
+}: {
   activeStep: number;
   incrementStep: () => void;
   resetTour: () => void;
 }) => {
-  const { activeStep, incrementStep, resetTour } = tourControls;
-  const footerAction = (
+  const footerAction = (hideNextButton: boolean) => (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiButtonEmpty
@@ -68,19 +74,21 @@ const getSteps = (tourControls: {
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButton
-          size="s"
-          onClick={() => incrementStep()}
-          color="success"
-          data-test-subj="onboarding--securityTourNextStepButton"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
-            defaultMessage="Next"
-          />
-        </EuiButton>
-      </EuiFlexItem>
+      {!hideNextButton && (
+        <EuiFlexItem>
+          <EuiButton
+            size="s"
+            onClick={() => incrementStep()}
+            color="success"
+            data-test-subj="onboarding--securityTourNextStepButton"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
+              defaultMessage="Next"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
   const lastStepFooter = (
@@ -96,8 +104,11 @@ const getSteps = (tourControls: {
       />
     </EuiButtonEmpty>
   );
-  return tourConfig.map((stepConfig: StepConfig) => {
-    const { content, imageConfig, dataTestSubj, ...rest } = stepConfig;
+  return tourConfig.map((stepConfig: StepConfig, i: number) => {
+    const { content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = stepConfig;
+    if (stepConfig.step === activeStep) {
+      console.log('isStepOpen', stepConfig);
+    }
     return (
       <EuiTourStep
         {...rest}
@@ -124,7 +135,9 @@ const getSteps = (tourControls: {
             )}
           </>
         }
-        footerAction={activeStep === tourConfig.length ? lastStepFooter : footerAction}
+        footerAction={
+          activeStep === tourConfig.length ? lastStepFooter : footerAction(hideNextButton)
+        }
       />
     );
   });
@@ -133,15 +146,31 @@ const getSteps = (tourControls: {
 export interface TourContextValue {
   isTourShown: boolean;
   endTour: () => void;
+  incrementStep: () => void;
 }
 
 const TourContext = createContext<TourContextValue>({
   isTourShown: false,
   endTour: () => {},
+  incrementStep: () => {},
 } as TourContextValue);
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
-  const [isTourActive, _setIsTourActive] = useState<boolean>(getIsTourActiveFromLocalStorage());
+  const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
+  const isPrimaryTourActive = useObservable(
+    guidedOnboardingApi?.isGuideStepActive$('security', 'alerts') ?? of(false),
+    false
+  );
+  const tourActiveGuideState = useObservable(
+    guidedOnboardingApi?.fetchActiveGuideState$() ?? of(undefined),
+    undefined
+  );
+  const isGuidedOnboardingActive = useObservable(
+    guidedOnboardingApi?.isGuidedOnboardingActiveForIntegration$('security') ?? of(undefined),
+    undefined
+  );
+  const [isTourActive, _setIsTourActive] = useState<boolean>(isPrimaryTourActive);
+  useEffect(() => _setIsTourActive(isPrimaryTourActive), [isPrimaryTourActive]);
   const setIsTourActive = useCallback((value: boolean) => {
     _setIsTourActive(value);
     saveIsTourActiveToLocalStorage(value);
@@ -169,7 +198,16 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
 
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
   const showTour = isTourActive && !isSmallScreen;
-  const context: TourContextValue = { isTourShown: showTour, endTour: resetTour };
+  const context: TourContextValue = { isTourShown: showTour, endTour: resetTour, incrementStep };
+  if (isPrimaryTourActive) {
+    console.log('Provider', {
+      tourActiveGuideState,
+      isGuidedOnboardingActive,
+      showTour,
+      isTourActive,
+      isPrimaryTourActive,
+    });
+  }
   return (
     <TourContext.Provider value={context}>
       <>
