@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type {
+  ResponderCapabilities,
+  ResponderCommands,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
@@ -16,10 +20,6 @@ import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
 import type { ImmutableArray } from '../../../../common/endpoint/types';
 import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
-import type {
-  ResponderCapabilities,
-  ResponderCommands,
-} from '../../../../common/endpoint/constants';
 import { getCommandAboutInfo } from './get_command_about_info';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {

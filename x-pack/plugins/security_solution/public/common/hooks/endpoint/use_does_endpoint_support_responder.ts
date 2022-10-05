@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
 import type { HostMetadata, MaybeImmutable } from '../../../../common/endpoint/types';
 
 export const useDoesEndpointSupportResponder = (

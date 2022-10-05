@@ -16,8 +16,8 @@ import { getEndpointResponseActionsConsoleCommands } from '../endpoint_response_
 import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
-import type { ResponderCapabilities } from '../../../../../common/endpoint/constants';
-import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/constants';
+import type { ResponderCapabilities } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using the kill-process action from response actions console', () => {
   let render: (
