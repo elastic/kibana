@@ -2,10 +2,10 @@
   "attributes": {
     "title": "logstash-*"
   },
-  "coreMigrationVersion": "8.4.0",
+  "coreMigrationVersion": "7.17.7",
   "id": "defaultspace-index-pattern-id",
   "migrationVersion": {
-    "index-pattern": "8.0.0"
+    "index-pattern": "7.11.0"
   },
   "originId": "cts_ip_1",
   "references": [],
@@ -39,10 +39,10 @@
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
     }
   },
-  "coreMigrationVersion": "8.4.0",
+  "coreMigrationVersion": "7.11.0",
   "id": "defaultspace-dashboard-id",
   "migrationVersion": {
-    "dashboard": "8.4.0"
+    "dashboard": "7.17.3"
   },
   "type": "dashboard",
   "updated_at": "2017-09-21T18:49:16.270Z",

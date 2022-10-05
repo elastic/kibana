@@ -2,10 +2,10 @@
   "attributes": {
     "title": "logstash-*"
   },
-  "coreMigrationVersion": "8.4.0",
+  "coreMigrationVersion": "7.17.7",
   "id": "space2-index-pattern-id",
   "migrationVersion": {
-    "index-pattern": "8.0.0"
+    "index-pattern": "7.11.0"
   },
   "references": [],
   "type": "index-pattern",
@@ -37,10 +37,10 @@
     },
     "version": 1
   },
-  "coreMigrationVersion": "8.4.0",
+  "coreMigrationVersion": "7.17.7",
   "id": "space2-dashboard-id",
   "migrationVersion": {
-    "dashboard": "8.4.0"
+    "dashboard": "7.17.3"
   },
   "type": "dashboard",
   "updated_at": "2017-09-21T18:49:16.270Z",
