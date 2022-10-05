@@ -105,10 +105,66 @@ export function elasticsearchSpan(spanName: string, statement?: string) {
     spanName,
     spanType,
     spanSubType,
+
+    ...(statement
+      ? {
+          'span.db.statement': statement,
+          'span.db.type': 'elasticsearch',
+          'span.action': 'query',
+        }
+      : {}),
+
     'service.target.type': spanSubType,
     'destination.address': 'qwerty.us-west2.gcp.elastic-cloud.com',
     'destination.port': 443,
-    'span.db.statement': statement,
+    'span.destination.service.name': spanSubType,
+    'span.destination.service.type': spanType,
+    'span.destination.service.resource': spanSubType,
+  };
+}
+
+export function sqliteSpan(spanName: string, statement?: string) {
+  const spanType = 'db';
+  const spanSubType = 'sqlite';
+
+  return {
+    spanName,
+    spanType,
+    spanSubType,
+
+    ...(statement
+      ? {
+          'span.db.statement': statement,
+          'span.db.type': 'sql',
+          'span.action': 'query',
+        }
+      : {}),
+
+    // destination
+    'service.target.type': spanSubType,
+    'destination.address': 'qwerty.us-west2.gcp.elastic-cloud.com',
+    'destination.port': 443,
+    'span.destination.service.name': spanSubType,
+    'span.destination.service.type': spanType,
+    'span.destination.service.resource': spanSubType,
+  };
+}
+
+export function redisSpan(spanName: string) {
+  const spanType = 'db';
+  const spanSubType = 'redis';
+
+  return {
+    spanName,
+    spanType,
+    spanSubType,
+
+    'span.action': 'query',
+
+    // destination
+    'service.target.type': spanSubType,
+    'destination.address': 'qwerty.us-west2.gcp.elastic-cloud.com',
+    'destination.port': 443,
     'span.destination.service.name': spanSubType,
     'span.destination.service.type': spanType,
     'span.destination.service.resource': spanSubType,
