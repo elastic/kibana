@@ -186,6 +186,101 @@ describe('rule_details', () => {
       expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalled();
     });
 
+    describe('actions', () => {
+      it('renders an rule action', () => {
+        const rule = mockRule({
+          actions: [
+            {
+              group: 'default',
+              id: uuid.v4(),
+              params: {},
+              actionTypeId: '.server-log',
+            },
+          ],
+        });
+
+        const actionTypes: ActionType[] = [
+          {
+            id: '.server-log',
+            name: 'Server log',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+          },
+        ];
+
+        const wrapper = mountWithIntl(
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={actionTypes}
+            {...mockRuleApis}
+          />
+        );
+
+        expect(
+          wrapper.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
+        ).toBeTruthy();
+      });
+
+      it('renders a counter for multiple rule action', () => {
+        const rule = mockRule({
+          actions: [
+            {
+              group: 'default',
+              id: uuid.v4(),
+              params: {},
+              actionTypeId: '.server-log',
+            },
+            {
+              group: 'default',
+              id: uuid.v4(),
+              params: {},
+              actionTypeId: '.email',
+            },
+          ],
+        });
+        const actionTypes: ActionType[] = [
+          {
+            id: '.server-log',
+            name: 'Server log',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+          },
+          {
+            id: '.email',
+            name: 'Send email',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+          },
+        ];
+
+        const details = mountWithIntl(
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={actionTypes}
+            {...mockRuleApis}
+          />
+        );
+
+        expect(
+          details.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
+        ).toBeTruthy();
+        expect(
+          details.find('[data-test-subj="actionConnectorName-0-Send email"]').exists
+        ).toBeTruthy();
+      });
+    });
+
     describe('links', () => {
       it('links to the app that created the rule', () => {
         const rule = mockRule();

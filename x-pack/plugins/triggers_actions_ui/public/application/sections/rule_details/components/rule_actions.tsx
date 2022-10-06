@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -27,13 +27,9 @@ export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProp
     ruleActions,
   });
 
-  const hasConnectors = useMemo(() => {
-    return actionConnectors && actionConnectors.length > 0;
-  }, [actionConnectors]);
+  const hasConnectors = actionConnectors && actionConnectors.length > 0;
 
-  const hasActions = useMemo(() => {
-    return ruleActions && ruleActions.length > 0;
-  }, [ruleActions]);
+  const hasActions = ruleActions && ruleActions.length > 0;
 
   if (!hasConnectors || !hasActions) {
     return (
@@ -56,7 +52,7 @@ export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProp
 
   const getActionName = (actionTypeId?: string) => {
     const actionConnector = actionConnectors.find((connector) => connector.id === actionTypeId);
-    return actionConnector && actionConnector.name;
+    return actionConnector?.name;
   };
 
   if (isLoadingActionConnectors) return <EuiLoadingSpinner size="s" />;
