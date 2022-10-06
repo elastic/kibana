@@ -8,9 +8,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { UserDetailsLink } from '../../../common/components/links';
-import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
+import { getEmptyTagValue, getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 
 import type { Columns, Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
 import { PaginatedTable } from '../../../common/components/paginated_table';
@@ -22,6 +23,13 @@ import * as i18n from './translations';
 import { usersActions, usersModel, usersSelectors } from '../../store';
 import type { User } from '../../../../common/search_strategy/security_solution/users/all';
 import type { SortUsersField } from '../../../../common/search_strategy/security_solution/users/common';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScore } from '../../../common/components/severity/common';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { VIEW_USERS_BY_SEVERITY } from '../user_risk_score_table/translations';
+import { SecurityPageName } from '../../../app/types';
+import { UsersTableType } from '../../store/model';
+import { useNavigateTo } from '../../../common/lib/kibana';
 
 const tableType = usersModel.UsersTableType.allUsers;
 
@@ -41,7 +49,8 @@ interface UsersTableProps {
 export type UsersTableColumns = [
   Columns<User['name']>,
   Columns<User['lastSeen']>,
-  Columns<User['domain']>
+  Columns<User['domain']>,
+  Columns<RiskSeverity>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -55,51 +64,89 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const getUsersColumns = (): UsersTableColumns => [
-  {
-    field: 'name',
-    name: i18n.USER_NAME,
-    truncateText: false,
-    sortable: true,
-    mobileOptions: { show: true },
-    render: (name) =>
-      name != null && name.length > 0
-        ? getRowItemDraggables({
-            rowItems: [name],
-            attrName: 'user.name',
-            idPrefix: `users-table-${name}-name`,
-            render: (item) => <UserDetailsLink userName={item} />,
-            isAggregatable: true,
-            fieldType: 'keyword',
-          })
-        : getOrEmptyTagFromValue(name),
-  },
-  {
-    field: 'lastSeen',
-    name: i18n.LAST_SEEN,
-    sortable: true,
-    truncateText: false,
-    mobileOptions: { show: true },
-    render: (lastSeen) => <FormattedRelativePreferenceDate value={lastSeen} />,
-  },
-  {
-    field: 'domain',
-    name: i18n.DOMAIN,
-    sortable: false,
-    truncateText: false,
-    mobileOptions: { show: true },
-    render: (domain) =>
-      domain != null && domain.length > 0
-        ? getRowItemDraggables({
-            rowItems: [domain],
-            attrName: 'user.domain',
-            idPrefix: `users-table-${domain}-domain`,
-            isAggregatable: true,
-            fieldType: 'keyword',
-          })
-        : getOrEmptyTagFromValue(domain),
-  },
-];
+const getUsersColumns = (
+  showRiskColumn: boolean,
+  dispatchSeverityUpdate: (s: RiskSeverity) => void
+): UsersTableColumns => {
+  const columns: UsersTableColumns = [
+    {
+      field: 'name',
+      name: i18n.USER_NAME,
+      truncateText: false,
+      sortable: true,
+      mobileOptions: { show: true },
+      render: (name) =>
+        name != null && name.length > 0
+          ? getRowItemDraggables({
+              rowItems: [name],
+              attrName: 'user.name',
+              idPrefix: `users-table-${name}-name`,
+              render: (item) => <UserDetailsLink userName={item} />,
+              isAggregatable: true,
+              fieldType: 'keyword',
+            })
+          : getOrEmptyTagFromValue(name),
+    },
+    {
+      field: 'lastSeen',
+      name: i18n.LAST_SEEN,
+      sortable: true,
+      truncateText: false,
+      mobileOptions: { show: true },
+      render: (lastSeen) => <FormattedRelativePreferenceDate value={lastSeen} />,
+    },
+    {
+      field: 'domain',
+      name: i18n.DOMAIN,
+      sortable: false,
+      truncateText: false,
+      mobileOptions: { show: true },
+      render: (domain) =>
+        domain != null && domain.length > 0
+          ? getRowItemDraggables({
+              rowItems: [domain],
+              attrName: 'user.domain',
+              idPrefix: `users-table-${domain}-domain`,
+              isAggregatable: true,
+              fieldType: 'keyword',
+            })
+          : getOrEmptyTagFromValue(domain),
+    },
+  ];
+
+  if (showRiskColumn) {
+    columns.push({
+      field: 'risk',
+      name: (
+        <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
+          <>
+            {i18n.USER_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      truncateText: false,
+      mobileOptions: { show: true },
+      sortable: false,
+      render: (riskScore: RiskSeverity) => {
+        if (riskScore != null) {
+          return (
+            <RiskScore
+              toolTipContent={
+                <EuiLink onClick={() => dispatchSeverityUpdate(riskScore)}>
+                  <EuiText size="xs">{VIEW_USERS_BY_SEVERITY(riskScore.toLowerCase())}</EuiText>
+                </EuiLink>
+              }
+              severity={riskScore}
+            />
+          );
+        }
+        return getEmptyTagValue();
+      },
+    });
+  }
+
+  return columns;
+};
 
 const UsersTableComponent: React.FC<UsersTableProps> = ({
   users,
@@ -116,6 +163,8 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const dispatch = useDispatch();
   const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
   const { activePage, limit } = useDeepEqualSelector((state) => getUsersSelector(state));
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const { navigateTo } = useNavigateTo();
 
   const updateLimitPagination = useCallback(
     (newLimit) => {
@@ -159,7 +208,26 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
     },
     [dispatch, sort]
   );
-  const columns = useMemo(() => getUsersColumns(), []);
+
+  const dispatchSeverityUpdate = useCallback(
+    (s: RiskSeverity) => {
+      dispatch(
+        usersActions.updateUserRiskScoreSeverityFilter({
+          severitySelection: [s],
+        })
+      );
+      navigateTo({
+        deepLinkId: SecurityPageName.users,
+        path: UsersTableType.risk,
+      });
+    },
+    [dispatch, navigateTo]
+  );
+
+  const columns = useMemo(
+    () => getUsersColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate),
+    [isPlatinumOrTrialLicense, dispatchSeverityUpdate]
+  );
 
   return (
     <PaginatedTable
