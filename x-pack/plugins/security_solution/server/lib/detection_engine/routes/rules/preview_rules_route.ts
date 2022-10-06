@@ -154,7 +154,6 @@ export const previewRulesRoute = async (
           ...securityRuleTypeOptions,
           ruleDataClient: previewRuleDataClient,
           ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
-          isPreview: true,
         });
 
         const runExecutors = async <
@@ -252,6 +251,7 @@ export const previewRulesRoute = async (
               state: statePreview,
               tags: [],
               updatedBy: rule.updatedBy,
+              isPreview: true,
             })) as TState;
 
             const errors = loggedStatusChanges

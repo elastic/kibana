@@ -33,7 +33,7 @@ export const wrapHitsFactory =
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
     indicesToQuery: string[];
-    alertTimestampOverride?: Date;
+    alertTimestampOverride: Date | undefined;
   }) =>
   (
     events: Array<estypes.SearchHit<SignalSource>>,

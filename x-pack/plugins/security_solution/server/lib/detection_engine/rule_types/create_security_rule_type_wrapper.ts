@@ -42,7 +42,7 @@ import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_ma
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version, isPreview }) =>
+  ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -68,6 +68,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             state,
             updatedBy: updatedByUser,
             rule,
+            isPreview,
           } = options;
           let runState = state;
           let inputIndex: string[] = [];

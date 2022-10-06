@@ -44,7 +44,7 @@ export const buildAlertGroupFromSequence = (
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
-  alertTimestampOverride?: Date
+  alertTimestampOverride: Date | undefined
 ): Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>> => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
@@ -126,7 +126,7 @@ export const buildAlertRoot = (
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
-  alertTimestampOverride?: Date
+  alertTimestampOverride: Date | undefined
 ): EqlShellFieldsLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({

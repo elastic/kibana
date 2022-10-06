@@ -105,6 +105,8 @@ export const createNewTermsAlertType = (
         params,
         spaceId,
         state,
+        startedAt,
+        isPreview,
       } = execOptions;
 
       // Validate the history window size compared to `from` at runtime as well as in the `validate`
@@ -276,12 +278,14 @@ export const createNewTermsAlertType = (
             newTerms: [bucket.key],
           }));
 
+          const alertTimestampOverride = isPreview ? startedAt : undefined;
           const wrappedAlerts = wrapNewTermsAlerts({
             eventsAndTerms,
             spaceId,
             completeRule,
             mergeStrategy,
             indicesToQuery: inputIndex,
+            alertTimestampOverride,
           });
 
           const bulkCreateResult = await bulkCreate(

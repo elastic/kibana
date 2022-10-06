@@ -139,7 +139,7 @@ export const buildAlert = (
   spaceId: string | null | undefined,
   reason: string,
   indicesToQuery: string[],
-  alertTimestampOverride?: Date,
+  alertTimestampOverride: Date | undefined,
   overrides?: {
     nameOverride: string;
     severityOverride: string;

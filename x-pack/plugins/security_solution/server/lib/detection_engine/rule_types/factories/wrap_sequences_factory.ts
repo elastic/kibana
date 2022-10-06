@@ -32,7 +32,7 @@ export const wrapSequencesFactory =
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
     indicesToQuery: string[];
-    alertTimestampOverride?: Date;
+    alertTimestampOverride: Date | undefined;
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
