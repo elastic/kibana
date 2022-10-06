@@ -26,8 +26,22 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
     bool: {
       filter: [
         {
-          exists: {
-            field: 'process.entry_leader.entity_id', // to exclude any records which have no entry_leader.entity_id
+          bool: {
+            // show sessions table results by filtering events where event.action is fork, exec, or end
+            should: [
+              { match_phrase: { 'event.action': 'exec' } },
+              { match_phrase: { 'event.action': 'fork' } },
+              { match_phrase: { 'event.action': 'end' } },
+            ],
+          },
+        },
+        {
+          bool: {
+            filter: {
+              exists: {
+                field: 'process.entry_leader.entity_id', // to exclude any records which have no entry_leader.entity_id
+              },
+            },
           },
         },
       ],
