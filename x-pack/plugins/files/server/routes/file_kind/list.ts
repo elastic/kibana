@@ -18,7 +18,7 @@ const rt = {
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, { files: FileJSON[] }>;
+export type Endpoint<M = unknown> = CreateRouteDefinition<typeof rt, { files: Array<FileJSON<M>> }>;
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const {

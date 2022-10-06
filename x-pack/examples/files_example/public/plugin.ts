@@ -6,7 +6,7 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind, MyImageMetadata } from '../common';
 import { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
 
 export class FilesExamplePlugin
@@ -28,8 +28,8 @@ export class FilesExamplePlugin
           coreStart,
           {
             files: {
-              unscoped: deps.files.filesClientFactory.asUnscoped(),
-              example: deps.files.filesClientFactory.asScoped(exampleFileKind.id),
+              unscoped: deps.files.filesClientFactory.asUnscoped<MyImageMetadata>(),
+              example: deps.files.filesClientFactory.asScoped<MyImageMetadata>(exampleFileKind.id),
             },
           },
           params

@@ -21,7 +21,6 @@ export const useFilesContext = () => {
   }
   return ctx;
 };
-
 export const FilesContext: FunctionComponent = ({ children }) => {
   return (
     <FilesContextObject.Provider

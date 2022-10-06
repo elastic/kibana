@@ -11,9 +11,10 @@ import {
   setFileKindsRegistry,
   FileKindsRegistryImpl,
 } from '../common/file_kinds_registry';
-import type { FilesClientFactory } from './types';
+import type { FilesClient, FilesClientFactory } from './types';
 import { createFilesClient } from './files_client';
 import { FileKind } from '../common';
+import { ScopedFilesClient } from '.';
 
 /**
  * Public setup-phase contract
@@ -50,11 +51,11 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
 
   setup(core: CoreSetup): FilesSetup {
     this.filesClientFactory = {
-      asScoped(fileKind: string) {
-        return createFilesClient({ fileKind, http: core.http });
+      asScoped<M = unknown>(fileKind: string) {
+        return createFilesClient({ fileKind, http: core.http }) as ScopedFilesClient<M>;
       },
-      asUnscoped() {
-        return createFilesClient({ http: core.http });
+      asUnscoped<M>() {
+        return createFilesClient({ http: core.http }) as FilesClient<M>;
       },
     };
     return {

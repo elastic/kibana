@@ -8,7 +8,12 @@ import mime from 'mime';
 import type { ResponseHeaders } from '@kbn/core/server';
 import type { File } from '../../common/types';
 
-export function getDownloadHeadersForFile(file: File, fileName?: string): ResponseHeaders {
+interface Args {
+  file: File;
+  fileName?: string;
+}
+
+export function getDownloadHeadersForFile({ file, fileName }: Args): ResponseHeaders {
   return {
     'content-type':
       (fileName && mime.getType(fileName)) ?? file.data.mimeType ?? 'application/octet-stream',
