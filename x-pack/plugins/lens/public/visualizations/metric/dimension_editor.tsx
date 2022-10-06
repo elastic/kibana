@@ -271,7 +271,7 @@ function PrimaryMetricEditor(props: SubProps) {
 
   const supportingVisHelpText =
     !hasDefaultTimeField && !state.maxAccessor
-      ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
+      ? i18n.translate('xpack.lens.metric.supportingVis.needBoth', {
           defaultMessage:
             'Use a data view with a default time field to enable trendlines. Add a maximum dimension to enable the progress bar',
         })

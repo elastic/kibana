@@ -48,6 +48,7 @@ describe('metric toolbar', () => {
     maxCols: 5,
     color: 'static-color',
     palette,
+    showBar: true,
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',
     trendlineMetricAccessor: 'trendline-metric-col-id',
