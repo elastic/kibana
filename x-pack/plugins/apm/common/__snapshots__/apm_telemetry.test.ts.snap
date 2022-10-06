@@ -1075,6 +1075,9 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                       "properties": {
                         "kuery_fields": {
                           "type": "keyword"
+                        },
+                        "total": {
+                          "type": "long"
                         }
                       }
                     },

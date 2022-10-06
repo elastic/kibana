@@ -22,6 +22,7 @@ export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessi
     cancel: jest.fn(),
     extend: jest.fn(),
     delete: jest.fn(),
+    status: jest.fn(),
     getConfig: jest.fn(
       () =>
         ({
