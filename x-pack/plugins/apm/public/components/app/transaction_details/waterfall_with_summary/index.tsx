@@ -130,7 +130,10 @@ export function WaterfallWithSummary({
       <EuiSpacer size="s" />
 
       {isLoading || !entryTransaction ? (
-        <EuiLoadingContent lines={1} data-test-sub="loading-content" />
+        <>
+          <EuiSpacer size="s" />
+          <EuiLoadingContent lines={1} data-test-sub="loading-content" />
+        </>
       ) : (
         <TransactionSummary
           errorCount={waterfall.apiResponse.errorDocs.length}
