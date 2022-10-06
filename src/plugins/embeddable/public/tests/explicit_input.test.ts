@@ -7,6 +7,7 @@
  */
 
 import { skip } from 'rxjs/operators';
+import { waitFor } from '@testing-library/react';
 import { testPlugin } from './test_plugin';
 import {
   MockFilter,
@@ -69,43 +70,47 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
 });
 
 test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', (done) => {
-  const testPanel = createEmbeddablePanelMock({
-    getActions: uiActions.getTriggerCompatibleActions,
-    getEmbeddableFactory: start.getEmbeddableFactory,
-    getAllEmbeddableFactories: start.getEmbeddableFactories,
-    overlays: coreStart.overlays,
-    notifications: coreStart.notifications,
-    application: coreStart.application,
-  });
-  const container = new HelloWorldContainer(
-    { id: 'hello', panels: {} },
-    {
+  waitFor(async () => {
+    const testPanel = createEmbeddablePanelMock({
+      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      panelComponent: testPanel,
-    }
-  );
-
-  const embeddable = await container.addNewEmbeddable<any, any, any>(FILTERABLE_EMBEDDABLE, {});
-
-  if (isErrorEmbeddable(embeddable)) {
-    throw new Error('Error adding embeddable');
-  }
-
-  embeddable.updateInput({ filters: [] });
-
-  expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual([]);
-
-  const subscription = embeddable
-    .getInput$()
-    .pipe(skip(1))
-    .subscribe(() => {
-      if (embeddable.getInput().filters === undefined) {
-        subscription.unsubscribe();
-        done();
-      }
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+      application: coreStart.application,
     });
+    const container = new HelloWorldContainer(
+      { id: 'hello', panels: {} },
+      {
+        getEmbeddableFactory: start.getEmbeddableFactory,
+        panelComponent: testPanel,
+      }
+    );
 
-  embeddable.updateInput({ filters: undefined });
+    const embeddable = await container.addNewEmbeddable<any, any, any>(FILTERABLE_EMBEDDABLE, {});
+
+    if (isErrorEmbeddable(embeddable)) {
+      throw new Error('Error adding embeddable');
+    }
+
+    embeddable.updateInput({ filters: [] });
+
+    expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual(
+      []
+    );
+
+    const subscription = embeddable
+      .getInput$()
+      .pipe(skip(1))
+      .subscribe(() => {
+        if (embeddable.getInput().filters === undefined) {
+          subscription.unsubscribe();
+          done();
+        }
+      });
+
+    embeddable.updateInput({ filters: undefined });
+  });
 });
 
 // The goal is to make sure that if the container input changes after `onPanelAdded` is called

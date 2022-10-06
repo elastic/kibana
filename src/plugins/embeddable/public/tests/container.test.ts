@@ -8,6 +8,7 @@
 
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
+import { waitFor } from '@testing-library/react';
 import {
   isErrorEmbeddable,
   EmbeddableOutput,
@@ -128,7 +129,7 @@ describe('container initialization', () => {
     expect(embeddable.id).toBe('123');
   };
 
-  it('initializes embeddables', (done) => {
+  it('initializes embeddables', async () => {
     const { container } = await createHelloWorldContainerAndEmbeddable({
       id: 'hello',
       panels,
@@ -137,10 +138,9 @@ describe('container initialization', () => {
     expectEmbeddableLoaded(container, '123');
     expectEmbeddableLoaded(container, '456');
     expectEmbeddableLoaded(container, '789');
-    done();
   });
 
-  it('initializes embeddables once and only once with multiple input updates', (done) => {
+  it('initializes embeddables once and only once with multiple input updates', async () => {
     const { container, contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable({
       id: 'hello',
       panels,
@@ -148,55 +148,56 @@ describe('container initialization', () => {
     container.updateInput({ lastReloadRequestTime: 1 });
     container.updateInput({ lastReloadRequestTime: 2 });
     expect(contactCardCreateSpy).toHaveBeenCalledTimes(4);
-    done();
   });
 
-  it('initializes embeddables in order', (done) => {
-    const childIdInitializeOrder = ['456', '123', '789'];
-    const { contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable(
-      {
-        id: 'hello',
-        panels,
-      },
-      {},
-      { childIdInitializeOrder }
-    );
-
-    await new Promise((r) => setTimeout(r, 1));
-    for (const [index, orderedId] of childIdInitializeOrder.entries()) {
-      expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
-        index + 1,
-        expect.objectContaining({ id: orderedId }),
-        expect.anything() // parent passed into create method
+  it('initializes embeddables in order', async () => {
+    await waitFor(async () => {
+      const childIdInitializeOrder = ['456', '123', '789'];
+      const { contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable(
+        {
+          id: 'hello',
+          panels,
+        },
+        {},
+        { childIdInitializeOrder }
       );
-    }
-    done();
+
+      await new Promise((r) => setTimeout(r, 1));
+      for (const [index, orderedId] of childIdInitializeOrder.entries()) {
+        expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
+          index + 1,
+          expect.objectContaining({ id: orderedId }),
+          expect.anything() // parent passed into create method
+        );
+      }
+    });
   });
 
-  it('initializes embeddables in order with partial order arg', (done) => {
-    const childIdInitializeOrder = ['789', 'idontexist'];
-    const { contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable(
-      {
-        id: 'hello',
-        panels,
-      },
-      {},
-      { childIdInitializeOrder }
-    );
-    const expectedInitializeOrder = ['789', '123', '456'];
-
-    await new Promise((r) => setTimeout(r, 1));
-    for (const [index, orderedId] of expectedInitializeOrder.entries()) {
-      expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
-        index + 1,
-        expect.objectContaining({ id: orderedId }),
-        expect.anything() // parent passed into create method
+  it('initializes embeddables in order with partial order arg', async () => {
+    await waitFor(async () => {
+      const childIdInitializeOrder = ['789', 'idontexist'];
+      const { contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable(
+        {
+          id: 'hello',
+          panels,
+        },
+        {},
+        { childIdInitializeOrder }
       );
-    }
-    done();
+      const expectedInitializeOrder = ['789', '123', '456'];
+
+      await new Promise((r) => setTimeout(r, 1));
+      for (const [index, orderedId] of expectedInitializeOrder.entries()) {
+        expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
+          index + 1,
+          expect.objectContaining({ id: orderedId }),
+          expect.anything() // parent passed into create method
+        );
+      }
+    });
   });
 
-  it('initializes embeddables in order, awaiting each', (done) => {
+  it('initializes embeddables in order, awaiting each', async () => {
     const childIdInitializeOrder = ['456', '123', '789'];
     const { container, contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable(
       {
@@ -220,7 +221,6 @@ describe('container initialization', () => {
       );
       expect(untilEmbeddableLoadedMock).toHaveBeenCalledWith(orderedId);
     }
-    done();
   });
 });
 
@@ -245,58 +245,60 @@ test('Container.addNewEmbeddable', async () => {
 });
 
 test('Container.removeEmbeddable removes and cleans up', (done) => {
-  const { start, testPanel } = await createHelloWorldContainerAndEmbeddable();
+  waitFor(async () => {
+    const { start, testPanel } = await createHelloWorldContainerAndEmbeddable();
 
-  const container = new HelloWorldContainer(
-    {
-      id: 'hello',
-      panels: {
-        '123': {
-          explicitInput: { id: '123', firstName: 'Sam', lastName: 'Tarley' },
-          type: CONTACT_CARD_EMBEDDABLE,
+    const container = new HelloWorldContainer(
+      {
+        id: 'hello',
+        panels: {
+          '123': {
+            explicitInput: { id: '123', firstName: 'Sam', lastName: 'Tarley' },
+            type: CONTACT_CARD_EMBEDDABLE,
+          },
         },
       },
-    },
-    {
-      getEmbeddableFactory: start.getEmbeddableFactory,
-      panelComponent: testPanel,
-    }
-  );
-  const embeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Susy',
-    lastName: 'Q',
-  });
-
-  if (isErrorEmbeddable(embeddable)) {
-    expect(false).toBe(true);
-    return;
-  }
-
-  embeddable.updateInput({ lastName: 'Z' });
-
-  container
-    .getOutput$()
-    .pipe(skip(1))
-    .subscribe(() => {
-      const noFind = container.getChild<ContactCardEmbeddable>(embeddable.id);
-      expect(noFind).toBeUndefined();
-
-      expect(container.getInput().panels[embeddable.id]).toBeUndefined();
-      if (isErrorEmbeddable(embeddable)) {
-        expect(false).toBe(true);
-        done();
+      {
+        getEmbeddableFactory: start.getEmbeddableFactory,
+        panelComponent: testPanel,
       }
-
-      expect(() => embeddable.updateInput({ nameTitle: 'Sir' })).toThrowError();
-      expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
-      done();
+    );
+    const embeddable = await container.addNewEmbeddable<
+      ContactCardEmbeddableInput,
+      ContactCardEmbeddableOutput,
+      ContactCardEmbeddable
+    >(CONTACT_CARD_EMBEDDABLE, {
+      firstName: 'Susy',
+      lastName: 'Q',
     });
 
-  container.removeEmbeddable(embeddable.id);
+    if (isErrorEmbeddable(embeddable)) {
+      expect(false).toBe(true);
+      return;
+    }
+
+    embeddable.updateInput({ lastName: 'Z' });
+
+    container
+      .getOutput$()
+      .pipe(skip(1))
+      .subscribe(() => {
+        const noFind = container.getChild<ContactCardEmbeddable>(embeddable.id);
+        expect(noFind).toBeUndefined();
+
+        expect(container.getInput().panels[embeddable.id]).toBeUndefined();
+        if (isErrorEmbeddable(embeddable)) {
+          expect(false).toBe(true);
+          done();
+        }
+
+        expect(() => embeddable.updateInput({ nameTitle: 'Sir' })).toThrowError();
+        expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
+        done();
+      });
+
+    container.removeEmbeddable(embeddable.id);
+  });
 });
 
 test('Container.input$ is notified when child embeddable input is updated', async () => {
@@ -404,60 +406,61 @@ test('Container view mode change propagates to children', async () => {
 });
 
 test(`Container updates its state when a child's input is updated`, (done) => {
-  const { container, embeddable, start, coreStart, uiActions } =
-    await createHelloWorldContainerAndEmbeddable(
-      { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
-      {
-        id: '123',
-        firstName: 'Susy',
+  waitFor(async () => {
+    const { container, embeddable, start, coreStart, uiActions } =
+      await createHelloWorldContainerAndEmbeddable(
+        { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
+        {
+          id: '123',
+          firstName: 'Susy',
+        }
+      );
+
+    expect(isErrorEmbeddable(embeddable)).toBe(false);
+
+    const containerSubscription = Rx.merge(container.getInput$(), container.getOutput$()).subscribe(
+      () => {
+        const child = container.getChild<ContactCardEmbeddable>(embeddable.id);
+        if (
+          container.getOutput().embeddableLoaded[embeddable.id] &&
+          child.getInput().nameTitle === 'Dr.'
+        ) {
+          containerSubscription.unsubscribe();
+
+          // Make sure a brand new container built off the output of container also creates an embeddable
+          // with "Dr.", not the default the embeddable was first added with. Makes sure changed input
+          // is preserved with the container.
+          const testPanel = createEmbeddablePanelMock({
+            getActions: uiActions.getTriggerCompatibleActions,
+            getEmbeddableFactory: start.getEmbeddableFactory,
+            getAllEmbeddableFactories: start.getEmbeddableFactories,
+            overlays: coreStart.overlays,
+            notifications: coreStart.notifications,
+            application: coreStart.application,
+          });
+          const containerClone = new HelloWorldContainer(container.getInput(), {
+            getEmbeddableFactory: start.getEmbeddableFactory,
+            panelComponent: testPanel,
+          });
+          const cloneSubscription = Rx.merge(
+            containerClone.getOutput$(),
+            containerClone.getInput$()
+          ).subscribe(() => {
+            const childClone = containerClone.getChild<ContactCardEmbeddable>(embeddable.id);
+
+            if (
+              containerClone.getOutput().embeddableLoaded[embeddable.id] &&
+              childClone.getInput().nameTitle === 'Dr.'
+            ) {
+              cloneSubscription.unsubscribe();
+              done();
+            }
+          });
+        }
       }
     );
-
-  expect(isErrorEmbeddable(embeddable)).toBe(false);
-
-  const containerSubscription = Rx.merge(container.getInput$(), container.getOutput$()).subscribe(
-    () => {
-      const child = container.getChild<ContactCardEmbeddable>(embeddable.id);
-      if (
-        container.getOutput().embeddableLoaded[embeddable.id] &&
-        child.getInput().nameTitle === 'Dr.'
-      ) {
-        containerSubscription.unsubscribe();
-
-        // Make sure a brand new container built off the output of container also creates an embeddable
-        // with "Dr.", not the default the embeddable was first added with. Makes sure changed input
-        // is preserved with the container.
-        const testPanel = createEmbeddablePanelMock({
-          getActions: uiActions.getTriggerCompatibleActions,
-          getEmbeddableFactory: start.getEmbeddableFactory,
-          getAllEmbeddableFactories: start.getEmbeddableFactories,
-          overlays: coreStart.overlays,
-          notifications: coreStart.notifications,
-          application: coreStart.application,
-        });
-        const containerClone = new HelloWorldContainer(container.getInput(), {
-          getEmbeddableFactory: start.getEmbeddableFactory,
-          panelComponent: testPanel,
-        });
-        const cloneSubscription = Rx.merge(
-          containerClone.getOutput$(),
-          containerClone.getInput$()
-        ).subscribe(() => {
-          const childClone = containerClone.getChild<ContactCardEmbeddable>(embeddable.id);
-
-          if (
-            containerClone.getOutput().embeddableLoaded[embeddable.id] &&
-            childClone.getInput().nameTitle === 'Dr.'
-          ) {
-            cloneSubscription.unsubscribe();
-            done();
-          }
-        });
-      }
-    }
-  );
-
-  embeddable.updateInput({ nameTitle: 'Dr.' });
+    embeddable.updateInput({ nameTitle: 'Dr.' });
+  });
 });
 
 test(`Derived container state passed to children`, async () => {
@@ -488,62 +491,66 @@ test(`Derived container state passed to children`, async () => {
 });
 
 test(`Can subscribe to children embeddable updates`, (done) => {
-  const { embeddable } = await createHelloWorldContainerAndEmbeddable(
-    {
-      id: 'hello container',
-      panels: {},
-      viewMode: ViewMode.VIEW,
-    },
-    {
-      firstName: 'Susy',
-    }
-  );
+  waitFor(async () => {
+    const { embeddable } = await createHelloWorldContainerAndEmbeddable(
+      {
+        id: 'hello container',
+        panels: {},
+        viewMode: ViewMode.VIEW,
+      },
+      {
+        firstName: 'Susy',
+      }
+    );
 
-  expect(isErrorEmbeddable(embeddable)).toBe(false);
+    expect(isErrorEmbeddable(embeddable)).toBe(false);
 
-  const subscription = embeddable.getInput$().subscribe((input: ContactCardEmbeddableInput) => {
-    if (input.nameTitle === 'Dr.') {
-      subscription.unsubscribe();
-      done();
-    }
+    const subscription = embeddable.getInput$().subscribe((input: ContactCardEmbeddableInput) => {
+      if (input.nameTitle === 'Dr.') {
+        subscription.unsubscribe();
+        done();
+      }
+    });
+    embeddable.updateInput({ nameTitle: 'Dr.' });
   });
-  embeddable.updateInput({ nameTitle: 'Dr.' });
 });
 
 test('Test nested reactions', (done) => {
-  const { container, embeddable } = await createHelloWorldContainerAndEmbeddable(
-    { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
-    {
-      firstName: 'Susy',
-    }
-  );
+  waitFor(async () => {
+    const { container, embeddable } = await createHelloWorldContainerAndEmbeddable(
+      { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
+      {
+        firstName: 'Susy',
+      }
+    );
 
-  expect(isErrorEmbeddable(embeddable)).toBe(false);
+    expect(isErrorEmbeddable(embeddable)).toBe(false);
 
-  const containerSubscription = container.getInput$().subscribe((input: any) => {
-    const embeddableNameTitle = embeddable.getInput().nameTitle;
-    const viewMode = input.viewMode;
-    const nameTitleFromContainer = container.getInputForChild<ContactCardEmbeddableInput>(
-      embeddable.id
-    ).nameTitle;
-    if (
-      embeddableNameTitle === 'Dr.' &&
-      nameTitleFromContainer === 'Dr.' &&
-      viewMode === ViewMode.EDIT
-    ) {
-      containerSubscription.unsubscribe();
-      embeddableSubscription.unsubscribe();
-      done();
-    }
+    const containerSubscription = container.getInput$().subscribe((input: any) => {
+      const embeddableNameTitle = embeddable.getInput().nameTitle;
+      const viewMode = input.viewMode;
+      const nameTitleFromContainer = container.getInputForChild<ContactCardEmbeddableInput>(
+        embeddable.id
+      ).nameTitle;
+      if (
+        embeddableNameTitle === 'Dr.' &&
+        nameTitleFromContainer === 'Dr.' &&
+        viewMode === ViewMode.EDIT
+      ) {
+        containerSubscription.unsubscribe();
+        embeddableSubscription.unsubscribe();
+        done();
+      }
+    });
+
+    const embeddableSubscription = embeddable.getInput$().subscribe(() => {
+      if (embeddable.getInput().nameTitle === 'Dr.') {
+        container.updateInput({ viewMode: ViewMode.EDIT });
+      }
+    });
+
+    embeddable.updateInput({ nameTitle: 'Dr.' });
   });
-
-  const embeddableSubscription = embeddable.getInput$().subscribe(() => {
-    if (embeddable.getInput().nameTitle === 'Dr.') {
-      container.updateInput({ viewMode: ViewMode.EDIT });
-    }
-  });
-
-  embeddable.updateInput({ nameTitle: 'Dr.' });
 });
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
@@ -579,33 +586,37 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
 });
 
 test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', (done) => {
-  const { container } = await createHelloWorldContainerAndEmbeddable({ id: 'hello', panels: {} });
+  waitFor(async () => {
+    const { container } = await createHelloWorldContainerAndEmbeddable({ id: 'hello', panels: {} });
 
-  const embeddable = await container.addNewEmbeddable<
-    FilterableEmbeddableInput,
-    EmbeddableOutput,
-    FilterableEmbeddable
-  >(FILTERABLE_EMBEDDABLE, {});
+    const embeddable = await container.addNewEmbeddable<
+      FilterableEmbeddableInput,
+      EmbeddableOutput,
+      FilterableEmbeddable
+    >(FILTERABLE_EMBEDDABLE, {});
 
-  if (isErrorEmbeddable(embeddable)) {
-    throw new Error('Error adding embeddable');
-  }
+    if (isErrorEmbeddable(embeddable)) {
+      throw new Error('Error adding embeddable');
+    }
 
-  embeddable.updateInput({ filters: [] });
+    embeddable.updateInput({ filters: [] });
 
-  expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual([]);
+    expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual(
+      []
+    );
 
-  const subscription = embeddable
-    .getInput$()
-    .pipe(skip(1))
-    .subscribe(() => {
-      if (embeddable.getInput().filters === undefined) {
-        subscription.unsubscribe();
-        done();
-      }
-    });
+    const subscription = embeddable
+      .getInput$()
+      .pipe(skip(1))
+      .subscribe(() => {
+        if (embeddable.getInput().filters === undefined) {
+          subscription.unsubscribe();
+          done();
+        }
+      });
 
-  embeddable.updateInput({ filters: undefined });
+    embeddable.updateInput({ filters: undefined });
+  });
 });
 
 test('Panel removed from input state', async () => {
@@ -667,85 +678,89 @@ test('Panel added to input state', async () => {
 });
 
 test('Container changes made directly after adding a new embeddable are propagated', (done) => {
-  const coreSetup = coreMock.createSetup();
-  const coreStart = coreMock.createStart();
-  const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
+  waitFor(async () => {
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
 
-  const factory = new SlowContactCardEmbeddableFactory({
-    loadTickCount: 3,
-    execAction: uiActions.executeTriggerActions,
-  });
-  setup.registerEmbeddableFactory(factory.type, factory);
+    const factory = new SlowContactCardEmbeddableFactory({
+      loadTickCount: 3,
+      execAction: uiActions.executeTriggerActions,
+    });
+    setup.registerEmbeddableFactory(factory.type, factory);
 
-  const start = doStart();
+    const start = doStart();
 
-  const testPanel = createEmbeddablePanelMock({
-    getActions: uiActions.getTriggerCompatibleActions,
-    getEmbeddableFactory: start.getEmbeddableFactory,
-    getAllEmbeddableFactories: start.getEmbeddableFactories,
-    overlays: coreStart.overlays,
-    notifications: coreStart.notifications,
-    application: coreStart.application,
-  });
-  const container = new HelloWorldContainer(
-    {
-      id: 'hello',
-      panels: {},
-      viewMode: ViewMode.EDIT,
-    },
-    {
+    const testPanel = createEmbeddablePanelMock({
+      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      panelComponent: testPanel,
-    }
-  );
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+      application: coreStart.application,
+    });
+    const container = new HelloWorldContainer(
+      {
+        id: 'hello',
+        panels: {},
+        viewMode: ViewMode.EDIT,
+      },
+      {
+        getEmbeddableFactory: start.getEmbeddableFactory,
+        panelComponent: testPanel,
+      }
+    );
 
-  const subscription = Rx.merge(container.getOutput$(), container.getInput$())
-    .pipe(skip(2))
-    .subscribe(() => {
-      expect(Object.keys(container.getOutput().embeddableLoaded).length).toBe(1);
-      if (Object.keys(container.getOutput().embeddableLoaded).length > 0) {
-        const embeddableId = Object.keys(container.getOutput().embeddableLoaded)[0];
+    const subscription = Rx.merge(container.getOutput$(), container.getInput$())
+      .pipe(skip(2))
+      .subscribe(() => {
+        expect(Object.keys(container.getOutput().embeddableLoaded).length).toBe(1);
+        if (Object.keys(container.getOutput().embeddableLoaded).length > 0) {
+          const embeddableId = Object.keys(container.getOutput().embeddableLoaded)[0];
 
-        if (container.getOutput().embeddableLoaded[embeddableId] === true) {
-          const embeddable = container.getChild(embeddableId);
-          if (embeddable.getInput().viewMode === ViewMode.VIEW) {
-            subscription.unsubscribe();
-            done();
+          if (container.getOutput().embeddableLoaded[embeddableId] === true) {
+            const embeddable = container.getChild(embeddableId);
+            if (embeddable.getInput().viewMode === ViewMode.VIEW) {
+              subscription.unsubscribe();
+              done();
+            }
           }
         }
-      }
+      });
+
+    container.addNewEmbeddable<ContactCardEmbeddableInput>(CONTACT_CARD_EMBEDDABLE, {
+      firstName: 'A girl',
+      lastName: 'has no name',
     });
 
-  container.addNewEmbeddable<ContactCardEmbeddableInput>(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'A girl',
-    lastName: 'has no name',
+    container.updateInput({ viewMode: ViewMode.VIEW });
   });
-
-  container.updateInput({ viewMode: ViewMode.VIEW });
 });
 
 test('container stores ErrorEmbeddables when a factory for a child cannot be found (so the panel can be removed)', (done) => {
-  const { container } = await createHelloWorldContainerAndEmbeddable({
-    id: 'hello',
-    panels: {
-      '123': {
-        type: 'IDontExist',
-        explicitInput: { id: '123' },
+  waitFor(async () => {
+    const { container } = await createHelloWorldContainerAndEmbeddable({
+      id: 'hello',
+      panels: {
+        '123': {
+          type: 'IDontExist',
+          explicitInput: { id: '123' },
+        },
       },
-    },
-    viewMode: ViewMode.EDIT,
-  });
+      viewMode: ViewMode.EDIT,
+    });
 
-  container.getOutput$().subscribe(() => {
-    if (container.getOutput().embeddableLoaded['123']) {
-      const child = container.getChild('123');
-      expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
-      done();
-    }
+    container.getOutput$().subscribe(() => {
+      if (container.getOutput().embeddableLoaded['123']) {
+        const child = container.getChild('123');
+        expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
+        done();
+      }
+    });
   });
 });
 
-test('container stores ErrorEmbeddables when a saved object cannot be found', (done) => {
+test('container stores ErrorEmbeddables when a saved object cannot be found', async (done) => {
   const { container } = await createHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
@@ -767,28 +782,30 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', (d
 });
 
 test('ErrorEmbeddables get updated when parent does', (done) => {
-  const { container } = await createHelloWorldContainerAndEmbeddable({
-    id: 'hello',
-    panels: {
-      '123': {
-        type: 'vis',
-        explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
+  waitFor(async () => {
+    const { container } = await createHelloWorldContainerAndEmbeddable({
+      id: 'hello',
+      panels: {
+        '123': {
+          type: 'vis',
+          explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
+        },
       },
-    },
-    viewMode: ViewMode.EDIT,
-  });
+      viewMode: ViewMode.EDIT,
+    });
 
-  container.getOutput$().subscribe(() => {
-    if (container.getOutput().embeddableLoaded['123']) {
-      const embeddable = container.getChild('123');
+    container.getOutput$().subscribe(() => {
+      if (container.getOutput().embeddableLoaded['123']) {
+        const embeddable = container.getChild('123');
 
-      expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+        expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
 
-      container.updateInput({ viewMode: ViewMode.VIEW });
+        container.updateInput({ viewMode: ViewMode.VIEW });
 
-      expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
-      done();
-    }
+        expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
+        done();
+      }
+    });
   });
 });
 
@@ -831,7 +848,7 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
   expect((error as Error).message).toMatchInlineSnapshot(`"Panel not found"`);
 });
 
-test('untilEmbeddableLoaded() resolves if child is loaded in the container', (done) => {
+test('untilEmbeddableLoaded() resolves if child is loaded in the container', async () => {
   const { setup, doStart, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -866,7 +883,6 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', (do
   const child = await container.untilEmbeddableLoaded('123');
   expect(child).toBeDefined();
   expect(child.type).toBe(HELLO_WORLD_EMBEDDABLE);
-  done();
 });
 
 test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', (done) => {
