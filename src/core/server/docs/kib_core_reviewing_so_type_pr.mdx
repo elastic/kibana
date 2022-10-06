@@ -60,14 +60,20 @@ Here, we need to check:
 
 - Review the migration function
     - owners are supposed to do it, but an additional review never hurts
+    - make sure they are typing their migration function using `SavedObjectMigrationFn` and supplying arguments for the generics 
+      e.g. `SavedObjectMigrationFn<My810Type, My816Type>`.
 - Make sure that the migration function is properly tested
   - by unit tests
   - and, ideally, by integration tests using 'real' data
 - If the migration function is moving/creating/deleting/mutating fields, make sure that the type's mappings and/or schemas were updated accordingly
+- Please refer to [the migration section of our testing docs](https://github.com/elastic/kibana/blob/main/dev_docs/tutorials/testing_plugins.mdx#L796) for more details
 
 ### A mapping change was performed
 
-- Make sure a migration function was added to reflect the changes.
+- Make sure a migration function was added to reflect the changes:
+    - If a field was removed, ensure the migration function always removes the field from all documents
+    - If a field type was changed from e.g. `text` to `long`, make sure the migration function guarantees that all documents have compatible fields
+    - If a text type was changed to a keyword, make sure the text won't exceed Elasticsearch's 32k keyword length limit by e.g. specifying: `ignore_above: 256`
 - If the migration function is present, refer to previous section.
 - If the type is registering validation schemas, make sure a new schema was added reflecting the changes to the model.
 
