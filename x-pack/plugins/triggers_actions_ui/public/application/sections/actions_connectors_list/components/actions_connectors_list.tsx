@@ -53,6 +53,8 @@ import {
 } from '../../../../common/connectors_selection';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { getCurrentDocTitle } from '../../../lib/doc_title';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -84,6 +86,8 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     notifications: { toasts },
     application: { capabilities },
     actionTypeRegistry,
+    setBreadcrumbs,
+    chrome,
   } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canExecute = hasExecuteActionsCapability(capabilities);
@@ -107,6 +111,12 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
+
+  // Set breadcrumb and page title
+  useEffect(() => {
+    setBreadcrumbs([getAlertingSectionBreadcrumb('connectors')]);
+    chrome.docTitle.change(getCurrentDocTitle('connectors'));
+  }, [chrome, setBreadcrumbs]);
 
   useEffect(() => {
     (async () => {
