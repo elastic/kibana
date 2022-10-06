@@ -16,7 +16,9 @@ const LazyUnifiedHistogramLayout = lazy(() => import('./layout'));
 
 /**
  * A resizable layout component with two panels that renders a histogram with a hits
- * counter in the top panel, and a main display (data table, etc.) in the bottom panel
+ * counter in the top panel, and a main display (data table, etc.) in the bottom panel.
+ * If all context props are left undefined, the layout will render in a single panel
+ * mode including only the main display.
  */
 export const UnifiedHistogramLayout = withSuspense(
   LazyUnifiedHistogramLayout,

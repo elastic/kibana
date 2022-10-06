@@ -23,11 +23,11 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   className?: string;
   services: UnifiedHistogramServices;
   /**
-   * Context object for the hits count
+   * Context object for the hits count -- leave undefined to hide the hits count
    */
-  hits: UnifiedHistogramHitsContext;
+  hits?: UnifiedHistogramHitsContext;
   /**
-   * Context object for the chart -- leave undefined to hide the top panel
+   * Context object for the chart -- leave undefined to hide the chart
    */
   chart?: UnifiedHistogramChartContext;
   /**
@@ -84,24 +84,26 @@ export const UnifiedHistogramLayout = ({
     []
   );
 
-  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || !chart || chart.hidden;
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const showFixedPanels = isMobile || !chart || chart.hidden;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minTopPanelHeight = euiTheme.base * 8;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartClassName =
-    showFixedPanels && !chart?.hidden
+    isMobile && chart && !chart.hidden
       ? css`
           height: ${defaultTopPanelHeight}px;
         `
       : 'eui-fullHeight';
 
-  const panelsMode = chart
-    ? showFixedPanels
-      ? PANELS_MODE.FIXED
-      : PANELS_MODE.RESIZABLE
-    : PANELS_MODE.SINGLE;
+  const panelsMode =
+    chart || hits
+      ? showFixedPanels
+        ? PANELS_MODE.FIXED
+        : PANELS_MODE.RESIZABLE
+      : PANELS_MODE.SINGLE;
 
   const onResetChartHeight = useMemo(() => {
     return topPanelHeight !== defaultTopPanelHeight && panelsMode === PANELS_MODE.RESIZABLE

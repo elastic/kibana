@@ -109,11 +109,14 @@ export const useDiscoverHistogram = ({
   );
 
   const hits = useMemo(
-    () => ({
-      status: hitsFetchStatus,
-      total: hitsTotal,
-    }),
-    [hitsFetchStatus, hitsTotal]
+    () =>
+      isPlainRecord
+        ? undefined
+        : {
+            status: hitsFetchStatus,
+            total: hitsTotal,
+          },
+    [hitsFetchStatus, hitsTotal, isPlainRecord]
   );
 
   const { fetchStatus: chartFetchStatus, response, error } = useDataState(savedSearchData$.charts$);
@@ -131,11 +134,11 @@ export const useDiscoverHistogram = ({
 
   const chart = useMemo(
     () =>
-      isPlainRecord
+      isPlainRecord || !isTimeBased
         ? undefined
         : {
             status: chartFetchStatus,
-            hidden: state.hideChart || !isTimeBased,
+            hidden: state.hideChart,
             timeInterval: state.interval,
             bucketInterval,
             data: chartData,

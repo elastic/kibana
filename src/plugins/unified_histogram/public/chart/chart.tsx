@@ -33,7 +33,7 @@ import type {
 export interface ChartProps {
   className?: string;
   services: UnifiedHistogramServices;
-  hits: UnifiedHistogramHitsContext;
+  hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
   appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
@@ -147,7 +147,7 @@ export function Chart({
             className="eui-textTruncate eui-textNoWrap"
             css={resultCountTitleCss}
           >
-            <HitsCounter hits={hits} append={appendHitsCounter} />
+            {hits && <HitsCounter hits={hits} append={appendHitsCounter} />}
           </EuiFlexItem>
           {chart && (
             <EuiFlexItem grow={false} css={resultCountToggleCss}>
