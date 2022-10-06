@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { EventAction } from '@kbn/session-view-plugin/common/types/process_tree';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -30,9 +29,9 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
           bool: {
             // show sessions table query should only filter events where event.action IN fork, exec, or end
             should: [
-              { match_phrase: { 'event.action': EventAction.exec } },
-              { match_phrase: { 'event.action': EventAction.fork } },
-              { match_phrase: { 'event.action': EventAction.end } },
+              { match_phrase: { 'event.action': 'exec' } },
+              { match_phrase: { 'event.action': 'fork' } },
+              { match_phrase: { 'event.action': 'end' } },
             ],
           },
         },
