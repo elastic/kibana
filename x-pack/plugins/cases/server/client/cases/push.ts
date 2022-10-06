@@ -114,6 +114,7 @@ export const push = async (
     logger,
     authorization,
     securityStartPlugin,
+    publicBaseUrl,
   } = clientArgs;
 
   try {
@@ -165,6 +166,7 @@ export const push = async (
       alerts,
       casesConnectors,
       userProfiles: profiles,
+      publicBaseUrl,
     });
 
     const pushRes = await actionsClient.execute({

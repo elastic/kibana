@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { flow, uniqBy, isEmpty } from 'lodash';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { UserProfile } from '@kbn/security-plugin/common';
+import { IBasePath } from '@kbn/core-http-browser';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import {
   ActionConnector,
@@ -28,6 +29,7 @@ import {
   User,
   CaseAttributes,
   CaseAssignees,
+  getCaseDetailsUrl,
 } from '../../../common/api';
 import { CasesClientGetAlertsResponse } from '../alerts/types';
 import {
@@ -56,6 +58,7 @@ interface CreateIncidentArgs {
   alerts: CasesClientGetAlertsResponse;
   casesConnectors: CasesConnectorsMap;
   userProfiles?: Map<string, UserProfile>;
+  publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
 
 export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
@@ -168,6 +171,7 @@ export const createIncident = async ({
   alerts,
   casesConnectors,
   userProfiles,
+  publicBaseUrl,
 }: CreateIncidentArgs): Promise<MapIncident> => {
   const {
     comments: caseComments,
@@ -219,7 +223,18 @@ export const createIncident = async ({
     userProfiles,
   });
 
-  incident = { ...incident, ...transformedFields, externalId };
+  const descriptionWithKibanaURL = addKibanaURLToDescription(
+    theCase,
+    transformedFields.description,
+    publicBaseUrl
+  );
+
+  incident = {
+    ...incident,
+    ...transformedFields,
+    externalId,
+    description: descriptionWithKibanaURL,
+  };
 
   const commentsIdsToBeUpdated = new Set(
     userActions
@@ -247,6 +262,22 @@ export const createIncident = async ({
   comments = addAlertMessage(theCase.id, caseComments, comments);
 
   return { incident, comments };
+};
+
+const addKibanaURLToDescription = (
+  theCase: CaseResponse,
+  desc: string | null,
+  publicBaseUrl?: IBasePath['publicBaseUrl']
+) => {
+  if (desc == null) {
+    return null;
+  }
+
+  if (!publicBaseUrl) {
+    return desc;
+  }
+
+  return `${desc} \n\n View Case in [Kibana](${publicBaseUrl}/${getCaseDetailsUrl(theCase.id)})`;
 };
 
 export const getEntity = (
