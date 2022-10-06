@@ -152,7 +152,7 @@ describe('test endpoint routes', () => {
     endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     mockAgentService = startContract.agentService!;
     mockAgentClient = createMockAgentClient();
-    mockAgentService.asScoped = () => mockAgentClient;
+    mockAgentService.asInternalUser = mockAgentClient;
     mockAgentPolicyService = startContract.agentPolicyService!;
 
     registerEndpointRoutes(routerMock, {

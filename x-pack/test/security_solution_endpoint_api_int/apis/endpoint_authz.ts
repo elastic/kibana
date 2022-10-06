@@ -7,7 +7,6 @@
 
 import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import {
-  ACTION_STATUS_ROUTE,
   AGENT_POLICY_SUMMARY_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
   GET_PROCESSES_ROUTE,
@@ -40,11 +39,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const apiList = [
-      {
-        method: 'get',
-        path: `${ACTION_STATUS_ROUTE}?agent_ids=1`,
-        body: undefined,
-      },
       {
         method: 'get',
         path: `${AGENT_POLICY_SUMMARY_ROUTE}?package_name=endpoint`,
