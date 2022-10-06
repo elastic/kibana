@@ -167,11 +167,6 @@ export function ShowShareModal({
     unhashUrl(baseUrl)
   );
 
-  const snapshotWarning = i18n.translate('dashboard.share.longUrlWarning', {
-    defaultMessage:
-      'This dashboard has a lot of unsaved changes, so it is recommended that you save before continuing.',
-  });
-
   toggleShareContextMenu({
     isDirty,
     anchorElement,
@@ -199,6 +194,8 @@ export function ShowShareModal({
       },
     ],
     showPublicUrlSwitch,
-    snapshotShareWarning: Boolean(unsavedDashboardState?.panels) ? snapshotWarning : undefined,
+    snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
+      ? shareModalStrings.getSnapshotShareWarning()
+      : undefined,
   });
 }

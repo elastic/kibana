@@ -20,6 +20,7 @@ import {
   EuiRadioGroup,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -455,7 +456,9 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   private renderWithWarning = (child: React.ReactNode, warningContent: React.ReactNode) => {
     return (
       <EuiFlexGroup gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="warning">{child}</EuiTextColor>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip type="alert" color="warning" content={warningContent} position="bottom" />
         </EuiFlexItem>
