@@ -493,7 +493,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge
-                        color="default"
+                        color={euiTheme.colors.lightShade}
                         css={styles.linesBadge}
                         data-test-subj="unifiedTextLangEditor-inline-lines-badge"
                       >
