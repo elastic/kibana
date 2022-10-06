@@ -148,8 +148,7 @@ export const defineExplainLogRateSpikesRoute = (
         push(addErrorAction(m));
       }
 
-      // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
-      (async () => {
+      async function runAnalysis() {
         logInfoMessage('Reset.');
         push(resetAction());
         logInfoMessage('Load field candidates.');
@@ -666,7 +665,11 @@ export const defineExplainLogRateSpikesRoute = (
         }
 
         endWithUpdatedLoadingState();
-      })();
+      }
+
+      // Do not call this using `await` so it will run asynchronously while we return the stream already.
+      // The timeout is used because the response needs to be passed on to the client before we start pushing to the stream.
+      setTimeout(() => runAnalysis(), 100);
 
       return response.ok(responseWithHeaders);
     }
