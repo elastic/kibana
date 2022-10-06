@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { getImageMetadata, isImage, ImageMetadataFactory, fitToBox } from './image_metadata';
+export { getImageMetadata, isImage, fitToBox } from './image_metadata';
+export type { ImageMetadataFactory } from './image_metadata';
