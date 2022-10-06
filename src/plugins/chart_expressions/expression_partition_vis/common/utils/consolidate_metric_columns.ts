@@ -7,15 +7,13 @@
  */
 
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export const consolidateMetricColumns = (
   table: Datatable,
   bucketAccessors: Array<string | ExpressionValueVisDimension> = [],
-  metricAccessors: Array<string | ExpressionValueVisDimension>,
-  formatService: FieldFormatsStart
+  metricAccessors: Array<string | ExpressionValueVisDimension>
 ): {
   table: Datatable;
   metricAccessor: string | ExpressionValueVisDimension | undefined;
@@ -39,17 +37,6 @@ export const consolidateMetricColumns = (
 
   const transposedRows: DatatableRow[] = [];
 
-  const [priorBucketColumns, finalBucketColumn] = [
-    bucketColumns.slice(0, bucketColumns.length - 1),
-    bucketColumns[bucketColumns.length - 1],
-  ];
-
-  const finalBucketFormatter = finalBucketColumn
-    ? formatService
-        .deserialize(getFormatByAccessor(finalBucketColumn.id, table.columns))
-        .getConverterFor('text')
-    : undefined;
-
   const nameColumnId = 'metric-name';
   const valueColumnId = 'value';
 
@@ -57,13 +44,11 @@ export const consolidateMetricColumns = (
     metricColumns.forEach((metricCol) => {
       const newRow: DatatableRow = {};
 
-      priorBucketColumns.forEach(({ id }) => {
+      bucketColumns.forEach(({ id }) => {
         newRow[id] = row[id];
       });
 
-      newRow[nameColumnId] = finalBucketColumn
-        ? `${finalBucketFormatter!(row[finalBucketColumn.id])} - ${metricCol.name}`
-        : metricCol.name;
+      newRow[nameColumnId] = metricCol.name;
       newRow[valueColumnId] = row[metricCol.id];
 
       transposedRows.push(newRow);
@@ -71,7 +56,7 @@ export const consolidateMetricColumns = (
   });
 
   const transposedColumns: DatatableColumn[] = [
-    ...priorBucketColumns,
+    ...bucketColumns,
     {
       id: nameColumnId,
       name: nameColumnId,
@@ -79,7 +64,6 @@ export const consolidateMetricColumns = (
         type: 'string',
         sourceParams: {
           consolidatedMetricsColumn: true,
-          combinedWithBucketColumn: Boolean(finalBucketColumn),
         },
       },
     },
@@ -94,7 +78,7 @@ export const consolidateMetricColumns = (
 
   return {
     metricAccessor: valueColumnId,
-    bucketAccessors: [...priorBucketColumns.map(({ id }) => id), nameColumnId],
+    bucketAccessors: [...bucketColumns.map(({ id }) => id), nameColumnId],
     table: {
       type: 'datatable',
       columns: transposedColumns,

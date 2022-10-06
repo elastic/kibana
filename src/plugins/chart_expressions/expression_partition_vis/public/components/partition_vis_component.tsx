@@ -112,15 +112,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       consolidateMetricColumns(
         originalVisData,
         visParams.dimensions.buckets,
-        visParams.dimensions.metrics,
-        services.fieldFormats
+        visParams.dimensions.metrics
       ),
-    [
-      originalVisData,
-      services.fieldFormats,
-      visParams.dimensions.buckets,
-      visParams.dimensions.metrics,
-    ]
+    [originalVisData, visParams.dimensions.buckets, visParams.dimensions.metrics]
   );
 
   const { bucketColumns, metricColumn } = useMemo(

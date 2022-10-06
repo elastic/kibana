@@ -66,21 +66,17 @@ export const getFilterClickData = (
         // this logic maps the indices of the elements in the
         // visualization's table to the indices in the table before
         // any multiple metrics were collapsed into one metric column
-        const originalColumnIndexes = currentColumn.meta?.sourceParams?.consolidatedMetricsColumn
-          ? // if this is the special combined column, expand it into both original columns
-            currentColumn.meta.sourceParams.combinedWithBucketColumn
-            ? [currentColumnIndex + 1 + (rowIndex % numOriginalMetrics), currentColumnIndex]
-            : [currentColumnIndex + (rowIndex % numOriginalMetrics)]
-          : [currentColumnIndex];
+        const originalColumnIndex = currentColumn.meta?.sourceParams?.consolidatedMetricsColumn
+          ? currentColumnIndex + (rowIndex % numOriginalMetrics)
+          : currentColumnIndex;
 
-        return originalColumnIndexes.map((colIdx) => ({
-          column: colIdx,
+        return {
+          column: originalColumnIndex,
           row: originalRowIndex,
           value: clickedLayer.groupByRollup,
           table: originalVisData,
-        }));
+        };
       })
-      .flat()
       .filter(Boolean) as ValueClickContext['data']['data'])
   );
 
