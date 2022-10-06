@@ -14,7 +14,7 @@ import { SuspendProcessActionResult } from './suspend_process_action';
 import { EndpointStatusActionResult } from './status_action';
 import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
-import type { ImmutableArray } from '../../../../common/endpoint/types';
+import type { EndpointPrivileges, ImmutableArray } from '../../../../common/endpoint/types';
 import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
 import type {
   ResponderCapabilities,
@@ -93,9 +93,11 @@ const COMMENT_ARG_ABOUT = i18n.translate(
 export const getEndpointResponseActionsConsoleCommands = ({
   endpointAgentId,
   endpointCapabilities,
+  endpointPrivileges,
 }: {
   endpointAgentId: string;
   endpointCapabilities: ImmutableArray<string>;
+  endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
   const doesEndpointSupportCommand = (commandName: ResponderCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
@@ -104,6 +106,17 @@ export const getEndpointResponseActionsConsoleCommands = ({
     }
     return false;
   };
+  const getRbacControl = (commandName: ResponderCommands): boolean => {
+    const commandToPrivilegeMap = new Map<ResponderCommands, boolean>([
+      ['isolate', endpointPrivileges.canIsolateHost],
+      ['release', endpointPrivileges.canUnIsolateHost],
+      ['kill-process', endpointPrivileges.canKillProcess],
+      ['suspend-process', endpointPrivileges.canSuspendProcess],
+      ['processes', endpointPrivileges.canGetRunningProcesses],
+    ]);
+    return commandToPrivilegeMap.get(commandName as ResponderCommands) ?? false;
+  };
+
   return [
     {
       name: 'isolate',
@@ -132,6 +145,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 0,
       helpDisabled: doesEndpointSupportCommand('isolate') === false,
+      helpHidden: getRbacControl('isolate') === false,
     },
     {
       name: 'release',
@@ -160,6 +174,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 1,
       helpDisabled: doesEndpointSupportCommand('release') === false,
+      helpHidden: getRbacControl('release') === false,
     },
     {
       name: 'kill-process',
@@ -213,6 +228,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 4,
       helpDisabled: doesEndpointSupportCommand('kill-process') === false,
+      helpHidden: getRbacControl('kill-process') === false,
     },
     {
       name: 'suspend-process',
@@ -269,6 +285,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 5,
       helpDisabled: doesEndpointSupportCommand('suspend-process') === false,
+      helpHidden: getRbacControl('suspend-process') === false,
     },
     {
       name: 'status',
@@ -313,6 +330,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 3,
       helpDisabled: doesEndpointSupportCommand('processes') === false,
+      helpHidden: getRbacControl('processes') === false,
     },
   ];
 };
