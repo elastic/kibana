@@ -16,7 +16,6 @@ import {
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 
 import { registerFlameChartSearchRoute } from './flamechart';
-import { registerFrameInformationRoute } from './frames';
 import { registerTopNFunctionsSearchRoute } from './functions';
 
 import {
@@ -50,5 +49,4 @@ export function registerRoutes(params: RouteRegisterParameters) {
   registerTraceEventsTopNHostsSearchRoute(params);
   registerTraceEventsTopNStackTracesSearchRoute(params);
   registerTraceEventsTopNThreadsSearchRoute(params);
-  registerFrameInformationRoute(params);
 }

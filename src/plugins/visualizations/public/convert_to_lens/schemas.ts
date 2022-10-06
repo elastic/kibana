@@ -8,10 +8,10 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
-import { AggBasedColumn, SchemaConfig } from '../../common';
+import { AggBasedColumn, PercentageModeConfig, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
-import { getCutomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
+import { getCustomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
 import type { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
 import {
@@ -24,28 +24,43 @@ import {
   sortColumns,
 } from './utils';
 
+const areVisSchemasValid = (visSchemas: Schemas, unsupported: Array<keyof Schemas>) => {
+  const usedUnsupportedSchemas = unsupported.filter(
+    (schema) => visSchemas[schema] && visSchemas[schema]?.length
+  );
+  return !usedUnsupportedSchemas.length;
+};
+
 export const getColumnsFromVis = <T>(
   vis: Vis<T>,
   timefilter: TimefilterContract,
   dataView: DataView,
-  { splits, buckets }: { splits: Array<keyof Schemas>; buckets: Array<keyof Schemas> } = {
-    splits: [],
-    buckets: [],
-  },
+  {
+    splits = [],
+    buckets = [],
+    unsupported = [],
+  }: {
+    splits?: Array<keyof Schemas>;
+    buckets?: Array<keyof Schemas>;
+    unsupported?: Array<keyof Schemas>;
+  } = {},
   config?: {
     dropEmptyRowsInDateHistogram?: boolean;
-  }
+  } & (PercentageModeConfig | void)
 ) => {
+  const { dropEmptyRowsInDateHistogram, ...percentageModeConfig } = config ?? {
+    isPercentageMode: false,
+  };
   const visSchemas = getVisSchemas(vis, {
     timefilter,
     timeRange: timefilter.getAbsoluteTime(),
   });
 
-  if (!isValidVis(visSchemas)) {
+  if (!isValidVis(visSchemas) || !areVisSchemasValid(visSchemas, unsupported)) {
     return null;
   }
 
-  const customBuckets = getCutomBucketsFromSiblingAggs(visSchemas.metric);
+  const customBuckets = getCustomBucketsFromSiblingAggs(visSchemas.metric);
 
   // doesn't support sibbling pipeline aggs with different bucket aggs
   if (customBuckets.length > 1) {
@@ -55,8 +70,8 @@ export const getColumnsFromVis = <T>(
   const metricsWithoutDuplicates = getMetricsWithoutDuplicates(visSchemas.metric);
   const aggs = metricsWithoutDuplicates as Array<SchemaConfig<METRIC_TYPES>>;
 
-  const metricColumns = metricsWithoutDuplicates.flatMap((m) =>
-    convertMetricToColumns(m, dataView, aggs)
+  const metricColumns = aggs.flatMap((m) =>
+    convertMetricToColumns(m, dataView, aggs, percentageModeConfig)
   );
 
   if (metricColumns.includes(null)) {
@@ -69,7 +84,7 @@ export const getColumnsFromVis = <T>(
     const customBucketColumn = convertBucketToColumns(
       { agg: customBuckets[0], dataView, metricColumns: metrics, aggs },
       false,
-      config?.dropEmptyRowsInDateHistogram
+      dropEmptyRowsInDateHistogram
     );
     if (!customBucketColumn) {
       return null;
@@ -83,7 +98,7 @@ export const getColumnsFromVis = <T>(
     dataView,
     false,
     metricColumns as AggBasedColumn[],
-    config?.dropEmptyRowsInDateHistogram
+    dropEmptyRowsInDateHistogram
   );
   if (!bucketColumns) {
     return null;
@@ -95,7 +110,7 @@ export const getColumnsFromVis = <T>(
     dataView,
     true,
     metricColumns as AggBasedColumn[],
-    config?.dropEmptyRowsInDateHistogram
+    dropEmptyRowsInDateHistogram
   );
   if (!splitBucketColumns) {
     return null;
@@ -111,8 +126,8 @@ export const getColumnsFromVis = <T>(
   const columnsWithoutReferenced = getColumnsWithoutReferenced(columns);
 
   return {
-    metrics: getColumnIds(metrics),
-    buckets: getColumnIds([...bucketColumns, ...splitBucketColumns, ...customBucketColumns]),
+    metrics: getColumnIds(columnsWithoutReferenced.filter((с) => !с.isBucketed)),
+    buckets: getColumnIds(columnsWithoutReferenced.filter((c) => c.isBucketed)),
     bucketCollapseFn: getBucketCollapseFn(visSchemas.metric, customBucketColumns),
     columnsWithoutReferenced,
     columns,

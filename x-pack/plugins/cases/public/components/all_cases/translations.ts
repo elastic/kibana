@@ -71,10 +71,6 @@ export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
   defaultMessage: 'Closed',
 });
 
-export const DELETE = i18n.translate('xpack.cases.caseTable.delete', {
-  defaultMessage: 'Delete',
-});
-
 export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
   defaultMessage: 'Select',
 });

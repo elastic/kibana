@@ -10,9 +10,14 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { sumBy } from 'lodash/fp';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
-import { useHostRiskScoreKpi, useUserRiskScoreKpi } from '../../../../risk_score/containers';
+import { useRiskScoreKpi } from '../../../../risk_score/containers';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
-import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
+import {
+  Direction,
+  RiskScoreEntity,
+  RiskScoreFields,
+  RiskSeverity,
+} from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
@@ -49,15 +54,19 @@ export const EntityAnalyticsHeader = () => {
     loading: hostRiskLoading,
     inspect: inspectHostRiskScore,
     refetch: refetchHostRiskScore,
-  } = useHostRiskScoreKpi({ timerange });
+  } = useRiskScoreKpi({
+    timerange,
+    riskEntity: RiskScoreEntity.host,
+  });
 
   const {
     severityCount: usersSeverityCount,
     loading: userRiskLoading,
     refetch: refetchUserRiskScore,
     inspect: inspectUserRiskScore,
-  } = useUserRiskScoreKpi({
+  } = useRiskScoreKpi({
     timerange,
+    riskEntity: RiskScoreEntity.user,
   });
 
   const { data } = useNotableAnomaliesSearch({ skip: false, from, to });
@@ -69,7 +78,7 @@ export const EntityAnalyticsHeader = () => {
     services: { ml, http },
   } = useKibana();
 
-  const [goToHostRiskTabFilterdByCritical, hostRiskTabUrl] = useMemo(() => {
+  const [goToHostRiskTabFilteredByCritical, hostRiskTabUrl] = useMemo(() => {
     const { onClick, href } = getSecuritySolutionLinkProps({
       deepLinkId: SecurityPageName.hosts,
       path: getTabsOnHostsUrl(HostsTableType.risk),
@@ -92,7 +101,7 @@ export const EntityAnalyticsHeader = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
-  const [goToUserRiskTabFilterdByCritical, userRiskTabUrl] = useMemo(() => {
+  const [goToUserRiskTabFilteredByCritical, userRiskTabUrl] = useMemo(() => {
     const { onClick, href } = getSecuritySolutionLinkProps({
       deepLinkId: SecurityPageName.users,
       path: getTabsOnUsersUrl(UsersTableType.risk),
@@ -161,7 +170,7 @@ export const EntityAnalyticsHeader = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <LinkAnchor
-                  onClick={goToHostRiskTabFilterdByCritical}
+                  onClick={goToHostRiskTabFilteredByCritical}
                   href={hostRiskTabUrl}
                   data-test-subj="critical_hosts_link"
                 >
@@ -183,7 +192,7 @@ export const EntityAnalyticsHeader = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <LinkAnchor
-                  onClick={goToUserRiskTabFilterdByCritical}
+                  onClick={goToUserRiskTabFilteredByCritical}
                   href={userRiskTabUrl}
                   data-test-subj="critical_users_link"
                 >
