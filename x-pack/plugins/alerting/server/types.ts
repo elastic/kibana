@@ -103,7 +103,7 @@ export interface RuleExecutorOptions<
   tags: string[];
   createdBy: string | null;
   updatedBy: string | null;
-  isPreview: boolean | undefined;
+  isPreview?: boolean;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
