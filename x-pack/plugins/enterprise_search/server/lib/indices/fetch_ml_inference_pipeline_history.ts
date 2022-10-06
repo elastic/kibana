@@ -18,7 +18,7 @@ export const fetchMlInferencePipelineHistory = async (
   client: ElasticsearchClient,
   index: string
 ): Promise<MlInferenceHistoryResponse> => {
-  const ingestPipeleProcessorsResult = await client.search<
+  const ingestPipelineProcessorsResult = await client.search<
     unknown,
     {
       inference_processors: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
@@ -36,7 +36,8 @@ export const fetchMlInferencePipelineHistory = async (
     size: 0,
   });
 
-  const processorBuckets = ingestPipeleProcessorsResult.aggregations?.inference_processors.buckets;
+  const processorBuckets =
+    ingestPipelineProcessorsResult.aggregations?.inference_processors.buckets;
   if (!processorBuckets) {
     return { history: [] };
   }
