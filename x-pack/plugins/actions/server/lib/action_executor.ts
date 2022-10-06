@@ -253,18 +253,14 @@ export class ActionExecutor {
         };
 
         event.event = event.event || {};
-        event.kibana = event.kibana || {};
-        event.kibana.alerting = event.kibana.alerting || {};
 
         if (result.status === 'ok') {
           span?.setOutcome('success');
           event.event.outcome = 'success';
-          event.kibana.alerting.outcome = 'success';
           event.message = `action executed: ${actionLabel}`;
         } else if (result.status === 'error') {
           span?.setOutcome('failure');
           event.event.outcome = 'failure';
-          event.kibana.alerting.outcome = 'failure';
           event.message = `action execution failure: ${actionLabel}`;
           event.error = event.error || {};
           event.error.message = actionErrorToMessage(result);
@@ -278,7 +274,6 @@ export class ActionExecutor {
         } else {
           span?.setOutcome('failure');
           event.event.outcome = 'failure';
-          event.kibana.alerting.outcome = 'failure';
           event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
           event.error = event.error || {};
           event.error.message = 'action execution returned unexpected result';
