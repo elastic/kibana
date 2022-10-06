@@ -151,8 +151,4 @@ module.exports = {
     escapeString: true,
     printBasicPrototype: true,
   },
-
-  fakeTimers: {
-    enableGlobally: true,
-  },
 };
