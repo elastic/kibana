@@ -32649,8 +32649,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeFailed": "无法更改规则暂停设置",
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess": "已成功暂停规则",
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.unsnoozeSuccess": "已成功取消暂停规则",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex": "操作",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip": "无法加载与此规则关联的连接器之一。请编辑该规则以选择新连接器。",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle": "API 密钥所有者",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteAriaLabel": "删除",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteButtonTooltip": "删除",
