@@ -707,6 +707,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...projectMonitors,
             keep_stale: false,
             monitors: testMonitors,
+            project: 'test-project-2',
           });
 
         const messages = await parseStreamApiResponse(
@@ -714,6 +715,7 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify({
             ...projectMonitors,
             keep_stale: false,
+            project: 'test-project-2',
           })
         );
 
