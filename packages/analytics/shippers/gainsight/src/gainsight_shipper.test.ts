@@ -31,28 +31,28 @@ describe('gainSightShipper', () => {
     describe('identify', () => {
       test('calls `identify` when the userId is provided', () => {
         const userId = 'test-user-id';
-        const cluster_uuid = '123654';
-        gainSightShipper.extendContext({ userId, cluster_uuid });
+        const clusterUuid = '123654';
+        gainSightShipper.extendContext({ userId, cluster_uuid: clusterUuid });
         expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', {
-          id: cluster_uuid,
+          id: clusterUuid,
           userType: 'deployment',
         });
       });
 
       test('calls `identify` again only if the userId changes', () => {
         const userId = 'test-user-id';
-        const cluster_uuid = '123654';
-        gainSightShipper.extendContext({ userId, cluster_uuid });
+        const clusterUuid = '123654';
+        gainSightShipper.extendContext({ userId, cluster_uuid: clusterUuid });
         expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2);
         expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', {
-          id: cluster_uuid,
+          id: clusterUuid,
           userType: 'deployment',
         });
 
-        gainSightShipper.extendContext({ userId, cluster_uuid });
+        gainSightShipper.extendContext({ userId, cluster_uuid: clusterUuid });
         expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2);
 
-        gainSightShipper.extendContext({ userId: `${userId}-1`, cluster_uuid });
+        gainSightShipper.extendContext({ userId: `${userId}-1`, cluster_uuid: clusterUuid });
         expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(4); // called again because the user changed
       });
     });
