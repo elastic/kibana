@@ -130,21 +130,21 @@ describe('Action List Route', () => {
   });
 
   describe('User auth level', () => {
-    it('allows user with `canReadActionsLogManagement` access to API request', async () => {
+    it('allows user with `canReadActionsLogManagement` access for API requests', async () => {
       await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
         authz: { canReadActionsLogManagement: true },
       });
       expect(mockResponse.ok).toBeCalled();
     });
 
-    it('does not allow user with `canReadActionsLogManagement` access to API request', async () => {
+    it('does not allow user without `canReadActionsLogManagement` access for API requests', async () => {
       await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
         authz: { canReadActionsLogManagement: false },
       });
       expect(mockResponse.forbidden).toBeCalled();
     });
 
-    it('does not allow user access to API request if license is below platinum', async () => {
+    it('does not allow user access to API requests if license is below platinum', async () => {
       await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
         license: Gold,
       });
