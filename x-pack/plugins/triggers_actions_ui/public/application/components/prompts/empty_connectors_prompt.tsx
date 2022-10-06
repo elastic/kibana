@@ -33,7 +33,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
       <p>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorEmptyBody"
-          defaultMessage="Configure email, Slack, Elasticsearch, and third-party services that Kibana runs."
+          defaultMessage="Configure various third-party services to Kibana."
         />
       </p>
     }
