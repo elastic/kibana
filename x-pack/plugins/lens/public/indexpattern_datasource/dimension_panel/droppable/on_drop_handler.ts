@@ -187,7 +187,7 @@ function onMoveCompatible(
   }: DropHandlerProps<DataViewDragDropOperation>,
   shouldDeleteSource?: boolean
 ) {
-  const modifiedLayers = copyColumn({
+  let modifiedLayers = copyColumn({
     layers: state.layers,
     target,
     source,
@@ -201,18 +201,19 @@ function onMoveCompatible(
     target.columnId
   );
 
-  const newLayer = {
-    ...modifiedLayers[target.layerId],
-    columnOrder: updatedColumnOrder,
-    columns: modifiedLayers[target.layerId].columns,
+  modifiedLayers = {
+    ...modifiedLayers,
+    [target.layerId]: {
+      ...modifiedLayers[target.layerId],
+      columnOrder: updatedColumnOrder,
+      columns: modifiedLayers[target.layerId].columns,
+    },
   };
 
-  // Time to replace
   setState(
-    mergeLayer({
+    mergeLayers({
       state,
-      layerId: target.layerId,
-      newLayer,
+      newLayers: modifiedLayers,
     })
   );
   return true;
