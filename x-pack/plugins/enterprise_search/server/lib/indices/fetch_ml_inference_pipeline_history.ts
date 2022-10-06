@@ -45,7 +45,7 @@ export const fetchMlInferencePipelineHistory = async (
     : Object.values(processorBuckets);
   return {
     history: bucketsList.map((bucket) => ({
-      docCount: bucket.doc_count,
+      doc_count: bucket.doc_count,
       pipeline: bucket.key,
     })),
   };

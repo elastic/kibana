@@ -27,7 +27,7 @@ export interface MlInferencePipeline extends IngestPipeline {
 }
 
 export interface MlInferenceHistoryItem {
-  docCount: number;
+  doc_count: number;
   pipeline: string;
 }
 

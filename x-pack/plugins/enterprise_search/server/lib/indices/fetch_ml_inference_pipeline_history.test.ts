@@ -85,11 +85,11 @@ const ObjectMockResponse: HistorySearchResponse = {
 const ExpectedMockResults: MlInferenceHistoryResponse = {
   history: [
     {
-      docCount: 20,
+      doc_count: 20,
       pipeline: 'ml-inference-test-001',
     },
     {
-      docCount: 33,
+      doc_count: 33,
       pipeline: 'ml-inference-test-002',
     },
   ],

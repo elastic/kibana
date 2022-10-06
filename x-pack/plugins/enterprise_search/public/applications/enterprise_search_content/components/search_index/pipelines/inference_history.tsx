@@ -43,7 +43,7 @@ export const InferenceHistory: React.FC = () => {
     },
     {
       dataType: 'number',
-      field: 'docCount',
+      field: 'doc_count',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.tableColumn.docCount',
         { defaultMessage: 'Approx. document count' }
