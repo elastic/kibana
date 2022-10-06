@@ -74,6 +74,28 @@ describe('AlertsByStatus', () => {
     ).toBeInTheDocument();
   });
 
+  test('shows correct names when no entity filter provided', () => {
+    const { getByText, getByTestId } = render(
+      <TestProviders>
+        <AlertsByStatus {...props} />
+      </TestProviders>
+    );
+
+    expect(getByText('Alerts')).toBeInTheDocument();
+    expect(getByTestId('view-details-button')).toHaveTextContent('View alerts');
+  });
+
+  test('shows correct names when entity filter IS provided', () => {
+    const { getByText, getByTestId } = render(
+      <TestProviders>
+        <AlertsByStatus {...props} entityFilter={{ field: 'name', value: 'val' }} />
+      </TestProviders>
+    );
+
+    expect(getByText('Alerts by Severity')).toBeInTheDocument();
+    expect(getByTestId('view-details-button')).toHaveTextContent('Investigate in Timeline');
+  });
+
   test('render HeaderSection', () => {
     const { container } = render(
       <TestProviders>

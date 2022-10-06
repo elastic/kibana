@@ -5,4 +5,19 @@
  * 2.0.
  */
 
+import type { OutputError } from '@kbn/securitysolution-es-utils';
+
 export type SavedObjectTemplate = 'hostRiskScoreDashboards' | 'userRiskScoreDashboards';
+
+export interface BulkCreateSavedObjectsResult {
+  hostRiskScoreDashboards?: {
+    success: boolean;
+    error: OutputError;
+    body?: { id: string; name: string; type: string };
+  };
+  userRiskScoreDashboards?: {
+    success: boolean;
+    error: OutputError;
+    body?: { id: string; name: string; type: string };
+  };
+}
