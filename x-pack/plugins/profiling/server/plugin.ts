@@ -5,18 +5,36 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { LogLevelId } from '@kbn/logging';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import Path from 'path';
+import Piscina from 'piscina';
+import { MessageChannel } from 'worker_threads';
+import agent from 'elastic-apm-node';
 import { ProfilingConfig } from '.';
 import { PROFILING_FEATURE } from './feature';
 import { registerRoutes } from './routes';
-import {
+import { getFlameGraph } from './routes/get_flamegraph';
+import type {
   ProfilingPluginSetup,
   ProfilingPluginSetupDeps,
   ProfilingPluginStart,
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
+  WorkerFlameGraphOptions,
 } from './types';
-import { createProfilingEsClient } from './utils/create_profiling_es_client';
+import {
+  createProfilingEsClientFromRequest,
+  getAbortSignalFromRequest,
+} from './utils/create_profiling_es_client';
 
 export class ProfilingPlugin
   implements
@@ -42,6 +60,20 @@ export class ProfilingPlugin
 
     const config = this.initializerContext.config.get();
 
+    let piscina: Piscina | undefined;
+
+    if (config.workers.min > 0 && config.elasticsearch) {
+      piscina = new Piscina({
+        minThreads: config.workers.min,
+        maxThreads: config.workers.max,
+        filename: Path.join(__dirname, '../scripts/worker.js'),
+        env: {
+          ...process.env,
+          ELASTIC_APM_SERVICE_NAME: 'kibana-profiling-worker',
+        },
+      });
+    }
+
     core.getStartServices().then(([coreStart, depsStart]) => {
       const profilingSpecificEsClient = config.elasticsearch
         ? coreStart.elasticsearch.createClient('profiling', {
@@ -51,6 +83,20 @@ export class ProfilingPlugin
           })
         : undefined;
 
+      function createProfilingEsClient({
+        request,
+        esClient: defaultEsClient,
+      }: {
+        request: KibanaRequest;
+        esClient: ElasticsearchClient;
+      }) {
+        const esClient = profilingSpecificEsClient
+          ? profilingSpecificEsClient.asScoped(request).asInternalUser
+          : defaultEsClient;
+
+        return createProfilingEsClientFromRequest({ request, esClient });
+      }
+
       registerRoutes({
         router,
         logger: this.logger!,
@@ -59,13 +105,50 @@ export class ProfilingPlugin
           setup: deps,
         },
         services: {
-          createProfilingEsClient: ({ request, esClient: defaultEsClient }) => {
-            const esClient = profilingSpecificEsClient
-              ? profilingSpecificEsClient.asScoped(request).asInternalUser
-              : defaultEsClient;
+          getFlameGraph: async ({ timeFrom, timeTo, kuery, context, request, logger }) => {
+            if (piscina) {
+              const messageChannel = new MessageChannel();
+              messageChannel.port2.on(
+                'message',
+                ({
+                  level,
+                  args,
+                }: {
+                  level: Exclude<LogLevelId, 'all' | 'off'>;
+                  args: [string, any];
+                }) => {
+                  logger[level](...args);
+                }
+              );
 
-            return createProfilingEsClient({ request, esClient });
+              const options: WorkerFlameGraphOptions = {
+                timeFrom,
+                timeTo,
+                kuery,
+                port: messageChannel!.port1,
+                childOf: agent.currentTraceparent!,
+                ...config.elasticsearch!,
+              };
+
+              return piscina.run(options, {
+                name: 'getFlameGraph',
+                signal: getAbortSignalFromRequest(request),
+                transferList: [messageChannel!.port1],
+              });
+            }
+
+            return getFlameGraph({
+              client: createProfilingEsClient({
+                request,
+                esClient: (await context.core).elasticsearch.client.asCurrentUser,
+              }),
+              kuery,
+              timeFrom,
+              timeTo,
+              logger,
+            });
           },
+          createProfilingEsClient,
         },
       });
     });

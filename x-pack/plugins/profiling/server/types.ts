@@ -8,6 +8,8 @@
 import { RequestHandlerContext } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import { MessagePort } from 'node:worker_threads';
+import { FlameGraphOptions } from './routes/get_flamegraph';
 
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
@@ -23,3 +25,11 @@ export interface ProfilingPluginSetup {}
 export interface ProfilingPluginStart {}
 
 export type ProfilingRequestHandlerContext = RequestHandlerContext;
+
+export type WorkerFlameGraphOptions = Omit<FlameGraphOptions, 'logger' | 'client'> & {
+  hosts: string;
+  username: string;
+  password: string;
+  port: MessagePort;
+  childOf: string;
+};

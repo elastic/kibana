@@ -5,25 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import type { KibanaRequest } from '@kbn/core/server';
-import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import { Client } from '@elastic/elasticsearch';
 import { MgetRequest, MgetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { ProfilingESEvent } from '../../common/elasticsearch';
 import { withProfilingSpan } from './with_profiling_span';
-
-export function cancelEsRequestOnAbort<T extends Promise<any>>(
-  promise: T,
-  request: KibanaRequest,
-  controller: AbortController
-): T {
-  const subscription = request.events.aborted$.subscribe(() => {
-    controller.abort();
-  });
-
-  return promise.finally(() => subscription.unsubscribe()) as T;
-}
 
 export interface ProfilingESClient {
   search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
@@ -36,31 +25,25 @@ export interface ProfilingESClient {
   ): Promise<MgetResponse<TDocument>>;
 }
 
-export function createProfilingEsClient({
-  request,
+function createProfilingEsClient({
+  signal,
   esClient,
 }: {
-  request: KibanaRequest;
   esClient: ElasticsearchClient;
+  signal: AbortSignal;
 }): ProfilingESClient {
   return {
     search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
-      const controller = new AbortController();
-
       const promise = withProfilingSpan(operationName, () => {
-        return cancelEsRequestOnAbort(
-          esClient.search(searchRequest, {
-            signal: controller.signal,
-            meta: true,
-          }) as unknown as Promise<{
-            body: InferSearchResponseOf<TDocument, TSearchRequest>;
-          }>,
-          request,
-          controller
-        );
+        return esClient.search(searchRequest, {
+          signal,
+          meta: true,
+        }) as unknown as Promise<{
+          body: InferSearchResponseOf<TDocument, TSearchRequest>;
+        }>;
       });
 
       return unwrapEsResponse(promise);
@@ -69,20 +52,59 @@ export function createProfilingEsClient({
       operationName: string,
       mgetRequest: MgetRequest
     ): Promise<MgetResponse<TDocument>> {
-      const controller = new AbortController();
-
       const promise = withProfilingSpan(operationName, () => {
-        return cancelEsRequestOnAbort(
-          esClient.mget<TDocument>(mgetRequest, {
-            signal: controller.signal,
-            meta: true,
-          }),
-          request,
-          controller
-        );
+        return esClient.mget<TDocument>(mgetRequest, {
+          signal,
+          meta: true,
+        });
       });
 
       return unwrapEsResponse(promise);
     },
   };
+}
+
+export function getAbortSignalFromRequest(request: KibanaRequest) {
+  const controller = new AbortController();
+  request.events.aborted$.subscribe(() => {
+    controller.abort();
+  });
+
+  return controller.signal;
+}
+
+export function createProfilingEsClientFromRequest({
+  request,
+  esClient,
+}: {
+  request: KibanaRequest;
+  esClient: ElasticsearchClient;
+}) {
+  return createProfilingEsClient({
+    esClient,
+    signal: getAbortSignalFromRequest(request),
+  });
+}
+
+export function createProfilingEsClientInWorkerThread({
+  username,
+  password,
+  hosts,
+  signal,
+}: {
+  username: string;
+  password: string;
+  hosts: string;
+  signal: AbortSignal;
+}) {
+  return createProfilingEsClient({
+    esClient: new Client({
+      node: hosts,
+      auth: {
+        username,
+        password,
+      },
+    }),
+    signal,
+  });
 }

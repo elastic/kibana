@@ -18,6 +18,13 @@ const configSchema = schema.object({
       password: schema.string(),
     })
   ),
+  workers: schema.object(
+    {
+      min: schema.number({ defaultValue: 2 }),
+      max: schema.number({ defaultValue: 4 }),
+    },
+    { defaultValue: { min: 2, max: 4 } }
+  ),
 });
 
 export type ProfilingConfig = TypeOf<typeof configSchema>;

@@ -26,6 +26,13 @@ import {
   registerTraceEventsTopNThreadsSearchRoute,
 } from './topn';
 
+import { FlameGraphOptions, FlameGraphResponse } from './get_flamegraph';
+
+type FlameGraphRequestOptions = Omit<FlameGraphOptions, 'client'> & {
+  request: KibanaRequest;
+  context: ProfilingRequestHandlerContext;
+};
+
 export interface RouteRegisterParameters {
   router: IRouter<ProfilingRequestHandlerContext>;
   logger: Logger;
@@ -34,6 +41,7 @@ export interface RouteRegisterParameters {
     setup: ProfilingPluginSetupDeps;
   };
   services: {
+    getFlameGraph: (options: FlameGraphRequestOptions) => Promise<FlameGraphResponse>;
     createProfilingEsClient: (params: {
       request: KibanaRequest;
       esClient: ElasticsearchClient;

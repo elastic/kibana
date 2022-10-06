@@ -6,20 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteRegisterParameters } from '.';
+import { type RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
-import { createCalleeTree } from '../../common/callee';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { createBaseFlameGraph } from '../../common/flamegraph';
-import { withProfilingSpan } from '../utils/with_profiling_span';
-import { getClient } from './compat';
-import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
-import { createCommonFilter } from './query';
 
 export function registerFlameChartSearchRoute({
   router,
   logger,
-  services: { createProfilingEsClient },
+  services: { getFlameGraph },
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
@@ -35,44 +29,16 @@ export function registerFlameChartSearchRoute({
     },
     async (context, request, response) => {
       const { timeFrom, timeTo, kuery } = request.query;
-      const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
       try {
-        const esClient = await getClient(context);
-        const filter = createCommonFilter({
+        const flamegraph = await getFlameGraph({
+          request,
+          context,
           timeFrom,
           timeTo,
           kuery,
+          logger,
         });
-        const totalSeconds = timeTo - timeFrom;
-
-        const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames } =
-          await getExecutablesAndStackTraces({
-            logger,
-            client: createProfilingEsClient({ request, esClient }),
-            filter,
-            sampleSize: targetSampleSize,
-          });
-
-        const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
-          const t0 = Date.now();
-          const tree = createCalleeTree(
-            stackTraceEvents,
-            stackTraces,
-            stackFrames,
-            executables,
-            totalFrames
-          );
-          logger.info(`creating callee tree took ${Date.now() - t0} ms`);
-
-          const t1 = Date.now();
-          const fg = createBaseFlameGraph(tree, totalSeconds);
-          logger.info(`creating flamegraph took ${Date.now() - t1} ms`);
-
-          return fg;
-        });
-
-        logger.info('returning payload response to client');
 
         return response.ok({ body: flamegraph });
       } catch (error) {
