@@ -43,7 +43,8 @@ export const useInputHints = () => {
     // If we know the command name and the input popover is not opened, then show hints (if any)
     if (commandEntered && !isInputPopoverOpen) {
       // Is valid command name? ==> show usage
-      if (commandEnteredDefinition) {
+      if (commandEnteredDefinition && commandEnteredDefinition.helpHidden !== true) {
+        console.log('we in here');
         const exampleInstruction = commandEnteredDefinition?.exampleInstruction ?? '';
         const exampleUsage = commandEnteredDefinition?.exampleUsage ?? '';
 
