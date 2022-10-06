@@ -7,24 +7,11 @@
 
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
-  CloseAlertParams,
-  CreateAlertParams,
-  Config,
-  Secrets,
-} from '../../../../server/connector_types/stack/opsgenie/types';
+  OpsgenieActionConfig,
+  OpsgenieActionSecrets,
+} from '../../../../server/connector_types/stack';
 
-export type OpsgenieActionConnector = UserConfiguredActionConnector<Config, Secrets>;
-
-export interface CreateAlertActionParams {
-  subAction: 'createAlert';
-  subActionParams: CreateAlertParams;
-}
-
-export interface CloseAlertActionParams {
-  subAction: 'closeAlert';
-  subActionParams: CloseAlertParams;
-}
-
-export type OpsgenieActionParams = CreateAlertActionParams | CloseAlertActionParams;
-
-export type { Config, Secrets } from '../../../../server/connector_types/stack/opsgenie/types';
+export type OpsgenieActionConnector = UserConfiguredActionConnector<
+  OpsgenieActionConfig,
+  OpsgenieActionSecrets
+>;

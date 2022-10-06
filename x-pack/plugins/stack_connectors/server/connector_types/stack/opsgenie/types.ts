@@ -17,3 +17,15 @@ export type Secrets = TypeOf<typeof SecretsSchema>;
 
 export type CreateAlertParams = TypeOf<typeof CreateAlertParamsSchema>;
 export type CloseAlertParams = TypeOf<typeof CloseAlertParamsSchema>;
+
+export interface CreateAlertSubActionParams {
+  subAction: 'createAlert';
+  subActionParams: CreateAlertParams;
+}
+
+export interface CloseAlertSubActionParams {
+  subAction: 'closeAlert';
+  subActionParams: CloseAlertParams;
+}
+
+export type Params = CreateAlertSubActionParams | CloseAlertSubActionParams;

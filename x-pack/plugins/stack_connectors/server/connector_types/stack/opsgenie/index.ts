@@ -37,3 +37,13 @@ export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secre
     ],
   };
 };
+
+export type {
+  Config as OpsgenieActionConfig,
+  Secrets as OpsgenieActionSecrets,
+  Params as OpsgenieActionParams,
+  CreateAlertSubActionParams as OpsgenieCreateAlertSubActionParams,
+  CloseAlertSubActionParams as OpsgenieCloseAlertSubActionParams,
+  CreateAlertParams as OpsgenieCreateAlertParams,
+  CloseAlertParams as OpsgenieCloseAlertParams,
+} from './types';

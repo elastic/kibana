@@ -50,6 +50,15 @@ export {
 export type { ActionParamsType as WebhookActionParams } from './webhook';
 
 export { getOpsgenieConnectorType, OpsgenieConnectorTypeId } from './opsgenie';
+export type {
+  OpsgenieActionConfig,
+  OpsgenieActionSecrets,
+  OpsgenieActionParams,
+  OpsgenieCloseAlertSubActionParams,
+  OpsgenieCreateAlertSubActionParams,
+  OpsgenieCloseAlertParams,
+  OpsgenieCreateAlertParams,
+} from './opsgenie';
 
 export {
   getConnectorType as getXmattersConnectorType,

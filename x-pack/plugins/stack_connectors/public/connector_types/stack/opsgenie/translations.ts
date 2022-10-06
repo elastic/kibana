@@ -49,23 +49,23 @@ export const MESSAGE_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const NAME_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.resilient.requiredNameTextField',
+export const MESSAGE_IS_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.requiredMessageTextField',
   {
-    defaultMessage: 'Name is required.',
+    defaultMessage: 'Message is required.',
   }
 );
 
-export const INCIDENT_TYPES_API_ERROR = i18n.translate(
-  'xpack.stackConnectors.components.resilient.unableToGetIncidentTypesMessage',
+export const ALIAS_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.aliasLabel',
   {
-    defaultMessage: 'Unable to get incident types',
+    defaultMessage: 'Alias',
   }
 );
 
-export const SEVERITY_API_ERROR = i18n.translate(
-  'xpack.stackConnectors.components.resilient.unableToGetSeverityMessage',
+export const ALIAS_IS_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.requiredAliasTextField',
   {
-    defaultMessage: 'Unable to get severity',
+    defaultMessage: 'Alias is required.',
   }
 );
