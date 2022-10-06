@@ -4,44 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
-import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
+import React from 'react';
+import { EuiBadge, EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTheme } from '@kbn/observability-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
-import { getMonitorRecentPingsAction, selectLatestPing, selectPingsLoading } from '../../state';
-import { useSelectedLocation } from './hooks/use_selected_location';
+import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 
 export const MonitorDetailsStatus: React.FC = () => {
-  const dispatch = useDispatch();
   const theme = useTheme();
-  const latestPing = useSelector(selectLatestPing);
-  const pingsLoading = useSelector(selectPingsLoading);
+  const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
 
   const { monitor } = useSelectedMonitor();
-  const location = useSelectedLocation();
 
-  useEffect(() => {
-    const locationId = location?.label;
-    const monitorId = monitor?.id;
-    if (monitorId && locationId) {
-      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId }));
-    }
-  }, [dispatch, monitor, location]);
-
-  if (!monitor || pingsLoading) {
-    return null;
-  }
-
-  if (latestPing && latestPing.monitor.id !== monitor.id) {
+  if (!monitor) {
     return null;
   }
 
   const isBrowserType = monitor.type === 'browser';
 
-  const badge = !latestPing ? (
+  const badge = pingsLoading ? (
+    <EuiLoadingSpinner size="s" />
+  ) : !latestPing ? (
     <EuiBadge color="default">{PENDING_LABEL}</EuiBadge>
   ) : latestPing.monitor.status === 'up' ? (
     <EuiBadge color={theme.eui.euiColorVis0}>{isBrowserType ? SUCCESS_LABEL : UP_LABEL}</EuiBadge>
