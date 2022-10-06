@@ -76,6 +76,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.title,
       ...windowParameters,
+      compressResponse: false,
     },
     { reducer: streamReducer, initialState }
   );

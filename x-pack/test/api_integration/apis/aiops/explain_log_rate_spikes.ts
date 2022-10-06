@@ -75,11 +75,11 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
     });
 
-    it('should return full data without streaming', async () => {
+    async function requestWithoutStreaming(body: ApiExplainLogRateSpikes['body']) {
       const resp = await supertest
         .post(`/internal/aiops/explain_log_rate_spikes`)
         .set('kbn-xsrf', 'kibana')
-        .send(requestBody)
+        .send(body)
         .expect(200);
 
       expect(Buffer.isBuffer(resp.body)).to.be(true);
@@ -131,16 +131,24 @@ export default ({ getService }: FtrProviderContext) => {
       histograms.forEach((h, index) => {
         expect(h.histogram.length).to.be(20);
       });
+    }
+
+    it('should return full data without streaming with compression', async () => {
+      await requestWithoutStreaming(requestBody);
     });
 
-    it('should return data in chunks with streaming', async () => {
+    it('should return full data without streaming without compression', async () => {
+      await requestWithoutStreaming({ ...requestBody, compressResponse: false });
+    });
+
+    async function requestWithStreaming(body: ApiExplainLogRateSpikes['body']) {
       const response = await fetch(`${kibanaServerUrl}/internal/aiops/explain_log_rate_spikes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'kbn-xsrf': 'stream',
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(body),
       });
 
       expect(response.ok).to.be(true);
@@ -189,6 +197,14 @@ export default ({ getService }: FtrProviderContext) => {
           expect(h.histogram.length).to.be(20);
         });
       }
+    }
+
+    it('should return data in chunks with streaming with compression', async () => {
+      await requestWithStreaming(requestBody);
+    });
+
+    it('should return data in chunks with streaming without compression', async () => {
+      await requestWithStreaming({ ...requestBody, compressResponse: false });
     });
 
     it('should return an error for non existing index without streaming', async () => {
