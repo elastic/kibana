@@ -38,6 +38,7 @@ export interface MetricVisRenderConfig {
   visType: typeof visType;
   visData: Datatable;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
+  canNavigateToLens: boolean;
 }
 
 export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition<

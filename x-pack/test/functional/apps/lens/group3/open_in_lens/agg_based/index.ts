@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Agg based Vis to Lens', function () {
     loadTestFile(require.resolve('./pie'));
+    loadTestFile(require.resolve('./metric'));
   });
 }

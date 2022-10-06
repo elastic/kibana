@@ -20,3 +20,4 @@ export * from './terms';
 export * from './types';
 export * from './last_value';
 export * from './range';
+export * from './percentage_mode';
