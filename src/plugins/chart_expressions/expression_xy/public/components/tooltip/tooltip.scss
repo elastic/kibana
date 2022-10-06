@@ -22,6 +22,10 @@
   }
 }
 
+.detailedTooltip__labelContainer {
+  max-width: $euiSizeXL * 5;
+}
+
 .detailedTooltip__labelContainer,
 .detailedTooltip__valueContainer {
   overflow-wrap: break-word;
