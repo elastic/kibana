@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getStopsWithColorsFromRanges } from './palette';
+export { getPalette } from './palette';
+export { getPercentageModeConfig } from './percentage_mode';

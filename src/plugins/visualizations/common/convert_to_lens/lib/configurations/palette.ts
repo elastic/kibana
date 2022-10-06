@@ -8,9 +8,8 @@
 
 import color from 'color';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { VisParams } from '../../types';
-import { getStopsWithColorsFromRanges } from '../../utils';
-import { PaletteConfig } from '../../utils/palette';
+import { getStopsWithColorsFromRanges, PaletteConfig } from '../../../utils';
+import { PaletteParams } from './types';
 
 type ColorStopsWithMinMax = Pick<
   CustomPaletteParams,
@@ -53,10 +52,12 @@ const buildCustomPalette = (
   };
 };
 
-export const getPalette = (params: VisParams): PaletteOutput<CustomPaletteParams> | undefined => {
-  const { colorSchema, colorsRange, invertColors, metricColorMode } = params.metric;
+export const getPalette = (
+  params: PaletteParams
+): PaletteOutput<CustomPaletteParams> | undefined => {
+  const { colorSchema, colorsRange, invertColors } = params;
 
-  if (metricColorMode === 'None' || !(colorsRange && colorsRange.length)) {
+  if (!(colorsRange && colorsRange.length)) {
     return;
   }
 

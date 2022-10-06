@@ -7,45 +7,24 @@
  */
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
-import { VisParams } from '../../types';
 import { getPalette } from './palette';
+import { PaletteParams } from './types';
 
 describe('getPalette', () => {
-  const params: VisParams = {
-    addTooltip: false,
-    addLegend: false,
-    dimensions: {} as VisParams['dimensions'],
-    metric: {
-      percentageMode: false,
-      percentageFormatPattern: '',
-      useRanges: true,
-      colorSchema: ColorSchemas.Greys,
-      metricColorMode: 'Labels',
-      colorsRange: [
-        { type: 'range', from: 0, to: 100 },
-        { type: 'range', from: 100, to: 200 },
-        { type: 'range', from: 200, to: 300 },
-      ],
-      labels: {},
-      invertColors: false,
-      style: {} as VisParams['metric']['style'],
-    },
-    type: 'metric',
+  const params: PaletteParams = {
+    colorSchema: ColorSchemas.Greys,
+    colorsRange: [
+      { type: 'range', from: 0, to: 100 },
+      { type: 'range', from: 100, to: 200 },
+      { type: 'range', from: 200, to: 300 },
+    ],
+    invertColors: false,
   };
 
-  test('should return undefined if metricColorMode is `None`', () => {
-    const metricColorMode = 'None';
-    const paramsWithNoneMetricColorMode: VisParams = {
-      ...params,
-      metric: { ...params.metric, metricColorMode },
-    };
-    expect(getPalette(paramsWithNoneMetricColorMode)).toBeUndefined();
-  });
-
   test('should return undefined if empty color ranges were passed', () => {
-    const paramsWithNoneMetricColorMode: VisParams = {
+    const paramsWithNoneMetricColorMode: PaletteParams = {
       ...params,
-      metric: { ...params.metric, colorsRange: [] },
+      colorsRange: [],
     };
     expect(getPalette(paramsWithNoneMetricColorMode)).toBeUndefined();
   });
