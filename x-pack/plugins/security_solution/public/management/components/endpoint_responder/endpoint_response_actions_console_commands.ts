@@ -15,7 +15,10 @@ import { EndpointStatusActionResult } from './status_action';
 import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
 import type { EndpointPrivileges, ImmutableArray } from '../../../../common/endpoint/types';
-import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
+import {
+  INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
+  UPGRADE_ENDPOINT_FOR_RESPONDER,
+} from '../../../common/translations';
 import type {
   ResponderCapabilities,
   ResponderCommands,
@@ -53,17 +56,46 @@ const commandToCapabilitiesMap = new Map<ResponderCommands, ResponderCapabilitie
   ['processes', 'running_processes'],
 ]);
 
-const capabilitiesValidator = (command: Command): true | string => {
+const getRbacControl = ({
+  commandName,
+  privileges,
+}: {
+  commandName: ResponderCommands;
+  privileges: EndpointPrivileges;
+}): boolean => {
+  const commandToPrivilegeMap = new Map<ResponderCommands, boolean>([
+    ['isolate', privileges.canIsolateHost],
+    ['release', privileges.canUnIsolateHost],
+    ['kill-process', privileges.canKillProcess],
+    ['suspend-process', privileges.canSuspendProcess],
+    ['processes', privileges.canGetRunningProcesses],
+  ]);
+  return commandToPrivilegeMap.get(commandName as ResponderCommands) ?? false;
+};
+
+const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
+  const privileges = command.commandDefinition.meta.privileges;
   const endpointCapabilities: ResponderCapabilities[] = command.commandDefinition.meta.capabilities;
-  const responderCapability = commandToCapabilitiesMap.get(
-    command.commandDefinition.name as ResponderCommands
-  );
+  const commandName = command.commandDefinition.name as ResponderCommands;
+  const responderCapability = commandToCapabilitiesMap.get(commandName);
+  let errorMessage = '';
+  if (!responderCapability) {
+    errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
+  }
   if (responderCapability) {
-    if (endpointCapabilities.includes(responderCapability)) {
-      return true;
+    if (!endpointCapabilities.includes(responderCapability)) {
+      errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
     }
   }
-  return UPGRADE_ENDPOINT_FOR_RESPONDER;
+  if (getRbacControl({ commandName, privileges }) !== true) {
+    errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
+  }
+
+  if (errorMessage.length > 0) {
+    return errorMessage;
+  }
+
+  return true;
 };
 
 const HELP_GROUPS = Object.freeze({
@@ -106,16 +138,6 @@ export const getEndpointResponseActionsConsoleCommands = ({
     }
     return false;
   };
-  const getRbacControl = (commandName: ResponderCommands): boolean => {
-    const commandToPrivilegeMap = new Map<ResponderCommands, boolean>([
-      ['isolate', endpointPrivileges.canIsolateHost],
-      ['release', endpointPrivileges.canUnIsolateHost],
-      ['kill-process', endpointPrivileges.canKillProcess],
-      ['suspend-process', endpointPrivileges.canSuspendProcess],
-      ['processes', endpointPrivileges.canGetRunningProcesses],
-    ]);
-    return commandToPrivilegeMap.get(commandName as ResponderCommands) ?? false;
-  };
 
   return [
     {
@@ -130,10 +152,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'isolate --comment "isolate this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       args: {
         comment: {
           required: false,
@@ -145,7 +168,8 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 0,
       helpDisabled: doesEndpointSupportCommand('isolate') === false,
-      helpHidden: getRbacControl('isolate') === false,
+      helpHidden:
+        getRbacControl({ commandName: 'isolate', privileges: endpointPrivileges }) === false,
     },
     {
       name: 'release',
@@ -159,10 +183,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'release --comment "release this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       args: {
         comment: {
           required: false,
@@ -174,7 +199,8 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 1,
       helpDisabled: doesEndpointSupportCommand('release') === false,
-      helpHidden: getRbacControl('release') === false,
+      helpHidden:
+        getRbacControl({ commandName: 'release', privileges: endpointPrivileges }) === false,
     },
     {
       name: 'kill-process',
@@ -191,10 +217,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       mustHaveArgs: true,
       args: {
         comment: {
@@ -228,7 +255,8 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 4,
       helpDisabled: doesEndpointSupportCommand('kill-process') === false,
-      helpHidden: getRbacControl('kill-process') === false,
+      helpHidden:
+        getRbacControl({ commandName: 'kill-process', privileges: endpointPrivileges }) === false,
     },
     {
       name: 'suspend-process',
@@ -245,10 +273,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       mustHaveArgs: true,
       args: {
         comment: {
@@ -285,7 +314,9 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 5,
       helpDisabled: doesEndpointSupportCommand('suspend-process') === false,
-      helpHidden: getRbacControl('suspend-process') === false,
+      helpHidden:
+        getRbacControl({ commandName: 'suspend-process', privileges: endpointPrivileges }) ===
+        false,
     },
     {
       name: 'status',
@@ -315,10 +346,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'processes --comment "get the processes"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       args: {
         comment: {
           required: false,
@@ -330,7 +362,8 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 3,
       helpDisabled: doesEndpointSupportCommand('processes') === false,
-      helpHidden: getRbacControl('processes') === false,
+      helpHidden:
+        getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }) === false,
     },
   ];
 };
