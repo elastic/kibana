@@ -128,8 +128,8 @@ export function TextBasedLanguagesDataPanel({
           </EuiFlexItem>
           <EuiFlexItem>
             {/* TODO: Refactor to use shared components from UnifiedFieldList instead of their classes */}
-            <div className="unifiedFieldList__fieldList">
-              <div className="unifiedFieldList__fieldList__accordionContainer">
+            <div className="unifiedFieldList__fieldListGrouped">
+              <div className="unifiedFieldList__fieldListGrouped__container">
                 <ul
                   className="unifiedFieldList__fieldsAccordion__fieldItems"
                   data-test-subj="lnsTextBasedLanguagesPanelFields"
