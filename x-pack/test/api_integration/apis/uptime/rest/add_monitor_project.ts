@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.10.2')
+        .post('/api/fleet/epm/packages/synthetics/0.10.3')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -1798,6 +1798,14 @@ export default function ({ getService }: FtrProviderContext) {
                 config_id: { value: configId, type: 'text' },
                 run_once: { value: false, type: 'bool' },
                 origin: { value: 'project', type: 'text' },
+                'monitor.project.id': {
+                  type: 'text',
+                  value: 'test-suite',
+                },
+                'monitor.project.name': {
+                  type: 'text',
+                  value: 'test-suite',
+                },
               },
               id: `synthetics/http-http-${id}-${testPolicyId}`,
               compiled_stream: {
@@ -1828,6 +1836,8 @@ export default function ({ getService }: FtrProviderContext) {
                       fields: {
                         'monitor.fleet_managed': true,
                         config_id: configId,
+                        'monitor.project.id': 'test-suite',
+                        'monitor.project.name': 'test-suite',
                       },
                     },
                   },
@@ -1859,7 +1869,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(packagePolicy2).eql(undefined);
       } finally {
-        await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, httpProjectMonitors.project);
 
         const apiResponsePolicy2 = await supertest.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
