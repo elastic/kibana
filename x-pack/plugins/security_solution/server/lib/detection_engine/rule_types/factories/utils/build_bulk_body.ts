@@ -52,7 +52,7 @@ export const buildBulkBody = (
   applyOverrides: boolean,
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
-  alertTimestampOverride?: Date
+  alertTimestampOverride: Date | undefined
 ): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const eventFields = buildEventTypeAlert(mergedDoc);
