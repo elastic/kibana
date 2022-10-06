@@ -32638,8 +32638,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeFailed": "Impossible de modifier les paramètres de répétition de la règle",
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess": "Répétition de la règle activée",
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.unsnoozeSuccess": "Répétition de la règle désactivée",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex": "Actions",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip": "Impossible de charger l'un des connecteurs associés à cette règle. Modifiez la règle pour sélectionner un nouveau connecteur.",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle": "Propriétaire de la clé d'API",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteAriaLabel": "Supprimer",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteButtonTooltip": "Supprimer",
