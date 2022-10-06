@@ -11,7 +11,7 @@ cat <<EOF > $KIBANA_DIR/.bazelrc
   build --build_metadata=ROLE=CI
 EOF
 
-BAZEL_CACHE_MODE=${BAZEL_CACHE_MODE:-gcs}
+BAZEL_CACHE_MODE=none
 
 if [[ "$BAZEL_CACHE_MODE" == "gcs" ]]; then
   echo "[bazel] enabling caching with GCS buckets"
