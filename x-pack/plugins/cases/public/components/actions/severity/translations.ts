@@ -75,24 +75,3 @@ export const SET_SEVERITY_CRITICAL = ({
     caseTitle,
     severity: severities[CaseSeverity.CRITICAL].label,
   });
-
-export const BULK_ACTION_STATUS_CLOSE = i18n.translate(
-  'xpack.cases.caseTable.bulkActions.status.close',
-  {
-    defaultMessage: 'Close selected',
-  }
-);
-
-export const BULK_ACTION_STATUS_OPEN = i18n.translate(
-  'xpack.cases.caseTable.bulkActions.status.open',
-  {
-    defaultMessage: 'Open selected',
-  }
-);
-
-export const BULK_ACTION_STATUS_IN_PROGRESS = i18n.translate(
-  'xpack.cases.caseTable.bulkActions.status.inProgress',
-  {
-    defaultMessage: 'Mark in progress',
-  }
-);
