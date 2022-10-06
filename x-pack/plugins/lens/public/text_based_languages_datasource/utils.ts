@@ -35,6 +35,34 @@ export async function loadIndexPatternRefs(
     });
 }
 
+export const getAllColumns = (
+  existingColumns: TextBasedLanguagesLayerColumn[],
+  columnsFromQuery: DatatableColumn[]
+) => {
+  // filter out columns that do not exist on the query
+  const columns = existingColumns.filter((c) => {
+    const columnExists = columnsFromQuery?.some((f) => f.name === c?.fieldName);
+    if (columnExists) return c;
+  });
+  const allCols = [
+    ...columns,
+    ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
+  ];
+  const uniqueIds: string[] = [];
+
+  return allCols.filter((col) => {
+    const isDuplicate = uniqueIds.includes(col.columnId);
+
+    if (!isDuplicate) {
+      uniqueIds.push(col.columnId);
+
+      return true;
+    }
+
+    return false;
+  });
+};
+
 export async function getStateFromAggregateQuery(
   state: TextBasedLanguagesPrivateState,
   query: AggregateQuery,
@@ -59,12 +87,7 @@ export async function getStateFromAggregateQuery(
     const dataView = await dataViews.get(index);
     timeFieldName = dataView.timeFieldName;
     columnsFromQuery = table?.columns ?? [];
-    const existingColumns = state.layers[newLayerId].allColumns;
-
-    allColumns = [
-      ...existingColumns,
-      ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
-    ];
+    allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
   } catch (e) {
     errors.push(e);
   }

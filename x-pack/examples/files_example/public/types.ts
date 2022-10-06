@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MyImageMetadata } from '../common';
 import type { FilesSetup, FilesStart, ScopedFilesClient, FilesClient } from './imports';
 
 export interface FilesExamplePluginsSetup {
@@ -16,9 +17,9 @@ export interface FilesExamplePluginsStart {
 }
 
 export interface FileClients {
-  unscoped: FilesClient;
+  unscoped: FilesClient<MyImageMetadata>;
   // Example file kind
-  example: ScopedFilesClient;
+  example: ScopedFilesClient<MyImageMetadata>;
 }
 
 export interface AppPluginStartDependencies {

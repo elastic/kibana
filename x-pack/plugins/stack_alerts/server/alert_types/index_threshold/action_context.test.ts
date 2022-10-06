@@ -6,7 +6,7 @@
  */
 
 import { BaseActionContext, addMessages } from './action_context';
-import { ParamsSchema } from './alert_type_params';
+import { ParamsSchema } from './rule_type_params';
 
 describe('ActionContext', () => {
   it('generates expected properties if aggField is null', async () => {
@@ -28,10 +28,10 @@ describe('ActionContext', () => {
       value: 42,
       conditions: 'count greater than 4',
     };
-    const context = addMessages({ name: '[alert-name]' }, base, params);
-    expect(context.title).toMatchInlineSnapshot(`"alert [alert-name] group [group] met threshold"`);
+    const context = addMessages({ name: '[rule-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(`"alert [rule-name] group [group] met threshold"`);
     expect(context.message).toEqual(
-      `alert '[alert-name]' is active for group '[group]':
+      `alert '[rule-name]' is active for group '[group]':
 
 - Value: 42
 - Conditions Met: count greater than 4 over 5m
@@ -59,10 +59,10 @@ describe('ActionContext', () => {
       value: 42,
       conditions: 'avg([aggField]) greater than 4.2',
     };
-    const context = addMessages({ name: '[alert-name]' }, base, params);
-    expect(context.title).toMatchInlineSnapshot(`"alert [alert-name] group [group] met threshold"`);
+    const context = addMessages({ name: '[rule-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(`"alert [rule-name] group [group] met threshold"`);
     expect(context.message).toEqual(
-      `alert '[alert-name]' is active for group '[group]':
+      `alert '[rule-name]' is active for group '[group]':
 
 - Value: 42
 - Conditions Met: avg([aggField]) greater than 4.2 over 5m
@@ -89,10 +89,10 @@ describe('ActionContext', () => {
       value: 4,
       conditions: 'count between 4 and 5',
     };
-    const context = addMessages({ name: '[alert-name]' }, base, params);
-    expect(context.title).toMatchInlineSnapshot(`"alert [alert-name] group [group] met threshold"`);
+    const context = addMessages({ name: '[rule-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(`"alert [rule-name] group [group] met threshold"`);
     expect(context.message).toEqual(
-      `alert '[alert-name]' is active for group '[group]':
+      `alert '[rule-name]' is active for group '[group]':
 
 - Value: 4
 - Conditions Met: count between 4 and 5 over 5m
@@ -119,10 +119,10 @@ describe('ActionContext', () => {
       value: 'unknown',
       conditions: 'count between 4 and 5',
     };
-    const context = addMessages({ name: '[alert-name]' }, base, params);
-    expect(context.title).toMatchInlineSnapshot(`"alert [alert-name] group [group] met threshold"`);
+    const context = addMessages({ name: '[rule-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(`"alert [rule-name] group [group] met threshold"`);
     expect(context.message).toEqual(
-      `alert '[alert-name]' is active for group '[group]':
+      `alert '[rule-name]' is active for group '[group]':
 
 - Value: unknown
 - Conditions Met: count between 4 and 5 over 5m

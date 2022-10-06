@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiCode, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
@@ -45,14 +45,6 @@ export const CrawlRequestsPanel: React.FC = () => {
                 'Requests originating from the crawler can be identified by the following User Agent. This is configured in your enterprise-search.yml file.',
             }
           )}{' '}
-          <EuiLink target="_blank" href={'' /* needs docLink */}>
-            {i18n.translate(
-              'xpack.enterpriseSearch.crawler.crawlRequestsPanel.userAgentDocumentationLink',
-              {
-                defaultMessage: 'Learn more about Elastic crawler user agents',
-              }
-            )}
-          </EuiLink>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiCode>{data ? data.userAgent : ''}</EuiCode>

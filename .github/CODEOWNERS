@@ -332,15 +332,15 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/event_log/ @elastic/response-ops
 /x-pack/plugins/task_manager/ @elastic/response-ops
 /x-pack/plugins/stack_connectors/ @elastic/response-ops
-/x-pack/plugins/stack_connectors/public/connector_types/stack/ @elastic/response-ops-execution
-/x-pack/plugins/stack_connectors/server/connector_types/stack/ @elastic/response-ops-execution
-/x-pack/plugins/stack_connectors/public/connector_types/cases/ @elastic/response-ops-cases
-/x-pack/plugins/stack_connectors/server/connector_types/cases/ @elastic/response-ops-cases
+/x-pack/plugins/stack_connectors/public/connector_types/stack/ @elastic/response-ops @elastic/response-ops-execution
+/x-pack/plugins/stack_connectors/server/connector_types/stack/ @elastic/response-ops @elastic/response-ops-execution
+/x-pack/plugins/stack_connectors/public/connector_types/cases/ @elastic/response-ops @elastic/response-ops-cases
+/x-pack/plugins/stack_connectors/server/connector_types/cases/ @elastic/response-ops @elastic/response-ops-cases
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
-/x-pack/test/alerting_api_integration/basic/tests/actions/connector_types/stack/ @elastic/response-ops-execution
-/x-pack/test/alerting_api_integration/basic/tests/actions/connector_types/cases/ @elastic/response-ops-cases
-/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/stack/ @elastic/response-ops-execution
-/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/cases/ @elastic/response-ops-cases
+/x-pack/test/alerting_api_integration/basic/tests/actions/connector_types/stack/ @elastic/response-ops @elastic/response-ops-execution
+/x-pack/test/alerting_api_integration/basic/tests/actions/connector_types/cases/ @elastic/response-ops @elastic/response-ops-cases
+/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/stack/ @elastic/response-ops @elastic/response-ops-execution
+/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/cases/ @elastic/response-ops @elastic/response-ops-cases
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/plugins/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
@@ -833,6 +833,7 @@ packages/core/status/core-status-server-internal @elastic/kibana-core
 packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-deprecations-getters @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-http-setup-browser @elastic/kibana-core
+packages/core/test-helpers/core-test-helpers-so-type-serializer @elastic/kibana-core
 packages/core/theme/core-theme-browser @elastic/kibana-core
 packages/core/theme/core-theme-browser-internal @elastic/kibana-core
 packages/core/theme/core-theme-browser-mocks @elastic/kibana-core
