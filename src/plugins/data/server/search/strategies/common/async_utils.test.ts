@@ -9,6 +9,7 @@
 import { getCommonDefaultAsyncSubmitParams, getCommonDefaultAsyncGetParams } from './async_utils';
 import moment from 'moment';
 import { SearchSessionsConfigSchema } from '../../../../config';
+import { coreMock } from '@kbn/core/server/mocks';
 
 const getMockSearchSessionsConfig = ({
   enabled = true,
@@ -20,12 +21,25 @@ const getMockSearchSessionsConfig = ({
   } as SearchSessionsConfigSchema);
 
 describe('request utils', () => {
+  const mockContext = coreMock.createPluginInitializerContext({
+    search: {
+      async_search: {
+        wait_for_completion: {
+          asMilliseconds: () => '100ms',
+        },
+        keep_alive: {
+          asMilliseconds: () => '60000ms',
+        },
+      },
+    },
+  });
+
   describe('getCommonDefaultAsyncSubmitParams', () => {
     test('Uses short `keep_alive` if no `sessionId` is provided', async () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
       });
-      const params = getCommonDefaultAsyncSubmitParams(mockConfig, {});
+      const params = getCommonDefaultAsyncSubmitParams(mockContext, mockConfig, {});
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
@@ -33,7 +47,7 @@ describe('request utils', () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
       });
-      const params = getCommonDefaultAsyncSubmitParams(mockConfig, {
+      const params = getCommonDefaultAsyncSubmitParams(mockContext, mockConfig, {
         sessionId: 'foo',
       });
       expect(params).toHaveProperty('keep_alive', '1m');
@@ -43,7 +57,7 @@ describe('request utils', () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
       });
-      const params = getCommonDefaultAsyncSubmitParams(mockConfig, {
+      const params = getCommonDefaultAsyncSubmitParams(mockContext, mockConfig, {
         sessionId: 'foo',
         isStored: true,
       });
@@ -55,7 +69,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = getCommonDefaultAsyncSubmitParams(mockConfig, {
+      const params = getCommonDefaultAsyncSubmitParams(mockContext, mockConfig, {
         sessionId: 'foo',
       });
       expect(params).toHaveProperty('keep_alive', '1m');
@@ -63,7 +77,7 @@ describe('request utils', () => {
 
     test('Uses `keep_on_completion` if enabled', async () => {
       const mockConfig = getMockSearchSessionsConfig({});
-      const params = getCommonDefaultAsyncSubmitParams(mockConfig, {
+      const params = getCommonDefaultAsyncSubmitParams(mockContext, mockConfig, {
         sessionId: 'foo',
       });
       expect(params).toHaveProperty('keep_on_completion', true);
@@ -74,7 +88,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = getCommonDefaultAsyncSubmitParams(mockConfig, {
+      const params = getCommonDefaultAsyncSubmitParams(mockContext, mockConfig, {
         sessionId: 'foo',
       });
       expect(params).toHaveProperty('keep_on_completion', false);
@@ -87,7 +101,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getCommonDefaultAsyncGetParams(mockConfig, {});
+      const params = getCommonDefaultAsyncGetParams(mockContext, mockConfig, {});
       expect(params).toHaveProperty('wait_for_completion_timeout');
     });
 
@@ -96,7 +110,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getCommonDefaultAsyncGetParams(mockConfig, {});
+      const params = getCommonDefaultAsyncGetParams(mockContext, mockConfig, {});
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
@@ -105,7 +119,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getCommonDefaultAsyncGetParams(mockConfig, { sessionId: 'foo' });
+      const params = getCommonDefaultAsyncGetParams(mockContext, mockConfig, { sessionId: 'foo' });
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
@@ -114,7 +128,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getCommonDefaultAsyncGetParams(mockConfig, {
+      const params = getCommonDefaultAsyncGetParams(mockContext, mockConfig, {
         sessionId: 'foo',
         isStored: true,
       });
@@ -126,7 +140,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getCommonDefaultAsyncGetParams(mockConfig, {
+      const params = getCommonDefaultAsyncGetParams(mockContext, mockConfig, {
         sessionId: 'foo',
         isStored: true,
         isSearchStored: true,
@@ -139,7 +153,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getCommonDefaultAsyncGetParams(mockConfig, {
+      const params = getCommonDefaultAsyncGetParams(mockContext, mockConfig, {
         sessionId: 'foo',
         isStored: true,
         isSearchStored: false,
@@ -153,7 +167,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = getCommonDefaultAsyncGetParams(mockConfig, { sessionId: 'foo' });
+      const params = getCommonDefaultAsyncGetParams(mockContext, mockConfig, { sessionId: 'foo' });
       expect(params).toHaveProperty('keep_alive', '1m');
     });
   });

@@ -15,6 +15,7 @@ import { IUiSettingsClient } from '@kbn/core/server';
 import { UI_SETTINGS } from '../../../../common';
 import moment from 'moment';
 import { SearchSessionsConfigSchema } from '../../../../config';
+import { coreMock } from '@kbn/core/server/mocks';
 
 const getMockUiSettingsClient = (config: Record<string, unknown>) => {
   return { get: async (key: string) => config[key] } as IUiSettingsClient;
@@ -30,6 +31,19 @@ const getMockSearchSessionsConfig = ({
   } as SearchSessionsConfigSchema);
 
 describe('request utils', () => {
+  const mockContext = coreMock.createPluginInitializerContext({
+    search: {
+      async_search: {
+        wait_for_completion: {
+          asMilliseconds: () => '100ms',
+        },
+        keep_alive: {
+          asMilliseconds: () => '60000ms',
+        },
+      },
+    },
+  });
+
   describe('getIgnoreThrottled', () => {
     test('does not return `ignore_throttled` when `includeFrozen` is `false`', async () => {
       const mockUiSettingsClient = getMockUiSettingsClient({
@@ -56,7 +70,12 @@ describe('request utils', () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
       });
-      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {});
+      const params = await getDefaultAsyncSubmitParams(
+        mockContext,
+        mockUiSettingsClient,
+        mockConfig,
+        {}
+      );
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
@@ -67,10 +86,15 @@ describe('request utils', () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
       });
-      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {
-        sessionId: 'foo',
-        isStored: true,
-      });
+      const params = await getDefaultAsyncSubmitParams(
+        mockContext,
+        mockUiSettingsClient,
+        mockConfig,
+        {
+          sessionId: 'foo',
+          isStored: true,
+        }
+      );
       expect(params).toHaveProperty('keep_alive', '259200000ms');
     });
 
@@ -82,9 +106,14 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {
-        sessionId: 'foo',
-      });
+      const params = await getDefaultAsyncSubmitParams(
+        mockContext,
+        mockUiSettingsClient,
+        mockConfig,
+        {
+          sessionId: 'foo',
+        }
+      );
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
@@ -93,9 +122,14 @@ describe('request utils', () => {
         [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
       });
       const mockConfig = getMockSearchSessionsConfig({});
-      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {
-        sessionId: 'foo',
-      });
+      const params = await getDefaultAsyncSubmitParams(
+        mockContext,
+        mockUiSettingsClient,
+        mockConfig,
+        {
+          sessionId: 'foo',
+        }
+      );
       expect(params).toHaveProperty('keep_on_completion', true);
     });
 
@@ -107,9 +141,14 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {
-        sessionId: 'foo',
-      });
+      const params = await getDefaultAsyncSubmitParams(
+        mockContext,
+        mockUiSettingsClient,
+        mockConfig,
+        {
+          sessionId: 'foo',
+        }
+      );
       expect(params).toHaveProperty('keep_on_completion', false);
     });
   });
@@ -120,7 +159,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getDefaultAsyncGetParams(mockConfig, {});
+      const params = getDefaultAsyncGetParams(mockContext, mockConfig, {});
       expect(params).toHaveProperty('wait_for_completion_timeout');
     });
 
@@ -129,7 +168,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getDefaultAsyncGetParams(mockConfig, {});
+      const params = getDefaultAsyncGetParams(mockContext, mockConfig, {});
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
@@ -138,7 +177,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getDefaultAsyncGetParams(mockConfig, {
+      const params = getDefaultAsyncGetParams(mockContext, mockConfig, {
         sessionId: 'foo',
         isStored: true,
         isSearchStored: true,
@@ -151,7 +190,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = getDefaultAsyncGetParams(mockConfig, { sessionId: 'foo' });
+      const params = getDefaultAsyncGetParams(mockContext, mockConfig, { sessionId: 'foo' });
       expect(params).toHaveProperty('keep_alive', '1m');
     });
   });
