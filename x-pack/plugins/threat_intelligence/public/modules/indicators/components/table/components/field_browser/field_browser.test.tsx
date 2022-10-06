@@ -36,7 +36,9 @@ describe('<IndicatorsFieldBrowser />', () => {
         columnIds: [],
         onResetColumns: stub,
         onToggleColumn: stub,
-        options: {},
+        options: {
+          preselectedCategoryIds: ['threat'],
+        },
       })
     );
   });
