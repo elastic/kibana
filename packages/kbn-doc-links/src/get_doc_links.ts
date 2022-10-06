@@ -375,6 +375,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         es_connection: '',
       },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
+      configureEndpointIntegrationPolicy: `${SECURITY_SOLUTION_DOCS}configure-endpoint-integration-policy.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

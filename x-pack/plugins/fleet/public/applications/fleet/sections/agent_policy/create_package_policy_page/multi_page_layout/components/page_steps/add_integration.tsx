@@ -217,11 +217,11 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     return (
       extensionView && (
         <ExtensionWrapper>
-          <extensionView.Component newPolicy={packagePolicy} />
+          <extensionView.Component />
         </ExtensionWrapper>
       )
     );
-  }, [packagePolicy, extensionView]);
+  }, [extensionView]);
 
   const content = useMemo(() => {
     if (packageInfo.name !== 'endpoint') {
