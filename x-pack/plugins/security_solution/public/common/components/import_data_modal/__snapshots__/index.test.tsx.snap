@@ -8,6 +8,7 @@ Object {
     <div
       class="euiOverlayMask"
       data-euiportal="true"
+      data-relative-to-header="above"
     >
       <div
         data-eui="EuiFocusTrap"

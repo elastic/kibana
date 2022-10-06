@@ -1407,8 +1407,12 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                         className="euiButtonEmpty__text"
                       >
                         <div
-                          className="euiText emotion-euiText-s-euiTextColor-ghost"
-                          style={Object {}}
+                          className="euiText emotion-euiText-s-euiTextColor-customColor"
+                          style={
+                            Object {
+                              "color": "text",
+                            }
+                          }
                         >
                           Page 
                           1
@@ -2891,8 +2895,12 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                         className="euiButtonEmpty__text"
                       >
                         <div
-                          className="euiText emotion-euiText-s-euiTextColor-ghost"
-                          style={Object {}}
+                          className="euiText emotion-euiText-s-euiTextColor-customColor"
+                          style={
+                            Object {
+                              "color": "text",
+                            }
+                          }
                         >
                           Page 
                           1
@@ -3191,8 +3199,12 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                         className="euiButtonEmpty__text"
                       >
                         <div
-                          className="euiText emotion-euiText-s-euiTextColor-ghost"
-                          style={Object {}}
+                          className="euiText emotion-euiText-s-euiTextColor-customColor"
+                          style={
+                            Object {
+                              "color": "text",
+                            }
+                          }
                         >
                           Page 
                           1

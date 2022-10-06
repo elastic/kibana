@@ -208,7 +208,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText emotion-euiText-s-euiTextColor-customColor"
                         >
                           Page 1
                         </div>
@@ -482,7 +482,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText emotion-euiText-s-euiTextColor-customColor"
                         >
                           Page 1
                         </div>
@@ -756,7 +756,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText emotion-euiText-s-euiTextColor-customColor"
                         >
                           Page 1
                         </div>
@@ -1031,7 +1031,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText emotion-euiText-s-euiTextColor-customColor"
                         >
                           Page 1
                         </div>
@@ -1305,7 +1305,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText emotion-euiText-s-euiTextColor-customColor"
                         >
                           Page 1
                         </div>

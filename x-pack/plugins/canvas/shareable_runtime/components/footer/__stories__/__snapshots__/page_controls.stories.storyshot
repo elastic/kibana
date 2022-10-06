@@ -56,8 +56,12 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
             className="euiButtonEmpty__text"
           >
             <div
-              className="euiText emotion-euiText-s-euiTextColor-ghost"
-              style={Object {}}
+              className="euiText emotion-euiText-s-euiTextColor-customColor"
+              style={
+                Object {
+                  "color": "text",
+                }
+              }
             >
               Page 
               1
@@ -154,8 +158,12 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
             className="euiButtonEmpty__text"
           >
             <div
-              className="euiText emotion-euiText-s-euiTextColor-ghost"
-              style={Object {}}
+              className="euiText emotion-euiText-s-euiTextColor-customColor"
+              style={
+                Object {
+                  "color": "text",
+                }
+              }
             >
               Page 
               1
@@ -252,8 +260,12 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
             className="euiButtonEmpty__text"
           >
             <div
-              className="euiText emotion-euiText-s-euiTextColor-ghost"
-              style={Object {}}
+              className="euiText emotion-euiText-s-euiTextColor-customColor"
+              style={
+                Object {
+                  "color": "text",
+                }
+              }
             >
               Page 
               1
