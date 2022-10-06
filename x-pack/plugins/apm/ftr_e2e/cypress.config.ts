@@ -6,9 +6,10 @@
  */
 
 import { defineConfig } from 'cypress';
-import { plugin } from './cypress/plugins';
+import { setupNodeEvents } from './setup_cypress_node_events';
 
 module.exports = defineConfig({
+  projectId: 'omwh6f',
   fileServerFolder: './cypress',
   fixturesFolder: './cypress/fixtures',
   screenshotsFolder: './cypress/screenshots',
@@ -18,16 +19,16 @@ module.exports = defineConfig({
   defaultCommandTimeout: 30000,
   execTimeout: 120000,
   pageLoadTimeout: 120000,
-  viewportHeight: 900,
+  viewportHeight: 1800,
   viewportWidth: 1440,
-  video: false,
-  screenshotOnRunFailure: false,
+  video: true,
+  videoUploadOnPasses: false,
+  screenshotOnRunFailure: true,
+  retries: {
+    runMode: 1,
+  },
   e2e: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
-    setupNodeEvents(on, config) {
-      plugin(on, config);
-    },
+    setupNodeEvents,
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',
     specPattern: './cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',

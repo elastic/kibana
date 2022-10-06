@@ -8,7 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
-import { AggBasedColumn, SchemaConfig } from '../../common';
+import { AggBasedColumn, PercentageModeConfig, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { getCustomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
@@ -46,8 +46,11 @@ export const getColumnsFromVis = <T>(
   } = {},
   config?: {
     dropEmptyRowsInDateHistogram?: boolean;
-  }
+  } & (PercentageModeConfig | void)
 ) => {
+  const { dropEmptyRowsInDateHistogram, ...percentageModeConfig } = config ?? {
+    isPercentageMode: false,
+  };
   const visSchemas = getVisSchemas(vis, {
     timefilter,
     timeRange: timefilter.getAbsoluteTime(),
@@ -67,8 +70,8 @@ export const getColumnsFromVis = <T>(
   const metricsWithoutDuplicates = getMetricsWithoutDuplicates(visSchemas.metric);
   const aggs = metricsWithoutDuplicates as Array<SchemaConfig<METRIC_TYPES>>;
 
-  const metricColumns = metricsWithoutDuplicates.flatMap((m) =>
-    convertMetricToColumns(m, dataView, aggs)
+  const metricColumns = aggs.flatMap((m) =>
+    convertMetricToColumns(m, dataView, aggs, percentageModeConfig)
   );
 
   if (metricColumns.includes(null)) {
@@ -81,7 +84,7 @@ export const getColumnsFromVis = <T>(
     const customBucketColumn = convertBucketToColumns(
       { agg: customBuckets[0], dataView, metricColumns: metrics, aggs },
       false,
-      config?.dropEmptyRowsInDateHistogram
+      dropEmptyRowsInDateHistogram
     );
     if (!customBucketColumn) {
       return null;
@@ -95,7 +98,7 @@ export const getColumnsFromVis = <T>(
     dataView,
     false,
     metricColumns as AggBasedColumn[],
-    config?.dropEmptyRowsInDateHistogram
+    dropEmptyRowsInDateHistogram
   );
   if (!bucketColumns) {
     return null;
@@ -107,7 +110,7 @@ export const getColumnsFromVis = <T>(
     dataView,
     true,
     metricColumns as AggBasedColumn[],
-    config?.dropEmptyRowsInDateHistogram
+    dropEmptyRowsInDateHistogram
   );
   if (!splitBucketColumns) {
     return null;

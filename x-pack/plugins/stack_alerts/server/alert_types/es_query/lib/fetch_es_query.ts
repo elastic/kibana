@@ -28,7 +28,7 @@ export async function fetchEsQuery(
   const esClient = scopedClusterClient.asCurrentUser;
   const {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    parsedQuery: { query, fields, runtime_mappings },
+    parsedQuery: { query, fields, runtime_mappings, _source },
     dateStart,
     dateEnd,
   } = getSearchParams(params);
@@ -76,6 +76,7 @@ export async function fetchEsQuery(
     track_total_hits: true,
     fields,
     runtime_mappings,
+    _source,
   });
 
   logger.debug(
