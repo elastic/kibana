@@ -159,7 +159,7 @@ export function CasesTableServiceProvider(
     },
 
     async refreshTable() {
-      await testSubjects.click('all-cases-refresh');
+      await testSubjects.click('all-cases-refresh-link-icon');
     },
 
     async openRowActions(index: number) {
@@ -177,7 +177,8 @@ export function CasesTableServiceProvider(
 
     async selectAllCasesAndOpenBulkActions() {
       await testSubjects.setCheckbox('checkboxSelectAll', 'check');
-      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
+      await testSubjects.existOrFail('case-table-bulk-actions-link-icon');
+      const button = await testSubjects.find('case-table-bulk-actions-link-icon');
       await button.click();
     },
 
