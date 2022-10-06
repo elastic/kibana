@@ -37,8 +37,14 @@ import { IndexPatternLayer } from '../../indexpattern_datasource/types';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
-export const getDefaultColor = (hasMax: boolean) =>
-  hasMax ? euiLightVars.euiColorPrimary : euiThemeVars.euiColorLightestShade;
+export const showingBar = (
+  state: MetricVisualizationState
+): state is MetricVisualizationState & { showBar: true; maxAccessor: string } =>
+  Boolean(state.showBar && state.maxAccessor);
+
+export const getDefaultColor = (state: MetricVisualizationState) =>
+  showingBar(state) ? euiLightVars.euiColorPrimary : euiThemeVars.euiColorLightestShade;
+
 export interface MetricVisualizationState {
   layerId: string;
   layerType: LayerType;
@@ -52,6 +58,7 @@ export interface MetricVisualizationState {
   subtitle?: string;
   secondaryPrefix?: string;
   progressDirection?: LayoutDirection;
+  showBar?: boolean;
   color?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
@@ -109,7 +116,7 @@ const getMetricLayerConfiguration = (
         }
       : {
           triggerIcon: 'color',
-          color: getDefaultColor(!!props.state.maxAccessor),
+          color: getDefaultColor(props.state),
         };
   };
 
@@ -298,6 +305,7 @@ const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
 const removeMaxDimension = (state: MetricVisualizationState) => {
   delete state.maxAccessor;
   delete state.progressDirection;
+  delete state.showBar;
 };
 
 const removeBreakdownByDimension = (state: MetricVisualizationState) => {
@@ -506,6 +514,9 @@ export const getMetricVisualization = ({
         break;
       case GROUP_ID.MAX:
         updated.maxAccessor = columnId;
+        if (!prevState.trendlineLayerId) {
+          updated.showBar = true;
+        }
         break;
       case GROUP_ID.BREAKDOWN_BY:
         updated.breakdownByAccessor = columnId;

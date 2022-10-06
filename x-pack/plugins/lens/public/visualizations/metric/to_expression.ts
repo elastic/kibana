@@ -12,6 +12,7 @@ import {
 } from '@kbn/expression-metric-vis-plugin/public';
 import { Ast, AstFunction } from '@kbn/interpreter';
 import { DatasourceLayers } from '../../types';
+import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
 
 // TODO - deduplicate with gauges?
@@ -139,13 +140,13 @@ export const toExpression = (
           secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
           secondaryPrefix:
             typeof state.secondaryPrefix !== 'undefined' ? [state.secondaryPrefix] : [],
-          max: state.maxAccessor ? [state.maxAccessor] : [],
+          max: showingBar(state) ? [state.maxAccessor] : [],
           breakdownBy:
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
           trendline: trendlineExpression ? [trendlineExpression] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
-          color: [state.color || getDefaultColor(!!state.maxAccessor)],
+          color: [state.color || getDefaultColor(state)],
           palette: state.palette?.params
             ? [
                 paletteService

@@ -17,8 +17,6 @@ import {
   EuiColorPicker,
   euiPaletteColorBlind,
   EuiSpacer,
-  EuiSwitch,
-  EuiToolTip,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useState } from 'react';
@@ -41,9 +39,16 @@ import {
 } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
-import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
+import {
+  DEFAULT_MAX_COLUMNS,
+  getDefaultColor,
+  MetricVisualizationState,
+  showingBar,
+} from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { DebouncedInput } from '../../shared_components/debounced_input';
+
+export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
 type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
@@ -131,49 +136,7 @@ function BreakdownByEditor({ setState, state }: SubProps) {
 }
 
 function MaximumEditor({ setState, state, idPrefix }: SubProps) {
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-        defaultMessage: 'Bar direction',
-      })}
-      fullWidth
-      display="columnCompressed"
-    >
-      <EuiButtonGroup
-        isFullWidth
-        buttonSize="compressed"
-        legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-          defaultMessage: 'Bar direction',
-        })}
-        data-test-subj="lnsMetric_progress_direction_buttons"
-        name="alignment"
-        options={[
-          {
-            id: `${idPrefix}vertical`,
-            label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
-              defaultMessage: 'Vertical',
-            }),
-            'data-test-subj': 'lnsMetric_progress_bar_vertical',
-          },
-          {
-            id: `${idPrefix}horizontal`,
-            label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
-              defaultMessage: 'Horizontal',
-            }),
-            'data-test-subj': 'lnsMetric_progress_bar_horizontal',
-          },
-        ]}
-        idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
-        onChange={(id) => {
-          const newDirection = id.replace(idPrefix, '') as LayoutDirection;
-          setState({
-            ...state,
-            progressDirection: newDirection,
-          });
-        }}
-      />
-    </EuiFormRow>
-  );
+  return null;
 }
 
 function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, state }: SubProps) {
@@ -302,49 +265,133 @@ function PrimaryMetricEditor(props: SubProps) {
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
 
   const hasDefaultTimeField = props.datasource?.hasDefaultTimeField();
-  const trendlineLabel = i18n.translate('xpack.lens.metric.enableTrendline.label', {
-    defaultMessage: 'Trendline',
+  const supportingVisLabel = i18n.translate('xpack.lens.metric.supportingVis.label', {
+    defaultMessage: 'Supporting visualization',
   });
+
+  const supportingVisHelpText = !hasDefaultTimeField
+    ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
+        defaultMessage: 'Use a data view with a default time field to enable trendlines.',
+      })
+    : !state.maxAccessor
+    ? i18n.translate('xpack.lens.metric.summportingVis.needMaxDimension', {
+        defaultMessage: 'Add a maximum dimension to enable the progress bar.',
+      })
+    : null;
+
+  const buttonIdPrefix = `${idPrefix}--`;
 
   return (
     <>
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={trendlineLabel}
-        css={css`
-          align-items: center;
-        `}
-        isDisabled={!hasDefaultTimeField}
+        label={supportingVisLabel}
+        helpText={supportingVisHelpText}
       >
-        <EuiToolTip
-          content={
-            hasDefaultTimeField
-              ? i18n.translate('xpack.lens.metric.enableTrendline.explanationTooltip', {
-                  defaultMessage: 'This adds a line chart to the background of your metrics.',
-                })
-              : i18n.translate('xpack.lens.metric.enableTrendline.disabledTooltip', {
-                  defaultMessage: 'Use a data view with a default time field to show trendlines.',
-                })
-          }
-        >
-          <EuiSwitch
-            label={trendlineLabel}
-            showLabel={false}
-            data-test-subj="lnsMetric_trendline_toggle"
-            compressed
-            disabled={!hasDefaultTimeField}
-            checked={Boolean(state.trendlineLayerId)}
-            onChange={() => {
-              if (!state.trendlineLayerId) {
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="compressed"
+          legend={supportingVisLabel}
+          data-test-subj="lnsMetric_supporting_visualization_buttons"
+          options={[
+            {
+              id: `${buttonIdPrefix}none`,
+              label: i18n.translate('xpack.lens.metric.supportingVisualization.none', {
+                defaultMessage: 'None',
+              }),
+              'data-test-subj': 'lnsMetric_supporting_visualization_none',
+            },
+            {
+              id: `${buttonIdPrefix}trendline`,
+              label: supportingVisLabel,
+              isDisabled: !hasDefaultTimeField,
+              'data-test-subj': 'lnsMetric_supporting_visualization_trendline',
+            },
+            {
+              id: `${buttonIdPrefix}bar`,
+              label: i18n.translate('xpack.lens.metric.supportingVisualization.bar', {
+                defaultMessage: 'Bar',
+              }),
+              isDisabled: !state.maxAccessor,
+              'data-test-subj': 'lnsMetric_supporting_visualization_bar',
+            },
+          ]}
+          idSelected={`${buttonIdPrefix}${
+            state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'none'
+          }`}
+          onChange={(id) => {
+            const supportingVisualizationType = id.split('--')[1] as SupportingVisType;
+
+            switch (supportingVisualizationType) {
+              case 'trendline':
+                setState({
+                  ...state,
+                  showBar: false,
+                });
                 props.addLayer('metricTrendline');
-              } else {
-                props.removeLayer(state.trendlineLayerId);
-              }
+                break;
+              case 'bar':
+                setState({
+                  ...state,
+                  showBar: true,
+                });
+                if (state.trendlineLayerId) props.removeLayer(state.trendlineLayerId);
+                break;
+              case 'none':
+                setState({
+                  ...state,
+                  showBar: false,
+                });
+                if (state.trendlineLayerId) props.removeLayer(state.trendlineLayerId);
+                break;
+            }
+          }}
+        />
+      </EuiFormRow>
+      {showingBar(state) && (
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+            defaultMessage: 'Bar direction',
+          })}
+          fullWidth
+          display="columnCompressed"
+        >
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+              defaultMessage: 'Bar direction',
+            })}
+            data-test-subj="lnsMetric_progress_direction_buttons"
+            name="alignment"
+            options={[
+              {
+                id: `${idPrefix}vertical`,
+                label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
+                  defaultMessage: 'Vertical',
+                }),
+                'data-test-subj': 'lnsMetric_progress_bar_vertical',
+              },
+              {
+                id: `${idPrefix}horizontal`,
+                label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
+                  defaultMessage: 'Horizontal',
+                }),
+                'data-test-subj': 'lnsMetric_progress_bar_horizontal',
+              },
+            ]}
+            idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
+            onChange={(id) => {
+              const newDirection = id.replace(idPrefix, '') as LayoutDirection;
+              setState({
+                ...state,
+                progressDirection: newDirection,
+              });
             }}
           />
-        </EuiToolTip>
-      </EuiFormRow>
+        </EuiFormRow>
+      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -483,7 +530,7 @@ function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setStat
     useDebouncedValue<string>(
       {
         onChange: setColor,
-        value: state.color || getDefaultColor(!!state.maxAccessor),
+        value: state.color || getDefaultColor(state),
       },
       { allowFalsyValue: true }
     );

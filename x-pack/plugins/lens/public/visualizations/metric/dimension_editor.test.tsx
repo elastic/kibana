@@ -12,10 +12,10 @@ import { VisualizationDimensionEditorProps } from '../../types';
 import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { MetricVisualizationState } from './visualization';
-import { DimensionEditor } from './dimension_editor';
+import { DimensionEditor, SupportingVisType } from './dimension_editor';
 import { HTMLAttributes, mount, ReactWrapper, shallow } from 'enzyme';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { EuiButtonGroup, EuiColorPicker, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiButtonGroup, EuiColorPicker, PropsOf } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { LayoutDirection } from '@elastic/charts';
 import { act } from 'react-dom/test-utils';
@@ -38,8 +38,13 @@ jest.mock('lodash', () => {
 const SELECTORS = {
   PRIMARY_METRIC_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_primary_metric"]',
   SECONDARY_METRIC_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_secondary_metric"]',
+  MAX_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_maximum"]',
   BREAKDOWN_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_breakdown"]',
 };
+
+// see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
+const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
+  expect(mock1.mock.invocationCallOrder[0]).toBeLessThan(mock2.mock.invocationCallOrder[0]);
 
 describe('dimension editor', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
@@ -64,6 +69,7 @@ describe('dimension editor', () => {
     maxCols: 5,
     color: 'static-color',
     palette,
+    showBar: true,
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',
     trendlineMetricAccessor: 'trendline-metric-col-id',
@@ -93,8 +99,11 @@ describe('dimension editor', () => {
     };
   });
 
+  afterEach(() => jest.clearAllMocks());
+
   describe('primary metric dimension', () => {
     const accessor = 'primary-metric-col-id';
+    const metricAccessorState = { ...fullState, metricAccessor: accessor };
 
     beforeEach(() => {
       props.frame.activeData = {
@@ -141,27 +150,52 @@ describe('dimension editor', () => {
         });
       }
 
-      private get trendlineSwitch() {
-        return this._wrapper.find(EuiSwitch);
+      private get supportingVisButtonGroup() {
+        return this._wrapper.find(
+          'EuiButtonGroup[data-test-subj="lnsMetric_supporting_visualization_buttons"]'
+        ) as unknown as ReactWrapper<PropsOf<typeof EuiButtonGroup>>;
       }
 
-      public get trendlineEnabled() {
-        return this.trendlineSwitch.props().checked;
+      public get currentSupportingVis() {
+        return this.supportingVisButtonGroup
+          .props()
+          .idSelected?.split('--')[1] as SupportingVisType;
       }
 
-      public toggleTrendline() {
-        this.trendlineSwitch.props().onChange({} as EuiSwitchEvent);
+      public isDisabled(type: SupportingVisType) {
+        return this.supportingVisButtonGroup.props().options.find(({ id }) => id.includes(type))
+          ?.isDisabled;
+      }
+
+      public setSupportingVis(type: SupportingVisType) {
+        this.supportingVisButtonGroup.props().onChange(`some-id--${type}`);
+      }
+
+      private get progressDirectionControl() {
+        return this._wrapper.find(
+          'EuiButtonGroup[data-test-subj="lnsMetric_progress_direction_buttons"]'
+        ) as unknown as ReactWrapper<PropsOf<typeof EuiButtonGroup>>;
+      }
+
+      public get progressDirectionShowing() {
+        return this.progressDirectionControl.exists();
+      }
+
+      public setProgressDirection(direction: LayoutDirection) {
+        this.progressDirectionControl.props().onChange(direction);
+        this._wrapper.update();
       }
     }
 
     const mockSetState = jest.fn();
 
-    const getHarnessWithState = (state: MetricVisualizationState) =>
+    const getHarnessWithState = (state: MetricVisualizationState, datasource = props.datasource) =>
       new Harness(
         mountWithIntl(
           <DimensionEditor
             {...props}
-            state={{ ...state, metricAccessor: accessor }}
+            datasource={datasource}
+            state={state}
             setState={mockSetState}
             accessor={accessor}
           />
@@ -179,21 +213,25 @@ describe('dimension editor', () => {
 
       expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeTruthy();
       expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeFalsy();
+      expect(component.exists(SELECTORS.MAX_EDITOR)).toBeFalsy();
       expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
     });
 
     describe('static color controls', () => {
       it('is hidden when dynamic coloring is enabled', () => {
-        const harnessWithPalette = getHarnessWithState({ ...fullState, palette });
+        const harnessWithPalette = getHarnessWithState({ ...metricAccessorState, palette });
         expect(harnessWithPalette.colorPicker.exists()).toBeFalsy();
 
-        const harnessNoPalette = getHarnessWithState({ ...fullState, palette: undefined });
+        const harnessNoPalette = getHarnessWithState({
+          ...metricAccessorState,
+          palette: undefined,
+        });
         expect(harnessNoPalette.colorPicker.exists()).toBeTruthy();
       });
 
       it('fills with default value', () => {
         const localHarness = getHarnessWithState({
-          ...fullState,
+          ...metricAccessorState,
           palette: undefined,
           color: undefined,
         });
@@ -202,7 +240,7 @@ describe('dimension editor', () => {
 
       it('sets color', () => {
         const localHarness = getHarnessWithState({
-          ...fullState,
+          ...metricAccessorState,
           palette: undefined,
           color: 'some-color',
         });
@@ -224,27 +262,120 @@ describe('dimension editor', () => {
       });
     });
 
-    describe('trendline', () => {
+    describe('supporting visualizations', () => {
       const stateWOTrend = {
-        ...fullState,
+        ...metricAccessorState,
         trendlineLayerId: undefined,
       };
 
-      it('reflects visualization state', () => {
-        expect(getHarnessWithState(fullState).trendlineEnabled).toBe(true);
-        expect(getHarnessWithState(stateWOTrend).trendlineEnabled).toBe(false);
+      describe('reflecting visualization state', () => {
+        it('should select the correct button', () => {
+          expect(
+            getHarnessWithState({ ...stateWOTrend, showBar: false, maxAccessor: undefined })
+              .currentSupportingVis
+          ).toBe<SupportingVisType>('none');
+          expect(
+            getHarnessWithState({ ...stateWOTrend, showBar: true }).currentSupportingVis
+          ).toBe<SupportingVisType>('bar');
+          expect(
+            getHarnessWithState(metricAccessorState).currentSupportingVis
+          ).toBe<SupportingVisType>('trendline');
+        });
+
+        it('should disable bar when no max dimension', () => {
+          expect(
+            getHarnessWithState({
+              ...stateWOTrend,
+              showBar: false,
+              maxAccessor: 'something',
+            }).isDisabled('bar')
+          ).toBeFalsy();
+          expect(
+            getHarnessWithState({
+              ...stateWOTrend,
+              showBar: false,
+              maxAccessor: undefined,
+            }).isDisabled('bar')
+          ).toBeTruthy();
+        });
+
+        it('should disable trendline when no default time field', () => {
+          expect(
+            getHarnessWithState(stateWOTrend, {
+              hasDefaultTimeField: () => false,
+            } as DatasourcePublicAPI).isDisabled('trendline')
+          ).toBeTruthy();
+          expect(
+            getHarnessWithState(stateWOTrend, {
+              hasDefaultTimeField: () => true,
+            } as DatasourcePublicAPI).isDisabled('trendline')
+          ).toBeFalsy();
+        });
       });
 
-      it('adds layer when enabled', () => {
-        getHarnessWithState(stateWOTrend).toggleTrendline();
-        expect(props.addLayer).toHaveBeenCalledWith('metricTrendline');
-        expect(props.removeLayer).not.toHaveBeenCalled();
+      describe('responding to buttons', () => {
+        it('enables trendline', () => {
+          getHarnessWithState(stateWOTrend).setSupportingVis('trendline');
+
+          expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
+          expect(props.addLayer).toHaveBeenCalledWith('metricTrendline');
+
+          expectCalledBefore(mockSetState, props.addLayer as jest.Mock);
+        });
+
+        it('enables bar', () => {
+          getHarnessWithState(metricAccessorState).setSupportingVis('bar');
+
+          expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: true });
+          expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
+
+          expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
+        });
+
+        it('selects none from bar', () => {
+          getHarnessWithState(stateWOTrend).setSupportingVis('none');
+
+          expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
+          expect(props.removeLayer).not.toHaveBeenCalled();
+        });
+
+        it('selects none from trendline', () => {
+          getHarnessWithState(metricAccessorState).setSupportingVis('none');
+
+          expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
+          expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
+
+          expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
+        });
       });
 
-      it('removes layer when disabled', () => {
-        getHarnessWithState(fullState).toggleTrendline();
-        expect(props.removeLayer).toHaveBeenCalledWith(fullState.trendlineLayerId);
-        expect(props.addLayer).not.toHaveBeenCalled();
+      describe('progress bar direction controls', () => {
+        it('hides direction controls if bar not showing', () => {
+          expect(
+            getHarnessWithState({ ...stateWOTrend, showBar: false }).progressDirectionShowing
+          ).toBeFalsy();
+        });
+
+        it('toggles progress direction', () => {
+          const harness = getHarnessWithState(metricAccessorState);
+
+          expect(harness.progressDirectionShowing).toBeTruthy();
+          expect(harness.currentState.progressDirection).toBe('vertical');
+
+          harness.setProgressDirection('horizontal');
+          harness.setProgressDirection('vertical');
+          harness.setProgressDirection('horizontal');
+
+          expect(mockSetState).toHaveBeenCalledTimes(3);
+          expect(mockSetState.mock.calls.map((args) => args[0].progressDirection))
+            .toMatchInlineSnapshot(`
+              Array [
+                "horizontal",
+                "vertical",
+                "horizontal",
+              ]
+            `);
+        });
       });
     });
   });
@@ -281,6 +412,7 @@ describe('dimension editor', () => {
 
       expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeTruthy();
       expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
+      expect(component.exists(SELECTORS.MAX_EDITOR)).toBeFalsy();
       expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeFalsy();
     });
 
@@ -364,81 +496,21 @@ describe('dimension editor', () => {
   });
 
   describe('maximum dimension', () => {
-    const accessor = 'maximum-col-id';
-    class Harness {
-      public _wrapper;
+    const accessor = 'max-col-id';
 
-      constructor(
-        wrapper: ReactWrapper<HTMLAttributes, unknown, React.Component<{}, {}, unknown>>
-      ) {
-        this._wrapper = wrapper;
-      }
-
-      private get rootComponent() {
-        return this._wrapper.find(DimensionEditor);
-      }
-
-      private get progressDirectionControl() {
-        return this._wrapper.find(EuiButtonGroup);
-      }
-
-      public get currentState() {
-        return this.rootComponent.props().state;
-      }
-
-      public setProgressDirection(direction: LayoutDirection) {
-        this.progressDirectionControl.props().onChange(direction);
-        this._wrapper.update();
-      }
-
-      public get progressDirectionDisabled() {
-        return this.progressDirectionControl.find(EuiButtonGroup).props().isDisabled;
-      }
-
-      public setMaxCols(max: number) {
-        act(() => {
-          this._wrapper.find('EuiFieldNumber[data-test-subj="lnsMetric_max_cols"]').props()
-            .onChange!({
-            target: { value: String(max) },
-          } as unknown as FormEvent);
-        });
-      }
-    }
-
-    let harness: Harness;
-    const mockSetState = jest.fn();
-
-    beforeEach(() => {
-      harness = new Harness(
-        mountWithIntl(
-          <DimensionEditor
-            {...props}
-            state={{ ...fullState, maxAccessor: accessor }}
-            accessor={accessor}
-            setState={mockSetState}
-          />
-        )
+    it('renders when the accessor matches', () => {
+      const component = shallow(
+        <DimensionEditor
+          {...props}
+          state={{ ...fullState, maxAccessor: accessor }}
+          accessor={accessor}
+        />
       );
-    });
 
-    afterEach(() => mockSetState.mockClear());
-
-    it('toggles progress direction', () => {
-      expect(harness.currentState.progressDirection).toBe('vertical');
-
-      harness.setProgressDirection('horizontal');
-      harness.setProgressDirection('vertical');
-      harness.setProgressDirection('horizontal');
-
-      expect(mockSetState).toHaveBeenCalledTimes(3);
-      expect(mockSetState.mock.calls.map((args) => args[0].progressDirection))
-        .toMatchInlineSnapshot(`
-          Array [
-            "horizontal",
-            "vertical",
-            "horizontal",
-          ]
-        `);
+      expect(component.exists(SELECTORS.MAX_EDITOR)).toBeTruthy();
+      expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeFalsy();
+      expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeFalsy();
+      expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
     });
   });
 
@@ -505,6 +577,7 @@ describe('dimension editor', () => {
 
       expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeTruthy();
       expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeFalsy();
+      expect(component.exists(SELECTORS.MAX_EDITOR)).toBeFalsy();
       expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeFalsy();
     });
 

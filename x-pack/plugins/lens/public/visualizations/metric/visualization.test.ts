@@ -70,6 +70,7 @@ describe('metric visualization', () => {
     maxCols: 5,
     color: 'static-color',
     palette,
+    showBar: false,
   };
 
   const fullStateWTrend: Required<MetricVisualizationState> = {
@@ -130,7 +131,7 @@ describe('metric visualization', () => {
         ).toMatchInlineSnapshot(`
           Array [
             Object {
-              "color": "#0077cc",
+              "color": "#f5f7fa",
               "columnId": "metric-col-id",
               "triggerIcon": "color",
             },
@@ -302,9 +303,7 @@ describe('metric visualization', () => {
                 "inspectorTableId": Array [
                   "first",
                 ],
-                "max": Array [
-                  "max-metric-col-id",
-                ],
+                "max": Array [],
                 "maxCols": Array [
                   5,
                 ],
@@ -367,9 +366,7 @@ describe('metric visualization', () => {
                 "inspectorTableId": Array [
                   "first",
                 ],
-                "max": Array [
-                  "max-metric-col-id",
-                ],
+                "max": Array [],
                 "maxCols": Array [
                   5,
                 ],
@@ -611,6 +608,7 @@ describe('metric visualization', () => {
             visualization.toExpression(
               {
                 ...fullState,
+                showBar: true,
                 color: undefined,
               },
               datasourceLayers
@@ -623,7 +621,37 @@ describe('metric visualization', () => {
             visualization.toExpression(
               {
                 ...fullState,
+                showBar: false,
+                color: undefined,
+              },
+              datasourceLayers
+            ) as ExpressionAstExpression
+          ).chain[1].arguments.color[0]
+        ).toBe(euiLightVars.euiColorLightestShade);
+
+        expect(
+          (
+            visualization.toExpression(
+              {
+                ...fullState,
                 maxAccessor: undefined,
+                showBar: false,
+                color: undefined,
+              },
+              datasourceLayers
+            ) as ExpressionAstExpression
+          ).chain[1].arguments.color[0]
+        ).toBe(euiLightVars.euiColorLightestShade);
+
+        // this case isn't currently relevant because other parts of the code don't allow showBar to be
+        // set when there isn't a max dimension but this test covers the branch anyhow
+        expect(
+          (
+            visualization.toExpression(
+              {
+                ...fullState,
+                maxAccessor: undefined,
+                showBar: true,
                 color: undefined,
               },
               datasourceLayers
@@ -821,9 +849,38 @@ describe('metric visualization', () => {
           layerId: 'some-id',
           frame: mockFrameApi,
         })
+      ).toEqual(
+        expect.objectContaining({
+          [accessor]: columnId,
+        })
+      );
+    });
+
+    it('shows the progress bar when maximum dimension set', () => {
+      expect(
+        visualization.setDimension({
+          prevState: state,
+          columnId,
+          groupId: GROUP_ID.MAX,
+          layerId: 'some-id',
+          frame: mockFrameApi,
+        })
       ).toEqual({
-        [accessor]: columnId,
+        maxAccessor: columnId,
+        showBar: true,
       });
+    });
+
+    it('does NOT show the progress bar when maximum dimension set when trendline enabled', () => {
+      expect(
+        visualization.setDimension({
+          prevState: { ...state, ...trendlineProps },
+          columnId,
+          groupId: GROUP_ID.MAX,
+          layerId: 'some-id',
+          frame: mockFrameApi,
+        })
+      ).not.toHaveProperty('showBar');
     });
   });
 
