@@ -92,7 +92,7 @@ export const registerGainSightStyleRoute = ({
   );
 
   /**
-   * Register a custom JS endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
+   * Register a custom endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
    */
   httpResources.register(
     {
@@ -105,7 +105,7 @@ export const registerGainSightStyleRoute = ({
     },
     async (context, req, res) => {
       try {
-        return res.renderJs(await renderGainSightLibrary());
+        return res.renderCss(await renderGainSightLibrary());
       } catch (e) {
         return res.customError({
           body: `Could not load GainSight library from disk due to error: ${e.toString()}`,
