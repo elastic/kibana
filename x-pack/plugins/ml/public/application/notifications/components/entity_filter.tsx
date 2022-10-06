@@ -45,8 +45,8 @@ export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onCha
       newQuery = newQuery.removeSimpleFieldClauses('job_id');
 
       if (entitiesSelection.length > 0) {
-        newQuery = uniqBy(entitiesSelection, 'value').reduce((acc, curr) => {
-          return acc.addOrFieldValue('job_id', curr.value, true, 'eq');
+        newQuery = uniqBy(entitiesSelection, 'id').reduce((acc, curr) => {
+          return acc.addOrFieldValue('job_id', curr.id, true, 'eq');
         }, newQuery);
       }
 
@@ -77,7 +77,11 @@ export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onCha
       anchorPosition="downCenter"
     >
       <EuiPanel paddingSize="s" css={{ width: '300px' }}>
-        <MlEntitySelector selectedOptions={selectedOptions} onSelectionChange={onSelectionChange} />
+        <MlEntitySelector
+          selectedOptions={selectedOptions}
+          onSelectionChange={onSelectionChange}
+          handleDuplicates
+        />
       </EuiPanel>
     </EuiPopover>
   );

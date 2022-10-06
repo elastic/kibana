@@ -13,11 +13,12 @@ import {
   euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { countBy } from 'lodash';
 import { useMlApiContext } from '../../contexts/kibana';
 
 type EntityType = 'anomaly_detector' | 'data_frame_analytics' | 'trained_models';
 
-type EntitiesSelection = Array<{ value: string; label: string }>;
+type EntitiesSelection = Array<{ id: string; type: EntityType }>;
 
 export interface MlEntitySelectorProps {
   entityTypes?: Record<EntityType, boolean>;
@@ -27,6 +28,11 @@ export interface MlEntitySelectorProps {
    */
   selectedOptions?: string[];
   onSelectionChange?: (jobSelection: EntitiesSelection) => void;
+  /**
+   * In case the there are duplicated IDs across different ML entity types,
+   * they should be de-selected simultaneously if this setting is enabled.
+   */
+  handleDuplicates?: boolean;
 }
 
 export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
@@ -34,6 +40,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
   multiSelect = true,
   selectedOptions,
   onSelectionChange,
+  handleDuplicates = false,
 }) => {
   const { jobs: jobsApi, trainedModels, dataFrameAnalytics } = useMlApiContext();
 
@@ -126,13 +133,26 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
   const onChange = useCallback<Exclude<EuiComboBoxProps<string>['onChange'], undefined>>(
     (selection) => {
       if (!onSelectionChange) return;
+
+      let resultSelection = selection;
+
+      if (handleDuplicates) {
+        const prevCounts = countBy(selectedEntities, 'value');
+        const currentCounts = countBy(selection, 'value');
+        resultSelection = resultSelection.filter(({ value }) => {
+          // If an ID with duplicates has been removed, delete all of them.
+          return !(prevCounts[value!] > 1 && currentCounts[value!] < prevCounts[value!]);
+        });
+      }
+
       onSelectionChange(
-        selection.map((s) => {
-          return { value: s.value!, label: s.label };
+        resultSelection.map((s) => {
+          const [type] = s.key!.split(':');
+          return { id: s.value!, type: type as EntityType };
         })
       );
     },
-    [onSelectionChange]
+    [onSelectionChange, selectedEntities, handleDuplicates]
   );
 
   return (
