@@ -35,7 +35,8 @@ import {
   LensDocShape850,
   LensDocShape860,
 } from './types';
-import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState, isPartitionShape } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState } from '../../common';
+import { isPartitionShape } from '../../common/visualizations';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (

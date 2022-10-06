@@ -145,7 +145,6 @@ function FlameGraphTooltip({
 
 export interface FlameGraphProps {
   id: string;
-  height: number | string;
   comparisonMode: FlameGraphComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
@@ -153,7 +152,6 @@ export interface FlameGraphProps {
 
 export const FlameGraph: React.FC<FlameGraphProps> = ({
   id,
-  height,
   comparisonMode,
   primaryFlamegraph,
   comparisonFlamegraph,
