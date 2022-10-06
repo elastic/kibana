@@ -41,7 +41,8 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
 
       const { end, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
         request.headers,
-        logger
+        logger,
+        request.body.compressResponse
       );
 
       const entities = [
