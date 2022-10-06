@@ -23,7 +23,9 @@ describe('shared ux markdown component', () => {
 
   it('will not render EuiMarkdownFormat when readOnly false and markdownContent specified', () => {
     const exampleMarkdownContent = 'error';
-    const component = render(<Markdown readOnly={false} markdownContent={exampleMarkdownContent} />)
+    const component = render(
+      <Markdown readOnly={false} markdownContent={exampleMarkdownContent} />
+    );
     expect(component.has('EuiMarkdownEditor')).toBeTruthy();
-  })
+  });
 });
