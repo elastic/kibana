@@ -40,7 +40,7 @@ export const sampleAttributeCoreWebVital = {
                 params: {
                   missingBucket: false,
                   orderBy: {
-                    columnId: 'y-axis-column-layer0',
+                    columnId: 'y-axis-column-layer0-0',
                     type: 'column',
                   },
                   orderDirection: 'desc',
