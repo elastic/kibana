@@ -55,7 +55,7 @@ export const MonitorDetailsPanel = () => {
   return (
     <div css={wrapperStyle}>
       <EuiSpacer size="s" />
-      <EuiDescriptionList type="responsiveColumn" compressed={true}>
+      <EuiDescriptionList type="column" compressed={true}>
         <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           {monitor && (

@@ -399,8 +399,8 @@ describe('filters', () => {
         );
 
         instance
-          .find('[data-test-subj="lns-customBucketContainer-remove"]')
-          .at(2)
+          .find('[data-test-subj="lns-customBucketContainer-remove-1"]')
+          .at(0)
           .simulate('click');
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer,

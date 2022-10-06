@@ -15,6 +15,7 @@ import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   SavedServiceGroup,
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+  MAX_NUMBER_OF_SERVICE_GROUPS,
 } from '../../../../common/service_groups';
 import { getKueryFields } from '../../helpers/get_kuery_fields';
 import {
@@ -1134,7 +1135,7 @@ export const tasks: TelemetryTask[] = [
       const response = await savedObjectsClient.find<SavedServiceGroup>({
         type: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 50,
+        perPage: MAX_NUMBER_OF_SERVICE_GROUPS,
         sortField: 'updated_at',
         sortOrder: 'desc',
       });
@@ -1148,6 +1149,7 @@ export const tasks: TelemetryTask[] = [
       return {
         service_groups: {
           kuery_fields: kueryFields,
+          total: response.total ?? 0,
         },
       };
     },

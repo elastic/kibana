@@ -42,6 +42,8 @@ export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInp
 
 export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSelectInput"]';
 
+export const JSON_EDITOR = "[data-test-subj='actionJsonEditor']";
+
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
@@ -57,6 +59,8 @@ export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRule
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
+
+export const COMBO_BOX_SELECTION = '.euiMark';
 
 export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
@@ -256,3 +260,7 @@ export const savedQueryByName = (savedQueryName: string) =>
 
 export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
   '[data-test-subj="saved-query-management-apply-changes-button"]';
+
+export const INDEX_SELECTOR = "[data-test-subj='.index-siem-ActionTypeSelectOption']";
+
+export const CREATE_CONNECTOR_BTN = "[data-test-subj='createActionConnectorButton-0']";

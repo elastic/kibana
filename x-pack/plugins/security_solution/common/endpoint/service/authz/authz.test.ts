@@ -108,37 +108,64 @@ describe('Endpoint Authz service', () => {
       });
     });
 
-    describe('endpoint rbac is enabled', () => {
-      describe('canIsolateHost', () => {
-        it('should be true if packagePrivilege.writeHostIsolation is true', () => {
-          fleetAuthz.packagePrivileges!.endpoint.actions.writeHostIsolation.executePackageAction =
-            true;
-          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
-          expect(authz.canIsolateHost).toBe(true);
-        });
-
-        it('should be false if packagePrivilege.writeHostIsolation is false', () => {
-          fleetAuthz.packagePrivileges!.endpoint.actions.writeHostIsolation.executePackageAction =
-            false;
-          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
-          expect(authz.canIsolateHost).toBe(false);
-        });
+    describe('and endpoint rbac is enabled', () => {
+      it.each<[EndpointAuthzKeyList[number], string]>([
+        ['canWriteEndpointList', 'writeEndpointList'],
+        ['canReadEndpointList', 'readEndpointList'],
+        ['canWritePolicyManagement', 'writePolicyManagement'],
+        ['canReadPolicyManagement', 'readPolicyManagement'],
+        ['canWriteActionsLogManagement', 'writeActionsLogManagement'],
+        ['canReadActionsLogManagement', 'readActionsLogManagement'],
+        ['canIsolateHost', 'writeHostIsolation'],
+        ['canUnIsolateHost', 'writeHostIsolation'],
+        ['canKillProcess', 'writeProcessOperations'],
+        ['canSuspendProcess', 'writeProcessOperations'],
+        ['canGetRunningProcesses', 'writeProcessOperations'],
+        ['canWriteFileOperations', 'writeFileOperations'],
+        ['canWriteTrustedApplications', 'writeTrustedApplications'],
+        ['canReadTrustedApplications', 'readTrustedApplications'],
+        ['canWriteHostIsolationExceptions', 'writeHostIsolationExceptions'],
+        ['canReadHostIsolationExceptions', 'readHostIsolationExceptions'],
+        ['canWriteBlocklist', 'writeBlocklist'],
+        ['canReadBlocklist', 'readBlocklist'],
+        ['canWriteEventFilters', 'writeEventFilters'],
+        ['canReadEventFilters', 'readEventFilters'],
+      ])('%s should be true if `packagePrivilege.%s` is `true`', (auth) => {
+        const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+        expect(authz[auth]).toBe(true);
       });
 
-      describe('canUnIsolateHost', () => {
-        it('should be true if packagePrivilege.writeHostIsolation is true', () => {
-          fleetAuthz.packagePrivileges!.endpoint.actions.writeHostIsolation.executePackageAction =
-            true;
-          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
-          expect(authz.canUnIsolateHost).toBe(true);
+      it.each<[EndpointAuthzKeyList[number], string[]]>([
+        ['canWriteEndpointList', ['writeEndpointList']],
+        ['canReadEndpointList', ['writeEndpointList', 'readEndpointList']],
+        ['canWritePolicyManagement', ['writePolicyManagement']],
+        ['canReadPolicyManagement', ['writePolicyManagement', 'readPolicyManagement']],
+        ['canWriteActionsLogManagement', ['writeActionsLogManagement']],
+        ['canReadActionsLogManagement', ['writeActionsLogManagement', 'readActionsLogManagement']],
+        ['canIsolateHost', ['writeHostIsolation']],
+        ['canUnIsolateHost', ['writeHostIsolation']],
+        ['canKillProcess', ['writeProcessOperations']],
+        ['canSuspendProcess', ['writeProcessOperations']],
+        ['canGetRunningProcesses', ['writeProcessOperations']],
+        ['canWriteFileOperations', ['writeFileOperations']],
+        ['canWriteTrustedApplications', ['writeTrustedApplications']],
+        ['canReadTrustedApplications', ['writeTrustedApplications', 'readTrustedApplications']],
+        ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
+        [
+          'canReadHostIsolationExceptions',
+          ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
+        ],
+        ['canWriteBlocklist', ['writeBlocklist']],
+        ['canReadBlocklist', ['writeBlocklist', 'readBlocklist']],
+        ['canWriteEventFilters', ['writeEventFilters']],
+        ['canReadEventFilters', ['writeEventFilters', 'readEventFilters']],
+      ])('%s should be false if `packagePrivilege.%s` is `false`', (auth, privileges) => {
+        // read permission checks for write || read so we need to set both to false
+        privileges.forEach((privilege) => {
+          fleetAuthz.packagePrivileges!.endpoint.actions[privilege].executePackageAction = false;
         });
-
-        it('should be false if packagePrivilege.writeHostIsolation is false', () => {
-          fleetAuthz.packagePrivileges!.endpoint.actions.writeHostIsolation.executePackageAction =
-            false;
-          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
-          expect(authz.canUnIsolateHost).toBe(false);
-        });
+        const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+        expect(authz[auth]).toBe(false);
       });
     });
   });
@@ -148,13 +175,28 @@ describe('Endpoint Authz service', () => {
       expect(getEndpointAuthzInitialState()).toEqual({
         canAccessFleet: false,
         canAccessEndpointManagement: false,
+        canCreateArtifactsByPolicy: false,
+        canWriteEndpointList: false,
+        canReadEndpointList: false,
+        canWritePolicyManagement: false,
+        canReadPolicyManagement: false,
+        canWriteActionsLogManagement: false,
+        canReadActionsLogManagement: false,
         canIsolateHost: false,
         canUnIsolateHost: true,
-        canCreateArtifactsByPolicy: false,
         canKillProcess: false,
         canSuspendProcess: false,
         canGetRunningProcesses: false,
         canAccessResponseConsole: false,
+        canWriteFileOperations: false,
+        canWriteTrustedApplications: false,
+        canReadTrustedApplications: false,
+        canWriteHostIsolationExceptions: false,
+        canReadHostIsolationExceptions: false,
+        canWriteBlocklist: false,
+        canReadBlocklist: false,
+        canWriteEventFilters: false,
+        canReadEventFilters: false,
       });
     });
   });

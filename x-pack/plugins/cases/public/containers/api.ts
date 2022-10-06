@@ -10,6 +10,7 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/const
 import { isEmpty } from 'lodash';
 import {
   Cases,
+  CaseUpdateRequest,
   FetchCasesProps,
   ResolvedCase,
   SeverityAll,
@@ -58,7 +59,6 @@ import {
 
 import {
   ActionLicense,
-  BulkUpdateStatus,
   Case,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
@@ -238,8 +238,8 @@ export const patchCase = async (
   return convertCasesToCamelCase(decodeCasesResponse(response));
 };
 
-export const patchCasesStatus = async (
-  cases: BulkUpdateStatus[],
+export const updateCases = async (
+  cases: CaseUpdateRequest[],
   signal: AbortSignal
 ): Promise<Case[]> => {
   const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {

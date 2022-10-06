@@ -65,7 +65,6 @@ export function createExecutionHandler<
 
   return async ({
     actionGroup,
-    actionSubgroup,
     context,
     state,
     ruleRunMetricsStore,
@@ -92,7 +91,6 @@ export function createExecutionHandler<
             alertInstanceId: alertId,
             alertActionGroup: actionGroup,
             alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
-            alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
             actionId: action.id,
@@ -203,7 +201,6 @@ export function createExecutionHandler<
         typeId: actionTypeId,
         alertId,
         alertGroup: actionGroup,
-        alertSubgroup: actionSubgroup,
       });
     }
 

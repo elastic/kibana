@@ -11,17 +11,10 @@ export const PLATINUM = i18n.translate('xpack.securitySolution.paywall.platinum'
   defaultMessage: 'Platinum',
 });
 
-export const UPGRADE_CTA = i18n.translate('xpack.securitySolution.paywall.upgradeButton', {
-  defaultMessage: 'Available from Platinum',
+export const UPGRADE_MESSAGE = i18n.translate('xpack.securitySolution.paywall.upgradeMessage', {
+  defaultMessage: 'This feature is available with Platinum or higher subscription',
 });
 
-export const UPGRADE_MESSAGE = (description?: string) =>
-  i18n.translate('xpack.securitySolution.paywall.upgradeMessage', {
-    values: { description: description ? description : 'this feature' },
-    defaultMessage:
-      'To turn use {description}, you must upgrade your license to Platinum, start a free 30-days trial, or spin up a cloud deployment on AWS, GCP, or Azure.',
-  });
-
-export const UPGRADE_BUTTON = i18n.translate('xpack.securitySolution.paywall.upgradeCta', {
+export const UPGRADE_BUTTON = i18n.translate('xpack.securitySolution.paywall.upgradeButton', {
   defaultMessage: 'Upgrade to Platinum',
 });

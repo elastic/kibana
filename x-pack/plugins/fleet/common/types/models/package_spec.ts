@@ -42,6 +42,7 @@ export type PackageSpecCategory =
   | 'datastore'
   | 'elastic_stack'
   | 'google_cloud'
+  | 'infrastructure'
   | 'kubernetes'
   | 'languages'
   | 'message_queue'

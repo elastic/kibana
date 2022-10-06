@@ -56,10 +56,10 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { ISource } from '../classes/sources/source';
-import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { EMSTMSSource } from '../classes/sources/ems_tms_source';
+import { IRasterSource } from '../classes/sources/raster_source';
 import { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
 
@@ -83,7 +83,7 @@ export function createLayerInstance(
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor);
   switch (layerDescriptor.type) {
     case LAYER_TYPE.RASTER_TILE:
-      return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
+      return new RasterTileLayer({ layerDescriptor, source: source as IRasterSource });
     case LAYER_TYPE.EMS_VECTOR_TILE:
       return new EmsVectorTileLayer({
         layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,

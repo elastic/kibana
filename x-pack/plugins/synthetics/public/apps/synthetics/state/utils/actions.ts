@@ -6,13 +6,13 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpSerializedFetchError } from './http_error';
 
 export function createAsyncAction<Payload, SuccessPayload>(actionStr: string) {
   return {
     get: createAction<Payload>(actionStr),
     success: createAction<SuccessPayload>(`${actionStr}_SUCCESS`),
-    fail: createAction<IHttpFetchError>(`${actionStr}_FAIL`),
+    fail: createAction<IHttpSerializedFetchError>(`${actionStr}_FAIL`),
   };
 }
 

@@ -8,8 +8,10 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
-import React from 'react';
+import React, { useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { NoData } from '../../../../components/empty_states';
 import { InfraClientStartDeps } from '../../../../types';
 
 const getLensHostsTable = (
@@ -93,16 +95,24 @@ const getLensHostsTable = (
                   },
                   customLabel: true,
                 },
-                '0a9bd0fa-9966-489b-8c95-70997a7aad4cX0': {
-                  label: 'Part of Memory Total (avg)',
+                '3eca2307-228e-4842-a023-57e15c8c364d': {
+                  label: 'Disk latency (avg.)',
                   dataType: 'number',
-                  operationType: 'average',
-                  sourceField: 'system.memory.total',
+                  operationType: 'formula',
                   isBucketed: false,
                   scale: 'ratio',
                   params: {
-                    emptyAsNull: false,
+                    formula: 'average(system.diskio.io.time) / 1000',
+                    isFormulaBroken: false,
+                    format: {
+                      id: 'number',
+                      params: {
+                        decimals: 0,
+                        suffix: 'ms',
+                      },
+                    },
                   },
+                  references: ['3eca2307-228e-4842-a023-57e15c8c364dX1'],
                   customLabel: true,
                 },
                 '0a9bd0fa-9966-489b-8c95-70997a7aad4c': {
@@ -124,18 +134,6 @@ const getLensHostsTable = (
                   references: ['0a9bd0fa-9966-489b-8c95-70997a7aad4cX0'],
                   customLabel: true,
                 },
-                'fe5a4d7d-6f48-45ab-974c-96bc864ac36fX0': {
-                  label: 'Part of Memory Usage (avg)',
-                  dataType: 'number',
-                  operationType: 'average',
-                  sourceField: 'system.memory.used.pct',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    emptyAsNull: false,
-                  },
-                  customLabel: true,
-                },
                 'fe5a4d7d-6f48-45ab-974c-96bc864ac36f': {
                   label: 'Memory usage (avg.)',
                   dataType: 'number',
@@ -153,6 +151,30 @@ const getLensHostsTable = (
                     },
                   },
                   references: ['fe5a4d7d-6f48-45ab-974c-96bc864ac36fX0'],
+                  customLabel: true,
+                },
+                '0a9bd0fa-9966-489b-8c95-70997a7aad4cX0': {
+                  label: 'Part of Memory Total (avg)',
+                  dataType: 'number',
+                  operationType: 'average',
+                  sourceField: 'system.memory.total',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    emptyAsNull: false,
+                  },
+                  customLabel: true,
+                },
+                'fe5a4d7d-6f48-45ab-974c-96bc864ac36fX0': {
+                  label: 'Part of Memory Usage (avg)',
+                  dataType: 'number',
+                  operationType: 'average',
+                  sourceField: 'system.memory.used.pct',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    emptyAsNull: false,
+                  },
                   customLabel: true,
                 },
                 '3eca2307-228e-4842-a023-57e15c8c364dX0': {
@@ -188,24 +210,208 @@ const getLensHostsTable = (
                   references: ['3eca2307-228e-4842-a023-57e15c8c364dX0'],
                   customLabel: true,
                 },
-                '3eca2307-228e-4842-a023-57e15c8c364d': {
-                  label: 'Disk latency (avg.)',
+                '02e9d54c-bbe0-42dc-839c-55080a29838dX0': {
+                  label: 'Part of RX (avg)',
+                  dataType: 'number',
+                  operationType: 'average',
+                  sourceField: 'host.network.ingress.bytes',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  filter: {
+                    query: 'host.network.ingress.bytes: *',
+                    language: 'kuery',
+                  },
+                  params: {
+                    emptyAsNull: false,
+                  },
+                  customLabel: true,
+                },
+                '02e9d54c-bbe0-42dc-839c-55080a29838dX1': {
+                  label: 'Part of RX (avg)',
+                  dataType: 'number',
+                  operationType: 'max',
+                  sourceField: 'metricset.period',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  filter: {
+                    query: 'host.network.ingress.bytes: *',
+                    language: 'kuery',
+                  },
+                  params: {
+                    emptyAsNull: false,
+                  },
+                  customLabel: true,
+                },
+                '02e9d54c-bbe0-42dc-839c-55080a29838dX2': {
+                  label: 'Part of RX (avg)',
+                  dataType: 'number',
+                  operationType: 'math',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    tinymathAst: {
+                      type: 'function',
+                      name: 'divide',
+                      args: [
+                        {
+                          type: 'function',
+                          name: 'multiply',
+                          args: ['02e9d54c-bbe0-42dc-839c-55080a29838dX0', 8],
+                          location: {
+                            min: 1,
+                            max: 40,
+                          },
+                          text: 'average(host.network.ingress.bytes) * 8',
+                        },
+                        {
+                          type: 'function',
+                          name: 'divide',
+                          args: ['02e9d54c-bbe0-42dc-839c-55080a29838dX1', 1000],
+                          location: {
+                            min: 45,
+                            max: 73,
+                          },
+                          text: 'max(metricset.period) / 1000',
+                        },
+                      ],
+                      location: {
+                        min: 0,
+                        max: 75,
+                      },
+                      text: '(average(host.network.ingress.bytes) * 8) / (max(metricset.period) / 1000)\n',
+                    },
+                  },
+                  references: [
+                    '02e9d54c-bbe0-42dc-839c-55080a29838dX0',
+                    '02e9d54c-bbe0-42dc-839c-55080a29838dX1',
+                  ],
+                  customLabel: true,
+                },
+                '02e9d54c-bbe0-42dc-839c-55080a29838d': {
+                  label: 'RX (avg.)',
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
                   scale: 'ratio',
                   params: {
-                    formula: 'average(system.diskio.io.time) / 1000',
+                    formula:
+                      '(average(host.network.ingress.bytes) * 8) / (max(metricset.period) / 1000)\n',
                     isFormulaBroken: false,
                     format: {
-                      id: 'number',
+                      id: 'bits',
                       params: {
                         decimals: 0,
-                        suffix: 'ms',
+                        suffix: '/s',
                       },
                     },
                   },
-                  references: ['3eca2307-228e-4842-a023-57e15c8c364dX1'],
+                  references: ['02e9d54c-bbe0-42dc-839c-55080a29838dX2'],
+                  filter: {
+                    query: 'host.network.ingress.bytes: *',
+                    language: 'kuery',
+                  },
+                  customLabel: true,
+                },
+                '7802ef93-622c-44df-94fa-03eec01bb7b6X0': {
+                  label: 'Part of TX',
+                  dataType: 'number',
+                  operationType: 'average',
+                  sourceField: 'host.network.egress.bytes',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  filter: {
+                    query: 'host.network.egress.bytes: *',
+                    language: 'kuery',
+                  },
+                  params: {
+                    emptyAsNull: false,
+                  },
+                  customLabel: true,
+                },
+                '7802ef93-622c-44df-94fa-03eec01bb7b6X1': {
+                  label: 'Part of TX',
+                  dataType: 'number',
+                  operationType: 'max',
+                  sourceField: 'metricset.period',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  filter: {
+                    query: 'host.network.egress.bytes: *',
+                    language: 'kuery',
+                  },
+                  params: {
+                    emptyAsNull: false,
+                  },
+                  customLabel: true,
+                },
+                '7802ef93-622c-44df-94fa-03eec01bb7b6X2': {
+                  label: 'Part of TX',
+                  dataType: 'number',
+                  operationType: 'math',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    tinymathAst: {
+                      type: 'function',
+                      name: 'divide',
+                      args: [
+                        {
+                          type: 'function',
+                          name: 'multiply',
+                          args: ['7802ef93-622c-44df-94fa-03eec01bb7b6X0', 8],
+                          location: {
+                            min: 1,
+                            max: 39,
+                          },
+                          text: 'average(host.network.egress.bytes) * 8',
+                        },
+                        {
+                          type: 'function',
+                          name: 'divide',
+                          args: ['7802ef93-622c-44df-94fa-03eec01bb7b6X1', 1000],
+                          location: {
+                            min: 44,
+                            max: 72,
+                          },
+                          text: 'max(metricset.period) / 1000',
+                        },
+                      ],
+                      location: {
+                        min: 0,
+                        max: 74,
+                      },
+                      text: '(average(host.network.egress.bytes) * 8) / (max(metricset.period) / 1000)\n',
+                    },
+                  },
+                  references: [
+                    '7802ef93-622c-44df-94fa-03eec01bb7b6X0',
+                    '7802ef93-622c-44df-94fa-03eec01bb7b6X1',
+                  ],
+                  customLabel: true,
+                },
+                '7802ef93-622c-44df-94fa-03eec01bb7b6': {
+                  label: 'TX (avg.)',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    formula:
+                      '(average(host.network.egress.bytes) * 8) / (max(metricset.period) / 1000)\n',
+                    isFormulaBroken: false,
+                    format: {
+                      id: 'bits',
+                      params: {
+                        decimals: 0,
+                        suffix: '/s',
+                      },
+                    },
+                  },
+                  references: ['7802ef93-622c-44df-94fa-03eec01bb7b6X2'],
+                  filter: {
+                    query: 'host.network.egress.bytes: *',
+                    language: 'kuery',
+                  },
                   customLabel: true,
                 },
               },
@@ -214,12 +420,20 @@ const getLensHostsTable = (
                 '155fc728-d010-498e-8126-0bc46cad2be2',
                 '467de550-9186-4e18-8cfa-bce07087801a',
                 '3eca2307-228e-4842-a023-57e15c8c364d',
+                '02e9d54c-bbe0-42dc-839c-55080a29838d',
+                '7802ef93-622c-44df-94fa-03eec01bb7b6',
                 '0a9bd0fa-9966-489b-8c95-70997a7aad4c',
                 'fe5a4d7d-6f48-45ab-974c-96bc864ac36f',
                 '0a9bd0fa-9966-489b-8c95-70997a7aad4cX0',
                 'fe5a4d7d-6f48-45ab-974c-96bc864ac36fX0',
                 '3eca2307-228e-4842-a023-57e15c8c364dX0',
                 '3eca2307-228e-4842-a023-57e15c8c364dX1',
+                '02e9d54c-bbe0-42dc-839c-55080a29838dX0',
+                '02e9d54c-bbe0-42dc-839c-55080a29838dX1',
+                '02e9d54c-bbe0-42dc-839c-55080a29838dX2',
+                '7802ef93-622c-44df-94fa-03eec01bb7b6X0',
+                '7802ef93-622c-44df-94fa-03eec01bb7b6X1',
+                '7802ef93-622c-44df-94fa-03eec01bb7b6X2',
               ],
               incompleteColumns: {},
               indexPatternId: '305688db-9e02-4046-acc1-5d0d8dd73ef6',
@@ -234,6 +448,7 @@ const getLensHostsTable = (
           {
             columnId: '8d17458d-31af-41d1-a23c-5180fd960bee',
             width: 296.16666666666663,
+            isTransposed: false,
           },
           {
             columnId: '155fc728-d010-498e-8126-0bc46cad2be2',
@@ -246,6 +461,10 @@ const getLensHostsTable = (
             width: 121.11666666666667,
           },
           {
+            columnId: '3eca2307-228e-4842-a023-57e15c8c364d',
+            isTransposed: false,
+          },
+          {
             columnId: '0a9bd0fa-9966-489b-8c95-70997a7aad4c',
             isTransposed: false,
           },
@@ -254,8 +473,12 @@ const getLensHostsTable = (
             isTransposed: false,
           },
           {
-            columnId: '3eca2307-228e-4842-a023-57e15c8c364d',
             isTransposed: false,
+            columnId: '02e9d54c-bbe0-42dc-839c-55080a29838d',
+          },
+          {
+            isTransposed: false,
+            columnId: '7802ef93-622c-44df-94fa-03eec01bb7b6',
           },
         ],
         paging: {
@@ -277,24 +500,54 @@ interface Props {
   timeRange: TimeRange;
   query: Query;
   searchSessionId: string;
+  onRefetch: () => void;
+  onLoading: (isLoading: boolean) => void;
+  isLensLoading: boolean;
 }
 export const HostsTable: React.FunctionComponent<Props> = ({
   dataView,
   timeRange,
   query,
   searchSessionId,
+  onRefetch,
+  onLoading,
+  isLensLoading,
 }) => {
   const {
     services: { lens },
   } = useKibana<InfraClientStartDeps>();
   const LensComponent = lens?.EmbeddableComponent;
+  const [noData, setNoData] = useState(false);
 
+  if (noData && !isLensLoading) {
+    return (
+      <NoData
+        titleText={i18n.translate('xpack.infra.metrics.emptyViewTitle', {
+          defaultMessage: 'There is no data to display.',
+        })}
+        bodyText={i18n.translate('xpack.infra.metrics.emptyViewDescription', {
+          defaultMessage: 'Try adjusting your time or filter.',
+        })}
+        refetchText={i18n.translate('xpack.infra.metrics.refetchButtonLabel', {
+          defaultMessage: 'Check for new data',
+        })}
+        onRefetch={onRefetch}
+        testString="metricsEmptyViewState"
+      />
+    );
+  }
   return (
     <LensComponent
       id="hostsView"
       timeRange={timeRange}
       attributes={getLensHostsTable(dataView, query)}
       searchSessionId={searchSessionId}
+      onLoad={(isLoading, adapters) => {
+        if (!isLoading && adapters?.tables) {
+          setNoData(adapters?.tables.tables.default?.rows.length === 0);
+          onLoading(false);
+        }
+      }}
     />
   );
 };

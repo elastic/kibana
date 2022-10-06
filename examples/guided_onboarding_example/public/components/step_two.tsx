@@ -55,7 +55,7 @@ export const StepTwo = (props: StepTwoProps) => {
             <FormattedMessage
               id="guidedOnboardingExample.guidesSelection.stepTwo.explanation"
               defaultMessage="The code on this page is listening to the guided setup state using an Observable subscription. If the state is set to
-              Search guide, step Search experience, a EUI tour will be displayed, pointing to the button below."
+              Search guide, step Browse documents, a EUI tour will be displayed, pointing to the button below."
             />
           </p>
         </EuiText>
@@ -73,7 +73,7 @@ export const StepTwo = (props: StepTwoProps) => {
           }}
           step={1}
           stepsTotal={1}
-          title="Step Search experience"
+          title="Step Browse documents"
           anchorPosition="rightUp"
         >
           <EuiButton

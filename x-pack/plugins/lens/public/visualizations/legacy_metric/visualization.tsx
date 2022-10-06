@@ -258,7 +258,7 @@ export const getLegacyMetricVisualization = ({
           filterOperations: (op: OperationMetadata) =>
             !op.isBucketed && legacyMetricSupportedTypes.has(op.dataType),
           enableDimensionEditor: true,
-          required: true,
+          requiredMinDimensionCount: 1,
         },
       ],
     };

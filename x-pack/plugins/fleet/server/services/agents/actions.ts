@@ -8,6 +8,7 @@
 import uuid from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import { appContextService } from '../app_context';
 import type {
   Agent,
   AgentAction,
@@ -99,6 +100,32 @@ export async function bulkCreateAgentActions(
   });
 
   return actions;
+}
+
+export async function createErrorActionResults(
+  esClient: ElasticsearchClient,
+  actionId: string,
+  errors: Record<Agent['id'], Error>,
+  errorMessage: string
+) {
+  const errorCount = Object.keys(errors).length;
+  if (errorCount > 0) {
+    appContextService
+      .getLogger()
+      .info(
+        `Writing error action results of ${errorCount} agents. Possibly failed validation: ${errorMessage}.`
+      );
+
+    // writing out error result for those agents that have errors, so the action is not going to stay in progress forever
+    await bulkCreateAgentActionResults(
+      esClient,
+      Object.keys(errors).map((agentId) => ({
+        agentId,
+        actionId,
+        error: errors[agentId].message,
+      }))
+    );
+  }
 }
 
 export async function bulkCreateAgentActionResults(
@@ -227,6 +254,19 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     if (!hit._source || !hit._source.agents || !hit._source.action_id) {
       continue;
     }
+    if (hit._source.type === 'UPGRADE') {
+      await bulkUpdateAgents(
+        esClient,
+        hit._source.agents.map((agentId) => ({
+          agentId,
+          data: {
+            upgraded_at: null,
+            upgrade_started_at: null,
+          },
+        })),
+        {}
+      );
+    }
     await createAgentAction(esClient, {
       id: cancelActionId,
       type: 'CANCEL',
@@ -237,18 +277,6 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
       created_at: now,
       expiration: hit._source.expiration,
     });
-    if (hit._source.type === 'UPGRADE') {
-      await bulkUpdateAgents(
-        esClient,
-        hit._source.agents.map((agentId) => ({
-          agentId,
-          data: {
-            upgraded_at: null,
-            upgrade_started_at: null,
-          },
-        }))
-      );
-    }
   }
 
   return {

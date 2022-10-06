@@ -40,17 +40,21 @@ export const createCustomRule = (
   rule: CustomRule,
   ruleId = 'rule_testing',
   interval = '100m'
-): Cypress.Chainable<Cypress.Response<unknown>> =>
-  cy.request({
+): Cypress.Chainable<Cypress.Response<unknown>> => {
+  const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
+  const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
+  const timeline = rule.timeline != null ? rule.timeline : undefined;
+
+  return cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
       rule_id: ruleId,
-      risk_score: parseInt(rule.riskScore, 10),
+      risk_score: riskScore,
       description: rule.description,
       interval,
       name: rule.name,
-      severity: rule.severity.toLocaleLowerCase(),
+      severity,
       type: 'query',
       from: 'now-50000h',
       index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
@@ -60,29 +64,33 @@ export const createCustomRule = (
       enabled: false,
       exceptions_list: rule.exceptionLists ?? [],
       tags: rule.tags,
-      ...(rule.timeline.id ?? rule.timeline.templateTimelineId
+      ...(timeline?.id ?? timeline?.templateTimelineId
         ? {
-            timeline_id: rule.timeline.id ?? rule.timeline.templateTimelineId,
-            timeline_title: rule.timeline.title,
+            timeline_id: timeline.id ?? timeline.templateTimelineId,
+            timeline_title: timeline.title,
           }
         : {}),
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
   });
+};
 
 export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing') => {
+  const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
+  const severity = rule.severity != null ? rule.severity.toLowerCase() : undefined;
+
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
       rule_id: ruleId,
-      risk_score: parseInt(rule.riskScore, 10),
+      risk_score: riskScore,
       description: rule.description,
-      interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
-      from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
+      interval: `${rule.runsEvery?.interval}${rule.runsEvery?.type}`,
+      from: `now-${rule.lookBack?.interval}${rule.lookBack?.type}`,
       name: rule.name,
-      severity: rule.severity.toLocaleLowerCase(),
+      severity,
       type: 'eql',
       index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
       data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
@@ -96,17 +104,20 @@ export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_test
 };
 
 export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing') => {
+  const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
+  const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
+
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
       rule_id: ruleId,
-      risk_score: parseInt(rule.riskScore, 10),
+      risk_score: riskScore,
       description: rule.description,
-      interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
-      from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
+      interval: `${rule.runsEvery?.interval}${rule.runsEvery?.type}`,
+      from: `now-${rule.lookBack?.interval}${rule.lookBack?.type}`,
       name: rule.name,
-      severity: rule.severity.toLocaleLowerCase(),
+      severity,
       type: 'threshold',
       index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
       data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
@@ -124,17 +135,20 @@ export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing'
 };
 
 export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') => {
+  const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
+  const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
+
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
       rule_id: ruleId,
-      risk_score: parseInt(rule.riskScore, 10),
+      risk_score: riskScore,
       description: rule.description,
-      interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
-      from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
+      interval: `${rule.runsEvery?.interval}${rule.runsEvery?.type}`,
+      from: `now-${rule.lookBack?.interval}${rule.lookBack?.type}`,
       name: rule.name,
-      severity: rule.severity.toLocaleLowerCase(),
+      severity,
       type: 'new_terms',
       index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
       data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
@@ -151,17 +165,21 @@ export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') 
 export const createSavedQueryRule = (
   rule: SavedQueryRule,
   ruleId = 'saved_query_rule_testing'
-): Cypress.Chainable<Cypress.Response<unknown>> =>
-  cy.request({
+): Cypress.Chainable<Cypress.Response<unknown>> => {
+  const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
+  const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
+  const timeline = rule.timeline != null ? rule.timeline : undefined;
+
+  return cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
       rule_id: ruleId,
-      risk_score: parseInt(rule.riskScore, 10),
+      risk_score: riskScore,
       description: rule.description,
       interval: rule.interval,
       name: rule.name,
-      severity: rule.severity.toLocaleLowerCase(),
+      severity,
       type: 'saved_query',
       from: 'now-50000h',
       index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : undefined,
@@ -171,33 +189,38 @@ export const createSavedQueryRule = (
       enabled: false,
       exceptions_list: rule.exceptionLists ?? [],
       tags: rule.tags,
-      ...(rule.timeline.id ?? rule.timeline.templateTimelineId
+      ...(timeline?.id ?? timeline?.templateTimelineId
         ? {
-            timeline_id: rule.timeline.id ?? rule.timeline.templateTimelineId,
-            timeline_title: rule.timeline.title,
+            timeline_id: timeline.id ?? timeline.templateTimelineId,
+            timeline_title: timeline.title,
           }
         : {}),
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
   });
+};
 
 export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') => {
+  const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
+  const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
+  const timeline = rule.timeline != null ? rule.timeline : undefined;
+
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
       rule_id: ruleId,
-      risk_score: parseInt(rule.riskScore, 10),
+      risk_score: riskScore,
       description: rule.description,
       // Default interval is 1m, our tests config overwrite this to 1s
       // See https://github.com/elastic/kibana/pull/125396 for details
       interval: '10s',
       name: rule.name,
-      severity: rule.severity.toLocaleLowerCase(),
+      severity,
       type: 'threat_match',
-      timeline_id: rule.timeline.templateTimelineId,
-      timeline_title: rule.timeline.title,
+      timeline_id: timeline?.templateTimelineId,
+      timeline_title: timeline?.title,
       threat_mapping: [
         {
           entries: [
@@ -233,17 +256,20 @@ export const createCustomRuleEnabled = (
   interval = '100m',
   maxSignals = 500
 ) => {
+  const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
+  const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
+
   if (rule.dataSource.type === 'indexPatterns') {
     cy.request({
       method: 'POST',
       url: 'api/detection_engine/rules',
       body: {
         rule_id: ruleId,
-        risk_score: parseInt(rule.riskScore, 10),
+        risk_score: riskScore,
         description: rule.description,
         interval,
         name: rule.name,
-        severity: rule.severity.toLocaleLowerCase(),
+        severity,
         type: 'query',
         from: 'now-50000h',
         index: rule.dataSource.index,
@@ -264,11 +290,11 @@ export const createCustomRuleEnabled = (
       url: 'api/detection_engine/rules',
       body: {
         rule_id: ruleId,
-        risk_score: parseInt(rule.riskScore, 10),
+        risk_score: riskScore,
         description: rule.description,
         interval,
         name: rule.name,
-        severity: rule.severity.toLocaleLowerCase(),
+        severity,
         type: 'query',
         from: 'now-50000h',
         index: [],
