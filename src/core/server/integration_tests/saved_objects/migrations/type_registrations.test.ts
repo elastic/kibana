@@ -58,6 +58,7 @@ const previouslyRegisteredTypes = [
   'fleet-agents',
   'fleet-enrollment-api-keys',
   'fleet-preconfiguration-deletion-record',
+  'fleet-fleet-server-host',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
