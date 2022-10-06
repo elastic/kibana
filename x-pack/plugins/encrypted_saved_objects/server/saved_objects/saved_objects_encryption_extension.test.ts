@@ -98,7 +98,7 @@ describe('#decryptOrStripResponseAttributes', () => {
       },
     });
 
-    await expect(service.decryptAttributes).not.toHaveBeenCalled();
+    expect(service.decryptAttributes).not.toHaveBeenCalled();
   });
 
   test('strips encrypted attributes except for ones with `dangerouslyExposeValue` set to `true` if type is registered', async () => {
@@ -109,7 +109,7 @@ describe('#decryptOrStripResponseAttributes', () => {
       attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
     });
 
-    await expect(service.stripOrDecryptAttributes).toHaveBeenCalledTimes(1);
+    expect(service.stripOrDecryptAttributes).toHaveBeenCalledTimes(1);
   });
 
   test('includes both attributes and error if decryption fails.', async () => {
@@ -135,7 +135,7 @@ describe('#decryptOrStripResponseAttributes', () => {
       },
     });
 
-    await expect(service.stripOrDecryptAttributes).not.toHaveBeenCalled();
+    expect(service.stripOrDecryptAttributes).not.toHaveBeenCalled();
 
     await expect(extension.decryptOrStripResponseAttributes(registeredSO)).resolves.toEqual({
       ...registeredSO,
@@ -143,7 +143,7 @@ describe('#decryptOrStripResponseAttributes', () => {
       error: decryptionError,
     });
 
-    await expect(service.stripOrDecryptAttributes).toHaveBeenCalledTimes(1);
+    expect(service.stripOrDecryptAttributes).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -172,7 +172,7 @@ describe('#encryptAttributes', () => {
       attrThree: 'three',
     });
 
-    await expect(service.encryptAttributes).not.toBeCalled();
+    expect(service.encryptAttributes).not.toBeCalled();
   });
 
   test('encrypts attributes if the type is registered', async () => {
@@ -199,6 +199,6 @@ describe('#encryptAttributes', () => {
       attrThree: 'three',
     });
 
-    await expect(service.encryptAttributes).toBeCalledTimes(1);
+    expect(service.encryptAttributes).toBeCalledTimes(1);
   });
 });

@@ -244,7 +244,6 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
-          // expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         });
 
         test(`supplements internal parameters with the current namespace`, async () => {

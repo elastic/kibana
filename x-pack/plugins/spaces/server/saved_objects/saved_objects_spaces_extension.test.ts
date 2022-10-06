@@ -78,6 +78,19 @@ describe('#getSearchableNamespaces', () => {
     ]);
   });
 
+  test(`returns an empty array if the namespaces argument is an empty array`, async () => {
+    const { spacesClient, spacesExtension } = setup();
+    spacesClient.getAll.mockImplementation(() =>
+      Promise.resolve([
+        { id: 'ns-1', name: '', disabledFeatures: [] },
+        { id: 'ns-2', name: '', disabledFeatures: [] },
+        { id: 'ns-3', name: '', disabledFeatures: [] },
+        { id: 'ns-4', name: '', disabledFeatures: [] },
+      ])
+    );
+    await expect(spacesExtension.getSearchableNamespaces([])).resolves.toEqual([]);
+  });
+
   test(`filters results based on requested namespaces`, async () => {
     const { spacesClient, spacesExtension } = setup();
     spacesClient.getAll.mockImplementation(() =>
