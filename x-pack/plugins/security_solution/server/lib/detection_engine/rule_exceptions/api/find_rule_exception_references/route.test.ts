@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../../common/constants';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getRuleMock,
-} from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
-import { findRuleExceptionReferencesRoute } from './find_rule_exceptions_route';
-import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+} from '../../../routes/__mocks__/request_responses';
+import { requestContextMock, serverMock, requestMock } from '../../../routes/__mocks__';
+import { findRuleExceptionReferencesRoute } from './route';
+import { getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 describe('findRuleExceptionReferencesRoute', () => {

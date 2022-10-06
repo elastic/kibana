@@ -17,17 +17,13 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
-  DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
 } from '../../../../../common/constants';
 import type { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type {
   FullResponseSchema,
   PreviewResponse,
 } from '../../../../../common/detection_engine/schemas/request';
-import type {
-  GetInstalledIntegrationsResponse,
-  RulesReferencedByExceptionListsSchema,
-} from '../../../../../common/detection_engine/schemas/response';
+import type { GetInstalledIntegrationsResponse } from '../../../../../common/detection_engine/schemas/response';
 
 import type {
   UpdateRulesProps,
@@ -44,7 +40,6 @@ import type {
   BulkActionProps,
   BulkActionResponseMap,
   PreviewRulesProps,
-  FindRulesReferencedByExceptionsProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
@@ -374,35 +369,3 @@ export const fetchInstalledIntegrations = async ({
       signal,
     }
   );
-
-/**
- * Fetch info on what exceptions lists are referenced by what rules
- *
- * @param lists exception list information needed for making request
- * @param signal to cancel request
- *
- * @throws An error if response is not OK
- */
-export const findRuleExceptionReferences = async ({
-  lists,
-  signal,
-}: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> => {
-  const idsUndefined = lists.some(({ id }) => id === undefined);
-  const query = idsUndefined
-    ? {
-        namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
-      }
-    : {
-        ids: lists.map(({ id }) => id).join(','),
-        list_ids: lists.map(({ listId }) => listId).join(','),
-        namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
-      };
-  return KibanaServices.get().http.fetch<RulesReferencedByExceptionListsSchema>(
-    DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
-    {
-      method: 'GET',
-      query,
-      signal,
-    }
-  );
-};

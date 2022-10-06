@@ -45,7 +45,6 @@ describe('ExceptionsViewerItems', () => {
           getFormattedComments={() => []}
         />
       );
-      // expect(wrapper).toMatchSnapshot();
       expect(wrapper.getByTestId('emptyViewerState')).toBeInTheDocument();
       expect(wrapper.queryByTestId('exceptionsContainer')).not.toBeInTheDocument();
     });
@@ -70,7 +69,6 @@ describe('ExceptionsViewerItems', () => {
           getFormattedComments={() => []}
         />
       );
-      // expect(wrapper).toMatchSnapshot();
       expect(wrapper.getByTestId('emptySearchViewerState')).toBeInTheDocument();
       expect(wrapper.queryByTestId('exceptionsContainer')).not.toBeInTheDocument();
     });
@@ -95,7 +93,6 @@ describe('ExceptionsViewerItems', () => {
           getFormattedComments={() => []}
         />
       );
-      // expect(wrapper).toMatchSnapshot();
       expect(wrapper.getByTestId('exceptionsContainer')).toBeTruthy();
     });
   });

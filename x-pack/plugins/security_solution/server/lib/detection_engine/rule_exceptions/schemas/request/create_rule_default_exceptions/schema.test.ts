@@ -8,8 +8,8 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { createRuleExceptionsSchema } from './create_rule_exception_schema';
-import type { CreateRuleExceptionSchema } from './create_rule_exception_schema';
+import { createRuleExceptionsSchema } from './schema';
+import type { CreateRuleExceptionSchema } from './schema';
 
 import { getCreateExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 

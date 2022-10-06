@@ -7,11 +7,11 @@
 
 import { getDetectionsExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getRuleMock, resolveRuleMock } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
-import { createRuleExceptionsRoute } from './create_rule_exceptions_route';
-import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../common/constants';
+import { getRuleMock, resolveRuleMock } from '../../../routes/__mocks__/request_responses';
+import { requestContextMock, serverMock, requestMock } from '../../../routes/__mocks__';
+import { createRuleExceptionsRoute } from './route';
+import { getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
 
 const getMockExceptionItem = () => ({
   description: 'Exception item for rule default exception list',

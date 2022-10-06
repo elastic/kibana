@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 
 import { exceptionListSchema, listArray, list_id } from '@kbn/securitysolution-io-ts-list-types';
 
-import { rule_id, id, name } from '../common/schemas';
+import { rule_id, id, name } from '../../../../../../../common/detection_engine/schemas/common';
 
 export const ruleReferenceRuleInfoSchema = t.exact(
   t.type({

@@ -527,6 +527,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/security_solution/cypress/e2e/value_lists @elastic/security-solution-platform
 
 /x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-solution-platform
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-solution-platform
