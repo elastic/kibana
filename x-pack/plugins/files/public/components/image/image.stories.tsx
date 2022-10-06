@@ -38,7 +38,7 @@ export const Basic = Template.bind({});
 export const WithBlurhash = Template.bind({});
 WithBlurhash.storyName = 'With blurhash';
 WithBlurhash.args = {
-  style: { opacity: 0 },
+  style: { visibility: 'hidden' },
 };
 WithBlurhash.loaders = [
   async () => ({
@@ -47,7 +47,7 @@ WithBlurhash.loaders = [
 ];
 WithBlurhash.decorators = [
   (Story) => {
-    const alwaysShowBlurhash = `canvas { opacity: 1 !important; }`;
+    const alwaysShowBlurhash = `img:nth-of-type(1) { opacity: 1 !important; }`;
     return (
       <>
         <style>{alwaysShowBlurhash}</style>

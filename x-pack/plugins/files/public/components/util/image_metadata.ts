@@ -31,8 +31,8 @@ export function fitToBox(width: number, height: number): { width: number; height
     ) - 1 // Get the percentage we are exceeding. E.g., 0.3 - 1 = -0.7 means the image needs to shrink by 70% to fit
   );
   return {
-    width: width - offsetRatio * width,
-    height: height - offsetRatio * height,
+    width: Math.floor(width - offsetRatio * width),
+    height: Math.floor(height - offsetRatio * height),
   };
 }
 
@@ -64,7 +64,7 @@ export async function getImageMetadata(file: File | Blob): Promise<undefined | F
     ctx.drawImage(image, 0, 0, width, height);
     const imgData = ctx.getImageData(0, 0, width, height);
     return {
-      blurhash: bh.encode(imgData.data, imgData.width, imgData.height, 4, 3),
+      blurhash: bh.encode(imgData.data, imgData.width, imgData.height, 4, 4),
       width: image.width,
       height: image.height,
     };

@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { decode } from 'blurhash';
+import React, { useRef, useEffect } from 'react';
 import type { FunctionComponent } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import React, { useRef, useEffect } from 'react';
 import { css } from '@emotion/react';
+import { fitToBox } from '../../util';
 
 interface Props {
   visible: boolean;
@@ -25,21 +26,27 @@ export const Blurhash: FunctionComponent<Props> = ({
   height,
   isContainerWidth,
 }) => {
-  const ref = useRef<null | HTMLCanvasElement>(null);
+  const ref = useRef<null | HTMLImageElement>(null);
   const { euiTheme } = useEuiTheme();
   useEffect(() => {
     try {
-      const pixels = decode(hash, width, height);
-      const ctx = ref.current!.getContext('2d')!;
-      const imageData = ctx.createImageData(width, height);
-      imageData.data.set(pixels);
+      const { width: blurWidth, height: blurHeight } = fitToBox(width, height);
+      const canvas = document.createElement('canvas');
+      canvas.width = blurWidth;
+      canvas.height = blurHeight;
+      const ctx = canvas.getContext('2d')!;
+      const imageData = ctx.createImageData(blurWidth, blurHeight);
+      imageData.data.set(decode(hash, blurWidth, blurHeight));
       ctx.putImageData(imageData, 0, 0);
+      ref.current!.src = canvas.toDataURL();
     } catch (e) {
-      // ignore if something goes wrong loading the blurhash
+      // eslint-disable-next-line no-console
+      console.error(e);
     }
   }, [hash, width, height]);
   return (
-    <canvas
+    <img
+      alt=""
       css={css`
         top: 0;
         width: ${isContainerWidth ? '100%' : width + 'px'};
@@ -49,8 +56,6 @@ export const Blurhash: FunctionComponent<Props> = ({
         opacity: ${visible ? 1 : 0};
         transition: opacity ${euiTheme.animation.extraFast};
       `}
-      width={width}
-      height={height}
       ref={ref}
     />
   );
