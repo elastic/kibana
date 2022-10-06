@@ -11,7 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { ElasticDocsLink } from '../../shared/links/elastic_docs_link';
 
-export type TourType = 'createGroup' | 'editGroup' | 'serviceGroupCard';
+export type TourType =
+  | 'createGroup'
+  | 'editGroup'
+  | 'serviceGroupsAllServices';
 
 interface Props {
   title: string;
@@ -63,7 +66,7 @@ export function ServiceGroupsTour({
       step={1}
       stepsTotal={1}
       title={title}
-      anchorPosition="leftUp"
+      anchorPosition="upLeft"
       footerAction={
         <EuiButtonEmpty color="text" size="xs" onClick={dismissTour}>
           {i18n.translate('xpack.apm.serviceGroups.tour.dismiss', {

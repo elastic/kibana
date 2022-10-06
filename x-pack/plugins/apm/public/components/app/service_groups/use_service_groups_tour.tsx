@@ -11,7 +11,7 @@ import { TourType } from './service_groups_tour';
 const INITIAL_STATE: Record<TourType, boolean> = {
   createGroup: true,
   editGroup: true,
-  serviceGroupCard: true,
+  serviceGroupsAllServices: true,
 };
 
 export function useServiceGroupsTour(type: TourType) {

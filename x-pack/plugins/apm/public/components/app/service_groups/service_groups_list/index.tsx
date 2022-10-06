@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiFormControlLayout,
   EuiText,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
@@ -21,11 +22,58 @@ import { ServiceGroupsListItems } from './service_groups_list';
 import { Sort } from './sort';
 import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
 import { getDateRange } from '../../../../context/url_params_context/helpers';
+import { RedirectTo } from '../../../routing/redirect_to';
+import { ServiceGroupsTour } from '../service_groups_tour';
+import { useServiceGroupsTour } from '../use_service_groups_tour';
 
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';
 
 export function ServiceGroupsList() {
+  const { tourEnabled, dismissTour } = useServiceGroupsTour(
+    'serviceGroupsAllServices'
+  );
+  const buttonGroupOptions = {
+    allServices: {
+      id: 'allServices',
+      label: (
+        <ServiceGroupsTour
+          tourEnabled={tourEnabled}
+          dismissTour={dismissTour}
+          title={i18n.translate(
+            'xpack.apm.serviceGroups.tour.serviceGroups.title',
+            { defaultMessage: 'View all services' }
+          )}
+          content={i18n.translate(
+            'xpack.apm.serviceGroups.tour.serviceGroups.content',
+            {
+              defaultMessage:
+                "Now that you've created a service group, you can go back and view all services here.",
+            }
+          )}
+        >
+          <>
+            {i18n.translate('xpack.apm.serviceGroups.list.allServices.name', {
+              defaultMessage: 'All services',
+            })}
+          </>
+        </ServiceGroupsTour>
+      ),
+    },
+    serviceGroups: {
+      id: 'serviceGroups',
+      label: i18n.translate(
+        'xpack.apm.serviceGroups.emptyPrompt.serviceGroups',
+        {
+          defaultMessage: 'Service groups',
+        }
+      ),
+    },
+  };
+
   const [filter, setFilter] = useState('');
+  const [buttonGroupSelection, setButtonGroupSelection] = useState(
+    buttonGroupOptions.serviceGroups.id
+  );
 
   const [apmServiceGroupsSortType, setServiceGroupsSortType] =
     useState<ServiceGroupsSortType>('recently_added');
@@ -91,7 +139,6 @@ export function ServiceGroupsList() {
   }, []);
 
   if (isLoading) {
-    // return null;
     return (
       <EuiEmptyPrompt
         icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
@@ -106,9 +153,28 @@ export function ServiceGroupsList() {
     );
   }
 
+  if (buttonGroupSelection === buttonGroupOptions.allServices.id) {
+    return <RedirectTo pathname={'/services'} />;
+  }
+
   return (
     <RefreshServiceGroupsSubscriber onRefresh={refetch}>
       <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem>
+          <EuiButtonGroup
+            color="primary"
+            options={[
+              buttonGroupOptions.allServices,
+              buttonGroupOptions.serviceGroups,
+            ]}
+            idSelected={buttonGroupSelection}
+            onChange={(id) => {
+              dismissTour();
+              setButtonGroupSelection(id);
+            }}
+            legend=""
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem>
@@ -151,7 +217,7 @@ export function ServiceGroupsList() {
                     {i18n.translate('xpack.apm.serviceGroups.groupsCount', {
                       defaultMessage:
                         '{servicesCount} {servicesCount, plural, =0 {group} one {group} other {groups}}',
-                      values: { servicesCount: filteredItems.length + 1 },
+                      values: { servicesCount: filteredItems.length },
                     })}
                   </EuiText>
                 </EuiFlexItem>
