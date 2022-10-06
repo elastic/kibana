@@ -10,9 +10,9 @@ import React from 'react';
 
 import { MarkdownStorybookMock, MarkdownStorybookParams } from '@kbn/shared-ux-markdown-mocks';
 
+import { EuiFlexItem } from '@elastic/eui';
 import mdx from './README.mdx';
 import { Markdown } from './markdown';
-import { EuiFlexItem } from '@elastic/eui';
 
 export default {
   title: 'Markdown/Markdown',
@@ -29,9 +29,10 @@ const argTypes = mock.getArgumentTypes();
 
 export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
   return (
-  <EuiFlexItem style={{width: '50%'}}> 
-    <Markdown {...params} />
-  </EuiFlexItem>);
+    <EuiFlexItem style={{ width: '50%' }}>
+      <Markdown {...params} />
+    </EuiFlexItem>
+  );
 };
 
 MarkdownStoryComponent.argTypes = argTypes;
