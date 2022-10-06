@@ -79,6 +79,7 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
+import { getDefaultFleetServerHost } from './fleet_server_host';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -682,8 +683,9 @@ class AgentPolicyService {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
+    const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
 
-    if (!defaultOutputId) {
+    if (!defaultOutputId || !defaultFleetServerHost) {
       return;
     }
 

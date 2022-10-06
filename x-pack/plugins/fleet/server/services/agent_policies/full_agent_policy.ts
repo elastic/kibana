@@ -8,24 +8,18 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 
-import type {
-  FullAgentPolicy,
-  PackagePolicy,
-  Settings,
-  Output,
-  FullAgentPolicyOutput,
-} from '../../types';
+import type { FullAgentPolicy, PackagePolicy, Output, FullAgentPolicyOutput } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
 import { dataTypes, outputType } from '../../../common/constants';
 import type { FullAgentPolicyOutputPermissions, PackageInfo } from '../../../common/types';
-import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
 
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
+import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -188,19 +182,13 @@ export async function getFullAgentPolicy(
     return outputPermissions;
   }, {});
 
-  // only add settings if not in standalone
+  // only add fleet server hosts if not in standalone
   if (!standalone) {
-    let settings: Settings;
-    try {
-      settings = await getSettings(soClient);
-    } catch (error) {
-      throw new Error('Default settings is not setup');
-    }
-    if (settings.fleet_server_hosts && settings.fleet_server_hosts.length) {
-      fullAgentPolicy.fleet = {
-        hosts: settings.fleet_server_hosts,
-      };
-    }
+    const fleetServerHost = await getFleetServerHostsForAgentPolicy(soClient, agentPolicy);
+
+    fullAgentPolicy.fleet = {
+      hosts: fleetServerHost.host_urls,
+    };
   }
   return fullAgentPolicy;
 }

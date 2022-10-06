@@ -19,6 +19,7 @@ import type {
   FleetServerHostSOAttributes,
   FleetServerHost,
   NewFleetServerHost,
+  AgentPolicy,
 } from '../types';
 import { FleetServerHostUnauthorizedError } from '../errors';
 
@@ -175,6 +176,19 @@ export async function bulkGetFleetServerHosts(
       (fleetServerHostOrUndefined): fleetServerHostOrUndefined is FleetServerHost =>
         typeof fleetServerHostOrUndefined !== 'undefined'
     );
+}
+
+export async function getFleetServerHostsForAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  agentPolicy: AgentPolicy
+) {
+  // TODO support per agent policy
+  const fleetServerHosts = await getDefaultFleetServerHost(soClient);
+  if (!fleetServerHosts) {
+    throw new Error('Default Fleet Server host is not setup');
+  }
+
+  return fleetServerHosts;
 }
 
 /**
