@@ -158,10 +158,6 @@ describe('AllCasesListGeneric', () => {
           .prop('value')
       ).toBe(useGetCasesMockState.data.cases[0].createdAt);
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-severity"]`).first().text().toLowerCase()
-      ).toBe(useGetCasesMockState.data.cases[0].severity);
-
       expect(wrapper.find(`[data-test-subj="case-table-case-count"]`).first().text()).toEqual(
         'Showing 10 cases'
       );
@@ -272,6 +268,12 @@ describe('AllCasesListGeneric', () => {
     const res = appMockRenderer.render(<AllCasesList />);
 
     expect(res.getByTestId('tableHeaderCell_Status_6')).toBeInTheDocument();
+  });
+
+  it('renders the severity column', async () => {
+    const res = appMockRenderer.render(<AllCasesList />);
+
+    expect(res.getByTestId('tableHeaderCell_Severity_7')).toBeInTheDocument();
   });
 
   it('should render the case stats', () => {

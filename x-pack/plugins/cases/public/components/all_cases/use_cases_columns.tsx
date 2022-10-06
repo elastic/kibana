@@ -311,7 +311,10 @@ export const useCasesColumns = ({
         if (theCase.severity != null) {
           const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
           return (
-            <EuiHealth data-test-subj="case-table-column-severity" color={severityData.color}>
+            <EuiHealth
+              data-test-subj={`case-table-column-severity-${theCase.severity}`}
+              color={severityData.color}
+            >
               {severityData.label}
             </EuiHealth>
           );
