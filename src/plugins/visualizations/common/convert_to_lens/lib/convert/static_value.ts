@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-export { getColumnsFromVis } from './schemas';
-export {
-  getPercentageColumnFormulaColumn,
-  getPalette,
-  getPercentageModeConfig,
-  createStaticValueColumn,
-} from '../../common/convert_to_lens/lib';
+import uuid from 'uuid';
+import { StaticValueColumn } from '../../types';
+
+export const createStaticValueColumn = (value: number): StaticValueColumn => ({
+  operationType: 'static_value',
+  columnId: uuid(),
+  isBucketed: false,
+  isSplit: false,
+  dataType: 'number',
+  references: [],
+  params: {
+    value: value.toString(),
+  },
+});

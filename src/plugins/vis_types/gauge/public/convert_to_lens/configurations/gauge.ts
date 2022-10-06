@@ -7,7 +7,7 @@
  */
 
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { Column, GaugeVisConfiguration } from '@kbn/visualizations-plugin/common';
+import { GaugeVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { GaugeVisParams } from '../../types';
 
 export const getConfigurationForGauge = (
@@ -15,25 +15,26 @@ export const getConfigurationForGauge = (
   params: GaugeVisParams,
   palette: PaletteOutput<CustomPaletteParams> | undefined,
   {
-    metrics,
-    buckets,
-    columnsWithoutReferenced,
-    bucketCollapseFn,
+    metricAccessor,
+    minAccessor,
+    maxAccessor,
   }: {
-    metrics: string[];
-    buckets: string[];
-    columnsWithoutReferenced: Column[];
-    bucketCollapseFn?: Record<string, string | undefined>;
+    metricAccessor: string;
+    bucket?: string;
+    minAccessor: string;
+    maxAccessor: string;
   }
 ): GaugeVisConfiguration => {
-  const [metricAccessor] = metrics;
   return {
     layerId,
     layerType: 'data',
     palette,
     metricAccessor,
+    minAccessor,
+    maxAccessor,
     shape: 'horizontalBullet',
-    ticksPosition: 'bands',
+    ticksPosition: 'auto',
     labelMajorMode: 'auto',
+    colorMode: palette ? 'palette' : 'none',
   };
 };

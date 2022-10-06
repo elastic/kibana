@@ -9,14 +9,22 @@
 import { PercentageModeConfig } from '../../types';
 import { ExtendedPaletteParams } from './types';
 
-export const getPercentageModeConfig = (params: ExtendedPaletteParams): PercentageModeConfig => {
-  if (!params.percentageMode) {
-    return { isPercentageMode: false };
-  }
+export const getPercentageModeConfig = (
+  params: ExtendedPaletteParams,
+  respectPercentageMode: boolean = true
+): PercentageModeConfig => {
   const { colorsRange } = params;
-  return {
-    isPercentageMode: true,
+  const minMax = {
     min: colorsRange[0].from,
     max: colorsRange[colorsRange.length - 1].to,
+  };
+  if (!params.percentageMode) {
+    return respectPercentageMode
+      ? { isPercentageMode: false }
+      : { isPercentageMode: false, ...minMax };
+  }
+  return {
+    isPercentageMode: true,
+    ...minMax,
   };
 };

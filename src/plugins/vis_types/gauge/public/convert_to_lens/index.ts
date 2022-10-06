@@ -7,7 +7,11 @@
  */
 
 import uuid from 'uuid';
-import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
+import {
+  Column,
+  ColumnWithMeta,
+  PercentageModeConfigWithMinMax,
+} from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
@@ -42,10 +46,13 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     return null;
   }
 
-  const [{ getColumnsFromVis, getPalette, getPercentageModeConfig }, { getConfigurationForGauge }] =
-    await Promise.all([convertToLensModule, import('./configurations')]);
+  const [
+    { getColumnsFromVis, createStaticValueColumn, getPalette, getPercentageModeConfig },
+    { getConfigurationForGauge },
+  ] = await Promise.all([convertToLensModule, import('./configurations')]);
 
   const getConfiguration = getConfigurationForGauge;
+  const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 
   const result = getColumnsFromVis(
     vis,
@@ -54,7 +61,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     {
       splits: ['group'],
     },
-    { dropEmptyRowsInDateHistogram: true, ...getPercentageModeConfig(vis.params.gauge) }
+    { dropEmptyRowsInDateHistogram: true, ...percentageModeConfig }
   );
 
   if (result === null) {
@@ -62,7 +69,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
   }
 
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1 || result.buckets.length > 1) {
+  if (result.metrics.length > 1 || result.buckets.length) {
     return null;
   }
 
@@ -76,17 +83,27 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
   const layerId = uuid();
   const indexPatternId = dataView.id!;
 
+  const metricAccessor = result.metrics[0];
+  const { min, max } = percentageModeConfig as PercentageModeConfigWithMinMax;
+  const minColumn = createStaticValueColumn(min);
+  const maxColumn = createStaticValueColumn(max);
+  const columns = [...result.columns, minColumn, maxColumn];
+
   return {
     type: 'lnsGauge',
     layers: [
       {
         indexPatternId,
         layerId,
-        columns: result.columns.map(excludeMetaFromColumn),
+        columns: columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
-    configuration: getConfiguration(layerId, vis.params, getPalette(vis.params.gauge), result),
+    configuration: getConfiguration(layerId, vis.params, getPalette(vis.params.gauge), {
+      metricAccessor,
+      minAccessor: minColumn.columnId,
+      maxAccessor: maxColumn.columnId,
+    }),
     indexPatternIds: [indexPatternId],
   };
 };
