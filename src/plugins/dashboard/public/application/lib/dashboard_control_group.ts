@@ -143,11 +143,7 @@ export const syncDashboardControlGroup = async ({
         ),
         skip(1) // skip first filter output because it will have been applied in initialize
       )
-      .subscribe(({ filters }) => {
-        if (filters && filters.length > 0) {
-          dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() });
-        }
-      })
+      .subscribe(() => dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() }))
   );
 
   subscriptions.add(
