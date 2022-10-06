@@ -91,7 +91,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         })}
         onClick={this.onMenuButtonClick}
       >
-        <EuiIcon type="help" size="m" />
+        <EuiIcon type="questionInCircle" size="m" />
       </EuiHeaderSectionItemButton>
     );
 
