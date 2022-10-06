@@ -12,6 +12,7 @@ import { MarkdownStorybookMock, MarkdownStorybookParams } from '@kbn/shared-ux-m
 
 import mdx from './README.mdx';
 import { Markdown } from './markdown';
+import { EuiFlexItem } from '@elastic/eui';
 
 export default {
   title: 'Markdown/Markdown',
@@ -27,7 +28,10 @@ const mock = new MarkdownStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
 export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
-  return <Markdown {...params} />;
+  return (
+  <EuiFlexItem style={{width: '50%'}}> 
+    <Markdown {...params} />
+  </EuiFlexItem>);
 };
 
 MarkdownStoryComponent.argTypes = argTypes;
