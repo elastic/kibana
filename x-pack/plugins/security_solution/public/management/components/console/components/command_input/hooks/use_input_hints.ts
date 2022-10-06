@@ -44,7 +44,6 @@ export const useInputHints = () => {
     if (commandEntered && !isInputPopoverOpen) {
       // Is valid command name? ==> show usage
       if (commandEnteredDefinition && commandEnteredDefinition.helpHidden !== true) {
-        console.log('we in here');
         const exampleInstruction = commandEnteredDefinition?.exampleInstruction ?? '';
         const exampleUsage = commandEnteredDefinition?.exampleUsage ?? '';
 
