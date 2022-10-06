@@ -7,11 +7,11 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import './empty_connectors_prompt.scss';
 
 export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
-  <EuiEmptyPrompt
+  <EuiPageTemplate.EmptyPrompt
     data-test-subj="createFirstConnectorEmptyPrompt"
     title={
       <>

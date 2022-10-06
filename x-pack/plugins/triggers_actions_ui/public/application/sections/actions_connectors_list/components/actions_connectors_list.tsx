@@ -445,34 +445,40 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
 
   return (
     <>
-      <EuiPageTemplate.Header
+      {actionConnectorTableItems.length !== 0 && (
+        <EuiPageTemplate.Header
+          paddingSize="none"
+          pageTitle={i18n.translate('xpack.triggersActionsUI.connectors.home.appTitle', {
+            defaultMessage: 'Connectors',
+          })}
+          description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
+            defaultMessage: 'Connect third-party software with your alerting data.',
+          })}
+          rightSideItems={
+            canSave
+              ? [
+                  <EuiButton
+                    data-test-subj="createActionButton"
+                    key="create-action"
+                    fill
+                    onClick={() => setAddFlyoutVisibility(true)}
+                    iconType="plusInCircle"
+                  >
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
+                      defaultMessage="Create connector"
+                    />
+                  </EuiButton>,
+                ]
+              : []
+          }
+        />
+      )}
+      <EuiPageTemplate.Section
         paddingSize="none"
-        pageTitle={i18n.translate('xpack.triggersActionsUI.connectors.home.appTitle', {
-          defaultMessage: 'Connectors',
-        })}
-        description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
-          defaultMessage: 'Connect third-party software with your alerting data.',
-        })}
-        rightSideItems={
-          canSave
-            ? [
-                <EuiButton
-                  data-test-subj="createActionButton"
-                  key="create-action"
-                  fill
-                  onClick={() => setAddFlyoutVisibility(true)}
-                  iconType="plusInCircle"
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-                    defaultMessage="Create connector"
-                  />
-                </EuiButton>,
-              ]
-            : []
-        }
-      />
-      <EuiPageTemplate.Section paddingSize="none" data-test-subj="actionsList">
+        data-test-subj="actionsList"
+        alignment={actionConnectorTableItems.length === 0 ? 'center' : 'top'}
+      >
         <DeleteModalConfirmation
           data-test-subj="deleteConnectorsConfirmation"
           onDeleted={(deleted: string[]) => {
