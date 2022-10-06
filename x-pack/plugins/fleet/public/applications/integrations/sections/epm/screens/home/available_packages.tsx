@@ -336,7 +336,7 @@ export const AvailablePackages: React.FC<{
 
   return (
     <PackageListGrid
-      isLoading={isLoadingAllPackages}
+      isLoading={isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       controls={controls}
       initialSearch={searchParam}
       list={filteredCards}
