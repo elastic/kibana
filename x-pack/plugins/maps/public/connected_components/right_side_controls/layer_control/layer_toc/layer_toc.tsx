@@ -223,7 +223,7 @@ export class LayerTOC extends Component<Props> {
         <EuiDroppable
           droppableId="mapLayerTOC"
           spacing="none"
-          isCombineEnabled={!this.props.isReadOnly}
+          isCombineEnabled={!this.props.isReadOnly && !this.state.isOwnAncestor}
           className={this._getDroppableClass()}
         >
           {(droppableProvided, droppableSnapshot) => {
@@ -237,15 +237,12 @@ export class LayerTOC extends Component<Props> {
                 disableInteractiveElementBlocking // Allows button to be drag handle
               >
                 {(draggableProvided, draggableSnapshot) => {
-                  // const isDropNotAllowed = this.state.isOwnAncestor && this.state.sourceLayer?.getId() === layer.getId();
-                  // console.log('isDropNotAllowed', isDropNotAllowed);
                   return (
                     <TOCEntry
                       depth={depth}
                       layer={layer}
                       dragHandleProps={draggableProvided.dragHandleProps}
                       isDragging={draggableSnapshot.isDragging}
-                      isCombining={!!draggableSnapshot.combineWith}
                       isDraggingOver={droppableSnapshot.isDraggingOver}
                     />
                   );
