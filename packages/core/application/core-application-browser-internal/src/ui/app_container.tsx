@@ -8,9 +8,10 @@
 
 import './app_container.scss';
 
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -36,6 +37,7 @@ interface Props {
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
+  customLogo$?: Observable<string | undefined>;
 }
 
 export const AppContainer: FC<Props> = ({
@@ -48,12 +50,15 @@ export const AppContainer: FC<Props> = ({
   appStatus,
   setIsMounting,
   theme$,
+  customLogo$,
 }: Props) => {
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef: MutableRefObject<AppUnmount | null> = useRef<AppUnmount>(null);
-
+  const customLogo: string | undefined = useObservable(
+    customLogo$ ? customLogo$ : new BehaviorSubject<string | undefined>(undefined)
+  );
   useLayoutEffect(() => {
     const unmount = () => {
       if (unmountRef.current) {
@@ -114,13 +119,29 @@ export const AppContainer: FC<Props> = ({
   return (
     <Fragment>
       {appNotFound && <AppNotFound />}
-      {showSpinner && !appNotFound && <AppLoadingPlaceholder />}
+      {showSpinner && !appNotFound && <AppLoadingPlaceholder customLogo={customLogo} />}
       <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
     </Fragment>
   );
 };
 
-const AppLoadingPlaceholder: FC = () => {
+interface AppLoadingPlaceholderProps {
+  customLogo?: string;
+}
+
+const AppLoadingPlaceholder = ({ customLogo }: AppLoadingPlaceholderProps) => {
+  if (customLogo) {
+    return (
+      <EuiLoadingSpinner
+        size="xxl"
+        className="appContainer__loading"
+        aria-label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
+          defaultMessage: 'Loading application',
+        })}
+      />
+    );
+  }
+
   return (
     <EuiLoadingElastic
       className="appContainer__loading"

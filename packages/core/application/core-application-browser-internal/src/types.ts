@@ -16,6 +16,7 @@ import type {
   ApplicationSetup,
   ApplicationStart,
 } from '@kbn/core-application-browser';
+import { BehaviorSubject } from 'rxjs';
 
 /** @internal */
 export interface Mounter {
@@ -63,4 +64,10 @@ export interface InternalApplicationStart extends ApplicationStart {
    * @internal
    */
   history: History<unknown>;
+
+  /**
+   * Internal method to set custom logo, exposed only to Core.
+   * @param customLogo$
+   */
+  setCustomLogo$(customLogo$: BehaviorSubject<string | undefined>): void;
 }

@@ -291,6 +291,7 @@ export class ChromeService {
         if (whitelabellingRegistered) {
           throw new Error('Another plugin already registered');
         }
+        application.setCustomLogo$(customLogo$);
         whitelabellingRegistered = pluginName;
       },
 

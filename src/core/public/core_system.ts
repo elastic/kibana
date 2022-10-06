@@ -31,6 +31,7 @@ import { OverlayService } from '@kbn/core-overlays-browser-internal';
 import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
+import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import {
   ApplicationService,
@@ -103,6 +104,7 @@ export class CoreSystem {
   private readonly plugins: PluginsService;
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
+  private readonly rendering: RenderingService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreAppsService;
   private readonly deprecations: DeprecationsService;
@@ -142,6 +144,7 @@ export class CoreSystem {
       kibanaVersion: injectedMetadata.version,
     });
     this.docLinks = new DocLinksService();
+    this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
@@ -316,6 +319,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
       });
+
       const deprecations = this.deprecations.start({ http });
 
       this.coreApp.start({ application, docLinks, http, notifications, uiSettings });

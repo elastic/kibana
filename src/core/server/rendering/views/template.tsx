@@ -31,6 +31,8 @@ export const Template: FunctionComponent<Props> = ({
     theming,
   },
 }) => {
+  const favIcon =
+    theming && theming.favIcon ? theming.favIcon : `${uiPublicUrl}/favicons/favicon.svg`;
   return (
     <html lang={locale}>
       <head>
@@ -41,7 +43,7 @@ export const Template: FunctionComponent<Props> = ({
         <Fonts url={uiPublicUrl} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
-        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
+        <link rel="icon" type="image/svg+xml" href={favIcon} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
         {/* Inject EUI reset and global styles before all other component styles */}

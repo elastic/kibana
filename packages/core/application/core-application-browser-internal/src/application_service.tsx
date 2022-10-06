@@ -105,6 +105,7 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
+  private customLogo$?: BehaviorSubject<string | undefined>;
 
   public setup({
     http: { basePath },
@@ -345,8 +346,14 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            customLogo$={
+              this.customLogo$ ? this.customLogo$.pipe(takeUntil(this.stop$)) : undefined
+            }
           />
         );
+      },
+      setCustomLogo$: (customLogo$: BehaviorSubject<string | undefined>) => {
+        this.customLogo$ = customLogo$;
       },
     };
   }

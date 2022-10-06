@@ -13,6 +13,7 @@ export const configSchema = schema.object({
     pageTitle: schema.maybe(schema.string()),
     welcomeMessage: schema.maybe(schema.string()),
     mark: schema.maybe(schema.string()),
+    favIcon: schema.maybe(schema.string()),
   }),
 });
 

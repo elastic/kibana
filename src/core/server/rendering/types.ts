@@ -23,6 +23,7 @@ export interface ThemingInfo {
   pageTitle?: string;
   logo?: string;
   welcomeMessage?: string;
+  favIcon?: string;
 }
 
 /** @internal */
