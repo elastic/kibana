@@ -68,6 +68,9 @@ export function TransactionDistribution({
   const isLoading =
     waterfallStatus === FETCH_STATUS.LOADING ||
     traceSamplesStatus === FETCH_STATUS.LOADING;
+  const isNotInitiated =
+    waterfallStatus === FETCH_STATUS.NOT_INITIATED ||
+    traceSamplesStatus === FETCH_STATUS.NOT_INITIATED;
 
   const markerCurrentEvent =
     waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
@@ -122,6 +125,7 @@ export function TransactionDistribution({
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
           waterfall={waterfall}
+          isNotInitiated={isNotInitiated}
           isLoading={isLoading}
           traceSamples={traceSamples}
         />

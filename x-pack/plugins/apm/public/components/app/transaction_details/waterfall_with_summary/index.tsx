@@ -12,10 +12,10 @@ import {
   EuiPagination,
   EuiSpacer,
   EuiTitle,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import type { TraceSample } from '../../../../hooks/use_transaction_trace_samples_fetcher';
@@ -27,6 +27,7 @@ import { Environment } from '../../../../../common/environment_rt';
 interface Props {
   waterfall: IWaterfall;
   isLoading: boolean;
+  isNotInitiated?: boolean;
   traceSamples: TraceSample[];
   environment: Environment;
   onSampleClick: (sample: { transactionId: string; traceId: string }) => void;
@@ -39,6 +40,7 @@ interface Props {
 export function WaterfallWithSummary({
   waterfall,
   isLoading,
+  isNotInitiated,
   traceSamples,
   environment,
   onSampleClick,
@@ -61,7 +63,12 @@ export function WaterfallWithSummary({
 
   const { entryWaterfallTransaction } = waterfall;
 
-  if ((!entryWaterfallTransaction || traceSamples.length === 0) && !isLoading) {
+  if (
+    !entryWaterfallTransaction &&
+    traceSamples.length === 0 &&
+    !isLoading &&
+    isNotInitiated
+  ) {
     return (
       <EuiEmptyPrompt
         title={
@@ -123,25 +130,26 @@ export function WaterfallWithSummary({
       <EuiSpacer size="s" />
 
       {isLoading || !entryTransaction ? (
-        <LoadingStatePrompt />
+        <EuiLoadingContent lines={1} data-test-sub="loading-content" />
       ) : (
-        <>
-          <TransactionSummary
-            errorCount={waterfall.apiResponse.errorDocs.length}
-            totalDuration={waterfall.rootTransaction?.transaction.duration.us}
-            transaction={entryTransaction}
-          />
-          <EuiSpacer size="s" />
-          <TransactionTabs
-            transaction={entryTransaction}
-            detailTab={detailTab}
-            serviceName={serviceName}
-            waterfallItemId={waterfallItemId}
-            onTabClick={onTabClick}
-            waterfall={waterfall}
-          />
-        </>
+        <TransactionSummary
+          errorCount={waterfall.apiResponse.errorDocs.length}
+          totalDuration={waterfall.rootTransaction?.transaction.duration.us}
+          transaction={entryTransaction}
+        />
       )}
+
+      <EuiSpacer size="s" />
+
+      <TransactionTabs
+        transaction={entryTransaction}
+        detailTab={detailTab}
+        serviceName={serviceName}
+        waterfallItemId={waterfallItemId}
+        onTabClick={onTabClick}
+        waterfall={waterfall}
+        isLoading={isLoading}
+      />
     </>
   );
 }
