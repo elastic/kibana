@@ -10,7 +10,6 @@ jest.mock('./log_query_and_deprecation', () => ({
   __esModule: true,
   instrumentEsQueryAndDeprecationLogger: jest.fn(),
 }));
-jest.mock('./agent_manager');
 
 import { Agent } from 'http';
 import {
@@ -24,9 +23,8 @@ import { ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
-import { AgentManager } from './agent_manager';
+import { type AgentFactoryProvider, AgentManager } from './agent_manager';
 
-const AgentManagerMock = AgentManager as jest.Mock<AgentManager>;
 const kibanaVersion = '1.0.0';
 
 const createFakeConfig = (
@@ -46,31 +44,17 @@ const createFakeClient = () => {
   return client;
 };
 
-const createFakeAgentFactory = (logger: MockedLogger) => {
-  const agentFactory = () => new Agent();
-
-  AgentManagerMock.mockImplementationOnce(() => {
-    const agentManager = new AgentManager();
-    agentManager.getAgentFactory = () => agentFactory;
-    return agentManager;
-  });
-
-  const agentManager = new AgentManager();
-
-  return { agentManager, agentFactory };
-};
-
 describe('configureClient', () => {
   let logger: MockedLogger;
   let config: ElasticsearchClientConfig;
-  let agentManager: AgentManager;
+  let agentFactoryProvider: AgentFactoryProvider;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     config = createFakeConfig();
     parseClientOptionsMock.mockReturnValue({});
     ClientMock.mockImplementation(() => createFakeClient());
-    agentManager = new AgentManager();
+    agentFactoryProvider = new AgentManager();
   });
 
   afterEach(() => {
@@ -80,14 +64,26 @@ describe('configureClient', () => {
   });
 
   it('calls `parseClientOptions` with the correct parameters', () => {
-    configureClient(config, { logger, type: 'test', scoped: false, agentManager, kibanaVersion });
+    configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
     expect(parseClientOptionsMock).toHaveBeenCalledWith(config, false, kibanaVersion);
 
     parseClientOptionsMock.mockClear();
 
-    configureClient(config, { logger, type: 'test', scoped: true, agentManager, kibanaVersion });
+    configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: true,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
     expect(parseClientOptionsMock).toHaveBeenCalledWith(config, true, kibanaVersion);
@@ -103,7 +99,7 @@ describe('configureClient', () => {
       logger,
       type: 'test',
       scoped: false,
-      agentManager,
+      agentFactoryProvider,
       kibanaVersion,
     });
 
@@ -112,13 +108,17 @@ describe('configureClient', () => {
     expect(client).toBe(ClientMock.mock.results[0].value);
   });
 
-  it('constructs a client using the provided `agentManager`', () => {
-    const { agentManager: customAgentManager, agentFactory } = createFakeAgentFactory(logger);
+  it('constructs a client using the provided `agentFactoryProvider`', () => {
+    const agentFactory = () => new Agent();
+    const customAgentFactoryProvider = {
+      getAgentFactory: () => agentFactory,
+    };
+
     const client = configureClient(config, {
       logger,
       type: 'test',
       scoped: false,
-      agentManager: customAgentManager,
+      agentFactoryProvider: customAgentFactoryProvider,
       kibanaVersion,
     });
 
@@ -134,7 +134,7 @@ describe('configureClient', () => {
       type: 'test',
       scoped: false,
       getExecutionContext,
-      agentManager,
+      agentFactoryProvider,
       kibanaVersion,
     });
 
@@ -148,7 +148,7 @@ describe('configureClient', () => {
       type: 'test',
       scoped: true,
       getExecutionContext,
-      agentManager,
+      agentFactoryProvider,
       kibanaVersion,
     });
 
@@ -164,7 +164,7 @@ describe('configureClient', () => {
       logger,
       type: 'test',
       scoped: false,
-      agentManager,
+      agentFactoryProvider,
       kibanaVersion,
     });
 
@@ -185,7 +185,7 @@ describe('configureClient', () => {
       logger,
       type: 'test',
       scoped: false,
-      agentManager,
+      agentFactoryProvider,
       kibanaVersion,
     });
 
@@ -203,7 +203,7 @@ describe('configureClient', () => {
       logger,
       type: 'test',
       scoped: false,
-      agentManager,
+      agentFactoryProvider,
       kibanaVersion,
     });
 
