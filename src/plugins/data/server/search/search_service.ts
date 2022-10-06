@@ -138,7 +138,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
   ) {
-    initializerContext.config.legacy;
     this.sessionService = new SearchSessionService(
       logger,
       initializerContext.config.get(),
