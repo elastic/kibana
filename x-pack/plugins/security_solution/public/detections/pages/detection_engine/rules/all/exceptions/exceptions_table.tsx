@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 
 import {
@@ -14,14 +14,6 @@ import {
   EuiContextMenuPanel,
   EuiPagination,
   EuiPopover,
-  EuiFlyoutFooter,
-  EuiTextColor,
-  EuiFlyout,
-  EuiFilePicker,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiText,
-  EuiTitle,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,16 +22,9 @@ import {
   EuiSpacer,
   EuiPageHeader,
   EuiHorizontalRule,
-  useGeneratedHtmlId,
-  EuiCheckbox,
 } from '@elastic/eui';
 
-import type {
-  NamespaceType,
-  ExceptionListFilter,
-  BulkErrorSchema,
-  ImportExceptionsResponseSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
@@ -58,7 +43,7 @@ import { useListsConfig } from '../../../../../containers/detection_engine/lists
 import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../../../common/endpoint/service/artifacts/constants';
 import { ExceptionsListCard } from './exceptions_list_card';
-import { useImportExceptionList } from './use_import_exception_list';
+import { ImportExceptionListFlyout } from './import_exceptions_list_flyout';
 
 export type Func = () => Promise<void>;
 
@@ -109,7 +94,6 @@ export const ExceptionListsTable = React.memo(() => {
 
   const [initLoading, setInitLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
-  const filePickerRef = useRef<EuiFilePicker | null>(null);
 
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
@@ -305,82 +289,6 @@ export const ExceptionListsTable = React.memo(() => {
     setExportDownload({});
   }, []);
 
-  const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
-  const [file, setFile] = useState<File | null>(null);
-  const [overwrite, setOverwrite] = useState(false);
-  const [asNewList, setAsNewList] = useState(false);
-
-  const resetForm = useCallback(() => {
-    if (filePickerRef.current?.fileInput) {
-      filePickerRef.current.fileInput.value = '';
-      filePickerRef.current.handleChange();
-    }
-    setFile(null);
-    setAlreadyExistingItem(false);
-    setAsNewList(false);
-    setOverwrite(false);
-  }, []);
-  const { start: importExceptionList, ...importExceptionListState } = useImportExceptionList();
-  const ctrl = useRef(new AbortController());
-
-  const handleImportExceptionList = useCallback(() => {
-    if (!importExceptionListState.loading && file) {
-      ctrl.current = new AbortController();
-
-      importExceptionList({
-        file,
-        http,
-        signal: ctrl.current.signal,
-        overwrite,
-        overwriteExceptions: overwrite,
-        asNewList,
-      });
-    }
-  }, [asNewList, file, http, importExceptionList, importExceptionListState.loading, overwrite]);
-
-  const handleImportSuccess = useCallback(
-    (response: ImportExceptionsResponseSchema) => {
-      resetForm();
-      addSuccess({
-        text: i18n.uploadSuccessMessage(file?.name ?? ''),
-        title: i18n.UPLOAD_SUCCESS_TITLE,
-      });
-      handleRefresh();
-    },
-    // looking for file.name but we don't wan't to render success every time file name changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [resetForm, addSuccess, handleRefresh]
-  );
-  const handleImportError = useCallback(
-    (errors: BulkErrorSchema[]) => {
-      errors.forEach((error) => {
-        if (!error.error.message.includes('AbortError')) {
-          addError(error, { title: i18n.UPLOAD_ERROR });
-        }
-      });
-    },
-    [addError]
-  );
-  const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
-
-  useEffect(() => {
-    if (!importExceptionListState.loading && importExceptionListState?.result?.success) {
-      handleImportSuccess(importExceptionListState?.result);
-    } else if (!importExceptionListState.loading && importExceptionListState.result?.errors) {
-      handleImportError(importExceptionListState?.result?.errors);
-      setAlreadyExistingItem(true);
-    }
-  }, [
-    handleImportError,
-    handleImportSuccess,
-    importExceptionListState.error,
-    importExceptionListState.loading,
-    importExceptionListState.result,
-    setAlreadyExistingItem,
-  ]);
-  const handleFileChange = useCallback((files: FileList | null) => {
-    setFile(files?.item(0) ?? null);
-  }, []);
   const [activePage, setActivePage] = useState(0);
   const [rowSize, setRowSize] = useState(5);
   const [isRowSizePopoverOpen, setIsRowSizePopoverOpen] = useState(false);
@@ -470,75 +378,13 @@ export const ExceptionListsTable = React.memo(() => {
       </EuiFlexGroup>
 
       {displayImportListFlyout && (
-        <EuiFlyout ownFocus size="s" onClose={() => setDisplayImportListFlyout(false)}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>{'Import shared exception list'}</h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiText>{'Select shared exception lists to import'}</EuiText>
-            <EuiFilePicker
-              id={filePickerId}
-              multiple
-              ref={filePickerRef}
-              initialPromptText="Select or drag and drop multiple files"
-              onChange={handleFileChange}
-              display={'large'}
-              aria-label="Use aria labels when no actual label is in use"
-            />
-
-            {alreadyExistingItem && (
-              <>
-                <EuiSpacer />
-                <EuiTextColor color={'danger'}>
-                  {'We found a pre-existing list with that id'}
-                </EuiTextColor>
-                <EuiSpacer />
-                <EuiCheckbox
-                  id={'basicCheckboxId'}
-                  label="Overwrite the existing list"
-                  checked={overwrite}
-                  onChange={(e) => {
-                    setOverwrite(!overwrite);
-                    setAsNewList(false);
-                  }}
-                />
-                <EuiCheckbox
-                  id={'createNewListCheckbox'}
-                  label="Create new list"
-                  checked={asNewList}
-                  onChange={(e) => {
-                    setAsNewList(!asNewList);
-                    setOverwrite(false);
-                  }}
-                />
-              </>
-            )}
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={() => setDisplayImportListFlyout(false)}
-                  flush="left"
-                >
-                  {'Close'}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="exception-lists-form-import-action"
-                  onClick={handleImportExceptionList}
-                  disabled={file == null || importExceptionListState.loading}
-                >
-                  {i18n.UPLOAD_BUTTON}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
+        <ImportExceptionListFlyout
+          handleRefresh={handleRefresh}
+          http={http}
+          addSuccess={addSuccess}
+          addError={addError}
+          setDisplayImportListFlyout={setDisplayImportListFlyout}
+        />
       )}
 
       <EuiHorizontalRule />
