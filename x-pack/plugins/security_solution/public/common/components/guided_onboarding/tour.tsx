@@ -119,9 +119,13 @@ const getSteps = ({
         stepsTotal={tourConfig.length}
         isStepOpen={stepConfig.step === activeStep}
         onFinish={() => resetTour()}
-        panelProps={{
-          'data-test-subj': dataTestSubj,
-        }}
+        // TODO: re-add panelProps
+        // EUI has a bug https://github.com/elastic/eui/issues/6297
+        // where any panelProps overwrite their panelProps,
+        // so we lose cool things like the EuiBeacon
+        // panelProps={{
+        //   'data-test-subj': dataTestSubj,
+        // }}
         content={
           <>
             <EuiText size="xs">

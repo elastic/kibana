@@ -104,7 +104,7 @@ export const tourConfig: TourConfig = [
         defaultMessage: `The alert will be added to the case...`,
       }
     ),
-    anchor: `[data-test-subj="caseTitle"]`,
+    anchor: `[data-test-subj="create-case-flyout"]`,
     anchorPosition: 'leftUp',
     dataTestSubj: 'tourStep-alerts-5',
   },
