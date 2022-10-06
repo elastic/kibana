@@ -39,11 +39,15 @@ interface StreamFactoryReturnType<T = unknown> {
  * for gzip compression depending on provided request headers.
  *
  * @param headers - Request headers.
+ * @param logger - Kibana logger.
+ * @param compressOverride - Optional flag to override header based compression setting.
+ *
  * @returns An object with stream attributes and methods.
  */
 export function streamFactory<T = string>(
   headers: Headers,
   logger: Logger,
+  compressOverride?: boolean,
   flushFix?: boolean
 ): StreamFactoryReturnType<T>;
 /**
@@ -51,15 +55,19 @@ export function streamFactory<T = string>(
  * request headers. Any non-string data pushed to the stream will be stream as NDJSON.
  *
  * @param headers - Request headers.
+ * @param logger - Kibana logger.
+ * @param compressOverride - Optional flag to override header based compression setting.
+ *
  * @returns An object with stream attributes and methods.
  */
 export function streamFactory<T = unknown>(
   headers: Headers,
   logger: Logger,
+  compressOverride = true,
   flushFix: boolean = false
 ): StreamFactoryReturnType<T> {
   let streamType: StreamType;
-  const isCompressed = acceptCompression(headers);
+  const isCompressed = compressOverride && acceptCompression(headers);
 
   const stream = isCompressed ? zlib.createGzip() : new ResponseStream();
 
