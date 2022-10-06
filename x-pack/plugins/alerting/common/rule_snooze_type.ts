@@ -7,7 +7,7 @@
 
 import type { WeekdayStr } from 'rrule';
 
-type SnoozeRRule = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
+export type SnoozeRRule = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
 
 export interface RuleSnoozeSchedule {
   duration: number;
