@@ -210,69 +210,69 @@ describe('Discover main content component', () => {
     window.innerWidth = windowWidth;
   });
 
-  // describe('DISCOVER_PANELS_MODE', () => {
-  //   it('should set the panels mode to DISCOVER_PANELS_MODE.RESIZABLE when viewing on medium screens and above', async () => {
+  // describe('PANELS_MODE', () => {
+  //   it('should set the panels mode to PANELS_MODE.RESIZABLE when viewing on medium screens and above', async () => {
   //     const component = await mountComponent();
   //     setWindowWidth(component, euiThemeVars.euiBreakpoints.m);
   //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.RESIZABLE);
   //   });
 
-  //   it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED when viewing on small screens and below', async () => {
+  //   it('should set the panels mode to PANELS_MODE.FIXED when viewing on small screens and below', async () => {
   //     const component = await mountComponent();
   //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
   //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.FIXED);
   //   });
 
-  //   it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED if hideChart is true', async () => {
+  //   it('should set the panels mode to PANELS_MODE.FIXED if hideChart is true', async () => {
   //     const component = await mountComponent({ hideChart: true });
   //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.FIXED);
   //   });
 
-  //   it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED if isTimeBased is false', async () => {
+  //   it('should set the panels mode to PANELS_MODE.FIXED if isTimeBased is false', async () => {
   //     const component = await mountComponent({ isTimeBased: false });
   //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.FIXED);
   //   });
 
-  //   it('should set the panels mode to DISCOVER_PANELS_MODE.SINGLE if isPlainRecord is true', async () => {
+  //   it('should set the panels mode to PANELS_MODE.SINGLE if isPlainRecord is true', async () => {
   //     const component = await mountComponent({ isPlainRecord: true });
   //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.SINGLE);
   //   });
 
-  //   it('should set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and hideChart is false', async () => {
+  //   it('should set a fixed height for Chart when panels mode is PANELS_MODE.FIXED and hideChart is false', async () => {
   //     const component = await mountComponent();
   //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
   //     const expectedHeight = component.find(Panels).prop('topPanelHeight');
-  //     expect(component.find(DiscoverChart).childAt(0).getDOMNode()).toHaveStyle({
+  //     expect(component.find(Chart).childAt(0).getDOMNode()).toHaveStyle({
   //       height: `${expectedHeight}px`,
   //     });
   //   });
 
-  //   it('should not set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and hideChart is true', async () => {
+  //   it('should not set a fixed height for Chart when panels mode is PANELS_MODE.FIXED and hideChart is true', async () => {
   //     const component = await mountComponent({ hideChart: true });
   //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
   //     const expectedHeight = component.find(Panels).prop('topPanelHeight');
-  //     expect(component.find(DiscoverChart).childAt(0).getDOMNode()).not.toHaveStyle({
+  //     expect(component.find(Chart).childAt(0).getDOMNode()).not.toHaveStyle({
   //       height: `${expectedHeight}px`,
   //     });
   //   });
 
-  //   it('should not set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and isTimeBased is false', async () => {
+  //   it('should not set a fixed height for Chart when panels mode is PANELS_MODE.FIXED and isTimeBased is false', async () => {
   //     const component = await mountComponent({ isTimeBased: false });
   //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
   //     const expectedHeight = component.find(Panels).prop('topPanelHeight');
-  //     expect(component.find(DiscoverChart).childAt(0).getDOMNode()).not.toHaveStyle({
+  //     expect(component.find(Chart).childAt(0).getDOMNode()).not.toHaveStyle({
   //       height: `${expectedHeight}px`,
   //     });
   //   });
 
-  //   it('should pass undefined for onResetChartHeight to DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED', async () => {
+  //   it('should pass undefined for onResetChartHeight to Chart when panels mode is PANELS_MODE.FIXED', async () => {
   //     const storage = new LocalStorageMock({}) as unknown as Storage;
   //     const topPanelHeight = 123;
   //     storage.get = jest.fn().mockImplementation(() => topPanelHeight);
   //     const component = await mountComponent({ storage });
-  //     expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeDefined();
+  //     expect(component.find(Chart).prop('onResetChartHeight')).toBeDefined();
   //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-  //     expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeUndefined();
+  //     expect(component.find(Chart).prop('onResetChartHeight')).toBeUndefined();
   //   });
   // });
 
@@ -291,7 +291,7 @@ describe('Discover main content component', () => {
   });
 
   describe('topPanelHeight persistence', () => {
-    it('should try to get the initial topPanelHeight for DiscoverPanels from storage', async () => {
+    it('should try to get the initial topPanelHeight for UnifiedHistogramLayout from storage', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalGet = storage.get;
       storage.get = jest.fn().mockImplementation(originalGet);
@@ -299,7 +299,7 @@ describe('Discover main content component', () => {
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
     });
 
-    it('should pass undefined to DiscoverPanels if no value is found in storage', async () => {
+    it('should pass undefined to UnifiedHistogramLayout if no value is found in storage', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalGet = storage.get;
       storage.get = jest.fn().mockImplementation(originalGet);
@@ -309,7 +309,7 @@ describe('Discover main content component', () => {
       expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(undefined);
     });
 
-    it('should pass the stored topPanelHeight to DiscoverPanels if a value is found in storage', async () => {
+    it('should pass the stored topPanelHeight to UnifiedHistogramLayout if a value is found in storage', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const topPanelHeight = 123;
       storage.get = jest.fn().mockImplementation(() => topPanelHeight);
@@ -319,7 +319,7 @@ describe('Discover main content component', () => {
       expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(topPanelHeight);
     });
 
-    it('should update the topPanelHeight in storage and pass the new value to DiscoverPanels when the topPanelHeight changes', async () => {
+    it('should update the topPanelHeight in storage and pass the new value to UnifiedHistogramLayout when the topPanelHeight changes', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalSet = storage.set;
       storage.set = jest.fn().mockImplementation(originalSet);
@@ -336,7 +336,7 @@ describe('Discover main content component', () => {
       expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(newTopPanelHeight);
     });
 
-    // it('should reset the topPanelHeight to the default when onResetChartHeight is called on DiscoverChart', async () => {
+    // it('should reset the topPanelHeight to the default when onResetChartHeight is called on Chart', async () => {
     //   const storage = new LocalStorageMock({}) as unknown as Storage;
     //   const originalSet = storage.set;
     //   storage.set = jest.fn().mockImplementation(originalSet);
