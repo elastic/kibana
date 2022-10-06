@@ -10,8 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import {
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_PARAMETERS,
-  ALERT_RULE_UUID,
   ALERT_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -113,14 +113,17 @@ export const getViewInAppUrlInventory = (
   return getViewInAppUrl(basePath, relativeViewInAppUrl);
 };
 
-export const getAlertUuidFromAlertId = async (esClient: ElasticsearchClient, alertId: string) => {
+export const getAlertUuidFromExecutionId = async (
+  esClient: ElasticsearchClient,
+  executionId: string
+) => {
   const { hits } = await esClient.search({
     _source: false,
     fields: [ALERT_UUID],
     size: 1,
     query: {
       terms: {
-        [ALERT_RULE_UUID]: [alertId],
+        [ALERT_RULE_EXECUTION_UUID]: [executionId],
       },
     },
   });

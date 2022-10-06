@@ -32,10 +32,10 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
+  getAlertUuidFromExecutionId,
   getViewInAppUrlInventory,
-  getAlertUuidFromAlertId,
-  LINK_TO_ALERT_DETAIL,
   getViewInAppUrl,
+  LINK_TO_ALERT_DETAIL,
 } from '../common/utils';
 import { evaluateCondition, ConditionResult } from './evaluate_condition';
 
@@ -76,7 +76,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
 
     const esClient = services.scopedClusterClient.asCurrentUser;
-    const alertInstanceId = await getAlertUuidFromAlertId(esClient, alertId);
+    const alertInstanceId = await getAlertUuidFromExecutionId(esClient, executionId);
 
     const { alertWithLifecycle, savedObjectsClient, getAlertStartedDate } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason, additionalContext) =>

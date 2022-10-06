@@ -28,7 +28,7 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
-  getAlertUuidFromAlertId,
+  getAlertUuidFromExecutionId,
   getViewInAppUrl,
   LINK_TO_ALERT_DETAIL,
   UNGROUPED_FACTORY_KEY,
@@ -80,7 +80,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
 
     const esClient = services.scopedClusterClient.asCurrentUser;
-    const alertInstanceId = await getAlertUuidFromAlertId(esClient, alertId);
+    const alertInstanceId = await getAlertUuidFromExecutionId(esClient, executionId);
 
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
