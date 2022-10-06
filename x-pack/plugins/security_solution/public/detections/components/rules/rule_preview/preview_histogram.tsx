@@ -206,7 +206,7 @@ export const PreviewHistogram = ({
             dataProviders,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            end: endDate,
+            end: 'now+5m',
             start: startDate,
             entityType: 'events',
             filters: [],
