@@ -28,7 +28,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
       filter: [
         {
           bool: {
-            // show session events with exec
+            // show sessions table query should only filter events where event.action IN fork, exec, or end
             should: [
               { match_phrase: { 'event.action': EventAction.exec } },
               { match_phrase: { 'event.action': EventAction.fork } },
