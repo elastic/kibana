@@ -42,7 +42,7 @@ export const ENABLE_RISK_SCORE = (riskEntity: RiskScoreEntity) =>
 export const ENABLE_RISK_SCORE_DESCRIPTION = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.enableRiskScore.enableRiskScoreDescription', {
     defaultMessage:
-      'Once you have enabled this feature you can get quick access to the {riskEntity} risk scores in this section.',
+      'Once you have enabled this feature you can get quick access to the {riskEntity} risk scores in this section. The data might need an hour to be generated after enabling the module.',
     values: {
       riskEntity: getRiskEntityTranslation(riskEntity, true),
     },
