@@ -190,31 +190,35 @@ export function ChangeDataView({
             defaultMessage: 'Add a field to this data view',
           })}
         </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          key="manage"
-          icon="indexSettings"
-          data-test-subj="indexPattern-manage-field"
-          onClick={async () => {
-            if (onEditDataView) {
-              const dataView = await dataViews.get(currentDataViewId!);
-              dataViewEditor.openEditor({
-                editData: dataView,
-                onSave: (updatedDataView) => {
-                  onEditDataView(updatedDataView);
-                },
-              });
-            } else {
-              application.navigateToApp('management', {
-                path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
-              });
-            }
-            setPopoverIsOpen(false);
-          }}
-        >
-          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
-            defaultMessage: 'Manage this data view',
-          })}
-        </EuiContextMenuItem>,
+        onEditDataView || dataViewEditor.userPermissions.editDataView() ? (
+          <EuiContextMenuItem
+            key="manage"
+            icon="indexSettings"
+            data-test-subj="indexPattern-manage-field"
+            onClick={async () => {
+              if (onEditDataView) {
+                const dataView = await dataViews.get(currentDataViewId!);
+                dataViewEditor.openEditor({
+                  editData: dataView,
+                  onSave: (updatedDataView) => {
+                    onEditDataView(updatedDataView);
+                  },
+                });
+              } else {
+                application.navigateToApp('management', {
+                  path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
+                });
+              }
+              setPopoverIsOpen(false);
+            }}
+          >
+            {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
+              defaultMessage: 'Manage this data view',
+            })}
+          </EuiContextMenuItem>
+        ) : (
+          <React.Fragment />
+        ),
         <EuiHorizontalRule margin="none" />
       );
     }

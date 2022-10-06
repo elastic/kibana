@@ -10,6 +10,7 @@ import React from 'react';
 import SearchBar from './search_bar';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -83,6 +84,9 @@ function wrapSearchBarInContext(testProps: any) {
     intl: null as any,
   };
 
+  const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+  (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+
   const services = {
     uiSettings: startMock.uiSettings,
     savedObjects: startMock.savedObjects,
@@ -111,6 +115,7 @@ function wrapSearchBarInContext(testProps: any) {
             }),
         },
       },
+      dataViewEditor: dataViewEditorMock,
       dataViews: {
         getIdsWithTitle: jest.fn(() => []),
       },

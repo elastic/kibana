@@ -99,6 +99,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
     services: { application, http, dataViews, uiSettings, overlays },
   } = useKibana<DataViewEditorContext>();
 
+  const canSave = dataViews.getCanSaveSync();
+
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
     defaultValue: {
@@ -447,6 +449,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           isEdit={!!editData}
           isPersisted={Boolean(editData && editData.isPersisted())}
           allowAdHoc={allowAdHoc}
+          canSave={canSave}
         />
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>

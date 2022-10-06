@@ -329,7 +329,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const fieldInfoUnavailable =
     existenceFetchFailed || existenceFetchTimeout || currentIndexPattern?.hasRestrictions;
 
-  const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
+  const editPermission =
+    indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
 
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
     const containsData = (field: IndexPatternField) => {

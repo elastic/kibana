@@ -405,39 +405,6 @@ describe('Lens App', () => {
   });
 
   describe('TopNavMenu#dataViewPickerProps', () => {
-    it('calls the nav component with the correct dataview picker props if no permissions are given', async () => {
-      const { instance, lensStore } = await mountWith({ preloadedState: {} });
-      const document = {
-        savedObjectId: defaultSavedObjectId,
-        state: {
-          query: 'fake query',
-          filters: [{ query: { match_phrase: { src: 'test' } } }],
-        },
-        references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      } as unknown as Document;
-
-      act(() => {
-        lensStore.dispatch(
-          setState({
-            query: 'fake query' as unknown as Query,
-            persistedDoc: document,
-          })
-        );
-      });
-      instance.update();
-      const props = instance
-        .find('[data-test-subj="lnsApp_topNav"]')
-        .prop('dataViewPickerComponentProps') as TopNavMenuData[];
-      expect(props).toEqual(
-        expect.objectContaining({
-          currentDataViewId: 'mockip',
-          onChangeDataView: expect.any(Function),
-          onDataViewCreated: undefined,
-          onAddField: undefined,
-        })
-      );
-    });
-
     it('calls the nav component with the correct dataview picker props if permissions are given', async () => {
       const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
       services.dataViewEditor.userPermissions.editDataView = () => true;
