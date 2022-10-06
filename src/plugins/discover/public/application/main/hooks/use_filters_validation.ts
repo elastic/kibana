@@ -21,7 +21,7 @@ const addInvalidFiltersWarn = (toastNotifications: IToasts) => {
     title: warningTitle,
     text: i18n.translate('discover.invalidFiltersWarnToast.description', {
       defaultMessage:
-        'Data view id references in some of the applied filters are differ from chosen data view',
+        'Data view id references in some of the applied filters differ from the current data view.',
     }),
     'data-test-subj': 'invalidFiltersWarnToast',
   });
