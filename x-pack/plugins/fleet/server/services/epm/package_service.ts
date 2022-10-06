@@ -26,7 +26,7 @@ import { checkSuperuser } from '../../routes/security';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
-import { fetchFindLatestPackageOrThrow, getRegistryPackage } from './registry';
+import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 import { ensureInstalledPackage, getInstallation } from './packages';
 
 export type InstalledAssetType = EsAssetReference;
@@ -47,7 +47,7 @@ export interface PackageClient {
 
   fetchFindLatestPackage(packageName: string): Promise<RegistryPackage | BundledPackage>;
 
-  getRegistryPackage(
+  getPackage(
     packageName: string,
     packageVersion: string
   ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
@@ -121,13 +121,13 @@ class PackageClientImpl implements PackageClient {
     return fetchFindLatestPackageOrThrow(packageName);
   }
 
-  public async getRegistryPackage(
+  public async getPackage(
     packageName: string,
     packageVersion: string,
-    options?: Parameters<typeof getRegistryPackage>['2']
+    options?: Parameters<typeof getPackage>['2']
   ) {
     await this.#runPreflight();
-    return getRegistryPackage(packageName, packageVersion, options);
+    return getPackage(packageName, packageVersion, options);
   }
 
   public async reinstallEsAssets(

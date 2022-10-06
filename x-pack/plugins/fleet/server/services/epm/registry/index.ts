@@ -272,7 +272,7 @@ async function getPackageInfoFromArchiveOrCache(
   }
 }
 
-export async function getRegistryPackage(
+export async function getPackage(
   name: string,
   version: string,
   options?: { ignoreUnverified?: boolean }

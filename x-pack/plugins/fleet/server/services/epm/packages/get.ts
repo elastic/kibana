@@ -277,11 +277,12 @@ export async function getPackageFromSource(options: {
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
       }
     }
-    // for packages not in cache or package storage and installed from registry, check registry
+    // install source is now archive in all cases
+    // See https://github.com/elastic/kibana/issues/115032
     if (!res && pkgInstallSource === 'registry') {
       try {
-        res = await Registry.getRegistryPackage(pkgName, pkgVersion);
-        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from registry`);
+        res = await Registry.getPackage(pkgName, pkgVersion);
+        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion}`);
       } catch (error) {
         if (error instanceof PackageFailedVerificationError) {
           throw error;
@@ -291,9 +292,8 @@ export async function getPackageFromSource(options: {
       }
     }
   } else {
-    // else package is not installed or installed and missing from cache and storage and installed from registry
-    res = await Registry.getRegistryPackage(pkgName, pkgVersion, { ignoreUnverified });
-    logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion} from registry`);
+    res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+    logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion}`);
   }
   if (!res) {
     throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
