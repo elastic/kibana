@@ -235,7 +235,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupColumnTooltip',
             {
               defaultMessage:
-                'Displays field values unique to the group. Expand row to see all values.',
+                'Displays field/value pairs unique to the group. Expand row to see all field/value pairs.',
             }
           )}
         >
@@ -280,7 +280,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 +{Object.keys(repeatedValues).length}{' '}
                 <FormattedMessage
                   id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
-                  defaultMessage="more"
+                  defaultMessage="more field/value pairs also appearing in other groups"
                 />
               </EuiBadge>
               <EuiSpacer size="xs" />
