@@ -108,6 +108,12 @@ export interface ActionValidationService {
   isUriAllowed(uri: string): boolean;
 }
 
+export type RenderParameterTemplates<Params extends ActionTypeParams> = (
+  params: Params,
+  variables: Record<string, unknown>,
+  actionId?: string
+) => Params;
+
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -126,11 +132,7 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
 
-  renderParameterTemplates?(
-    params: Params,
-    variables: Record<string, unknown>,
-    actionId?: string
-  ): Params;
+  renderParameterTemplates?: RenderParameterTemplates<Params>;
 
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }

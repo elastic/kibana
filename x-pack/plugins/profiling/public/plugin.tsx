@@ -90,7 +90,7 @@ export class ProfilingPlugin implements Plugin {
           unknown
         ];
 
-        const profilingFetchServices = getServices(coreStart);
+        const profilingFetchServices = getServices();
         const { renderApp } = await import('./app');
 
         function pushKueryToSubject(location: Location) {
