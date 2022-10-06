@@ -9,7 +9,12 @@ import { render } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { useVariationMock } from '../../../common/components/utils.mocks';
 import { GlobalHeader } from '.';
-import { ADD_DATA_PATH, SecurityPageName } from '../../../../common/constants';
+import {
+  ADD_DATA_PATH,
+  ADD_THREAT_INTELLIGENCE_DATA_PATH,
+  SecurityPageName,
+  THREAT_INTELLIGENCE_PATH,
+} from '../../../../common/constants';
 import {
   createSecuritySolutionStorageMock,
   mockGlobalState,
@@ -96,6 +101,17 @@ describe('global header', () => {
     );
     const link = queryByTestId('add-data');
     expect(link?.getAttribute('href')).toBe(ADD_DATA_PATH);
+  });
+
+  it('points to the threat_intel Add data URL for threat_intelligence url', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
+    const { queryByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+      </TestProviders>
+    );
+    const link = queryByTestId('add-data');
+    expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
   });
 
   it('points to the resolved Add data URL by useVariation', () => {
