@@ -6,51 +6,47 @@
  */
 
 import './datapanel.scss';
-import { uniq, groupBy } from 'lodash';
-import React, { useState, memo, useCallback, useMemo, useRef, useEffect } from 'react';
+import { groupBy, uniq } from 'lodash';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiCallOut,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiCallOut,
   EuiFormControlLayout,
-  EuiFilterButton,
-  EuiScreenReaderOnly,
   EuiIcon,
+  EuiPopover,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type DataView } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { htmlIdGenerator } from '@elastic/eui';
-import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
+  ExistenceFetchStatus,
   FieldList,
-  type FieldListProps,
   type FieldListGroups,
+  type FieldListProps,
+  useExistingFields,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
   DatasourceDataPanelProps,
   DataType,
   FramePublicAPI,
-  IndexPattern,
   IndexPatternField,
 } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type { IndexPatternPrivateState } from './types';
-import { Loader } from '../loader';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { getFieldType } from './pure_utils';
-import { fieldContainsData, fieldExists } from '../shared_components';
 import { IndexPatternServiceAPI } from '../data_views_service/service';
 import { FieldItem } from './field_item';
 
@@ -108,27 +104,6 @@ const fieldTypeNames: Record<DataType, string> = {
   murmur3: i18n.translate('xpack.lens.datatypes.murmur3', { defaultMessage: 'murmur3' }),
 };
 
-// Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by
-// returning a query dsl object not matching anything
-function buildSafeEsQuery(
-  indexPattern: IndexPattern,
-  query: Query,
-  filters: Filter[],
-  queryConfig: EsQueryConfig
-) {
-  try {
-    return buildEsQuery(indexPattern, query, filters, queryConfig);
-  } catch (e) {
-    return {
-      bool: {
-        must_not: {
-          match_all: {},
-        },
-      },
-    };
-  }
-}
-
 export function IndexPatternDataPanel({
   state,
   dragDropContext,
@@ -148,53 +123,12 @@ export function IndexPatternDataPanel({
   indexPatternService,
   frame,
   onIndexPatternRefresh,
-  usedIndexPatterns,
 }: Props) {
-  const { indexPatterns, indexPatternRefs, existingFields, isFirstExistenceFetch } =
-    frame.dataViews;
+  const { indexPatterns, indexPatternRefs } = frame.dataViews;
   const { currentIndexPatternId } = state;
-
-  const indexPatternList = uniq(
-    (
-      usedIndexPatterns ?? Object.values(state.layers).map(({ indexPatternId }) => indexPatternId)
-    ).concat(currentIndexPatternId)
-  )
-    .filter((id) => !!indexPatterns[id])
-    .sort()
-    .map((id) => indexPatterns[id]);
-
-  const dslQuery = buildSafeEsQuery(
-    indexPatterns[currentIndexPatternId],
-    query,
-    filters,
-    getEsQueryConfig(core.uiSettings)
-  );
 
   return (
     <>
-      <Loader
-        load={() =>
-          indexPatternService.refreshExistingFields({
-            dateRange,
-            currentIndexPatternTitle: indexPatterns[currentIndexPatternId]?.title || '',
-            onNoData: showNoDataPopover,
-            dslQuery,
-            indexPatternList,
-            isFirstExistenceFetch,
-            existingFields,
-          })
-        }
-        loadDeps={[
-          query,
-          filters,
-          dateRange.fromDate,
-          dateRange.toDate,
-          indexPatternList.map((x) => `${x.title}:${x.timeFieldName}`).join(','),
-          // important here to rerun the fields existence on indexPattern change (i.e. add new fields in place)
-          frame.dataViews.indexPatterns,
-        ]}
-      />
-
       {Object.keys(indexPatterns).length === 0 && indexPatternRefs.length === 0 ? (
         <EuiFlexGroup
           gutterSize="m"
@@ -239,6 +173,7 @@ export function IndexPatternDataPanel({
           indexPatternService={indexPatternService}
           onIndexPatternRefresh={onIndexPatternRefresh}
           frame={frame}
+          showNoDataPopover={showNoDataPopover}
         />
       )}
     </>
@@ -287,9 +222,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatternService,
   frame,
   onIndexPatternRefresh,
+  showNoDataPopover,
 }: Omit<
   DatasourceDataPanelProps,
-  'state' | 'setState' | 'showNoDataPopover' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
+  'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
 > & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -310,10 +246,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     isEmptyAccordionOpen: false,
     isMetaAccordionOpen: false,
   });
-  const { existenceFetchFailed, existenceFetchTimeout, indexPatterns, existingFields } =
-    frame.dataViews;
+  const { indexPatterns } = frame.dataViews;
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
-  const existingFieldsForIndexPattern = existingFields[currentIndexPattern?.title];
+
+  const { refetchFieldsExistenceInfo, fieldsExistenceInfo, hasFieldData } = useExistingFields({
+    dataView: currentIndexPattern as unknown as DataView,
+    query,
+    filters,
+    fromDate: dateRange.fromDate,
+    toDate: dateRange.toDate,
+    services: {
+      data,
+      dataViews,
+      core,
+    },
+    onNoData: showNoDataPopover,
+  });
+  // TODO: add a loading indicator while info is loading
+
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
     if (!currentIndexPattern) return [];
@@ -331,19 +281,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ...localState.typeFilter,
   ]);
 
-  const fieldInfoUnavailable =
-    existenceFetchFailed || existenceFetchTimeout || currentIndexPattern?.hasRestrictions;
-
   const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
 
   const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
+    const fieldInfoUnavailable =
+      fieldsExistenceInfo?.fetchStatus !== ExistenceFetchStatus.succeeded;
+
     const containsData = (field: IndexPatternField) => {
-      const overallField = currentIndexPattern?.getFieldByName(field.name);
-      return (
-        overallField &&
-        existingFieldsForIndexPattern &&
-        fieldExists(existingFieldsForIndexPattern, overallField.name)
-      );
+      const overallField = currentIndexPattern?.getFieldByName(field.name); // TODO: is this check necessary?
+      return overallField && hasFieldData(currentIndexPatternId, overallField.name);
     };
 
     const allSupportedTypesFields = allFields.filter((field) =>
@@ -400,7 +346,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
         // Show details on timeout but not failure
-        hideDetails: fieldInfoUnavailable && !existenceFetchTimeout,
+        // hideDetails: fieldInfoUnavailable && !existenceFetchTimeout, // TODO: is this check still necessary?
+        hideDetails: fieldInfoUnavailable,
         defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
           defaultMessage: `There are no available fields that contain data.`,
         }),
@@ -450,11 +397,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   }, [
     allFields,
     core.uiSettings,
-    fieldInfoUnavailable,
+    fieldsExistenceInfo,
+    hasFieldData,
     filters.length,
-    existenceFetchTimeout,
+    currentIndexPatternId,
     currentIndexPattern,
-    existingFieldsForIndexPattern,
   ]);
 
   // TODO: fix DataViewField vs IndexPatternField types
@@ -481,12 +428,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     );
   }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
 
-  const checkFieldExists = useCallback(
-    (field: IndexPatternField) =>
-      fieldContainsData(field.name, currentIndexPattern, existingFieldsForIndexPattern),
-    [currentIndexPattern, existingFieldsForIndexPattern]
-  );
-
   const { nameFilter, typeFilter } = localState;
 
   const filter = useMemo(
@@ -508,6 +449,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     };
   }, []);
 
+  // TODO: when should we refresh fields existence info?
   const refreshFieldList = useCallback(async () => {
     if (currentIndexPattern) {
       const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
@@ -545,6 +487,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               onSave: () => {
                 if (indexPatternInstance.isPersisted()) {
                   refreshFieldList();
+                  refetchFieldsExistenceInfo();
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
                 }
@@ -559,6 +502,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       indexPatternFieldEditor,
       refreshFieldList,
       indexPatternService,
+      refetchFieldsExistenceInfo,
     ]
   );
 
@@ -575,6 +519,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               onDelete: () => {
                 if (indexPatternInstance.isPersisted()) {
                   refreshFieldList();
+                  refetchFieldsExistenceInfo();
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
                 }
@@ -589,6 +534,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       indexPatternFieldEditor,
       indexPatternService,
       refreshFieldList,
+      refetchFieldsExistenceInfo,
     ]
   );
 
@@ -597,7 +543,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       <FieldItem
         key={field.name}
         field={field}
-        exists={checkFieldExists(field)}
+        exists={hasFieldData(currentIndexPatternId, field.name)}
         hideDetails={hideDetails}
         itemIndex={itemIndex}
         groupIndex={groupIndex}
@@ -619,13 +565,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [
       core,
       fieldFormats,
+      currentIndexPatternId,
       currentIndexPattern,
       dateRange,
       query,
       filters,
       localState.nameFilter,
       charts.theme,
-      checkFieldExists,
+      hasFieldData,
       dropOntoWorkspace,
       hasSuggestionForField,
       editField,
@@ -736,30 +683,19 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             />
           </EuiFormControlLayout>
         </EuiFlexItem>
-        <EuiScreenReaderOnly>
-          <div aria-live="polite" id={fieldSearchDescriptionId}>
-            {i18n.translate('xpack.lens.indexPatterns.fieldSearchLiveRegion', {
-              defaultMessage:
-                '{availableFields} available {availableFields, plural, one {field} other {fields}}. {emptyFields} empty {emptyFields, plural, one {field} other {fields}}. {metaFields} meta {metaFields, plural, one {field} other {fields}}.',
-              values: {
-                availableFields: fieldGroups.AvailableFields.fields.length,
-                // empty fields can be undefined if there is no existence information to be fetched
-                emptyFields: fieldGroups.EmptyFields?.fields.length || 0,
-                metaFields: fieldGroups.MetaFields.fields.length,
-              },
-            })}
-          </div>
-        </EuiScreenReaderOnly>
         <EuiFlexItem>
           <FieldList
             fieldGroups={fieldGroups}
-            hasSyncedExistingFields={!!existingFieldsForIndexPattern}
+            hasSyncedExistingFields={
+              fieldsExistenceInfo?.fetchStatus !== ExistenceFetchStatus.unknown
+            }
             filter={filter}
             dataViewId={currentIndexPatternId}
-            existenceFetchFailed={existenceFetchFailed}
-            existenceFetchTimeout={existenceFetchTimeout}
+            existenceFetchFailed={fieldsExistenceInfo?.fetchStatus === ExistenceFetchStatus.failed}
+            existenceFetchTimeout={fieldsExistenceInfo?.fetchStatus === ExistenceFetchStatus.failed} // TODO: deprecate?
             existFieldsInIndex={!!allFields.length}
             renderFieldItem={renderFieldItem}
+            screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

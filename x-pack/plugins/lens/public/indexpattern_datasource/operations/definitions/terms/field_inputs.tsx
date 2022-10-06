@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ExistingFieldsMap, IndexPattern } from '../../../../types';
+import { IndexPattern } from '../../../../types';
 import {
   DragDropBuckets,
   FieldsBucketContainer,

@@ -77,8 +77,6 @@ export function getInitialDataViewsObject(
   return {
     indexPatterns,
     indexPatternRefs,
-    existingFields: {},
-    isFirstExistenceFetch: true,
   };
 }
 

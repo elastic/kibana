@@ -8,7 +8,8 @@
 
 import { partition, throttle } from 'lodash';
 import React, { useState, Fragment, useCallback, useMemo, useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps } from './fields_accordion';
@@ -53,6 +54,7 @@ export interface FieldListGroupedProps {
   dataViewId: string;
   existFieldsInIndex: boolean;
   renderFieldItem: FieldsAccordionProps['renderFieldItem'];
+  screenReaderDescriptionForSearchInputId?: string;
 }
 
 export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
@@ -65,6 +67,7 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
     dataViewId,
     existFieldsInIndex,
     renderFieldItem,
+    screenReaderDescriptionForSearchInputId,
   }) {
     const [fieldGroupsToShow, fieldGroupsToCollapse] = partition(
       Object.entries(fieldGroups),
@@ -131,6 +134,22 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
         onScroll={throttle(lazyScroll, 100)}
       >
         <div className="unifiedFieldList__fieldListGrouped__container">
+          {Boolean(screenReaderDescriptionForSearchInputId) && (
+            <EuiScreenReaderOnly>
+              <div aria-live="polite" id={screenReaderDescriptionForSearchInputId}>
+                {i18n.translate('unifiedFieldList.fieldListGrouped.fieldSearchLiveRegion', {
+                  defaultMessage:
+                    '{availableFields} available {availableFields, plural, one {field} other {fields}}. {emptyFields} empty {emptyFields, plural, one {field} other {fields}}. {metaFields} meta {metaFields, plural, one {field} other {fields}}.',
+                  values: {
+                    availableFields: fieldGroups.AvailableFields.fields.length,
+                    // empty fields can be undefined if there is no existence information to be fetched
+                    emptyFields: fieldGroups.EmptyFields?.fields.length || 0,
+                    metaFields: fieldGroups.MetaFields.fields.length,
+                  },
+                })}
+              </div>
+            </EuiScreenReaderOnly>
+          )}
           <ul>
             {fieldGroupsToCollapse.flatMap(([, { fields }]) =>
               fields.map((field, index) =>
@@ -144,7 +163,7 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
               <FieldsAccordion
                 initialIsOpen={Boolean(accordionState[key])}
                 key={key}
-                id={`fieldList${key}`}
+                id={`fieldListGrouped${key}`}
                 label={fieldGroup.title}
                 helpTooltip={fieldGroup.helpText}
                 hideDetails={fieldGroup.hideDetails}

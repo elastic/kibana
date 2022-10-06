@@ -59,8 +59,6 @@ export const defaultState = {
   dataViews: {
     indexPatterns: {},
     indexPatternRefs: [],
-    existingFields: {},
-    isFirstExistenceFetch: false,
   },
 };
 

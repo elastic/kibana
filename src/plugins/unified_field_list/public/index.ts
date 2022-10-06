@@ -30,3 +30,11 @@ export type {
   UnifiedFieldListPluginStart,
   AddFieldFilterHandler,
 } from './types';
+
+export {
+  useExistingFields,
+  ExistenceFetchStatus,
+  type ExistingFieldsInfo,
+  type ExistingFieldsResult,
+  type FetchExistenceInfoParams,
+} from './hooks/use_existing_fields';
