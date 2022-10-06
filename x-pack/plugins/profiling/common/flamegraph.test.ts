@@ -7,26 +7,36 @@
 
 import { sum } from 'lodash';
 import { createCalleeTree } from './callee';
-import { createColumnarViewModel, createFlameGraph } from './flamegraph';
+import { createBaseFlameGraph, createFlameGraph } from './flamegraph';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
 
+const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
+const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
+const baseFlamegraph = createBaseFlameGraph(tree, 60);
+const flamegraph = createFlameGraph(baseFlamegraph);
+
 describe('Flamegraph operations', () => {
-  test('1', () => {
-    const totalSamples = sum([...events.values()]);
-    const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
+  test('base flamegraph has non-zero total seconds', () => {
+    expect(baseFlamegraph.TotalSeconds).toEqual(60);
+  });
 
-    const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
-    const graph = createFlameGraph(tree, 60, totalSamples, totalSamples);
+  test('base flamegraph has one more node than the number of edges', () => {
+    const numEdges = baseFlamegraph.Edges.flatMap((edge) => edge).length;
 
-    expect(graph.Size).toEqual(totalFrames - 2);
+    expect(numEdges).toEqual(baseFlamegraph.Size - 1);
+  });
 
-    const viewModel1 = createColumnarViewModel(graph);
+  test('all flamegraph IDs are the same non-zero length', () => {
+    // 16 is the length of a 64-bit FNV-1a hash encoded to a hex string
+    const allSameLengthIDs = flamegraph.ID.every((id) => id.length === 16);
 
-    expect(sum(viewModel1.color)).toBeGreaterThan(0);
+    expect(allSameLengthIDs).toBeTruthy();
+  });
 
-    const viewModel2 = createColumnarViewModel(graph, false);
+  test('all flamegraph labels are non-empty', () => {
+    const allNonEmptyLabels = flamegraph.Label.every((id) => id.length > 0);
 
-    expect(sum(viewModel2.color)).toEqual(0);
+    expect(allNonEmptyLabels).toBeTruthy();
   });
 });

@@ -41,6 +41,11 @@ export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default'
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
+// File storage indexes supporting endpoint Upload/download
+export const FILE_STORAGE_METADATA_INDEX = '.fleet-files';
+export const FILE_STORAGE_DATA_INDEX = '.fleet-file_data';
+
+// Endpoint API routes
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/{id}`;

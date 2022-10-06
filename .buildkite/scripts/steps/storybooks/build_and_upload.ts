@@ -15,7 +15,7 @@ const STORYBOOKS = [
   'apm',
   'canvas',
   'ci_composite',
-  'cloud',
+  'cloud_chat',
   'coloring',
   'chart_icons',
   'controls',
