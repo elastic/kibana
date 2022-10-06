@@ -34,7 +34,9 @@ export type {
 export {
   useExistingFieldsFetcher,
   useExistingFieldsReader,
+  getDataViewHash,
   ExistenceFetchStatus,
   type ExistingFieldsInfo,
   type FetchExistenceInfoParams,
+  type ExistingFieldsReader,
 } from './hooks/use_existing_fields';

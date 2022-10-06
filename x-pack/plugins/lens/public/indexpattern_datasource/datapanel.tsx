@@ -36,6 +36,7 @@ import {
   type FieldListProps,
   useExistingFieldsReader,
   useExistingFieldsFetcher,
+  getDataViewHash,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
@@ -47,6 +48,7 @@ import type {
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type { IndexPatternPrivateState } from './types';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
+import { fieldContainsData } from '../shared_components';
 import { getFieldType } from './pure_utils';
 import { IndexPatternServiceAPI } from '../data_views_service/service';
 import { FieldItem } from './field_item';
@@ -251,7 +253,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
 
   const { refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-    dataView: currentIndexPattern as unknown as DataView,
+    dataViewId: currentIndexPatternId,
+    dataViewHash: getDataViewHash(currentIndexPattern as unknown as DataView),
     query,
     filters,
     fromDate: dateRange.fromDate,
@@ -266,7 +269,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const { getFieldsExistenceInfo, hasFieldData } = useExistingFieldsReader();
   // TODO: add a loading indicator while info is loading
   const fieldsExistenceInfo = getFieldsExistenceInfo(currentIndexPatternId);
-  // console.log('current info', fieldsExistenceInfo);
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
@@ -292,7 +294,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       fieldsExistenceInfo?.fetchStatus !== ExistenceFetchStatus.succeeded;
 
     const containsData = (field: IndexPatternField) => {
-      const overallField = currentIndexPattern?.getFieldByName(field.name); // TODO: is this check necessary?
+      const overallField = currentIndexPattern?.getFieldByName(field.name);
       return overallField && hasFieldData(currentIndexPatternId, overallField.name);
     };
 
@@ -547,7 +549,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       <FieldItem
         key={field.name}
         field={field}
-        exists={hasFieldData(currentIndexPatternId, field.name)}
+        exists={fieldContainsData(field.name, currentIndexPattern, hasFieldData)}
         hideDetails={hideDetails}
         itemIndex={itemIndex}
         groupIndex={groupIndex}
@@ -569,7 +571,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [
       core,
       fieldFormats,
-      currentIndexPatternId,
       currentIndexPattern,
       dateRange,
       query,

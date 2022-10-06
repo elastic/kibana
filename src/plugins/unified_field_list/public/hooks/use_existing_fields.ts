@@ -32,7 +32,8 @@ export interface ExistingFieldsInfo {
 }
 
 export interface FetchExistenceInfoParams {
-  dataView: DataView; // TODO: switch to data view list?
+  dataViewId: string; // TODO: switch to data view list?
+  dataViewHash: string;
   fromDate: string;
   toDate: string;
   query: Query | AggregateQuery;
@@ -46,6 +47,11 @@ export interface FetchExistenceInfoParams {
 }
 
 type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
+
+export interface ExistingFieldsReader {
+  hasFieldData: (dataViewId: string, fieldName: string) => boolean;
+  getFieldsExistenceInfo: (dataViewId: string) => ExistingFieldsInfo | undefined;
+}
 
 const initialData: ExistingFieldsByDataViewMap = {};
 const unknownInfo: ExistingFieldsInfo = {
@@ -66,7 +72,7 @@ export const useExistingFieldsFetcher = (
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({
-      dataView,
+      dataViewId,
       query,
       filters,
       fromDate,
@@ -74,11 +80,10 @@ export const useExistingFieldsFetcher = (
       services: { dataViews, data, core },
       onNoData,
     }: FetchExistenceInfoParams): Promise<void> => {
-      if (!dataView?.id) {
+      if (!dataViewId) {
         return;
       }
 
-      const dataViewId = dataView.id;
       const globalMap = globalMap$.getValue() ?? initialData;
       // console.log('fetching', globalMap);
       const currentInfo = globalMap[dataViewId];
@@ -88,6 +93,7 @@ export const useExistingFieldsFetcher = (
       }
 
       const numberOfFetches = (currentInfo?.numberOfFetches ?? 0) + 1;
+      const dataView = await dataViews.get(dataViewId);
       const hasRestrictions = Boolean(dataView?.typeMeta?.aggs);
       const info: ExistingFieldsInfo = {
         ...unknownInfo,
@@ -137,14 +143,13 @@ export const useExistingFieldsFetcher = (
     [mountedRef]
   );
 
-  const dataViewHash = `${params.dataView.id}-${params.dataView.title}-${params.dataView.timeFieldName}`;
   // TODO: accept dataViewId as a parameter here
   const refetchFieldsExistenceInfo = useCallback(async () => {
     return await fetchFieldsExistenceInfo(params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     fetchFieldsExistenceInfo,
-    dataViewHash,
+    params.dataViewHash,
     params.query,
     params.filters,
     params.fromDate,
@@ -172,10 +177,7 @@ export const useExistingFieldsFetcher = (
   );
 };
 
-export const useExistingFieldsReader: () => {
-  hasFieldData: (dataViewId: string, fieldName: string) => boolean;
-  getFieldsExistenceInfo: (dataViewId: string) => ExistingFieldsInfo | undefined;
-} = () => {
+export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
   const [existingFieldsByDataViewMap, setExistingFieldsByDataViewMap] =
     useState<ExistingFieldsByDataViewMap>(initialData);
 
@@ -218,6 +220,9 @@ export const useExistingFieldsReader: () => {
     [hasFieldData, getFieldsExistenceInfo]
   );
 };
+
+export const getDataViewHash = (dataView: DataView) =>
+  `${dataView.id}-${dataView.title}-${dataView.timeFieldName}`;
 
 // Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by
 // returning a query dsl object not matching anything

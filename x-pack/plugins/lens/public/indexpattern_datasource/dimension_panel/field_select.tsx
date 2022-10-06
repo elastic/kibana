@@ -10,11 +10,12 @@ import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import type { OperationType } from '../indexpattern';
 import type { OperationSupportMatrix } from './operation_support';
 import { FieldOption, FieldOptionValue, FieldPicker } from '../../shared_components/field_picker';
 import { fieldContainsData } from '../../shared_components';
-import type { ExistingFieldsMap, IndexPattern } from '../../types';
+import type { IndexPattern } from '../../types';
 import { getFieldType } from '../pure_utils';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
@@ -29,7 +30,6 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   operationByField: OperationSupportMatrix['operationByField'];
   onChoose: (choice: FieldChoiceWithOperationType) => void;
   onDeleteColumn?: () => void;
-  existingFields: ExistingFieldsMap[string];
   fieldIsInvalid: boolean;
   markAllFieldsCompatible?: boolean;
   'data-test-subj'?: string;
@@ -43,12 +43,12 @@ export function FieldSelect({
   operationByField,
   onChoose,
   onDeleteColumn,
-  existingFields,
   fieldIsInvalid,
   markAllFieldsCompatible,
   ['data-test-subj']: dataTestSub,
   ...rest
 }: FieldSelectProps) {
+  const { hasFieldData } = useExistingFieldsReader();
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
 
@@ -63,8 +63,8 @@ export function FieldSelect({
       (field) => currentIndexPattern.getFieldByName(field)?.type === 'document'
     );
 
-    function containsData(field: string) {
-      return fieldContainsData(field, currentIndexPattern, existingFields);
+    function containsData(fieldName: string) {
+      return fieldContainsData(fieldName, currentIndexPattern, hasFieldData);
     }
 
     function fieldNamesToOptions(items: string[]) {
@@ -141,7 +141,7 @@ export function FieldSelect({
     selectedOperationType,
     currentIndexPattern,
     operationByField,
-    existingFields,
+    hasFieldData,
     markAllFieldsCompatible,
   ]);
 
