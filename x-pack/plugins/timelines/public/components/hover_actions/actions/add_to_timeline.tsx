@@ -47,15 +47,15 @@ const useGetHandleStartDragToTimeline = ({
   return handleStartDragToTimeline;
 };
 
-const ToastAddSuccess: React.FC<{
-  addSuccess: string;
-  timelineType: 'default' | 'template';
-}> = ({ addSuccess, timelineType }) => {
-  const message = i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(
-    addSuccess,
-    timelineType === 'default'
+export interface SuccessMessageProps {
+  children: React.ReactChild;
+}
+export const AddSuccessMessage = (props: SuccessMessageProps) => {
+  return (
+    <span className="eui-textBreakWord" data-test-subj="add-to-timeline-toast-success">
+      {props.children}
+    </span>
   );
-  return <span className="eui-textBreakWord">{message}</span>;
 };
 
 export interface AddToTimelineButtonProps extends HoverActionComponentProps {
@@ -102,7 +102,12 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
             );
             addSuccess({
               title: toMountPoint(
-                <ToastAddSuccess addSuccess={provider.name} timelineType={timelineType} />
+                <AddSuccessMessage>
+                  {i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(
+                    provider.name,
+                    timelineType === 'default'
+                  )}
+                </AddSuccessMessage>
               ),
             });
           }
