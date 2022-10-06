@@ -24,7 +24,7 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
-import type { RuleReferenceSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { RuleDetailTabs } from '../../../../detections/pages/detection_engine/rules/details';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -36,7 +36,7 @@ const StyledFlexItem = styled(EuiFlexItem)`
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
-  references: RuleReferenceSchema[];
+  references: ExceptionListRuleReferencesSchema | null;
   dataTestSubj: string;
 }
 
@@ -51,7 +51,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
       if (references == null) {
         return [];
       }
-      return references.map((reference) => (
+      return references.referenced_rules.map((reference) => (
         <EuiContextMenuItem
           data-test-subj={`${dataTestSubj}-actionItem-${reference.id}`}
           key={reference.id}
@@ -94,25 +94,27 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             dataTestSubj={`${dataTestSubj}-updatedBy`}
           />
         </StyledFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiButtonEmpty
-                onClick={onAffectedRulesClick}
-                iconType="list"
-                data-test-subj={`${dataTestSubj}-affectedRulesButton`}
-              >
-                {i18n.AFFECTED_RULES(references?.length ?? 0)}
-              </EuiButtonEmpty>
-            }
-            panelPaddingSize="none"
-            isOpen={isPopoverOpen}
-            closePopover={onClosePopover}
-            data-test-subj={`${dataTestSubj}-items`}
-          >
-            <EuiContextMenuPanel size="s" items={itemActions} />
-          </EuiPopover>
-        </EuiFlexItem>
+        {references != null && (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonEmpty
+                  onClick={onAffectedRulesClick}
+                  iconType="list"
+                  data-test-subj={`${dataTestSubj}-affectedRulesButton`}
+                >
+                  {i18n.AFFECTED_RULES(references?.referenced_rules.length ?? 0)}
+                </EuiButtonEmpty>
+              }
+              panelPaddingSize="none"
+              isOpen={isPopoverOpen}
+              closePopover={onClosePopover}
+              data-test-subj={`${dataTestSubj}-items`}
+            >
+              <EuiContextMenuPanel size="s" items={itemActions} />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }
