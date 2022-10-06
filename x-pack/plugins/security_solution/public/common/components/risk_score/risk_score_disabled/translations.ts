@@ -24,7 +24,7 @@ export const ENABLE_HOST_RISK_SCORE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.riskScoreDisabled.hostsRiskDashboard.enableHostRiskScoreDescription',
   {
     defaultMessage:
-      'Once you have enabled this feature you can get quick access to the host risk scores in this section.',
+      'Once you have enabled this feature you can get quick access to the host risk scores in this section. The data might need an hour to be generated after enabling the module.',
   }
 );
 
@@ -53,6 +53,6 @@ export const ENABLE_USER_RISK_SCORE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.riskScoreDisabled.usersRiskDashboard.enableUserRiskScoreDescription',
   {
     defaultMessage:
-      'Once you have enabled this feature you can get quick access to the user risk scores in this section.',
+      'Once you have enabled this feature you can get quick access to the user risk scores in this section. The data might need an hour to be generated after enabling the module.',
   }
 );
