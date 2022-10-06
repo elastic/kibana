@@ -10,21 +10,23 @@ import { Logger } from '@kbn/core/server';
 import {
   CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
+  TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
-import { Params, ParamsSchema } from './alert_type_params';
+import { Params, ParamsSchema } from './rule_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
+import { getComparatorScript } from '../lib/comparator';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
 
-export function getAlertType(
+export function getRuleType(
   logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
 ): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
-  const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
+  const ruleTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
 
@@ -92,7 +94,7 @@ export function getAlertType(
     }
   );
 
-  const alertParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
+  const ruleParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
     (propKey: string) => {
       return {
         name: propKey,
@@ -103,7 +105,7 @@ export function getAlertType(
 
   return {
     id: ID,
-    name: alertTypeName,
+    name: ruleTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
     validate: {
@@ -121,7 +123,7 @@ export function getAlertType(
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
-        ...alertParamsVariables,
+        ...ruleParamsVariables,
       ],
     },
     minimumLicenseRequired: 'basic',
@@ -136,6 +138,8 @@ export function getAlertType(
   ) {
     const { alertId: ruleId, name, services, params } = options;
     const { alertFactory, scopedClusterClient } = services;
+
+    const alertLimit = alertFactory.alertLimit.getValue();
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -173,8 +177,18 @@ export function getAlertType(
       logger,
       esClient,
       query: queryParams,
+      condition: {
+        resultLimit: alertLimit,
+        conditionScript: getComparatorScript(
+          params.thresholdComparator,
+          params.threshold,
+          TIME_SERIES_BUCKET_SELECTOR_FIELD
+        ),
+      },
     });
     logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
+
+    const isGroupAgg = !!queryParams.termField;
 
     const unmetGroupValues: Record<string, number> = {};
     const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
@@ -196,7 +210,10 @@ export function getAlertType(
         continue;
       }
 
-      const met = compareFn(value, params.threshold);
+      // group aggregations use the bucket selector agg to compare conditions
+      // within the ES query, so only 'met' results are returned, therefore we don't need
+      // to use the compareFn
+      const met = isGroupAgg ? true : compareFn(value, params.threshold);
 
       if (!met) {
         unmetGroupValues[alertId] = value;
@@ -218,6 +235,8 @@ export function getAlertType(
       alert.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
+
+    alertFactory.alertLimit.setLimitReached(result.truncated);
 
     const { getRecoveredAlerts } = services.alertFactory.done();
     for (const recoveredAlert of getRecoveredAlerts()) {

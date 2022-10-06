@@ -265,6 +265,45 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(inGroup2).to.be.greaterThan(0);
     });
 
+    it('runs correctly: max grouped on float', async () => {
+      await createRule({
+        name: 'never fire',
+        aggType: 'max',
+        aggField: 'testedValueFloat',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 2,
+        thresholdComparator: '<',
+        threshold: [3.235423],
+      });
+
+      await createRule({
+        name: 'always fire',
+        aggType: 'max',
+        aggField: 'testedValueFloat',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 2, // two actions will fire each interval
+        thresholdComparator: '>=',
+        threshold: [200.2354364],
+      });
+
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
+
+      const docs = await waitForDocs(4);
+
+      for (const doc of docs) {
+        const { name, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+
+        const messagePattern =
+          /alert 'always fire' is active for group \'group-\d\':\n\n- Value: 234.2534637451172\n- Conditions Met: max\(testedValueFloat\) is greater than or equal to 200.2354364 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
+      }
+    });
+
     it('runs correctly: max grouped on unsigned long', async () => {
       await createRule({
         name: 'never fire',

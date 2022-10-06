@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { AlertingBuiltinsPlugin } from './plugin';
 import { configSchema, Config } from '../common/config';
-export { ID as INDEX_THRESHOLD_ID } from './alert_types/index_threshold/alert_type';
+export { ID as INDEX_THRESHOLD_ID } from './alert_types/index_threshold/rule_type';
 
 export const config: PluginConfigDescriptor<Config> = {
   exposeToBrowser: {},
