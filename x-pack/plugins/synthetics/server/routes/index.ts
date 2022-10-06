@@ -31,6 +31,7 @@ import {
   SyntheticsRestApiRouteFactory,
   SyntheticsStreamingRouteFactory,
 } from '../legacy_uptime/routes';
+import { getHasZipUrlMonitorRoute } from './fleet/get_has_zip_url_monitors';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
@@ -49,6 +50,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
   syntheticsGetPingsRoute,
+  getHasZipUrlMonitorRoute,
   createGetCurrentStatusRoute,
 ];
 
