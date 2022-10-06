@@ -96,10 +96,13 @@ export interface Agent extends AgentBase {
   access_api_key?: string;
   // @deprecated
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
-  outputs?: Array<{
-    api_key_id: string;
-    to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
-  }>;
+  outputs?: Record<
+    string,
+    {
+      api_key_id: string;
+      to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
+    }
+  >;
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;

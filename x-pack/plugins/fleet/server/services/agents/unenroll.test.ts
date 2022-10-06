@@ -331,15 +331,22 @@ describe('invalidateAPIKeysForAgents', () => {
             id: 'defaultApiKeyHistory2',
           },
         ],
-        outputs: [
-          {
+        outputs: {
+          output1: {
             api_key_id: 'outputApiKey1',
             to_retire_api_key_ids: [{ id: 'outputApiKeyRetire1' }, { id: 'outputApiKeyRetire2' }],
           },
-          {
+          output2: {
             api_key_id: 'outputApiKey2',
           },
-        ],
+          output3: {
+            api_key_id: 'outputApiKey3',
+            to_retire_api_key_ids: [
+              // Somes Fleet Server agents don't have an id here (probably a bug)
+              { retired_at: 'foo' },
+            ],
+          },
+        },
       } as any,
     ]);
 
@@ -353,6 +360,7 @@ describe('invalidateAPIKeysForAgents', () => {
       'outputApiKeyRetire1',
       'outputApiKeyRetire2',
       'outputApiKey2',
+      'outputApiKey3',
     ]);
   });
 });
