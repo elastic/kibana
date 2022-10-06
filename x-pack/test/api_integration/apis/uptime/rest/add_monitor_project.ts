@@ -19,8 +19,7 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { comparePolicies, getTestProjectSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/142110
-  describe.skip('AddProjectMonitors', function () {
+  describe('AddProjectMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -708,6 +707,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...projectMonitors,
             keep_stale: false,
             monitors: testMonitors,
+            project: 'test-project-2',
           });
 
         const messages = await parseStreamApiResponse(
@@ -715,6 +715,7 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify({
             ...projectMonitors,
             keep_stale: false,
+            project: 'test-project-2',
           })
         );
 
