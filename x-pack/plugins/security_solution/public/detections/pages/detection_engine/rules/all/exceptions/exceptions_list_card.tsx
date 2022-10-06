@@ -69,27 +69,16 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
               <React.Fragment key={exceptionsList.list_id}>
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={true}>
-                    <EuiFlexGroup direction="column">
-                      <EuiFlexItem>
-                        <EuiFlexGroup>
-                          <EuiFlexItem grow={false}>
-                            <EuiFlexGroup direction="column">
-                              <EuiFlexItem grow={false}>
-                                <EuiButtonEmpty
-                                  flush={'left'}
-                                  data-test-subj="exception-list-name"
-                                >{`${exceptionsList.name}`}</EuiButtonEmpty>
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <EuiText size="xs">
-                                  <EuiTextColor color="subdued">
-                                    {exceptionsList.description}
-                                  </EuiTextColor>
-                                </EuiText>
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
+                    <EuiFlexGroup direction="column" alignItems="flexStart">
+                      <EuiFlexItem grow={false} component={'span'}>
+                        <EuiButtonEmpty flush={'left'} data-test-subj="exception-list-name">
+                          {exceptionsList.name.toString()}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <EuiTextColor color="subdued">{exceptionsList.description}</EuiTextColor>
+                        </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
