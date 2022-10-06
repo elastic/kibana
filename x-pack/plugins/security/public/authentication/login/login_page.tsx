@@ -50,7 +50,7 @@ interface Props {
   fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;
   sameSiteCookies?: ConfigType['sameSiteCookies'];
-  customLogo$?: Observable<string>;
+  customLogo$?: Observable<string | undefined>;
 }
 
 interface State {
