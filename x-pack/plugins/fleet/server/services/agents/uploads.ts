@@ -6,10 +6,15 @@
  */
 import type { Readable } from 'stream';
 
+import mime from 'mime';
+
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { createEsFileClient } from '@kbn/files-plugin/server';
+import type { File } from '@kbn/files-plugin/common';
+
+import type { ResponseHeaders } from '@kbn/core-http-server';
 
 import type { AgentDiagnostics } from '../../../common/types/models';
 import { appContextService } from '../app_context';
@@ -97,8 +102,9 @@ async function _getRequestDiagnosticsActions(
 
 export async function getAgentUploadFile(
   esClient: ElasticsearchClient,
-  id: string
-): Promise<Readable> {
+  id: string,
+  fileName: string
+): Promise<{ body: Readable; headers: ResponseHeaders }> {
   try {
     const fileClient = createEsFileClient({
       blobStorageIndex: '.fleet-agent-file-data',
@@ -111,9 +117,25 @@ export async function getAgentUploadFile(
       id,
     });
 
-    return await file.downloadContent();
+    return {
+      body: await file.downloadContent(),
+      headers: getDownloadHeadersForFile(file, fileName),
+    };
   } catch (error) {
     appContextService.getLogger().error(error);
     throw error;
   }
+}
+
+// copied from https://github.com/elastic/kibana/blob/main/x-pack/plugins/files/server/routes/common.ts
+export function getDownloadHeadersForFile(file: File, fileName: string): ResponseHeaders {
+  return {
+    'content-type':
+      (fileName && mime.getType(fileName)) ?? file.data.mimeType ?? 'application/octet-stream',
+    // Note, this name can be overridden by the client if set via a "download" attribute on the HTML tag.
+    'content-disposition': `attachment; filename="${fileName}"`,
+    'cache-control': 'max-age=31536000, immutable',
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+    'x-content-type-options': 'nosniff',
+  };
 }

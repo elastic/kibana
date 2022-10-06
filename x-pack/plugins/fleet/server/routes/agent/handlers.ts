@@ -8,8 +8,6 @@
 import { readFile } from 'fs/promises';
 import Path from 'path';
 
-import { Stream } from 'stream';
-
 import { REPO_ROOT } from '@kbn/utils';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
@@ -389,12 +387,13 @@ export const getAgentUploadFileHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
-    const readable = await AgentService.getAgentUploadFile(esClient, request.params.fileId);
+    const resp = await AgentService.getAgentUploadFile(
+      esClient,
+      request.params.fileId,
+      request.params.fileName
+    );
 
-    const stream = new Stream.PassThrough();
-    readable.pipe(stream);
-
-    return response.ok({ body: stream });
+    return response.ok(resp);
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
