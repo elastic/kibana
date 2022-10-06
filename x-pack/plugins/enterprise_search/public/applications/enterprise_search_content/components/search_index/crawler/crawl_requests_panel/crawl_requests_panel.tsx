@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiCode, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
