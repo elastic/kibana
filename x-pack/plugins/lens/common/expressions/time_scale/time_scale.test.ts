@@ -12,18 +12,6 @@ import type { TimeRange } from '@kbn/es-query';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
-// mock the specific inner variable:
-// there are intra dependencies in the data plugin we might break trying to mock the whole thing
-jest.mock('@kbn/data-plugin/common/query/timefilter/get_time', () => {
-  const localMoment = jest.requireActual('moment');
-  return {
-    calculateBounds: jest.fn(({ from, to }) => ({
-      min: localMoment(from),
-      max: localMoment(to),
-    })),
-  };
-});
-
 import { getTimeScale } from './time_scale';
 import type { TimeScaleArgs } from './types';
 
@@ -34,7 +22,11 @@ describe('time_scale', () => {
     context?: ExecutionContext
   ) => Promise<Datatable>;
 
-  const timeScale = getTimeScale(createDatatableUtilitiesMock, () => 'UTC');
+  const timeScale = getTimeScale(
+    createDatatableUtilitiesMock,
+    () => 'UTC',
+    () => new Date('2010-01-04T06:30:30')
+  );
 
   const emptyTable: Datatable = {
     type: 'datatable',
@@ -402,7 +394,6 @@ describe('time_scale', () => {
         ...emptyTable,
         rows: [
           {
-            date: moment('2010-01-01T00:00:00.000Z').valueOf(),
             metric: 300,
           },
         ],
@@ -423,6 +414,34 @@ describe('time_scale', () => {
     );
 
     expect(result.rows.map(({ scaledMetric }) => scaledMetric)).toEqual([75]);
+  });
+
+  it('should work with relative time range', async () => {
+    const result = await timeScaleWrapped(
+      {
+        ...emptyTable,
+        rows: [
+          {
+            metric: 300,
+          },
+        ],
+      },
+      {
+        inputColumnId: 'metric',
+        outputColumnId: 'scaledMetric',
+        targetUnit: 'd',
+      },
+      {
+        getSearchContext: () => ({
+          timeRange: {
+            from: 'now-2d',
+            to: 'now',
+          },
+        }),
+      } as unknown as ExecutionContext
+    );
+
+    expect(result.rows.map(({ scaledMetric }) => scaledMetric)).toEqual([150]);
   });
 
   it('should apply fn for non-histogram fields (with Reduced time range)', async () => {
