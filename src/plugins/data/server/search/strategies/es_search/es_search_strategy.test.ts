@@ -89,7 +89,7 @@ describe('ES search strategy', () => {
       });
   });
 
-  it('has all response parameters', (done) =>
+  it('has all response parameters', (done) => {
     esSearchStrategyProvider(mockConfig$, mockLogger)
       .search(
         {
@@ -104,7 +104,8 @@ describe('ES search strategy', () => {
         expect(data).toHaveProperty('loaded');
         expect(data).toHaveProperty('rawResponse');
         done();
-      }));
+      });
+  });
 
   it('calls the client with transport options', async () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
@@ -148,7 +149,7 @@ describe('ES search strategy', () => {
     });
 
     try {
-      await esSearchStrategyProvider(mockConfig$, mockLogger)
+      esSearchStrategyProvider(mockConfig$, mockLogger)
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
@@ -166,7 +167,7 @@ describe('ES search strategy', () => {
     const errResponse = new errors.ElasticsearchClientError('This is a general ESClient error');
 
     try {
-      await esSearchStrategyProvider(mockConfig$, mockLogger)
+      esSearchStrategyProvider(mockConfig$, mockLogger)
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
@@ -184,7 +185,7 @@ describe('ES search strategy', () => {
     const errResponse = new Error('ESClient error');
 
     try {
-      await esSearchStrategyProvider(mockConfig$, mockLogger)
+      esSearchStrategyProvider(mockConfig$, mockLogger)
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
@@ -201,7 +202,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
     try {
-      await esSearchStrategyProvider(mockConfig$, mockLogger)
+      esSearchStrategyProvider(mockConfig$, mockLogger)
         .search({ indexType: 'banana', params }, {}, getMockedDeps())
         .toPromise();
     } catch (e) {

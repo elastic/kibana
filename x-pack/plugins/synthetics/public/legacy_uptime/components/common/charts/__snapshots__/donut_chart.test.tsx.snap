@@ -772,6 +772,27 @@ exports[`DonutChart component renders a donut chart 1`] = `
   }
 }
 
+.c1.c1 {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.c2 {
+  text-align: right;
+}
+
+.c0 {
+  max-width: 150px;
+  min-width: 100px;
+}
+
+@media (max-width:767px) {
+  .c0 {
+    min-width: 0px;
+    max-width: 100px;
+  }
+}
+
 <div
   class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
 >
@@ -893,6 +914,36 @@ exports[`DonutChart component renders a donut chart 1`] = `
 `;
 
 exports[`DonutChart component renders a green check when all monitors are up 1`] = `
+.c2.c2 {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.c3 {
+  text-align: right;
+}
+
+.c1 {
+  max-width: 150px;
+  min-width: 100px;
+}
+
+.c0 {
+  height: 42px;
+  width: 42px;
+  color: #017d73;
+  top: 51px;
+  left: 51px;
+  position: absolute;
+}
+
+@media (max-width:767px) {
+  .c1 {
+    min-width: 0px;
+    max-width: 100px;
+  }
+}
+
 .c2.c2 {
   margin-left: 0px;
   margin-right: 0px;

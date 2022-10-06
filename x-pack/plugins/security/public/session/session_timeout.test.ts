@@ -25,6 +25,8 @@ import type { SessionInfo } from '../../common/types';
 import { createSessionExpiredMock } from './session_expired.mock';
 import { SessionTimeout, startTimer } from './session_timeout';
 
+const originalProcessNextTick = process.nextTick;
+
 jest.useFakeTimers();
 
 jest.spyOn(window, 'addEventListener');
@@ -137,7 +139,7 @@ describe('SessionTimeout', () => {
 
     // Trigger session extension and wait for next tick
     window.dispatchEvent(new Event('mousemove'));
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise((resolve) => originalProcessNextTick(resolve));
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
     expect(http.fetch).toHaveBeenLastCalledWith(
@@ -166,7 +168,7 @@ describe('SessionTimeout', () => {
 
     // Trigger session extension and wait for next tick
     window.dispatchEvent(new Event('mousemove'));
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise((resolve) => originalProcessNextTick(resolve));
 
     expect(http.fetch).toHaveBeenCalledTimes(1);
   });
@@ -187,7 +189,7 @@ describe('SessionTimeout', () => {
 
     // Trigger session extension and wait for next tick
     window.dispatchEvent(new Event('mousemove'));
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise((resolve) => originalProcessNextTick(resolve));
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
 
@@ -196,7 +198,7 @@ describe('SessionTimeout', () => {
 
     // Trigger session extension and wait for next tick
     window.dispatchEvent(new Event('mousemove'));
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise((resolve) => originalProcessNextTick(resolve));
 
     // Without exponential retry backoff, this would have been called a 3rd time
     expect(http.fetch).toHaveBeenCalledTimes(2);

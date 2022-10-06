@@ -13,6 +13,14 @@ Array [
   width: 75%;
 }
 
+.c1.c1.c1 {
+  width: 25%;
+}
+
+.c0.c0.c0 {
+  width: 75%;
+}
+
 <dl
     class="euiDescriptionList emotion-euiDescriptionList-column-left"
     data-type="column"

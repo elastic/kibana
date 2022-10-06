@@ -124,7 +124,7 @@ describe('MetaRewritePolicy', () => {
           "error": Object {},
           "tags": Array [
             "0",
-            undefined,
+            ,
           ],
         }
       `);

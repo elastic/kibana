@@ -82,6 +82,7 @@ describe('SourcesLogic', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
+    jest.spyOn(window, 'clearInterval');
     mount();
   });
 

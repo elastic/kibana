@@ -19,6 +19,7 @@ describe('loadSnippet', () => {
     Object.defineProperty(global, 'document', {
       writable: true,
       value: {
+        querySelectorAll: jest.fn().mockReturnValue([]),
         createElement: jest.fn().mockReturnValue({}),
         getElementsByTagName: jest
           .fn()

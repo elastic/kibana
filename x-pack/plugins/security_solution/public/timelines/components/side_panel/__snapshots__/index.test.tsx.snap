@@ -40,6 +40,13 @@ Array [
   margin-top: 8px;
 }
 
+.c0 {
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  margin-top: 8px;
+}
+
 <div
     class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
   >
@@ -118,6 +125,32 @@ Array [
 `;
 
 exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Event Details view of the Details Panel in the flyout when the panelView is eventDetail and the eventId is set 1`] = `
+.c0 {
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  margin-top: 8px;
+}
+
+.c1 .euiFlyoutBody__overflow {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  overflow: hidden;
+}
+
+.c1 .euiFlyoutBody__overflow .euiFlyoutBody__overflowContent {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  overflow: hidden;
+  padding: 0 12px 12px;
+}
+
 .c0 {
   -webkit-flex: 0 1 auto;
   -ms-flex: 0 1 auto;
@@ -230,6 +263,84 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
 `;
 
 exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `
+.c3 {
+  color: #535966;
+}
+
+.c2 {
+  word-break: break-word;
+}
+
+.c2 dt {
+  font-size: 12px !important;
+}
+
+.c2 dd {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c2 dd > div {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .euiButtonIcon {
+  position: absolute;
+  right: 12px;
+  top: 6px;
+  z-index: 2;
+}
+
+.c0 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c0 > * {
+  max-width: 100%;
+}
+
+.c0 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+
+.c0:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c4 {
+  padding: 12px;
+  background: rgba(250,251,253,0.9);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.c5 {
+  height: 100%;
+}
+
 .c3 {
   color: #535966;
 }
@@ -574,6 +685,84 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 `;
 
 exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `
+.c3 {
+  color: #535966;
+}
+
+.c2 {
+  word-break: break-word;
+}
+
+.c2 dt {
+  font-size: 12px !important;
+}
+
+.c2 dd {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c2 dd > div {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .euiButtonIcon {
+  position: absolute;
+  right: 12px;
+  top: 6px;
+  z-index: 2;
+}
+
+.c0 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c0 > * {
+  max-width: 100%;
+}
+
+.c0 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+
+.c0:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c4 {
+  padding: 12px;
+  background: rgba(250,251,253,0.9);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.c5 {
+  height: 100%;
+}
+
 .c3 {
   color: #535966;
 }

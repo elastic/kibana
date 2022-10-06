@@ -90,10 +90,6 @@ exports[`LinkToApp component should render with href 1`] = `
                   data-styled="active"
                   data-styled-version="5.1.0"
                 />
-                <style
-                  data-styled="active"
-                  data-styled-version="5.1.0"
-                />
               </head>,
               "ctr": 8,
               "insertionPoint": undefined,

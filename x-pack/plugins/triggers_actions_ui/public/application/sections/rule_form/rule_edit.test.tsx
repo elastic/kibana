@@ -241,7 +241,7 @@ describe('rule_edit', () => {
     });
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(

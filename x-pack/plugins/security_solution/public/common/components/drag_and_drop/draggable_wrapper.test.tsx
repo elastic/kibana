@@ -60,17 +60,11 @@ describe('DraggableWrapper', () => {
   const message = 'draggable wrapper content';
   const mount = useMountAppended();
 
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-
   afterEach(() => {
     const portal = document.querySelector('[data-euiportal="true"]');
     if (portal != null) {
       portal.innerHTML = '';
     }
-
-    jest.useRealTimers();
   });
 
   describe('rendering', () => {

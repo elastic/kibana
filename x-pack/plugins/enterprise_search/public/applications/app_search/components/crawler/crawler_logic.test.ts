@@ -353,6 +353,7 @@ describe('CrawlerLogic', () => {
     describe('createNewTimeoutForCrawlerData', () => {
       it('saves the timeout ID in the logic', () => {
         jest.useFakeTimers();
+        jest.spyOn(global, 'setTimeout');
 
         jest.spyOn(CrawlerLogic.actions, 'onCreateNewTimeout');
         jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
@@ -368,6 +369,7 @@ describe('CrawlerLogic', () => {
       });
 
       it('clears a timeout if one already exists', () => {
+        jest.spyOn(global, 'clearTimeout');
         const timeoutId = setTimeout(() => {}, 1);
         mount({
           timeoutId,

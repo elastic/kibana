@@ -6,6 +6,11 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
   margin-left: 5px;
 }
 
+.c0 {
+  display: inline-block;
+  margin-left: 5px;
+}
+
 <div
   class="euiHealth emotion-euiHealth-s"
 >

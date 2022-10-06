@@ -32,7 +32,7 @@ describe('FieldTypeIcon', () => {
     typeIconComponent.simulate('mouseover');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     typeIconComponent.update();
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2);
@@ -40,7 +40,7 @@ describe('FieldTypeIcon', () => {
     typeIconComponent.simulate('mouseout');
 
     // Run the timers so the EuiTooltip will be hidden again
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     typeIconComponent.update();
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);

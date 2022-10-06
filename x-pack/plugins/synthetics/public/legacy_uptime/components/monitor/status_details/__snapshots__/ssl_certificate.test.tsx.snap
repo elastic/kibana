@@ -7,6 +7,11 @@ Array [
   max-width: 250px;
 }
 
+.c0.c0.c0 {
+  width: 30%;
+  max-width: 250px;
+}
+
 <dt
     class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal"
   >
@@ -16,6 +21,17 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   .c0.c0.c0 {
+  width: 70%;
+  overflow-wrap: anywhere;
+}
+
+.c1.c1.c1 {
+  margin: 0 0 0 4px;
+  display: inline-block;
+  color: inherit;
+}
+
+.c0.c0.c0 {
   width: 70%;
   overflow-wrap: anywhere;
 }
@@ -62,6 +78,11 @@ Array [
   max-width: 250px;
 }
 
+.c0.c0.c0 {
+  width: 30%;
+  max-width: 250px;
+}
+
 <dt
     class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal"
   >
@@ -71,6 +92,11 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   .c0.c0.c0 {
+  width: 70%;
+  overflow-wrap: anywhere;
+}
+
+.c0.c0.c0 {
   width: 70%;
   overflow-wrap: anywhere;
 }

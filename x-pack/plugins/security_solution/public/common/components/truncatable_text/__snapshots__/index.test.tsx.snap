@@ -11,6 +11,16 @@ exports[`TruncatableText renders correctly against snapshot 1`] = `
   white-space: nowrap;
 }
 
+.c0,
+.c0 * {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
 <TruncatableText>
   <EllipsisText>
     <span

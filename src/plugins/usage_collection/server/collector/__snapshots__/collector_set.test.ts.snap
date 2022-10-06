@@ -1,107 +1,111 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CollectorSet bulkFetch skips collectors that are not ready 1`] = `
-Array [
-  Object {
-    "result": Object {},
-    "type": "ready_col",
-  },
-  Object {
-    "result": Object {
-      "failed": Object {
-        "count": 0,
-        "names": Array [],
-      },
-      "fetch_duration_breakdown": Array [
-        Object {
-          "duration": 0,
-          "name": "ready_col",
-        },
-      ],
-      "is_ready_duration_breakdown": Array [
-        Object {
-          "duration": 0,
-          "name": "ready_col",
-        },
-        Object {
-          "duration": 0,
-          "name": "not_ready_col",
-        },
-      ],
-      "not_ready": Object {
-        "count": 1,
-        "names": Array [
-          "not_ready_col",
-        ],
-      },
-      "not_ready_timeout": Object {
-        "count": 0,
-        "names": Array [],
-      },
-      "succeeded": Object {
-        "count": 1,
-        "names": Array [
-          "ready_col",
-        ],
-      },
-      "total_duration": 0,
-      "total_fetch_duration": 0,
-      "total_is_ready_duration": 0,
+Object {
+  "results": Array [
+    Object {
+      "result": Object {},
+      "type": "ready_col",
     },
-    "type": "usage_collector_stats",
-  },
-]
+    Object {
+      "result": Object {
+        "failed": Object {
+          "count": 0,
+          "names": Array [],
+        },
+        "fetch_duration_breakdown": Array [
+          Object {
+            "duration": 0,
+            "name": "ready_col",
+          },
+        ],
+        "is_ready_duration_breakdown": Array [
+          Object {
+            "duration": 0,
+            "name": "ready_col",
+          },
+          Object {
+            "duration": 0,
+            "name": "not_ready_col",
+          },
+        ],
+        "not_ready": Object {
+          "count": 1,
+          "names": Array [
+            "not_ready_col",
+          ],
+        },
+        "not_ready_timeout": Object {
+          "count": 0,
+          "names": Array [],
+        },
+        "succeeded": Object {
+          "count": 1,
+          "names": Array [
+            "ready_col",
+          ],
+        },
+        "total_duration": 0,
+        "total_fetch_duration": 0,
+        "total_is_ready_duration": 0,
+      },
+      "type": "usage_collector_stats",
+    },
+  ],
+}
 `;
 
 exports[`CollectorSet bulkFetch skips collectors that have timed out 1`] = `
-Array [
-  Object {
-    "result": Object {},
-    "type": "ready_col",
-  },
-  Object {
-    "result": Object {
-      "failed": Object {
-        "count": 0,
-        "names": Array [],
-      },
-      "fetch_duration_breakdown": Array [
-        Object {
-          "duration": 0,
-          "name": "ready_col",
-        },
-      ],
-      "is_ready_duration_breakdown": Array [
-        Object {
-          "duration": Any<Number>,
-          "name": "ready_col",
-        },
-        Object {
-          "duration": Any<Number>,
-          "name": "timeout_col",
-        },
-      ],
-      "not_ready": Object {
-        "count": 0,
-        "names": Array [],
-      },
-      "not_ready_timeout": Object {
-        "count": 1,
-        "names": Array [
-          "timeout_col",
-        ],
-      },
-      "succeeded": Object {
-        "count": 1,
-        "names": Array [
-          "ready_col",
-        ],
-      },
-      "total_duration": Any<Number>,
-      "total_fetch_duration": 0,
-      "total_is_ready_duration": Any<Number>,
+Object {
+  "results": Array [
+    Object {
+      "result": Object {},
+      "type": "ready_col",
     },
-    "type": "usage_collector_stats",
-  },
-]
+    Object {
+      "result": Object {
+        "failed": Object {
+          "count": 0,
+          "names": Array [],
+        },
+        "fetch_duration_breakdown": Array [
+          Object {
+            "duration": 0,
+            "name": "ready_col",
+          },
+        ],
+        "is_ready_duration_breakdown": Array [
+          Object {
+            "duration": Any<Number>,
+            "name": "ready_col",
+          },
+          Object {
+            "duration": Any<Number>,
+            "name": "timeout_col",
+          },
+        ],
+        "not_ready": Object {
+          "count": 0,
+          "names": Array [],
+        },
+        "not_ready_timeout": Object {
+          "count": 1,
+          "names": Array [
+            "timeout_col",
+          ],
+        },
+        "succeeded": Object {
+          "count": 1,
+          "names": Array [
+            "ready_col",
+          ],
+        },
+        "total_duration": Any<Number>,
+        "total_fetch_duration": 0,
+        "total_is_ready_duration": Any<Number>,
+      },
+      "type": "usage_collector_stats",
+    },
+  ],
+}
 `;

@@ -22,6 +22,16 @@ Array [
   overflow-wrap: anywhere;
 }
 
+.c0.c0.c0 {
+  width: 30%;
+  max-width: 250px;
+}
+
+.c1.c1.c1 {
+  width: 70%;
+  overflow-wrap: anywhere;
+}
+
 <dl
     class="euiDescriptionList emotion-euiDescriptionList-column-left"
     data-type="column"

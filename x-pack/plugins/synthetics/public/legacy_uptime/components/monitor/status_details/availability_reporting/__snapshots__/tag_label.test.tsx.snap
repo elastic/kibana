@@ -13,6 +13,18 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
   }
 }
 
+.c0 {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+@media (max-width:1042px) {
+  .c0 {
+    display: inline-block;
+    margin-right: 16px;
+  }
+}
+
 <div
   class="c0"
 >
