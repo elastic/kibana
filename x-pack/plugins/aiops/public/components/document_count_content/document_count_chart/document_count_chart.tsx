@@ -356,7 +356,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
             style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
-          {adjustedChartPoints && (
+          {adjustedChartPoints?.length && (
             <HistogramBarSeries
               id={SPEC_ID}
               name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
@@ -369,7 +369,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               yNice
             />
           )}
-          {adjustedChartPointsSplit && (
+          {adjustedChartPointsSplit?.length && (
             <HistogramBarSeries
               id={`${SPEC_ID}_split`}
               name={chartPointsSplitLabel}
