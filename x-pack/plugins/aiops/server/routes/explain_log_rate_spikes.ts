@@ -107,7 +107,12 @@ export const defineExplainLogRateSpikesRoute = (
         end: streamEnd,
         push,
         responseWithHeaders,
-      } = streamFactory<AiopsExplainLogRateSpikesApiAction>(request.headers, logger, true);
+      } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
+        request.headers,
+        logger,
+        request.body.compressResponse,
+        true
+      );
 
       function pushPing() {
         push(pingAction());
