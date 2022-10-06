@@ -44,13 +44,14 @@ export const PageReducerStream: FC = () => {
   const basePath = http?.basePath.get() ?? '';
 
   const [simulateErrors, setSimulateErrors] = useState(false);
+  const [compressResponse, setCompressResponse] = useState(true);
 
   const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream<
     ApiReducerStream,
     typeof basePath
   >(
     `${basePath}/internal/response_stream/reducer_stream`,
-    { simulateErrors },
+    { compressResponse, simulateErrors },
     { reducer: reducerStreamReducer, initialState }
   );
 
@@ -142,6 +143,13 @@ export const PageReducerStream: FC = () => {
           label="Simulate errors (gets applied to new streams only, not currently running ones)."
           checked={simulateErrors}
           onChange={(e) => setSimulateErrors(!simulateErrors)}
+          compressed
+        />
+        <EuiCheckbox
+          id="responseStreamCompressionCheckbox"
+          label="Toggle compression setting for response stream."
+          checked={compressResponse}
+          onChange={(e) => setCompressResponse(!compressResponse)}
           compressed
         />
       </EuiText>
