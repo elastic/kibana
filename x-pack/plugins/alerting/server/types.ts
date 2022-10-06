@@ -90,7 +90,7 @@ export interface RuleExecutorOptions<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > {
-  alertId: string;
+  alertId: string; // Why is this still called `alertId`? It is actually the rule id
   executionId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
