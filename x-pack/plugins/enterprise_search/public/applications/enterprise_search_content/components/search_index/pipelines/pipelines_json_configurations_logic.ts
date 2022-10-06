@@ -71,6 +71,7 @@ export const IndexPipelinesConfigurationsLogic = kea<
       }
     },
   }),
+  path: ['enterprise_search', 'content', 'pipelines_json_configurations'],
   reducers: () => ({
     selectedPipelineId: [
       '',

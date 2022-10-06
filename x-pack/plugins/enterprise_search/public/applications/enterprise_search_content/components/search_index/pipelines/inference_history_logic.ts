@@ -52,6 +52,7 @@ export const InferenceHistoryLogic = kea<
     fetchIndexInferenceHistory: () => clearFlashMessages(),
     fetchIndexInferenceHistoryError: (error) => flashAPIErrors(error),
   }),
+  path: ['enterprise_search', 'content', 'pipelines_inference_history'],
   selectors: ({ selectors }) => ({
     inferenceHistory: [
       () => [selectors.inferenceHistoryData],
