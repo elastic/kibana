@@ -7,7 +7,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
 
-import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
@@ -56,7 +56,7 @@ export const EntityAnalyticsAnomalies = () => {
     from,
     to,
   });
-  const columns = useAnomaliesColumns(isLoading);
+  const columns = useAnomaliesColumns(isLoading, refetch);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   useEffect(() => {
@@ -86,6 +86,11 @@ export const EntityAnalyticsAnomalies = () => {
     });
     return [onClick, href];
   }, [getSecuritySolutionLinkProps]);
+
+  const installedJobsIds = useMemo(
+    () => data.filter(({ job }) => !!job && job.isInstalled).map(({ job }) => job?.id ?? ''),
+    [data]
+  );
 
   return (
     <EuiPanel hasBorder data-test-subj={ENTITY_ANALYTICS_ANOMALIES_PANEL}>
@@ -124,6 +129,7 @@ export const EntityAnalyticsAnomalies = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </HeaderSection>
+      <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
       {toggleStatus && (
         <EuiInMemoryTable
           responsive={false}

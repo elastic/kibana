@@ -9,8 +9,9 @@ import type { RenderResult } from '@testing-library/react-hooks';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
 import type { Refetch } from '../../../store/inputs/model';
+import type { SecurityJob } from '../../ml_popover/types';
 import type { AnomaliesCount } from './use_anomalies_search';
-import { useNotableAnomaliesSearch, AnomalyJobStatus, AnomalyEntity } from './use_anomalies_search';
+import { useNotableAnomaliesSearch, AnomalyEntity } from './use_anomalies_search';
 
 const jobId = 'auth_rare_source_ip_for_a_user';
 const from = 'now-24h';
@@ -119,9 +120,13 @@ describe('useNotableAnomaliesSearch', () => {
         expect.arrayContaining([
           {
             count: 99,
-            jobId,
             name: jobId,
-            status: AnomalyJobStatus.enabled,
+            job: {
+              isInstalled: true,
+              datafeedState: 'started',
+              jobState: 'opened',
+              isCompatible: true,
+            } as SecurityJob,
             entity: AnomalyEntity.Host,
           },
         ])
@@ -153,9 +158,9 @@ describe('useNotableAnomaliesSearch', () => {
         expect.arrayContaining([
           {
             count: 0,
-            jobId: undefined,
-            name: jobId,
-            status: AnomalyJobStatus.uninstalled,
+            job: {
+              isInstalled: false,
+            } as SecurityJob,
             entity: AnomalyEntity.Host,
           },
         ])
@@ -196,9 +201,11 @@ describe('useNotableAnomaliesSearch', () => {
         expect.arrayContaining([
           {
             count: 99,
-            jobId: customJobId,
+            // jobId: customJobId,
             name: jobId,
-            status: AnomalyJobStatus.enabled,
+            job: {
+              isInstalled: true,
+            } as SecurityJob,
             entity: AnomalyEntity.Host,
           },
         ])
@@ -254,9 +261,11 @@ describe('useNotableAnomaliesSearch', () => {
         expect.arrayContaining([
           {
             count: 99,
-            jobId: mostRecentJobId,
+            // jobId: mostRecentJobId,
             name: jobId,
-            status: AnomalyJobStatus.enabled,
+            job: {
+              isInstalled: false,
+            } as SecurityJob,
             entity: AnomalyEntity.Host,
           },
         ])

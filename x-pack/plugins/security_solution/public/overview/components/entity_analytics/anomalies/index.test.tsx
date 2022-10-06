@@ -9,12 +9,10 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { EntityAnalyticsAnomalies } from '.';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
-import {
-  AnomalyJobStatus,
-  AnomalyEntity,
-} from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { AnomalyEntity } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 
 import { TestProviders } from '../../../../common/mock';
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 
 const mockUseNotableAnomaliesSearch = jest.fn().mockReturnValue({
   isLoading: false,
@@ -66,10 +64,9 @@ describe('EntityAnalyticsAnomalies', () => {
 
   it('renders enabled jobs', () => {
     const jobCount: AnomaliesCount = {
-      jobId: 'v3_windows_anomalous_script',
+      job: { isInstalled: true, datafeedState: 'started', jobState: 'opened' } as SecurityJob,
       name: 'v3_windows_anomalous_script',
       count: 9999,
-      status: AnomalyJobStatus.enabled,
       entity: AnomalyEntity.User,
     };
 
@@ -93,10 +90,14 @@ describe('EntityAnalyticsAnomalies', () => {
 
   it('renders disabled jobs', () => {
     const jobCount: AnomaliesCount = {
-      jobId: 'v3_windows_anomalous_script',
+      job: {
+        isInstalled: true,
+        datafeedState: 'stopped',
+        jobState: 'closed',
+        isCompatible: true,
+      } as SecurityJob,
       name: 'v3_windows_anomalous_script',
       count: 0,
-      status: AnomalyJobStatus.disabled,
       entity: AnomalyEntity.User,
     };
 
@@ -119,10 +120,10 @@ describe('EntityAnalyticsAnomalies', () => {
 
   it('renders uninstalled jobs', () => {
     const jobCount: AnomaliesCount = {
-      jobId: 'v3_windows_anomalous_script',
+      job: { isInstalled: false, isCompatible: true } as SecurityJob,
       name: 'v3_windows_anomalous_script',
       count: 0,
-      status: AnomalyJobStatus.uninstalled,
+
       entity: AnomalyEntity.User,
     };
 
@@ -144,10 +145,14 @@ describe('EntityAnalyticsAnomalies', () => {
 
   it('renders failed jobs', () => {
     const jobCount: AnomaliesCount = {
-      jobId: 'v3_windows_anomalous_script',
+      job: {
+        isInstalled: true,
+        datafeedState: 'failed',
+        jobState: 'failed',
+        isCompatible: true,
+      } as SecurityJob,
       name: 'v3_windows_anomalous_script',
       count: 0,
-      status: AnomalyJobStatus.failed,
       entity: AnomalyEntity.User,
     };
 
@@ -157,22 +162,22 @@ describe('EntityAnalyticsAnomalies', () => {
       refetch: jest.fn(),
     });
 
-    const { getByTestId } = render(
+    const { getByTestId, debug } = render(
       <TestProviders>
         <EntityAnalyticsAnomalies />
       </TestProviders>
     );
 
     expect(getByTestId('anomalies-table-column-name')).toHaveTextContent(jobCount.name);
+    debug();
     expect(getByTestId('anomalies-table-column-count')).toHaveTextContent('failed');
   });
 
   it('renders empty count column while loading', () => {
     const jobCount: AnomaliesCount = {
-      jobId: 'v3_windows_anomalous_script',
+      job: undefined,
       name: 'v3_windows_anomalous_script',
       count: 0,
-      status: AnomalyJobStatus.failed,
       entity: AnomalyEntity.User,
     };
 
