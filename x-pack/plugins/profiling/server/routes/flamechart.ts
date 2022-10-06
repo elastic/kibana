@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createCalleeTree } from '../../common/callee';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { createBaseFlameGraph } from '../../common/flamegraph';
 import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
@@ -71,14 +72,8 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
         logger.info('returning payload response to client');
 
         return response.ok({ body: flamegraph });
-      } catch (e) {
-        logger.error(e);
-        return response.customError({
-          statusCode: e.statusCode ?? 500,
-          body: {
-            message: e.message,
-          },
-        });
+      } catch (error) {
+        return handleRouteHandlerError({ error, logger, response });
       }
     }
   );
