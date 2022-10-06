@@ -348,7 +348,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                           <strong>
                             <FormattedMessage
                               id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeAllEventsInfoRecommendation"
-                              defaultMessage="Recommended for Cloud Workload Protection auditing and forensics use cases."
+                              defaultMessage="Recommended for Cloud Workload Protection, auditing and forensics use cases."
                             />
                           </strong>
                         </em>
