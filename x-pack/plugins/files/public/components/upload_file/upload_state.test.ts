@@ -11,7 +11,7 @@ import { TestScheduler } from 'rxjs/testing';
 import type { FileKind, FileJSON } from '../../../common';
 import { createMockFilesClient } from '../../mocks';
 import type { FilesClient } from '../../types';
-import { ImageMetadataFactory } from '../common/image_metadata';
+import { ImageMetadataFactory } from '../util/image_metadata';
 
 import { UploadState } from './upload_state';
 
