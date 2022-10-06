@@ -26,7 +26,7 @@ export interface MlEntitySelectorProps {
   /**
    * Array of selected ids
    */
-  selectedOptions?: string[];
+  selectedOptions?: Array<{ id: string; type?: EntityType }>;
   onSelectionChange?: (jobSelection: EntitiesSelection) => void;
   /**
    * In case the there are duplicated IDs across different ML entity types,
@@ -118,8 +118,10 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
     return (selectedOptions ?? []).flatMap((o) => {
       const fromOptions = options
         .flatMap((g) => g.options)
-        .filter((op): op is EuiComboBoxOptionOption<string> => op!.value === o);
-      return fromOptions.length > 0 ? fromOptions : [{ value: o, label: o, key: `unknown:${o}` }];
+        .filter((op): op is EuiComboBoxOptionOption<string> => op!.value === o.id);
+      return fromOptions.length > 0
+        ? fromOptions
+        : [{ value: o.id, label: o.id, key: `unknown:${o.id}` }];
     });
   }, [options, selectedOptions]);
 

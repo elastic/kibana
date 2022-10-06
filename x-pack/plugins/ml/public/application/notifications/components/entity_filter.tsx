@@ -25,13 +25,13 @@ export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onCha
   const closePopover = setIsOpen.bind(null, false);
 
   const selectedOptions = useMemo(() => {
-    let options: MlEntitySelectorProps['selectedOptions'] = [];
+    let options: Exclude<MlEntitySelectorProps['selectedOptions'], undefined> = [];
 
     if (orFieldClause && Array.isArray(orFieldClause.value)) {
-      options = orFieldClause.value as string[];
+      options = orFieldClause.value.map((v) => ({ id: v as string }));
     }
     if (simpleFieldClause && simpleFieldClause.value) {
-      options.push(simpleFieldClause.value as string);
+      options.push({ id: simpleFieldClause.value as string });
     }
     return options;
   }, [orFieldClause, simpleFieldClause]);
