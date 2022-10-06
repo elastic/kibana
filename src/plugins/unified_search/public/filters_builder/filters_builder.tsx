@@ -18,7 +18,7 @@ import { FiltersBuilderReducer } from './filters_builder_reducer';
 
 export interface FiltersBuilderProps {
   filters: Filter[];
-  dataView: DataView;
+  dataView?: DataView;
   onChange: (filters: Filter[]) => void;
   timeRangeForSuggestionsOverride?: boolean;
   maxDepth?: number;

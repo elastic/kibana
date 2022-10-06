@@ -19,11 +19,11 @@ import { ConditionTypes, getConditionalOperationType } from '../utils';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;
-  dataView: DataView;
+  dataViews: DataView[];
   conditionType?: ConditionTypes;
 }
 
-export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressionProps) {
+export function FilterExpressionBadge({ filter, dataViews }: FilterBadgeExpressionProps) {
   const conditionalOperationType = getConditionalOperationType(filter);
 
   const paddingLeft = useEuiPaddingCSS('left').xs;
@@ -45,7 +45,7 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
   };
 
   if (!conditionalOperationType) {
-    label = getValueLabel(filter, dataView);
+    label = getValueLabel(filter, dataViews);
   }
 
   return conditionalOperationType ? (
@@ -55,7 +55,7 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
       </span>
       <FilterBadgeGroup
         filters={Array.isArray(filter) ? filter : filter.meta?.params}
-        dataView={dataView}
+        dataViews={dataViews}
         conditionType={conditionalOperationType}
       />
       <span css={paddingRight}>

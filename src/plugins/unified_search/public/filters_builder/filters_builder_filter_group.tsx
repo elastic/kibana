@@ -136,7 +136,7 @@ export const FilterGroup = ({
     <EuiPanel
       color={color}
       hasShadow={false}
-      paddingSize="none"
+      paddingSize={renderedLevel > 0 ? 'none' : 'xs'}
       hasBorder
       className={cx({
         'filter-builder__panel': true,

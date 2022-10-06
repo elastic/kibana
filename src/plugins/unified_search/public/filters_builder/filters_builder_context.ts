@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FiltersBuilderActions } from './filters_builder_reducer';
 
 interface FiltersBuilderContextType {
-  dataView: DataView;
+  dataView?: DataView;
   dispatch: Dispatch<FiltersBuilderActions>;
   globalParams: {
     maxDepth: number;

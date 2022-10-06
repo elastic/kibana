@@ -56,7 +56,7 @@ export const mockedDataView = {
 
 Default.args = {
   filters: getFilterMockOrConditional(),
-  dataView: mockedDataView,
+  dataViews: [mockedDataView],
 };
 
 const createMockWebStorage = () => ({

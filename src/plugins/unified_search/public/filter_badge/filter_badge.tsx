@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, useEuiPaddingSize } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
@@ -16,30 +16,32 @@ import { ConditionTypes } from '../utils';
 
 export interface FilterBadgeProps {
   filters: Filter[];
-  dataView: DataView;
+  dataViews: DataView[];
   iconOnClick: () => void;
   onClick: () => void;
 }
 
 const rootLevelConditionType = ConditionTypes.AND;
 
-function FilterBadge({ filters, dataView, iconOnClick, onClick }: FilterBadgeProps) {
-  const sPaddingSize = useEuiPaddingSize('s');
+function FilterBadge({ filters, dataViews, iconOnClick, onClick }: FilterBadgeProps) {
+  const { euiTheme } = useEuiTheme();
 
-  const badgePadiing = useMemo(
+  const badgePading = useMemo(
     () => css`
-      padding: ${sPaddingSize};
+      padding: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
     `,
-    [sPaddingSize]
+    [euiTheme.size.xs, euiTheme.size.xxs]
   );
 
-  if (!dataView) {
+  if (!dataViews.length) {
     return null;
   }
 
+  console.log('filters', filters)
+
   return (
     <EuiBadge
-      className={badgePadiing}
+      className={badgePading}
       color="hollow"
       iconType="cross"
       iconSide="right"
@@ -52,7 +54,7 @@ function FilterBadge({ filters, dataView, iconOnClick, onClick }: FilterBadgePro
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
         <FilterBadgeGroup
           filters={filters}
-          dataView={dataView}
+          dataViews={dataViews}
           conditionType={rootLevelConditionType}
         />
       </EuiFlexGroup>

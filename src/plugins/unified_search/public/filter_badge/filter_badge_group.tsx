@@ -16,7 +16,7 @@ import { ConditionTypes } from '../utils';
 
 export interface FilterBadgeGroupProps {
   filters: Filter[];
-  dataView: DataView;
+  dataViews: DataView[];
   conditionType?: ConditionTypes;
 }
 
@@ -32,12 +32,12 @@ const ConditionalTypeDelimiter = ({ conditional }: { conditional: ConditionTypes
   return <EuiTextColor className={bracketСolor}>{conditional}</EuiTextColor>;
 };
 
-export function FilterBadgeGroup({ filters, dataView, conditionType }: FilterBadgeGroupProps) {
+export function FilterBadgeGroup({ filters, dataViews, conditionType }: FilterBadgeGroupProps) {
   return (
     <>
       {filters.map((filter, index, acc) => (
         <>
-          <FilterExpressionBadge filter={filter} dataView={dataView} />
+          <FilterExpressionBadge filter={filter} dataViews={dataViews} />
           {conditionType && index + 1 < acc.length ? (
             <ConditionalTypeDelimiter conditional={conditionType} />
           ) : null}

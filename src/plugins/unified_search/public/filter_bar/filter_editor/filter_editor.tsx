@@ -29,6 +29,7 @@ import {
   buildCustomFilter,
   cleanFilter,
   getFilterParams,
+  buildOrFilter,
 } from '@kbn/es-query';
 import { get } from 'lodash';
 import React, { Component } from 'react';
@@ -49,11 +50,12 @@ import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { getFieldValidityAndErrorMessage } from './lib/helpers';
+import { FiltersBuilder } from '../../filters_builder';
 
 export interface FilterEditorProps {
   filter: Filter;
   indexPatterns: DataView[];
-  onSubmit: (filter: Filter) => void;
+  onSubmit: (filters: Filter) => void;
   onCancel: () => void;
   intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
@@ -69,6 +71,7 @@ interface State {
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
+  filters: Filter[];
 }
 
 const panelTitleAdd = i18n.translate('unifiedSearch.filter.filterEditor.addFilterPopupTitle', {
@@ -97,6 +100,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
+      filters: [props.filter],
     };
   }
 
@@ -133,7 +137,9 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
           <div className="globalFilterItem__editorForm">
             {this.renderIndexPatternInput()}
 
-            {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
+            {this.state.isCustomEditorOpen
+              ? this.renderCustomEditor()
+              : this.renderFilterBuilderEditor()}
 
             <EuiSpacer size="m" />
 
@@ -262,6 +268,18 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
         <EuiSpacer size="s" />
         <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>
       </div>
+    );
+  }
+
+  private renderFilterBuilderEditor() {
+    const { selectedIndexPattern, filters } = this.state;
+    return (
+      <FiltersBuilder
+        filters={filters}
+        dataView={selectedIndexPattern}
+        onChange={(filters: Filter[]) => this.setState({ filters })}
+        hideOr={true}
+      />
     );
   }
 
@@ -467,7 +485,16 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       }
     }
 
-    return isFilterValid(indexPattern, field, operator, params);
+    return this.state.filters
+      .map((filter) =>
+        isFilterValid(
+          indexPattern,
+          getFieldFromFilter(filter as FieldFilter, indexPattern!),
+          getOperatorFromFilter(filter),
+          getFilterParams(filter)
+        )
+      )
+      .every((filterValid) => Boolean(filterValid));
   }
 
   private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
@@ -538,19 +565,52 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
-      this.props.onSubmit(filter);
-    } else if (indexPattern && field && operator) {
-      const filter = buildFilter(
-        indexPattern,
-        field,
-        operator.type,
-        operator.negate,
-        this.props.filter.meta.disabled ?? false,
-        params ?? '',
-        alias,
-        $state.store
+      // this.props.onSubmit(filter);
+    } else if (indexPattern) {
+      // const filter = buildFilter(
+      //   indexPattern,
+      //   field,
+      //   operator.type,
+      //   operator.negate,
+      //   this.props.filter.meta.disabled ?? false,
+      //   params ?? '',
+      //   alias,
+      //   $state.store
+      // );
+
+      console.log(
+        'build or filter',
+        buildOrFilter(
+          this.state.filters.map((filter) =>
+            buildFilter(
+              indexPattern,
+              getFieldFromFilter(filter as FieldFilter, indexPattern)!,
+              getOperatorFromFilter(filter)?.type!,
+              getOperatorFromFilter(filter)?.negate!,
+              filter.meta.disabled ?? false,
+              getFilterParams(filter) ?? '',
+              alias,
+              filter?.$state?.store
+            )
+          )
+        )
       );
-      this.props.onSubmit(filter);
+      this.props.onSubmit(
+        // buildOrFilter([
+          this.state.filters.map((filter) =>
+            buildFilter(
+              indexPattern,
+              getFieldFromFilter(filter as FieldFilter, indexPattern)!,
+              getOperatorFromFilter(filter)?.type!,
+              getOperatorFromFilter(filter)?.negate!,
+              filter.meta.disabled ?? false,
+              getFilterParams(filter) ?? '',
+              alias,
+              filter?.$state?.store
+            )
+          ),
+        // ])
+      );
     }
   };
 }

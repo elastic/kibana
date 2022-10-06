@@ -65,8 +65,8 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
 
   function onAdd(filter: Filter) {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
-    closePopover?.();
     const updatedFilters = [...filters, filter];
+    closePopover?.();
     onFiltersUpdated?.(updatedFilters);
   }
 

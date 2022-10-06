@@ -8,10 +8,12 @@
 
 import { EuiBadge, EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
 import { FilterLabel } from '..';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
+import { FilterBadge } from '../../filter_badge';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 interface Props {
   filter: Filter;
@@ -22,6 +24,9 @@ interface Props {
   errorMessage?: string;
   hideAlias?: boolean;
   [propName: string]: any;
+  dataViews: DataView[];
+  iconOnClick: () => void;
+  onClick: (e: MouseEvent<HTMLInputElement>) => void;
 }
 
 export const FilterView: FC<Props> = ({
@@ -34,6 +39,7 @@ export const FilterView: FC<Props> = ({
   errorMessage,
   filterLabelStatus,
   hideAlias,
+  dataViews,
   ...rest
 }: Props) => {
   const [ref, innerText] = useInnerText();
@@ -92,15 +98,23 @@ export const FilterView: FC<Props> = ({
       };
 
   const FilterPill = () => (
-    <EuiBadge {...badgeProps} {...rest}>
-      <FilterLabel
-        filter={filter}
-        valueLabel={valueLabel}
-        fieldLabel={fieldLabel}
-        filterLabelStatus={filterLabelStatus}
-        hideAlias={hideAlias}
+    <>
+      <FilterBadge
+        filters={[filter]}
+        dataViews={dataViews}
+        {...badgeProps}
+        {...rest}
       />
-    </EuiBadge>
+      {/* <EuiBadge {...badgeProps} {...rest}>
+        <FilterLabel
+          filter={filter}
+          valueLabel={valueLabel}
+          fieldLabel={fieldLabel}
+          filterLabelStatus={filterLabelStatus}
+          hideAlias={hideAlias}
+        />
+      </EuiBadge> */}
+    </>
   );
 
   return readOnly ? (

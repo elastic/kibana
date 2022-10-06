@@ -42,7 +42,7 @@ function isFilterApplicable(filter: Filter, dataViews: DataView[]) {
   return flatFields.includes(filter.meta?.key || '');
 }
 
-export function getValueLabel(filter: Filter, dataView: DataView): LabelOptions {
+export function getValueLabel(filter: Filter, dataViews: DataView[]): LabelOptions {
   const label: LabelOptions = {
     title: '',
     message: '',
@@ -53,9 +53,9 @@ export function getValueLabel(filter: Filter, dataView: DataView): LabelOptions 
     return label;
   }
 
-  if (isFilterApplicable(filter, [dataView])) {
+  if (isFilterApplicable(filter, dataViews)) {
     try {
-      label.title = getDisplayValueFromFilter(filter, [dataView]);
+      label.title = getDisplayValueFromFilter(filter, dataViews);
     } catch (e) {
       label.status = FILTER_LABLE_STATUS.FILTER_ITEM_WARNING;
       label.title = i18n.translate('unifiedSearch.filter.filterBar.labelWarningText', {
