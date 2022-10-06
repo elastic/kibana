@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import { buildEsQuery, Query, Filter, AggregateQuery, EsQueryConfig } from '@kbn/es-query';
 import {
@@ -31,7 +32,7 @@ export interface ExistingFieldsInfo {
 }
 
 export interface FetchExistenceInfoParams {
-  dataView: DataView;
+  dataView: DataView; // TODO: switch to data view list?
   fromDate: string;
   toDate: string;
   query: Query | AggregateQuery;
@@ -44,12 +45,6 @@ export interface FetchExistenceInfoParams {
   onNoData?: () => unknown;
 }
 
-export interface ExistingFieldsResult {
-  hasFieldData: (dataViewId: string, fieldName: string) => boolean;
-  refetchFieldsExistenceInfo: () => Promise<void>;
-  fieldsExistenceInfo: ExistingFieldsInfo | undefined;
-}
-
 type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
 
 const initialData: ExistingFieldsByDataViewMap = {};
@@ -59,24 +54,15 @@ const unknownInfo: ExistingFieldsInfo = {
   numberOfFetches: 0,
 };
 
-export const useExistingFields = (params: FetchExistenceInfoParams): ExistingFieldsResult => {
-  const [existingFieldsByDataViewMap, setExistingFieldsByDataViewMap] =
-    useState<ExistingFieldsByDataViewMap>(initialData);
-  const existingFieldsByDataViewMapRef = useRef<ExistingFieldsByDataViewMap>(initialData);
+// TODO: when should it be reset fully?
+const globalMap$ = new BehaviorSubject<ExistingFieldsByDataViewMap>(initialData); // for syncing between hooks
+
+export const useExistingFieldsFetcher = (
+  params: FetchExistenceInfoParams
+): {
+  refetchFieldsExistenceInfo: () => Promise<void>;
+} => {
   const mountedRef = useRef<boolean>(true);
-
-  const hasFieldData: ExistingFieldsResult['hasFieldData'] = useCallback(
-    (dataViewId, fieldName) => {
-      const info = existingFieldsByDataViewMap[dataViewId];
-
-      if (info?.fetchStatus === ExistenceFetchStatus.succeeded) {
-        return Boolean(info?.existingFieldsByFieldNameMap[fieldName]);
-      }
-
-      return true; // TODO: double check this including for `dataViewHasRestrictions` case
-    },
-    [existingFieldsByDataViewMap]
-  );
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({
@@ -93,7 +79,9 @@ export const useExistingFields = (params: FetchExistenceInfoParams): ExistingFie
       }
 
       const dataViewId = dataView.id;
-      const currentInfo = existingFieldsByDataViewMapRef.current[dataViewId];
+      const globalMap = globalMap$.getValue() ?? initialData;
+      // console.log('fetching', globalMap);
+      const currentInfo = globalMap[dataViewId];
 
       if (!mountedRef.current) {
         return;
@@ -138,37 +126,33 @@ export const useExistingFields = (params: FetchExistenceInfoParams): ExistingFie
       }
 
       if (mountedRef.current) {
-        setExistingFieldsByDataViewMap((state) => {
-          const newState = {
-            ...state,
-            [dataViewId]: info,
-          };
+        const newState = {
+          ...globalMap,
+          [dataViewId]: info, // TODO: switch to map by title instead of id?
+        };
 
-          existingFieldsByDataViewMapRef.current = newState;
-
-          return newState;
-        });
+        globalMap$.next(newState);
       }
     },
-    [setExistingFieldsByDataViewMap, existingFieldsByDataViewMapRef, mountedRef]
+    [mountedRef]
   );
 
   const dataViewHash = `${params.dataView.id}-${params.dataView.title}-${params.dataView.timeFieldName}`;
-  const refetchFieldsExistenceInfo: ExistingFieldsResult['refetchFieldsExistenceInfo'] =
-    useCallback(async () => {
-      return await fetchFieldsExistenceInfo(params);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      fetchFieldsExistenceInfo,
-      dataViewHash,
-      params.query,
-      params.filters,
-      params.fromDate,
-      params.toDate,
-      params.services.core,
-      params.services.data,
-      params.services.dataViews,
-    ]);
+  // TODO: accept dataViewId as a parameter here
+  const refetchFieldsExistenceInfo = useCallback(async () => {
+    return await fetchFieldsExistenceInfo(params);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    fetchFieldsExistenceInfo,
+    dataViewHash,
+    params.query,
+    params.filters,
+    params.fromDate,
+    params.toDate,
+    params.services.core,
+    params.services.data,
+    params.services.dataViews,
+  ]);
 
   useEffect(() => {
     refetchFieldsExistenceInfo();
@@ -182,13 +166,56 @@ export const useExistingFields = (params: FetchExistenceInfoParams): ExistingFie
 
   return useMemo(
     () => ({
-      hasFieldData,
       refetchFieldsExistenceInfo,
-      fieldsExistenceInfo: params.dataView.id
-        ? existingFieldsByDataViewMap[params.dataView.id]
-        : unknownInfo,
     }),
-    [hasFieldData, refetchFieldsExistenceInfo, existingFieldsByDataViewMap, params.dataView.id]
+    [refetchFieldsExistenceInfo]
+  );
+};
+
+export const useExistingFieldsReader: () => {
+  hasFieldData: (dataViewId: string, fieldName: string) => boolean;
+  getFieldsExistenceInfo: (dataViewId: string) => ExistingFieldsInfo | undefined;
+} = () => {
+  const [existingFieldsByDataViewMap, setExistingFieldsByDataViewMap] =
+    useState<ExistingFieldsByDataViewMap>(initialData);
+
+  useEffect(() => {
+    const subscription = globalMap$.subscribe((data) => {
+      // console.log('received', data);
+      setExistingFieldsByDataViewMap(data);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [setExistingFieldsByDataViewMap]);
+
+  const hasFieldData = useCallback(
+    (dataViewId: string, fieldName: string) => {
+      const info = existingFieldsByDataViewMap[dataViewId];
+
+      if (info?.fetchStatus === ExistenceFetchStatus.succeeded) {
+        return Boolean(info?.existingFieldsByFieldNameMap[fieldName]);
+      }
+
+      return true; // TODO: double check this including for `dataViewHasRestrictions` case
+    },
+    [existingFieldsByDataViewMap]
+  );
+
+  const getFieldsExistenceInfo = useCallback(
+    (dataViewId: string) => {
+      return dataViewId ? existingFieldsByDataViewMap[dataViewId] : unknownInfo;
+    },
+    [existingFieldsByDataViewMap]
+  );
+
+  return useMemo(
+    () => ({
+      hasFieldData,
+      getFieldsExistenceInfo,
+    }),
+    [hasFieldData, getFieldsExistenceInfo]
   );
 };
 

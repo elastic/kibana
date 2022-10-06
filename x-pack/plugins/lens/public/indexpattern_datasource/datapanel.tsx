@@ -34,7 +34,8 @@ import {
   FieldList,
   type FieldListGroups,
   type FieldListProps,
-  useExistingFields,
+  useExistingFieldsReader,
+  useExistingFieldsFetcher,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
@@ -249,7 +250,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const { indexPatterns } = frame.dataViews;
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
 
-  const { refetchFieldsExistenceInfo, fieldsExistenceInfo, hasFieldData } = useExistingFields({
+  const { refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     dataView: currentIndexPattern as unknown as DataView,
     query,
     filters,
@@ -262,7 +263,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     },
     onNoData: showNoDataPopover,
   });
+  const { getFieldsExistenceInfo, hasFieldData } = useExistingFieldsReader();
   // TODO: add a loading indicator while info is loading
+  const fieldsExistenceInfo = getFieldsExistenceInfo(currentIndexPatternId);
+  // console.log('current info', fieldsExistenceInfo);
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {

@@ -32,9 +32,9 @@ export type {
 } from './types';
 
 export {
-  useExistingFields,
+  useExistingFieldsFetcher,
+  useExistingFieldsReader,
   ExistenceFetchStatus,
   type ExistingFieldsInfo,
-  type ExistingFieldsResult,
   type FetchExistenceInfoParams,
 } from './hooks/use_existing_fields';
