@@ -150,6 +150,7 @@ const processTransformAssetsPerModule = (
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS) {
       const validFields = processFields(content);
       const mappings = generateMappings(validFields);
+
       packageAssets?.set('mappings', mappings);
     }
 
@@ -168,31 +169,27 @@ const processTransformAssetsPerModule = (
       });
     }
 
-    if (fileName === TRANSFORM_SPECS_TYPES.MANIFEST) {
+    // Create index templates for destination indices if destination_index_template OR fields are defined
+    if (
+      fileName === TRANSFORM_SPECS_TYPES.MANIFEST ||
+      isPopulatedObject(packageAssets.get('mappings'))
+    ) {
       if (isPopulatedObject(content, ['start']) && content.start === false) {
         transformsSpecifications.get(transformModuleId)?.set('start', false);
       }
-      // If manifest.yml contains destination_index_template
-      // Combine the mappings and other index template settings from manifest.yml into a single index template
-      // Create the index template and track the template in EsAssetReferences
-      if (
-        isPopulatedObject(content, ['destination_index_template']) ||
-        isPopulatedObject(packageAssets.get('mappings'))
-      ) {
-        const destinationIndexTemplate =
-          (content.destination_index_template as Record<string, unknown>) ?? {};
-        destinationIndexTemplates.push({
+      const destinationIndexTemplate =
+        (content.destination_index_template as Record<string, unknown>) ?? {};
+      destinationIndexTemplates.push({
+        transformModuleId,
+        _meta: getESAssetMetadata({ packageName: installablePackage.name }),
+        installationName: getTransformAssetNameForInstallation(
+          installablePackage,
           transformModuleId,
-          _meta: getESAssetMetadata({ packageName: installablePackage.name }),
-          installationName: getTransformAssetNameForInstallation(
-            installablePackage,
-            transformModuleId,
-            'template'
-          ),
-          template: destinationIndexTemplate,
-        } as DestinationIndexTemplateInstallation);
-        packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
-      }
+          'template'
+        ),
+        template: destinationIndexTemplate,
+      } as DestinationIndexTemplateInstallation);
+      packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
     }
   });
 
@@ -242,10 +239,19 @@ const installTransformsAssets = async (
       indexTemplatesRefs,
       componentTemplatesRefs,
       transformRefs,
-      transforms,
+      // @TODO: revert - this is arbitrary setting `pivot_transform` before `latest_transform`
+      transforms: unsortedTransforms,
       destinationIndexTemplates,
       transformsSpecifications,
     } = processTransformAssetsPerModule(installablePackage, installNameSuffix, transformPaths);
+
+    // @TODO: remove - this is arbitrary setting `pivot_transform` before `latest_transform`
+    // @ts-ignore
+    const transforms = unsortedTransforms.sort((t1, t2) =>
+      // @ts-ignore
+      t2.transformModuleId?.localeCompare(t1.transformModuleId)
+    );
+
     // get and save refs associated with the transforms before installing
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
@@ -261,6 +267,10 @@ const installTransformsAssets = async (
     await Promise.all(
       destinationIndexTemplates
         .map((destinationIndexTemplate) => {
+          const pipelineId = transformsSpecifications
+            .get(destinationIndexTemplate.transformModuleId)
+            ?.get('destinationIndex')?.pipeline;
+
           const customMappings = transformsSpecifications
             .get(destinationIndexTemplate.transformModuleId)
             ?.get('mappings');
@@ -274,7 +284,11 @@ const installTransformsAssets = async (
             templateName: destinationIndexTemplate.installationName,
             registryElasticsearch,
             packageName: installablePackage.name,
-            defaultSettings: {},
+            defaultSettings: {
+              // Adding destination pipeline here because else these templates will be overridden
+              // by index setting
+              ...(pipelineId ? { default_pipeline: pipelineId } : {}),
+            },
           });
 
           if (destinationIndexTemplate || customMappings) {
@@ -308,7 +322,6 @@ const installTransformsAssets = async (
     await Promise.all(
       transforms.map(async (transform) => {
         const index = transform.content.dest.index;
-        const pipelineId = transform.content.dest.pipeline;
 
         try {
           await retryTransientEsErrors(
@@ -316,7 +329,6 @@ const installTransformsAssets = async (
               esClient.indices.create(
                 {
                   index,
-                  ...(pipelineId ? { settings: { default_pipeline: pipelineId } } : {}),
                 },
                 { ignore: [400] }
               ),
