@@ -28,7 +28,7 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async function () {
       await kibanaServer.savedObjects.clean({
-        types: ['fleet-fleet-server-hosts'],
+        types: ['fleet-fleet-server-host'],
       });
       const { body: defaultRes } = await supertest
         .post(`/api/fleet/fleet_server_hosts`)
