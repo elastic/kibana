@@ -25,9 +25,8 @@ export function hasIcon(icon: string | undefined): icon is string {
 
 export function getEventAnnotationService(): EventAnnotationServiceType {
   const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
-    const visibleAnnotations = annotations.filter(({ isHidden }) => !isHidden);
     const [queryBasedAnnotations, manualBasedAnnotations] = partition(
-      visibleAnnotations,
+      annotations,
       isQueryAnnotationConfig
     );
 
@@ -50,6 +49,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 label: [label || defaultAnnotationLabel],
                 color: [color || defaultAnnotationRangeColor],
                 outside: [Boolean(outside)],
+                isHidden: [Boolean(annotation.isHidden)],
               },
             },
           ],
@@ -71,6 +71,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 lineStyle: [lineStyle || 'solid'],
                 icon: hasIcon(icon) ? [icon] : ['triangle'],
                 textVisibility: [textVisibility || false],
+                isHidden: [Boolean(annotation.isHidden)],
               },
             },
           ],
@@ -112,6 +113,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               filter: filter ? [queryToAst(filter)] : [],
               extraFields: extraFields || [],
               ignoreGlobalFilters: [Boolean(ignoreGlobalFilters)],
+              isHidden: [Boolean(annotation.isHidden)],
             },
           },
         ],
