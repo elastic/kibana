@@ -188,7 +188,7 @@ describe('When using EPM `get` services', () => {
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
-      MockRegistry.getRegistryPackage.mockResolvedValue({
+      MockRegistry.getPackage.mockResolvedValue({
         paths: [],
         packageInfo: {
           name: 'my-package',
@@ -366,7 +366,7 @@ describe('When using EPM `get` services', () => {
           status: 'not_installed',
         });
 
-        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
 
       // when calling the get package endpoint without a package version we
@@ -392,7 +392,7 @@ describe('When using EPM `get` services', () => {
           status: 'not_installed',
         });
 
-        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
     });
   });
