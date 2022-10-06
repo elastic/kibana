@@ -274,7 +274,8 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
   ): Promise<{
     tracesPerMinute: number;
     numberOfServices: number;
-    estimatedSize: number;
+    totalSize: number;
+    estimatedIncrementalSize: number;
     dailyDataGeneration: number;
   }> => {
     const {

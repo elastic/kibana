@@ -122,7 +122,7 @@ export async function getMainSummaryStats({
 }) {
   const { apmEventClient } = setup;
 
-  const [{ indices: allIndicesStats }, res] = await Promise.all([
+  const [totalIndicesStats, res] = await Promise.all([
     getTotalIndicesStats({ context, setup }),
     apmEventClient.search('get_storage_explorer_main_summary_stats', {
       apm: {
@@ -180,7 +180,8 @@ export async function getMainSummaryStats({
     }),
   ]);
 
-  const estimatedSize = allIndicesStats
+  const { indices: allIndicesStats } = totalIndicesStats;
+  const estimatedIncrementalSize = allIndicesStats
     ? res.aggregations?.sample.indices.buckets.reduce((prev, curr) => {
         return (
           prev +
@@ -196,8 +197,9 @@ export async function getMainSummaryStats({
   const durationAsDays = (end - start) / 1000 / 60 / 60 / 24;
 
   return {
+    totalSize: totalIndicesStats._all.total?.store?.size_in_bytes ?? 0,
     numberOfServices: res.aggregations?.services_count.value ?? 0,
-    estimatedSize,
-    dailyDataGeneration: estimatedSize / durationAsDays,
+    estimatedIncrementalSize,
+    dailyDataGeneration: estimatedIncrementalSize / durationAsDays,
   };
 }

@@ -28,7 +28,8 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { asTransactionRate } from '../../../../common/utils/formatters';
 
 const INITIAL_DATA = {
-  estimatedSize: 0,
+  totalSize: 0,
+  estimatedIncrementalSize: 0,
   dailyDataGeneration: 0,
   tracesPerMinute: 0,
   numberOfServices: 0,
@@ -100,7 +101,17 @@ export function SummaryStats() {
                     defaultMessage: 'Total APM size',
                   }
                 )}
-                value={asDynamicBytes(data?.estimatedSize)}
+                value={asDynamicBytes(data?.totalSize)}
+                color={euiTheme.colors.primary}
+              />
+              <SummaryMetric
+                label={i18n.translate(
+                  'xpack.apm.storageExplorer.summary.incrementalSize',
+                  {
+                    defaultMessage: 'Incremental APM size',
+                  }
+                )}
+                value={asDynamicBytes(data?.estimatedIncrementalSize)}
                 color={euiTheme.colors.primary}
               />
               <SummaryMetric
