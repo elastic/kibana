@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
-import _ from 'lodash';
+import { omit } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup } from '@elastic/eui';
@@ -156,7 +156,7 @@ export function ShowShareModal({
 
   let _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
   if (_g?.filters && _g.filters.length === 0) {
-    _g = _.omit(_g, 'filters');
+    _g = omit(_g, 'filters');
   }
   const baseUrl = setStateToKbnUrl('_g', _g);
 
