@@ -64,6 +64,10 @@ export interface StepConfig {
   };
   status?: StepStatus;
   integration?: string;
+  manualCompletion?: {
+    title: string;
+    description: string;
+  };
 }
 export interface GuideConfig {
   title: string;

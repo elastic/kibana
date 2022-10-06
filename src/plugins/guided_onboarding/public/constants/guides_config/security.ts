@@ -29,6 +29,10 @@ export const securityConfig: GuideConfig = {
       id: 'rules',
       title: 'Turn on rules',
       descriptionList: ['Load prebuilt rules.', 'Select rules relevant to you.'],
+      manualCompletion: {
+        title: 'Continue with the tour',
+        description: 'When you’ve enabled the rules you want continue...',
+      },
     },
     {
       id: 'alertsCases',

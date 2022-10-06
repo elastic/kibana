@@ -28,26 +28,6 @@ export const searchAddDataActiveState: GuideState = {
   ],
 };
 
-export const searchAddDataInProgressState: GuideState = {
-  isActive: true,
-  status: 'in_progress',
-  steps: [
-    {
-      id: 'add_data',
-      status: 'in_progress',
-    },
-    {
-      id: 'browse_docs',
-      status: 'inactive',
-    },
-    {
-      id: 'search_experience',
-      status: 'inactive',
-    },
-  ],
-  guideId: 'search',
-};
-
 export const securityAddDataInProgressState: GuideState = {
   guideId: 'security',
   status: 'in_progress',
@@ -64,7 +44,7 @@ export const securityAddDataInProgressState: GuideState = {
   ],
 };
 
-export const securityRulesActivesState: GuideState = {
+export const securityRulesActiveState: GuideState = {
   guideId: 'security',
   isActive: true,
   status: 'in_progress',
@@ -76,6 +56,10 @@ export const securityRulesActivesState: GuideState = {
     {
       id: 'rules',
       status: 'active',
+    },
+    {
+      id: 'alertsCases',
+      status: 'inactive',
     },
   ],
 };
