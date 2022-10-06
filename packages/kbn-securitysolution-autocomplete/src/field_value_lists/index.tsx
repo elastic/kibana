@@ -121,7 +121,11 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
       !allowLargeValueLists && (
         <EuiText size="xs">
           {i18n.LISTS_TOOLTIP_INFO}{' '}
-          <EuiLink external target="_blank" href="https://www.elastic.co/">
+          <EuiLink
+            external
+            target="_blank"
+            href="https://www.elastic.co/guide/en/security/master/detections-ui-exceptions.html#manage-value-lists"
+          >
             {i18n.SEE_DOCUMENTATION}
           </EuiLink>
         </EuiText>
