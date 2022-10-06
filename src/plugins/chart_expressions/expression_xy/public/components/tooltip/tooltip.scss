@@ -25,6 +25,7 @@
 .detailedTooltip__labelContainer,
 .detailedTooltip__valueContainer {
   overflow-wrap: break-word;
+  word-break: break-all;
   word-wrap: break-word;
 }
 
