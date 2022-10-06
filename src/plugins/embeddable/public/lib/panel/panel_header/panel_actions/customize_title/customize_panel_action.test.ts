@@ -8,6 +8,7 @@
 
 import { Container, isErrorEmbeddable } from '../../../..';
 import { nextTick } from '@kbn/test-jest-helpers';
+import { act } from '@testing-library/react';
 import { CustomizePanelTitleAction } from './customize_panel_action';
 import {
   ContactCardEmbeddable,
@@ -53,25 +54,27 @@ beforeEach(async () => {
   }
 });
 
-test('Updates the embeddable title when given', (done) => {
-  const getUserData = () => Promise.resolve({ title: 'What is up?' });
-  const customizePanelAction = new CustomizePanelTitleAction(getUserData);
-  expect(embeddable.getInput().title).toBeUndefined();
-  expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
-  await customizePanelAction.execute({ embeddable });
-  await nextTick();
-  expect(embeddable.getTitle()).toBe('What is up?');
-  expect(embeddable.getInput().title).toBe('What is up?');
+test('Updates the embeddable title when given', async () => {
+  await act(async () => {
+    const getUserData = () => Promise.resolve({ title: 'What is up?' });
+    const customizePanelAction = new CustomizePanelTitleAction(getUserData);
+    expect(embeddable.getInput().title).toBeUndefined();
+    expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
+    await customizePanelAction.execute({ embeddable });
+    await nextTick();
+    expect(embeddable.getTitle()).toBe('What is up?');
+    expect(embeddable.getInput().title).toBe('What is up?');
 
-  // Recreating the container should preserve the custom title.
-  const containerClone = createHelloWorldContainer(container.getInput());
-  // Need to wait for the container to tell us the embeddable has been loaded.
-  const subscription = containerClone.getOutput$().subscribe(() => {
-    if (containerClone.getOutput().embeddableLoaded[embeddable.id]) {
-      expect(embeddable.getInput().title).toBe('What is up?');
-      subscription.unsubscribe();
-      done();
-    }
+    // Recreating the container should preserve the custom title.
+    const containerClone = createHelloWorldContainer(container.getInput());
+    // Need to wait for the container to tell us the embeddable has been loaded.
+    const subscription = containerClone.getOutput$().subscribe(() => {
+      if (containerClone.getOutput().embeddableLoaded[embeddable.id]) {
+        expect(embeddable.getInput().title).toBe('What is up?');
+        subscription.unsubscribe();
+        done();
+      }
+    });
   });
 });
 
