@@ -188,7 +188,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                   status: 'error',
                   retry: false,
                   message: 'an error occurred while running the action',
-                  service_message: `Sub action "invalidAction" is not registered. Connector id: ${opsgenieActionId}. Connector name: Opsgenie Connector. Connector type: .opsgenie`,
+                  service_message: `Sub action "invalidAction" is not registered. Connector id: ${opsgenieActionId}. Connector name: Opsgenie. Connector type: .opsgenie`,
                 });
               });
           });
