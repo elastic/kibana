@@ -25,7 +25,8 @@ import {
   StyleMetaDescriptor,
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../../sources/source';
-import { type DataRequestContext, getLayersExtent } from '../../../actions';
+import { type DataRequestContext } from '../../../actions';
+import { getLayersExtent } from '../../../actions/get_layers_extent';
 import { ILayer, LayerIcon } from '../layer';
 import { IStyle } from '../../styles/style';
 import { LICENSED_FEATURES } from '../../../licensed_features';

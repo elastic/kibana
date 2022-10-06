@@ -94,6 +94,17 @@ describe('TOCEntry', () => {
       expect(component).toMatchSnapshot();
     });
 
+    test('Should indent child layer', async () => {
+      const component = shallow(<TOCEntry {...defaultProps} depth={2} />);
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+
     test('should display layer details when isLegendDetailsOpen is true', async () => {
       const component = shallow(<TOCEntry {...defaultProps} isLegendDetailsOpen={true} />);
 

@@ -22,6 +22,9 @@ const mockLayers = [
     getId: () => {
       return '1';
     },
+    getParent: () => {
+      return undefined;
+    },
     supportsFitToBounds: () => {
       return true;
     },
@@ -29,6 +32,9 @@ const mockLayers = [
   {
     getId: () => {
       return '2';
+    },
+    getParent: () => {
+      return undefined;
     },
     supportsFitToBounds: () => {
       return false;
