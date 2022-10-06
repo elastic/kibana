@@ -8,7 +8,8 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs/operators';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { ConfigSchema } from '../../../../config';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
@@ -23,6 +24,7 @@ import { getIgnoreThrottled } from '../ese_search/request_utils';
 import { getCommonDefaultAsyncGetParams } from '../common/async_utils';
 
 export const eqlSearchStrategyProvider = (
+  initializerContext: PluginInitializerContext<ConfigSchema>,
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
@@ -46,11 +48,11 @@ export const eqlSearchStrategyProvider = (
           uiSettingsClient
         );
         const params = id
-          ? getCommonDefaultAsyncGetParams(null, options)
+          ? getCommonDefaultAsyncGetParams(initializerContext, null, options)
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...defaultParams,
-              ...getCommonDefaultAsyncGetParams(null, options),
+              ...getCommonDefaultAsyncGetParams(initializerContext, null, options),
               ...request.params,
             };
         const response = id

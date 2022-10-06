@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
-import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { ConfigSchema } from '../../../../config';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -35,7 +35,7 @@ import {
 } from '../es_search';
 
 export const enhancedEsSearchStrategyProvider = (
-  legacyConfig$: Observable<SharedGlobalConfig>,
+  initializerContext: PluginInitializerContext<ConfigSchema>,
   logger: Logger,
   usage?: SearchUsage,
   useInternalUser: boolean = false
@@ -58,9 +58,10 @@ export const enhancedEsSearchStrategyProvider = (
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams(searchSessionsClient.getConfig(), options)
+        ? getDefaultAsyncGetParams(initializerContext, searchSessionsClient.getConfig(), options)
         : {
             ...(await getDefaultAsyncSubmitParams(
+              initializerContext,
               uiSettingsClient,
               searchSessionsClient.getConfig(),
               options
@@ -108,6 +109,7 @@ export const enhancedEsSearchStrategyProvider = (
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    const legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     const legacyConfig = await firstValueFrom(legacyConfig$);
     const { body, index, ...params } = request.params!;
     const method = 'POST';

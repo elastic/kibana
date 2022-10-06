@@ -7,6 +7,8 @@
  */
 
 import { SqlGetAsyncRequest, SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { PluginInitializerContext } from '@kbn/core/server';
+import { ConfigSchema } from '../../../../config';
 import { ISearchOptions } from '../../../../common';
 import { SearchSessionsConfigSchema } from '../../../../config';
 import {
@@ -18,11 +20,12 @@ import {
  @internal
  */
 export function getDefaultAsyncSubmitParams(
+  initializerContext: PluginInitializerContext<ConfigSchema>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'> {
   return {
-    ...getCommonDefaultAsyncSubmitParams(searchSessionsConfig, options),
+    ...getCommonDefaultAsyncSubmitParams(initializerContext, searchSessionsConfig, options),
   };
 }
 
@@ -30,10 +33,11 @@ export function getDefaultAsyncSubmitParams(
  @internal
  */
 export function getDefaultAsyncGetParams(
+  initializerContext: PluginInitializerContext<ConfigSchema>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Pick<SqlGetAsyncRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
   return {
-    ...getCommonDefaultAsyncGetParams(searchSessionsConfig, options),
+    ...getCommonDefaultAsyncGetParams(initializerContext, searchSessionsConfig, options),
   };
 }

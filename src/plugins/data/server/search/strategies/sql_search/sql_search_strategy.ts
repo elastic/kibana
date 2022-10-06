@@ -7,10 +7,11 @@
  */
 
 import type { IncomingHttpHeaders } from 'http';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { ConfigSchema } from '../../../../config';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -22,6 +23,7 @@ import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request
 import { toAsyncKibanaSearchResponse } from './response_utils';
 
 export const sqlSearchStrategyProvider = (
+  initializerContext: PluginInitializerContext<ConfigSchema>,
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<SqlSearchStrategyRequest, SqlSearchStrategyResponse> => {
@@ -56,7 +58,7 @@ export const sqlSearchStrategyProvider = (
         ({ body, headers } = await client.sql.getAsync(
           {
             format: params?.format ?? 'json',
-            ...getDefaultAsyncGetParams(sessionConfig, options),
+            ...getDefaultAsyncGetParams(initializerContext, sessionConfig, options),
             id,
           },
           { ...options.transport, signal: options.abortSignal, meta: true }
@@ -65,7 +67,7 @@ export const sqlSearchStrategyProvider = (
         ({ headers, body } = await client.sql.query(
           {
             format: params.format ?? 'json',
-            ...getDefaultAsyncSubmitParams(sessionConfig, options),
+            ...getDefaultAsyncSubmitParams(initializerContext, sessionConfig, options),
             ...params,
           },
           { ...options.transport, signal: options.abortSignal, meta: true }

@@ -48,6 +48,11 @@ export const searchSessionsConfigSchema = schema.object({
 
 export const configSchema = schema.object({
   search: schema.object({
+    async_search: schema.object({
+      wait_for_completion: schema.duration({ defaultValue: '100ms' }),
+      keep_alive: schema.duration({ defaultValue: '1m' }),
+      batched_reduce_size: schema.number({ defaultValue: 64 }),
+    }),
     aggs: schema.object({
       shardDelay: schema.object({
         // Whether or not to register the shard_delay (which is only available in snapshot versions

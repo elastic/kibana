@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
+import { IUiSettingsClient, PluginInitializerContext } from '@kbn/core/server';
 import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ConfigSchema } from '../../../../config';
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchSessionsConfigSchema } from '../../../../config';
@@ -31,6 +32,7 @@ export async function getIgnoreThrottled(
  @internal
  */
 export async function getDefaultAsyncSubmitParams(
+  initializerContext: PluginInitializerContext<ConfigSchema>,
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
@@ -49,8 +51,8 @@ export async function getDefaultAsyncSubmitParams(
 > {
   return {
     // TODO: adjust for partial results
-    batched_reduce_size: 64,
-    ...getCommonDefaultAsyncSubmitParams(searchSessionsConfig, options),
+    batched_reduce_size: initializerContext.config.get().search.async_search.batched_reduce_size,
+    ...getCommonDefaultAsyncSubmitParams(initializerContext, searchSessionsConfig, options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
     // If search sessions are used, set the initial expiration time.
@@ -61,10 +63,11 @@ export async function getDefaultAsyncSubmitParams(
  @internal
  */
 export function getDefaultAsyncGetParams(
+  initializerContext: PluginInitializerContext<ConfigSchema>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
   return {
-    ...getCommonDefaultAsyncGetParams(searchSessionsConfig, options),
+    ...getCommonDefaultAsyncGetParams(initializerContext, searchSessionsConfig, options),
   };
 }

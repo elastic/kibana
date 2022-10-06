@@ -8,7 +8,6 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { pluginInitializerContextConfigMock } from '@kbn/core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 
@@ -16,6 +15,7 @@ import * as indexNotFoundException from '../../../../common/search/test_data/ind
 import { errors } from '@elastic/elasticsearch';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { firstValueFrom } from 'rxjs';
+import { coreMock } from '@kbn/core/server/mocks';
 
 describe('ES search strategy', () => {
   const successBody = {
@@ -30,6 +30,7 @@ describe('ES search strategy', () => {
   const mockLogger: any = {
     debug: () => {},
   };
+  const mockContext = coreMock.createPluginInitializerContext({});
 
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
@@ -50,10 +51,8 @@ describe('ES search strategy', () => {
     } as unknown as SearchStrategyDependencies;
   }
 
-  const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
-
   it('returns a strategy with `search`', async () => {
-    const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await esSearchStrategyProvider(mockContext, mockLogger);
 
     expect(typeof esSearch.search).toBe('function');
   });
@@ -61,7 +60,7 @@ describe('ES search strategy', () => {
   it('calls the API caller with the params with defaults', async (done) => {
     const params = { index: 'logstash-*' };
 
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+    await esSearchStrategyProvider(mockContext, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
         expect(esClient.search).toBeCalled();
@@ -77,7 +76,7 @@ describe('ES search strategy', () => {
   it('calls the API caller with overridden defaults', async (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+    await esSearchStrategyProvider(mockContext, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
         expect(esClient.search).toBeCalled();
@@ -90,7 +89,7 @@ describe('ES search strategy', () => {
   });
 
   it('has all response parameters', async (done) =>
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+    await esSearchStrategyProvider(mockContext, mockLogger)
       .search(
         {
           params: { index: 'logstash-*' },
@@ -109,7 +108,7 @@ describe('ES search strategy', () => {
   it('calls the client with transport options', async () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
     await firstValueFrom(
-      esSearchStrategyProvider(mockConfig$, mockLogger).search(
+      esSearchStrategyProvider(mockContext, mockLogger).search(
         { params },
         { transport: { maxRetries: 5 } },
         getMockedDeps()
@@ -125,7 +124,7 @@ describe('ES search strategy', () => {
     const abortController = new AbortController();
     abortController.abort();
 
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+    await esSearchStrategyProvider(mockContext, mockLogger)
       .search({ params }, { abortSignal: abortController.signal }, getMockedDeps())
       .toPromise();
 
@@ -148,7 +147,7 @@ describe('ES search strategy', () => {
     });
 
     try {
-      await esSearchStrategyProvider(mockConfig$, mockLogger)
+      await esSearchStrategyProvider(mockContext, mockLogger)
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
@@ -166,7 +165,7 @@ describe('ES search strategy', () => {
     const errResponse = new errors.ElasticsearchClientError('This is a general ESClient error');
 
     try {
-      await esSearchStrategyProvider(mockConfig$, mockLogger)
+      await esSearchStrategyProvider(mockContext, mockLogger)
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
@@ -184,7 +183,7 @@ describe('ES search strategy', () => {
     const errResponse = new Error('ESClient error');
 
     try {
-      await esSearchStrategyProvider(mockConfig$, mockLogger)
+      await esSearchStrategyProvider(mockContext, mockLogger)
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
@@ -201,7 +200,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
     try {
-      await esSearchStrategyProvider(mockConfig$, mockLogger)
+      await esSearchStrategyProvider(mockContext, mockLogger)
         .search({ indexType: 'banana', params }, {}, getMockedDeps())
         .toPromise();
     } catch (e) {

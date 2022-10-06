@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, from, Observable } from 'rxjs';
+import { firstValueFrom, from } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
+import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { ConfigSchema } from '../../../../config';
 import type { ISearchStrategy } from '../../types';
 import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
@@ -17,7 +18,7 @@ import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../../collectors/search/usage';
 
 export const esSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>,
+  initializerContext: PluginInitializerContext<ConfigSchema>,
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy => ({
@@ -37,7 +38,8 @@ export const esSearchStrategyProvider = (
 
     const search = async () => {
       try {
-        const config = await firstValueFrom(config$);
+        const legacyConfig$ = initializerContext.config.legacy.globalConfig$;
+        const config = await firstValueFrom(legacyConfig$);
         // @ts-expect-error params fall back to any, but should be valid SearchRequest params
         const { terminateAfter, ...requestParams } = request.params ?? {};
         const params = {

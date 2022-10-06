@@ -52,6 +52,7 @@ describe('Search service', () => {
     const mockLogger = context.logger.get();
     context.config.create = jest.fn().mockImplementation(() => {
       return of({
+        async_search: {},
         search: {
           aggs: {
             shardDelay: {
