@@ -19,7 +19,7 @@ const rt = {
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, { file: FileJSON }>;
+export type Endpoint<M = unknown> = CreateRouteDefinition<typeof rt, { file: FileJSON<M> }>;
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const { fileService } = await files;
