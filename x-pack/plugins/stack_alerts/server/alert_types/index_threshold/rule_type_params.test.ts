@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ParamsSchema, Params } from './alert_type_params';
+import { ParamsSchema, Params } from './rule_type_params';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
 import { CoreQueryParams, MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
@@ -22,7 +22,7 @@ const DefaultParams: Writable<Partial<Params>> = {
   threshold: [0],
 };
 
-describe('alertType Params validate()', () => {
+describe('ruleType Params validate()', () => {
   runTests(ParamsSchema, DefaultParams);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
