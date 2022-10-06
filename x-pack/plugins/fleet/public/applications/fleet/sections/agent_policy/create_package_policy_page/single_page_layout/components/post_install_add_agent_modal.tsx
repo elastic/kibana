@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { WithGuidedOnboardingTour } from '../../../../../../integrations/sections/epm/screens/detail/components/with_guided_onboarding_tour';
@@ -24,47 +33,61 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo.name);
 
   return (
-    <EuiConfirmModal
-      title={
-        <FormattedMessage
-          id="xpack.fleet.agentPolicy.postInstallAddAgentModal"
-          defaultMessage="{packageName} integration added"
-          values={{
-            packageName: toTitleCase(packageInfo.title),
-          }}
-        />
-      }
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      cancelButtonText={
-        <FormattedMessage
-          id="xpack.fleet.agentPolicy.postInstallAddAgentModalCancelButtonLabel"
-          defaultMessage="Add Elastic Agent later"
-        />
-      }
-      confirmButtonText={
+    <EuiModal data-test-subj="postInstallAddAgentModal" onClose={onCancel}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+          <FormattedMessage
+            id="xpack.fleet.agentPolicy.postInstallAddAgentModal"
+            defaultMessage="{packageName} integration added"
+            values={{
+              packageName: toTitleCase(packageInfo.title),
+            }}
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        <EuiText data-test-subj="confirmModalBodyText">
+          <p>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicy.postInstallAddAgentModalDescription"
+              defaultMessage="To complete this integration, add {elasticAgent} to your hosts to collect data and send it to Elastic Stack"
+              values={{
+                elasticAgent: <strong>Elastic Agent</strong>,
+              }}
+            />
+          </p>
+        </EuiText>
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty data-test-subj="confirmModalCancelButton" onClick={onCancel}>
+          <FormattedMessage
+            id="xpack.fleet.agentPolicy.postInstallAddAgentModalCancelButtonLabel"
+            defaultMessage="Add Elastic Agent later"
+          />
+        </EuiButtonEmpty>
+
         <WithGuidedOnboardingTour
           packageKey={packageInfo.name}
           tourType="agentModalButton"
-          isGuidedOnboardingActive={isGuidedOnboardingActive}
+          isTourVisible={isGuidedOnboardingActive}
           tourPosition="downCenter"
+          tourOffset={-20}
         >
-          <FormattedMessage
-            id="xpack.fleet.agentPolicy.postInstallAddAgentModalConfirmButtonLabel"
-            defaultMessage="Add Elastic Agent to your hosts"
-          />
+          <EuiButton
+            data-test-subj="confirmModalConfirmButton"
+            onClick={onConfirm}
+            fill
+            color="primary"
+          >
+            <FormattedMessage
+              id="xpack.fleet.agentPolicy.postInstallAddAgentModalConfirmButtonLabel"
+              defaultMessage="Add Elastic Agent to your hosts"
+            />
+          </EuiButton>
         </WithGuidedOnboardingTour>
-      }
-      buttonColor="primary"
-      data-test-subj="postInstallAddAgentModal"
-    >
-      <FormattedMessage
-        id="xpack.fleet.agentPolicy.postInstallAddAgentModalDescription"
-        defaultMessage="To complete this integration, add {elasticAgent} to your hosts to collect data and send it to Elastic Stack"
-        values={{
-          elasticAgent: <strong>Elastic Agent</strong>,
-        }}
-      />
-    </EuiConfirmModal>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

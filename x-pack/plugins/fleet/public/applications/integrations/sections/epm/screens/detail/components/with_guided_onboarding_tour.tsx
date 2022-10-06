@@ -59,16 +59,17 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
 };
 export const WithGuidedOnboardingTour: FunctionComponent<{
   packageKey: string;
-  isGuidedOnboardingActive: boolean;
+  isTourVisible: boolean;
   tourType: TourType;
   tourPosition?: EuiTourStepProps['anchorPosition'];
   children: ReactElement;
-}> = ({ packageKey, isGuidedOnboardingActive, tourType, children, tourPosition }) => {
+  tourOffset?: EuiTourStepProps['offset'];
+}> = ({ packageKey, isTourVisible, tourType, children, tourPosition, tourOffset }) => {
   const [isGuidedOnboardingTourOpen, setIsGuidedOnboardingTourOpen] =
-    useState<boolean>(isGuidedOnboardingActive);
+    useState<boolean>(isTourVisible);
   useEffect(() => {
-    setIsGuidedOnboardingTourOpen(isGuidedOnboardingActive);
-  }, [isGuidedOnboardingActive]);
+    setIsGuidedOnboardingTourOpen(isTourVisible);
+  }, [isTourVisible]);
   const config = getTourConfig(packageKey, tourType);
 
   return config ? (
@@ -79,6 +80,7 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
       onFinish={() => setIsGuidedOnboardingTourOpen(false)}
       step={1}
       stepsTotal={1}
+      offset={tourOffset}
       title={config.title}
       anchorPosition={tourPosition ? tourPosition : 'rightUp'}
       footerAction={
