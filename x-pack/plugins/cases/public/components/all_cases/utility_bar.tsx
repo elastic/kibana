@@ -60,13 +60,13 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
         <EuiFlexGroup
           alignItems="center"
           justifyContent="flexStart"
-          gutterSize="xs"
+          gutterSize="s"
           css={{
             borderBottom: euiTheme.border.thin,
             marginTop: 0,
             marginBottom: 0,
-            paddingTop: euiTheme.size.xs,
-            paddingBottom: euiTheme.size.xs,
+            paddingTop: euiTheme.size.s,
+            paddingBottom: euiTheme.size.s,
           }}
         >
           <EuiFlexItem
@@ -74,7 +74,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             grow={false}
             css={{
               borderRight: euiTheme.border.thin,
-              paddingRight: euiTheme.size.m,
+              paddingRight: euiTheme.size.s,
             }}
           >
             <EuiText size="xs" color="subdued">
@@ -82,14 +82,10 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs">
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
               {!isSelectorView && showBulkActions && (
                 <>
-                  <EuiFlexItem
-                    data-test-subj="case-table-selected-case-count"
-                    grow={false}
-                    // css={{ paddingLeft: euiTheme.size.m }}
-                  >
+                  <EuiFlexItem data-test-subj="case-table-selected-case-count" grow={false}>
                     <EuiText size="xs" color="subdued">
                       {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
                     </EuiText>
@@ -106,6 +102,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                           size="xs"
                           iconSide="right"
                           iconType="arrowDown"
+                          flush="left"
                           data-test-subj="case-table-bulk-actions-link-icon"
                         >
                           {i18n.BULK_ACTIONS}
@@ -127,6 +124,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                   size="xs"
                   iconSide="left"
                   iconType="refresh"
+                  flush="left"
                   data-test-subj="all-cases-refresh-link-icon"
                 >
                   {i18n.REFRESH}
