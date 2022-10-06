@@ -15,7 +15,7 @@ import { debounceTime } from 'rxjs';
 
 const addInvalidFiltersWarn = (toastNotifications: IToasts) => {
   const warningTitle = i18n.translate('discover.invalidFiltersWarnToast.title', {
-    defaultMessage: 'Index references in filters are differ from current data view',
+    defaultMessage: 'Different index references',
   });
   toastNotifications.addWarning({
     title: warningTitle,
