@@ -129,7 +129,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
-      await testSubjects.click('lnsMetric_trendline_toggle');
+
+      await testSubjects.click('lnsMetric_supporting_visualization_trendline');
 
       await PageObjects.lens.waitForVisualization('mtrVis');
 
@@ -145,7 +146,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await inspector.close();
 
-      await testSubjects.click('lnsMetric_trendline_toggle');
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
+
+      await testSubjects.click('lnsMetric_supporting_visualization_none');
 
       await PageObjects.lens.waitForVisualization('mtrVis');
 

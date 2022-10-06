@@ -269,15 +269,21 @@ function PrimaryMetricEditor(props: SubProps) {
     defaultMessage: 'Supporting visualization',
   });
 
-  const supportingVisHelpText = !hasDefaultTimeField
-    ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
-        defaultMessage: 'Use a data view with a default time field to enable trendlines.',
-      })
-    : !state.maxAccessor
-    ? i18n.translate('xpack.lens.metric.summportingVis.needMaxDimension', {
-        defaultMessage: 'Add a maximum dimension to enable the progress bar.',
-      })
-    : null;
+  const supportingVisHelpText =
+    !hasDefaultTimeField && !state.maxAccessor
+      ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
+          defaultMessage:
+            'Use a data view with a default time field to enable trendlines. Add a maximum dimension to enable the progress bar',
+        })
+      : !hasDefaultTimeField
+      ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
+          defaultMessage: 'Use a data view with a default time field to enable trendlines.',
+        })
+      : !state.maxAccessor
+      ? i18n.translate('xpack.lens.metric.summportingVis.needMaxDimension', {
+          defaultMessage: 'Add a maximum dimension to enable the progress bar.',
+        })
+      : null;
 
   const buttonIdPrefix = `${idPrefix}--`;
 
@@ -304,7 +310,9 @@ function PrimaryMetricEditor(props: SubProps) {
             },
             {
               id: `${buttonIdPrefix}trendline`,
-              label: supportingVisLabel,
+              label: i18n.translate('xpack.lens.metric.supportingVisualization.trendline', {
+                defaultMessage: 'Trend line',
+              }),
               isDisabled: !hasDefaultTimeField,
               'data-test-subj': 'lnsMetric_supporting_visualization_trendline',
             },
