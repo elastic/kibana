@@ -24,7 +24,7 @@ export const SinglePingResult = ({ ping, loading }: { ping: Ping; loading: boole
   const responseStatus = !loading ? ping?.http?.response?.status_code : undefined;
 
   return (
-    <EuiDescriptionList type="responsiveColumn" compressed={true}>
+    <EuiDescriptionList type="column" compressed={true}>
       <EuiDescriptionListTitle>IP</EuiDescriptionListTitle>
       <EuiDescriptionListDescription>{ip}</EuiDescriptionListDescription>
       <EuiDescriptionListTitle>{DURATION_LABEL}</EuiDescriptionListTitle>
