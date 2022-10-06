@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect, useCallback, ChangeEvent, useMemo } from 'react';
+import React, { useState, Fragment, useEffect, useCallback, ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -31,8 +31,6 @@ import {
   builtInAggregationTypes,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { debounce } from 'lodash';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
 import './expression.scss';
@@ -144,30 +142,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     setEsFields(currentEsFields);
   };
 
-  const filterQueryHasError = (kuery: string) => {
-    try {
-      toElasticsearchQuery(fromKueryExpression(kuery));
-      return false;
-    } catch (e) {
-      return true;
-    }
-  };
-
-  const validateFilterKuery = useMemo(
-    () =>
-      debounce((val) => {
-        setRuleParams('filterKueryError', filterQueryHasError(val) ? true : undefined);
-      }, 500),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
   const handleFilterChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setRuleParams('filterKuery', e.target.value || undefined);
-      validateFilterKuery(e.target.value);
     },
-    [setRuleParams, validateFilterKuery]
+    [setRuleParams]
   );
 
   useEffect(() => {

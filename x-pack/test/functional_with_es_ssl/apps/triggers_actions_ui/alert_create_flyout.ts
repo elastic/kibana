@@ -137,10 +137,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // filterKuery validation
       await testSubjects.setValue('filterKuery', 'group:');
       const filterKueryInput = await testSubjects.find('filterKuery');
-      await pageObjects.common.sleep(500);
       expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(true);
       await testSubjects.setValue('filterKuery', 'group: group-0');
-      await pageObjects.common.sleep(500);
       expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(false);
 
       await testSubjects.click('.slack-alerting-ActionTypeSelectOption');

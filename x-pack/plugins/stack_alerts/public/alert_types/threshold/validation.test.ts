@@ -95,7 +95,7 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe('Threshold1 is required.');
   });
 
-  test('if filterKueryError is true should return proper error message', () => {
+  test('if filterKuery is invalid should return proper error message', () => {
     const initialParams: IndexThresholdAlertParams = {
       index: ['test'],
       aggType: 'count',
@@ -104,7 +104,7 @@ describe('expression params validation', () => {
       timeWindowSize: 1,
       timeWindowUnit: 's',
       thresholdComparator: 'between',
-      filterKueryError: true,
+      filterKuery: 'group:',
     };
     expect(validateExpression(initialParams).errors.filterKuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.filterKuery[0]).toBe(
