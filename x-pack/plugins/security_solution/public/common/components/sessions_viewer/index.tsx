@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
+import { EventAction } from '@kbn/session-view-plugin/common/types/process_tree';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -26,8 +27,22 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
     bool: {
       filter: [
         {
-          exists: {
-            field: 'process.entry_leader.entity_id', // to exclude any records which have no entry_leader.entity_id
+          bool: {
+            // show session events with exec
+            should: [
+              { match_phrase: { 'event.action': EventAction.exec } },
+              { match_phrase: { 'event.action': EventAction.fork } },
+              { match_phrase: { 'event.action': EventAction.end } },
+            ],
+          },
+        },
+        {
+          bool: {
+            filter: {
+              exists: {
+                field: 'process.entry_leader.entity_id', // to exclude any records which have no entry_leader.entity_id
+              },
+            },
           },
         },
       ],
