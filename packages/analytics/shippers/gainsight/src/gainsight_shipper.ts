@@ -63,7 +63,7 @@ export class GainSightShipper implements IShipper {
       });
       this.lastUserId = userId;
     } else {
-      console.log(`Identify has already been called with ${userId} and ${clusterUuid}`)
+      console.log(`Identify has already been called with ${userId} and ${clusterUuid}`);
       this.initContext.logger.debug(
         `Identify has already been called with ${userId} and ${clusterUuid}`
       );
