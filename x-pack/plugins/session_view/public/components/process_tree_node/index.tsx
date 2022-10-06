@@ -99,8 +99,8 @@ export function ProcessTreeNode({
   }, [selectedProcess, process, childrenExpanded]);
 
   const alerts = process.getAlerts();
-  const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
-  const hasOutputs = useMemo(() => process.hasOutput(), [process]);
+  const hasAlerts = !!alerts.length;
+  const hasOutputs = process.hasOutput();
   const hasInvestigatedAlert = useMemo(
     () =>
       !!(
