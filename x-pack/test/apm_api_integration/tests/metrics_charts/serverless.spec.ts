@@ -159,7 +159,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('Avg. Duration', () => {
           const transactionDurationInMicroSeconds = TRANSACTION_DURATION * 1000;
           [
-            { title: 'Billed Duration', expectedValue: BILLED_DURATION_MS },
+            { title: 'Billed Duration', expectedValue: BILLED_DURATION_MS * 1000 },
             { title: 'Transaction Duration', expectedValue: transactionDurationInMicroSeconds },
           ].map(({ title, expectedValue }) =>
             it(`returns correct ${title} value`, () => {
@@ -186,7 +186,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
           it('returns correct overall value', () => {
             expect(coldStartDurationMetric?.series[0].overallValue).to.equal(
-              COLD_START_DURATION_PYTHON
+              COLD_START_DURATION_PYTHON * 1000
             );
           });
 
@@ -195,7 +195,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               coldStartDurationMetric?.series[0]?.data.filter((item) => item.y !== null),
               'y'
             );
-            expect(meanValue).to.equal(COLD_START_DURATION_PYTHON);
+            expect(meanValue).to.equal(COLD_START_DURATION_PYTHON * 1000);
           });
         });
 
@@ -308,7 +308,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('Avg. Duration', () => {
           const transactionDurationInMicroSeconds = TRANSACTION_DURATION * 1000;
           [
-            { title: 'Billed Duration', expectedValue: BILLED_DURATION_MS },
+            { title: 'Billed Duration', expectedValue: BILLED_DURATION_MS * 1000 },
             { title: 'Transaction Duration', expectedValue: transactionDurationInMicroSeconds },
           ].map(({ title, expectedValue }) =>
             it(`returns correct ${title} value`, () => {
@@ -336,7 +336,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('returns 0 overall value', () => {
             expect(coldStartDurationMetric?.series[0].overallValue).to.equal(
-              COLD_START_DURATION_NODE
+              COLD_START_DURATION_NODE * 1000
             );
           });
 
@@ -345,7 +345,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               coldStartDurationMetric?.series[0]?.data.filter((item) => item.y !== null),
               'y'
             );
-            expect(meanValue).to.equal(COLD_START_DURATION_NODE);
+            expect(meanValue).to.equal(COLD_START_DURATION_NODE * 1000);
           });
         });
 
