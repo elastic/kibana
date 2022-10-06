@@ -25,7 +25,8 @@ const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_ov
 
 export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConsole => {
   const consoleManager = useConsoleManager();
-  const { canAccessResponseConsole } = useUserPrivileges().endpointPrivileges;
+  const { canAccessResponseConsole, canReadActionsLogManagement } =
+    useUserPrivileges().endpointPrivileges;
 
   return useCallback(
     (endpointMetadata: HostMetadata) => {
@@ -57,11 +58,11 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
             },
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             PageBodyComponent: () => <OfflineCallout endpointId={endpointAgentId} />,
-            ActionComponents: [ActionLogButton],
+            ActionComponents: canReadActionsLogManagement ? [ActionLogButton] : [],
           })
           .show();
       }
     },
-    [canAccessResponseConsole, consoleManager]
+    [canAccessResponseConsole, canReadActionsLogManagement, consoleManager]
   );
 };
