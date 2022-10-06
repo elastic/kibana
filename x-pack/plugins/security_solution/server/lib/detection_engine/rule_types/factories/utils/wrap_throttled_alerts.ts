@@ -18,7 +18,8 @@ import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import type { SignalSource } from '../../../signals/types';
 import { buildBulkBody } from './build_bulk_body';
 import {
-  ALERT_ENTITY_VALUES,
+  ALERT_THROTTLE_FIELDS,
+  ALERT_THROTTLE_VALUES,
   ALERT_THROTTLE_COUNT,
   ALERT_THROTTLE_END,
   ALERT_THROTTLE_START,
@@ -40,6 +41,7 @@ export const wrapThrottledAlerts = ({
   mergeStrategy,
   indicesToQuery,
   buildReasonMessage,
+  groupByFields,
 }: {
   throttleBuckets: ThrottleBuckets[];
   spaceId: string | null | undefined;
@@ -47,6 +49,7 @@ export const wrapThrottledAlerts = ({
   mergeStrategy: ConfigType['alertMergeStrategy'];
   indicesToQuery: string[];
   buildReasonMessage: BuildReasonMessage;
+  groupByFields: string[];
 }): Array<WrappedFieldsLatest<ThrottledFieldsLatest>> => {
   return throttleBuckets.map((bucket) => {
     const id = objectHash([
@@ -73,7 +76,8 @@ export const wrapThrottledAlerts = ({
       _index: '',
       _source: {
         ...baseAlert,
-        [ALERT_ENTITY_VALUES]: bucket.values,
+        [ALERT_THROTTLE_FIELDS]: groupByFields,
+        [ALERT_THROTTLE_VALUES]: bucket.values,
         [ALERT_THROTTLE_START]: bucket.start,
         [ALERT_THROTTLE_END]: bucket.end,
         [ALERT_THROTTLE_COUNT]: bucket.count,

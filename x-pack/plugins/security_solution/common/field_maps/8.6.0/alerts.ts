@@ -7,7 +7,7 @@
 
 import { alertsFieldMap840 } from '../8.4.0';
 import {
-  ALERT_ENTITY_VALUES,
+  ALERT_THROTTLE_VALUES,
   ALERT_THROTTLE_START,
   ALERT_THROTTLE_END,
   ALERT_THROTTLE_COUNT,
@@ -15,7 +15,7 @@ import {
 
 export const alertsFieldMap860 = {
   ...alertsFieldMap840,
-  [ALERT_ENTITY_VALUES]: {
+  [ALERT_THROTTLE_VALUES]: {
     type: 'keyword',
     array: true,
     required: false,

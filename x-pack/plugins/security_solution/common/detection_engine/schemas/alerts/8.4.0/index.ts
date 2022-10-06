@@ -8,7 +8,7 @@
 import type { ALERT_BUILDING_BLOCK_TYPE, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
-  ALERT_ENTITY_VALUES,
+  ALERT_THROTTLE_VALUES,
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
   ALERT_NEW_TERMS,
@@ -16,6 +16,7 @@ import type {
   ALERT_THROTTLE_COUNT,
   ALERT_THROTTLE_END,
   ALERT_THROTTLE_START,
+  ALERT_THROTTLE_FIELDS,
 } from '../../../../field_maps/field_names';
 import type {
   Ancestor800,
@@ -64,7 +65,8 @@ export type NewTermsAlert840 = AlertWithCommonFields800<NewTermsFields840>;
 
 // TODO: move to new folder for 8.6.0
 export interface ThrottledFields860 extends BaseFields840 {
-  [ALERT_ENTITY_VALUES]: Array<string | number | null>;
+  [ALERT_THROTTLE_FIELDS]: string[];
+  [ALERT_THROTTLE_VALUES]: Array<string | number | null>;
   [ALERT_THROTTLE_START]: Date;
   [ALERT_THROTTLE_END]: Date;
   [ALERT_THROTTLE_COUNT]: number;

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import type moment from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
@@ -82,9 +80,7 @@ export const groupAndBulkCreate = async ({
     const tuple = runOpts.tuple;
 
     const filteredBucketHistory =
-      bucketHistory?.filter((bucket) => {
-        bucket.endDate > tuple.from.toDate();
-      }) ?? [];
+      bucketHistory?.filter((bucket) => bucket.endDate > tuple.from.toDate()) ?? [];
 
     const toReturn: GroupAndBulkCreateReturnType = {
       success: true,
@@ -173,6 +169,7 @@ export const groupAndBulkCreate = async ({
         mergeStrategy: runOpts.mergeStrategy,
         indicesToQuery: runOpts.inputIndex,
         buildReasonMessage,
+        groupByFields,
       });
 
       // const enrichedEvents = await enrichment(wrappedAlerts);

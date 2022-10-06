@@ -16,9 +16,10 @@ export const ALERT_ORIGINAL_TIME = `${ALERT_NAMESPACE}.original_time` as const;
 export const ALERT_THRESHOLD_RESULT = `${ALERT_NAMESPACE}.threshold_result` as const;
 export const ALERT_THRESHOLD_RESULT_COUNT = `${ALERT_THRESHOLD_RESULT}.count` as const;
 export const ALERT_NEW_TERMS = `${ALERT_NAMESPACE}.new_terms` as const;
-export const ALERT_ENTITY_VALUES = `${ALERT_NAMESPACE}.entities` as const;
 
 export const ALERT_THROTTLE_META = `${ALERT_NAMESPACE}.throttle` as const;
+export const ALERT_THROTTLE_FIELDS = `${ALERT_THROTTLE_META}.fields` as const;
+export const ALERT_THROTTLE_VALUES = `${ALERT_THROTTLE_META}.values` as const;
 export const ALERT_THROTTLE_START = `${ALERT_THROTTLE_META}.start` as const;
 export const ALERT_THROTTLE_END = `${ALERT_THROTTLE_META}.end` as const;
 export const ALERT_THROTTLE_COUNT = `${ALERT_THROTTLE_META}.count` as const;

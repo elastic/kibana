@@ -36,7 +36,7 @@ import {
   ALERT_RULE_INDICES,
   ALERT_THROTTLE_START,
   ALERT_THROTTLE_END,
-  ALERT_ENTITY_VALUES,
+  ALERT_THROTTLE_VALUES,
   ALERT_THROTTLE_COUNT,
 } from '../../../../common/field_maps/field_names';
 import type { TimelineResult } from '../../../../common/types/timeline';
@@ -287,8 +287,6 @@ export const isNewTermsAlert = (ecsData: Ecs): boolean => {
 };
 
 export const isThrottledAlert = (ecsData: Ecs): boolean => {
-  console.log(ecsData);
-  console.log(getField(ecsData, ALERT_THROTTLE_COUNT));
   return getField(ecsData, ALERT_THROTTLE_COUNT) != null;
 };
 
@@ -678,7 +676,7 @@ const getThrottledAlertData = (ecsData: Ecs | Ecs[]) => {
   const params = getField(normalizedEcsData, ALERT_RULE_PARAMETERS);
   // TODO: fix snake and camel case mixing in HTTP schema
   const groupByFields: string[] = params.alert_grouping.groupBy;
-  const entities = getField(normalizedEcsData, ALERT_ENTITY_VALUES);
+  const entities = getField(normalizedEcsData, ALERT_THROTTLE_VALUES);
   const dataProviderPartials = groupByFields.map((field, i) => {
     const fieldId = field.replace('.', '-');
     const value = entities[i];
