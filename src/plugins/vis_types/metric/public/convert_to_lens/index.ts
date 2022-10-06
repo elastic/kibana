@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { Column, ColumnWithMeta, SchemaConfig } from '@kbn/visualizations-plugin/common';
+import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
-  getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
-import { getConfiguration } from './configurations';
-import { ConvertTableToLensVisualization } from './types';
+import { ConvertMetricVisToLensVisualization } from './types';
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {
@@ -33,7 +30,7 @@ export const excludeMetaFromColumn = (column: Column) => {
   return column;
 };
 
-export const convertToLens: ConvertTableToLensVisualization = async (vis, timefilter) => {
+export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
     return null;
   }
@@ -45,51 +42,42 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     return null;
   }
 
-  const { getColumnsFromVis, getPercentageColumnFormulaColumn } = await convertToLensModule;
+  const [{ getColumnsFromVis }, { getConfiguration, getPercentageModeConfig }] = await Promise.all([
+    convertToLensModule,
+    import('./configurations'),
+  ]);
+
   const result = getColumnsFromVis(
     vis,
     timefilter,
     dataView,
     {
-      buckets: ['bucket'],
-      splits: ['split_row', 'split_column'],
+      splits: ['group'],
     },
-    { dropEmptyRowsInDateHistogram: true, isPercentageMode: false }
+    { dropEmptyRowsInDateHistogram: true, ...getPercentageModeConfig(vis.params) }
   );
 
   if (result === null) {
     return null;
   }
 
-  if (vis.params.percentageCol) {
-    const visSchemas = getVisSchemas(vis, {
-      timefilter,
-      timeRange: timefilter.getAbsoluteTime(),
-    });
-    const metricAgg = visSchemas.metric.find((m) => m.label === vis.params.percentageCol);
-    if (!metricAgg) {
+  // for now, multiple metrics are not supported
+  if (result.metrics.length > 1 || result.buckets.length > 1) {
+    return null;
+  }
+
+  if (result.metrics[0]) {
+    const metric = result.columns.find(({ columnId }) => columnId === result.metrics[0]);
+    if (metric?.dataType !== 'number') {
       return null;
     }
-    const percentageColumn = getPercentageColumnFormulaColumn({
-      agg: metricAgg as SchemaConfig<METRIC_TYPES>,
-      dataView,
-      aggs: visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>,
-    });
-    if (!percentageColumn) {
-      return null;
-    }
-    result.columns.splice(
-      result.columnsWithoutReferenced.findIndex((c) => c.meta.aggId === metricAgg.aggId) + 1,
-      0,
-      percentageColumn
-    );
-    result.columnsWithoutReferenced.push(percentageColumn);
   }
 
   const layerId = uuid();
   const indexPatternId = dataView.id!;
+
   return {
-    type: 'lnsDatatable',
+    type: 'lnsMetric',
     layers: [
       {
         indexPatternId,
