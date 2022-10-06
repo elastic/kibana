@@ -6,27 +6,23 @@
  */
 
 import type { Query, TimeRange } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { useMetricsDataViewContext } from './hooks/use_data_view';
 import { HostsTable } from './components/hosts_table';
-import { InfraClientStartDeps } from '../../../types';
 import { useSourceContext } from '../../../containers/metrics_source';
+import { useSnapshot } from '../inventory_view/hooks/use_snaphot';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 
 export const HostsContent: React.FunctionComponent = () => {
-  const {
-    services: { data },
-  } = useKibana<InfraClientStartDeps>();
-  const { source } = useSourceContext();
+  const { source, sourceId } = useSourceContext();
   const [dateRange, setDateRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const { metricsDataView, hasFailedCreatingDataView, hasFailedFetchingDataView } =
     useMetricsDataViewContext();
   // needed to refresh the lens table when filters havent changed
-  const [searchSessionId, setSearchSessionId] = useState(data.search.session.start());
 
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -34,14 +30,31 @@ export const HostsContent: React.FunctionComponent = () => {
       if (payload.query) {
         setQuery(payload.query);
       }
-      setSearchSessionId(data.search.session.start());
     },
-    [setDateRange, setQuery, data.search.session]
+    [setDateRange, setQuery]
+  );
+  const hostMetrics: Array<{ type: SnapshotMetricType }> = [
+    { type: 'rx' },
+    { type: 'tx' },
+    { type: 'memory' },
+    // add others
+  ];
+
+  const { loading, nodes } = useSnapshot(
+    '', // use the unified search query
+    hostMetrics,
+    [],
+    'host',
+    sourceId,
+    1665066458353, // currentTime.  need to add support not to require this?
+    '',
+    '',
+    true
   );
 
   return (
     <div>
-      {metricsDataView ? (
+      {metricsDataView && !loading ? (
         <>
           <SearchBar
             showQueryBar={true}
@@ -60,7 +73,7 @@ export const HostsContent: React.FunctionComponent = () => {
             dataView={metricsDataView}
             timeRange={dateRange}
             query={query}
-            searchSessionId={searchSessionId}
+            nodes={nodes}
           />
         </>
       ) : hasFailedCreatingDataView || hasFailedFetchingDataView ? (
