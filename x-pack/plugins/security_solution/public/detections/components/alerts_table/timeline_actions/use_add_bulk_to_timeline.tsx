@@ -54,7 +54,8 @@ export const useAddBulkToTimelineAction = () => {
       if (!items) return;
       sendBulkEventsToTimelineAction(
         createTimeline,
-        items.map((item) => item.ecs)
+        items.map((item) => item.ecs),
+        'KqlFilter'
       );
     },
     [createTimeline]
