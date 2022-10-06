@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { MyImage, Props as MyImageProps } from './my_img';
+export { Img, Props as ImgProps } from './img';
 export { Blurhash } from './blurhash';

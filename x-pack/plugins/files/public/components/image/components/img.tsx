@@ -16,7 +16,8 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   size?: EuiImageSize;
   observerRef: (el: null | HTMLImageElement) => void;
 }
-export const MyImage = React.forwardRef<HTMLImageElement, Props>(
+
+export const Img = React.forwardRef<HTMLImageElement, Props>(
   ({ observerRef, src, hidden, size, ...rest }, ref) => {
     const { euiTheme } = useEuiTheme();
     const styles = [

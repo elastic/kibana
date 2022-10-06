@@ -9,7 +9,7 @@ import { type ImgHTMLAttributes, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import type { FileImageMetadata } from '../../../common';
 import { useViewportObserver } from './use_viewport_observer';
-import { MyImage, MyImageProps, Blurhash } from './components';
+import { Img, type ImgProps, Blurhash } from './components';
 import { sizes } from './styles';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
@@ -23,7 +23,7 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   /**
    * @default original
    */
-  size?: MyImageProps['size'];
+  size?: ImgProps['size'];
   /**
    * Props to pass to the wrapper element
    */
@@ -86,11 +86,11 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
             height={meta.height}
           />
         )}
-        <MyImage
+        <Img
           observerRef={observerRef}
+          ref={ref}
           size={size}
           hidden={!isVisible}
-          ref={ref}
           src={isVisible ? src : undefined}
           alt={alt}
           onLoad={(ev) => {
