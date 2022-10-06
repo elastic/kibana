@@ -20,6 +20,7 @@ import {
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
   clearSearchSelection,
+  expandExceptionActions,
 } from '../../tasks/exceptions_table';
 import {
   EXCEPTIONS_TABLE_DELETE_BTN,
@@ -72,7 +73,6 @@ describe('Exceptions Table', () => {
   it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
-    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     exportExceptionList();
 
@@ -87,7 +87,6 @@ describe('Exceptions Table', () => {
   });
 
   it('Filters exception lists on search', () => {
-    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -138,7 +137,6 @@ describe('Exceptions Table', () => {
   });
 
   it('Deletes exception list without rule reference', () => {
-    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -185,7 +183,7 @@ describe('Exceptions Table - read only', () => {
   });
 
   it('Delete icon is not shown', () => {
-    cy.get('[data-test-subj="exceptionsListCardOverflowActions"] button').click();
+    expandExceptionActions();
     cy.get(EXCEPTIONS_TABLE_DELETE_BTN).should('be.disabled');
   });
 });
