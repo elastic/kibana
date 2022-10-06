@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import {
@@ -440,6 +441,51 @@ describe('data telemetry collection tasks', () => {
           user_agent: {
             original: { all_agents: { '1d': 4 }, rum: { '1d': 2 } },
           },
+        },
+      });
+    });
+  });
+
+  describe('service groups', () => {
+    const task = tasks.find((t) => t.name === 'service_groups');
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    savedObjectsClient.find.mockResolvedValue({
+      page: 1,
+      per_page: 500,
+      total: 2,
+      saved_objects: [
+        {
+          type: 'apm-service-group',
+          id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+          namespaces: ['default'],
+          attributes: {
+            color: '#5094C4',
+            kuery: 'service.environment: production',
+            groupName: 'production',
+          },
+          references: [],
+          score: 1,
+        },
+        {
+          type: 'apm-service-group',
+          id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+          namespaces: ['default'],
+          attributes: {
+            color: '#5094C4',
+            kuery: 'agent.name: go',
+            groupName: 'agent',
+          },
+          references: [],
+          score: 0,
+        },
+      ],
+    });
+    it('returns service group stats', async () => {
+      expect(await task?.executor({ savedObjectsClient } as any)).toEqual({
+        service_groups: {
+          kuery_fields: ['service.environment', 'agent.name'],
+          total: 2,
         },
       });
     });
