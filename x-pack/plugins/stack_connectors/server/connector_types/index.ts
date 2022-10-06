@@ -12,20 +12,20 @@ import {
   getIndexConnectorType,
   getPagerDutyConnectorType,
   getServerLogConnectorType,
+  getServiceNowITOMConnectorType,
   getSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
   getOpsgenieConnectorType,
+  getXmattersConnectorType,
 } from './stack';
 import {
   getCasesWebhookConnectorType,
   getJiraConnectorType,
   getResilientConnectorType,
-  getServiceNowITOMConnectorType,
   getServiceNowITSMConnectorType,
   getServiceNowSIRConnectorType,
   getSwimlaneConnectorType,
-  getXmattersConnectorType,
 } from './cases';
 export type {
   EmailActionParams,
@@ -35,31 +35,32 @@ export type {
   SlackActionParams,
   TeamsActionParams,
   WebhookActionParams,
+  XmattersActionParams,
 } from './stack';
 export {
   EmailConnectorTypeId,
   IndexConnectorTypeId,
   PagerDutyConnectorTypeId,
+  ServiceNowITOMConnectorTypeId,
   ServerLogConnectorTypeId,
   SlackConnectorTypeId,
   TeamsConnectorTypeId,
   WebhookConnectorTypeId,
+  OpsgenieConnectorTypeId,
+  XmattersConnectorTypeId,
 } from './stack';
 export type {
   CasesWebhookActionParams,
   JiraActionParams,
   ResilientActionParams,
   ServiceNowActionParams,
-  XmattersActionParams,
 } from './cases';
 export {
   CasesWebhookConnectorTypeId,
   JiraConnectorTypeId,
   ResilientConnectorTypeId,
-  ServiceNowITOMConnectorTypeId,
   ServiceNowITSMConnectorTypeId,
   ServiceNowSIRConnectorTypeId,
-  XmattersConnectorTypeId,
 } from './cases';
 
 export function registerConnectorTypes({

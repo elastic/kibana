@@ -15,7 +15,7 @@ import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type {
   IndexPatternRef,
-  TextBasedLanguagesPersistedState,
+  TextBasedLanguagesPrivateState,
   TextBasedLanguagesLayerColumn,
 } from './types';
 
@@ -35,8 +35,36 @@ export async function loadIndexPatternRefs(
     });
 }
 
+export const getAllColumns = (
+  existingColumns: TextBasedLanguagesLayerColumn[],
+  columnsFromQuery: DatatableColumn[]
+) => {
+  // filter out columns that do not exist on the query
+  const columns = existingColumns.filter((c) => {
+    const columnExists = columnsFromQuery?.some((f) => f.name === c?.fieldName);
+    if (columnExists) return c;
+  });
+  const allCols = [
+    ...columns,
+    ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
+  ];
+  const uniqueIds: string[] = [];
+
+  return allCols.filter((col) => {
+    const isDuplicate = uniqueIds.includes(col.columnId);
+
+    if (!isDuplicate) {
+      uniqueIds.push(col.columnId);
+
+      return true;
+    }
+
+    return false;
+  });
+};
+
 export async function getStateFromAggregateQuery(
-  state: TextBasedLanguagesPersistedState,
+  state: TextBasedLanguagesPrivateState,
   query: AggregateQuery,
   dataViews: DataViewsPublicPluginStart,
   data: DataPublicPluginStart,
@@ -45,24 +73,21 @@ export async function getStateFromAggregateQuery(
   const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
   const errors: Error[] = [];
   const layerIds = Object.keys(state.layers);
+  const context = state.initialContext;
   const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromTextBasedQuery(query);
   // get the id of the dataview
   const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
-  let columns: TextBasedLanguagesLayerColumn[] = [];
+  let allColumns: TextBasedLanguagesLayerColumn[] = [];
   let timeFieldName;
   try {
     const table = await fetchDataFromAggregateQuery(query, dataViews, data, expressions);
     const dataView = await dataViews.get(index);
     timeFieldName = dataView.timeFieldName;
     columnsFromQuery = table?.columns ?? [];
-    const existingColumns = state.layers[newLayerId].allColumns;
-    columns = [
-      ...existingColumns,
-      ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
-    ];
+    allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
   } catch (e) {
     errors.push(e);
   }
@@ -73,7 +98,7 @@ export async function getStateFromAggregateQuery(
         index,
         query,
         columns: state.layers[newLayerId].columns ?? [],
-        allColumns: columns,
+        allColumns,
         timeField: timeFieldName,
         errors,
       },
@@ -84,6 +109,7 @@ export async function getStateFromAggregateQuery(
     ...tempState,
     fieldList: columnsFromQuery ?? [],
     indexPatternRefs,
+    initialContext: context,
   };
 }
 

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import crypto from 'crypto';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { OpsgenieId } from '.';
+import { OpsgenieConnectorTypeId } from '.';
 import { OpsgenieConnector } from './connector';
 
 describe('OpsgenieConnector', () => {
@@ -18,6 +19,20 @@ describe('OpsgenieConnector', () => {
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
+
+  const defaultCreateAlertExpect = {
+    method: 'post',
+    url: 'https://example.com/v2/alerts',
+    headers: { Authorization: 'GenieKey 123', 'Content-Type': 'application/json' },
+    responseSchema: expect.anything(),
+  };
+
+  const createCloseAlertExpect = (alias: string) => ({
+    method: 'post',
+    url: `https://example.com/v2/alerts/${alias}/close?identifierType=alias`,
+    headers: { Authorization: 'GenieKey 123', 'Content-Type': 'application/json' },
+    responseSchema: expect.anything(),
+  });
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -27,7 +42,7 @@ describe('OpsgenieConnector', () => {
     connector = new OpsgenieConnector({
       configurationUtilities: mockedActionsConfig,
       config: { apiUrl: 'https://example.com' },
-      connector: { id: '1', type: OpsgenieId },
+      connector: { id: '1', type: OpsgenieConnectorTypeId },
       secrets: { apiKey: '123' },
       logger,
       services,
@@ -42,11 +57,55 @@ describe('OpsgenieConnector', () => {
     await connector.createAlert({ message: 'hello' });
 
     expect(connectorSpy).toBeCalledWith({
-      method: 'post',
-      url: 'https://example.com',
+      ...defaultCreateAlertExpect,
       data: { message: 'hello' },
-      headers: { Authorization: 'GenieKey 123' },
-      responseSchema: expect.anything(),
+    });
+  });
+
+  it('calls request without modifying the alias when it is less than 512 characters when creating an alert', async () => {
+    const connectorSpy = jest
+      // @ts-expect-error it's complaining because request is a protected method
+      .spyOn(connector, 'request')
+      .mockImplementation(async () => ({}));
+    await connector.createAlert({ message: 'hello', alias: '111' });
+
+    expect(connectorSpy).toBeCalledWith({
+      ...defaultCreateAlertExpect,
+      data: { message: 'hello', alias: '111' },
+    });
+  });
+
+  it('calls request without modifying the alias when it is equal to 512 characters when creating an alert', async () => {
+    const connectorSpy = jest
+      // @ts-expect-error it's complaining because request is a protected method
+      .spyOn(connector, 'request')
+      .mockImplementation(async () => ({}));
+
+    const alias = 'a'.repeat(512);
+    await connector.createAlert({ message: 'hello', alias });
+
+    expect(connectorSpy).toBeCalledWith({
+      ...defaultCreateAlertExpect,
+      data: { message: 'hello', alias },
+    });
+  });
+
+  it('calls request with the sha256 hash of the alias when it is greater than 512 characters when creating an alert', async () => {
+    const connectorSpy = jest
+      // @ts-expect-error it's complaining because request is a protected method
+      .spyOn(connector, 'request')
+      .mockImplementation(async () => ({}));
+
+    const alias = 'a'.repeat(513);
+
+    const hasher = crypto.createHash('sha256');
+    const sha256Hash = hasher.update(alias);
+
+    await connector.createAlert({ message: 'hello', alias });
+
+    expect(connectorSpy).toBeCalledWith({
+      ...defaultCreateAlertExpect,
+      data: { message: 'hello', alias: sha256Hash.digest('hex') },
     });
   });
 
@@ -55,14 +114,11 @@ describe('OpsgenieConnector', () => {
       // @ts-expect-error it's complaining because request is a protected method
       .spyOn(connector, 'request')
       .mockImplementation(async () => ({}));
-    await connector.closeAlert({ user: 'sam' });
+    await connector.closeAlert({ user: 'sam', alias: '111' });
 
     expect(connectorSpy).toBeCalledWith({
-      method: 'post',
-      url: 'https://example.com/close',
+      ...createCloseAlertExpect('111'),
       data: { user: 'sam' },
-      headers: { Authorization: 'GenieKey 123' },
-      responseSchema: expect.anything(),
     });
   });
 });

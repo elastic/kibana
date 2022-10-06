@@ -8,17 +8,15 @@
 import http from 'http';
 
 export const getDataFromPostRequest = async (request: http.IncomingMessage) => {
-  let data: Record<string, unknown> = {};
-
-  if (request.method === 'POST') {
-    const buffers = [];
-
-    for await (const chunk of request) {
-      buffers.push(chunk);
-    }
-
-    data = JSON.parse(Buffer.concat(buffers).toString());
+  if (request.method !== 'POST') {
+    return {};
   }
 
-  return data;
+  const buffers = [];
+
+  for await (const chunk of request) {
+    buffers.push(chunk);
+  }
+
+  return JSON.parse(Buffer.concat(buffers).toString());
 };

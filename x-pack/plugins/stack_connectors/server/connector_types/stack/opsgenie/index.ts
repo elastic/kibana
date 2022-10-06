@@ -10,21 +10,26 @@ import {
   SecurityConnectorFeatureId,
   UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import {
+  SubActionConnectorType,
+  ValidatorType,
+} from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { OpsgenieConnector } from './connector';
 import { ConfigSchema, SecretsSchema } from './schema';
 import { Config, Secrets } from './types';
+import * as i18n from './translations';
 
-export const OpsgenieId = '.opsgenie';
+export const OpsgenieConnectorTypeId = '.opsgenie';
 
 export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secrets> => {
   return {
     Service: OpsgenieConnector,
-    // TODO: determine license requirement
-    minimumLicenseRequired: 'gold',
-    name: 'Opsgenie Connector',
-    id: OpsgenieId,
+    minimumLicenseRequired: 'platinum',
+    name: i18n.OPSGENIE_NAME,
+    id: OpsgenieConnectorTypeId,
     schema: { config: ConfigSchema, secrets: SecretsSchema },
+    validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') }],
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,

@@ -18,6 +18,7 @@ export interface ProxyArgs {
 
 export abstract class Simulator {
   private _requestData: Record<string, unknown> | undefined;
+  private _requestUrl: string | undefined;
   private proxyServer: httpProxy | undefined;
   private readonly proxyArgs: ProxyArgs | undefined;
   protected server: http.Server;
@@ -54,6 +55,7 @@ export abstract class Simulator {
   private baseHandler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
     const data = await getDataFromPostRequest(request);
     this._requestData = data;
+    this._requestUrl = new URL(request.url ?? '', `http://${request.headers.host}`).toString();
 
     return this.handler(request, response, data);
   };
@@ -82,5 +84,9 @@ export abstract class Simulator {
 
   public get requestData() {
     return this._requestData;
+  }
+
+  public get requestUrl() {
+    return this._requestUrl;
   }
 }
