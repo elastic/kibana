@@ -223,7 +223,7 @@ export async function invalidateAPIKeysForAgents(agents: Agent[]) {
         if (output.to_retire_api_key_ids) {
           Object.values(output.to_retire_api_key_ids).forEach((apiKey) => {
             if (apiKey?.id) {
-              keys.push(apiKey.id)
+              keys.push(apiKey.id);
             }
           });
         }
