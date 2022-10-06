@@ -201,6 +201,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         return await testSubjects.isDisplayed('disableButton');
       });
 
+      await testSubjects.click('disableButton');
+
       await refreshAlertsList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
