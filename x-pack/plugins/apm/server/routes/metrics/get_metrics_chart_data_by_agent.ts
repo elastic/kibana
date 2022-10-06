@@ -41,15 +41,15 @@ export async function getMetricsChartDataByAgent({
     start,
     end,
   };
+  if (isServerlessAgent(serviceRuntimeName)) {
+    return getServerlessAgentMetricCharts(options);
+  }
+
   if (isJavaAgentName(agentName)) {
     return getJavaMetricsCharts({
       ...options,
       serviceNodeName,
     });
-  }
-
-  if (isServerlessAgent(serviceRuntimeName)) {
-    return getServerlessAgentMetricCharts(options);
   }
 
   return getDefaultMetricsCharts(options);
