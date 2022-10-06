@@ -32,7 +32,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 interface UseInvestigateInTimelineActionProps {
-  ecsRowData?: Ecs | Ecs[] | null;
+  ecsRowData?: Ecs | null;
   onInvestigateInTimelineAlertClick?: () => void;
 }
 

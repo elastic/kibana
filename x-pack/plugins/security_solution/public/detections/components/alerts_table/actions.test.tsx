@@ -9,6 +9,8 @@ import sinon from 'sinon';
 import moment from 'moment';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
 import {
   sendAlertToTimelineAction,
@@ -27,6 +29,7 @@ import {
 } from '../../../common/mock';
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
 import type { Ecs } from '../../../../common/ecs';
+import type { DataProvider } from '../../../../common/types/timeline';
 import {
   TimelineId,
   TimelineType,
@@ -55,6 +58,7 @@ import {
   USER,
 } from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -86,6 +90,38 @@ export const getExceptionListItemSchemaMock = (
   ...(overrides || {}),
 });
 
+const getExpectedcreateTimelineParam = (
+  from: string,
+  to: string,
+  dataProviders: DataProvider[],
+  filters: Filter[]
+) => ({
+  from,
+  notes: null,
+  timeline: {
+    ...timelineDefaults,
+    dataProviders,
+    id: TimelineId.active,
+    indexNames: [],
+    dateRange: {
+      start: from,
+      end: to,
+    },
+    eventType: 'all',
+    filters,
+    kqlQuery: {
+      filterQuery: {
+        kuery: {
+          kind: 'kuery',
+          expression: '',
+        },
+        serializedQuery: '',
+      },
+    },
+  },
+  to,
+});
+
 describe('alert actions', () => {
   const anchor = '2020-03-01T17:59:46.349Z';
   const unix = moment(anchor).valueOf();
@@ -98,6 +134,7 @@ describe('alert actions', () => {
   let fetchMock: jest.Mock;
   let toastMock: jest.Mock;
   const mockEcsData = mockTimelineData.map((item) => item.ecs);
+  const eventIds = mockEcsData.map((ecs) => ecs._id);
 
   const ecsDataMockWithNoTemplateTimeline = getThresholdDetectionAlertAADMock({
     ...mockAADEcsDataWithAlert,
@@ -1040,25 +1077,162 @@ describe('alert actions', () => {
   });
 
   describe('sendBulkEventsToTimelineAction', () => {
-    test('send multiple events to timeline ', () => {
-      sendBulkEventsToTimelineAction(createTimeline, mockEcsData);
-      expect(1).toBe(2);
+    test('send multiple events to timeline  with dataProviders preference ', () => {
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsData, 'dataProvider');
+      const { from, to } = determineToAndFrom({ ecs: mockEcsData });
+      const expectedDataProviders: DataProvider[] = [
+        {
+          and: [],
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${
+            TimelineId.active
+          }-alert-id-${eventIds.join(',')}`,
+          name: eventIds.join(','),
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: '_id',
+            value: eventIds,
+            operator: 'includes',
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(from, to, expectedDataProviders, []);
+      expect(createTimeline).toHaveBeenCalledWith(expected);
     });
 
-    test('send single event to timeline', () => {
-      expect(1).toBe(2);
+    test('send single event to timeline with data provider preference', () => {
+      const mockEcsDataModified = mockEcsData.slice(0, 1);
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsDataModified);
+      const { from, to } = determineToAndFrom({ ecs: mockEcsDataModified });
+      const expectedDataProviders: DataProvider[] = [
+        {
+          and: [],
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${eventIds[0]}`,
+          name: eventIds[0],
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: '_id',
+            value: eventIds[0],
+            operator: ':',
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(from, to, expectedDataProviders, []);
+      expect(createTimeline).toHaveBeenCalledWith(expected);
     });
-
-    test('send multiple events to timeline with dataprovider preference', () => {
-      expect(1).toBe(2);
+    test('send single event to timeline with filter preference', () => {
+      const mockEcsDataModified = mockEcsData.slice(0, 1);
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsDataModified, 'KqlFilter');
+      const { from, to } = determineToAndFrom({ ecs: mockEcsDataModified });
+      const expectedDataProviders: DataProvider[] = [];
+      const expectedFilters: Filter[] = [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: '_id',
+            params: {
+              query: eventIds[0],
+            },
+          },
+          query: {
+            match_phrase: {
+              _id: eventIds[0],
+            },
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(
+        from,
+        to,
+        expectedDataProviders,
+        expectedFilters
+      );
+      expect(createTimeline).toHaveBeenCalledWith(expected);
     });
 
     test('send multiple events to timeline with filter preference without label', () => {
-      expect(1).toBe(2);
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsData, 'KqlFilter');
+      const { from, to } = determineToAndFrom({ ecs: mockEcsData });
+      const expectedDataProviders: DataProvider[] = [];
+      const expectedFilters: Filter[] = [
+        {
+          query: {
+            bool: {
+              filter: {
+                ids: {
+                  values: eventIds,
+                },
+              },
+            },
+          },
+          meta: {
+            alias: `${mockEcsData.length} event IDs`,
+            negate: false,
+            disabled: false,
+            type: 'phrases',
+            key: '_id',
+            value: eventIds.join(),
+            params: eventIds,
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(
+        from,
+        to,
+        expectedDataProviders,
+        expectedFilters
+      );
+      expect(createTimeline).toHaveBeenCalledWith(expected);
     });
 
     test('send multiple events to timeline with filter preference with label', () => {
-      expect(1).toBe(2);
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsData, 'KqlFilter', 'test-label');
+      const { from, to } = determineToAndFrom({ ecs: mockEcsData });
+      const expectedDataProviders: DataProvider[] = [];
+      const expectedFilters: Filter[] = [
+        {
+          query: {
+            bool: {
+              filter: {
+                ids: {
+                  values: eventIds,
+                },
+              },
+            },
+          },
+          meta: {
+            alias: 'test-label',
+            negate: false,
+            disabled: false,
+            type: 'phrases',
+            key: '_id',
+            value: eventIds.join(),
+            params: eventIds,
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(
+        from,
+        to,
+        expectedDataProviders,
+        expectedFilters
+      );
+      expect(createTimeline).toHaveBeenCalledWith(expected);
     });
   });
 });

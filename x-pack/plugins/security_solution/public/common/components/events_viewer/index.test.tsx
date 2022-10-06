@@ -109,16 +109,4 @@ describe('StatefulEventsViewer', () => {
     unmount();
     expect(mockCloseEditor).toHaveBeenCalled();
   });
-
-  test('shows no bulk action', () => {
-    expect(1).toBe(2);
-  });
-
-  test('shows custom bulk Action but no alert actions', () => {
-    expect(1).toBe(2);
-  });
-
-  test('shows custom bulk Action with alert actions', () => {
-    expect(1).toBe(2);
-  });
 });

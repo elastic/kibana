@@ -288,6 +288,32 @@ export const buildAlertsKqlFilter = (
   alertIds: string[],
   label: string = 'Alert Ids'
 ): Filter[] => {
+  const singleId = alertIds.length === 1;
+  if (singleId) {
+    return [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key,
+          params: {
+            query: alertIds[0],
+          },
+        },
+        query: {
+          match_phrase: {
+            _id: alertIds[0],
+          },
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+      },
+    ];
+  }
+
   return [
     {
       query: {
@@ -315,38 +341,39 @@ export const buildAlertsKqlFilter = (
   ];
 };
 
+const buildEventsDataProviderById = (
+  key: '_id' | 'signal.group.id' | 'kibana.alert.group.id',
+  eventIds: string[]
+): DataProvider[] => {
+  const singleId = eventIds.length === 1;
+  return [
+    {
+      and: [],
+      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${
+        TimelineId.active
+      }-alert-id-${eventIds.join(',')}`,
+      name: eventIds.join(','),
+      enabled: true,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: key,
+        value: singleId ? eventIds[0] : eventIds,
+        operator: singleId ? ':' : 'includes',
+      },
+    },
+  ];
+};
+
 const buildTimelineDataProviderOrFilter = (
   alertIds: string[],
-  _id: string,
-  // prefer: 'dataProvider' | 'KqlFilter' = 'dataProvider',
+  prefer: 'dataProvider' | 'KqlFilter',
   label?: string
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
-  // TODO: Add prefer is when `is one of` operator for data provider is complete
-  if (!isEmpty(alertIds) && Array.isArray(alertIds) && alertIds.length > 1) {
-    return {
-      filters: buildAlertsKqlFilter('_id', alertIds, label),
-      dataProviders: [],
-    };
-  } else {
-    return {
-      filters: [],
-      dataProviders: [
-        {
-          and: [],
-          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${_id}`,
-          name: _id,
-          enabled: true,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: '_id',
-            value: _id,
-            operator: ':' as const,
-          },
-        },
-      ],
-    };
-  }
+  return {
+    filters: prefer === 'KqlFilter' ? buildAlertsKqlFilter('_id', alertIds, label) : [],
+    dataProviders: prefer === 'dataProvider' ? buildEventsDataProviderById('_id', alertIds) : [],
+  };
 };
 
 const buildEqlDataProviderOrFilter = (
@@ -666,15 +693,20 @@ const createNewTermsTimeline = async (
   }
 };
 
-export const sendBulkEventsToTimelineAction = (createTimeline: CreateTimeline, ecs: Ecs[]) => {
+export const sendBulkEventsToTimelineAction = (
+  createTimeline: CreateTimeline,
+  ecs: Ecs[],
+  prefer: 'dataProvider' | 'KqlFilter' = 'dataProvider',
+  label?: string
+) => {
   const eventIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
 
   const { to, from } = determineToAndFrom({ ecs });
 
   const { dataProviders, filters } = buildTimelineDataProviderOrFilter(
     eventIds,
-    '',
-    `${ecs.length} event IDs`
+    prefer,
+    label || `${ecs.length} event IDs`
   );
 
   createTimeline({
@@ -715,9 +747,12 @@ export const sendAlertToTimelineAction = async ({
   /* FUTURE DEVELOPER
    * We are making an assumption here that if you have an array of ecs data they are all coming from the same rule
    * but we still want to determine the filter for each alerts
+   *
+   *  New Update: Wherever we need to add multiple alerts/events to the timeline, new function `sendBulkEventsToTimelineAction`
+   *  should be invoked
    */
-  const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
-  const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
+
+  const ecsData: Ecs = Array.isArray(ecs) ? ecs[0] : ecs;
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
@@ -855,9 +890,12 @@ export const sendAlertToTimelineAction = async ({
   } else if (isNewTermsAlert(ecsData)) {
     return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
-    let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
+    let { dataProviders, filters } = buildTimelineDataProviderOrFilter(
+      [ecsData._id],
+      'dataProvider'
+    );
     if (isEqlAlertWithGroupId(ecsData)) {
-      const tempEql = buildEqlDataProviderOrFilter(alertIds ?? [], ecs);
+      const tempEql = buildEqlDataProviderOrFilter([ecsData._id], ecs);
       dataProviders = tempEql.dataProviders;
       filters = tempEql.filters;
     }
