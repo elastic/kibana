@@ -622,6 +622,7 @@ export type InferSearchResponseOf<
             };
           }) & {
         hits: HitsOf<
+          // @ts-expect-error type no longer match
           TSearchRequest['body'] extends estypes.SearchRequest['body']
             ? TSearchRequest['body']
             : TSearchRequest,
