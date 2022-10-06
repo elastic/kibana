@@ -72,6 +72,12 @@ export class LayerTOC extends Component<Props> {
     return [...this._getForebearers(parentLayer), parentId];
   }
 
+  _onDragStart = ({ source }: DropResult) => {
+    const sourceIndex = this._reverseIndex(source.index);
+    const sourceLayer = this.props.layerList[sourceIndex];
+    this.setState({ ...CLEAR_DND_STATE, sourceLayer });
+  };
+
   _onDragUpdate = ({ combine, destination, source }: DropResult) => {
     const sourceIndex = this._reverseIndex(source.index);
     const sourceLayer = this.props.layerList[sourceIndex];
@@ -103,7 +109,6 @@ export class LayerTOC extends Component<Props> {
     }
 
     const destinationIndex = this._reverseIndex(destination.index);
-
     const newRightSiblingIndex =
       sourceIndex > destinationIndex
         ? // When layer is moved to the right, new right sibling is layer to the right of destination
@@ -170,6 +175,23 @@ export class LayerTOC extends Component<Props> {
       : { depth, showInTOC: false };
   }
 
+  _getDroppableClass() {
+    if (!this.state.sourceLayer) {
+      // nothing is dragged
+      return '';
+    }
+
+    if (this.state.isOwnAncestor) {
+      return 'mapLayerToc-droppable-dropNotAllowed';
+    }
+
+    if (this.state.combineLayer) {
+      return 'mapLayerToc-droppable-isCombining';
+    }
+
+    return 'mapLayerToc-droppable-isDragging';
+  }
+
   _renderLayers() {
     const tocEntryList = this.props.layerList
       .map((layer, index) => {
@@ -193,11 +215,16 @@ export class LayerTOC extends Component<Props> {
     }
 
     return (
-      <EuiDragDropContext onDragUpdate={this._onDragUpdate} onDragEnd={this._onDragEnd}>
+      <EuiDragDropContext
+        onDragStart={this._onDragStart}
+        onDragUpdate={this._onDragUpdate}
+        onDragEnd={this._onDragEnd}
+      >
         <EuiDroppable
           droppableId="mapLayerTOC"
           spacing="none"
           isCombineEnabled={!this.props.isReadOnly}
+          className={this._getDroppableClass()}
         >
           {(droppableProvided, droppableSnapshot) => {
             const tocEntries = tocEntryList.map(({ draggableIndex, depth, layer }) => (
@@ -210,6 +237,8 @@ export class LayerTOC extends Component<Props> {
                 disableInteractiveElementBlocking // Allows button to be drag handle
               >
                 {(draggableProvided, draggableSnapshot) => {
+                  // const isDropNotAllowed = this.state.isOwnAncestor && this.state.sourceLayer?.getId() === layer.getId();
+                  // console.log('isDropNotAllowed', isDropNotAllowed);
                   return (
                     <TOCEntry
                       depth={depth}
