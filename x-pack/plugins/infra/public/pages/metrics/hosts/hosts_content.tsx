@@ -9,6 +9,7 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { NoData } from '../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { useMetricsDataViewContext } from './hooks/use_data_view';
 import { HostsTable } from './components/hosts_table';
@@ -33,6 +34,7 @@ export const HostsContent: React.FunctionComponent = () => {
     },
     [setDateRange, setQuery]
   );
+
   const hostMetrics: Array<{ type: SnapshotMetricType }> = [
     { type: 'rx' },
     { type: 'tx' },
@@ -40,42 +42,62 @@ export const HostsContent: React.FunctionComponent = () => {
     // add others
   ];
 
-  const { loading, nodes } = useSnapshot(
-    '', // use the unified search query
+  const { loading, nodes, reload } = useSnapshot(
+    '', // use the unified search query, supported type?
     hostMetrics,
     [],
     'host',
     sourceId,
-    1665066458353, // currentTime.  need to add support not to require this?
+    1665066458353, // currentTime.  need to add support for TimeRange?
     '',
     '',
     true
   );
 
+  const noData = !loading && nodes && nodes.length === 0;
+
   return (
     <div>
       {metricsDataView && !loading ? (
-        <>
-          <SearchBar
-            showQueryBar={true}
-            showFilterBar={false}
-            showDatePicker={true}
-            showAutoRefreshOnly={false}
-            showSaveQuery={true}
-            showQueryInput={true}
-            query={query}
-            dateRangeFrom={dateRange.from}
-            dateRangeTo={dateRange.to}
-            indexPatterns={[metricsDataView]}
-            onQuerySubmit={onQuerySubmit}
+        noData ? (
+          <NoData
+            titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
+              defaultMessage: 'There is no data to display.',
+            })}
+            bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
+              defaultMessage: 'Try adjusting your time or filter.',
+            })}
+            refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
+              defaultMessage: 'Check for new data',
+            })}
+            onRefetch={() => {
+              reload();
+            }}
+            testString="noMetricsDataPrompt"
           />
-          <HostsTable
-            dataView={metricsDataView}
-            timeRange={dateRange}
-            query={query}
-            nodes={nodes}
-          />
-        </>
+        ) : (
+          <>
+            <SearchBar
+              showQueryBar={true}
+              showFilterBar={false}
+              showDatePicker={true}
+              showAutoRefreshOnly={false}
+              showSaveQuery={true}
+              showQueryInput={true}
+              query={query}
+              dateRangeFrom={dateRange.from}
+              dateRangeTo={dateRange.to}
+              indexPatterns={[metricsDataView]}
+              onQuerySubmit={onQuerySubmit}
+            />
+            <HostsTable
+              dataView={metricsDataView}
+              timeRange={dateRange}
+              query={query}
+              nodes={nodes}
+            />
+          </>
+        )
       ) : hasFailedCreatingDataView || hasFailedFetchingDataView ? (
         <div>
           <div>There was an error trying to load or create the Data View:</div>
