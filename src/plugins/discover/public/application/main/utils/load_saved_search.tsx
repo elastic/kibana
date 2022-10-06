@@ -45,11 +45,10 @@ export const loadSavedSearch = async (
   if (!currentDataView) {
     return;
   }
-
   if (!currentSavedSearch.searchSource.getField('index')) {
     currentSavedSearch.searchSource.setField('index', currentDataView);
-    stateContainer.internalStateContainer.transitions.setDataView(currentDataView);
   }
+  stateContainer.internalStateContainer.transitions.setDataView(currentDataView);
 
   restoreStateFromSavedSearch({
     savedSearch: currentSavedSearch,
