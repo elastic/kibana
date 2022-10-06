@@ -80,16 +80,12 @@ export const useAdHocDataViews = ({
         toDataView: newDataView.id,
         usedDataViews: [],
       } as ActionExecutionContext);
-      stateContainer.kbnUrlStateStorage.kbnUrlControls.flush(true);
 
-      const updatedFilters = filterManager.getFilters();
-      savedSearch.searchSource.setField('index', newDataView);
-      stateContainer.replaceUrlAppState({ index: newDataView.id, filters: updatedFilters });
+      stateContainer.replaceUrlAppState({ index: newDataView.id });
       setUrlTracking(newDataView);
-
       return newDataView;
     },
-    [dataViews, filterManager, savedSearch.searchSource, setUrlTracking, stateContainer]
+    [dataViews, setUrlTracking, stateContainer]
   );
 
   const { openConfirmSavePrompt, updateSavedSearch } =
