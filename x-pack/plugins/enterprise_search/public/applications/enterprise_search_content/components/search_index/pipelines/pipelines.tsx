@@ -25,6 +25,7 @@ import { DataPanel } from '../../../../shared/data_panel/data_panel';
 import { docLinks } from '../../../../shared/doc_links';
 import { isApiIndex } from '../../../utils/indices';
 
+import { InferenceHistory } from './inference_history';
 import { IngestPipelinesCard } from './ingest_pipelines_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
 import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
@@ -40,6 +41,16 @@ export const SearchIndexPipelines: React.FC = () => {
   const apiIndex = isApiIndex(index);
 
   const pipelinesTabs: EuiTabbedContentTab[] = [
+    {
+      content: <InferenceHistory />,
+      id: 'inference-history',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory',
+        {
+          defaultMessage: 'Inference history',
+        }
+      ),
+    },
     {
       content: <PipelinesJSONConfigurations />,
       id: 'json-configurations',

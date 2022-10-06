@@ -153,6 +153,7 @@ export const MLInferenceLogic = kea<
       actions.makeMappingRequest({ indexName });
     },
   }),
+  path: ['enterprise_search', 'content', 'pipelines_add_ml_inference_pipeline'],
   reducers: {
     addInferencePipelineModal: [
       {
