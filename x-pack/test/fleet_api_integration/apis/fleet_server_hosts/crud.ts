@@ -19,14 +19,17 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_fleet_server_hosts_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
     setupFleetAndAgents(providerContext);
 
     let defaultFleetServerHostId: string;
 
     before(async function () {
+      await kibanaServer.savedObjects.clean({
+        types: ['fleet-fleet-server-hosts'],
+      });
       const { body: defaultRes } = await supertest
         .post(`/api/fleet/fleet_server_hosts`)
         .set('kbn-xsrf', 'xxxx')
