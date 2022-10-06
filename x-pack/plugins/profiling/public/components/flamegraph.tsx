@@ -190,9 +190,14 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
   const selected: undefined | React.ComponentProps<typeof FlamegraphInformationWindow>['frame'] =
     primaryFlamegraph && highlightedVmIndex !== undefined
       ? {
+          fileID: primaryFlamegraph.FileID[highlightedVmIndex],
+          frameType: primaryFlamegraph.FrameType[highlightedVmIndex],
           exeFileName: primaryFlamegraph.ExeFilename[highlightedVmIndex],
-          sourceFileName: primaryFlamegraph.SourceFilename[highlightedVmIndex],
+          addressOrLine: primaryFlamegraph.AddressOrLine[highlightedVmIndex],
           functionName: primaryFlamegraph.FunctionName[highlightedVmIndex],
+          functionOffset: primaryFlamegraph.FunctionOffset[highlightedVmIndex],
+          sourceFileName: primaryFlamegraph.SourceFilename[highlightedVmIndex],
+          sourceLine: primaryFlamegraph.SourceLine[highlightedVmIndex],
           countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],
           countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
         }
