@@ -12,7 +12,7 @@ import {
   createMockedRestrictedIndexPattern,
 } from '../indexpattern_datasource/mocks';
 import { DataViewsState } from '../state_management';
-import { ExistingFieldsMap, IndexPattern } from '../types';
+import { ExistingFieldsMap, IndexPattern } from '../types'; // TODO: refactor tests
 import { getFieldByNameFactory } from './loader';
 
 /**

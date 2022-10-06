@@ -59,14 +59,6 @@ describe('reference editor', () => {
       paramEditorUpdater,
       selectionStyle: 'full' as const,
       currentIndexPattern: createMockedIndexPattern(),
-      existingFields: {
-        'my-fake-index-pattern': {
-          timestamp: true,
-          bytes: true,
-          memory: true,
-          source: true,
-        },
-      },
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       storage: {} as IStorageWrapper,
       uiSettings: {} as IUiSettingsClient,

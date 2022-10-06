@@ -601,7 +601,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     setIsCloseable,
     paramEditorCustomProps,
     ReferenceEditor,
-    existingFields: props.existingFields,
     ...services,
   };
 
@@ -776,7 +775,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 }}
                 validation={validation}
                 currentIndexPattern={currentIndexPattern}
-                existingFields={props.existingFields}
                 selectionStyle={selectedOperationDefinition.selectionStyle}
                 dateRange={dateRange}
                 labelAppend={selectedOperationDefinition?.getHelpMessage?.({
@@ -802,7 +800,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           selectedColumn={selectedColumn as FieldBasedIndexPatternColumn}
           columnId={columnId}
           indexPattern={currentIndexPattern}
-          existingFields={props.existingFields}
           operationSupportMatrix={operationSupportMatrix}
           updateLayer={(newLayer) => {
             if (temporaryQuickFunction) {
@@ -832,7 +829,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const customParamEditor = ParamEditor ? (
     <>
       <ParamEditor
-        existingFields={props.existingFields}
         layer={state.layers[layerId]}
         activeData={props.activeData}
         paramEditorUpdater={

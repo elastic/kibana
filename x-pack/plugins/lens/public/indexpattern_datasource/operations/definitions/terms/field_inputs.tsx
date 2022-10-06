@@ -27,7 +27,6 @@ export const MAX_MULTI_FIELDS_SIZE = 3;
 export interface FieldInputsProps {
   column: TermsIndexPatternColumn;
   indexPattern: IndexPattern;
-  existingFields: ExistingFieldsMap;
   invalidFields?: string[];
   operationSupportMatrix: Pick<OperationSupportMatrix, 'operationByField'>;
   onChange: (newValues: string[]) => void;
@@ -49,7 +48,6 @@ export function FieldInputs({
   column,
   onChange,
   indexPattern,
-  existingFields,
   operationSupportMatrix,
   invalidFields,
 }: FieldInputsProps) {
@@ -153,7 +151,6 @@ export function FieldInputs({
               <FieldSelect
                 fieldIsInvalid={shouldShowError}
                 currentIndexPattern={indexPattern}
-                existingFields={existingFields[indexPattern.title]}
                 operationByField={filteredOperationByField}
                 selectedOperationType={column.operationType}
                 selectedField={value}
