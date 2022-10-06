@@ -9,23 +9,34 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 interface Config {
   isCloudEnabled: boolean;
+  trialEndDate?: string;
+  isElasticStaffOwned?: boolean;
 }
 
 interface CloudUsage {
   isCloudEnabled: boolean;
+  trialEndDate?: string;
+  inTrial?: boolean;
+  isElasticStaffOwned?: boolean;
 }
 
 export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, config: Config) {
-  const { isCloudEnabled } = config;
+  const { isCloudEnabled, trialEndDate, isElasticStaffOwned } = config;
   return usageCollection.makeUsageCollector<CloudUsage>({
     type: 'cloud',
     isReady: () => true,
     schema: {
       isCloudEnabled: { type: 'boolean' },
+      trialEndDate: { type: 'date' },
+      inTrial: { type: 'boolean' },
+      isElasticStaffOwned: { type: 'boolean' },
     },
     fetch: () => {
       return {
         isCloudEnabled,
+        isElasticStaffOwned,
+        trialEndDate,
+        ...(trialEndDate ? { inTrial: Date.now() <= new Date(trialEndDate).getTime() } : {}),
       };
     },
   });
