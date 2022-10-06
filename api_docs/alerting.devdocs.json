@@ -551,9 +551,9 @@
               ", filterOpts: ",
               "AlertingAuthorizationFilterOpts",
               ") => Promise<{ filter?: ",
-              "KueryNode",
-              " | ",
               "JsonObject",
+              " | ",
+              "KueryNode",
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
@@ -634,9 +634,9 @@
                 "text": "WriteOperations"
               },
               ") => Promise<{ filter?: ",
-              "KueryNode",
-              " | ",
               "JsonObject",
+              " | ",
+              "KueryNode",
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
