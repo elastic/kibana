@@ -18,7 +18,7 @@ const SET_SEVERITY = ({
   severity: string;
   caseTitle?: string;
 }) =>
-  i18n.translate('xpack.cases.containers.markInProgressCases', {
+  i18n.translate('xpack.cases.actions.severity', {
     values: { caseTitle, totalCases, severity },
     defaultMessage:
       '{totalCases, plural, =1 {Case "{caseTitle}" was} other {{totalCases} cases were}} set to {severity}',
