@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
+import type { Logger } from '@kbn/core/server';
 
 import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -20,6 +20,7 @@ import { createPrebuiltSavedObjectsSchema } from '../schema';
 
 export const createPrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,
+  logger: Logger,
   security: SetupPlugins['security']
 ) => {
   router.post(
@@ -34,29 +35,24 @@ export const createPrebuiltSavedObjectsRoute = (
       const siemResponse = buildSiemResponse(response);
       const { template_name: templateName } = request.params;
 
-      try {
-        const securitySolution = await context.securitySolution;
+      const securitySolution = await context.securitySolution;
 
-        const spaceId = securitySolution?.getSpaceId();
+      const spaceId = securitySolution?.getSpaceId();
 
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
-
-        const res = await bulkCreateSavedObjects({
-          savedObjectsClient,
-          spaceId,
-          savedObjectTemplate: templateName,
-        });
-
-        return response.ok({
-          body: res,
-        });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+      const frameworkRequest = await buildFrameworkRequest(context, security, request);
+      const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
+      const result = await bulkCreateSavedObjects({
+        savedObjectsClient,
+        logger,
+        spaceId,
+        savedObjectTemplate: templateName,
+      });
+      const error =
+        result?.hostRiskScoreDashboards?.error || result?.userRiskScoreDashboards?.error;
+      if (error != null) {
+        return siemResponse.error({ statusCode: error.statusCode, body: error.message });
+      } else {
+        return response.ok({ body: result });
       }
     }
   );
