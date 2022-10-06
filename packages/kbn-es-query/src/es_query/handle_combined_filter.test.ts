@@ -162,7 +162,7 @@ describe('#handleCombinedFilter', function () {
     `);
   });
 
-  it('Handles nested OR filters', () => {
+  it('Handles nested COMBINED filters', () => {
     const nestedCombinedFilter = buildCombinedFilter([
       buildPhraseFilter(getField('machine.os'), 'value', indexPattern),
       buildPhraseFilter(getField('extension'), 'value', indexPattern),
@@ -602,7 +602,7 @@ describe('#handleCombinedFilter', function () {
               },
             },
           ],
-          "type": "OR",
+          "type": "combined",
         },
       }
     `);

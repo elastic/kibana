@@ -10,7 +10,7 @@ import { Filter, FilterMeta, FILTERS } from './types';
 import { buildEmptyFilter } from './build_empty_filter';
 
 /**
- * Each item in an OR filter may represent either one filter (to be ORed) or an array of filters (ANDed together before
+ * Each item in an COMBINED filter may represent either one filter (to be ORed) or an array of filters (ANDed together before
  * becoming part of the OR clause).
  * @public
  */
@@ -20,7 +20,7 @@ export type FilterItem = Filter | FilterItem[];
  * @public
  */
 export interface CombinedFilterMeta extends FilterMeta {
-  type: typeof FILTERS.OR;
+  type: typeof FILTERS.COMBINED;
   params: FilterItem[];
 }
 
@@ -35,11 +35,11 @@ export interface CombinedFilter extends Filter {
  * @public
  */
 export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
-  return filter?.meta?.type === FILTERS.OR;
+  return filter?.meta?.type === FILTERS.COMBINED;
 }
 
 /**
- * Builds an OR filter. An OR filter is a filter with multiple sub-filters. Each sub-filter (FilterItem) represents a
+ * Builds an COMBINED filter. An COMBINED filter is a filter with multiple sub-filters. Each sub-filter (FilterItem) represents a
  * condition.
  * @param filters An array of CombinedFilterItem
  * @public
@@ -50,7 +50,7 @@ export function buildCombinedFilter(filters: FilterItem[]): CombinedFilter {
     ...filter,
     meta: {
       ...filter.meta,
-      type: FILTERS.OR,
+      type: FILTERS.COMBINED,
       params: filters,
     },
   };
