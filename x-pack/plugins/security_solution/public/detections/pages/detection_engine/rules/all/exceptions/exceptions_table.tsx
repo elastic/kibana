@@ -412,6 +412,7 @@ export const ExceptionListsTable = React.memo(() => {
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
             />
+            <EuiSpacer size="m" />
             {exceptionListsWithRuleRefs.length > 0 && (
               <React.Fragment data-test-subj="exceptionsTable">
                 {exceptionListsWithRuleRefs.map((excList) => (

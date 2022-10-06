@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiLink,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -62,18 +62,18 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
     const onClosePopover = () => setIsPopoverOpen(false);
 
     return (
-      <EuiFlexGroup data-test-subj="exceptionsListCard">
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiPanel>
-            {
-              <React.Fragment key={exceptionsList.list_id}>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexGroup key={exceptionsList.list_id} alignItems="center" gutterSize="l">
+              <EuiFlexItem grow={true}>
+                <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem grow={true}>
                     <EuiFlexGroup direction="column" alignItems="flexStart">
                       <EuiFlexItem grow={false} component={'span'}>
-                        <EuiButtonEmpty flush={'left'} data-test-subj="exception-list-name">
+                        <EuiLink data-test-subj="exception-list-name">
                           {exceptionsList.name.toString()}
-                        </EuiButtonEmpty>
+                        </EuiLink>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText size="xs">
@@ -83,74 +83,96 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText>{'created by: '}</EuiText>
-                  </EuiFlexItem>
-                  <StyledFlexItem grow={false}>
-                    <EuiBadge>{exceptionsList.created_by}</EuiBadge>{' '}
-                  </StyledFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText>{'created on: '}</EuiText>
-                  </EuiFlexItem>
-                  <StyledFlexItem grow={false}>
-                    <EuiBadge>{exceptionsList.created_at}</EuiBadge>
-                  </StyledFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      data-test-subj="exceptionsListCardOverflowActions"
-                      button={
-                        <EuiButtonIcon
-                          isDisabled={false}
-                          data-test-subj="exceptionsListCardOverflowActions"
-                          aria-label="Exception item actions menu"
-                          iconType="boxesHorizontal"
-                          onClick={onItemActionsClick}
-                        />
-                      }
-                      panelPaddingSize="none"
-                      isOpen={isPopoverOpen}
-                      closePopover={onClosePopover}
-                    >
-                      <EuiContextMenuPanel
-                        size="s"
-                        items={[
-                          <EuiContextMenuItem
-                            key={'delete'}
-                            disabled={exceptionsList.list_id === 'endpoint_list' || readOnly}
-                            data-test-subj="exceptionsTableDeleteButton"
-                            icon={'trash'}
-                            onClick={() => {
-                              onClosePopover();
-                              handleDelete({
-                                id: exceptionsList.id,
-                                listId: exceptionsList.list_id,
-                                namespaceType: exceptionsList.namespace_type,
-                              })();
-                            }}
-                          >
-                            {'Delete exception list'}
-                          </EuiContextMenuItem>,
-                          <EuiContextMenuItem
-                            key={'export'}
-                            icon={'exportAction'}
-                            data-test-subj="exceptionsTableExportButton"
-                            onClick={() => {
-                              onClosePopover();
-                              handleExport({
-                                id: exceptionsList.id,
-                                listId: exceptionsList.list_id,
-                                namespaceType: exceptionsList.namespace_type,
-                              })();
-                            }}
-                          >
-                            {'Export exception list'}
-                          </EuiContextMenuItem>,
-                        ]}
-                      />
-                    </EuiPopover>
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem style={{ flex: '1 1 auto' }}>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiText>{'created by: '}</EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge>{exceptionsList.created_by}</EuiBadge>{' '}
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem style={{ flex: '1 1 auto' }}>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiText>{'created by: '}</EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge>{exceptionsList.created_by}</EuiBadge>{' '}
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem style={{ flex: '1 1 auto' }}>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiText>{'created on: '}</EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge>{exceptionsList.created_at}</EuiBadge>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </React.Fragment>
-            }
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  data-test-subj="exceptionsListCardOverflowActions"
+                  button={
+                    <EuiButtonIcon
+                      isDisabled={false}
+                      data-test-subj="exceptionsListCardOverflowActions"
+                      aria-label="Exception item actions menu"
+                      iconType="boxesHorizontal"
+                      onClick={onItemActionsClick}
+                    />
+                  }
+                  panelPaddingSize="none"
+                  isOpen={isPopoverOpen}
+                  closePopover={onClosePopover}
+                >
+                  <EuiContextMenuPanel
+                    size="s"
+                    items={[
+                      <EuiContextMenuItem
+                        key={'delete'}
+                        disabled={exceptionsList.list_id === 'endpoint_list' || readOnly}
+                        data-test-subj="exceptionsTableDeleteButton"
+                        icon={'trash'}
+                        onClick={() => {
+                          onClosePopover();
+                          handleDelete({
+                            id: exceptionsList.id,
+                            listId: exceptionsList.list_id,
+                            namespaceType: exceptionsList.namespace_type,
+                          })();
+                        }}
+                      >
+                        {'Delete exception list'}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key={'export'}
+                        icon={'exportAction'}
+                        data-test-subj="exceptionsTableExportButton"
+                        onClick={() => {
+                          onClosePopover();
+                          handleExport({
+                            id: exceptionsList.id,
+                            listId: exceptionsList.list_id,
+                            namespaceType: exceptionsList.namespace_type,
+                          })();
+                        }}
+                      >
+                        {'Export exception list'}
+                      </EuiContextMenuItem>,
+                    ]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
