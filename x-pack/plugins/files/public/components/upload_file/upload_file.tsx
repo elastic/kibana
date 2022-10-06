@@ -40,7 +40,7 @@ export interface Props<Kind extends string = string> {
   /**
    * A files client that will be used process uploads.
    */
-  client: FilesClient;
+  client: FilesClient<any>;
   /**
    * Allow users to clear a file after uploading.
    *
