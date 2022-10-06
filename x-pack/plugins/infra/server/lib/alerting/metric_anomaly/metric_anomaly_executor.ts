@@ -23,12 +23,14 @@ import { InfraBackendLibs } from '../../infra_types';
 import { stateToAlertMessage } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
 import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_rule_type';
+import { getAlertUuidFromAlertId, getViewInAppUrl, LINK_TO_ALERT_DETAIL } from '../common/utils';
 
 export const createMetricAnomalyExecutor =
   (_libs: InfraBackendLibs, ml?: MlPluginSetup) =>
   async ({
     services,
     params,
+    alertId,
     startedAt,
   }: RuleExecutorOptions<
     /**
@@ -46,6 +48,9 @@ export const createMetricAnomalyExecutor =
     const request = {} as KibanaRequest;
     const mlSystem = ml.mlSystemProvider(request, services.savedObjectsClient);
     const mlAnomalyDetectors = ml.anomalyDetectorsProvider(request, services.savedObjectsClient);
+
+    const esClient = services.scopedClusterClient.asCurrentUser;
+    const alertInstanceId = await getAlertUuidFromAlertId(esClient, alertId);
 
     const { metric, alertInterval, influencerFilter, sourceId, spaceId, nodeType, threshold } =
       params as MetricAnomalyParams;
@@ -86,6 +91,10 @@ export const createMetricAnomalyExecutor =
       const alert = services.alertFactory.create(`${nodeType}-${metric}`);
 
       alert.scheduleActions(FIRED_ACTIONS_ID, {
+        alertDetailsUrl: getViewInAppUrl(
+          _libs.basePath,
+          `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
+        ),
         alertState: stateToAlertMessage[AlertStates.ALERT],
         timestamp: moment(anomalyStartTime).toISOString(),
         anomalyScore,

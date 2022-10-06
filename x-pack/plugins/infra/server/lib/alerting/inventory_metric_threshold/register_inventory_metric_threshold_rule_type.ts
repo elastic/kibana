@@ -24,6 +24,7 @@ import {
 } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import {
+  alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
@@ -102,6 +103,7 @@ export async function registerMetricInventoryThresholdRuleType(
       context: [
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
+        { name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },

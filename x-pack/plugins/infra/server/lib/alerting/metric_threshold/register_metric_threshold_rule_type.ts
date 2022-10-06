@@ -13,6 +13,7 @@ import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/a
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
 import {
+  alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,
   groupActionVariableDescription,
   metricActionVariableDescription,
@@ -94,6 +95,7 @@ export async function registerMetricThresholdRuleType(
       context: [
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
+        { name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },

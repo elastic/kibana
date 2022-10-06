@@ -8,8 +8,13 @@
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
-import type { IBasePath } from '@kbn/core/server';
-import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
+import {
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_UUID,
+  ALERT_UUID,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
@@ -107,3 +112,19 @@ export const getViewInAppUrlInventory = (
   const relativeViewInAppUrl = getInventoryViewInAppUrl(parseTechnicalFields(fields, true));
   return getViewInAppUrl(basePath, relativeViewInAppUrl);
 };
+
+export const getAlertUuidFromAlertId = async (esClient: ElasticsearchClient, alertId: string) => {
+  const { hits } = await esClient.search({
+    _source: false,
+    fields: [ALERT_UUID],
+    size: 1,
+    query: {
+      terms: {
+        [ALERT_RULE_UUID]: [alertId],
+      },
+    },
+  });
+  return hits.hits[0].fields?.[ALERT_UUID];
+};
+
+export const LINK_TO_ALERT_DETAIL = '/app/observability/alerts';

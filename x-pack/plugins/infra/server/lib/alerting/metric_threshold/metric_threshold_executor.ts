@@ -26,7 +26,13 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
-import { UNGROUPED_FACTORY_KEY, getViewInAppUrl, createScopedLogger } from '../common/utils';
+import {
+  createScopedLogger,
+  getAlertUuidFromAlertId,
+  getViewInAppUrl,
+  LINK_TO_ALERT_DETAIL,
+  UNGROUPED_FACTORY_KEY,
+} from '../common/utils';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -66,11 +72,16 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
-    const startTime = Date.now();
     const { services, params, state, startedAt, alertId, executionId } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
+    const startTime = Date.now();
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
+
+    const esClient = services.scopedClusterClient.asCurrentUser;
+    const alertInstanceId = await getAlertUuidFromAlertId(esClient, alertId);
+
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
@@ -100,15 +111,21 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
+
         alert.scheduleActions(actionGroupId, {
-          group: UNGROUPED_FACTORY_KEY,
+          alertDetailsUrl: getViewInAppUrl(
+            libs.basePath,
+            `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
+          ),
           alertState: stateToAlertMessage[AlertStates.ERROR],
+          group: UNGROUPED_FACTORY_KEY,
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
           reason,
-          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
           timestamp,
           value: null,
-          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
         });
+
         return {
           lastRunTimestamp: startedAt.valueOf(),
           missingGroups: [],
@@ -228,21 +245,26 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             : FIRED_ACTIONS.id;
         const alert = alertFactory(`${group}`, reason);
         scheduledActionsCount++;
+
         alert.scheduleActions(actionGroupId, {
-          group,
+          alertDetailsUrl: getViewInAppUrl(
+            libs.basePath,
+            `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
+          ),
           alertState: stateToAlertMessage[nextState],
+          group,
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
           reason,
-          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
+          threshold: mapToConditionsLookup(
+            alertResults,
+            (result) => formatAlertResult(result[group]).threshold
+          ),
           timestamp,
           value: mapToConditionsLookup(
             alertResults,
             (result) => formatAlertResult(result[group]).currentValue
           ),
-          threshold: mapToConditionsLookup(
-            alertResults,
-            (result) => formatAlertResult(result[group]).threshold
-          ),
-          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
         });
       }
     }
@@ -253,12 +275,16 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const recoveredAlertId = alert.getId();
       const viewInAppUrl = getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
       const context = {
-        group: recoveredAlertId,
+        alertDetailsUrl: getViewInAppUrl(
+          libs.basePath,
+          `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
+        ),
         alertState: stateToAlertMessage[AlertStates.OK],
-        timestamp: startedAt.toISOString(),
-        viewInAppUrl,
-        threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+        group: recoveredAlertId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
+        timestamp: startedAt.toISOString(),
+        threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+        viewInAppUrl,
       };
       alert.setContext(context);
     }
