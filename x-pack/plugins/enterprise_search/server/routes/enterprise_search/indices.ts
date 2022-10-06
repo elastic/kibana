@@ -9,10 +9,12 @@ import {
   IngestPutPipelineRequest,
   IngestSimulateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+
 import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
+import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { deleteConnectorById } from '../../lib/connectors/delete_connector';
 
@@ -26,8 +28,10 @@ import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
+import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
+import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import {
@@ -293,9 +297,15 @@ export function registerIndexRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
-      const pipelines = await getCustomPipelines(indexName, client);
+      const [defaultPipeline, customPipelines] = await Promise.all([
+        getPipeline(DEFAULT_PIPELINE_NAME, client),
+        getCustomPipelines(indexName, client),
+      ]);
       return response.ok({
-        body: pipelines,
+        body: {
+          ...defaultPipeline,
+          ...customPipelines,
+        },
         headers: { 'content-type': 'application/json' },
       });
     })
@@ -511,6 +521,30 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: simulateResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/errors',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      const errors = await getMlInferenceErrors(indexName, client.asCurrentUser);
+
+      return response.ok({
+        body: {
+          errors,
+        },
         headers: { 'content-type': 'application/json' },
       });
     })

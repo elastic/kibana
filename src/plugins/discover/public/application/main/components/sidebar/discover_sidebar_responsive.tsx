@@ -182,7 +182,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { dataViewFieldEditor, dataViewEditor } = services;
   const { availableFields$ } = props;
 
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !selectedDataView?.isPersisted();
 
   useEffect(
     () => {
@@ -241,25 +242,19 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     ]
   );
 
-  const createNewDataView = useMemo(
-    () =>
-      canEditDataView
-        ? () => {
-            const ref = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                onDataViewCreated(dataView);
-              },
-            });
-            if (setDataViewEditorRef) {
-              setDataViewEditorRef(ref);
-            }
-            if (closeFlyout) {
-              closeFlyout();
-            }
-          }
-        : undefined,
-    [canEditDataView, dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]
-  );
+  const createNewDataView = useCallback(() => {
+    const ref = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        onDataViewCreated(dataView);
+      },
+    });
+    if (setDataViewEditorRef) {
+      setDataViewEditorRef(ref);
+    }
+    if (closeFlyout) {
+      closeFlyout();
+    }
+  }, [dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]);
 
   if (!selectedDataView) {
     return null;
