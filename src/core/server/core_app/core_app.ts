@@ -21,7 +21,7 @@ import type {
   IBasePath,
 } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
+import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { registerBundleRoutes } from './bundle_routes';
 import type { InternalCoreAppRequestHandlerContext } from './internal_types';

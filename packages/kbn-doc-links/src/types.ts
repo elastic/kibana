@@ -277,6 +277,7 @@ export interface DocLinks {
     };
     readonly threatIntelInt: string;
     readonly responseActions: string;
+    readonly configureEndpointIntegrationPolicy: string;
   };
   readonly query: {
     readonly eql: string;
@@ -340,6 +341,7 @@ export interface DocLinks {
     userExperience: string;
     createAlerts: string;
     syntheticsCommandReference: string;
+    syntheticsProjectMonitors: string;
   }>;
   readonly alerting: Record<string, string>;
   readonly maps: Readonly<{

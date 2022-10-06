@@ -1,0 +1,200 @@
+{
+  "id": "@kbn/core-http-resources-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-http-resources-server-internal",
+        "id": "def-server.HttpResourcesService",
+        "type": "Class",
+        "tags": [],
+        "label": "HttpResourcesService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-resources-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpResourcesServerInternalPluginApi",
+            "section": "def-server.HttpResourcesService",
+            "text": "HttpResourcesService"
+          },
+          " implements ",
+          "CoreService",
+          "<",
+          "InternalHttpResourcesPreboot",
+          ", void>"
+        ],
+        "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-resources-server-internal",
+            "id": "def-server.HttpResourcesService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-resources-server-internal",
+                "id": "def-server.HttpResourcesService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-resources-server-internal",
+            "id": "def-server.HttpResourcesService.preboot",
+            "type": "Function",
+            "tags": [],
+            "label": "preboot",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "PrebootDeps",
+              ") => { createRegistrar: (router: ",
+              "IRouter",
+              "<",
+              "RequestHandlerContext",
+              ">) => ",
+              "HttpResources",
+              "; }"
+            ],
+            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-resources-server-internal",
+                "id": "def-server.HttpResourcesService.preboot.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "PrebootDeps"
+                ],
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-resources-server-internal",
+            "id": "def-server.HttpResourcesService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SetupDeps",
+              ") => { createRegistrar: (router: ",
+              "IRouter",
+              "<",
+              "RequestHandlerContext",
+              ">) => ",
+              "HttpResources",
+              "; }"
+            ],
+            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-resources-server-internal",
+                "id": "def-server.HttpResourcesService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SetupDeps"
+                ],
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-resources-server-internal",
+            "id": "def-server.HttpResourcesService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-resources-server-internal",
+            "id": "def-server.HttpResourcesService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
