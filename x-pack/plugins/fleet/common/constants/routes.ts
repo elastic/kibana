@@ -131,6 +131,7 @@ export const AGENT_API_ROUTES = {
   ACTION_STATUS_PATTERN: `${API_ROOT}/agents/action_status`,
   LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
+  GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

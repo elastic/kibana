@@ -8,6 +8,8 @@
 import { readFile } from 'fs/promises';
 import Path from 'path';
 
+import { Stream } from 'stream';
+
 import { REPO_ROOT } from '@kbn/utils';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
@@ -42,6 +44,7 @@ import type {
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
   GetActionStatusRequestSchema,
+  GetAgentUploadFileRequestSchema,
 } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
@@ -375,6 +378,23 @@ export const getAgentUploadsHandler: RequestHandler<
     };
 
     return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getAgentUploadFileHandler: RequestHandler<
+  TypeOf<typeof GetAgentUploadFileRequestSchema.params>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    const readable = await AgentService.getAgentUploadFile(esClient, request.params.fileId);
+
+    const stream = new Stream.PassThrough();
+    readable.pipe(stream);
+
+    return response.ok({ body: stream });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

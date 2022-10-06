@@ -210,6 +210,11 @@ export const agentRouteService = {
   getBulkRequestDiagnosticsPath: () => AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
   getListAgentUploads: (agentId: string) =>
     AGENT_API_ROUTES.LIST_UPLOADS_PATTERN.replace('{agentId}', agentId),
+  getAgentFileDownloadLink: (fileId: string, fileName: string) =>
+    AGENT_API_ROUTES.GET_UPLOAD_FILE_PATTERN.replace('{fileId}', fileId).replace(
+      '{fileName}',
+      fileName
+    ),
 };
 
 export const outputRoutesService = {

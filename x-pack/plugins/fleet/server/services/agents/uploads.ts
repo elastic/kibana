@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Readable } from 'stream';
+
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
@@ -11,7 +13,7 @@ import { createEsFileClient } from '@kbn/files-plugin/server';
 
 import type { AgentDiagnostics } from '../../../common/types/models';
 import { appContextService } from '../app_context';
-import { AGENT_ACTIONS_INDEX } from '../../../common';
+import { AGENT_ACTIONS_INDEX, agentRouteService } from '../../../common';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -38,7 +40,7 @@ export async function getAgentUploads(
       file = files[0];
     }
     const fileName = file?.name ?? `${moment(action.timestamp!).format('YYYY-MM-DD HH:mm:ss')}.zip`;
-    const filePath = `/api/files/files/${action.actionId}/blob/${fileName}`; // TODO mock value
+    const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
     return {
       actionId: action.actionId,
       id: file?.id ?? action.actionId,
@@ -93,7 +95,10 @@ async function _getRequestDiagnosticsActions(
   }));
 }
 
-export async function getDiagnosticFile(esClient: ElasticsearchClient, id: string): Promise<any> {
+export async function getAgentUploadFile(
+  esClient: ElasticsearchClient,
+  id: string
+): Promise<Readable> {
   try {
     const fileClient = createEsFileClient({
       blobStorageIndex: '.fleet-agent-file-data',
@@ -102,10 +107,11 @@ export async function getDiagnosticFile(esClient: ElasticsearchClient, id: strin
       logger: appContextService.getLogger(),
     });
 
-    const results = await fileClient.get({
+    const file = await fileClient.get({
       id,
     });
-    return results;
+
+    return await file.downloadContent();
   } catch (error) {
     appContextService.getLogger().error(error);
     throw error;

@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import {
   sendGetAgentUploads,
   sendPostRequestDiagnostics,
+  useLink,
   useStartServices,
 } from '../../../../../hooks';
 import type { AgentDiagnostics, Agent } from '../../../../../../../../common/types/models';
@@ -41,6 +42,7 @@ export interface AgentDiagnosticsProps {
 
 export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps> = ({ agent }) => {
   const { notifications } = useStartServices();
+  const { getAbsolutePath } = useLink();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [diagnosticsEntries, setDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
@@ -91,7 +93,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       render: (id: string) => {
         const currentItem = diagnosticsEntries.find((item) => item.id === id);
         return currentItem?.status === 'READY' ? (
-          <EuiLink href={currentItem?.filePath} download target="_blank">
+          <EuiLink href={getAbsolutePath(currentItem?.filePath)} download target="_blank">
             <EuiIcon type="download" /> &nbsp; {currentItem?.name}
           </EuiLink>
         ) : currentItem?.status === 'IN_PROGRESS' || currentItem?.status === 'AWAITING_UPLOAD' ? (
