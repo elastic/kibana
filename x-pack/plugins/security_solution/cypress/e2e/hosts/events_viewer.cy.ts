@@ -12,6 +12,7 @@ import {
   FIELDS_BROWSER_VIEW_BUTTON,
 } from '../../screens/fields_browser';
 import {
+  EVENT_VIEWER_CHECKBOX,
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
   INSPECT_MODAL,
@@ -38,6 +39,11 @@ import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
 import { HOSTS_URL } from '../../urls/navigation';
 import { resetFields } from '../../tasks/timeline';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { SELECTED_ALERTS } from '../../screens/alerts';
+import {
+  SELECT_ALL_EVENTS,
+  SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE,
+} from '../../screens/common/controls';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -153,6 +159,34 @@ describe('Events Viewer', () => {
           kqlSearch(`${filterInput}{enter}`);
           cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', initialNumberOfEvents);
         });
+    });
+  });
+
+  context.only('Bulk operations', () => {
+    beforeEach(() => {
+      visit(HOSTS_URL);
+      openEvents();
+      waitsForEventsToBeLoaded();
+    });
+
+    it('Adding multiple events to the timeline should be successful', () => {
+      // select all visible events
+      cy.get(EVENT_VIEWER_CHECKBOX).first().scrollIntoView().click();
+      cy.get(SELECTED_ALERTS).then((sub) => {
+        const alertCountText = sub.text();
+        const alertCount = alertCountText.split(' ')[1];
+        sub.trigger('click');
+        cy.get(SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE).click();
+        cy.get('body').should('contain.text', `${alertCount} event IDs`);
+        cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
+      });
+    });
+
+    it('When selected all events are selected, bulk action should be disabled', () => {
+      cy.get(EVENT_VIEWER_CHECKBOX).first().scrollIntoView().click();
+      cy.get(SELECT_ALL_EVENTS).click();
+      cy.get(SELECTED_ALERTS).click();
+      cy.get(SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE).should('be.disabled');
     });
   });
 });

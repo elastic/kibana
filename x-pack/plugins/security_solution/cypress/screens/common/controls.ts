@@ -14,3 +14,7 @@ export const EUI_CHECKBOX = '.euiCheckbox__input';
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const COMBO_BOX_SELECTION = '.euiMark';
+
+export const SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE = '[data-test-subj="add-bulk-to-timeline"]';
+
+export const SELECT_ALL_EVENTS = '[data-test-subj="selectAllAlertsButton"]';
