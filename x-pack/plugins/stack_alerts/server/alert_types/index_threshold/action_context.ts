@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { RuleExecutorOptions, AlertInstanceContext } from '@kbn/alerting-plugin/server';
-import { Params } from './alert_type_params';
+import { Params } from './rule_type_params';
 
-// alert type context provided to actions
+// rule type context provided to actions
 
 type RuleInfo = Pick<RuleExecutorOptions, 'name'>;
 
@@ -21,10 +21,10 @@ export interface ActionContext extends BaseActionContext {
 }
 
 export interface BaseActionContext extends AlertInstanceContext {
-  // the aggType used in the alert
+  // the aggType used in the rule
   // the value of the aggField, if used, otherwise 'all documents'
   group: string;
-  // the date the alert was run as an ISO date
+  // the date the rule was run as an ISO date
   date: string;
   // the value that met the threshold
   value: number | string;

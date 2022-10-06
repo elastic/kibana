@@ -5,14 +5,5 @@
  * 2.0.
  */
 
-export interface TimeSeriesResult {
-  results: TimeSeriesResultRow[];
-  truncated: boolean;
-}
-
-export interface TimeSeriesResultRow {
-  group: string;
-  metrics: MetricResult[];
-}
-
-export type MetricResult = [string, number]; // [iso date, value]
+export { getImageMetadata, isImage, fitToBox } from './image_metadata';
+export type { ImageMetadataFactory } from './image_metadata';
