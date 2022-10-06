@@ -13,6 +13,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect, RecursivePartial } from '@elastic/eui';
 import { cloneDeep, isEqual, set } from 'lodash';
+import { OpsgenieSubActions } from '../../../../common';
 import type {
   OpsgenieActionParams,
   OpsgenieCloseAlertSubActionParams,
@@ -99,8 +100,8 @@ const CloseAlertComponent: React.FC<SubActionProps<OpsgenieCloseAlertSubActionPa
 CloseAlertComponent.displayName = 'CloseAlertComponent';
 
 interface SubActionState {
-  createAlert: RecursivePartial<OpsgenieCreateAlertParams>;
-  closeAlert: RecursivePartial<OpsgenieCreateAlertParams>;
+  [OpsgenieSubActions.CreateAlert]: RecursivePartial<OpsgenieCreateAlertParams> | undefined;
+  [OpsgenieSubActions.CloseAlert]: RecursivePartial<OpsgenieCreateAlertParams> | undefined;
 }
 
 const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = ({
@@ -111,20 +112,23 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   messageVariables,
 }) => {
   const { subAction, subActionParams } = actionParams;
-  const defaultedSubAction = useMemo(() => subAction ?? 'createAlert', [subAction]);
+  const defaultedSubAction: OpsgenieSubActions = useMemo(
+    () => subAction ?? OpsgenieSubActions.CreateAlert,
+    [subAction]
+  );
 
   const [subActionParamsState, setSubActionParamsState] = useState<SubActionState>({
-    createAlert: {},
-    closeAlert: {},
+    createAlert: undefined,
+    closeAlert: undefined,
   });
 
   const actionOptions = [
     {
-      value: 'createAlert',
+      value: OpsgenieSubActions.CreateAlert,
       text: i18n.CREATE_ALERT_ACTION,
     },
     {
-      value: 'closeAlert',
+      value: OpsgenieSubActions.CloseAlert,
       text: i18n.CLOSE_ALERT_ACTION,
     },
   ];
@@ -156,24 +160,36 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
 
   useEffect(() => {
     /**
-     * Unfortunately I'm not able to do two editAction calls right after each other. For whatever reason the first call
-     * gets ignored. Ideally when the subAction is changed I can grab the subActionParams for that particular action and
-     * call editAction. This would be done in the onActionChange callback but it doesn't work. So instead when the
-     * component rerenders because the subAction changes we'll check to see if the params are different, if so then we'll
-     * assume we need to switch to the saved state.
-     *
-     * This shouldn't cause unnecessary rerenders because the state should be updated whenever editAction would be called
-     * with a subActionParams change, so the subActionParams and state should only be unequal when the subAction is
-     * changed the initially
+     * When an action is created we pass a default string for the alias field for both create and close alert.
+     * So if the state is not initialized yet then we should take whatever is specified by the actionParams prop.
+     * It's possible that value will be undefined for a few renders, but that's fine because we'll keep checking until
      */
-    if (!isEqual(subActionParams, subActionParamsState[defaultedSubAction])) {
+    if (subActionParamsState[defaultedSubAction] == null) {
+      setSubActionParamsState((previousState) => {
+        const stateCopy = cloneDeep(previousState);
+        set(stateCopy, `${defaultedSubAction}`, subActionParams);
+
+        return stateCopy;
+      });
+    } else if (!isEqual(subActionParams, subActionParamsState[defaultedSubAction])) {
+      /**
+       * Unfortunately I'm not able to do two editAction calls right after each other. For whatever reason the first call
+       * gets ignored. Ideally when the subAction is changed I can grab the subActionParams for that particular action and
+       * call editAction. This would be done in the onActionChange callback but it doesn't work. So instead when the
+       * component rerenders because the subAction changes we'll check to see if the params are different, if so then we'll
+       * assume we need to switch to the saved state.
+       *
+       * This shouldn't cause unnecessary rerenders because the state should be updated whenever editAction would be called
+       * with a subActionParams change, so the subActionParams and state should only be unequal when the subAction is
+       * changed the initially
+       */
       editAction('subActionParams', subActionParamsState[defaultedSubAction], index);
     }
   }, [defaultedSubAction, editAction, index, subActionParams, subActionParamsState]);
 
   useEffect(() => {
     if (!subAction) {
-      editAction('subAction', 'createAlert', index);
+      editAction('subAction', OpsgenieSubActions.CreateAlert, index);
     }
 
     if (!subActionParams) {
@@ -223,4 +239,5 @@ export { OpsgenieParamFields as default };
 
 const isCreateAlertAction = (
   params: Partial<OpsgenieActionParams>
-): params is Partial<OpsgenieCreateAlertSubActionParams> => params.subAction === 'createAlert';
+): params is Partial<OpsgenieCreateAlertSubActionParams> =>
+  params.subAction === OpsgenieSubActions.CreateAlert;

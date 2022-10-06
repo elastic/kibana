@@ -13,6 +13,7 @@ import {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RecursivePartial } from '@elastic/eui';
+import { OpsgenieSubActions } from '../../../../common';
 import type {
   OpsgenieActionConfig,
   OpsgenieActionParams,
@@ -30,6 +31,8 @@ const SELECT_MESSAGE = i18n.translate(
 const TITLE = i18n.translate('xpack.stackConnectors.components.opsgenie.connectorTypeTitle', {
   defaultMessage: 'Opsgenie',
 });
+
+const defaultAlias = `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`;
 
 export const getConnectorType = (): ConnectorTypeModel<
   OpsgenieActionConfig,
@@ -55,14 +58,14 @@ export const getConnectorType = (): ConnectorTypeModel<
       };
 
       if (
-        actionParams.subAction === 'createAlert' &&
+        actionParams.subAction === OpsgenieSubActions.CreateAlert &&
         !actionParams?.subActionParams?.message?.length
       ) {
         errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
       }
 
       if (
-        actionParams.subAction === 'closeAlert' &&
+        actionParams.subAction === OpsgenieSubActions.CloseAlert &&
         !actionParams?.subActionParams?.alias?.length
       ) {
         errors['subActionParams.alias'].push(translations.ALIAS_IS_REQUIRED);
@@ -73,9 +76,15 @@ export const getConnectorType = (): ConnectorTypeModel<
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
     defaultActionParams: {
-      subAction: 'createAlert',
+      subAction: OpsgenieSubActions.CreateAlert,
       subActionParams: {
-        alias: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+        alias: defaultAlias,
+      },
+    },
+    defaultRecoveredActionParams: {
+      subAction: OpsgenieSubActions.CloseAlert,
+      subActionParams: {
+        alias: defaultAlias,
       },
     },
   };
