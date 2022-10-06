@@ -1688,6 +1688,37 @@ module.exports = {
     },
 
     /**
+     * Enterprise Search case override
+     * Allows snake_case variables in the server, because that's how we return API properties
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/naming-convention': [
+          'error',
+          {
+            selector: 'default',
+            format: ['camelCase', 'snake_case'],
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
+
+          {
+            selector: 'variable',
+            format: ['camelCase', 'UPPER_CASE', 'snake_case'],
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
+
+          {
+            selector: 'typeLike',
+            format: ['PascalCase'],
+          },
+        ],
+      },
+    },
+
+    /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
