@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import uuid from 'uuid';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
@@ -15,22 +15,14 @@ import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 
-import { errorsToResults, bulkUpdateAgents } from './crud';
-import { createAgentAction } from './actions';
+import { bulkUpdateAgents } from './crud';
+import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class ReassignActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
-    return await reassignBatch(
-      this.soClient,
-      this.esClient,
-      this.actionParams! as any,
-      agents,
-      {},
-      undefined,
-      true
-    );
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
+    return await reassignBatch(this.soClient, this.esClient, this.actionParams! as any, agents, {});
   }
 
   protected getTaskType() {
@@ -51,10 +43,8 @@ export async function reassignBatch(
     total?: number;
   },
   givenAgents: Agent[],
-  outgoingErrors: Record<Agent['id'], Error>,
-  agentIds?: string[],
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+  outgoingErrors: Record<Agent['id'], Error>
+): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -62,7 +52,7 @@ export async function reassignBatch(
   const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
     if (agent.policy_id === options.newAgentPolicyId) {
       errors[agent.id] = new AgentReassignmentError(
-        `${agent.id} is already assigned to ${options.newAgentPolicyId}`
+        `Agent ${agent.id} is already assigned to agent policy ${options.newAgentPolicyId}`
       );
     } else if (isHostedAgent(hostedPolicies, agent)) {
       errors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
@@ -74,14 +64,12 @@ export async function reassignBatch(
     return agents;
   }, []);
 
-  const result = { items: errorsToResults(givenAgents, errors, agentIds, skipSuccess) };
-
   if (agentsToUpdate.length === 0) {
     // early return if all agents failed validation
     appContextService
       .getLogger()
       .debug('No agents to update, skipping agent update and action creation');
-    return result;
+    throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
   }
 
   await bulkUpdateAgents(
@@ -92,17 +80,31 @@ export async function reassignBatch(
         policy_id: options.newAgentPolicyId,
         policy_revision: null,
       },
-    }))
+    })),
+    errors
   );
+
+  const actionId = options.actionId ?? uuid();
+  const total = options.total ?? givenAgents.length;
 
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
-    id: options.actionId,
+    id: actionId,
     agents: agentsToUpdate.map((agent) => agent.id),
     created_at: now,
     type: 'POLICY_REASSIGN',
-    total: options.total,
+    total,
+    data: {
+      policy_id: options.newAgentPolicyId,
+    },
   });
 
-  return result;
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'already assigned or assigned to hosted policy'
+  );
+
+  return { actionId };
 }

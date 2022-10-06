@@ -14,27 +14,28 @@ import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import {
+  TableListViewKibanaDependencies,
+  TableListViewKibanaProvider,
+} from '@kbn/content-management-table-list';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
+import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
 import { addHelpMenuToAppChrome } from './lib';
+import { pluginServices } from '../services/plugin_services';
 import { DashboardNoMatch } from './listing/dashboard_no_match';
+import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
+import { DashboardApplicationService } from '../services/application/types';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
-import {
-  DashboardAppServices,
-  DashboardEmbedSettings,
-  RedirectToProps,
-  DashboardMountContextProps,
-} from '../types';
-import { DashboardStart, DashboardStartDependencies } from '../plugin';
-import { pluginServices } from '../services/plugin_services';
+import { DashboardEmbedSettings, RedirectToProps, DashboardMountContextProps } from '../types';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -50,25 +51,28 @@ export interface DashboardMountProps {
   mountContext: DashboardMountContextProps;
 }
 
+// because the type of `application.capabilities.advancedSettings` is so generic, the provider
+// requiring the `save` key to be part of it is causing type issues - so, creating a custom type
+type TableListViewApplicationService = DashboardApplicationService & {
+  capabilities: { advancedSettings: { save: boolean } };
+};
+
 export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
-  const [, , dashboardStart] = await core.getStartServices(); // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   const { DashboardMountContext } = await import('./hooks/dashboard_mount_context');
 
   const {
+    application,
     chrome: { setBadge, docTitle },
     dashboardCapabilities: { showWriteControls },
     data: dataStart,
     embeddable,
+    notifications,
+    savedObjectsTagging,
     settings: { uiSettings },
   } = pluginServices.getServices();
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
   let routerHistory: History;
-
-  // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
-  const dashboardServices: DashboardAppServices = {
-    savedDashboards: dashboardStart.getSavedDashboardLoader(),
-  };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
     createKbnUrlStateStorage({
@@ -158,12 +162,25 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   });
 
   const app = (
-    // TODO: Remove KibanaContextProvider as part of https://github.com/elastic/kibana/pull/138774
     <I18nProvider>
       <Provider store={dashboardStateStore}>
-        <KibanaContextProvider services={dashboardServices}>
-          <DashboardMountContext.Provider value={mountContext}>
-            <KibanaThemeProvider theme$={core.theme.theme$}>
+        <DashboardMountContext.Provider value={mountContext}>
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <TableListViewKibanaProvider
+              {...{
+                core: {
+                  application: application as TableListViewApplicationService,
+                  notifications,
+                },
+                toMountPoint,
+                savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
+                  ? ({
+                      ui: savedObjectsTagging,
+                    } as TableListViewKibanaDependencies['savedObjectsTagging'])
+                  : undefined,
+                FormattedRelative,
+              }}
+            >
               <HashRouter>
                 <Switch>
                   <Route
@@ -184,9 +201,9 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
                   <Route render={renderNoMatch} />
                 </Switch>
               </HashRouter>
-            </KibanaThemeProvider>
-          </DashboardMountContext.Provider>
-        </KibanaContextProvider>
+            </TableListViewKibanaProvider>
+          </KibanaThemeProvider>
+        </DashboardMountContext.Provider>
       </Provider>
     </I18nProvider>
   );

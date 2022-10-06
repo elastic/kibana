@@ -7,13 +7,14 @@
  */
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { Query, AggregateQuery } from '@kbn/es-query';
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, DocLinksStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
@@ -84,6 +85,9 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   application: CoreStart['application'];
   http: CoreStart['http'];
   storage: IStorageWrapper;
+  docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   usageCollection?: UsageCollectionStart;
 }

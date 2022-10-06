@@ -10,7 +10,46 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
+        "id": "def-server.createAgentStoreMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createAgentStoreMock",
+        "description": [],
+        "signature": [
+          "(agents?: Set<",
+          "NetworkAgent",
+          ">) => ",
+          "AgentStore"
+        ],
+        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/agent_manager.mocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
+            "id": "def-server.createAgentStoreMock.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "agents",
+            "description": [],
+            "signature": [
+              "Set<",
+              "NetworkAgent",
+              ">"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/agent_manager.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -237,7 +276,7 @@
             "label": "asInternalUser",
             "description": [],
             "signature": [
-              "{ get: ",
+              "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -341,7 +380,7 @@
               },
               "<",
               "default",
-              ">; name: string | symbol; index: ",
+              ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1348,7 +1387,7 @@
             "label": "asInternalUser",
             "description": [],
             "signature": [
-              "{ get: ",
+              "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1452,7 +1491,7 @@
               },
               "<",
               "default",
-              ">; name: string | symbol; index: ",
+              ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2413,7 +2452,7 @@
             "label": "asCurrentUser",
             "description": [],
             "signature": [
-              "{ get: ",
+              "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2517,7 +2556,7 @@
               },
               "<",
               "default",
-              ">; name: string | symbol; index: ",
+              ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -3545,7 +3584,7 @@
         "label": "ElasticsearchClientMock",
         "description": [],
         "signature": [
-          "{ get: ",
+          "{ name: string | symbol; get: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",
@@ -3649,7 +3688,7 @@
           },
           "<",
           "default",
-          ">; name: string | symbol; index: ",
+          ">; index: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",

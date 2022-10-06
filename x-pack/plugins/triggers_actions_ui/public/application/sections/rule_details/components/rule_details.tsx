@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { updateAPIKey, deleteRules } from '../../../lib/rule_api';
+import { bulkUpdateAPIKey, deleteRules } from '../../../lib/rule_api';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { RuleActionsPopover } from './rule_actions_popover';
 import {
@@ -36,7 +36,7 @@ import {
   hasExecuteActionsCapability,
   hasManageApiKeysCapability,
 } from '../../../lib/capabilities';
-import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import {
   Rule,
@@ -117,10 +117,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([
-      getAlertingSectionBreadcrumb('rules'),
-      getRuleDetailsBreadcrumb(rule.id, rule.name),
-    ]);
+    setBreadcrumbs([getAlertingSectionBreadcrumb('rules', true), { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -298,7 +295,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           setRulesToUpdateAPIKey([]);
         }}
         idsToUpdate={rulesToUpdateAPIKey}
-        apiUpdateApiKeyCall={updateAPIKey}
+        apiUpdateApiKeyCall={bulkUpdateAPIKey}
         setIsLoadingState={() => {}}
         onUpdated={async () => {
           setRulesToUpdateAPIKey([]);

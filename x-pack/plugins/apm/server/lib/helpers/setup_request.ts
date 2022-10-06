@@ -39,7 +39,7 @@ export async function setupRequest({
   plugins,
   request,
   config,
-}: APMRouteHandlerResources) {
+}: APMRouteHandlerResources): Promise<Setup> {
   return withApmSpan('setup_request', async () => {
     const { query } = params;
     const coreContext = await context.core;

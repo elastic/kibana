@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FileKind } from '@kbn/files-plugin/common';
+import type { FileKind, FileImageMetadata } from '@kbn/files-plugin/common';
 
 export const PLUGIN_ID = 'filesExample';
 export const PLUGIN_NAME = 'filesExample';
@@ -16,6 +16,7 @@ const httpTags = {
 
 export const exampleFileKind: FileKind = {
   id: 'filesExample',
+  allowedMimeTypes: ['image/png'],
   http: {
     create: httpTags,
     delete: httpTags,
@@ -26,3 +27,5 @@ export const exampleFileKind: FileKind = {
     update: httpTags,
   },
 };
+
+export type MyImageMetadata = FileImageMetadata;

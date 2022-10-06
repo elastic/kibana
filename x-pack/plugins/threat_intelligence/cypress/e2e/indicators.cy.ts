@@ -6,25 +6,31 @@
  */
 
 import {
+  ADD_INTEGRATIONS_BUTTON,
+  BREADCRUMBS,
   DEFAULT_LAYOUT_TITLE,
+  EMPTY_STATE,
+  ENDING_BREADCRUMB,
+  FIELD_BROWSER,
+  FIELD_BROWSER_MODAL,
+  FIELD_SELECTOR,
+  FIELD_SELECTOR_INPUT,
+  FIELD_SELECTOR_LIST,
+  FIELD_SELECTOR_TOGGLE_BUTTON,
+  FILTERS_GLOBAL_CONTAINER,
   FLYOUT_JSON,
   FLYOUT_TABLE,
   FLYOUT_TABS,
   FLYOUT_TITLE,
+  INDICATOR_TYPE_CELL,
   INDICATORS_TABLE,
-  TOGGLE_FLYOUT_BUTTON,
-  FILTERS_GLOBAL_CONTAINER,
-  TIME_RANGE_PICKER,
+  INSPECTOR_BUTTON,
+  INSPECTOR_PANEL,
+  LEADING_BREADCRUMB,
   QUERY_INPUT,
   TABLE_CONTROLS,
-  INDICATOR_TYPE_CELL,
-  EMPTY_STATE,
-  FIELD_SELECTOR,
-  BREADCRUMBS,
-  LEADING_BREADCRUMB,
-  ENDING_BREADCRUMB,
-  FIELD_BROWSER,
-  FIELD_BROWSER_MODAL,
+  TIME_RANGE_PICKER,
+  TOGGLE_FLYOUT_BUTTON,
 } from '../screens/indicators';
 import { login } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -143,16 +149,13 @@ describe('Indicators', () => {
 
     it('should have the default selected field, then update when user selects', () => {
       const threatFeedName = 'threat.feed.name';
-      cy.get(`${FIELD_SELECTOR}`).should('have.value', threatFeedName);
+      cy.get(`${FIELD_SELECTOR_INPUT}`).eq(0).should('have.text', threatFeedName);
 
-      const threatIndicatorIp: string = 'threat.indicator.ip';
+      const timestamp: string = '@timestamp';
 
-      cy.get(`${FIELD_SELECTOR}`)
-        .should('exist')
-        .select(threatIndicatorIp)
-        .should('have.value', threatIndicatorIp);
+      cy.get(`${FIELD_SELECTOR_TOGGLE_BUTTON}`).should('exist').click();
 
-      cy.get(`${FIELD_SELECTOR}`).should('have.value', threatIndicatorIp);
+      cy.get(`${FIELD_SELECTOR_LIST}`).should('exist').contains(timestamp);
     });
   });
 
@@ -168,6 +171,38 @@ describe('Indicators', () => {
         cy.get(FIELD_BROWSER).last().click({ force: true });
 
         cy.get(FIELD_BROWSER_MODAL).should('be.visible');
+      });
+    });
+  });
+
+  describe('Request inspector', () => {
+    before(() => {
+      cy.visit(THREAT_INTELLIGENCE);
+
+      selectRange();
+    });
+
+    describe('when inspector button is clicked', () => {
+      it('should render the inspector flyout', () => {
+        cy.get(INSPECTOR_BUTTON).last().click({ force: true });
+
+        cy.get(INSPECTOR_PANEL).contains('Indicators search requests');
+      });
+    });
+  });
+
+  describe('Add integrations', () => {
+    before(() => {
+      cy.visit(THREAT_INTELLIGENCE);
+
+      selectRange();
+    });
+
+    describe('when the global header add integrations button is clicked', () => {
+      it('should navigate to the Integrations page with Threat Intelligence category selected', () => {
+        cy.get(ADD_INTEGRATIONS_BUTTON).click();
+
+        cy.url().should('include', 'threat_intel');
       });
     });
   });

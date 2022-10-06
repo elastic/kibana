@@ -30,16 +30,15 @@ export const providers: PluginServiceProviders<
   ControlsServices,
   KibanaPluginServiceParams<ControlsPluginStartDeps>
 > = {
-  http: new PluginServiceProvider(httpServiceFactory),
+  controls: new PluginServiceProvider(controlsServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
-  unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
-  overlays: new PluginServiceProvider(overlaysServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
+  http: new PluginServiceProvider(httpServiceFactory),
+  optionsList: new PluginServiceProvider(optionsListServiceFactory, ['data', 'http']),
+  overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   theme: new PluginServiceProvider(themeServiceFactory),
-
-  optionsList: new PluginServiceProvider(optionsListServiceFactory, ['data', 'http']),
-  controls: new PluginServiceProvider(controlsServiceFactory),
+  unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
 };
 
 export const pluginServices = new PluginServices<ControlsServices>();

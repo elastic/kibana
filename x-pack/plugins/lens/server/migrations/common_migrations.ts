@@ -34,7 +34,8 @@ import {
   VisState850,
   LensDocShape850,
 } from './types';
-import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState, isPartitionShape } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState } from '../../common';
+import { isPartitionShape } from '../../common/visualizations';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -423,7 +424,7 @@ export const commonFixValueLabelsInXY = (
   };
 };
 
-export const commonExplicitAnnotationType = (
+export const commonEnrichAnnotationLayer = (
   attributes: LensDocShape850<XYVisStatePre850>
 ): LensDocShape850<VisState850> => {
   // Skip the migration heavy part if not XY or it does not contain annotations
@@ -449,6 +450,7 @@ export const commonExplicitAnnotationType = (
           return {
             ...l,
             annotations: l.annotations.map((a) => ({ ...a, type: 'manual' })),
+            ignoreGlobalFilters: true,
           };
         }),
       },

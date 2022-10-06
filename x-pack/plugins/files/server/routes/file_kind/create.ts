@@ -5,32 +5,27 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Ensure } from '@kbn/utility-types';
-import type { CreateFileKindHttpEndpoint } from '../../../common/api_routes';
-import type { FileKind } from '../../../common/types';
-import { FILES_API_ROUTES } from '../api_routes';
-import type { FileKindRouter, FileKindsRequestHandler } from './types';
+import { schema } from '@kbn/config-schema';
+import type { FileJSON, FileKind } from '../../../common/types';
+import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import type { FileKindRouter } from './types';
 import * as commonSchemas from '../common_schemas';
+import { CreateHandler } from './types';
 
 export const method = 'post' as const;
 
-export const bodySchema = schema.object({
-  name: commonSchemas.fileName,
-  alt: commonSchemas.fileAlt,
-  meta: commonSchemas.fileMeta,
-  mimeType: schema.maybe(schema.string()),
-});
+const rt = {
+  body: schema.object({
+    name: commonSchemas.fileName,
+    alt: commonSchemas.fileAlt,
+    meta: commonSchemas.fileMeta,
+    mimeType: schema.maybe(schema.string()),
+  }),
+};
 
-type Body = Ensure<CreateFileKindHttpEndpoint['inputs']['body'], TypeOf<typeof bodySchema>>;
+export type Endpoint<M = unknown> = CreateRouteDefinition<typeof rt, { file: FileJSON<M> }>;
 
-type Response = CreateFileKindHttpEndpoint['output'];
-
-export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
-  { fileKind, files },
-  req,
-  res
-) => {
+export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req, res) => {
   const { fileService } = await files;
   const {
     body: { name, alt, meta, mimeType },
@@ -38,7 +33,7 @@ export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
   const file = await fileService
     .asCurrentUser()
     .create({ fileKind, name, alt, meta, mime: mimeType });
-  const body: Response = {
+  const body: Endpoint['output'] = {
     file: file.toJSON(),
   };
   return res.ok({ body });
@@ -50,7 +45,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
       {
         path: FILES_API_ROUTES.fileKind.getCreateFileRoute(fileKind.id),
         validate: {
-          body: bodySchema,
+          ...rt,
         },
         options: {
           tags: fileKind.http.create.tags,

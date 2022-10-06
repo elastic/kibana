@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 
 import type { Agent, AgentAction, ActionStatus, CurrentUpgrade, NewAgentAction } from '../models';
 
@@ -72,13 +72,11 @@ export interface PostBulkAgentUnenrollRequest {
   };
 }
 
-export type PostBulkAgentUnenrollResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export interface BulkAgentAction {
+  actionId: string;
+}
+
+export type PostBulkAgentUnenrollResponse = BulkAgentAction;
 
 export interface PostAgentUpgradeRequest {
   params: {
@@ -100,13 +98,7 @@ export interface PostBulkAgentUpgradeRequest {
   };
 }
 
-export type PostBulkAgentUpgradeResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export type PostBulkAgentUpgradeResponse = BulkAgentAction;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
@@ -129,21 +121,9 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
-export type PostBulkAgentReassignResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export type PostBulkAgentReassignResponse = BulkAgentAction;
 
-export type PostBulkUpdateAgentTagsResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export type PostBulkUpdateAgentTagsResponse = BulkAgentAction;
 
 export interface DeleteAgentRequest {
   params: {

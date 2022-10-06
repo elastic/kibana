@@ -38,13 +38,9 @@ import type {
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 
+import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
-import {
-  hasEqlSequenceQuery,
-  isEqlRule,
-  isNewTermsRule,
-  isThresholdRule,
-} from '../../../../../common/detection_engine/utils';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
@@ -66,6 +62,7 @@ import {
 import { Loader } from '../../../../common/components/loader';
 import type { ErrorInfo } from '../error_callout';
 import { ErrorCallout } from '../error_callout';
+import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 
 interface EditExceptionFlyoutProps {
   ruleName: string;
@@ -131,7 +128,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
-    Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+    ExceptionsBuilderReturnExceptionItem[]
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
@@ -258,7 +255,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
       exceptionItems,
       errorExists,
     }: {
-      exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+      exceptionItems: ExceptionsBuilderReturnExceptionItem[];
       errorExists: boolean;
     }) => {
       setExceptionItemsToAdd(exceptionItems);
@@ -283,7 +280,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
 
   const enrichExceptionItems = useCallback(() => {
     const [exceptionItemToEdit] = exceptionItemsToAdd;
-    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [
+    let enriched: ExceptionsBuilderReturnExceptionItem[] = [
       {
         ...enrichExistingExceptionItemWithComments(exceptionItemToEdit, [
           ...exceptionItem.comments,
@@ -303,7 +300,9 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(
         maybeRule?.rule_id ?? '',
-        enrichExceptionItems(),
+        // This is being rewritten in https://github.com/elastic/kibana/pull/140643
+        // As of now, flyout cannot yet create item of type CreateRuleExceptionListItemSchema
+        enrichExceptionItems() as Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
         undefined,
         bulkCloseIndex
       );
@@ -337,6 +336,11 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
       }, '')
       .slice(0, -2);
   };
+
+  const allowLargeValueLists = useMemo(
+    () => (maybeRule != null ? ruleTypesThatAllowLargeValueLists.includes(maybeRule.type) : false),
+    [maybeRule]
+  );
 
   return (
     <EuiFlyout size="l" onClose={onCancel} data-test-subj="edit-exception-flyout">
@@ -386,10 +390,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
                 </>
               )}
               {getExceptionBuilderComponentLazy({
-                allowLargeValueLists:
-                  !isEqlRule(maybeRule?.type) &&
-                  !isThresholdRule(maybeRule?.type) &&
-                  !isNewTermsRule(maybeRule?.type),
+                allowLargeValueLists,
                 httpService: http,
                 autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: [exceptionItem],

@@ -6,8 +6,9 @@
  */
 import uuid from 'uuid';
 import expect from '@kbn/expect';
-import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -34,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.10.2')
+        .post('/api/fleet/epm/packages/synthetics/0.10.3')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -228,6 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
       const monitor = {
         ...httpMonitorJson,
         name: `Test monitor ${uuid.v4()}`,
+        [ConfigKey.NAMESPACE]: 'default',
         locations: [
           {
             id: testFleetPolicyID,
@@ -263,7 +265,9 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
 
-        expect(apiResponse.body.attributes).eql(omit(monitor, secretKeys));
+        expect(apiResponse.body.attributes).eql(
+          omit({ ...monitor, [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID) }, secretKeys)
+        );
         monitorId = apiResponse.body.id;
 
         const policyResponse = await supertestAPI.get(
@@ -277,7 +281,15 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(packagePolicy.policy_id).eql(testFleetPolicyID);
         expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0-${SPACE_ID}`);
-        comparePolicies(packagePolicy, getTestSyntheticsPolicy(monitor.name, monitorId));
+        comparePolicies(
+          packagePolicy,
+          getTestSyntheticsPolicy(
+            monitor.name,
+            monitorId,
+            undefined,
+            formatKibanaNamespace(SPACE_ID)
+          )
+        );
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);

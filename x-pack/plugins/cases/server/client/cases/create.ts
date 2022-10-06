@@ -22,13 +22,14 @@ import {
   excess,
   CaseSeverity,
 } from '../../../common/api';
-import { MAX_TITLE_LENGTH } from '../../../common/constants';
-import { isInvalidTag } from '../../../common/utils/validators';
+import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
+import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import { CasesClientArgs } from '..';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 /**
  * Creates a new case.
@@ -84,6 +85,14 @@ export const create = async (
           'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
         );
       }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+    }
+
+    if (areTotalAssigneesInvalid(query.assignees)) {
+      throw Boom.badRequest(
+        `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case.`
+      );
     }
 
     const newCase = await caseService.postNewCase({

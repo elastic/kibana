@@ -36,6 +36,10 @@ import type {
   TimestampOverride,
 } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type {
+  RuleResponseAction,
+  ResponseAction,
+} from '../../../../../common/detection_engine/rule_response_actions/schemas';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -58,6 +62,7 @@ export enum RuleStep {
   scheduleRule = 'schedule-rule',
   ruleActions = 'rule-actions',
 }
+
 export type RuleStepsOrder = [
   RuleStep.defineRule,
   RuleStep.aboutRule,
@@ -162,6 +167,7 @@ export interface DefineStepRule {
   dataSourceType: DataSourceType;
   newTermsFields: string[];
   historyWindowSize: string;
+  shouldLoadQueryDynamically: boolean;
 }
 
 export interface ScheduleStepRule {
@@ -172,6 +178,7 @@ export interface ScheduleStepRule {
 
 export interface ActionsStepRule {
   actions: RuleAction[];
+  responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
   throttle?: string | null;
@@ -238,6 +245,7 @@ export interface ScheduleStepRuleJson {
 
 export interface ActionsStepRuleJson {
   actions: RuleAlertAction[];
+  response_actions?: ResponseAction[];
   enabled: boolean;
   throttle?: string | null;
   meta?: unknown;

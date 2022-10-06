@@ -266,13 +266,49 @@ describe('test endpoint routes', () => {
               },
               {
                 bool: {
-                  should: [
+                  filter: [
                     {
                       bool: {
-                        filter: [
+                        should: [
                           {
                             bool: {
-                              should: [{ exists: { field: 'united.agent.upgrade_started_at' } }],
+                              filter: [
+                                {
+                                  bool: {
+                                    should: [
+                                      { exists: { field: 'united.agent.upgrade_started_at' } },
+                                    ],
+                                    minimum_should_match: 1,
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    must_not: {
+                                      bool: {
+                                        should: [{ exists: { field: 'united.agent.upgraded_at' } }],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            bool: {
+                              must_not: {
+                                bool: {
+                                  should: [{ exists: { field: 'united.agent.last_checkin' } }],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [
+                                { exists: { field: 'united.agent.unenrollment_started_at' } },
+                              ],
                               minimum_should_match: 1,
                             },
                           },
@@ -281,11 +317,7 @@ describe('test endpoint routes', () => {
                               must_not: {
                                 bool: {
                                   should: [
-                                    {
-                                      match: {
-                                        'united.agent.upgrade_status': 'completed',
-                                      },
-                                    },
+                                    { exists: { field: 'united.agent.policy_revision_idx' } },
                                   ],
                                   minimum_should_match: 1,
                                 },
@@ -293,21 +325,6 @@ describe('test endpoint routes', () => {
                             },
                           },
                         ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must_not: {
-                          bool: {
-                            should: [{ exists: { field: 'united.agent.last_checkin' } }],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [{ exists: { field: 'united.agent.unenrollment_started_at' } }],
                         minimum_should_match: 1,
                       },
                     },
@@ -315,14 +332,97 @@ describe('test endpoint routes', () => {
                       bool: {
                         must_not: {
                           bool: {
-                            should: [{ exists: { field: 'united.agent.policy_revision_idx' } }],
+                            should: [
+                              {
+                                bool: {
+                                  should: [
+                                    { range: { 'united.agent.last_checkin': { lt: 'now-300s' } } },
+                                  ],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                              {
+                                bool: {
+                                  filter: [
+                                    {
+                                      bool: {
+                                        should: [
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  match: {
+                                                    'united.agent.last_checkin_status': 'error',
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  match: {
+                                                    'united.agent.last_checkin_status': 'degraded',
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                        ],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
+                                    {
+                                      bool: {
+                                        must_not: {
+                                          bool: {
+                                            should: [
+                                              {
+                                                bool: {
+                                                  should: [
+                                                    {
+                                                      range: {
+                                                        'united.agent.last_checkin': {
+                                                          lt: 'now-300s',
+                                                        },
+                                                      },
+                                                    },
+                                                  ],
+                                                  minimum_should_match: 1,
+                                                },
+                                              },
+                                              {
+                                                bool: {
+                                                  should: [
+                                                    {
+                                                      exists: {
+                                                        field:
+                                                          'united.agent.unenrollment_started_at',
+                                                      },
+                                                    },
+                                                  ],
+                                                  minimum_should_match: 1,
+                                                },
+                                              },
+                                            ],
+                                            minimum_should_match: 1,
+                                          },
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
                             minimum_should_match: 1,
                           },
                         },
                       },
                     },
                   ],
-                  minimum_should_match: 1,
                 },
               },
               {

@@ -22,6 +22,7 @@ export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
 export const ADD_DATA_PATH = `/app/integrations/browse/security`;
+export const ADD_THREAT_INTELLIGENCE_DATA_PATH = `/app/integrations/browse/threat_intel`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern' as const;
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -113,7 +114,7 @@ export enum SecurityPageName {
   noPage = '',
   overview = 'overview',
   policies = 'policy',
-  actionHistory = 'action_history',
+  responseActionsHistory = 'response_actions_history',
   rules = 'rules',
   rulesCreate = 'rules-create',
   sessions = 'sessions',
@@ -152,6 +153,7 @@ export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
+export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
@@ -159,7 +161,7 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
-export const ACTION_HISTORY_PATH = `${MANAGEMENT_PATH}/action_history` as const;
+export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -183,7 +185,8 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
-export const APP_ACTION_HISTORY_PATH = `${APP_PATH}${ACTION_HISTORY_PATH}` as const;
+export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
+  `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const APP_ENTITY_ANALYTICS_PATH = `${APP_PATH}${ENTITY_ANALYTICS_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
@@ -277,15 +280,22 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
+export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
+export const RISK_SCORE_RESTART_TRANSFORMS = `${INTERNAL_RISK_SCORE_URL}/transforms/restart`;
 export const DEV_TOOL_PREBUILT_CONTENT =
-  `/internal/prebuilt_content/dev_tool/{console_id}` as const;
+  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
 export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
-  `/s/${spaceId}/internal/prebuilt_content/dev_tool/${consoleId}` as const;
-export const PREBUILT_SAVED_OBJECTS_BULK_CREATE =
-  '/internal/prebuilt_content/saved_objects/_bulk_create/{template_name}';
+  `/s/${spaceId}${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/${consoleId}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_CREATE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/{template_name}`;
 export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
-  `/internal/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
-
+  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
+export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
+  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
+export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
+export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
+export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
+export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
 /**
  * Internal detection engine routes
  */
@@ -317,6 +327,7 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
+export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -440,12 +451,7 @@ export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAG
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.4',
-  RULE_CREATION_PAGE_DEFINE_STEP:
-    'securitySolution.ruleCreationPage.defineStep.newFeaturesTour.v8.4',
 };
-
-export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
-  'securitySolution.rulesManagementPage.newFeaturesTour.v8.4';
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
@@ -460,4 +466,6 @@ export enum BulkActionsDryRunErrCode {
 }
 
 export const RISKY_HOSTS_DOC_LINK =
-  'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
+  'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
+export const RISKY_USERS_DOC_LINK =
+  'https://www.elastic.co/guide/en/security/current/user-risk-score.html';

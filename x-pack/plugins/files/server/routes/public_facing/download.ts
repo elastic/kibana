@@ -4,40 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Ensure } from '@kbn/utility-types';
-import { schema, TypeOf } from '@kbn/config-schema';
-
+import { schema } from '@kbn/config-schema';
+import { Readable } from 'stream';
 import { NoDownloadAvailableError } from '../../file/errors';
 import { FileNotFoundError } from '../../file_service/errors';
 import {
   FileShareNotFoundError,
   FileShareTokenInvalidError,
 } from '../../file_share_service/errors';
-import type { FilesRouter, FilesRequestHandler } from '../types';
-import { FilePublicDownloadHttpEndpoint, FILES_API_ROUTES } from '../api_routes';
+import type { FilesRouter } from '../types';
+import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import { getDownloadHeadersForFile } from '../common';
 import { fileNameWithExt } from '../common_schemas';
+import { CreateHandler } from '../types';
 
 const method = 'get' as const;
 
-const querySchema = schema.object({
-  token: schema.string(),
-});
+const rt = {
+  query: schema.object({
+    token: schema.string(),
+  }),
+  params: schema.object({
+    fileName: schema.maybe(fileNameWithExt),
+  }),
+};
 
-export const paramsSchema = schema.object({
-  fileName: schema.maybe(fileNameWithExt),
-});
+export type Endpoint = CreateRouteDefinition<typeof rt, any>;
 
-type Query = Ensure<FilePublicDownloadHttpEndpoint['inputs']['query'], TypeOf<typeof querySchema>>;
-
-type Params = Ensure<
-  FilePublicDownloadHttpEndpoint['inputs']['params'],
-  TypeOf<typeof paramsSchema>
->;
-
-type Response = FilePublicDownloadHttpEndpoint['output'];
-
-const handler: FilesRequestHandler<Params, Query> = async ({ files }, req, res) => {
+const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;
   const {
     query: { token },
@@ -46,10 +40,10 @@ const handler: FilesRequestHandler<Params, Query> = async ({ files }, req, res) 
 
   try {
     const file = await fileService.asInternalUser().getByToken(token);
-    const body: Response = await file.downloadContent();
+    const body: Readable = await file.downloadContent();
     return res.ok({
       body,
-      headers: getDownloadHeadersForFile(file, fileName),
+      headers: getDownloadHeadersForFile({ file, fileName }),
     });
   } catch (e) {
     if (
@@ -73,10 +67,7 @@ export function register(router: FilesRouter) {
   router[method](
     {
       path: FILES_API_ROUTES.public.download,
-      validate: {
-        query: querySchema,
-        params: paramsSchema,
-      },
+      validate: { ...rt },
       options: {
         authRequired: false,
       },

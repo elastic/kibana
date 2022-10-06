@@ -9,7 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import * as i18n from '../../utils/translations';
+import * as sharedI18n from '../../utils/translations';
+import * as i18n from './translations';
 import type { GetExceptionItemProps } from '.';
 
 const ITEMS_SCHEMA = {
@@ -75,8 +76,8 @@ const ExceptionsViewerSearchBarComponent = ({
 
   const addExceptionButtonText = useMemo(() => {
     return listType === ExceptionListTypeEnum.ENDPOINT
-      ? i18n.ADD_TO_ENDPOINT_LIST
-      : i18n.ADD_TO_DETECTIONS_LIST;
+      ? sharedI18n.ADD_TO_ENDPOINT_LIST
+      : sharedI18n.ADD_TO_DETECTIONS_LIST;
   }, [listType]);
 
   return (
@@ -84,8 +85,8 @@ const ExceptionsViewerSearchBarComponent = ({
       <EuiFlexItem grow={true}>
         <EuiSearchBar
           box={{
-            placeholder: 'Search on the fields below: e.g. name:"my list"',
-            incremental: false,
+            placeholder: i18n.SEARCH_PLACEHOLDER,
+            incremental: true,
             schema: ITEMS_SCHEMA,
             'data-test-subj': 'exceptionsViewerSearchBar',
           }}

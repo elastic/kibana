@@ -24,6 +24,8 @@ import {
   SELECT_TABLE,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
+  CLOSE_FLYOUT,
+  OPEN_ANALYZER_BTN,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -81,6 +83,8 @@ export const expandFirstAlert = () => {
     .should('exist')
     .pipe(($el) => $el.trigger('click'));
 };
+
+export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
 
@@ -153,6 +157,10 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
 
 export const investigateFirstAlertInTimeline = () => {
   cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
+};
+
+export const openAnalyzerForFirstAlertInTimeline = () => {
+  cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
 export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {

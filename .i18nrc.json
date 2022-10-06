@@ -7,6 +7,7 @@
     "bfetch": "src/plugins/bfetch",
     "charts": "src/plugins/charts",
     "console": "src/plugins/console",
+    "contentManagement": "packages/content-management",
     "core": [
       "src/core",
       "packages/core"
@@ -40,6 +41,7 @@
     "eventAnnotation": "src/plugins/event_annotation",
     "fieldFormats": "src/plugins/field_formats",
     "flot": "packages/kbn-flot-charts/lib",
+    "guidedOnboarding": "src/plugins/guided_onboarding",
     "home": "src/plugins/home",
     "homePackages": "packages/home",
     "indexPatternEditor": "src/plugins/data_view_editor",
@@ -58,6 +60,7 @@
     "kibana-react": "src/plugins/kibana_react",
     "kibanaOverview": "src/plugins/kibana_overview",
     "lists": "packages/kbn-securitysolution-list-utils/src",
+    "exceptionList-components": "packages/kbn-securitysolution-exception-list-components/src",
     "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
     "monaco": "packages/kbn-monaco/src",
     "navigation": "src/plugins/navigation",
