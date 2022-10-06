@@ -28,7 +28,7 @@ describe('find_exception_list_references_schema', () => {
     });
   });
 
-  test('"ids" cannot be undefined', () => {
+  test('"ids" can be optional', () => {
     const payload: Omit<FindExceptionReferencesOnRuleSchema, 'ids'> = {
       list_ids: '123,456',
       namespace_types: 'single,agnostic',
@@ -37,11 +37,14 @@ describe('find_exception_list_references_schema', () => {
     const decoded = findExceptionReferencesOnRuleSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual(['Invalid value "undefined" supplied to "ids"']);
-    expect(output.schema).toEqual({});
+    expect(formatErrors(output.errors)).toEqual([]);
+    expect(output.schema).toEqual({
+      list_ids: ['123', '456'],
+      namespace_types: ['single', 'agnostic'],
+    });
   });
 
-  test('"list_ids" cannot be undefined', () => {
+  test('"list_ids" can be undefined', () => {
     const payload: Omit<FindExceptionReferencesOnRuleSchema, 'list_ids'> = {
       ids: 'abc',
       namespace_types: 'single',
@@ -50,10 +53,11 @@ describe('find_exception_list_references_schema', () => {
     const decoded = findExceptionReferencesOnRuleSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([
-      'Invalid value "undefined" supplied to "list_ids"',
-    ]);
-    expect(output.schema).toEqual({});
+    expect(formatErrors(output.errors)).toEqual([]);
+    expect(output.schema).toEqual({
+      ids: ['abc'],
+      namespace_types: ['single'],
+    });
   });
 
   test('defaults "namespacetypes" to ["single"] if none set', () => {
