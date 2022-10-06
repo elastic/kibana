@@ -144,6 +144,9 @@ export const TopNFunctionsTable = ({
         defaultMessage: 'Samples',
       }),
       align: 'right',
+      render: (_, { samples }) => {
+        return <EuiText style={{ whiteSpace: 'nowrap', fontSize: 'inherit' }}>{samples}</EuiText>;
+      },
     },
     {
       field: TopNFunctionSortField.ExclusiveCPU,
