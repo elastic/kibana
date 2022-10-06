@@ -9,6 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createTopNFunctions } from '../../common/functions';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
@@ -54,7 +55,8 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
             sampleSize: targetSampleSize,
           });
 
-        const topNFunctions = await withProfilingSpan('collect_topn_functions', async () => {
+        const t0 = Date.now();
+        const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
           return createTopNFunctions(
             stackTraceEvents,
             stackTraces,
@@ -64,20 +66,15 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
             endIndex
           );
         });
+        logger.info(`creating topN functions took ${Date.now() - t0} ms`);
 
         logger.info('returning payload response to client');
 
         return response.ok({
           body: topNFunctions,
         });
-      } catch (e) {
-        logger.error(e);
-        return response.customError({
-          statusCode: e.statusCode ?? 500,
-          body: {
-            message: e.message,
-          },
-        });
+      } catch (error) {
+        return handleRouteHandlerError({ error, logger, response });
       }
     }
   );

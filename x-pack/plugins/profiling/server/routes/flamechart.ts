@@ -8,7 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
-import { FlameGraph } from '../../common/flamegraph';
+import { createCalleeTree } from '../../common/callee';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
+import { createBaseFlameGraph } from '../../common/flamegraph';
 import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
@@ -39,8 +41,9 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
           timeTo,
           kuery,
         });
+        const totalSeconds = timeTo - timeFrom;
 
-        const { stackTraces, executables, stackFrames, eventsIndex, totalCount, stackTraceEvents } =
+        const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames } =
           await getExecutablesAndStackTraces({
             logger,
             client: createProfilingEsClient({ request, esClient }),
@@ -48,31 +51,29 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
             sampleSize: targetSampleSize,
           });
 
-        const flamegraph = await withProfilingSpan('collect_flamegraph', async () => {
-          return new FlameGraph({
-            sampleRate: eventsIndex.sampleRate,
-            totalCount,
-            events: stackTraceEvents,
+        const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
+          const t0 = Date.now();
+          const tree = createCalleeTree(
+            stackTraceEvents,
             stackTraces,
             stackFrames,
             executables,
-            totalSeconds: timeTo - timeFrom,
-          }).toElastic();
+            totalFrames
+          );
+          logger.info(`creating callee tree took ${Date.now() - t0} ms`);
+
+          const t1 = Date.now();
+          const fg = createBaseFlameGraph(tree, totalSeconds);
+          logger.info(`creating flamegraph took ${Date.now() - t1} ms`);
+
+          return fg;
         });
 
         logger.info('returning payload response to client');
 
-        return response.ok({
-          body: flamegraph,
-        });
-      } catch (e) {
-        logger.error(e);
-        return response.customError({
-          statusCode: e.statusCode ?? 500,
-          body: {
-            message: e.message,
-          },
-        });
+        return response.ok({ body: flamegraph });
+      } catch (error) {
+        return handleRouteHandlerError({ error, logger, response });
       }
     }
   );

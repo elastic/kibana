@@ -7,6 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../../common/constants';
@@ -89,6 +90,10 @@ type PipelinesActions = Pick<
     FetchCustomPipelineApiLogicArgs,
     FetchCustomPipelineApiLogicResponse
   >['makeRequest'];
+  fetchCustomPipelineSuccess: Actions<
+    FetchCustomPipelineApiLogicArgs,
+    FetchCustomPipelineApiLogicResponse
+  >['apiSuccess'];
   fetchDefaultPipeline: Actions<undefined, FetchDefaultPipelineResponse>['makeRequest'];
   fetchDefaultPipelineSuccess: Actions<undefined, FetchDefaultPipelineResponse>['apiSuccess'];
   fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
@@ -105,10 +110,14 @@ type PipelinesActions = Pick<
 interface PipelinesValues {
   canSetPipeline: boolean;
   canUseMlInferencePipeline: boolean;
+  customPipelineData: Record<string, IngestPipeline | undefined>;
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
+  hasIndexIngestionPipeline: boolean;
   index: FetchIndexApiResponse;
+  indexName: string;
   mlInferencePipelineProcessors: InferencePipeline[];
+  pipelineName: string;
   pipelineState: IngestPipelineParams;
   showAddMlInferencePipelineModal: boolean;
   showModal: boolean;
@@ -138,7 +147,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       FetchDefaultPipelineApiLogic,
       ['apiSuccess as fetchDefaultPipelineSuccess', 'makeRequest as fetchDefaultPipeline'],
       FetchCustomPipelineApiLogic,
-      ['makeRequest as fetchCustomPipeline'],
+      ['apiSuccess as fetchCustomPipelineSuccess', 'makeRequest as fetchCustomPipeline'],
       FetchMlInferencePipelineProcessorsApiLogic,
       [
         'makeRequest as fetchMlInferenceProcessors',
@@ -154,6 +163,8 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ],
     ],
     values: [
+      FetchCustomPipelineApiLogic,
+      ['data as customPipelineData'],
       FetchDefaultPipelineApiLogic,
       ['data as defaultPipelineValuesData'],
       FetchIndexApiLogic,
@@ -211,7 +222,10 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     createMlInferencePipelineSuccess: () => {
+      // Re-fetch processors to ensure we display newly added ml processor
       actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     deleteMlPipelineError: (error) => flashAPIErrors(error),
     deleteMlPipelineSuccess: (value) => {
@@ -228,7 +242,10 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
           )
         );
       }
+      // Re-fetch processors to ensure we display newly removed ml processor
       actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     fetchIndexApiSuccess: (index) => {
       if (!values.showModal) {
@@ -290,13 +307,30 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       (index: ElasticsearchIndexWithIngestion) => !isApiIndex(index),
     ],
     canUseMlInferencePipeline: [
-      () => [selectors.canSetPipeline, selectors.pipelineState],
-      (canSetPipeline: boolean, pipelineState: IngestPipelineParams) =>
-        canSetPipeline && pipelineState.run_ml_inference,
+      () => [selectors.hasIndexIngestionPipeline, selectors.pipelineState, selectors.index],
+      (
+        hasIndexIngestionPipeline: boolean,
+        pipelineState: IngestPipelineParams,
+        index: ElasticsearchIndexWithIngestion
+      ) => hasIndexIngestionPipeline && (pipelineState.run_ml_inference || isApiIndex(index)),
     ],
     defaultPipelineValues: [
       () => [selectors.defaultPipelineValuesData],
       (pipeline: IngestPipelineParams | null) => pipeline ?? DEFAULT_PIPELINE_VALUES,
+    ],
+    hasIndexIngestionPipeline: [
+      () => [selectors.pipelineName, selectors.defaultPipelineValues],
+      (pipelineName: string, defaultPipelineValues: IngestPipelineParams) =>
+        pipelineName !== defaultPipelineValues.name,
+    ],
+    indexName: [
+      () => [selectors.index],
+      (index?: ElasticsearchIndexWithIngestion) => index?.name ?? '',
+    ],
+    pipelineName: [
+      () => [selectors.pipelineState, selectors.customPipelineData, selectors.indexName],
+      (pipelineState, customPipelineData, indexName) =>
+        customPipelineData && customPipelineData[indexName] ? indexName : pipelineState.name,
     ],
   }),
 });

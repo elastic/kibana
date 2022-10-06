@@ -26,6 +26,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { CreateCustomPipelineApiLogic } from '../../../api/index/create_custom_pipeline_api_logic';
 import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
+import { isApiIndex } from '../../../utils/indices';
 import { CurlRequest } from '../components/curl_request/curl_request';
 import { IndexViewLogic } from '../index_view_logic';
 
@@ -36,7 +37,8 @@ import { PipelinesLogic } from './pipelines_logic';
 export const IngestPipelinesCard: React.FC = () => {
   const { indexName } = useValues(IndexViewLogic);
 
-  const { canSetPipeline, pipelineState, showModal } = useValues(PipelinesLogic);
+  const { canSetPipeline, index, pipelineName, pipelineState, showModal } =
+    useValues(PipelinesLogic);
   const { closeModal, openModal, setPipelineState, savePipeline } = useActions(PipelinesLogic);
   const { makeRequest: fetchCustomPipeline } = useActions(FetchCustomPipelineApiLogic);
   const { makeRequest: createCustomPipeline } = useActions(CreateCustomPipelineApiLogic);
@@ -60,7 +62,7 @@ export const IngestPipelinesCard: React.FC = () => {
         indexName={indexName}
         isGated={isGated}
         isLoading={false}
-        pipeline={pipelineState}
+        pipeline={{ ...pipelineState, name: pipelineName }}
         savePipeline={savePipeline}
         setPipeline={setPipelineState}
         showModal={showModal}
@@ -83,7 +85,7 @@ export const IngestPipelinesCard: React.FC = () => {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <h4>{pipelineState.name}</h4>
+                    <h4>{pipelineName}</h4>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -97,22 +99,24 @@ export const IngestPipelinesCard: React.FC = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiAccordion
-                    buttonContent={i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.accordion.label',
-                      { defaultMessage: 'View sample cURL request' }
-                    )}
-                    id="ingestPipelinesCurlAccordion"
-                  >
-                    <CurlRequest
-                      document={{ body: 'body', title: 'Title' }}
-                      indexName={indexName}
-                      pipeline={pipelineState}
-                    />
-                  </EuiAccordion>
-                </EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd">
+                {isApiIndex(index) && (
+                  <EuiFlexItem>
+                    <EuiAccordion
+                      buttonContent={i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.accordion.label',
+                        { defaultMessage: 'View sample cURL request' }
+                      )}
+                      id="ingestPipelinesCurlAccordion"
+                    >
+                      <CurlRequest
+                        document={{ body: 'body', title: 'Title' }}
+                        indexName={indexName}
+                        pipeline={{ ...pipelineState, name: pipelineName }}
+                      />
+                    </EuiAccordion>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">
                     {i18n.translate(

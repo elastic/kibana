@@ -51,7 +51,7 @@ describe('AgentManager', () => {
         expect(HttpAgent).toBeCalledTimes(1);
         expect(HttpAgent).toBeCalledWith({
           keepAlive: true,
-          keepAliveMsecs: 50000,
+          keepAliveMsecs: 1000,
           maxFreeSockets: 256,
           maxSockets: 256,
           scheduling: 'lifo',
@@ -68,7 +68,7 @@ describe('AgentManager', () => {
         expect(HttpAgent).toBeCalledTimes(1);
         expect(HttpAgent).toBeCalledWith({
           keepAlive: true,
-          keepAliveMsecs: 50000,
+          keepAliveMsecs: 1000,
           maxFreeSockets: 32,
           maxSockets: 1024,
           scheduling: 'fifo',
@@ -104,10 +104,10 @@ describe('AgentManager', () => {
         const agentFactory = agentManager.getAgentFactory();
         const agent = agentFactory({ url: new URL('http://elastic-node-1:9200') });
         // eslint-disable-next-line dot-notation
-        expect(agentManager['httpStore'].has(agent)).toEqual(true);
+        expect(agentManager['agents'].has(agent)).toEqual(true);
         agent.destroy();
         // eslint-disable-next-line dot-notation
-        expect(agentManager['httpStore'].has(agent)).toEqual(false);
+        expect(agentManager['agents'].has(agent)).toEqual(false);
       });
     });
 
@@ -120,6 +120,23 @@ describe('AgentManager', () => {
         const agent2 = agentFactory2({ url: new URL('http://elastic-node-1:9200') });
         expect(agent1).not.toEqual(agent2);
       });
+    });
+  });
+
+  describe('#getAgents()', () => {
+    it('returns the created HTTP and HTTPs Agent instances', () => {
+      const agentManager = new AgentManager();
+      const agentFactory1 = agentManager.getAgentFactory();
+      const agentFactory2 = agentManager.getAgentFactory();
+      const agent1 = agentFactory1({ url: new URL('http://elastic-node-1:9200') });
+      const agent2 = agentFactory2({ url: new URL('http://elastic-node-1:9200') });
+      const agent3 = agentFactory1({ url: new URL('https://elastic-node-1:9200') });
+      const agent4 = agentFactory2({ url: new URL('https://elastic-node-1:9200') });
+
+      const agents = agentManager.getAgents();
+
+      expect(agents.size).toEqual(4);
+      expect([...agents]).toEqual(expect.arrayContaining([agent1, agent2, agent3, agent4]));
     });
   });
 });

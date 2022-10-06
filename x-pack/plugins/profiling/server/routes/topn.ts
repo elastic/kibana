@@ -8,12 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
-import { fromMapToRecord, getRoutePaths, INDEX_EVENTS } from '../../common';
+import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { ProfilingESField } from '../../common/elasticsearch';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { ProfilingRequestHandlerContext } from '../types';
 import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
@@ -142,9 +143,7 @@ export async function topNElasticSearchQuery({
   );
 
   const metadata = await withProfilingSpan('collect_stackframe_metadata', async () => {
-    return fromMapToRecord(
-      groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables)
-    );
+    return groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables);
   });
 
   logger.info('returning payload response to client');
@@ -191,15 +190,8 @@ export function queryTopNCommon(
             kuery,
           }),
         });
-      } catch (e) {
-        logger.error(e);
-
-        return response.customError({
-          statusCode: e.statusCode ?? 500,
-          body: {
-            message: 'Profiling TopN request failed: ' + e.message + '; full error ' + e.toString(),
-          },
-        });
+      } catch (error) {
+        return handleRouteHandlerError({ error, logger, response });
       }
     }
   );

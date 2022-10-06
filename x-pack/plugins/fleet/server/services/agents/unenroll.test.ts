@@ -6,6 +6,8 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { AGENT_ACTIONS_INDEX } from '../../../common';
+
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { invalidateAPIKeys } from '../api_keys';
 
@@ -13,8 +15,10 @@ import { appContextService } from '../app_context';
 
 import { createAppContextStartContractMock } from '../../mocks';
 
+import type { Agent } from '../../types';
+
 import { unenrollAgent, unenrollAgents } from './unenroll';
-import { invalidateAPIKeysForAgents } from './unenroll_action_runner';
+import { invalidateAPIKeysForAgents, isAgentUnenrolled } from './unenroll_action_runner';
 import { createClientMock } from './action.mock';
 
 jest.mock('../api_keys');
@@ -111,7 +115,7 @@ describe('unenrollAgents (plural)', () => {
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -124,7 +128,7 @@ describe('unenrollAgents (plural)', () => {
     }
 
     // hosted policy is updated in action results with error
-    const calledWithActionResults = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
+    const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
     // bulk write two line per create
     expect(calledWithActionResults.body?.length).toBe(2);
     const expectedObject = expect.objectContaining({
@@ -137,6 +141,78 @@ describe('unenrollAgents (plural)', () => {
     expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
   });
 
+  it('force unenroll updates in progress unenroll actions', async () => {
+    const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
+    esClient.search.mockReset();
+    esClient.search.mockImplementation((request) =>
+      Promise.resolve(
+        request?.index === AGENT_ACTIONS_INDEX
+          ? ({
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      agents: ['agent-in-regular-policy'],
+                      action_id: 'other-action',
+                    },
+                  },
+                ],
+              },
+            } as any)
+          : { hits: { hits: [] } }
+      )
+    );
+
+    const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
+    await unenrollAgents(soClient, esClient, {
+      agentIds: idsToUnenroll,
+      revoke: true,
+    });
+
+    expect(esClient.bulk.mock.calls.length).toEqual(3);
+    const bulkBody = (esClient.bulk.mock.calls[2][0] as estypes.BulkRequest)?.body?.[1] as any;
+    expect(bulkBody.agent_id).toEqual(agentInRegularDoc._id);
+    expect(bulkBody.action_id).toEqual('other-action');
+  });
+
+  it('force unenroll should not update completed unenroll actions', async () => {
+    const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
+    esClient.search.mockReset();
+    esClient.search.mockImplementation((request) =>
+      Promise.resolve(
+        request?.index === AGENT_ACTIONS_INDEX
+          ? ({
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      agents: ['agent-in-regular-policy'],
+                      action_id: 'other-action1',
+                    },
+                  },
+                ],
+              },
+            } as any)
+          : {
+              hits: {
+                hits: [
+                  { _source: { action_id: 'other-action1', agent_id: 'agent-in-regular-policy' } },
+                ],
+              },
+            }
+      )
+    );
+
+    const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
+    await unenrollAgents(soClient, esClient, {
+      agentIds: idsToUnenroll,
+      revoke: true,
+    });
+
+    // agent and force unenroll results updated, no other action results
+    expect(esClient.bulk.mock.calls.length).toEqual(2);
+  });
+
   it('cannot unenroll from a hosted agent policy with revoke=true', async () => {
     const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } =
       createClientMock();
@@ -147,21 +223,7 @@ describe('unenrollAgents (plural)', () => {
       agentIds: idsToUnenroll,
       revoke: true,
     });
-
-    expect(unenrolledResponse.items).toMatchObject([
-      {
-        id: 'agent-in-regular-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-hosted-policy',
-        success: false,
-      },
-      {
-        id: 'agent-in-regular-policy2',
-        success: true,
-      },
-    ]);
+    expect(unenrolledResponse.actionId).toBeDefined();
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
@@ -176,6 +238,21 @@ describe('unenrollAgents (plural)', () => {
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrolled_at');
     }
+
+    const errorResults = esClient.bulk.mock.calls[2][0];
+    const errorIds = (errorResults as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.agent_id)
+      .map((i: any) => i.agent_id);
+    expect(errorIds).toEqual([agentInHostedDoc._id]);
+
+    const actionResults = esClient.bulk.mock.calls[1][0];
+    const resultIds = (actionResults as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.agent_id)
+      .map((i: any) => i.agent_id);
+    expect(resultIds).toEqual(onlyRegular);
+
+    const action = esClient.create.mock.calls[0][0] as any;
+    expect(action.body.type).toEqual('FORCE_UNENROLL');
   });
 
   it('can unenroll from hosted agent policy with force=true', async () => {
@@ -210,20 +287,7 @@ describe('unenrollAgents (plural)', () => {
       force: true,
     });
 
-    expect(unenrolledResponse.items).toMatchObject([
-      {
-        id: 'agent-in-regular-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-hosted-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-regular-policy2',
-        success: true,
-      },
-    ]);
+    expect(unenrolledResponse.actionId).toBeDefined();
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
@@ -237,6 +301,15 @@ describe('unenrollAgents (plural)', () => {
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrolled_at');
     }
+
+    const actionResults = esClient.bulk.mock.calls[1][0];
+    const resultIds = (actionResults as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.agent_id)
+      .map((i: any) => i.agent_id);
+    expect(resultIds).toEqual(idsToUnenroll);
+
+    const action = esClient.create.mock.calls[0][0] as any;
+    expect(action.body.type).toEqual('FORCE_UNENROLL');
   });
 });
 
@@ -258,6 +331,15 @@ describe('invalidateAPIKeysForAgents', () => {
             id: 'defaultApiKeyHistory2',
           },
         ],
+        outputs: [
+          {
+            api_key_id: 'outputApiKey1',
+            to_retire_api_key_ids: [{ id: 'outputApiKeyRetire1' }, { id: 'outputApiKeyRetire2' }],
+          },
+          {
+            api_key_id: 'outputApiKey2',
+          },
+        ],
       } as any,
     ]);
 
@@ -267,6 +349,38 @@ describe('invalidateAPIKeysForAgents', () => {
       'defaultApiKey1',
       'defaultApiKeyHistory1',
       'defaultApiKeyHistory2',
+      'outputApiKey1',
+      'outputApiKeyRetire1',
+      'outputApiKeyRetire2',
+      'outputApiKey2',
     ]);
+  });
+});
+
+describe('isAgentUnenrolled', () => {
+  it('should return true if revoke and unenrolled_at set', () => {
+    expect(isAgentUnenrolled({ unenrolled_at: '2022-09-21' } as Agent, true)).toBe(true);
+  });
+
+  it('should return false if revoke and unenrolled_at null', () => {
+    expect(
+      isAgentUnenrolled({ unenrolled_at: null, unenrollment_started_at: '2022-09-21' } as any, true)
+    ).toBe(false);
+  });
+
+  it('should return true if unenrolled_at set', () => {
+    expect(isAgentUnenrolled({ unenrolled_at: '2022-09-21' } as Agent)).toBe(true);
+  });
+
+  it('should return true if unenrollment_started_at set and unenrolled_at null', () => {
+    expect(
+      isAgentUnenrolled({ unenrolled_at: null, unenrollment_started_at: '2022-09-21' } as any)
+    ).toBe(true);
+  });
+
+  it('should return false if unenrollment_started_at null and unenrolled_at null', () => {
+    expect(isAgentUnenrolled({ unenrolled_at: null, unenrollment_started_at: null } as any)).toBe(
+      false
+    );
   });
 });

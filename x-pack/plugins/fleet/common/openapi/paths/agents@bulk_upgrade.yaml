@@ -8,15 +8,9 @@ post:
         application/json:
           schema:
               type: object
-              additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  error:
-                    type: string
-                required:
-                  - success
+              properties:
+                actionId: 
+                  type: string
     '400':
       description: BAD REQUEST
       content:

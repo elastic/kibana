@@ -18,6 +18,8 @@ import {
   ProfilingStackTrace,
 } from '../../common/elasticsearch';
 import {
+  emptyExecutable,
+  emptyStackFrame,
   Executable,
   FileID,
   StackFrame,
@@ -28,7 +30,6 @@ import {
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { DownsampledEventsIndex } from './downsampling';
-import { logExecutionLatency } from './logger';
 import { ProjectTimeQuery } from './query';
 
 const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
@@ -69,7 +70,7 @@ export function runLengthEncode(input: number[]): Buffer {
     return Buffer.from(output);
   }
 
-  let count = 0;
+  let count = 1;
   let current = input[0];
 
   for (let i = 1; i < input.length; i++) {
@@ -80,13 +81,13 @@ export function runLengthEncode(input: number[]): Buffer {
       continue;
     }
 
-    output.push(count + 1, current);
+    output.push(count, current);
 
-    count = 0;
+    count = 1;
     current = next;
   }
 
-  output.push(count + 1, current);
+  output.push(count, current);
 
   return Buffer.from(output);
 }
@@ -119,6 +120,17 @@ export function runLengthDecode(input: Buffer, outputSize?: number): number[] {
       output[idx] = input[i + 1];
       idx++;
     }
+  }
+
+  // Due to truncation of the frame types for stacktraces longer than 255,
+  // the expected output size and the actual decoded size can be different.
+  // Ordinarily, these two values should be the same.
+  //
+  // We have decided to fill in the remainder of the output array with zeroes
+  // as a reasonable default. Without this step, the output array would have
+  // undefined values.
+  for (let i = idx; i < size; i++) {
+    output[i] = 0;
   }
 
   return output;
@@ -270,36 +282,36 @@ export async function mgetStackTraces({
   const stackFrameDocIDs = new Set<string>();
   const executableDocIDs = new Set<string>();
 
-  await logExecutionLatency(logger, 'processing data', async () => {
-    // flatMap() is significantly slower than an explicit for loop
-    for (const res of stackResponses) {
-      for (const trace of res.docs) {
-        if ('error' in trace) {
-          continue;
+  const t0 = Date.now();
+  // flatMap() is significantly slower than an explicit for loop
+  for (const res of stackResponses) {
+    for (const trace of res.docs) {
+      if ('error' in trace) {
+        continue;
+      }
+      // Sometimes we don't find the trace.
+      // This is due to ES delays writing (data is not immediately seen after write).
+      // Also, ES doesn't know about transactions.
+      if (trace.found) {
+        const traceid = trace._id as StackTraceID;
+        let stackTrace = traceLRU.get(traceid) as StackTrace;
+        if (!stackTrace) {
+          stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
+          traceLRU.set(traceid, stackTrace);
         }
-        // Sometimes we don't find the trace.
-        // This is due to ES delays writing (data is not immediately seen after write).
-        // Also, ES doesn't know about transactions.
-        if (trace.found) {
-          const traceid = trace._id as StackTraceID;
-          let stackTrace = traceLRU.get(traceid) as StackTrace;
-          if (!stackTrace) {
-            stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
-            traceLRU.set(traceid, stackTrace);
-          }
 
-          totalFrames += stackTrace.FrameIDs.length;
-          stackTraces.set(traceid, stackTrace);
-          for (const frameID of stackTrace.FrameIDs) {
-            stackFrameDocIDs.add(frameID);
-          }
-          for (const fileID of stackTrace.FileIDs) {
-            executableDocIDs.add(fileID);
-          }
+        totalFrames += stackTrace.FrameIDs.length;
+        stackTraces.set(traceid, stackTrace);
+        for (const frameID of stackTrace.FrameIDs) {
+          stackFrameDocIDs.add(frameID);
+        }
+        for (const fileID of stackTrace.FileIDs) {
+          executableDocIDs.add(fileID);
         }
       }
     }
-  });
+  }
+  logger.info(`processing data took ${Date.now() - t0} ms`);
 
   if (stackTraces.size !== 0) {
     logger.info('Average size of stacktrace: ' + totalFrames / stackTraces.size);
@@ -311,7 +323,7 @@ export async function mgetStackTraces({
     );
   }
 
-  return { stackTraces, stackFrameDocIDs, executableDocIDs };
+  return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
 }
 
 export async function mgetStackFrames({
@@ -337,32 +349,26 @@ export async function mgetStackFrames({
 
   // Create a lookup map StackFrameID -> StackFrame.
   let framesFound = 0;
-  await logExecutionLatency(logger, 'processing data', async () => {
-    const docs = resStackFrames.docs;
-    for (const frame of docs) {
-      if ('error' in frame) {
-        continue;
-      }
-      if (frame.found) {
-        stackFrames.set(frame._id, {
-          FileName: frame._source!.Stackframe.file?.name,
-          FunctionName: frame._source!.Stackframe.function?.name,
-          FunctionOffset: frame._source!.Stackframe.function?.offset,
-          LineNumber: frame._source!.Stackframe.line?.number,
-          SourceType: frame._source!.Stackframe.source?.type,
-        });
-        framesFound++;
-      } else {
-        stackFrames.set(frame._id, {
-          FileName: '',
-          FunctionName: '',
-          FunctionOffset: 0,
-          LineNumber: 0,
-          SourceType: 0,
-        });
-      }
+  const t0 = Date.now();
+  const docs = resStackFrames.docs;
+  for (const frame of docs) {
+    if ('error' in frame) {
+      continue;
     }
-  });
+    if (frame.found) {
+      stackFrames.set(frame._id, {
+        FileName: frame._source!.Stackframe.file?.name,
+        FunctionName: frame._source!.Stackframe.function?.name,
+        FunctionOffset: frame._source!.Stackframe.function?.offset,
+        LineNumber: frame._source!.Stackframe.line?.number,
+        SourceType: frame._source!.Stackframe.source?.type,
+      });
+      framesFound++;
+    } else {
+      stackFrames.set(frame._id, emptyStackFrame);
+    }
+  }
+  logger.info(`processing data took ${Date.now() - t0} ms`);
 
   logger.info('found ' + framesFound + ' / ' + stackFrameIDs.size + ' frames');
 
@@ -392,24 +398,22 @@ export async function mgetExecutables({
 
   // Create a lookup map StackFrameID -> StackFrame.
   let exeFound = 0;
-  await logExecutionLatency(logger, 'processing data', async () => {
-    const docs = resExecutables.docs;
-    for (const exe of docs) {
-      if ('error' in exe) {
-        continue;
-      }
-      if (exe.found) {
-        executables.set(exe._id, {
-          FileName: exe._source!.Executable.file.name,
-        });
-        exeFound++;
-      } else {
-        executables.set(exe._id, {
-          FileName: '',
-        });
-      }
+  const t0 = Date.now();
+  const docs = resExecutables.docs;
+  for (const exe of docs) {
+    if ('error' in exe) {
+      continue;
     }
-  });
+    if (exe.found) {
+      executables.set(exe._id, {
+        FileName: exe._source!.Executable.file.name,
+      });
+      exeFound++;
+    } else {
+      executables.set(exe._id, emptyExecutable);
+    }
+  }
+  logger.info(`processing data took ${Date.now() - t0} ms`);
 
   logger.info('found ' + exeFound + ' / ' + executableIDs.size + ' executables');
 

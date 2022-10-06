@@ -14,6 +14,7 @@ import {
   FilterStateStore,
   TimeRange,
   EsQueryConfig,
+  isOfQueryType,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -109,16 +110,7 @@ export function getLayerMetaInfo(
       isVisible,
     };
   }
-  // maybe add also datasourceId validation here?
-  if (datasourceAPI.datasourceId !== 'indexpattern') {
-    return {
-      meta: undefined,
-      error: i18n.translate('xpack.lens.app.showUnderlyingDataUnsupportedDatasource', {
-        defaultMessage: 'Underlying data does not support the current datasource',
-      }),
-      isVisible,
-    };
-  }
+
   const tableSpec = datasourceAPI.getTableSpec();
 
   const columnsWithNoTimeShifts = tableSpec.filter(
@@ -183,7 +175,7 @@ export function combineQueryAndFilters(
     lucene: [],
   };
 
-  const allQueries = Array.isArray(query) ? query : query ? [query] : [];
+  const allQueries = Array.isArray(query) ? query : query && isOfQueryType(query) ? [query] : [];
   const nonEmptyQueries = allQueries.filter((q) => Boolean(q.query.trim()));
 
   [queries.lucene, queries.kuery] = partition(nonEmptyQueries, (q) => q.language === 'lucene');

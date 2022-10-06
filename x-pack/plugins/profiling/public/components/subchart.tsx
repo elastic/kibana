@@ -84,7 +84,9 @@ export const SubChart: React.FC<SubChartProps> = ({
     },
     query: {
       ...query,
-      kuery: `${getFieldNameForTopNType(path.topNType)}:"${category}"`,
+      kuery: `${query.kuery ? `(${query.kuery}) AND ` : ''}${getFieldNameForTopNType(
+        path.topNType
+      )}:"${category}"`,
     },
   });
 
@@ -192,7 +194,7 @@ export const SubChart: React.FC<SubChartProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{asPercentage(percentage / 100, 2)}</EuiText>
+            <EuiText size="s">{asPercentage(percentage / 100)}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
