@@ -135,7 +135,7 @@ describe('#preboot', () => {
       );
     });
 
-    it('creates a ClusterClient using the internal AgentManager', async () => {
+    it('creates a ClusterClient using the internal AgentManager as AgentFactoryProvider ', async () => {
       const prebootContract = await elasticsearchService.preboot();
       const customConfig = { keepAlive: true };
       const clusterClient = prebootContract.createClient('custom-type', customConfig);
@@ -145,7 +145,7 @@ describe('#preboot', () => {
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
       expect(MockClusterClient.mock.calls[0][0]).toEqual(
         // eslint-disable-next-line dot-notation
-        expect.objectContaining({ agentManager: elasticsearchService['agentManager'] })
+        expect.objectContaining({ agentFactoryProvider: elasticsearchService['agentManager'] })
       );
     });
 
@@ -199,6 +199,11 @@ describe('#setup', () => {
     await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
     );
+  });
+
+  it('returns an AgentStore as part of the contract', async () => {
+    const setupContract = await elasticsearchService.setup(setupDeps);
+    expect(typeof setupContract.agentStore.getAgents).toEqual('function');
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {

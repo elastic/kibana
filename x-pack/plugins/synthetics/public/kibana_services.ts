@@ -12,4 +12,4 @@ export function setStartServices(core: CoreStart) {
   coreStart = core;
 }
 
-export const getDocLinks = () => coreStart.docLinks;
+export const getDocLinks = () => coreStart?.docLinks;

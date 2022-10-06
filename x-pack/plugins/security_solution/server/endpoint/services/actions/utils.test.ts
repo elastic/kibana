@@ -441,7 +441,18 @@ describe('When using Actions service utilities', () => {
           completedAt: COMPLETED_AT,
           wasSuccessful: true,
           errors: undefined,
-          outputs: {},
+          outputs: {
+            '456': {
+              content: {
+                file: {
+                  name: 'bad_file.txt',
+                  path: '/some/path/bad_file.txt',
+                  size: 221,
+                },
+              },
+              type: 'json',
+            },
+          },
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',

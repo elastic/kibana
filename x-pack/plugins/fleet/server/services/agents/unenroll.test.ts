@@ -331,6 +331,15 @@ describe('invalidateAPIKeysForAgents', () => {
             id: 'defaultApiKeyHistory2',
           },
         ],
+        outputs: [
+          {
+            api_key_id: 'outputApiKey1',
+            to_retire_api_key_ids: [{ id: 'outputApiKeyRetire1' }, { id: 'outputApiKeyRetire2' }],
+          },
+          {
+            api_key_id: 'outputApiKey2',
+          },
+        ],
       } as any,
     ]);
 
@@ -340,6 +349,10 @@ describe('invalidateAPIKeysForAgents', () => {
       'defaultApiKey1',
       'defaultApiKeyHistory1',
       'defaultApiKeyHistory2',
+      'outputApiKey1',
+      'outputApiKeyRetire1',
+      'outputApiKeyRetire2',
+      'outputApiKey2',
     ]);
   });
 });
