@@ -20,6 +20,7 @@ import {
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { map$ } from '@kbn/std';
+import { RouteConfigOptions } from '@kbn/core-http-server';
 import {
   StreamingResponseHandler,
   BatchRequestData,
@@ -54,7 +55,8 @@ export interface BfetchServerSetup {
       context: RequestHandlerContext
     ) => StreamingResponseHandler<Payload, Response>,
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE',
-    pluginRouter?: ReturnType<CoreSetup['http']['createRouter']>
+    pluginRouter?: ReturnType<CoreSetup['http']['createRouter']>,
+    options?: RouteConfigOptions<'get' | 'post' | 'put' | 'delete'>
   ) => void;
 }
 
@@ -65,6 +67,7 @@ const streamingHeaders = {
   'Content-Type': 'application/x-ndjson',
   Connection: 'keep-alive',
   'Transfer-Encoding': 'chunked',
+  'X-Accel-Buffering': 'no',
 };
 
 interface Query {
@@ -116,14 +119,16 @@ export class BfetchServerPlugin
       router: ReturnType<CoreSetup['http']['createRouter']>;
       logger: Logger;
     }): BfetchServerSetup['addStreamingResponseRoute'] =>
-    (path, handler, method = 'POST', pluginRouter) => {
+    (path, handler, method = 'POST', pluginRouter, options) => {
       const httpRouter = pluginRouter || router;
+
       const routeDefinition = {
         path: `/${removeLeadingSlash(path)}`,
         validate: {
           body: schema.any(),
           query: schema.object({ compress: schema.boolean({ defaultValue: false }) }),
         },
+        options,
       };
       const routeHandler: RequestHandler<unknown, Query> = async (
         context: RequestHandlerContext,

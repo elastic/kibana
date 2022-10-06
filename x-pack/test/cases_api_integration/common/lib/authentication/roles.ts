@@ -238,25 +238,12 @@ export const observabilityOnlyRead: Role = {
   },
 };
 
-export const roles = [
-  noKibanaPrivileges,
-  noCasesPrivilegesSpace1,
-  globalRead,
-  securitySolutionOnlyAll,
-  securitySolutionOnlyRead,
-  securitySolutionOnlyDelete,
-  securitySolutionOnlyNoDelete,
-  observabilityOnlyAll,
-  observabilityOnlyRead,
-  testDisabledPluginAll,
-];
-
 /**
  * These roles have access to all spaces.
  */
 
-export const securitySolutionOnlyAllSpacesAll: Role = {
-  name: 'sec_only_all',
+export const securitySolutionOnlyAllSpacesRole: Role = {
+  name: 'sec_only_all_spaces',
   privileges: {
     elasticsearch: {
       indices: [
@@ -279,74 +266,15 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
   },
 };
 
-export const securitySolutionOnlyReadSpacesAll: Role = {
-  name: 'sec_only_read',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          securitySolutionFixture: ['read'],
-          actions: ['read'],
-          actionsSimulators: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-export const observabilityOnlyAllSpacesAll: Role = {
-  name: 'obs_only_all',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          observabilityFixture: ['all'],
-          actions: ['all'],
-          actionsSimulators: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-export const observabilityOnlyReadSpacesAll: Role = {
-  name: 'obs_only_read',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          observabilityFixture: ['read'],
-          actions: ['read'],
-          actionsSimulators: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
+export const roles = [
+  noKibanaPrivileges,
+  noCasesPrivilegesSpace1,
+  globalRead,
+  securitySolutionOnlyAll,
+  securitySolutionOnlyRead,
+  securitySolutionOnlyDelete,
+  securitySolutionOnlyNoDelete,
+  observabilityOnlyAll,
+  observabilityOnlyRead,
+  testDisabledPluginAll,
+];

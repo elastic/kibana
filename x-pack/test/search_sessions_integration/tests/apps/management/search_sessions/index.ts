@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const searchSessions = getService('searchSessions');
 
   describe('search sessions management', function () {
     before(async () => {
@@ -25,6 +26,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await searchSessions.deleteAllSearchSessions();
     });
 
     loadTestFile(require.resolve('./sessions_management'));

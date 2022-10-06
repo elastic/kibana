@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
@@ -63,7 +63,7 @@ describe('find_rules', () => {
     test('allows optional query params', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        path: DETECTION_ENGINE_RULES_URL_FIND,
         query: {
           page: 2,
           per_page: 20,
@@ -79,7 +79,7 @@ describe('find_rules', () => {
     test('rejects unknown query params', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        path: DETECTION_ENGINE_RULES_URL_FIND,
         query: {
           invalid_value: 'hi mom',
         },

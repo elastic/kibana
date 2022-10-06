@@ -6,65 +6,74 @@
  * Side Public License, v 1.
  */
 
-import { discoverBazelPackages } from '@kbn/bazel-packages';
+import { resolve } from 'path';
 
-import { copyAll, Task } from '../lib';
+import globby from 'globby';
+import Piscina from 'piscina';
+
+import { Task } from '../lib';
 
 export const CopySource: Task = {
   description: 'Copying source into platform-generic build directory',
 
   async run(config, log, build) {
-    await copyAll(config.resolveFromRepo(), build.resolvePath(), {
-      dot: false,
-      select: [
-        'yarn.lock',
-        '.npmrc',
-        'kibana.d.ts',
-        'config/kibana.yml',
-        'config/node.options',
-        'typings/**',
-        'tsconfig*.json',
-        '.i18nrc.json',
-        'src/**',
+    const select = [
+      'yarn.lock',
+      '.npmrc',
+      'config/kibana.yml',
+      'config/node.options',
+      '.i18nrc.json',
+      'src/**',
 
-        'x-pack/plugins/**',
-        'x-pack/.i18nrc.json',
-        'x-pack/package.json',
+      'x-pack/plugins/**',
+      'x-pack/.i18nrc.json',
+      'x-pack/package.json',
 
-        '!{src,x-pack}/**/*.{test,test.mocks,mock,mocks}.*',
-        '!{src,x-pack}/**/target/**',
-        '!{src,x-pack}/**/{__stories__,storybook,.storybook}/**',
-        '!{src,x-pack}/**/{test,tests,test_resources,test_data,__tests__,manual_tests,__jest__,__snapshots__,__mocks__,mock_responses,mocks,fixtures,__fixtures__,cypress,integration_tests}/**',
+      '!src/dev/**',
+      '!src/**/mocks.{js,ts}',
+      '!src/cli*/dev.js',
+      '!src/plugins/telemetry/schema/**',
+      '!src/core/server/core_app/assets/favicons/favicon.distribution.{ico,png,svg}',
+      '!src/setup_node_env/index.js',
 
-        '!src/dev/**',
-        '!src/**/mocks.{js,ts}',
-        '!src/cli/repl/**',
-        '!src/cli*/dev.js',
-        '!src/plugins/telemetry/schema/**',
-        '!src/core/server/core_app/assets/favicons/favicon.distribution.{ico,png,svg}',
-        '!src/functional_test_runner/**',
-        '!src/setup_node_env/index.js',
+      '!x-pack/plugins/telemetry_collection_xpack/schema/**',
 
-        '!x-pack/plugins/**/{ftr_e2e,e2e}/**',
-        '!x-pack/plugins/**/scripts/**',
-        '!x-pack/plugins/telemetry_collection_xpack/schema/**',
+      '!**/jest*',
+      '!**/*.{story,stories}.{js,ts}',
+      '!**/{test_mocks,stubs}.ts',
+      '!**/*.{scss,console,d.ts,sh,md,mdx,asciidoc,docnav.json}',
+      '!**/*.{test,test.mocks,mock,mocks,spec}.*',
+      '!**/{packages,dev_docs,docs,public,__stories__,storybook,.storybook,ftr_e2e,e2e,scripts,test,tests,test_resources,test_data,__tests__,manual_tests,__jest__,__snapshots__,__mocks__,mock_responses,mocks,fixtures,__fixtures__,cypress,integration_tests}/**',
 
-        '!**/jest.config.js',
-        '!**/jest.config.dev.js',
-        '!**/jest.integration.config.js',
-        '!**/jest_setup.{js,ts}',
-        '!**/*.{story,stories}.{js,ts}',
-        '!**/test_mocks.ts',
-        '!**/*.{sh,md,mdx,asciidoc}',
-        '!**/*.console',
-        '!**/*.scss',
-        '!**/*.docnav.json',
-        '!**/{dev_docs,docs}/**',
-        '!**/public/**/*.{js,ts,tsx,json}',
+      '!x-pack/plugins/lens/to_playground.gif', // README.md
+      '!x-pack/plugins/lens/layout.png', // README.md
+      '!x-pack/plugins/cases/images', // README.md
+      '!x-pack/plugins/canvas/images', // unused
+    ];
 
-        // explicitly ignore all bazel package locations, even if they're not selected by previous patterns
-        ...(await discoverBazelPackages()).map((pkg) => `!${pkg.normalizedRepoRelativeDir}/**`),
-      ],
+    const piscina = new Piscina({
+      filename: resolve(__dirname, 'copy_source_worker.js'),
     });
+
+    const globbyOptions = { cwd: config.resolveFromRepo('.') };
+    const tasks = (
+      await Promise.all([
+        globby(select, globbyOptions),
+        globby(
+          [
+            '{x-pack,src}/plugins/*/public/assets/**',
+            'src/plugins/data/server/scripts/**',
+            'x-pack/plugins/fleet/server/services/epm/packages/**',
+            '!x-pack/plugins/fleet/server/services/epm/packages/*.test.ts',
+          ],
+          globbyOptions
+        ),
+      ])
+    )
+      .flat()
+      .map((source) => piscina.run({ source }));
+
+    await Promise.all(tasks);
+    await piscina.destroy();
   },
 };

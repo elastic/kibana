@@ -16,13 +16,14 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
-import { timelineSelectors } from '../../store/timeline';
+import { timelineSelectors, timelineActions } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
 import { inputsActions } from '../../../common/store/actions';
@@ -45,7 +46,7 @@ const OverlayContainer = styled.div`
 const FullScreenOverlayStyles = css`
   position: fixed;
   top: 0;
-  bottom: 0;
+  bottom: 2em;
   left: 0;
   right: 0;
   z-index: ${euiThemeVars.euiZLevel3};
@@ -84,11 +85,8 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   const { timelineFullScreen } = useTimelineFullScreen();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
-  );
-  const sessionViewConfig = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewConfig
+  const { graphEventId, sessionViewConfig } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
 
   const fullScreen = useMemo(
@@ -100,10 +98,11 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
 
   useEffect(() => {
     return () => {
+      dispatch(timelineActions.updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
       if (timelineId === TimelineId.active) {
-        dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen: false }));
+        dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen: false }));
       } else {
-        dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen: false }));
+        dispatch(inputsActions.setFullScreen({ id: InputsModelId.global, fullScreen: false }));
       }
     };
   }, [dispatch, timelineId]);

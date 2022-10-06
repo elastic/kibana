@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { sumBy } from 'lodash';
-import { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
@@ -174,6 +174,7 @@ async function getTransactionStats({
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -256,6 +257,7 @@ async function getCpuStats({
         events: [ProcessorEvent.metric],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -319,6 +321,7 @@ function getMemoryStats({
             events: [ProcessorEvent.metric],
           },
           body: {
+            track_total_hits: false,
             size: 0,
             query: {
               bool: {

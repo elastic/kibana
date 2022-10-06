@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 
+import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
@@ -25,11 +26,11 @@ import {
 
 import { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 
+import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
 import type {
-  SortOrder,
-  BulkAction,
   BulkActionEditPayload,
-} from '../../../../../common/detection_engine/schemas/common';
+  BulkAction,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import {
   alias_purpose as savedObjectResolveAliasPurpose,
   outcome as savedObjectResolveOutcome,
@@ -340,4 +341,15 @@ export interface PrePackagedRulesStatusResponse {
   timelines_installed: number;
   timelines_not_installed: number;
   timelines_not_updated: number;
+}
+
+export interface FindRulesReferencedByExceptionsListProp {
+  id?: string;
+  listId?: string;
+  namespaceType: NamespaceType;
+}
+
+export interface FindRulesReferencedByExceptionsProps {
+  lists: FindRulesReferencedByExceptionsListProp[];
+  signal?: AbortSignal;
 }

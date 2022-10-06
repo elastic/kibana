@@ -108,10 +108,18 @@ export interface DocLinks {
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
+    readonly connectorsMongoDB: string;
+    readonly connectorsMySQL: string;
+    readonly connectorsWorkplaceSearch: string;
+    readonly contentExtraction: string;
     readonly crawlerGettingStarted: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
+    readonly deployTrainedModels: string;
+    readonly documentLevelSecurity: string;
+    readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
+    readonly languageClients: string;
     readonly licenseManagement: string;
     readonly mailService: string;
     readonly start: string;
@@ -258,13 +266,18 @@ export interface DocLinks {
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
+    readonly endpointArtifacts: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
       macos_system_ext: string;
       linux_deadlock: string;
     };
+    readonly packageActionTroubleshooting: {
+      es_connection: string;
+    };
     readonly threatIntelInt: string;
     readonly responseActions: string;
+    readonly configureEndpointIntegrationPolicy: string;
   };
   readonly query: {
     readonly eql: string;
@@ -327,6 +340,8 @@ export interface DocLinks {
     monitorUptimeSynthetics: string;
     userExperience: string;
     createAlerts: string;
+    syntheticsCommandReference: string;
+    syntheticsProjectMonitors: string;
   }>;
   readonly alerting: Record<string, string>;
   readonly maps: Readonly<{

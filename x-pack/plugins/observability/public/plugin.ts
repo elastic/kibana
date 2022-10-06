@@ -26,7 +26,6 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -53,6 +52,11 @@ import { createExploratoryViewUrl } from './components/shared/exploratory_view/c
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
+export interface ConfigSchema {
+  unsafe: {
+    alertDetails: { enabled: boolean };
+  };
+}
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
@@ -72,7 +76,6 @@ export interface ObservabilityPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
-  sharedUX: SharedUXPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   security: SecurityPluginStart;
@@ -135,7 +138,7 @@ export class Plugin
     }),
   ];
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
@@ -143,6 +146,7 @@ export class Plugin
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
+    const config = this.initContext.config.get();
 
     createCallObservabilityApi(coreSetup.http);
 
@@ -159,6 +163,7 @@ export class Plugin
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
       return renderApp({
         core: coreStart,
+        config,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         appMountParameters: params,
         observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -282,14 +287,17 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
-      getSharedUXContext: pluginsStart.sharedUX.getContextServices,
+      getPageTemplateServices: () => ({ coreStart }),
     });
 
     const getAsyncO11yAlertsTableConfiguration = async () => {
       const { getO11yAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry);
+      return getO11yAlertsTableConfiguration(
+        this.observabilityRuleTypeRegistry,
+        this.initContext.config.get()
+      );
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;

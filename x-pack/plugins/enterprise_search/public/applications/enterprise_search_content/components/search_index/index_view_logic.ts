@@ -9,14 +9,18 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncStatus } from '../../../../../common/types/connectors';
+import {
+  Connector,
+  IngestPipelineParams,
+  SyncStatus,
+} from '../../../../../common/types/connectors';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
   flashAPIErrors,
   clearFlashMessages,
   flashSuccessToast,
 } from '../../../shared/flash_messages';
-import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector_package/start_sync_api_logic';
+import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
   FetchIndexApiLogic,
   FetchIndexApiParams,
@@ -29,6 +33,7 @@ import {
   getLastUpdated,
   indexToViewIndex,
   isConnectorIndex,
+  isConnectorViewIndex,
   isCrawlerIndex,
 } from '../../utils/indices';
 
@@ -61,6 +66,8 @@ export interface IndexViewActions {
 }
 
 export interface IndexViewValues {
+  connector: Connector | undefined;
+  connectorId: string | null;
   data: typeof FetchIndexApiLogic.values.data;
   fetchIndexTimeoutId: NodeJS.Timeout | null;
   index: ElasticsearchViewIndex | undefined;
@@ -71,6 +78,7 @@ export interface IndexViewValues {
   isWaitingForSync: boolean;
   lastUpdated: string | null;
   localSyncNowValue: boolean; // holds local value after update so UI updates correctly
+  pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
   resetFetchIndexLoading: boolean;
   syncStatus: SyncStatus | null;
@@ -170,7 +178,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     },
     startSync: () => {
       if (isConnectorIndex(values.data)) {
-        actions.makeStartSyncRequest({ connectorId: values.data?.connector?.id });
+        actions.makeStartSyncRequest({ connectorId: values.data.connector.id });
       }
     },
     startSyncApiError: (e) => flashAPIErrors(e),
@@ -215,6 +223,17 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
   },
   selectors: ({ selectors }) => ({
+    connector: [
+      () => [selectors.index],
+      (index: ElasticsearchViewIndex | undefined) =>
+        index && (isConnectorViewIndex(index) || isCrawlerIndex(index))
+          ? index.connector
+          : undefined,
+    ],
+    connectorId: [
+      () => [selectors.index],
+      (index) => (isConnectorViewIndex(index) ? index.connector.id : null),
+    ],
     index: [() => [selectors.data], (data) => (data ? indexToViewIndex(data) : undefined)],
     ingestionMethod: [() => [selectors.data], (data) => getIngestionMethod(data)],
     ingestionStatus: [() => [selectors.data], (data) => getIngestionStatus(data)],
@@ -227,6 +246,10 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       (data, localSyncNowValue) => data?.connector?.sync_now || localSyncNowValue,
     ],
     lastUpdated: [() => [selectors.data], (data) => getLastUpdated(data)],
+    pipelineData: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => connector?.pipeline ?? undefined,
+    ],
     syncStatus: [() => [selectors.data], (data) => data?.connector?.last_sync_status ?? null],
   }),
 });

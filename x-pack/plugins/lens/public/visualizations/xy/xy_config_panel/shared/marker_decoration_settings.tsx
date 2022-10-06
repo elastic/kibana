@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { IconPosition } from '@kbn/expression-xy-plugin/common';
@@ -77,17 +77,65 @@ export interface MarkerDecorationConfig<T extends string = string> {
   icon?: T;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
+  textField?: string;
+}
+
+function getSelectedOption(
+  { textField, textVisibility }: MarkerDecorationConfig = {},
+  isQueryBased?: boolean
+) {
+  if (!textVisibility) {
+    return 'none';
+  }
+  if (isQueryBased && textField) {
+    return 'field';
+  }
+  return 'name';
 }
 
 export function TextDecorationSetting<Icon extends string = string>({
   currentConfig,
   setConfig,
-  customIconSet,
+  isQueryBased,
+  children,
 }: {
   currentConfig?: MarkerDecorationConfig<Icon>;
   setConfig: (config: MarkerDecorationConfig<Icon>) => void;
-  customIconSet?: IconSet<Icon>;
+  isQueryBased?: boolean;
+  /** A children render function for custom sub fields on textDecoration change */
+  children?: (textDecoration: 'none' | 'name' | 'field') => JSX.Element | null;
 }) {
+  // To model the temporary state for label based on field when user didn't pick up the field yet,
+  // use a local state
+  const [selectedVisibleOption, setVisibleOption] = useState<'none' | 'name' | 'field'>(
+    getSelectedOption(currentConfig, isQueryBased)
+  );
+  const options = [
+    {
+      id: `${idPrefix}none`,
+      label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.none', {
+        defaultMessage: 'None',
+      }),
+      'data-test-subj': 'lnsXY_textVisibility_none',
+    },
+    {
+      id: `${idPrefix}name`,
+      label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.name', {
+        defaultMessage: 'Name',
+      }),
+      'data-test-subj': 'lnsXY_textVisibility_name',
+    },
+  ];
+  if (isQueryBased) {
+    options.push({
+      id: `${idPrefix}field`,
+      label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.field', {
+        defaultMessage: 'Field',
+      }),
+      'data-test-subj': 'lnsXY_textVisibility_field',
+    });
+  }
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.lineMarker.textVisibility', {
@@ -96,35 +144,42 @@ export function TextDecorationSetting<Icon extends string = string>({
       display="columnCompressed"
       fullWidth
     >
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.lens.lineMarker.textVisibility', {
-          defaultMessage: 'Text decoration',
-        })}
-        data-test-subj="lns-lineMarker-text-visibility"
-        name="textVisibilityStyle"
-        buttonSize="compressed"
-        options={[
-          {
-            id: `${idPrefix}none`,
-            label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.none', {
-              defaultMessage: 'None',
-            }),
-            'data-test-subj': 'lnsXY_textVisibility_none',
-          },
-          {
-            id: `${idPrefix}name`,
-            label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.name', {
-              defaultMessage: 'Name',
-            }),
-            'data-test-subj': 'lnsXY_textVisibility_name',
-          },
-        ]}
-        idSelected={`${idPrefix}${Boolean(currentConfig?.textVisibility) ? 'name' : 'none'}`}
-        onChange={(id) => {
-          setConfig({ textVisibility: id === `${idPrefix}name` });
-        }}
-        isFullWidth
-      />
+      <div>
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.lens.lineMarker.textVisibility', {
+            defaultMessage: 'Text decoration',
+          })}
+          data-test-subj="lns-lineMarker-text-visibility"
+          name="textVisibilityStyle"
+          buttonSize="compressed"
+          options={options}
+          idSelected={
+            selectedVisibleOption ? `${idPrefix}${selectedVisibleOption}` : `${idPrefix}none`
+          }
+          onChange={(id) => {
+            const chosenOption = id.replace(idPrefix, '') as 'none' | 'name' | 'field';
+            if (chosenOption === 'none') {
+              setConfig({
+                textVisibility: false,
+                textField: undefined,
+              });
+            } else if (chosenOption === 'name') {
+              setConfig({
+                textVisibility: true,
+                textField: undefined,
+              });
+            } else if (chosenOption === 'field') {
+              setConfig({
+                textVisibility: Boolean(currentConfig?.textField),
+              });
+            }
+
+            setVisibleOption(chosenOption);
+          }}
+          isFullWidth
+        />
+        {children?.(selectedVisibleOption)}
+      </div>
     </EuiFormRow>
   );
 }

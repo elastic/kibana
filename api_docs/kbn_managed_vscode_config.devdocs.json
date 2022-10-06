@@ -27,6 +27,7 @@
         ],
         "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/managed-vscode-config",
@@ -43,6 +44,7 @@
             ],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -59,6 +61,7 @@
             ],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -75,6 +78,7 @@
             ],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -97,6 +101,7 @@
         ],
         "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -114,6 +119,7 @@
         ],
         "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -136,10 +136,19 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                           isUsingRollover
                             ? [i18nTexts.minAgeUnitFieldSuffix, icon]
                             : [i18nTexts.minAgeUnitFieldSuffix];
+                        const unitValue = unitField.value as string;
+
+                        let unitOptions = timeUnits;
+                        // if current unit is no longer supported as a valid time unit (e.g. nanos, micros, millis or seconds),
+                        // add it back to correctly display the current state
+                        if (unitValue && !unitOptions.some((unit) => unit.value === unitValue)) {
+                          unitOptions = [...timeUnits, { value: unitValue, text: unitValue }];
+                        }
+
                         return (
                           <EuiSelect
                             compressed
-                            value={unitField.value as string}
+                            value={unitValue}
                             onChange={(e) => {
                               unitField.setValue(e.target.value);
                             }}
@@ -147,7 +156,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             append={selectAppendValue}
                             data-test-subj={`${phase}-selectedMinimumAgeUnits`}
                             aria-label={getUnitsAriaLabelForPhase(phase)}
-                            options={timeUnits}
+                            options={unitOptions}
                           />
                         );
                       }}

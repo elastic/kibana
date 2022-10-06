@@ -33,9 +33,10 @@ import {
   isAlertFromEndpointEvent,
   isAlertFromEndpointAlert,
 } from '../../../common/utils/endpoint_alert_check';
-import { HostStatus } from '../../../../common/endpoint/types';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
+import { HostStatus } from '../../../../common/endpoint/types';
+import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -465,23 +466,29 @@ describe('take action dropdown', () => {
           if (getApiResponse) {
             return {
               ...getApiResponse(),
+              metadata: {
+                ...getApiResponse().metadata,
+                Endpoint: {
+                  ...getApiResponse().metadata.Endpoint,
+                  capabilities: [...RESPONDER_CAPABILITIES],
+                },
+              },
               host_status: HostStatus.UNENROLLED,
             };
           }
-          throw new Error('mock implementation missing');
+          throw new Error('some error');
         });
         render();
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
+          wrapper.update();
+
+          expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+            HOST_ENDPOINT_UNENROLLED_TOOLTIP
+          );
         });
-
-        wrapper.update();
-
-        expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
-        expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
-          HOST_ENDPOINT_UNENROLLED_TOOLTIP
-        );
       });
     });
   });

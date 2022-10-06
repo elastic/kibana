@@ -25,6 +25,8 @@ import {
   policyResponseTitles,
 } from './policy_response_friendly_names';
 
+jest.setTimeout(10000);
+
 jest.mock('../../hooks/endpoint/use_get_endpoint_policy_response');
 jest.mock('../../hooks/endpoint/use_get_endpoint_details');
 

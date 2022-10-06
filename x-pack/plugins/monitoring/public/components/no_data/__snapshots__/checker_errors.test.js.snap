@@ -22,25 +22,26 @@ Array [
         There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
       </p>
       <dl
-        class="euiDescriptionList euiDescriptionList--row"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left"
+        data-type="row"
       >
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
         >
           403 Forbidden
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           no access for you
         </dd>
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
         >
           500 Internal Server Error
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           An internal server error occurred
         </dd>

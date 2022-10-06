@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "Suspicious WerFault Child Process",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"WerFault.exe\" and\n  not process.name : (\"cofire.exe\",\n                      \"psr.exe\",\n                      \"VsJITDebugger.exe\",\n                      \"TTTracer.exe\",\n                      \"rundll32.exe\",\n                      \"LogiOptionsMgr.exe\") and\n  not process.args : (\"/LOADSAVEDWINDOWS\",\n                      \"/restore\",\n                      \"RestartByRestartManager*\",\n                      \"--restarted\",\n                      \"createdump\",\n                      \"dontsend\",\n                      \"/watson\")\n",
+  "query": "process where event.type == \"start\" and\n  process.parent.name : \"WerFault.exe\" and\n  not process.name : (\"cofire.exe\",\n                      \"psr.exe\",\n                      \"VsJITDebugger.exe\",\n                      \"TTTracer.exe\",\n                      \"rundll32.exe\",\n                      \"LogiOptionsMgr.exe\") and\n  not process.args : (\"/LOADSAVEDWINDOWS\",\n                      \"/restore\",\n                      \"RestartByRestartManager*\",\n                      \"--restarted\",\n                      \"createdump\",\n                      \"dontsend\",\n                      \"/watson\")\n",
   "references": [
     "https://www.hexacorn.com/blog/2019/09/19/silentprocessexit-quick-look-under-the-hood/",
     "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Persistence/persistence_SilentProcessExit_ImageHijack_sysmon_13_1.evtx",
@@ -74,5 +74,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 101
 }

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useHttp } from '../../lib/kibana';
 import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
 
@@ -18,7 +18,7 @@ interface UserAlertPrevalenceFromProcessTreeResult {
 }
 
 interface ProcessTreeAlertPrevalenceResponse {
-  alertIds: string[];
+  alertIds: string[] | undefined;
 }
 
 interface EntityResponse {
@@ -99,7 +99,7 @@ export function useAlertPrevalenceFromProcessTree({
 }: UseAlertPrevalenceFromProcessTree): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
 
-  const { selectedPatterns, to, from } = useTimelineDataFilters(timelineId);
+  const { selectedPatterns } = useTimelineDataFilters(timelineId);
   const alertAndOriginalIndices = [...new Set(selectedPatterns.concat(indices))];
   const { loading, id, schema } = useAlertDocumentAnalyzerSchema({
     documentId,
@@ -115,7 +115,6 @@ export function useAlertPrevalenceFromProcessTree({
           descendants: 500,
           indexPatterns: alertAndOriginalIndices,
           nodes: [id],
-          timeRange: { from, to },
           includeHits: true,
         }),
       });

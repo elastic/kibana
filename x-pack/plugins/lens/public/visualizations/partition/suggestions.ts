@@ -20,24 +20,19 @@ import {
   PieChartTypes,
   PieVisualizationState,
 } from '../../../common';
+import { isPartitionShape } from '../../../common/visualizations';
 import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { isPartitionShape } from './render_helpers';
 
 function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
 }
 
 function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
-  // Histograms are not good for pi. But we should not reject them on switching between partition charts.
-  const shouldRejectIntervals =
-    state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
-
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    shouldRejectIntervals ||
     table.columns.some((col) => col.operation.isStaticValue)
   );
 }
@@ -111,6 +106,10 @@ export function suggestions({
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
+  // Histograms are not good for pi. But we should not hide suggestion on switching between partition charts.
+  const shouldHideSuggestion =
+    state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
+
   if (
     groups.length <= PartitionChartsMeta.pie.maxBuckets &&
     !hasCustomSuggestionsExists(subVisualizationId)
@@ -131,13 +130,13 @@ export function suggestions({
             ? {
                 ...state.layers[0],
                 layerId: table.layerId,
-                groups: groups.map((col) => col.columnId),
+                primaryGroups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
-                groups: groups.map((col) => col.columnId),
+                primaryGroups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -196,7 +195,7 @@ export function suggestions({
             ? {
                 ...state.layers[0],
                 layerId: table.layerId,
-                groups: groups.map((col) => col.columnId),
+                primaryGroups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 categoryDisplay:
                   state.layers[0].categoryDisplay === CategoryDisplay.INSIDE
@@ -206,7 +205,7 @@ export function suggestions({
               }
             : {
                 layerId: table.layerId,
-                groups: groups.map((col) => col.columnId),
+                primaryGroups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -243,14 +242,16 @@ export function suggestions({
             ? {
                 ...state.layers[0],
                 layerId: table.layerId,
-                groups: groups.map((col) => col.columnId),
+                primaryGroups: groups[0] ? [groups[0].columnId] : [],
+                secondaryGroups: groups[1] ? [groups[1].columnId] : [],
                 metric: metricColumnId,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
-                groups: groups.map((col) => col.columnId),
+                primaryGroups: groups[0] ? [groups[0].columnId] : [],
+                secondaryGroups: groups[1] ? [groups[1].columnId] : [],
                 metric: metricColumnId,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -282,14 +283,14 @@ export function suggestions({
             ? {
                 ...state.layers[0],
                 layerId: table.layerId,
-                groups: groups.map((col) => col.columnId),
+                primaryGroups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
-                groups: groups.map((col) => col.columnId),
+                primaryGroups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -307,11 +308,11 @@ export function suggestions({
   return [...results]
     .map((suggestion) => ({
       ...suggestion,
-      score: suggestion.score + 0.05 * groups.length,
+      score: shouldHideSuggestion ? 0 : suggestion.score + 0.05 * groups.length,
     }))
     .sort((a, b) => b.score - a.score)
     .map((suggestion) => ({
       ...suggestion,
-      hide: incompleteConfiguration || suggestion.hide,
+      hide: shouldHideSuggestion || incompleteConfiguration || suggestion.hide,
     }));
 }

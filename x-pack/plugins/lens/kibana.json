@@ -26,7 +26,8 @@
     "expressionMetricVis",
     "expressionHeatmap",
     "eventAnnotation",
-    "unifiedSearch"
+    "unifiedSearch",
+    "unifiedFieldList"
   ],
   "optionalPlugins": [
     "expressionXY",
@@ -45,7 +46,8 @@
     "kibanaUtils",
     "kibanaReact",
     "embeddable",
-    "fieldFormats"
+    "fieldFormats",
+    "charts"
   ],
   "owner": {
     "name": "Vis Editors",

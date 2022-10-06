@@ -111,6 +111,7 @@ import {
   toAbsoluteDates,
   boundsDescendingRaw,
   getResponseInspectorStats,
+  calcAutoIntervalLessThan,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
@@ -138,6 +139,8 @@ export type {
   ParsedInterval,
   // expressions
   ExecutionContextSearch,
+  ExpressionFunctionKql,
+  ExpressionFunctionLucene,
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
   ExpressionValueSearchContext,
@@ -180,7 +183,6 @@ export {
   SearchSource,
   SearchSessionState,
   SortDirection,
-  handleResponse,
 } from './search';
 
 export type {
@@ -217,6 +219,7 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
+    calcAutoIntervalLessThan,
   },
   getResponseInspectorStats,
   tabifyAggResponse,
@@ -290,7 +293,6 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  IDataPluginServices,
   DataPublicPluginStartActions,
 } from './types';
 

@@ -29,7 +29,6 @@ export function extractLayerDescriptorParams(vis: Vis<RegionMapVisParams>) {
     leftFieldName: vis.params.selectedLayer.isEMS ? vis.params.selectedJoinField.name : undefined,
     colorSchema: vis.params.colorSchema,
     indexPatternId: vis.data.indexPattern?.id,
-    indexPatternTitle: vis.data.indexPattern?.title,
     metricAgg: 'count',
   };
 

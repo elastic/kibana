@@ -7,7 +7,7 @@
 
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { SavedQuery } from '@kbn/data-plugin/public';
 import { Document } from '../persistence';
 
@@ -41,6 +41,7 @@ export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
   activeData?: TableInspectorAdapter;
+  requestWarnings?: string[];
 }
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;

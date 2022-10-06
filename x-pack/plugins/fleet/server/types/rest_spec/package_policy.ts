@@ -9,13 +9,18 @@ import { schema } from '@kbn/config-schema';
 
 import {
   CreatePackagePolicyRequestBodySchema,
+  SimplifiedCreatePackagePolicyRequestBodySchema,
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { ListWithKuerySchema } from '.';
+import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
   query: ListWithKuerySchema,
+};
+
+export const BulkGetPackagePoliciesRequestSchema = {
+  body: BulkRequestBodySchema,
 };
 
 export const GetOnePackagePolicyRequestSchema = {
@@ -25,12 +30,18 @@ export const GetOnePackagePolicyRequestSchema = {
 };
 
 export const CreatePackagePolicyRequestSchema = {
-  body: CreatePackagePolicyRequestBodySchema,
+  body: schema.oneOf([
+    CreatePackagePolicyRequestBodySchema,
+    SimplifiedCreatePackagePolicyRequestBodySchema,
+  ]),
 };
 
 export const UpdatePackagePolicyRequestSchema = {
   ...GetOnePackagePolicyRequestSchema,
-  body: UpdatePackagePolicyRequestBodySchema,
+  body: schema.oneOf([
+    UpdatePackagePolicyRequestBodySchema,
+    SimplifiedCreatePackagePolicyRequestBodySchema,
+  ]),
 };
 
 export const DeletePackagePoliciesRequestSchema = {

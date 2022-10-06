@@ -277,7 +277,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
-      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
+      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition({ serverPaging: true })] : []),
       ...columnRegistry.getAll().map((column) => {
         column.setColumnContext({ capabilities });
         column.registerOnFinishCallback(() => {

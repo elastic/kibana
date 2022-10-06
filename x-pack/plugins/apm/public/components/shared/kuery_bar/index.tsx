@@ -40,6 +40,7 @@ export function KueryBar(props: {
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
   value?: string;
+  suggestionFilter?: (querySuggestion: QuerySuggestion) => boolean;
 }) {
   const { path, query } = useApmParams('/*');
 
@@ -102,7 +103,7 @@ export function KueryBar(props: {
     currentRequestCheck = currentRequest;
 
     try {
-      const suggestions = (
+      const suggestions =
         (await unifiedSearch.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [dataView],
@@ -120,14 +121,21 @@ export function KueryBar(props: {
           selectionEnd: selectionStart,
           useTimeRange: true,
           method: 'terms_agg',
-        })) || []
-      ).slice(0, 15);
+        })) || [];
+
+      const filteredSuggestions = props.suggestionFilter
+        ? suggestions.filter(props.suggestionFilter)
+        : suggestions;
 
       if (currentRequest !== currentRequestCheck) {
         return;
       }
 
-      setState({ ...state, suggestions, isLoadingSuggestions: false });
+      setState({
+        ...state,
+        suggestions: filteredSuggestions.slice(0, 15),
+        isLoadingSuggestions: false,
+      });
     } catch (e) {
       console.error('Error while fetching suggestions', e);
     }

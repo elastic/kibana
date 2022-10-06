@@ -10,6 +10,7 @@ import React from 'react';
 import SearchBar from './search_bar';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -17,7 +18,9 @@ const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
+import { FilterItems } from '../filter_bar';
+import { DataViewPicker } from '..';
 
 const mockTimeHistory = {
   get: () => {
@@ -81,6 +84,9 @@ function wrapSearchBarInContext(testProps: any) {
     intl: null as any,
   };
 
+  const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+  (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+
   const services = {
     uiSettings: startMock.uiSettings,
     savedObjects: startMock.savedObjects,
@@ -108,6 +114,10 @@ function wrapSearchBarInContext(testProps: any) {
               ],
             }),
         },
+      },
+      dataViewEditor: dataViewEditorMock,
+      dataViews: {
+        getIdsWithTitle: jest.fn(() => []),
       },
     },
   };
@@ -241,5 +251,41 @@ describe('SearchBar', () => {
     );
     expect(component.find(QUERY_INPUT).length).toBeFalsy();
     expect(component.find(EDITOR).length).toBeTruthy();
+  });
+
+  it('Should render in isDisabled state', () => {
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        isDisabled: true,
+        query: kqlQuery,
+        filters: [],
+        onFiltersUpdated: noop,
+        dataViewPickerComponentProps: {
+          trigger: {
+            label: 'Data View',
+          },
+        },
+      })
+    );
+    const queryInput = component.find(QUERY_INPUT).at(0).getDOMNode();
+    expect(queryInput.querySelector('textarea')).toBeDisabled();
+    expect(queryInput.querySelector('[title="Clear input"]')).toBeNull();
+
+    expect(component.find(EuiSuperDatePicker).prop('isDisabled')).toBe(true);
+    expect(component.find(EuiSuperUpdateButton).prop('isDisabled')).toBe(true);
+    expect(component.find(FilterItems).prop('readOnly')).toBe(true);
+
+    expect(component.find('[data-test-subj="showQueryBarMenu"]').at(0).getDOMNode()).toBeDisabled();
+    expect(component.find('[data-test-subj="addFilter"]').at(0).getDOMNode()).toBeDisabled();
+
+    expect(component.find(DataViewPicker).prop('isDisabled')).toBe(true);
+
+    // also run a wildcard, this could help to find missing [disabled] when someone adds a new button
+    Array.from(component.getDOMNode().querySelectorAll('button')).forEach((button) => {
+      expect(button).toBeDisabled();
+    });
   });
 });

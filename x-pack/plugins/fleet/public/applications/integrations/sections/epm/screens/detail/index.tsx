@@ -25,6 +25,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
 import { splitPkgKey } from '../../../../../../../common/services';
+import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
+
 import {
   useGetPackageInstallStatus,
   useSetPackageInstallStatus,
@@ -37,15 +39,20 @@ import {
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
-import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
+import {
+  useGetPackageInfoByKey,
+  useLink,
+  useAgentPolicyContext,
+  useIsGuidedOnboardingActive,
+} from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import { Error, Loading } from '../../../../components';
+import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { HeaderReleaseBadge } from '../../components/release_badge';
+import { WithGuidedOnboardingTour } from './components/with_guided_onboarding_tour';
 
 import { useIsFirstTimeAgentUser } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
@@ -61,6 +68,7 @@ import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
+import { DocumentationPage } from './documentation';
 
 import './index.scss';
 
@@ -153,6 +161,7 @@ export function Detail() {
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUser();
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
@@ -291,6 +300,7 @@ export function Detail() {
         isCloud,
         isExperimentalAddIntegrationPageEnabled,
         isFirstTimeAgentUser,
+        isGuidedOnboardingActive,
         pkgkey,
       });
 
@@ -304,6 +314,7 @@ export function Detail() {
       isCloud,
       isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
+      isGuidedOnboardingActive,
       pathname,
       pkgkey,
       search,
@@ -348,19 +359,25 @@ export function Detail() {
               { isDivider: true },
               {
                 content: (
-                  <AddIntegrationButton
-                    userCanInstallPackages={userCanInstallPackages}
-                    href={getHref('add_integration_to_policy', {
-                      pkgkey,
-                      ...(integration ? { integration } : {}),
-                      ...(agentPolicyIdFromContext
-                        ? { agentPolicyId: agentPolicyIdFromContext }
-                        : {}),
-                    })}
-                    missingSecurityConfiguration={missingSecurityConfiguration}
-                    packageName={integrationInfo?.title || packageInfo.title}
-                    onClick={handleAddIntegrationPolicyClick}
-                  />
+                  <WithGuidedOnboardingTour
+                    packageKey={pkgkey}
+                    tourType={'addIntegrationButton'}
+                    isGuidedOnboardingActive={isGuidedOnboardingActive}
+                  >
+                    <AddIntegrationButton
+                      userCanInstallPackages={userCanInstallPackages}
+                      href={getHref('add_integration_to_policy', {
+                        pkgkey,
+                        ...(integration ? { integration } : {}),
+                        ...(agentPolicyIdFromContext
+                          ? { agentPolicyId: agentPolicyIdFromContext }
+                          : {}),
+                      })}
+                      missingSecurityConfiguration={missingSecurityConfiguration}
+                      packageName={integrationInfo?.title || packageInfo.title}
+                      onClick={handleAddIntegrationPolicyClick}
+                    />
+                  </WithGuidedOnboardingTour>
                 ),
               },
             ].map((item, index) => (
@@ -384,6 +401,7 @@ export function Detail() {
       packageInfo,
       updateAvailable,
       isInstalled,
+      isGuidedOnboardingActive,
       userCanInstallPackages,
       getHref,
       pkgkey,
@@ -491,6 +509,24 @@ export function Detail() {
       });
     }
 
+    if (!HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo.name)) {
+      tabs.push({
+        id: 'api-reference',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.documentationLinkText"
+            defaultMessage="API reference"
+          />
+        ),
+        isSelected: panel === 'api-reference',
+        'data-test-subj': `tab-api-reference`,
+        href: getHref('integration_details_api_reference', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
+
     return tabs;
   }, [
     packageInfo,
@@ -576,6 +612,9 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
             <CustomViewPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_api_reference}>
+            <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
           </Route>
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
         </Switch>

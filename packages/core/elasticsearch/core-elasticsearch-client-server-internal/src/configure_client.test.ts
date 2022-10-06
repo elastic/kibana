@@ -11,16 +11,21 @@ jest.mock('./log_query_and_deprecation', () => ({
   instrumentEsQueryAndDeprecationLogger: jest.fn(),
 }));
 
+import { Agent } from 'http';
 import {
   parseClientOptionsMock,
   createTransportMock,
   ClientMock,
 } from './configure_client.test.mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
+import { type AgentFactoryProvider, AgentManager } from './agent_manager';
+
+const kibanaVersion = '1.0.0';
 
 const createFakeConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -40,14 +45,16 @@ const createFakeClient = () => {
 };
 
 describe('configureClient', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let logger: MockedLogger;
   let config: ElasticsearchClientConfig;
+  let agentFactoryProvider: AgentFactoryProvider;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     config = createFakeConfig();
     parseClientOptionsMock.mockReturnValue({});
     ClientMock.mockImplementation(() => createFakeClient());
+    agentFactoryProvider = new AgentManager();
   });
 
   afterEach(() => {
@@ -57,17 +64,29 @@ describe('configureClient', () => {
   });
 
   it('calls `parseClientOptions` with the correct parameters', () => {
-    configureClient(config, { logger, type: 'test', scoped: false });
+    configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
-    expect(parseClientOptionsMock).toHaveBeenCalledWith(config, false);
+    expect(parseClientOptionsMock).toHaveBeenCalledWith(config, false, kibanaVersion);
 
     parseClientOptionsMock.mockClear();
 
-    configureClient(config, { logger, type: 'test', scoped: true });
+    configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: true,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
-    expect(parseClientOptionsMock).toHaveBeenCalledWith(config, true);
+    expect(parseClientOptionsMock).toHaveBeenCalledWith(config, true, kibanaVersion);
   });
 
   it('constructs a client using the options returned by `parseClientOptions`', () => {
@@ -76,23 +95,62 @@ describe('configureClient', () => {
     };
     parseClientOptionsMock.mockReturnValue(parsedOptions);
 
-    const client = configureClient(config, { logger, type: 'test', scoped: false });
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining(parsedOptions));
     expect(client).toBe(ClientMock.mock.results[0].value);
   });
 
+  it('constructs a client using the provided `agentFactoryProvider`', () => {
+    const agentFactory = () => new Agent();
+    const customAgentFactoryProvider = {
+      getAgentFactory: () => agentFactory,
+    };
+
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentFactoryProvider: customAgentFactoryProvider,
+      kibanaVersion,
+    });
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining({ agent: agentFactory }));
+    expect(client).toBe(ClientMock.mock.results[0].value);
+  });
+
   it('calls `createTransport` with the correct parameters', () => {
     const getExecutionContext = jest.fn();
-    configureClient(config, { logger, type: 'test', scoped: false, getExecutionContext });
+    configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      getExecutionContext,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(createTransportMock).toHaveBeenCalledTimes(1);
     expect(createTransportMock).toHaveBeenCalledWith({ getExecutionContext });
 
     createTransportMock.mockClear();
 
-    configureClient(config, { logger, type: 'test', scoped: true, getExecutionContext });
+    configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: true,
+      getExecutionContext,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(createTransportMock).toHaveBeenCalledTimes(1);
     expect(createTransportMock).toHaveBeenCalledWith({ getExecutionContext });
@@ -102,7 +160,13 @@ describe('configureClient', () => {
     const mockedTransport = { mockTransport: true };
     createTransportMock.mockReturnValue(mockedTransport);
 
-    const client = configureClient(config, { logger, type: 'test', scoped: false });
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(
@@ -117,7 +181,13 @@ describe('configureClient', () => {
     const mockedTransport = { mockTransport: true };
     createTransportMock.mockReturnValue(mockedTransport);
 
-    const client = configureClient(config, { logger, type: 'test', scoped: false });
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(
@@ -129,7 +199,13 @@ describe('configureClient', () => {
   });
 
   it('calls instrumentEsQueryAndDeprecationLogger', () => {
-    const client = configureClient(config, { logger, type: 'test', scoped: false });
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
 
     expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledTimes(1);
     expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledWith({

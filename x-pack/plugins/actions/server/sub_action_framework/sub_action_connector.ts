@@ -8,19 +8,12 @@
 import { isPlainObject, isEmpty } from 'lodash';
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  Method,
-  AxiosError,
-  AxiosRequestHeaders,
-} from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestHeaders } from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
-import { SubAction } from './types';
+import { SubAction, SubActionRequestParams } from './types';
 import { ServiceParams } from './types';
 import * as i18n from './translations';
+import { request } from '../lib/axios_utils';
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
   return isPlainObject(value);
@@ -123,37 +116,25 @@ export abstract class SubActionConnector<Config, Secrets> {
     responseSchema,
     headers,
     ...config
-  }: {
-    url: string;
-    responseSchema: Type<R>;
-    method?: Method;
-  } & AxiosRequestConfig): Promise<AxiosResponse<R>> {
+  }: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
     try {
       this.assertURL(url);
       this.ensureUriAllowed(url);
       const normalizedURL = this.normalizeURL(url);
 
-      const { httpAgent, httpsAgent } = getCustomAgents(
-        this.configurationUtilities,
-        this.logger,
-        url
-      );
-      const { maxContentLength, timeout } = this.configurationUtilities.getResponseSettings();
-
       this.logger.debug(
         `Request to external service. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type} Method: ${method}. URL: ${normalizedURL}`
       );
-      const res = await this.axiosInstance(normalizedURL, {
+
+      const res = await request({
         ...config,
+        axios: this.axiosInstance,
+        url: normalizedURL,
+        logger: this.logger,
         method,
-        headers: this.getHeaders(headers),
         data: this.normalizeData(data),
-        // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
-        httpAgent,
-        httpsAgent,
-        proxy: false,
-        maxContentLength,
-        timeout,
+        configurationUtilities: this.configurationUtilities,
+        headers: this.getHeaders(headers),
       });
 
       this.validateResponse(responseSchema, res.data);

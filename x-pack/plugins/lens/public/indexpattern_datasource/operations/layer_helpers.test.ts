@@ -39,6 +39,9 @@ import {
 import { TinymathAST } from '@kbn/tinymath';
 import { CoreStart } from '@kbn/core/public';
 import { IndexPattern } from '../../types';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
+const dataMock = dataPluginMock.createStartContract();
 
 jest.mock('.');
 jest.mock('../../id_generator');
@@ -99,6 +102,8 @@ const indexPattern = {
   hasRestrictions: false,
   fields: indexPatternFields,
   getFieldByName: getFieldByNameFactory([...indexPatternFields, documentField]),
+  isPersisted: true,
+  spec: {},
 };
 
 describe('state_helpers', () => {
@@ -185,6 +190,7 @@ describe('state_helpers', () => {
             layerId: 'layer',
             dataView: indexPattern,
             filterOperations: () => true,
+            indexPatternId: '1',
           },
           target: {
             columnId: 'copy',
@@ -192,6 +198,7 @@ describe('state_helpers', () => {
             dataView: indexPattern,
             layerId: 'layer',
             filterOperations: () => true,
+            indexPatternId: '1',
           },
           shouldDeleteSource: false,
         }).layer
@@ -1380,6 +1387,7 @@ describe('state_helpers', () => {
     it('should execute adjustments for other columns when creating a reference', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
+        customLabel: true,
         dataType: 'string',
         isBucketed: true,
 
@@ -2816,6 +2824,8 @@ describe('state_helpers', () => {
       hasRestrictions: true,
       getFieldByName: getFieldByNameFactory(fields),
       fields,
+      isPersisted: true,
+      spec: {},
     };
 
     it('should switch index pattern id in layer', () => {
@@ -3043,7 +3053,8 @@ describe('state_helpers', () => {
         indexPattern,
         {},
         '1',
-        {}
+        {},
+        dataMock
       );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
@@ -3069,7 +3080,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
@@ -3104,7 +3116,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(notCalledMock).not.toHaveBeenCalled();
       expect(mock).toHaveBeenCalledTimes(1);
@@ -3140,7 +3153,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(savedRef).toHaveBeenCalled();
       expect(incompleteRef).not.toHaveBeenCalled();
@@ -3169,7 +3183,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(mock).toHaveBeenCalledWith(
         {
