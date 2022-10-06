@@ -96,7 +96,7 @@ exports[`Header renders 1`] = `
                       class="euiHeaderSectionItemButton__content"
                     >
                       <span
-                        data-euiicon-type="help"
+                        data-euiicon-type="questionInCircle"
                       />
                     </span>
                   </span>
