@@ -3388,6 +3388,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-so-type-serializer@link:bazel-bin/packages/core/test-helpers/core-test-helpers-so-type-serializer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
   version "0.0.0"
   uid ""
@@ -7545,6 +7549,10 @@
   uid ""
 
 "@types/kbn__core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-test-helpers-so-type-serializer@link:bazel-bin/packages/core/test-helpers/core-test-helpers-so-type-serializer/npm_module_types":
   version "0.0.0"
   uid ""
 
