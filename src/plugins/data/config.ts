@@ -23,7 +23,7 @@ export const searchSessionsConfigSchema = schema.object({
   /**
    * maxUpdateRetries controls how many retries we perform while attempting to save a search session
    */
-  maxUpdateRetries: schema.number({ defaultValue: 3 }),
+  maxUpdateRetries: schema.number({ defaultValue: 10 }),
 
   /**
    * defaultExpiration controls how long search sessions are valid for, until they are expired.
