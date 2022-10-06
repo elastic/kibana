@@ -12,6 +12,7 @@ import {
   RULES_BULK_EDIT_ACTIONS_WARNING,
   ADD_RULE_ACTIONS_MENU_ITEM,
 } from '../../screens/rules_bulk_edit';
+import { actionFormSelector } from '../../screens/common/rule_actions';
 
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
 import {
@@ -24,7 +25,7 @@ import {
   waitForRulesTableToBeLoaded,
   selectNumberOfRules,
   loadPrebuiltDetectionRulesFromHeaderBtn,
-  goToEditRuleActionsSettings,
+  goToEditRuleActionsSettingsOf,
 } from '../../tasks/alerts_detection_rules';
 import {
   waitForBulkEditActionToFinish,
@@ -60,11 +61,13 @@ import {
   getNewTermsRule,
 } from '../../objects/rule';
 
+const ruleNameToAssert = 'Custom rule name with actions';
 const expectedNumberOfCustomRulesToBeEdited = 7;
 // 7 custom rules of different types + 3 prebuilt.
 // number of selected rules doesn't matter, we only want to make sure they will be edited an no modal window displayed as for other actions
 const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 3;
 
+const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
 describe('Detection rules, bulk edit of rule actions', () => {
@@ -78,7 +81,30 @@ describe('Detection rules, bulk edit of rule actions', () => {
     deleteConnectors();
     esArchiverResetKibana();
 
-    createCustomRuleEnabled(getNewRule(), '1');
+    createSlackConnector().then(({ body }) => {
+      const actions = [
+        {
+          id: body.id,
+          action_type_id: '.slack',
+          group: 'default',
+          params: {
+            message: expectedExistingSlackMessage,
+          },
+        },
+      ];
+
+      createCustomRuleEnabled(
+        {
+          ...getNewRule(),
+          name: ruleNameToAssert,
+        },
+        '1',
+        '100m',
+        500,
+        actions
+      );
+    });
+
     createEventCorrelationRule(getEqlRule(), '2');
     createMachineLearningRule(getMachineLearningRule(), '3');
     createCustomIndicatorRule(getNewThreatIndicatorRule(), '4');
@@ -90,7 +116,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
   });
 
   context('Restricted action privileges', () => {
-    it('User has no actions privileges', () => {
+    it("User with no privileges can't add rule actions", () => {
       login(ROLES.hunter_no_actions);
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.hunter_no_actions);
       waitForRulesTableToBeLoaded();
@@ -109,7 +135,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
       waitForRulesTableToBeLoaded();
     });
 
-    it('Add rule actions to rules', () => {
+    it('Add a rule action to rules (existing connector)', () => {
       const expectedActionFrequency = 'Daily';
 
       loadPrebuiltDetectionRulesFromHeaderBtn();
@@ -128,10 +154,13 @@ describe('Detection rules, bulk edit of rule actions', () => {
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfRulesToBeEdited });
 
       // check if rule has been updated
-      goToEditRuleActionsSettings();
+      goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
       assertSelectedActionFrequency(expectedActionFrequency);
-      assertSlackRuleAction(expectedSlackMessage);
+      assertSlackRuleAction(expectedExistingSlackMessage, 0);
+      assertSlackRuleAction(expectedSlackMessage, 1);
+      // ensure there is no third action
+      cy.get(actionFormSelector(2)).should('not.exist');
     });
 
     it('Overwrite rule actions in rules', () => {
@@ -156,13 +185,15 @@ describe('Detection rules, bulk edit of rule actions', () => {
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfRulesToBeEdited });
 
       // check if rule has been updated
-      goToEditRuleActionsSettings();
+      goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
       assertSelectedActionFrequency(expectedActionFrequency);
       assertSlackRuleAction(expectedSlackMessage);
+      // ensure existing action was overwritten
+      cy.get(actionFormSelector(1)).should('not.exist');
     });
 
-    it('Add rule actions to rules when creating connector', () => {
+    it('Add a rule action to rules (new connector)', () => {
       const expectedActionFrequency = 'Hourly';
       const expectedEmail = 'test@example.com';
       const expectedSubject = 'Subject';
@@ -177,7 +208,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
       // check if rule has been updated
-      goToEditRuleActionsSettings();
+      goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
       assertSelectedActionFrequency(expectedActionFrequency);
       assertEmailRuleAction(expectedEmail, expectedSubject);

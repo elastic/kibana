@@ -32,8 +32,8 @@ export const addSlackRuleAction = (message: string) => {
   cy.get(SLACK_ACTION_MESSAGE_TEXTAREA).clear().type(message);
 };
 
-export const assertSlackRuleAction = (message: string) => {
-  cy.get(SLACK_ACTION_MESSAGE_TEXTAREA).should('have.value', message);
+export const assertSlackRuleAction = (message: string, position: number = 0) => {
+  cy.get(SLACK_ACTION_MESSAGE_TEXTAREA).eq(position).should('have.value', message);
 };
 
 export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {

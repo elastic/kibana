@@ -38,3 +38,6 @@ export const FORM_VALIDATION_ERROR = '.euiFormErrorText';
 export const JSON_EDITOR = "[data-test-subj='actionJsonEditor']";
 
 export const INDEX_SELECTOR = "[data-test-subj='.index-siem-ActionTypeSelectOption']";
+
+export const actionFormSelector = (position: number) =>
+  `[data-test-subj="alertActionAccordion-${position}"]`;

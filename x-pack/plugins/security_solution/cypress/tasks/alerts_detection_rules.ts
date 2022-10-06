@@ -420,8 +420,8 @@ export const clickErrorToastBtn = () => {
   cy.get(TOASTER_ERROR_BTN).click();
 };
 
-export const goToEditRuleActionsSettings = () => {
-  goToRuleDetails();
+export const goToEditRuleActionsSettingsOf = (name: string) => {
+  goToTheRuleDetailsOf(name);
   goToRuleEditSettings();
   // wait until first step loads completely. Otherwise cypress stuck at the first edit page
   cy.get(EDIT_SUBMIT_BUTTON).should('be.enabled');
