@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { SuperuserAtSpace1 } from '../../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -19,20 +19,32 @@ export default ({ getService }: FtrProviderContext) => {
     const objectRemover = new ObjectRemover(supertest);
     after(() => objectRemover.removeAll());
 
-    const ids = ['fake_rule_id_1', 'fake_rule_id_2', 'fake_rule_id_3'];
-    const params = { ids };
-
     it('happy path', async () => {
       const { user, space } = SuperuserAtSpace1;
+
+      const { body: createdRule1 } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ tags: ['foo'] }))
+        .expect(200);
+
+      const { body: createdRule2 } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ tags: ['foo'] }))
+        .expect(200);
 
       const response = await supertestWithoutAuth
         .patch(`${getUrlPrefix(space.id)}/api/alerting/rules/_bulk_delete`)
         .set('kbn-xsrf', 'foo')
-        .send(params)
+        .send({ ids: [createdRule1.id, createdRule2.id] })
         .auth(user.username, user.password);
 
       expect(response.statusCode).to.eql(200);
       expect(response.body).to.eql({});
+
+      objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+      objectRemover.add(space.id, createdRule2.id, 'rule', 'alerting');
     });
   });
 };

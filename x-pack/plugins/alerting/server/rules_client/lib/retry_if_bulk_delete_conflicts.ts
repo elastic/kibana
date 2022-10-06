@@ -21,9 +21,9 @@ const MaxIdsNumberInRetryFilter = 1000;
 // TODO: change to Return type and decide if we need errors!
 type BulkDeleteOperation = (filter: KueryNode | null) => Promise<{
   apiKeysToInvalidate: string[];
-  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
-  result: SavedObjectsBulkDeleteResponse;
   errors: BulkEditError[];
+  result: SavedObjectsBulkDeleteResponse;
+  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   taskIdsToDelete: string[];
 }>;
 
@@ -61,7 +61,7 @@ export const retryIfBulkDeleteConflicts = async (
       apiKeysToInvalidate: localApiKeysToInvalidate,
       errors: localErrors,
       result,
-      rules: localRules,
+      rules,
       taskIdsToDelete: localTaskIdsToDelete,
     } = await bulkDeleteOperation(filter);
 
@@ -91,13 +91,13 @@ export const retryIfBulkDeleteConflicts = async (
     if (retries <= 0) {
       logger.warn('Bulk delele rules conflicts, exceeded retries');
 
-      const conflictErrors = localRules
-        .filter((obj) => conflictErrorMap.has(obj.id))
-        .map((obj) => ({
-          message: conflictErrorMap.get(obj.id)?.message ?? 'n/a',
+      const conflictErrors = rules
+        .filter((rule) => conflictErrorMap.has(rule.id))
+        .map((rule) => ({
+          message: conflictErrorMap.get(rule.id)?.message ?? 'n/a',
           rule: {
-            id: obj.id,
-            name: obj.attributes?.name ?? 'n/a',
+            id: rule.id,
+            name: rule.attributes?.name ?? 'n/a',
           },
         }));
 

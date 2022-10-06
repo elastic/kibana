@@ -1784,7 +1784,7 @@ export class RulesClient {
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
 
-    const { apiKeysToInvalidate, taskIdsToDelete } = await retryIfBulkDeleteConflicts(
+    const { apiKeysToInvalidate, errors, taskIdsToDelete } = await retryIfBulkDeleteConflicts(
       this.logger,
       (filterKueryNode: KueryNode | null) => this.bulkDeleteWithOCC({ filter: filterKueryNode }),
       kueryNodeFilterWithAuth
@@ -1802,7 +1802,7 @@ export class RulesClient {
       this.unsecuredSavedObjectsClient
     );
 
-    return;
+    return { ids, errors, taskIdsToDelete };
   };
 
   private bulkDeleteWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
