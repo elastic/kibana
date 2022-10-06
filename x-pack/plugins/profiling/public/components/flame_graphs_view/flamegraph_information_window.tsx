@@ -15,14 +15,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../common';
 import { getImpactRows } from './get_impact_rows';
+import { getInformationRows } from './get_information_rows';
 
 interface Props {
   frame?: {
+    fileID: string;
+    frameType: number;
     exeFileName: string;
+    addressOrLine: number;
     functionName: string;
     sourceFileName: string;
+    sourceLine: number;
     countInclusive: number;
     countExclusive: number;
   };
@@ -104,7 +108,27 @@ export function FlamegraphInformationWindow({ onClose, frame, totalSamples, tota
     );
   }
 
-  const { exeFileName, functionName, sourceFileName, countInclusive, countExclusive } = frame;
+  const {
+    fileID,
+    frameType,
+    exeFileName,
+    addressOrLine,
+    functionName,
+    sourceFileName,
+    sourceLine,
+    countInclusive,
+    countExclusive,
+  } = frame;
+
+  const informationRows = getInformationRows({
+    fileID,
+    frameType,
+    exeFileName,
+    addressOrLine,
+    functionName,
+    sourceFileName,
+    sourceLine,
+  });
 
   const impactRows = getImpactRows({
     countInclusive,
@@ -117,30 +141,7 @@ export function FlamegraphInformationWindow({ onClose, frame, totalSamples, tota
     <FlamegraphFrameInformationPanel onClose={onClose}>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <KeyValueList
-            rows={[
-              {
-                label: i18n.translate(
-                  'xpack.profiling.flameGraphInformationWindow.executableLabel',
-                  { defaultMessage: 'Executable' }
-                ),
-                value: exeFileName || NOT_AVAILABLE_LABEL,
-              },
-              {
-                label: i18n.translate('xpack.profiling.flameGraphInformationWindow.functionLabel', {
-                  defaultMessage: 'Function',
-                }),
-                value: functionName || NOT_AVAILABLE_LABEL,
-              },
-              {
-                label: i18n.translate(
-                  'xpack.profiling.flameGraphInformationWindow.sourceFileLabel',
-                  { defaultMessage: 'Source file' }
-                ),
-                value: sourceFileName || NOT_AVAILABLE_LABEL,
-              },
-            ]}
-          />
+          <KeyValueList rows={informationRows} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
