@@ -19,9 +19,15 @@ import { HttpError, Status } from '../../../../../../../common/types/api';
 import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
+import {
+  FetchIndexApiLogic,
+  FetchIndexApiResponse,
+} from '../../../../api/index/fetch_index_api_logic';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
 import { CreateMlInferencePipelineApiLogic } from '../../../../api/ml_models/create_ml_inference_pipeline';
 import { MLModelsApiLogic } from '../../../../api/ml_models/ml_models_logic';
+
+import { isConnectorIndex } from '../../../../utils/indices';
 
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 import {
@@ -44,6 +50,7 @@ export enum AddInferencePipelineSteps {
 }
 
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
+const DEFAULT_CONNECTOR_FIELDS = ['body', 'title', 'id', 'type', 'url'];
 
 interface MLInferenceProcessorsActions {
   createApiError: (error: HttpError) => HttpError;
@@ -76,6 +83,7 @@ interface MLInferenceProcessorsValues {
   formErrors: AddInferencePipelineFormErrors;
   isLoading: boolean;
   isPipelineDataValid: boolean;
+  index: FetchIndexApiResponse;
   mappingData: typeof MappingsApiLogic.values.data;
   mappingStatus: Status;
   mlInferencePipeline?: MlInferencePipeline;
@@ -113,6 +121,8 @@ export const MLInferenceLogic = kea<
       ],
     ],
     values: [
+      FetchIndexApiLogic,
+      ['data as index'],
       MappingsApiLogic,
       ['data as mappingData', 'status as mappingStatus'],
       MLModelsApiLogic,
@@ -210,10 +220,19 @@ export const MLInferenceLogic = kea<
       },
     ],
     sourceFields: [
-      () => [selectors.mappingStatus, selectors.mappingData],
-      (status: Status, mapping: IndicesGetMappingIndexMappingRecord) => {
+      () => [selectors.mappingStatus, selectors.mappingData, selectors.index],
+      (
+        status: Status,
+        mapping: IndicesGetMappingIndexMappingRecord,
+        index: FetchIndexApiResponse
+      ) => {
         if (status !== Status.SUCCESS) return;
-        if (mapping?.mappings?.properties === undefined) return [];
+        if (mapping?.mappings?.properties === undefined) {
+          if (isConnectorIndex(index)) {
+            return DEFAULT_CONNECTOR_FIELDS;
+          }
+          return [];
+        }
         return Object.entries(mapping.mappings.properties)
           .reduce((fields, [key, value]) => {
             if (value.type === 'text' || value.type === 'keyword') {
