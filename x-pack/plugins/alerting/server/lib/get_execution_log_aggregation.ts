@@ -424,7 +424,7 @@ export function getExecutionLogAggregation({
 
 export function getExecutionLogRuntimeMappings(): estypes.MappingRuntimeFields {
   return {
-    'kibana.alerting.outcome': {
+    [OUTCOME_FIELD]: {
       type: 'keyword',
       script: {
         source: `
