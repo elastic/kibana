@@ -63,6 +63,12 @@ export async function getAgentUploads(
       id: 'failed1',
       status: 'FAILED',
     });
+
+    // TODO mock simulating last in progress action turning ready if taken in last 10s
+    const diag = result.find((item) => item.status === 'IN_PROGRESS');
+    if (diag && new Date(diag.createTime).getTime() > Date.now() - 10000) {
+      diag.status = 'READY';
+    }
   }
 
   return result;

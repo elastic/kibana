@@ -46,6 +46,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [diagnosticsEntries, setDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
+  const [prevDiagnosticsEntries, setPrevDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
 
   const loadData = useCallback(async () => {
     try {
@@ -85,6 +86,30 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
 
     return cleanup;
   }, [loadData]);
+
+  useEffect(() => {
+    setPrevDiagnosticEntries(diagnosticsEntries);
+    if (prevDiagnosticsEntries.length > 0) {
+      diagnosticsEntries
+        .filter((newEntry) => {
+          const oldEntry = prevDiagnosticsEntries.find((entry) => entry.id === newEntry.id);
+          return newEntry.status === 'READY' && (!oldEntry || oldEntry?.status !== 'READY');
+        })
+        .forEach((entry) => {
+          notifications.toasts.addSuccess(
+            {
+              title: i18n.translate('xpack.fleet.requestDiagnostics.readyNotificationTitle', {
+                defaultMessage: 'Agent diagnostics {name} ready',
+                values: {
+                  name: entry.name,
+                },
+              }),
+            },
+            { toastLifeTimeMs: 5000 }
+          );
+        });
+    }
+  }, [prevDiagnosticsEntries, diagnosticsEntries, notifications.toasts]);
 
   const columns: Array<EuiTableFieldDataColumnType<AgentDiagnostics>> = [
     {
