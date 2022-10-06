@@ -14119,7 +14119,7 @@
             "section": "def-common.RegistryPackage",
             "text": "RegistryPackage"
           },
-          ", \"internal\" | \"assets\" | \"readme\" | \"data_streams\" | \"elasticsearch\">"
+          ", \"elasticsearch\" | \"internal\" | \"assets\" | \"readme\" | \"data_streams\">"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,

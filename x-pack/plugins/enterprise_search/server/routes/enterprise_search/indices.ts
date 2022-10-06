@@ -9,6 +9,7 @@ import {
   IngestPutPipelineRequest,
   IngestSimulateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+
 import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,7 @@ import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
+import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
@@ -519,6 +521,30 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: simulateResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/errors',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      const errors = await getMlInferenceErrors(indexName, client.asCurrentUser);
+
+      return response.ok({
+        body: {
+          errors,
+        },
         headers: { 'content-type': 'application/json' },
       });
     })

@@ -242,7 +242,7 @@
           "label": "guidedOnboardingApi",
           "description": [],
           "signature": [
-            "ApiService",
+            "GuidedOnboardingApi",
             " | undefined"
           ],
           "path": "src/plugins/guided_onboarding/public/types.ts",
