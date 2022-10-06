@@ -19,6 +19,8 @@ import { DataContextType } from './types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EuiLink } from '@elastic/eui';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('datatable cell renderer', () => {
   const table: Datatable = {
     type: 'datatable',
@@ -236,7 +238,7 @@ describe('datatable cell renderer', () => {
     function flushEffect(component: ReactWrapper) {
       return act(async () => {
         await component;
-        await new Promise((r) => setImmediate(r));
+        await new Promise((r) => originalProcessNextTick(r));
         component.update();
       });
     }

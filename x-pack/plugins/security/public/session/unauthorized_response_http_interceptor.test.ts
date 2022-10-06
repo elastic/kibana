@@ -16,11 +16,8 @@ import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_htt
 
 jest.mock('./session_expired');
 
-const drainPromiseQueue = () => {
-  return new Promise((resolve) => {
-    setImmediate(resolve);
-  });
-};
+const originalProcessNextTick = process.nextTick;
+export const nextTick = () => new Promise((res) => originalProcessNextTick(res));
 
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
@@ -55,7 +52,7 @@ it(`logs out 401 responses`, async () => {
   );
 
   await logoutPromise;
-  await drainPromiseQueue();
+  await nextTick();
   expect(fetchResolved).toBe(false);
   expect(fetchRejected).toBe(false);
   expect(sessionExpired.logout).toHaveBeenCalledWith('AUTHENTICATION_ERROR');

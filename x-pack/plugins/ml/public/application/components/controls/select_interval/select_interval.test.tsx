@@ -15,6 +15,7 @@ import { EuiSelect } from '@elastic/eui';
 import { UrlStateProvider } from '../../../util/url_state';
 
 import { SelectInterval } from './select_interval';
+const originalProcessNextTick = process.nextTick;
 
 describe('SelectInterval', () => {
   test('creates correct initial selected value', () => {
@@ -51,7 +52,7 @@ describe('SelectInterval', () => {
       }
     });
 
-    setImmediate(() => {
+    originalProcessNextTick(() => {
       wrapper.update();
       const updatedSelect = wrapper.find(EuiSelect).first();
       const updatedSelectedValue = updatedSelect.props().value;

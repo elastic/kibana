@@ -326,6 +326,7 @@ describe('TelemetrySender', () => {
     });
 
     it('catches fetchTelemetry errors and retries again', async () => {
+      jest.spyOn(window, 'setTimeout');
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       telemetryService.getTelemetryUrl = jest.fn();
@@ -341,6 +342,7 @@ describe('TelemetrySender', () => {
     });
 
     it('catches fetch errors and sets a new timeout if fetch fails more than once', async () => {
+      jest.spyOn(window, 'setTimeout');
       const mockTelemetryPayload = ['hashed_cluster_usage_data1', 'hashed_cluster_usage_data2'];
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
@@ -364,6 +366,7 @@ describe('TelemetrySender', () => {
     });
 
     it('stops trying to resend the data after 20 retries', async () => {
+      jest.spyOn(window, 'setTimeout');
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       telemetryService.getTelemetryUrl = jest.fn();

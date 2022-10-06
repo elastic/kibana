@@ -40,7 +40,8 @@ let mockCoreSetup: MockedKeys<CoreSetup>;
 let bfetchSetup: jest.Mocked<BfetchPublicSetup>;
 let fetchMock: jest.Mock<any>;
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const originalProcessNextTick = process.nextTick;
+const flushPromises = () => new Promise((resolve) => originalProcessNextTick(resolve));
 jest.useFakeTimers();
 
 const timeTravel = async (msToRun = 0) => {

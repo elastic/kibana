@@ -14,11 +14,12 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PrebootService } from './preboot_service';
 
+const originalProcessNextTick = process.nextTick;
 function nextTick() {
   // we can't import { nextTick } from '@kbn/test-jest-helpers' on server-side tests
   // because the package contains code that relies on jsdom (aka browser-like Jest presets)
   // see https://github.com/elastic/kibana/pull/130255#discussion_r855033733
-  return new Promise((resolve) => setImmediate(resolve));
+  return new Promise((resolve) => originalProcessNextTick(resolve));
 }
 
 describe('PrebootService', () => {

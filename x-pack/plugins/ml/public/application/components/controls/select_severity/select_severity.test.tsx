@@ -16,6 +16,8 @@ import { UrlStateProvider } from '../../../util/url_state';
 
 import { SelectSeverity } from './select_severity';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('SelectSeverity', () => {
   test('creates correct severity options and initial selected value', () => {
     const wrapper = mount(
@@ -88,7 +90,7 @@ describe('SelectSeverity', () => {
       }
     });
 
-    setImmediate(() => {
+    originalProcessNextTick(() => {
       wrapper.update();
       const updatedSelect = wrapper.find(EuiSuperSelect).first();
       const updatedSelectedValue = updatedSelect.props().valueOfSelected;

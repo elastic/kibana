@@ -15,6 +15,8 @@ import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
+const originalProcessNextTick = process.nextTick;
+
 const unifiedSearch = {
   ui: {
     SearchBar: () => <div className="searchBar" />,
@@ -124,7 +126,7 @@ describe('TopNavMenu', () => {
             });
           }
 
-          setImmediate(() => resolve(dom)); // flushes any pending promises
+          originalProcessNextTick(() => resolve(dom)); // flushes any pending promises
         } catch (error) {
           reject(error);
         }

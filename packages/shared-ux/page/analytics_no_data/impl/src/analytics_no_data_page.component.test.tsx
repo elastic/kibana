@@ -16,6 +16,8 @@ import { AnalyticsNoDataPage } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPageProvider } from './services';
 import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('AnalyticsNoDataPageComponent', () => {
   const services = getAnalyticsNoDataPageServicesMock();
   const onDataViewCreated = jest.fn();
@@ -31,7 +33,7 @@ describe('AnalyticsNoDataPageComponent', () => {
       </AnalyticsNoDataPageProvider>
     );
 
-    await act(() => new Promise(setImmediate));
+    await act(() => new Promise(originalProcessNextTick));
 
     expect(component.find(KibanaNoDataPage).length).toBe(1);
 

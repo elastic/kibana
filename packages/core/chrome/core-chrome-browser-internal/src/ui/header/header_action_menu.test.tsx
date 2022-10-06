@@ -15,6 +15,8 @@ import { HeaderActionMenu } from './header_action_menu';
 
 type MockedUnmount = jest.MockedFunction<UnmountCallback>;
 
+const originalProcessNextTick = process.nextTick;
+
 describe('HeaderActionMenu', () => {
   let component: ReactWrapper;
   let menuMount$: BehaviorSubject<MountPoint | undefined>;
@@ -34,7 +36,7 @@ describe('HeaderActionMenu', () => {
           });
         }
 
-        setImmediate(() => resolve(component)); // flushes any pending promises
+        originalProcessNextTick(() => resolve(component)); // flushes any pending promises
       } catch (error) {
         reject(error);
       }

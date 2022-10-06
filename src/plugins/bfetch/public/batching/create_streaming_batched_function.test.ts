@@ -11,7 +11,8 @@ import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streami
 import { AbortError, defer, of } from '@kbn/kibana-utils-plugin/public';
 import { Subject } from 'rxjs';
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const originalProcessNextTick = process.nextTick;
+const flushPromises = () => new Promise((resolve) => originalProcessNextTick(resolve));
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
   Promise.race<'resolved' | 'rejected' | 'pending'>([

@@ -28,6 +28,8 @@ import { kibanaVersion } from '../client_integration/helpers';
 
 import { notificationServiceMock, executionContextServiceMock } from '@kbn/core/public/mocks';
 
+const originalProcessNextTick = process.nextTick;
+
 let store = null;
 const indices = [];
 
@@ -61,7 +63,7 @@ for (let i = 0; i < 105; i++) {
 let component = null;
 
 // Resolve outstanding API requests. See https://www.benmvp.com/blog/asynchronous-testing-with-enzyme-react-jest/
-const runAllPromises = () => new Promise(setImmediate);
+const runAllPromises = () => new Promise(originalProcessNextTick);
 
 const status = (rendered, row = 0) => {
   rendered.update();

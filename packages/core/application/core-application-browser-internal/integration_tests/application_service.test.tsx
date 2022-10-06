@@ -20,7 +20,9 @@ import type { MockLifecycle } from '../src/test_helpers/test_types';
 import { ApplicationService } from '../src/application_service';
 import { createRenderer } from './utils';
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const originalProcessNextTick = process.nextTick;
+
+const flushPromises = () => new Promise((resolve) => originalProcessNextTick(resolve));
 
 describe('ApplicationService', () => {
   let setupDeps: MockLifecycle<'setup'>;

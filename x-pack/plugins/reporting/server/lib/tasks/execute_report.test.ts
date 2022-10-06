@@ -110,7 +110,7 @@ describe('Execute Report Task', () => {
     } as unknown as RunContext);
 
     const taskPromise = taskRunner.run();
-    setImmediate(() => {
+    await process.nextTick(() => {
       mockReporting.pluginStop();
     });
     await taskPromise;

@@ -8,9 +8,10 @@
 
 import { SearchAbortController } from './search_abort_controller';
 
+const originalProcessNextTick = process.nextTick;
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
-  return new Promise((resolve) => setImmediate(resolve));
+  return new Promise((resolve) => originalProcessNextTick(resolve));
 };
 
 describe('search abort controller', () => {

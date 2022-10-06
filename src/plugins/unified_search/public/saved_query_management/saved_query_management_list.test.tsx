@@ -21,6 +21,8 @@ import {
   SavedQueryManagementList,
 } from './saved_query_management_list';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('Saved query management list component', () => {
   const startMock = coreMock.createStart();
   const dataMock = dataPluginMock.createStartContract();
@@ -51,7 +53,7 @@ describe('Saved query management list component', () => {
   function flushEffect(component: ReactWrapper) {
     return act(async () => {
       await component;
-      await new Promise((r) => setImmediate(r));
+      await new Promise((r) => originalProcessNextTick(r));
       component.update();
     });
   }

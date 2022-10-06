@@ -17,6 +17,8 @@ import { MockedMounterTuple, Mountable } from '../src/test_helpers/test_types';
 type Dom = ReturnType<typeof mount> | null;
 type Renderer = () => Dom | Promise<Dom>;
 
+const originalProcessNextTick = process.nextTick;
+
 export const createRenderer = (element: ReactElement | null): Renderer => {
   const dom: Dom = element && mount(<I18nProvider>{element}</I18nProvider>);
 
@@ -29,7 +31,7 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
           });
         }
 
-        setImmediate(() => resolve(dom)); // flushes any pending promises
+        originalProcessNextTick(() => resolve(dom)); // flushes any pending promises
       } catch (error) {
         reject(error);
       }

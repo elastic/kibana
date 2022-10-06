@@ -10,6 +10,8 @@ import type { CloudFullStoryConfigType } from '../server/config';
 import { CloudFullStoryPlugin } from './plugin';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
     describe('setupFullStory', () => {
@@ -35,7 +37,7 @@ describe('Cloud Plugin', () => {
         plugin.setup(coreSetup, { cloud });
 
         // Wait for FullStory dynamic import to resolve
-        await new Promise((r) => setImmediate(r));
+        await new Promise((r) => originalProcessNextTick(r));
 
         return { initContext, plugin, coreSetup };
       };

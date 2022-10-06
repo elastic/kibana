@@ -8,9 +8,7 @@
 
 import { AbortError, abortSignalToPromise } from './abort_utils';
 
-jest.useFakeTimers();
-
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const flushPromises = () => new Promise(process.nextTick);
 
 describe('AbortUtils', () => {
   describe('AbortError', () => {
@@ -33,7 +31,7 @@ describe('AbortUtils', () => {
         const promise = abortSignalToPromise(controller.signal).promise;
         const whenRejected = jest.fn();
         promise.catch(whenRejected);
-        await flushPromises();
+        await new Promise(process.nextTick);
         expect(whenRejected).not.toBeCalled();
       });
 

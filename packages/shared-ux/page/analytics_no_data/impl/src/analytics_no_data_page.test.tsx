@@ -15,6 +15,8 @@ import { AnalyticsNoDataPageProvider } from './services';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPage } from './analytics_no_data_page';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('AnalyticsNoDataPage', () => {
   const onDataViewCreated = jest.fn();
 
@@ -31,7 +33,7 @@ describe('AnalyticsNoDataPage', () => {
       </AnalyticsNoDataPageProvider>
     );
 
-    await act(() => new Promise(setImmediate));
+    await act(() => new Promise(originalProcessNextTick));
 
     expect(component.find(Component).length).toBe(1);
     expect(component.find(Component).props().kibanaGuideDocLink).toBe(services.kibanaGuideDocLink);

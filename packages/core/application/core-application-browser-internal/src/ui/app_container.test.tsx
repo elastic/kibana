@@ -17,6 +17,8 @@ import type { Mounter } from '../types';
 import { createMemoryHistory } from 'history';
 import { CoreScopedHistory as ScopedHistory } from '../scoped_history';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('AppContainer', () => {
   const appId = 'someApp';
   const setAppLeaveHandler = jest.fn();
@@ -32,7 +34,7 @@ describe('AppContainer', () => {
   const flushPromises = async () => {
     await new Promise<void>(async (resolve, reject) => {
       try {
-        setImmediate(() => resolve());
+        originalProcessNextTick(() => resolve());
       } catch (error) {
         reject(error);
       }

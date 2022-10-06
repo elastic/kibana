@@ -24,7 +24,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const MAX_UPDATE_RETRIES = 3;
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const originalProcessNextTick = process.nextTick;
+const flushPromises = () => new Promise((resolve) => originalProcessNextTick(resolve));
 
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;

@@ -41,6 +41,9 @@ const createApp = (props: Partial<App>): App => {
   };
 };
 
+const originalProcessNextTick = process.nextTick;
+export const nextTick = () => new Promise((res) => originalProcessNextTick(res));
+
 let setupDeps: MockLifecycle<'setup'>;
 let startDeps: MockLifecycle<'start'>;
 let service: ApplicationService;
@@ -811,7 +814,6 @@ describe('#start()', () => {
       const history = createMemoryHistory();
       setupDeps.history = history;
 
-      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
       // Create an app and a promise that allows us to control when the app completes mounting
       const createWaitingApp = (props: Partial<App>): [App, () => void] => {
         let finishMount: () => void;
@@ -848,7 +850,7 @@ describe('#start()', () => {
       expect(currentLoadingCount$.value).toEqual(1);
       await act(async () => {
         finishAlphaMount();
-        await flushPromises();
+        await nextTick();
       });
       expect(currentLoadingCount$.value).toEqual(0);
 
@@ -856,7 +858,7 @@ describe('#start()', () => {
       expect(currentLoadingCount$.value).toEqual(1);
       await act(async () => {
         finishBetaMount();
-        await flushPromises();
+        await nextTick();
       });
       expect(currentLoadingCount$.value).toEqual(0);
 

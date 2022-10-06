@@ -16,6 +16,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { CoreTheme } from '@kbn/core/public';
 import { KibanaThemeProvider } from './kibana_theme_provider';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('KibanaThemeProvider', () => {
   let euiTheme: UseEuiTheme | undefined;
 
@@ -26,7 +28,7 @@ describe('KibanaThemeProvider', () => {
   const flushPromises = async () => {
     await new Promise<void>(async (resolve, reject) => {
       try {
-        setImmediate(() => resolve());
+        originalProcessNextTick(() => resolve());
       } catch (error) {
         reject(error);
       }

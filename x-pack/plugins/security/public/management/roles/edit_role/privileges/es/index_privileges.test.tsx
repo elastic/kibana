@@ -19,7 +19,8 @@ import { IndexPrivileges } from './index_privileges';
 
 // the IndexPrivileges post-mount hook kicks off some promises;
 // we need to wait for those promises to resolve to ensure any errors are properly caught
-const flushPromises = () => new Promise(setImmediate);
+const originalProcessNextTick = process.nextTick;
+const flushPromises = () => new Promise(originalProcessNextTick);
 
 test('it renders without crashing', async () => {
   const license = licenseMock.create();

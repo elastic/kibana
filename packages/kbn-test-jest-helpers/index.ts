@@ -28,6 +28,8 @@ export * from './src/testbed';
 
 export * from './src/axe_helpers';
 
-export const nextTick = () => new Promise((res) => process.nextTick(res));
+const originalProcessNextTick = process.nextTick;
+
+export const nextTick = () => new Promise((res) => originalProcessNextTick(res));
 
 export const delay = (time = 0) => new Promise((resolve) => setTimeout(resolve, time));

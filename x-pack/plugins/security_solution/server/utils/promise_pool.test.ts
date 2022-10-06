@@ -8,7 +8,8 @@
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { initPromisePool } from './promise_pool';
 
-const nextTick = () => new Promise((resolve) => setImmediate(resolve));
+const originalProcessNextTick = process.nextTick;
+const nextTick = () => new Promise((resolve) => originalProcessNextTick(resolve));
 
 const initPoolWithTasks = ({ concurrency = 1, items = [1, 2, 3] }, abortSignal?: AbortSignal) => {
   const asyncTasks: Record<

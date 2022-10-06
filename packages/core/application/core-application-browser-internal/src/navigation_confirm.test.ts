@@ -10,7 +10,8 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { getUserConfirmationHandler, ConfirmHandler } from './navigation_confirm';
 
-const nextTick = () => new Promise((resolve) => setImmediate(resolve));
+const originalProcessNextTick = process.nextTick;
+const nextTick = () => new Promise((resolve) => originalProcessNextTick(resolve));
 
 describe('getUserConfirmationHandler', () => {
   let overlayStart: ReturnType<typeof overlayServiceMock.createStartContract>;

@@ -12,6 +12,8 @@ import { MountPoint, UnmountCallback } from '@kbn/core/public';
 import { MountPointPortal } from './mount_point_portal';
 import { act } from 'react-dom/test-utils';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('MountPointPortal', () => {
   let portalTarget: HTMLElement;
   let mountPoint: MountPoint;
@@ -27,7 +29,7 @@ describe('MountPointPortal', () => {
           });
         }
 
-        setImmediate(() => resolve(dom)); // flushes any pending promises
+        originalProcessNextTick(() => resolve(dom)); // flushes any pending promises
       } catch (error) {
         reject(error);
       }

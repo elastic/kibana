@@ -26,7 +26,8 @@ describe('ElasticV3ServerShipper', () => {
     },
   ];
 
-  const nextTick = () => new Promise((resolve) => setImmediate(resolve));
+  const originalProcessNextTick = process.nextTick;
+  const nextTick = () => new Promise((resolve) => originalProcessNextTick(resolve));
 
   const initContext: AnalyticsClientInitContext = {
     sendTo: 'staging',

@@ -18,6 +18,8 @@ import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-d
 import { KibanaNoDataPage } from './kibana_no_data_page';
 import { KibanaNoDataPageProvider } from './services';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('Kibana No Data Page', () => {
   const noDataConfig = {
     solution: 'Analytics',
@@ -50,7 +52,7 @@ describe('Kibana No Data Page', () => {
       </KibanaNoDataPageProvider>
     );
 
-    await act(() => new Promise(setImmediate));
+    await act(() => new Promise(originalProcessNextTick));
     component.update();
 
     expect(component.find(NoDataConfigPage).length).toBe(1);
@@ -65,7 +67,7 @@ describe('Kibana No Data Page', () => {
       </KibanaNoDataPageProvider>
     );
 
-    await act(() => new Promise(setImmediate));
+    await act(() => new Promise(originalProcessNextTick));
     component.update();
 
     expect(component.find(NoDataViewsPrompt).length).toBe(1);
@@ -90,7 +92,7 @@ describe('Kibana No Data Page', () => {
       </KibanaNoDataPageProvider>
     );
 
-    await act(() => new Promise(setImmediate));
+    await act(() => new Promise(originalProcessNextTick));
 
     expect(component.find(EuiLoadingElastic).length).toBe(1);
     expect(component.find(NoDataViewsPrompt).length).toBe(0);

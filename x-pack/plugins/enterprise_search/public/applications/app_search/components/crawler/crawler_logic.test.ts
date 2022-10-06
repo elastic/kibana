@@ -73,7 +73,7 @@ describe('CrawlerLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers(); // this should be run before every test to reset these mocks
+    // jest.useFakeTimers(); // this should be run before every test to reset these mocks
     mount();
   });
 
@@ -352,6 +352,8 @@ describe('CrawlerLogic', () => {
 
     describe('createNewTimeoutForCrawlerData', () => {
       it('saves the timeout ID in the logic', () => {
+        jest.useFakeTimers();
+
         jest.spyOn(CrawlerLogic.actions, 'onCreateNewTimeout');
         jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
 
@@ -407,6 +409,7 @@ describe('CrawlerLogic', () => {
   describe('events', () => {
     describe('beforeUnmount', () => {
       it('clears the timeout if there is one', () => {
+        jest.useFakeTimers();
         jest.spyOn(global, 'setTimeout');
 
         mount({

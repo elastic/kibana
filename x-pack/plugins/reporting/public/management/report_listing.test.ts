@@ -16,6 +16,8 @@ import { ListingProps as Props } from '.';
 import { setup, TestBed, TestDependencies, mockJobs } from './__test__';
 import { Job } from '../lib/job';
 
+const originalProcessNextTick = process.nextTick;
+
 describe('ReportListing', () => {
   let testBed: TestBed;
   let applicationService: TestDependencies['application'];
@@ -147,7 +149,7 @@ describe('ReportListing', () => {
         component.mount();
       });
       // Flush promises
-      await new Promise((r) => setImmediate(r));
+      await new Promise((r) => originalProcessNextTick(r));
       component.update();
     };
 

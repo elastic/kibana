@@ -16,6 +16,8 @@ import {
 } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
 
+const originalProcessNextTick = process.nextTick;
+
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
 describe('Reporting Plugin', () => {
@@ -62,7 +64,7 @@ describe('Reporting Plugin', () => {
   it('logs start issues', async () => {
     // wait for the setup phase background work
     plugin.setup(coreSetup, pluginSetup);
-    await new Promise(setImmediate);
+    await new Promise(originalProcessNextTick);
 
     // create a way for an error to happen
     const reportingCore = (plugin as unknown as { reportingCore: ReportingCore }).reportingCore;
@@ -70,7 +72,7 @@ describe('Reporting Plugin', () => {
 
     // wait for the startup phase background work
     plugin.start(coreStart, pluginStart);
-    await new Promise(setImmediate);
+    await new Promise(originalProcessNextTick);
 
     expect(logger.error.mock.calls.map(([message]) => message)).toMatchInlineSnapshot(`
       Array [

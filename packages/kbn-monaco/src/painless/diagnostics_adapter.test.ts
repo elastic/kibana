@@ -24,8 +24,9 @@ const getMockWorker = async () => {
   } as any;
 };
 
+const originalProcessNextTick = process.nextTick;
 function flushPromises() {
-  return new Promise((resolve) => setImmediate(resolve));
+  return new Promise((resolve) => originalProcessNextTick(resolve));
 }
 
 describe('Painless DiagnosticAdapter', () => {
