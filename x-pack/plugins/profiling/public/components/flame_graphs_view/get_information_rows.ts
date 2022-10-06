@@ -15,7 +15,6 @@ export function getInformationRows({
   exeFileName,
   addressOrLine,
   functionName,
-  functionOffset,
   sourceFileName,
   sourceLine,
 }: {
@@ -24,12 +23,11 @@ export function getInformationRows({
   exeFileName: string;
   addressOrLine: number;
   functionName: string;
-  functionOffset: number;
   sourceFileName: string;
   sourceLine: number;
 }) {
   const executable = fileID === '' && addressOrLine === 0 ? 'root' : exeFileName;
-  const functionSourceLine = functionOffset > 0 ? ` (+${sourceLine - functionOffset})` : '';
+  const sourceLineNumber = sourceLine > 0 ? `#${sourceLine}` : '';
 
   const informationRows = [];
 
@@ -53,14 +51,14 @@ export function getInformationRows({
     label: i18n.translate('xpack.profiling.flameGraphInformationWindow.functionLabel', {
       defaultMessage: 'Function',
     }),
-    value: functionName ? `${functionName}${functionSourceLine}` : NOT_AVAILABLE_LABEL,
+    value: functionName || NOT_AVAILABLE_LABEL,
   });
 
   informationRows.push({
     label: i18n.translate('xpack.profiling.flameGraphInformationWindow.sourceFileLabel', {
       defaultMessage: 'Source file',
     }),
-    value: sourceFileName || NOT_AVAILABLE_LABEL,
+    value: sourceFileName ? `${sourceFileName}${sourceLineNumber}` : NOT_AVAILABLE_LABEL,
   });
 
   return informationRows;

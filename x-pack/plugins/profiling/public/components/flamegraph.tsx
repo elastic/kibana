@@ -195,7 +195,6 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
           exeFileName: primaryFlamegraph.ExeFilename[highlightedVmIndex],
           addressOrLine: primaryFlamegraph.AddressOrLine[highlightedVmIndex],
           functionName: primaryFlamegraph.FunctionName[highlightedVmIndex],
-          functionOffset: primaryFlamegraph.FunctionOffset[highlightedVmIndex],
           sourceFileName: primaryFlamegraph.SourceFilename[highlightedVmIndex],
           sourceLine: primaryFlamegraph.SourceLine[highlightedVmIndex],
           countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],

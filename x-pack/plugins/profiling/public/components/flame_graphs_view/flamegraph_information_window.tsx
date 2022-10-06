@@ -25,7 +25,6 @@ interface Props {
     exeFileName: string;
     addressOrLine: number;
     functionName: string;
-    functionOffset: number;
     sourceFileName: string;
     sourceLine: number;
     countInclusive: number;
@@ -115,7 +114,6 @@ export function FlamegraphInformationWindow({ onClose, frame, totalSamples, tota
     exeFileName,
     addressOrLine,
     functionName,
-    functionOffset,
     sourceFileName,
     sourceLine,
     countInclusive,
@@ -128,7 +126,6 @@ export function FlamegraphInformationWindow({ onClose, frame, totalSamples, tota
     exeFileName,
     addressOrLine,
     functionName,
-    functionOffset,
     sourceFileName,
     sourceLine,
   });
