@@ -1358,6 +1358,7 @@
     "jest-config": "^29.1.2",
     "jest-diff": "^29.1.2",
     "jest-environment-jsdom": "^29.1.2",
+    "jest-jasmine2": "^29.1.2",
     "jest-mock": "^29.1.2",
     "jest-raw-loader": "^1.0.1",
     "jest-runtime": "^29.1.2",

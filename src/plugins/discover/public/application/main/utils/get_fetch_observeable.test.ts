@@ -51,7 +51,7 @@ describe('getFetchObservable', () => {
     jest.useRealTimers();
   });
 
-  test('refetch$.next should trigger fetch$.next', async (done) => {
+  test('refetch$.next should trigger fetch$.next', (done) => {
     const searchSessionManagerMock = createSearchSessionMock();
 
     const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });

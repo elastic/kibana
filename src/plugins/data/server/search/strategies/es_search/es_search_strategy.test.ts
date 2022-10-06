@@ -58,10 +58,10 @@ describe('ES search strategy', () => {
     expect(typeof esSearch.search).toBe('function');
   });
 
-  it('calls the API caller with the params with defaults', async (done) => {
+  it('calls the API caller with the params with defaults', (done) => {
     const params = { index: 'logstash-*' };
 
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+    esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
         expect(esClient.search).toBeCalled();
@@ -74,10 +74,10 @@ describe('ES search strategy', () => {
       });
   });
 
-  it('calls the API caller with overridden defaults', async (done) => {
+  it('calls the API caller with overridden defaults', (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+    esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
         expect(esClient.search).toBeCalled();
@@ -89,8 +89,8 @@ describe('ES search strategy', () => {
       });
   });
 
-  it('has all response parameters', async (done) =>
-    await esSearchStrategyProvider(mockConfig$, mockLogger)
+  it('has all response parameters', (done) =>
+    esSearchStrategyProvider(mockConfig$, mockLogger)
       .search(
         {
           params: { index: 'logstash-*' },
@@ -137,7 +137,7 @@ describe('ES search strategy', () => {
     expect(esClient.search.mock.calls[0][1]).toEqual({ signal: expect.any(AbortSignal) });
   });
 
-  it('throws normalized error if ResponseError is thrown', async (done) => {
+  it('throws normalized error if ResponseError is thrown', (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
     const errResponse = new errors.ResponseError({
       body: indexNotFoundException,
@@ -161,7 +161,7 @@ describe('ES search strategy', () => {
     }
   });
 
-  it('throws normalized error if ElasticsearchClientError is thrown', async (done) => {
+  it('throws normalized error if ElasticsearchClientError is thrown', (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
     const errResponse = new errors.ElasticsearchClientError('This is a general ESClient error');
 
@@ -179,7 +179,7 @@ describe('ES search strategy', () => {
     }
   });
 
-  it('throws normalized error if ESClient throws unknown error', async (done) => {
+  it('throws normalized error if ESClient throws unknown error', (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
     const errResponse = new Error('ESClient error');
 
@@ -197,7 +197,7 @@ describe('ES search strategy', () => {
     }
   });
 
-  it('throws KbnServerError for unknown index type', async (done) => {
+  it('throws KbnServerError for unknown index type', (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
     try {

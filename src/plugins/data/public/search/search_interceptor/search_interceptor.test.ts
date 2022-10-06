@@ -1529,7 +1529,7 @@ describe('SearchInterceptor', () => {
         await flushPromises();
       });
 
-      test('Immediately aborts if passed an aborted abort signal', async (done) => {
+      test('Immediately aborts if passed an aborted abort signal', (done) => {
         const abort = new AbortController();
         const mockRequest: IEsSearchRequest = {
           params: {},
