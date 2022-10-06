@@ -115,6 +115,15 @@ describe('IndexPattern Data Source', () => {
           query: { sql: 'SELECT * FROM foo' },
         },
       },
+      fieldList: [
+        {
+          id: 'col1',
+          name: 'Test 1',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
     } as unknown as TextBasedPrivateState;
   });
 
@@ -156,7 +165,9 @@ describe('IndexPattern Data Source', () => {
   describe('#getPersistedState', () => {
     it('should persist from saved state', async () => {
       expect(TextBasedDatasource.getPersistableState(baseState)).toEqual({
-        state: baseState,
+        state: {
+          layers: baseState.layers,
+        },
         savedObjectReferences: [
           { name: 'textBasedLanguages-datasource-layer-a', type: 'index-pattern', id: 'foo' },
         ],
@@ -644,6 +655,22 @@ describe('IndexPattern Data Source', () => {
               index: 'foo',
             },
           },
+          fieldList: [
+            {
+              id: 'col1',
+              name: 'Test 1',
+              meta: {
+                type: 'number',
+              },
+            },
+            {
+              id: 'col2',
+              name: 'Test 2',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
         } as unknown as TextBasedPrivateState;
 
         publicAPI = TextBasedDatasource.getPublicAPI({
@@ -655,6 +682,28 @@ describe('IndexPattern Data Source', () => {
           { columnId: 'col1', fields: ['Test 1'] },
           { columnId: 'col2', fields: ['Test 2'] },
         ]);
+      });
+
+      it('should return only the columns that exist on the query', () => {
+        const state = {
+          ...baseState,
+          fieldList: [
+            {
+              id: 'col2',
+              name: 'Test 2',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+        });
+        expect(publicAPI.getTableSpec()).toEqual([]);
       });
     });
 

@@ -603,7 +603,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
     ...services,
   };
 
-  const helpButton = <EuiButtonIcon onClick={onHelpClick} iconType="documentation" />;
+  const helpButton = (
+    <EuiButtonIcon
+      onClick={onHelpClick}
+      iconType="documentation"
+      aria-label={i18n.translate('xpack.lens.indexPattern.quickFunctions.tableTitle', {
+        defaultMessage: 'Description of functions',
+      })}
+    />
+  );
 
   const columnsSidebar = [
     {
@@ -637,6 +645,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
       <EuiFormRow
         label={
           <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
+                defaultMessage: 'Functions',
+              })}
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
                 anchorPosition="rightUp"
@@ -677,11 +690,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   />
                 </EuiPanel>
               </EuiPopover>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-                defaultMessage: 'Functions',
-              })}
             </EuiFlexItem>
           </EuiFlexGroup>
         }

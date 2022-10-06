@@ -354,7 +354,7 @@ export function getTextBasedDatasource({
         customLabel = selectedField?.fieldName;
       }
 
-      const columnExists = props.state.fieldList.some((f) => f.name === selectedField?.fieldName);
+      const columnExists = props.state.fieldList.some((f) => f.name === customLabel);
 
       render(
         <EuiButtonEmpty
@@ -535,8 +535,12 @@ export function getTextBasedDatasource({
         datasourceId: 'textBased',
 
         getTableSpec: () => {
+          const columns = state.layers[layerId]?.columns.filter((c) => {
+            const columnExists = state?.fieldList?.some((f) => f.name === c?.fieldName);
+            if (columnExists) return c;
+          });
           return (
-            state.layers[layerId]?.columns?.map((column) => ({
+            columns.map((column) => ({
               columnId: column.columnId,
               fields: [column.fieldName],
             })) || []
