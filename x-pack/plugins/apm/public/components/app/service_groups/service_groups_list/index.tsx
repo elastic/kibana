@@ -52,7 +52,7 @@ export function ServiceGroupsList() {
           )}
         >
           <>
-            {i18n.translate('xpack.apm.serviceGroups.list.allServices.name', {
+            {i18n.translate('xpack.apm.serviceGroups.buttonGroup.allServices', {
               defaultMessage: 'All services',
             })}
           </>
@@ -62,10 +62,8 @@ export function ServiceGroupsList() {
     serviceGroups: {
       id: 'serviceGroups',
       label: i18n.translate(
-        'xpack.apm.serviceGroups.emptyPrompt.serviceGroups',
-        {
-          defaultMessage: 'Service groups',
-        }
+        'xpack.apm.serviceGroups.buttonGroup.serviceGroups',
+        { defaultMessage: 'Service groups' }
       ),
     },
   };
@@ -88,11 +86,7 @@ export function ServiceGroupsList() {
   );
 
   const { start, end } = useMemo(
-    () =>
-      getDateRange({
-        rangeFrom: 'now-24h',
-        rangeTo: 'now',
-      }),
+    () => getDateRange({ rangeFrom: 'now-24h', rangeTo: 'now' }),
     []
   );
 
@@ -100,12 +94,7 @@ export function ServiceGroupsList() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi('GET /internal/apm/service_groups/services_count', {
-          params: {
-            query: {
-              start,
-              end,
-            },
-          },
+          params: { query: { start, end } },
         });
       }
     },
@@ -172,7 +161,10 @@ export function ServiceGroupsList() {
               dismissTour();
               setButtonGroupSelection(id);
             }}
-            legend=""
+            legend={i18n.translate(
+              'xpack.apm.servicesGroups.buttonGroup.legend',
+              { defaultMessage: 'View all services or service groups' }
+            )}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -193,9 +185,7 @@ export function ServiceGroupsList() {
                   onChange={(e) => setFilter(e.target.value)}
                   placeholder={i18n.translate(
                     'xpack.apm.servicesGroups.filter',
-                    {
-                      defaultMessage: 'Filter groups',
-                    }
+                    { defaultMessage: 'Filter groups' }
                   )}
                 />
               </EuiFormControlLayout>
