@@ -40,10 +40,11 @@ export function fitToBox(width: number, height: number): { width: number; height
  * Get the native size of the image
  */
 function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((res) => {
+  return new Promise((res, rej) => {
     const image = new window.Image();
     image.src = src;
     image.onload = () => res(image);
+    image.onerror = rej;
   });
 }
 
@@ -67,6 +68,9 @@ export async function getImageMetadata(file: File | Blob): Promise<undefined | F
       width: image.width,
       height: image.height,
     };
+  } catch (e) {
+    // Don't error out if we cannot generate the blurhash
+    return undefined;
   } finally {
     window.URL.revokeObjectURL(imgUrl);
   }

@@ -29,7 +29,7 @@ import {
 } from 'rxjs';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
-import { ImageMetadataFactory, getImageMetadata, isImage } from '../common';
+import { ImageMetadataFactory, getImageMetadata, isImage } from '../util';
 import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
