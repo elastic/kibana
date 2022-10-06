@@ -1,6 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`shared ux markdown component renders 1`] = `
+exports[`shared ux markdown component renders for displaying a readonly message 1`] = `
+<div
+  aria-label="markdown component"
+  class="euiText euiMarkdownFormat emotion-euiText-m-euiMarkdownFormat-m"
+>
+  <p>
+    error message
+  </p>
+</div>
+`;
+
+exports[`shared ux markdown component renders for editor 1`] = `
 <div
   class="euiMarkdownEditor euiMarkdownEditor--fullHeight"
 >
@@ -203,7 +214,7 @@ exports[`shared ux markdown component renders 1`] = `
       role="button"
     >
       <textarea
-        aria-label=""
+        aria-label="markdown component"
         class="euiMarkdownEditorTextArea"
         data-test-subj="euiMarkdownEditorTextArea"
         id="generated-id"

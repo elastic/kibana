@@ -11,8 +11,13 @@ import { Markdown } from './markdown';
 import { render } from 'enzyme';
 
 describe('shared ux markdown component', () => {
-  it('renders', () => {
-    const component = render(<Markdown placeholder={''} ariaLabelContent={''} readOnly={false} />);
+  it('renders for editor', () => {
+    const component = render(<Markdown readOnly={false} />);
     expect(component).toMatchSnapshot();
   });
+
+  it('renders for displaying a readonly message', () => {
+    const component = render(<Markdown readOnly markdownContent="error message" />);
+    expect(component).toMatchSnapshot();
+  })
 });
