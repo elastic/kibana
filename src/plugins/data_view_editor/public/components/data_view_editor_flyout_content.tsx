@@ -8,6 +8,7 @@
 
 import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -69,6 +70,7 @@ export interface Props {
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
   editData?: DataView;
+  showManagementLink?: boolean;
   allowAdHoc: boolean;
 }
 
@@ -94,10 +96,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
   requireTimestampField = false,
   editData,
   allowAdHoc,
+  showManagementLink,
 }: Props) => {
   const {
-    services: { http, dataViews, uiSettings, overlays },
+    services: { application, http, dataViews, uiSettings, overlays },
   } = useKibana<DataViewEditorContext>();
+
+  const canSave = dataViews.getCanSaveSync();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
@@ -393,6 +398,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
         </EuiTitle>
+        {showManagementLink && editData && editData.id && (
+          <EuiLink
+            href={application.getUrlForApp('management', {
+              path: `/kibana/dataViews/dataView/${editData.id}`,
+            })}
+          >
+            {i18n.translate('indexPatternEditor.goToManagementPage', {
+              defaultMessage: 'View on data view management page',
+            })}
+          </EuiLink>
+        )}
         <Form form={form} className="indexPatternEditor__form">
           <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
@@ -442,7 +458,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
           }}
           submitDisabled={form.isSubmitted && !form.isValid}
           isEdit={!!editData}
+          isPersisted={Boolean(editData && editData.isPersisted())}
           allowAdHoc={allowAdHoc}
+          canSave={canSave}
         />
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>

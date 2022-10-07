@@ -64,9 +64,13 @@ export async function getActionStatuses(
     const matchingBucket = (acks?.aggregations?.ack_counts as any)?.buckets?.find(
       (bucket: any) => bucket.key === action.actionId
     );
-    const nbAgentsAck = (matchingBucket?.agent_count as any)?.value ?? 0;
-    const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
     const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
+    const nbAgentsAck = Math.min(
+      matchingBucket?.doc_count ?? 0,
+      (matchingBucket?.agent_count as any)?.value ?? 0,
+      nbAgentsActioned
+    );
+    const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
     const complete = nbAgentsAck >= nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 

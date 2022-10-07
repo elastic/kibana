@@ -81,14 +81,14 @@ describe('Errors page', () => {
 
       it('clicking on type adds a filter in the kuerybar', () => {
         cy.visitKibana(javaServiceErrorsPageHref);
-        cy.get('[data-test-subj="headerFilterKuerybar"]')
+        cy.getByTestSubj('headerFilterKuerybar')
           .invoke('val')
           .should('be.empty');
         // `force: true` because Cypress says the element is 0x0
         cy.contains('exception 0').click({
           force: true,
         });
-        cy.get('[data-test-subj="headerFilterKuerybar"]')
+        cy.getByTestSubj('headerFilterKuerybar')
           .its('length')
           .should('be.gt', 0);
         cy.get('table')
@@ -158,7 +158,7 @@ describe('Check detailed statistics API with multiple errors', () => {
         ])
       );
     });
-    cy.get('[data-test-subj="pagination-button-1"]').click();
+    cy.getByTestSubj('pagination-button-1').click();
     cy.wait('@errorsDetailedStatistics').then((payload) => {
       expect(payload.request.body.groupIds).eql(
         JSON.stringify([

@@ -13,7 +13,8 @@ import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
 import { useFilters } from '../query_bar/hooks/use_filters';
 import moment from 'moment';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
-import { TABLE_TEST_ID } from './components/indicators_table';
+import { TABLE_TEST_ID } from './components/table';
+import { mockTimeRange } from '../../common/mocks/mock_indicators_filters_context';
 
 jest.mock('../query_bar/hooks/use_filters');
 jest.mock('./hooks/use_indicators');
@@ -41,15 +42,14 @@ describe('<IndicatorsPage />', () => {
       onChangeItemsPerPage: stub,
       onChangePage: stub,
       handleRefresh: stub,
+      dataUpdatedAt: Date.now(),
     });
 
     (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
       filters: [],
       filterQuery: { language: 'kuery', query: '' },
       filterManager: {} as any,
-      handleSavedQuery: stub,
-      handleSubmitQuery: stub,
-      handleSubmitTimeRange: stub,
+      timeRange: mockTimeRange,
     });
   });
 
@@ -59,9 +59,9 @@ describe('<IndicatorsPage />', () => {
     expect(queryByTestId(TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render the query input', () => {
+  it('should render SIEM Search Bar', () => {
     const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
-    expect(queryByTestId('iocListPageQueryInput')).toBeInTheDocument();
+    expect(queryByTestId('SiemSearchBar')).toBeInTheDocument();
   });
 
   it('should render stack by selector', () => {

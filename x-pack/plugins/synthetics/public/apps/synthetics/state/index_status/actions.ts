@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { createAction } from '@reduxjs/toolkit';
 import { StatesIndexStatus } from '../../../../../common/runtime_types';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 export const getIndexStatus = createAction<void>('[INDEX STATUS] GET');
 export const getIndexStatusSuccess = createAction<StatesIndexStatus>('[INDEX STATUS] GET SUCCESS');
-export const getIndexStatusFail = createAction<IHttpFetchError>('[INDEX STATUS] GET FAIL');
+export const getIndexStatusFail =
+  createAction<IHttpSerializedFetchError>('[INDEX STATUS] GET FAIL');
