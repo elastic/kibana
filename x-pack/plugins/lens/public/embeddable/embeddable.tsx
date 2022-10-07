@@ -257,7 +257,7 @@ export class Embeddable
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
   private warningDomNode: HTMLElement | Element | undefined;
-  private subscription: Subscription;
+  private subscription: Subscription | undefined;
   private isInitialized = false;
   private errors: ErrorMessage[] | undefined;
   private inputReloadSubscriptions: Subscription[];
@@ -302,6 +302,8 @@ export class Embeddable
       parent
     );
 
+    this.inputReloadSubscriptions = [];
+
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput)
@@ -311,85 +313,83 @@ export class Embeddable
         this.subscription = this.getUpdated$().subscribe(() =>
           this.onContainerStateChanged(this.input)
         );
-
-        const input$ = this.getInput$();
-        this.embeddableTitle = this.getTitle();
-
-        this.inputReloadSubscriptions = [];
-
-        // Lens embeddable does not re-render when embeddable input changes in
-        // general, to improve performance. This line makes sure the Lens embeddable
-        // re-renders when anything in ".dynamicActions" (e.g. drilldowns) changes.
-        this.inputReloadSubscriptions.push(
-          input$
-            .pipe(
-              map((input) => input.enhancements?.dynamicActions),
-              distinctUntilChanged((a, b) => fastIsEqual(a, b)),
-              skip(1)
-            )
-            .subscribe((input) => {
-              this.reload();
-            })
-        );
-
-        // Lens embeddable does not re-render when embeddable input changes in
-        // general, to improve performance. This line makes sure the Lens embeddable
-        // re-renders when dashboard view mode switches between "view/edit". This is
-        // needed to see the changes to ".dynamicActions" (e.g. drilldowns) when
-        // dashboard's mode is toggled.
-        this.inputReloadSubscriptions.push(
-          input$
-            .pipe(
-              map((input) => input.viewMode),
-              distinctUntilChanged(),
-              skip(1)
-            )
-            .subscribe((input) => {
-              // only reload if drilldowns are set
-              if (this.getInput().enhancements?.dynamicActions) {
-                this.reload();
-              }
-            })
-        );
-
-        // Re-initialize the visualization if either the attributes or the saved object id changes
-
-        this.inputReloadSubscriptions.push(
-          input$
-            .pipe(
-              distinctUntilChanged((a, b) =>
-                fastIsEqual(
-                  ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-                  ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
-                )
-              ),
-              skip(1)
-            )
-            .subscribe(async (input) => {
-              await this.initializeSavedVis(input);
-              this.reload();
-            })
-        );
-
-        // Update search context and reload on changes related to search
-        this.inputReloadSubscriptions.push(
-          this.getUpdated$()
-            .pipe(map(() => this.getInput()))
-            .pipe(
-              distinctUntilChanged((a, b) =>
-                fastIsEqual(
-                  [a.filters, a.query, a.timeRange, a.searchSessionId],
-                  [b.filters, b.query, b.timeRange, b.searchSessionId]
-                )
-              ),
-              skip(1)
-            )
-            .subscribe(async (input) => {
-              this.onContainerStateChanged(input);
-            })
-        );
       })
       .catch((e) => this.onFatalError(e));
+
+    const input$ = this.getInput$();
+    this.embeddableTitle = this.getTitle();
+
+    // Lens embeddable does not re-render when embeddable input changes in
+    // general, to improve performance. This line makes sure the Lens embeddable
+    // re-renders when anything in ".dynamicActions" (e.g. drilldowns) changes.
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          map((input) => input.enhancements?.dynamicActions),
+          distinctUntilChanged((a, b) => fastIsEqual(a, b)),
+          skip(1)
+        )
+        .subscribe((input) => {
+          this.reload();
+        })
+    );
+
+    // Lens embeddable does not re-render when embeddable input changes in
+    // general, to improve performance. This line makes sure the Lens embeddable
+    // re-renders when dashboard view mode switches between "view/edit". This is
+    // needed to see the changes to ".dynamicActions" (e.g. drilldowns) when
+    // dashboard's mode is toggled.
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          map((input) => input.viewMode),
+          distinctUntilChanged(),
+          skip(1)
+        )
+        .subscribe((input) => {
+          // only reload if drilldowns are set
+          if (this.getInput().enhancements?.dynamicActions) {
+            this.reload();
+          }
+        })
+    );
+
+    // Re-initialize the visualization if either the attributes or the saved object id changes
+
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          distinctUntilChanged((a, b) =>
+            fastIsEqual(
+              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
+              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
+            )
+          ),
+          skip(1)
+        )
+        .subscribe(async (input) => {
+          await this.initializeSavedVis(input);
+          this.reload();
+        })
+    );
+
+    // Update search context and reload on changes related to search
+    this.inputReloadSubscriptions.push(
+      this.getUpdated$()
+        .pipe(map(() => this.getInput()))
+        .pipe(
+          distinctUntilChanged((a, b) =>
+            fastIsEqual(
+              [a.filters, a.query, a.timeRange, a.searchSessionId],
+              [b.filters, b.query, b.timeRange, b.searchSessionId]
+            )
+          ),
+          skip(1)
+        )
+        .subscribe(async (input) => {
+          this.onContainerStateChanged(input);
+        })
+    );
   }
 
   public reportsEmbeddableLoad() {
