@@ -7,13 +7,13 @@
  */
 
 import { Position, ScaleType as ECScaleType } from '@elastic/charts';
-import {
+import type {
   Column,
-  SeriesTypes,
   XYConfiguration,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
+} from '@kbn/visualizations-plugin/common/convert_to_lens/types';
+import { SeriesTypes } from '@kbn/visualizations-plugin/common/convert_to_lens/constants';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { Layer } from '..';
 import { ChartType } from '../..';
