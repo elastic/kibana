@@ -10,7 +10,7 @@ import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { GaugeVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { GaugeVisParams } from '../../types';
 
-export const getConfigurationForGauge = (
+export const getConfigurationForGoal = (
   layerId: string,
   params: GaugeVisParams,
   palette: PaletteOutput<CustomPaletteParams> | undefined,
@@ -33,7 +33,7 @@ export const getConfigurationForGauge = (
     minAccessor,
     maxAccessor,
     shape: 'horizontalBullet',
-    ticksPosition: 'bands',
+    ticksPosition: 'hidden',
     labelMajorMode: showLabels ? 'auto' : 'none',
     colorMode: palette ? 'palette' : 'none',
     labelMinor: showLabels ? params.gauge.style.subText : undefined,

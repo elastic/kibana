@@ -48,10 +48,12 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
 
   const [
     { getColumnsFromVis, createStaticValueColumn, getPalette, getPercentageModeConfig },
-    { getConfigurationForGauge },
+    { getConfigurationForGauge, getConfigurationForGoal },
   ] = await Promise.all([convertToLensModule, import('./configurations')]);
 
-  const getConfiguration = getConfigurationForGauge;
+  const getConfiguration =
+    vis.type.name === 'gauge' ? getConfigurationForGauge : getConfigurationForGoal;
+
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 
   const result = getColumnsFromVis(
