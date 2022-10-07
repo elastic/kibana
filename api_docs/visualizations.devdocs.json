@@ -9483,6 +9483,42 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.MinMax",
+        "type": "Interface",
+        "tags": [],
+        "label": "MinMax",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.MinMax.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.MinMax.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.MovingAverageParams",
         "type": "Interface",
         "tags": [],
@@ -13160,6 +13196,29 @@
           "\"pie\" | \"donut\" | \"treemap\" | \"mosaic\" | \"waffle\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PercentageModeConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "PercentageModeConfig",
+        "description": [],
+        "signature": [
+          "({ isPercentageMode: true; } & ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.MinMax",
+            "text": "MinMax"
+          },
+          ") | { isPercentageMode: boolean; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -3942,6 +3942,22 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserOptions.preselectedCategoryIds",
+            "type": "Array",
+            "tags": [],
+            "label": "preselectedCategoryIds",
+            "description": [
+              "\nCategories that should be selected initially"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8202,6 +8218,18 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-server.TIME_SERIES_BUCKET_SELECTOR_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "TIME_SERIES_BUCKET_SELECTOR_FIELD",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-server.TimeSeriesQuery",
         "type": "Type",
         "tags": [],
@@ -8578,6 +8606,17 @@
               },
               "[]"
             ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.TimeSeriesResult.truncated",
+            "type": "boolean",
+            "tags": [],
+            "label": "truncated",
+            "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
             "deprecated": false,
             "trackAdoption": false
