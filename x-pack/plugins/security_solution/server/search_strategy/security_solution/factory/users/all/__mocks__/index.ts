@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 import { Direction } from '../../../../../../../common/search_strategy';
 import { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
 import type { UsersRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/all';
 import { UsersFields } from '../../../../../../../common/search_strategy/security_solution/users/common';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
+import type { EndpointAppContext } from '../../../../../../endpoint/types';
 
 export const mockOptions: UsersRequestOptions = {
   defaultIndex: ['test_indices*'],
@@ -47,14 +53,14 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
     },
     aggregations: {
       user_count: {
-        value: 1,
+        value: 2,
       },
       user_data: {
         doc_count_error_upper_bound: 0,
         sum_other_doc_count: 0,
         buckets: [
           {
-            key: 'vagrant',
+            key: 'jose52',
             doc_count: 780,
             lastSeen: {
               value: 1644837532000,
@@ -85,6 +91,38 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               },
             },
           },
+          {
+            key: 'danny',
+            doc_count: 781,
+            lastSeen: {
+              value: 1644837532000,
+              value_as_string: '2022-02-14T11:18:52.000Z',
+            },
+            domain: {
+              hits: {
+                total: {
+                  value: 100,
+                  relation: 'eq',
+                },
+                max_score: null,
+                hits: [
+                  {
+                    _index: 'endgame-00001',
+                    _id: 'inT0934BjUd1_U2597Vv',
+                    _score: null,
+                    fields: {
+                      'user.name': ['danny'],
+                      '@timestamp': ['2022-04-13T17:16:34.540Z'],
+                      'user.id': ['18'],
+                      'user.email': ['danny@barrett.com'],
+                      'user.domain': ['ENDPOINT-W-8-04'],
+                    },
+                    sort: [1644837532000],
+                  },
+                ],
+              },
+            },
+          },
         ],
       },
     },
@@ -94,3 +132,20 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
   total: 2,
   loaded: 2,
 };
+
+export const mockDeps = () => ({
+  esClient: elasticsearchServiceMock.createScopedClusterClient(),
+  savedObjectsClient: {} as SavedObjectsClientContract,
+  endpointContext: {
+    logFactory: {
+      get: jest.fn(),
+    },
+    config: jest.fn().mockResolvedValue({}),
+    experimentalFeatures: {
+      ...allowedExperimentalValues,
+    },
+    service: {} as EndpointAppContextService,
+  } as EndpointAppContext,
+  request: {} as KibanaRequest,
+  spaceId: 'test-space',
+});
