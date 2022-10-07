@@ -96,7 +96,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
   const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
-  console.log({ isEvent, isAgentEndpoint, ecsRowData });
   const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
   const timelineIdAllowsAddEndpointEventFilter = useMemo(
     () => timelineId === TimelineId.hostsPageEvents || timelineId === TimelineId.usersPageEvents,

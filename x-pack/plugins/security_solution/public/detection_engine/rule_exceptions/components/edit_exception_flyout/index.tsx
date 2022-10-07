@@ -25,7 +25,10 @@ import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListTypeEnum,
+  exceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { isEmpty } from 'lodash/fp';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
@@ -89,6 +92,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
 }): JSX.Element => {
   const selectedOs = useMemo(() => itemToEdit.os_types, [itemToEdit]);
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
+  const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);
 
   const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
@@ -219,6 +223,13 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     onCancel(false);
   }, [onCancel]);
 
+  const areItemsReadyForUpdate = useCallback(
+    (items: ExceptionsBuilderReturnExceptionItem[]): items is ExceptionListItemSchema[] => {
+      return items.every((item) => exceptionListItemSchema.is(item));
+    },
+    []
+  );
+
   const handleSubmit = useCallback(async (): Promise<void> => {
     if (submitEditExceptionItems == null) return;
 
@@ -226,54 +237,57 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       const items = entrichExceptionItemsForUpdate({
         itemName: exceptionItemName,
         commentToAdd: newComment,
-        listType: list.type,
+        listType,
         selectedOs: itemToEdit.os_types,
         items: exceptionItems,
       });
-      console.log({ items, exceptionItems });
-      await submitEditExceptionItems({
-        itemsToUpdate: items,
-      });
 
-      const ruleDefaultRule = rule != null ? [rule.rule_id] : [];
-      const referencedRules =
-        ruleReferences != null
-          ? ruleReferences[list.list_id].referenced_rules.map(({ rule_id: ruleId }) => ruleId)
-          : [];
-      const ruleIdsForBulkClose =
-        list.type === ExceptionListTypeEnum.RULE_DEFAULT ? ruleDefaultRule : referencedRules;
+      if (areItemsReadyForUpdate(items)) {
+        await submitEditExceptionItems({
+          itemsToUpdate: items,
+        });
 
-      if (closeAlerts != null && !isEmpty(ruleIdsForBulkClose) && bulkCloseAlerts) {
-        await closeAlerts(ruleIdsForBulkClose, items, undefined, bulkCloseIndex);
+        const ruleDefaultRule = rule != null ? [rule.rule_id] : [];
+        const referencedRules =
+          ruleReferences != null
+            ? ruleReferences[list.list_id].referenced_rules.map(({ rule_id: ruleId }) => ruleId)
+            : [];
+        const ruleIdsForBulkClose =
+          listType === ExceptionListTypeEnum.RULE_DEFAULT ? ruleDefaultRule : referencedRules;
+
+        if (closeAlerts != null && !isEmpty(ruleIdsForBulkClose) && bulkCloseAlerts) {
+          await closeAlerts(ruleIdsForBulkClose, items, undefined, bulkCloseIndex);
+        }
+
+        onConfirm(true);
       }
-
-      onConfirm(true);
     } catch (e) {
       onCancel(false);
     }
   }, [
-    bulkCloseAlerts,
-    bulkCloseIndex,
-    closeAlerts,
-    exceptionItemName,
-    exceptionItems,
-    itemToEdit.os_types,
-    list.list_id,
-    list.type,
-    ruleReferences,
-    newComment,
-    onCancel,
-    onConfirm,
-    rule,
     submitEditExceptionItems,
+    exceptionItemName,
+    newComment,
+    listType,
+    itemToEdit.os_types,
+    exceptionItems,
+    areItemsReadyForUpdate,
+    rule,
+    ruleReferences,
+    list.list_id,
+    closeAlerts,
+    bulkCloseAlerts,
+    onConfirm,
+    bulkCloseIndex,
+    onCancel,
   ]);
 
   const editExceptionMessage = useMemo(
     () =>
-      list.type === ExceptionListTypeEnum.ENDPOINT
+      listType === ExceptionListTypeEnum.ENDPOINT
         ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
         : i18n.EDIT_EXCEPTION_TITLE,
-    [list.type]
+    [listType]
   );
 
   const isSubmitButtonDisabled = useMemo(
@@ -305,17 +319,17 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           exceptionItemName={exceptionItemName}
           allowLargeValueLists={allowLargeValueLists}
           exceptionListItems={[itemToEdit]}
-          exceptionListType={list.type}
+          exceptionListType={listType}
           indexPatterns={indexPatterns}
           rules={rules}
           selectedOs={selectedOs}
-          showOsTypeOptions={list.type === ExceptionListTypeEnum.ENDPOINT}
+          showOsTypeOptions={listType === ExceptionListTypeEnum.ENDPOINT}
           isEdit
           onExceptionItemAdd={setExceptionItemsToAdd}
           onSetErrorExists={setConditionsValidationError}
           onFilterIndexPatterns={filterIndexPatterns}
         />
-        {list.type === ExceptionListTypeEnum.DETECTION && (
+        {listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />
             <ExceptionsLinkedToLists
@@ -325,7 +339,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
             />
           </>
         )}
-        {list.type === ExceptionListTypeEnum.RULE_DEFAULT && rule != null && (
+        {listType === ExceptionListTypeEnum.RULE_DEFAULT && rule != null && (
           <>
             <EuiHorizontalRule />
             <ExceptionsLinkedToRule rule={rule} />
@@ -341,7 +355,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           <>
             <EuiHorizontalRule />
             <ExceptionItemsFlyoutAlertsActions
-              exceptionListType={list.type}
+              exceptionListType={listType}
               shouldBulkCloseAlert={bulkCloseAlerts}
               disableBulkClose={disableBulkClose}
               exceptionListItems={exceptionItems}

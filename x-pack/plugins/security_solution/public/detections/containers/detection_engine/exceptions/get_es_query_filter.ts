@@ -6,11 +6,11 @@
  */
 
 import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
 import { getExceptionFilterFromExceptions } from '@kbn/securitysolution-list-api';
 import { buildEsQuery } from '@kbn/es-query';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 
 import type { Query, Index } from '../../../../../common/detection_engine/schemas/common';
@@ -21,7 +21,7 @@ export const getEsQueryFilter = async (
   language: Language,
   filters: unknown,
   index: Index,
-  lists: ExceptionsBuilderReturnExceptionItem[],
+  lists: ExceptionListItemSchema[],
   excludeExceptions: boolean = true
 ): Promise<ESBoolQuery> => {
   const indexPattern: DataViewBase = {

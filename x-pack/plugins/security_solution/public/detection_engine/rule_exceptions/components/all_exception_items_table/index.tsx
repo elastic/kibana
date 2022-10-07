@@ -99,6 +99,15 @@ const ExceptionsViewerComponent = ({
         : [],
     [listTypes, rule]
   );
+  const exceptionListsFormattedForReferenceQuery = useMemo(
+    () =>
+      exceptionListsToQuery.map(({ id, list_id: listId, namespace_type: namespaceType }) => ({
+        id,
+        listId,
+        namespaceType,
+      })),
+    [exceptionListsToQuery]
+  );
   const isEndpointSpecified = useMemo(
     () => listTypes.length === 1 && listTypes[0] === ExceptionListTypeEnum.ENDPOINT,
     [listTypes]
@@ -173,13 +182,11 @@ const ExceptionsViewerComponent = ({
     useFindExceptionListReferences();
 
   useEffect(() => {
-    if (fetchReferences != null && exceptionListsToQuery.length) {
-      const listsToQuery = exceptionListsToQuery.map(
-        ({ id, list_id: listId, namespace_type: namespaceType }) => ({ id, listId, namespaceType })
-      );
-      fetchReferences(listsToQuery);
+    if (fetchReferences != null && exceptionListsFormattedForReferenceQuery.length) {
+      console.log('BEING CALLED', { exceptionListsFormattedForReferenceQuery });
+      fetchReferences(exceptionListsFormattedForReferenceQuery);
     }
-  }, [exceptionListsToQuery, fetchReferences]);
+  }, [exceptionListsFormattedForReferenceQuery, fetchReferences]);
 
   useEffect(() => {
     if (isFetchReferencesError) {
@@ -373,6 +380,7 @@ const ExceptionsViewerComponent = ({
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
+      console.log('FETCHING ITEMS');
       handleGetExceptionListItems();
     } else {
       setViewerState('empty');
@@ -386,7 +394,7 @@ const ExceptionsViewerComponent = ({
         : null,
     [allReferences, exceptionToEdit]
   );
-
+  console.log({ allReferences, currenFlyout, exceptionToEditList, exceptionToEdit, rule });
   return (
     <>
       {currenFlyout === 'editException' &&

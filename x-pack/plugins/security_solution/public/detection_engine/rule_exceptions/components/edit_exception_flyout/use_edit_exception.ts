@@ -6,14 +6,14 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 
 export interface EditExceptionItemHookProps {
-  itemsToUpdate: ExceptionsBuilderReturnExceptionItem[];
+  itemsToUpdate: ExceptionListItemSchema[];
 }
 
 export type EditExceptionItemHookFuncProps = (arg: EditExceptionItemHookProps) => Promise<void>;

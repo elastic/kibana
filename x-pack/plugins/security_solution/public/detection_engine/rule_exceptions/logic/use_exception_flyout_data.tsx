@@ -28,24 +28,28 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
   const [dataViewLoading, setDataViewLoading] = useState(false);
   const isSingleRule = useMemo(() => rules != null && rules.length === 1, [rules]);
   const isMLRule = useMemo(
-    () => isSingleRule && rules[0].type === 'machine_learning',
+    () => rules != null && isSingleRule && rules[0].type === 'machine_learning',
     [isSingleRule, rules]
   );
   // If data view is defined, it superceeds use of rule defined index patterns.
   // If no rule is available, use fields from default data view id.
   const memoDataViewId = useMemo(
-    () => (isSingleRule ? rules[0].data_view_id || null : 'security-solution-default'),
+    () =>
+      rules != null && isSingleRule ? rules[0].data_view_id || null : 'security-solution-default',
     [isSingleRule, rules]
   );
 
   const memoNonDataViewIndexPatterns = useMemo(
-    () => (!memoDataViewId && isSingleRule && rules[0].index != null ? rules[0].index : []),
+    () =>
+      !memoDataViewId && rules != null && isSingleRule && rules[0].index != null
+        ? rules[0].index
+        : [],
     [memoDataViewId, isSingleRule, rules]
   );
 
   // Index pattern logic for ML
   const memoMlJobIds = useMemo(
-    () => (isMLRule && isSingleRule ? rules[0].machine_learning_job_id ?? [] : []),
+    () => (isMLRule && isSingleRule && rules != null ? rules[0].machine_learning_job_id ?? [] : []),
     [isMLRule, isSingleRule, rules]
   );
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);

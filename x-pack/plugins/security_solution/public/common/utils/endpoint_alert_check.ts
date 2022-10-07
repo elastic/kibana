@@ -45,7 +45,7 @@ export const isAlertFromEndpointAlert = ({
   if (ecsData == null) {
     return false;
   }
-  console.log({ ecsData });
+
   const eventModules = getOr([], 'kibana.alert.original_event.module', ecsData);
   const kinds = getOr([], 'kibana.alert.original_event.kind', ecsData);
 

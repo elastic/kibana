@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateRuleExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { useEffect, useRef, useState } from 'react';
 
-import type { CreateRuleExceptionListItemSchema } from '../../../../common/detection_engine/schemas/request';
 import { addRuleExceptions } from '../../../detections/containers/detection_engine/rules/api';
 import type { Rule } from '../../../detections/containers/detection_engine/rules/types';
 
