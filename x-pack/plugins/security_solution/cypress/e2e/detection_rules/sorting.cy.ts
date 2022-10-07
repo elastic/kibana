@@ -74,9 +74,7 @@ describe('Alerts detection rules', () => {
     const FIRST_PAGE_SELECTOR = pageSelector(1);
     const SECOND_PAGE_SELECTOR = pageSelector(2);
 
-    cy.get(RULES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
+    cy.get(RULES_TABLE).find(FIRST_PAGE_SELECTOR).should('have.attr', 'aria-current');
 
     cy.get(RULES_TABLE)
       .find(RULE_NAME)
@@ -90,11 +88,7 @@ describe('Alerts detection rules', () => {
         cy.get(RULES_TABLE).should('not.contain', ruleNameFirstPage);
       });
 
-    cy.get(RULES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('not.contain', 'euiPaginationButton-isActive');
-    cy.get(RULES_TABLE)
-      .find(SECOND_PAGE_SELECTOR)
-      .should('contain', 'euiPaginationButton-isActive');
+    cy.get(RULES_TABLE).find(FIRST_PAGE_SELECTOR).should('not.have.attr', 'aria-current');
+    cy.get(RULES_TABLE).find(SECOND_PAGE_SELECTOR).should('have.attr', 'aria-current');
   });
 });
