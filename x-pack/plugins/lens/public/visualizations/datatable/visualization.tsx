@@ -26,10 +26,10 @@ import type {
 import { TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { LayerType } from '../../../common';
-import { getDefaultSummaryLabel, PagingState } from '../../../common/expressions';
-import type { ColumnState, SortingState } from '../../../common/expressions';
+import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
+import type { ColumnState, SortingState, PagingState } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
-import { IndexPatternLayer } from '../../indexpattern_datasource/types';
+import type { IndexPatternLayer } from '../../indexpattern_datasource/types';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
