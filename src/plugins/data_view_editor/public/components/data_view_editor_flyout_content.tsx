@@ -20,6 +20,7 @@ import {
 } from '@kbn/data-views-plugin/public';
 
 import {
+  DataView,
   DataViewSpec,
   Form,
   useForm,
@@ -193,7 +194,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       loadingTimestampFields$.current.next(true);
       const getFieldsOptions: GetFieldsOptions = {
         pattern: index,
-        showHidden: allowHidden,
       };
       if (type === INDEX_PATTERN_TYPE.ROLLUP) {
         getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
@@ -211,7 +211,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       dataViews,
       requireTimestampField,
       type,
-      allowHidden,
       rollupIndex$,
       loadingTimestampFields$,
       timestampFieldOptions$,
