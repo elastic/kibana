@@ -116,3 +116,5 @@ export const ManagementContainer = memo(() => {
 });
 
 ManagementContainer.displayName = 'ManagementContainer';
+// eslint-disable-next-line import/no-default-export
+export { ManagementContainer as default };

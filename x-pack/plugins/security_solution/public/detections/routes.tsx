@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import type { RouteProps, RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { Alerts } from './pages/alerts';
+
+const AlertsLazy: React.FC = lazy(() => import('./pages/alerts'));
 
 const AlertsRoutes = () => (
   <PluginTemplateWrapper>
-    <Alerts />
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <AlertsLazy />
+    </Suspense>
   </PluginTemplateWrapper>
 );
 

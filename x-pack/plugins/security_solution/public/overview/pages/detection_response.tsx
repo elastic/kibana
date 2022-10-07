@@ -146,3 +146,5 @@ const DetectionResponseComponent = () => {
 };
 
 export const DetectionResponse = React.memo(DetectionResponseComponent);
+// eslint-disable-next-line import/no-default-export
+export { DetectionResponse as default };

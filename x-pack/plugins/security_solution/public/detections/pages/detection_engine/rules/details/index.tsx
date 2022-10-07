@@ -917,3 +917,5 @@ RuleDetailsPageComponent.displayName = 'RuleDetailsPageComponent';
 export const RuleDetailsPage = connector(React.memo(RuleDetailsPageComponent));
 
 RuleDetailsPage.displayName = 'RuleDetailsPage';
+// eslint-disable-next-line import/no-default-export
+export { RuleDetailsPage as default };

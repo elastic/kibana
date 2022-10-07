@@ -36,3 +36,5 @@ const AlertsContainerComponent: React.FC = () => {
 };
 
 export const Alerts = React.memo(AlertsContainerComponent);
+// eslint-disable-next-line import/no-default-export
+export { Alerts as default };

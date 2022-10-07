@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import { MANAGEMENT_PATH } from '../../common/constants';
-import { ManagementContainer } from './pages';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+
+const ManagementContainerLazy: React.FC = lazy(() => import('./pages'));
 
 /**
  * Returns the React Router Routes for the management area
@@ -18,7 +20,9 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 const ManagementRoutes = () => (
   <PluginTemplateWrapper>
     <CurrentLicense>
-      <ManagementContainer />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <ManagementContainerLazy />
+      </Suspense>
     </CurrentLicense>
   </PluginTemplateWrapper>
 );

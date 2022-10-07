@@ -4,30 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import * as i18n from './translations';
+import { EuiLoadingSpinner } from '@elastic/eui';
+// import * as i18n from './translations';
 import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
-import { ExceptionListsTable } from '../detections/pages/detection_engine/rules/all/exceptions/exceptions_table';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
-import { useReadonlyHeader } from '../use_readonly_header';
+// import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+
+const ExceptionListsTableLazy: React.FC = lazy(
+  () => import('../detections/pages/detection_engine/rules/all/exceptions/exceptions_table')
+);
 
 const ExceptionsRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exceptions}>
-      <ExceptionListsTable />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <ExceptionListsTableLazy />
+      </Suspense>
       <SpyRoute pageName={SecurityPageName.exceptions} />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
 
 const ExceptionsContainerComponent: React.FC = () => {
-  useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
+  // useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
     <Switch>

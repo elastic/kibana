@@ -75,3 +75,5 @@ export const ManagementCategories = () => {
 };
 
 ManagementCategories.displayName = 'ManagementCategories';
+// eslint-disable-next-line import/no-default-export
+export { ManageLandingPage as default };

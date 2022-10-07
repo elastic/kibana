@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { CASES_PATH } from '../../common/constants';
-import { Cases } from './pages';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+
+const CasesLazy: React.FC = lazy(() => import('./pages'));
 
 export const CasesRoutes = () => {
   return (
     <PluginTemplateWrapper>
       <TrackApplicationView viewId="case">
-        <Cases />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <CasesLazy />
+        </Suspense>
       </TrackApplicationView>
     </PluginTemplateWrapper>
   );

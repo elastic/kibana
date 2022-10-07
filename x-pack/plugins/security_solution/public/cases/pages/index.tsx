@@ -154,3 +154,5 @@ const CaseContainerComponent: React.FC = () => {
 };
 
 export const Cases = React.memo(CaseContainerComponent);
+// eslint-disable-next-line import/no-default-export
+export { Cases as default };

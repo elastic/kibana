@@ -89,3 +89,5 @@ export const DashboardsLandingPage = () => {
     </SecuritySolutionPageWrapper>
   );
 };
+// eslint-disable-next-line import/no-default-export
+export { DashboardsLandingPage as default };

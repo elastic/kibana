@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { HostsContainer } from './pages';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { HOSTS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
+const HostsContainerLazy: React.FC = lazy(() => import('./pages'));
+
 export const HostsRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.hosts}>
-      <HostsContainer />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <HostsContainerLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );

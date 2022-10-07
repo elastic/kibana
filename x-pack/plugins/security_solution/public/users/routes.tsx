@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { UsersContainer } from './pages';
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { USERS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
+const UsersContainerLazy: React.FC = lazy(() => import('./pages'));
+
 export const UsersRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.users}>
-      <UsersContainer />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <UsersContainerLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );

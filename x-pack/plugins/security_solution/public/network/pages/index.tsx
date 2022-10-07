@@ -92,3 +92,5 @@ const NetworkContainerComponent = () => {
 };
 
 export const NetworkContainer = React.memo(NetworkContainerComponent);
+// eslint-disable-next-line import/no-default-export
+export { NetworkContainer as default };

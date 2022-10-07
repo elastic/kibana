@@ -417,3 +417,5 @@ export const ExceptionListsTable = React.memo(() => {
 });
 
 ExceptionListsTable.displayName = 'ExceptionListsTable';
+// eslint-disable-next-line import/no-default-export
+export { ExceptionListsTable as default };

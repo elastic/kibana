@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { Timelines } from './pages';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { TIMELINES_PATH } from '../../common/constants';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
+const TimelinesLazy: React.FC = lazy(() => import('./pages'));
+
 const TimelinesRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.timelines}>
-      <Timelines />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <TimelinesLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );

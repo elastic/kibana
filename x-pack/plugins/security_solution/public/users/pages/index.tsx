@@ -78,3 +78,5 @@ export const UsersContainer = React.memo(() => {
 });
 
 UsersContainer.displayName = 'UsersContainer';
+// eslint-disable-next-line import/no-default-export
+export { UsersContainer as default };

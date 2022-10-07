@@ -20,3 +20,5 @@ export const LandingPage = memo(() => {
 });
 
 LandingPage.displayName = 'LandingPage';
+// eslint-disable-next-line import/no-default-export
+export { LandingPage as default };

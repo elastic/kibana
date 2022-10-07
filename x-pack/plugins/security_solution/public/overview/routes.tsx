@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import {
   LANDING_PATH,
   OVERVIEW_PATH,
@@ -16,16 +17,19 @@ import {
 } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 
-import { LandingPage } from './pages/landing';
-import { StatefulOverview } from './pages/overview';
-import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { EntityAnalyticsPage } from './pages/entity_analytics';
+
+const StatefulOverviewLazy: React.FC = lazy(() => import('./pages/overview'));
+const DetectionResponseLazy: React.FC = lazy(() => import('./pages/detection_response'));
+const LandingPageLazy: React.FC = lazy(() => import('./pages/landing'));
+const EntityAnalyticsPageLazy: React.FC = lazy(() => import('./pages/entity_analytics'));
 
 const OverviewRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.overview}>
-      <StatefulOverview />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <StatefulOverviewLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
@@ -33,7 +37,9 @@ const OverviewRoutes = () => (
 const DetectionResponseRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.detectionAndResponse}>
-      <DetectionResponse />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <DetectionResponseLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
@@ -41,7 +47,9 @@ const DetectionResponseRoutes = () => (
 const LandingRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.landing}>
-      <LandingPage />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LandingPageLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
@@ -49,7 +57,9 @@ const LandingRoutes = () => (
 const EntityAnalyticsRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.entityAnalytics}>
-      <EntityAnalyticsPage />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <EntityAnalyticsPageLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );

@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { NetworkContainer } from './pages';
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { NETWORK_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+const NetworkContainerLazy: React.FC = lazy(() => import('./pages'));
 
 export const NetworkRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.network}>
-      <NetworkContainer />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <NetworkContainerLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );

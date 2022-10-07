@@ -35,3 +35,5 @@ export const Timelines = React.memo(() => (
 ));
 
 Timelines.displayName = 'Timelines';
+// eslint-disable-next-line import/no-default-export
+export { Timelines as default };

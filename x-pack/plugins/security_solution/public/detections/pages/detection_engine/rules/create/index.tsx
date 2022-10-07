@@ -567,3 +567,5 @@ const CreateRulePageComponent: React.FC = () => {
 };
 
 export const CreateRulePage = React.memo(CreateRulePageComponent);
+// eslint-disable-next-line import/no-default-export
+export { CreateRulePage as default };

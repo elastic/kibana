@@ -101,3 +101,5 @@ export const KubernetesContainer = React.memo(() => {
 });
 
 KubernetesContainer.displayName = 'KubernetesContainer';
+// eslint-disable-next-line import/no-default-export
+export { KubernetesContainer as default };

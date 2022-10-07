@@ -152,3 +152,5 @@ const OverviewComponent = () => {
 };
 
 export const StatefulOverview = React.memo(OverviewComponent);
+// eslint-disable-next-line import/no-default-export
+export { StatefulOverview as default };

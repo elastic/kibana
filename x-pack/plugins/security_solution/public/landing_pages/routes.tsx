@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { DASHBOARDS_PATH, MANAGE_PATH, EXPLORE_PATH } from '../../common/constants';
-import { ExploreLandingPage } from './pages/explore';
-import { DashboardsLandingPage } from './pages/dashboards';
-import { ManageLandingPage } from './pages/manage';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+
+const ExploreLandingPageLazy: React.FC = lazy(() => import('./pages/explore'));
+const DashboardsLandingPageLazy: React.FC = lazy(() => import('./pages/dashboards'));
+const ManageLandingPageLazy: React.FC = lazy(() => import('./pages/manage'));
 
 export const ThreatHuntingRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
-      <ExploreLandingPage />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <ExploreLandingPageLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
@@ -27,7 +31,9 @@ export const ThreatHuntingRoutes = () => (
 export const DashboardRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.dashboardsLanding}>
-      <DashboardsLandingPage />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <DashboardsLandingPageLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
@@ -35,7 +41,9 @@ export const DashboardRoutes = () => (
 export const ManageRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.administration}>
-      <ManageLandingPage />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <ManageLandingPageLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );

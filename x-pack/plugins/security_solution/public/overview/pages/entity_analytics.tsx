@@ -79,3 +79,5 @@ const EntityAnalyticsComponent = () => {
 };
 
 export const EntityAnalyticsPage = React.memo(EntityAnalyticsComponent);
+// eslint-disable-next-line import/no-default-export
+export { EntityAnalyticsPage as default };

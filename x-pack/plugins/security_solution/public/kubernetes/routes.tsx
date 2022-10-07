@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { KubernetesContainer } from './pages';
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { KUBERNETES_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+const KubernetesContainerLazy: React.FC = lazy(() => import('./pages'));
 
 export const KubernetesRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.kubernetes}>
-      <KubernetesContainer />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <KubernetesContainerLazy />
+      </Suspense>
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );

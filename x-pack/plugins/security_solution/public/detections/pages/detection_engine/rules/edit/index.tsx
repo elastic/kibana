@@ -544,3 +544,5 @@ const EditRulePageComponent: FC = () => {
 };
 
 export const EditRulePage = memo(EditRulePageComponent);
+// eslint-disable-next-line import/no-default-export
+export { EditRulePage as default };

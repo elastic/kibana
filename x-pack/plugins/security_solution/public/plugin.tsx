@@ -69,6 +69,10 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 import type { SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { initDataView } from './common/store/sourcerer/model';
 import type { SecurityDataView } from './common/containers/sourcerer/api';
+import { getSubPluginRoutesByCapabilities } from './lazy_helpers_for_routes';
+import { subPluginClasses } from './lazy_sub_plugins';
+import { createInitialState, createStore, renderApp } from './lazy_application_dependencies';
+import { getFilteredLinks, links } from './common/links/app_links';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -167,8 +171,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
-        const { renderApp } = await this.lazyApplicationDependencies();
-        const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
         const subPluginRoutes = getSubPluginRoutesByCapabilities(
           subPlugins,
           coreStart.application.capabilities
@@ -278,47 +280,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return {};
   }
 
-  /**
-   * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
-   * Webpack is smart enough to only request (and download) this even when it is imported multiple times concurrently.
-   */
-  private lazyApplicationDependencies() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazy_application_dependencies" */
-      './lazy_application_dependencies'
-    );
-  }
-
-  private lazyHelpersForRoutes() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazyHelpersForRoutes" */
-      './lazy_helpers_for_routes'
-    );
-  }
-
-  /**
-   * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
-   * Webpack is smart enough to only request (and download) this even when it is imported multiple times concurrently.
-   */
-  private lazySubPlugins() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazy_sub_plugins" */
-      './lazy_sub_plugins'
-    );
-  }
-
   private lazyRegisterAlertsTableConfiguration() {
     /**
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
@@ -330,23 +291,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
   }
 
-  private lazyApplicationLinks() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazy_app_links" */
-      './common/links/app_links'
-    );
-  }
-
   /**
    * Lazily instantiated subPlugins. This should be instantiated just once.
    */
   private async subPlugins(): Promise<SubPlugins> {
     if (!this._subPlugins) {
-      const { subPluginClasses } = await this.lazySubPlugins();
+      // const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
         alerts: new subPluginClasses.Detections(),
         rules: new subPluginClasses.Rules(),
@@ -433,7 +383,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         defaultDataView = { ...initDataView, error };
         kibanaDataViews = [];
       }
-      const { createStore, createInitialState } = await this.lazyApplicationDependencies();
+      // const { createStore, createInitialState } = await this.lazyApplicationDependencies();
 
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
@@ -504,7 +454,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * Register deepLinks and appUpdater for all app links, to change deepLinks as needed when licensing changes.
    */
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
-    const { links, getFilteredLinks } = await this.lazyApplicationLinks();
+    // const { links, getFilteredLinks } = await this.lazyApplicationLinks();
 
     const { license$ } = plugins.licensing;
     const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, true);

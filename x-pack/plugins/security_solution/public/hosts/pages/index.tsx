@@ -97,3 +97,5 @@ export const HostsContainer = React.memo(() => (
 ));
 
 HostsContainer.displayName = 'HostsContainer';
+// eslint-disable-next-line import/no-default-export
+export { HostsContainer as default };
