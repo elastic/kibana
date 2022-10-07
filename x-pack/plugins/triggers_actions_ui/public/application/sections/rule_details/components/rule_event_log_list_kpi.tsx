@@ -35,21 +35,21 @@ const API_FAILED_MESSAGE = i18n.translate(
 const RESPONSE_TOOLTIP = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.responseTooltip',
   {
-    defaultMessage: 'The responses for the latest rule runs.',
+    defaultMessage: 'The responses for up to 10,000 most recent rule runs.',
   }
 );
 
 const ALERTS_TOOLTIP = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.alertsTooltip',
   {
-    defaultMessage: 'The alert statuses for the latest rule runs.',
+    defaultMessage: 'The alert statuses for up to 10,000 most recent rule runs.',
   }
 );
 
 const ACTIONS_TOOLTIP = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.actionsTooltip',
   {
-    defaultMessage: 'The action statuses for the latest rule runs.',
+    defaultMessage: 'The action statuses for up to 10,000 most recent rule runs.',
   }
 );
 
