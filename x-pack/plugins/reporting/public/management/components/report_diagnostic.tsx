@@ -65,7 +65,9 @@ const VerificationScreenshot = ({ screenshotBase64 }: { screenshotBase64: string
         allowFullScreen
         size="s"
         src={`data:image/png;base64,${screenshotBase64}`}
-        alt="a computer generated image of an aquarium"
+        alt={i18n.translate('xpack.reporting.listing.diagnosticSuccessScreenshot', {
+          defaultMessage: 'A screenshot of a Kibana test page.',
+        })}
       />
     );
   }

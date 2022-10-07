@@ -18,6 +18,6 @@ export const registerDiagnosticRoutes = (reporting: ReportingCore, logger: Logge
 export interface DiagnosticResponse {
   help: string[];
   success: boolean;
-  logs: string;
+  logs: string[];
   capture?: string;
 }

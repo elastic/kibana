@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import assert from 'assert';
 import { lastValueFrom } from 'rxjs';
 import { DiagnosticResponse } from '.';
 import { incrementApiUsageCounter } from '..';
@@ -56,7 +57,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       let response: DiagnosticResponse = {
         success: true,
         help: [],
-        logs: '',
+        logs: [],
       };
       try {
         const result = await lastValueFrom(
@@ -70,10 +71,15 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
             .pipe()
         );
 
+        assert(result);
+        assert(result.buffer);
+
         if (result.warnings.length) {
           response.success = false;
-          response.logs = result.warnings.join('\n');
+          response.logs = result.warnings;
         }
+
+        response.capture = result.buffer.toString('base64');
       } catch (err) {
         response = {
           success: false,
