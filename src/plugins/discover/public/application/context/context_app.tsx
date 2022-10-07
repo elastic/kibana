@@ -42,25 +42,21 @@ import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { ContextHistoryLocationState } from './services/locator';
 import { getUiActions } from '../../kibana_services';
 import { useRootBreadcrumb } from '../../hooks/use_root_breadcrumb';
+import { replaceContextLocation } from './utils/replace_context_location';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
 export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
-  locationState?: ContextHistoryLocationState;
+  locationState: ContextHistoryLocationState;
 }
 
-export const ContextApp = ({
-  dataView,
-  anchorId,
-  locationState: preservedReferrerState = {},
-}: ContextAppProps) => {
+export const ContextApp = ({ dataView, anchorId, locationState }: ContextAppProps) => {
   const services = useDiscoverServices();
   const { locator, uiSettings, capabilities, dataViews, navigation, filterManager, core } =
     services;
 
-  const initialDataViewId = useRef(dataView.id).current;
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
@@ -88,9 +84,9 @@ export const ContextApp = ({
     dataViewId: dataView.id!,
     filters: appState.filters,
     columns,
-    timeRange: preservedReferrerState.timeRange,
-    query: preservedReferrerState.query,
-    savedSearchId: preservedReferrerState.savedSearchId,
+    timeRange: locationState.timeRange,
+    query: locationState.query,
+    savedSearchId: locationState.savedSearchId,
   });
 
   useEffect(() => {
@@ -187,15 +183,10 @@ export const ContextApp = ({
         ...dataViewToUpdate.toSpec(),
         id: undefined,
       });
-
-      // do not clear data view from cache to preserve it for go back action
-      if (initialDataViewId !== dataViewToUpdate.id) {
-        dataViews.clearInstanceCache(dataViewToUpdate.id);
-      }
-
+      dataViews.clearInstanceCache(dataViewToUpdate.id);
       return updatedDataView;
     },
-    [dataViews, initialDataViewId]
+    [dataViews]
   );
 
   const onAdHocDataViewChange = useCallback(async () => {
@@ -205,10 +196,6 @@ export const ContextApp = ({
     const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
     const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
-    /**
-     * Execute doesn't needs to be awaited, this is important.
-     * Since pending history push, caused by filters update should be cancelled right away.
-     */
     action?.execute({
       trigger,
       fromDataView: dataView.id,
@@ -216,31 +203,24 @@ export const ContextApp = ({
       usedDataViews: [],
     } as ActionExecutionContext);
 
-    // cancel pending history push triggered by just updated filters
-    stateContainer.kbnUrlControls.cancel();
-
-    // getting just updated filters syncronously.
+    // get just updated filters, line order is important here
     const updatedFilters = [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()];
-    services.contextLocator.navigate(
-      {
-        rowId: anchorId,
-        dataViewSpec: updatedDataView.toSpec(false),
-        columns,
-        filters: updatedFilters,
-        timeRange: preservedReferrerState.timeRange,
-        query: preservedReferrerState.query,
-      },
-      { replace: true }
-    );
+    replaceContextLocation(services.contextLocator, {
+      rowId: anchorId,
+      dataViewSpec: updatedDataView.toSpec(false),
+      columns,
+      filters: updatedFilters,
+      timeRange: locationState.timeRange,
+      query: locationState.query,
+    });
   }, [
     anchorId,
     columns,
     dataView,
     filterManager,
-    preservedReferrerState.query,
-    preservedReferrerState.timeRange,
+    locationState.query,
+    locationState.timeRange,
     services.contextLocator,
-    stateContainer.kbnUrlControls,
     updateAdHocDataViewId,
   ]);
 

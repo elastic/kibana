@@ -20,7 +20,6 @@ import {
 
 import { connectToQueryState, DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import type { IKbnUrlControls } from '@kbn/kibana-utils-plugin/public/state_management/url';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 
@@ -123,10 +122,6 @@ export interface GetStateReturn {
    * @param filterManager
    */
   setFilters: (filterManager: FilterManager) => void;
-  /**
-   * URl controls
-   */
-  kbnUrlControls: IKbnUrlControls;
   /**
    * sync state to URL, used for testing
    */
@@ -256,7 +251,6 @@ export function getState({
         appStateContainer.set({ ...appStateContainer.getState(), ...{ filters: appFilters } });
       }
     },
-    kbnUrlControls: stateStorage.kbnUrlControls,
     // helper function just needed for testing
     flushToUrl: (replace?: boolean) => stateStorage.kbnUrlControls.flush(replace),
   };

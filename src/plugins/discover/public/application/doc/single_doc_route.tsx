@@ -12,12 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useDataView } from '../../hooks/use_data_view';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory } from '../../kibana_services';
 import { SingleDocHistoryLocationState } from './locator';
 import { DiscoverError } from '../../components/common/error_alert';
+import { useDataView } from './use_data_view';
 
 export interface DocUrlParams {
   dataViewId: string;

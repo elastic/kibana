@@ -37,7 +37,7 @@ export interface DiscoverContextAppLocatorDependencies {
 }
 
 export interface ContextHistoryLocationState {
-  dataViewSpec?: DataViewSpec;
+  dataViewSpec: DataViewSpec;
   timeRange?: TimeRange;
   query?: Query | AggregateQuery;
   savedSearchId?: string;

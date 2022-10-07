@@ -11,7 +11,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useDataView } from '../../hooks/use_data_view';
+import { useDataView } from './hooks/use_data_view';
 import { getScopedHistory } from '../../kibana_services';
 import { ContextHistoryLocationState } from './services/locator';
 
@@ -23,19 +23,20 @@ export interface ContextUrlParams {
 export function ContextAppRoute() {
   const scopedHistory = getScopedHistory();
   const [locationState, setLocationState] = React.useState<ContextHistoryLocationState>(
-    scopedHistory.location.state as ContextHistoryLocationState
+    (scopedHistory.location.state as ContextHistoryLocationState) || {}
   );
-  const dataViewSpec = locationState?.dataViewSpec;
 
   const { dataViewId: encodedDataViewId, id } = useParams<ContextUrlParams>();
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
 
   useEffect(() => {
-    setLocationState(scopedHistory.location.state as ContextHistoryLocationState);
+    if (scopedHistory.location.state) {
+      setLocationState(scopedHistory.location.state as ContextHistoryLocationState);
+    }
   }, [dataViewId, scopedHistory.location.state]);
 
-  const { dataView, error } = useDataView({ dataViewId, dataViewSpec });
+  const { dataView, error } = useDataView({ dataViewId, locationState, rowId: anchorId });
 
   if (error) {
     return (

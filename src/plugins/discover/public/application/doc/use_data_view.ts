@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from 'react';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { useDiscoverServices } from './use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export const useDataView = ({
   dataViewId,
