@@ -100,7 +100,29 @@ export class AutocompleteInfo {
       this.retrieveAliases(settingsToRetrieve),
       this.retrieveDataStreams(settingsToRetrieve),
       this.retrieveTemplates(templateSettingsToRetrieve),
-    ]).then(() => {
+    ]).then((response) => {
+      const errors = response.filter((result) => result.status === 'rejected');
+      if (errors.length) {
+        // Notify the user if mapping size is too large
+        const isMappingResponseExceededError = errors.some((error) => {
+          if ('reason' in error) {
+            return error.reason?.body?.message === 'Maximum size of mappings response exceeded';
+          }
+        });
+
+        if (isMappingResponseExceededError) {
+          this.notifications.toasts.addWarning({
+            title: i18n.translate('devTools.autocomplete.mappingResponseExceededTitle', {
+              defaultMessage: 'Maximum size of mappings response exceeded',
+            }),
+            text: i18n.translate('devTools.autocomplete.mappingResponseExceededText', {
+              defaultMessage:
+                'Some autocomplete suggestions may be missing. Disable autocomplete suggestions for fields in Settings to optimize performance.',
+            }),
+          });
+        }
+      }
+
       this.pollTimeoutId = setTimeout(() => {
         // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
         // a scheduled request if the user turns off polling.
@@ -129,7 +151,8 @@ export class AutocompleteInfo {
       return send({
         http: this.http,
         method: 'GET',
-        path: `${settingKeyToPathMap[settingsKey]}?pretty=false`, // pretty=false to compress the response and save bandwidth by avoiding whitespace
+        // pretty=false to compress the response and save bandwidth by avoiding whitespace
+        path: `${settingKeyToPathMap[settingsKey]}?pretty=false`,
         asSystemRequest: true,
       });
     } else {
@@ -145,23 +168,7 @@ export class AutocompleteInfo {
     );
 
     if (mappings) {
-      const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
-      let mappingsResponse;
-
-      if (maxMappingSize) {
-        this.notifications.toasts.addWarning({
-          title: i18n.translate('console.autocomplete.mappingsTooLargeTitle', {
-            defaultMessage: 'Mappings too large',
-          }),
-          text: i18n.translate('console.autocomplete.mappingsTooLargeText', {
-            defaultMessage: 'Mappings are too large to be displayed in autocomplete.',
-          }),
-        });
-        mappingsResponse = {};
-      } else {
-        mappingsResponse = mappings;
-      }
-      this.mapping.loadMappings(mappingsResponse);
+      this.mapping.loadMappings(mappings);
     }
   }
 
@@ -189,18 +196,20 @@ export class AutocompleteInfo {
   }
 
   private async retrieveTemplates(settingsToRetrieve: SettingsToRetrieve) {
-    const legacyTemplates = await this.retrieveSettings<IndicesGetTemplateResponse>(
-      ENTITIES.LEGACY_TEMPLATES,
-      settingsToRetrieve
-    );
-    const indexTemplates = await this.retrieveSettings<IndicesGetIndexTemplateResponse>(
-      ENTITIES.INDEX_TEMPLATES,
-      settingsToRetrieve
-    );
-    const componentTemplates = await this.retrieveSettings<ClusterGetComponentTemplateResponse>(
-      ENTITIES.COMPONENT_TEMPLATES,
-      settingsToRetrieve
-    );
+    const [legacyTemplates, indexTemplates, componentTemplates] = await Promise.all([
+      this.retrieveSettings<IndicesGetTemplateResponse>(
+        ENTITIES.LEGACY_TEMPLATES,
+        settingsToRetrieve
+      ),
+      this.retrieveSettings<IndicesGetIndexTemplateResponse>(
+        ENTITIES.INDEX_TEMPLATES,
+        settingsToRetrieve
+      ),
+      this.retrieveSettings<ClusterGetComponentTemplateResponse>(
+        ENTITIES.COMPONENT_TEMPLATES,
+        settingsToRetrieve
+      ),
+    ]);
 
     if (legacyTemplates) {
       this.legacyTemplate.loadTemplates(legacyTemplates);
