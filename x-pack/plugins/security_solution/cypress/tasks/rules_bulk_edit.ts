@@ -30,6 +30,7 @@ import {
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
   RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
+  RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
   RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR,
   UPDATE_SCHEDULE_MENU_ITEM,
   UPDATE_SCHEDULE_INTERVAL_INPUT,
@@ -159,6 +160,14 @@ export const checkOverwriteIndexPatternsCheckbox = () => {
     .should('be.checked');
 };
 
+export const checkOverwriteDataViewCheckbox = () => {
+  cy.get(RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX)
+    .should('have.text', 'Apply changes to rules configured with data views')
+    .click()
+    .get('input')
+    .should('be.checked');
+};
+
 export const selectTimelineTemplate = (timelineTitle: string) => {
   cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR).click();
   cy.get(TIMELINE_SEARCHBOX).type(`${timelineTitle}{enter}`).should('not.exist');
@@ -193,6 +202,19 @@ export const typeScheduleLookback = (lookback: string) => {
     .blur();
 };
 
+interface ScheduleFormFields {
+  interval: number;
+  lookback: number;
+}
+
+export const assertDefaultValuesAreAppliedToScheduleFields = ({
+  interval,
+  lookback,
+}: ScheduleFormFields) => {
+  cy.get(UPDATE_SCHEDULE_INTERVAL_INPUT).find('input').should('have.value', interval);
+  cy.get(UPDATE_SCHEDULE_LOOKBACK_INPUT).find('input').should('have.value', lookback);
+};
+
 type TimeUnit = 'Seconds' | 'Minutes' | 'Hours';
 export const setScheduleIntervalTimeUnit = (timeUnit: TimeUnit) => {
   cy.get(UPDATE_SCHEDULE_INTERVAL_INPUT).within(() => {
@@ -209,17 +231,15 @@ export const setScheduleLookbackTimeUnit = (timeUnit: TimeUnit) => {
 export const assertUpdateScheduleWarningExists = (expectedNumberOfNotMLRules: number) => {
   cy.get(RULES_BULK_EDIT_SCHEDULES_WARNING).should(
     'have.text',
-    `You're about to apply changes to ${expectedNumberOfNotMLRules} selected rules. The changes you made will be overwritten to the existing Rule schedules and additional look-back time (if any).`
+    `You're about to apply changes to ${expectedNumberOfNotMLRules} selected rules. The changes you make will overwrite the existing rule schedules and additional look-back time (if any).`
   );
 };
-
-export const assertRuleScheduleValues = ({
-  interval,
-  lookback,
-}: {
+interface RuleSchedule {
   interval: string;
   lookback: string;
-}) => {
+}
+
+export const assertRuleScheduleValues = ({ interval, lookback }: RuleSchedule) => {
   cy.get(SCHEDULE_DETAILS).within(() => {
     cy.get('dd').eq(0).should('contain.text', interval);
     cy.get('dd').eq(1).should('contain.text', lookback);

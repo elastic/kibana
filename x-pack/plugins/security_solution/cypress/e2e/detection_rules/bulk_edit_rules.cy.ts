@@ -71,6 +71,7 @@ import {
   setScheduleIntervalTimeUnit,
   assertRuleScheduleValues,
   assertUpdateScheduleWarningExists,
+  assertDefaultValuesAreAppliedToScheduleFields,
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
@@ -493,6 +494,18 @@ describe('Detection rules, bulk edit', () => {
   });
 
   describe('Schedule', () => {
+    it('Default values are applied to bulk edit schedule fields', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickUpdateScheduleMenuItem();
+
+      assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
+
+      assertDefaultValuesAreAppliedToScheduleFields({
+        interval: 5,
+        lookback: 1,
+      });
+    });
+
     it('Updates schedule for custom rules', () => {
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
       clickUpdateScheduleMenuItem();

@@ -301,7 +301,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
               <EuiFlexItem grow={false}>
                 <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
               </EuiFlexItem>
-              {option.user.email ? (
+              {option.user.email && option.user.email !== option.label ? (
                 <EuiFlexItem grow={false}>
                   <EuiTextColor color="subdued">
                     {searchValue ? (

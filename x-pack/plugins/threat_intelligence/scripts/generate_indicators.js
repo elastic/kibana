@@ -50,7 +50,7 @@ const main = async () => {
             'threat.feed.name': {
               type: 'keyword',
             },
-            'threat.indicator.url.original': {
+            'threat.indicator.url.full': {
               type: 'keyword',
             },
             'threat.indicator.first_seen': {
@@ -92,7 +92,7 @@ const main = async () => {
             'threat.indicator.first_seen': timestamp,
             'threat.feed.name': FEED_NAMES[Math.ceil(Math.random() * FEED_NAMES.length) - 1],
             'threat.indicator.type': 'url',
-            'threat.indicator.url.original': faker.internet.url(),
+            'threat.indicator.url.full': faker.internet.url(),
             'event.type': 'indicator',
             'event.category': 'threat',
           },

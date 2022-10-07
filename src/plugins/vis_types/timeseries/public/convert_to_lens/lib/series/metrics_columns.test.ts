@@ -20,6 +20,7 @@ const mockConvertToCounterRateColumn = jest.fn();
 const mockConvertOtherAggsToFormulaColumn = jest.fn();
 const mockConvertToLastValueColumn = jest.fn();
 const mockConvertToStaticValueColumn = jest.fn();
+const mockConvertStaticValueToFormulaColumn = jest.fn();
 const mockConvertToStandartDeviationColumn = jest.fn();
 const mockConvertMetricAggregationColumnWithoutSpecialParams = jest.fn();
 
@@ -32,6 +33,7 @@ jest.mock('../convert', () => ({
   convertOtherAggsToFormulaColumn: jest.fn(() => mockConvertOtherAggsToFormulaColumn()),
   convertToLastValueColumn: jest.fn(() => mockConvertToLastValueColumn()),
   convertToStaticValueColumn: jest.fn(() => mockConvertToStaticValueColumn()),
+  convertStaticValueToFormulaColumn: jest.fn(() => mockConvertStaticValueToFormulaColumn()),
   convertToStandartDeviationColumn: jest.fn(() => mockConvertToStandartDeviationColumn()),
   convertMetricAggregationColumnWithoutSpecialParams: jest.fn(() =>
     mockConvertMetricAggregationColumnWithoutSpecialParams()
@@ -138,8 +140,18 @@ describe('getMetricsColumns', () => {
       mockConvertToLastValueColumn,
     ],
     [
-      'call convertToStaticValueColumn if metric type is static',
+      'call convertStaticValueToFormulaColumn if metric type is static',
       [createSeries({ metrics: [{ type: TSVB_METRIC_TYPES.STATIC, id: '1' }] }), dataView, 1],
+      mockConvertStaticValueToFormulaColumn,
+    ],
+    [
+      'call convertToStaticValueColumn if metric type is static and isStaticValueColumnSupported is true',
+      [
+        createSeries({ metrics: [{ type: TSVB_METRIC_TYPES.STATIC, id: '1' }] }),
+        dataView,
+        1,
+        { isStaticValueColumnSupported: true },
+      ],
       mockConvertToStaticValueColumn,
     ],
     [

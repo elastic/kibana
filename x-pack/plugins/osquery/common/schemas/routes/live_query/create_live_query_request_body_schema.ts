@@ -13,7 +13,7 @@ import {
   packIdOrUndefined,
   queryOrUndefined,
   queriesOrUndefined,
-} from '../../common/schemas';
+} from '@kbn/osquery-io-ts-types';
 
 export const createLiveQueryRequestBodySchema = t.partial({
   agent_ids: t.array(t.string),

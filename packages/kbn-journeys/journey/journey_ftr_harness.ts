@@ -198,7 +198,12 @@ export class JourneyFtrHarness {
       return;
     }
 
-    await this.screenshots.addSuccess(step, await this.page.screenshot());
+    const [screenshot, fs] = await Promise.all([
+      this.page.screenshot(),
+      this.page.screenshot({ fullPage: true }),
+    ]);
+
+    await this.screenshots.addSuccess(step, screenshot, fs);
   }
 
   private async onStepError(step: AnyStep, err: Error) {
@@ -208,7 +213,12 @@ export class JourneyFtrHarness {
     }
 
     if (this.page) {
-      await this.screenshots.addError(step, await this.page.screenshot());
+      const [screenshot, fs] = await Promise.all([
+        this.page.screenshot(),
+        this.page.screenshot({ fullPage: true }),
+      ]);
+
+      await this.screenshots.addError(step, screenshot, fs);
     }
   }
 

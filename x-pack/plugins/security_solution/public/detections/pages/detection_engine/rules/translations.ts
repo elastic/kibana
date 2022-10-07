@@ -1084,20 +1084,6 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
     }
   );
 
-export const NEW_TERMS_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tour.newTermsTitle',
-  {
-    defaultMessage: 'A new Security Rule type is available!',
-  }
-);
-
-export const NEW_TERMS_TOUR_CONTENT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tour.newTermsContent',
-  {
-    defaultMessage: '"New Terms" rules alert on values that have not previously been seen',
-  }
-);
-
 export const RULE_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
   {

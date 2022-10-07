@@ -31,7 +31,7 @@ export const FILTERS_GLOBAL_CONTAINER = '[data-test-subj="filters-global-contain
 
 export const TIME_RANGE_PICKER = `[data-test-subj="superDatePickerToggleQuickMenuButton"]`;
 
-export const QUERY_INPUT = `[data-test-subj="iocListPageQueryInput"]`;
+export const QUERY_INPUT = `[data-test-subj="queryInput"]`;
 
 export const EMPTY_STATE = '[data-test-subj="indicatorsTableEmptyState"]';
 
@@ -117,3 +117,5 @@ export const INDICATOR_FLYOUT_INVESTIGATE_IN_TIMELINE_BUTTON =
 export const INSPECTOR_BUTTON = '[data-test-subj="tiIndicatorsGridInspect"]';
 
 export const INSPECTOR_PANEL = '[data-test-subj="inspectorPanel"]';
+
+export const ADD_INTEGRATIONS_BUTTON = '[data-test-subj="add-data"]';

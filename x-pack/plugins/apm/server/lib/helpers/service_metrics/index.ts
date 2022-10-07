@@ -53,6 +53,7 @@ export async function getHasAggregatedServicesMetrics({
         events: [ProcessorEvent.metric],
       },
       body: {
+        track_total_hits: 1,
         size: 1,
         query: {
           bool: {

@@ -27,6 +27,7 @@ export interface TimeseriesRenderValue {
   visParams: TimeseriesVisParams;
   syncColors: boolean;
   syncTooltips: boolean;
+  canNavigateToLens?: boolean;
 }
 
 export type TimeseriesExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -65,6 +66,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       getExecutionContext,
       inspectorAdapters,
       abortSignal: expressionAbortSignal,
+      variables,
     }
   ) {
     const visParams: TimeseriesVisParams = JSON.parse(args.params);
@@ -90,6 +92,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
         visData: response,
         syncColors,
         syncTooltips,
+        canNavigateToLens: variables.canNavigateToLens as boolean,
       },
     };
   },

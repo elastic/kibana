@@ -259,6 +259,26 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body.pageSize).to.eql(10);
         });
 
+        it('metadata api should return the endpoint based on the agent hostname', async () => {
+          const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
+          const targetAgentHostname = 'Example-host-name-XYZ';
+          const { body } = await supertest
+            .get(HOST_METADATA_LIST_ROUTE)
+            .set('kbn-xsrf', 'xxx')
+            .query({
+              kuery: `united.endpoint.host.hostname:${targetAgentHostname}`,
+            })
+            .expect(200);
+          expect(body.total).to.eql(1);
+          const resultHostId: string = body.data[0].metadata.host.id;
+          const resultElasticAgentName: string = body.data[0].metadata.host.hostname;
+          expect(resultHostId).to.eql(targetEndpointId);
+          expect(resultElasticAgentName).to.eql(targetAgentHostname);
+          expect(body.data.length).to.eql(1);
+          expect(body.page).to.eql(0);
+          expect(body.pageSize).to.eql(10);
+        });
+
         it('metadata api should return all hosts when filter is empty string', async () => {
           const { body } = await supertest
             .get(HOST_METADATA_LIST_ROUTE)

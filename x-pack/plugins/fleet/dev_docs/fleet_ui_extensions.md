@@ -35,6 +35,12 @@ export class Plugin {
 
     registerExtension({
       package: 'endpoint',
+      view: 'package-policy-create-multi-step',
+      component: LazyEndpointPolicyCreateMultiStepExtension,
+    });
+
+    registerExtension({
+      package: 'endpoint',
       view: 'package-detail-custom',
       component: getLazyEndpointPackageCustomExtension(core, plugins),
     });

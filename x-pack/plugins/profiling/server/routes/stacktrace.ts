@@ -18,6 +18,8 @@ import {
   ProfilingStackTrace,
 } from '../../common/elasticsearch';
 import {
+  emptyExecutable,
+  emptyStackFrame,
   Executable,
   FileID,
   StackFrame,
@@ -68,7 +70,7 @@ export function runLengthEncode(input: number[]): Buffer {
     return Buffer.from(output);
   }
 
-  let count = 0;
+  let count = 1;
   let current = input[0];
 
   for (let i = 1; i < input.length; i++) {
@@ -79,13 +81,13 @@ export function runLengthEncode(input: number[]): Buffer {
       continue;
     }
 
-    output.push(count + 1, current);
+    output.push(count, current);
 
-    count = 0;
+    count = 1;
     current = next;
   }
 
-  output.push(count + 1, current);
+  output.push(count, current);
 
   return Buffer.from(output);
 }
@@ -118,6 +120,17 @@ export function runLengthDecode(input: Buffer, outputSize?: number): number[] {
       output[idx] = input[i + 1];
       idx++;
     }
+  }
+
+  // Due to truncation of the frame types for stacktraces longer than 255,
+  // the expected output size and the actual decoded size can be different.
+  // Ordinarily, these two values should be the same.
+  //
+  // We have decided to fill in the remainder of the output array with zeroes
+  // as a reasonable default. Without this step, the output array would have
+  // undefined values.
+  for (let i = idx; i < size; i++) {
+    output[i] = 0;
   }
 
   return output;
@@ -310,7 +323,7 @@ export async function mgetStackTraces({
     );
   }
 
-  return { stackTraces, stackFrameDocIDs, executableDocIDs };
+  return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
 }
 
 export async function mgetStackFrames({
@@ -352,13 +365,7 @@ export async function mgetStackFrames({
       });
       framesFound++;
     } else {
-      stackFrames.set(frame._id, {
-        FileName: '',
-        FunctionName: '',
-        FunctionOffset: 0,
-        LineNumber: 0,
-        SourceType: 0,
-      });
+      stackFrames.set(frame._id, emptyStackFrame);
     }
   }
   logger.info(`processing data took ${Date.now() - t0} ms`);
@@ -403,9 +410,7 @@ export async function mgetExecutables({
       });
       exeFound++;
     } else {
-      executables.set(exe._id, {
-        FileName: '',
-      });
+      executables.set(exe._id, emptyExecutable);
     }
   }
   logger.info(`processing data took ${Date.now() - t0} ms`);

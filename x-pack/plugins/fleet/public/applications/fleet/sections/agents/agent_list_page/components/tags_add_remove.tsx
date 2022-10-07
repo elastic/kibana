@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useEffect, useState, useMemo, useCallback } from 'react';
-import { difference } from 'lodash';
+import { difference, uniq } from 'lodash';
 import styled from 'styled-components';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
@@ -95,8 +95,9 @@ export const TagsAddRemove: React.FC<Props> = ({
     if (hasCompleted) {
       return onTagsUpdated();
     }
-    const newSelectedTags = difference(selectedTags, tagsToRemove).concat(tagsToAdd);
-    const allTagsWithNew = allTags.includes(tagsToAdd[0]) ? allTags : allTags.concat(tagsToAdd);
+    const selected = labels.filter((tag) => tag.checked === 'on').map((tag) => tag.label);
+    const newSelectedTags = difference(selected, tagsToRemove).concat(tagsToAdd);
+    const allTagsWithNew = uniq(allTags.concat(newSelectedTags));
     const allTagsWithRemove = isRenameOrDelete
       ? difference(allTagsWithNew, tagsToRemove)
       : allTagsWithNew;
@@ -109,8 +110,8 @@ export const TagsAddRemove: React.FC<Props> = ({
     successMessage?: string,
     errorMessage?: string
   ) => {
-    const newSelectedTags = difference(selectedTags, tagsToRemove).concat(tagsToAdd);
     if (agentId) {
+      const newSelectedTags = difference(selectedTags, tagsToRemove).concat(tagsToAdd);
       updateTagsHook.updateTags(
         agentId,
         newSelectedTags,
@@ -119,10 +120,32 @@ export const TagsAddRemove: React.FC<Props> = ({
         errorMessage
       );
     } else {
+      // sending updated tags to add/remove, in case multiple actions are done quickly and the first one is not yet propagated
+      const updatedTagsToAdd = tagsToAdd.concat(
+        labels
+          .filter(
+            (tag) =>
+              tag.checked === 'on' &&
+              !selectedTags.includes(tag.label) &&
+              !tagsToRemove.includes(tag.label)
+          )
+          .map((tag) => tag.label)
+      );
+      const updatedTagsToRemove = tagsToRemove.concat(
+        labels
+          .filter(
+            (tag) =>
+              tag.checked !== 'on' &&
+              selectedTags.includes(tag.label) &&
+              !tagsToAdd.includes(tag.label)
+          )
+          .map((tag) => tag.label)
+      );
+
       updateTagsHook.bulkUpdateTags(
         agents!,
-        tagsToAdd,
-        tagsToRemove,
+        updatedTagsToAdd,
+        updatedTagsToRemove,
         (hasCompleted) => handleTagsUpdated(tagsToAdd, tagsToRemove, hasCompleted),
         successMessage,
         errorMessage

@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -29,17 +30,18 @@ import { Filter, Query } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldStats } from '@kbn/unified-field-list-plugin/public';
+import { AddFieldFilterHandler, FieldStats } from '@kbn/unified-field-list-plugin/public';
+import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
-import { DatasourceDataPanelProps, DataType } from '../types';
+import { DatasourceDataPanelProps, DataType, DraggedField } from '../types';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 import type { IndexPattern, IndexPatternField } from '../types';
-import type { DraggedField } from './types';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 import type { LensAppServices } from '../app_plugin/types';
 import { debouncedComponent } from '../debounced_component';
 import { getFieldType } from './pure_utils';
+import { combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -320,6 +322,21 @@ function FieldItemPopoverContents(props: FieldItemProps) {
   } = props;
   const services = useKibana<LensAppServices>().services;
 
+  const onAddFilter: AddFieldFilterHandler = useCallback(
+    (clickedField, values, operation) => {
+      const filterManager = services.data.query.filterManager;
+      const newFilters = generateFilters(
+        filterManager,
+        clickedField,
+        values,
+        operation,
+        indexPattern
+      );
+      filterManager.addFilters(newFilters);
+    },
+    [indexPattern, services.data.query.filterManager]
+  );
+
   const panelHeader = (
     <FieldPanelHeader
       indexPatternId={indexPattern.id}
@@ -330,6 +347,40 @@ function FieldItemPopoverContents(props: FieldItemProps) {
       removeField={removeField}
     />
   );
+
+  const exploreInDiscover = useMemo(() => {
+    const meta = {
+      id: indexPattern.id,
+      columns: [field.name],
+      filters: {
+        enabled: {
+          lucene: [],
+          kuery: [],
+        },
+        disabled: {
+          lucene: [],
+          kuery: [],
+        },
+      },
+    };
+    const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+      query,
+      filters,
+      meta,
+      [indexPattern],
+      getEsQueryConfig(services.uiSettings)
+    );
+    if (!services.discover || !services.application.capabilities.discover.show) {
+      return;
+    }
+    return services.discover.locator!.getRedirectUrl({
+      dataViewSpec: indexPattern?.spec,
+      timeRange: services.data.query.timefilter.timefilter.getTime(),
+      filters: newFilters,
+      query: newQuery,
+      columns: meta.columns,
+    });
+  }, [field.name, filters, indexPattern, query, services]);
 
   if (hideDetails) {
     return panelHeader;
@@ -345,6 +396,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
         fromDate={dateRange.fromDate}
         toDate={dateRange.toDate}
         dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
+        onAddFilter={onAddFilter}
         field={field as DataViewField}
         data-test-subj="lnsFieldListPanel"
         overrideMissingContent={(params) => {
@@ -387,6 +439,21 @@ function FieldItemPopoverContents(props: FieldItemProps) {
           return params.element;
         }}
       />
+      {exploreInDiscover && field.type !== 'geo_point' && field.type !== 'geo_shape' && (
+        <EuiPopoverFooter>
+          <EuiButton
+            fullWidth
+            size="s"
+            href={exploreInDiscover}
+            target="_blank"
+            data-test-subj={`lnsFieldListPanel-exploreInDiscover-${field.name}`}
+          >
+            {i18n.translate('xpack.lens.indexPattern.fieldExploreInDiscover', {
+              defaultMessage: 'Explore values in Discover',
+            })}
+          </EuiButton>
+        </EuiPopoverFooter>
+      )}
     </>
   );
 }

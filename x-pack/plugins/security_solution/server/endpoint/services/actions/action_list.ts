@@ -92,8 +92,8 @@ export const getActionListByStatus = async ({
     userIds,
     commands,
     statuses,
-    // for size 20 -> page 1: (0, 19), page 2: (20,39) ...etc
-    data: actionDetailsByStatus.slice((page - 1) * size, size * page - 1),
+    // for size 20 -> page 1: (0, 20), page 2: (20, 40) ...etc
+    data: actionDetailsByStatus.slice((page - 1) * size, size * page),
     total: actionDetailsByStatus.length,
   };
 };
@@ -251,7 +251,7 @@ const getActionDetailsList = async ({
   });
 
   // compute action details list for each action id
-  const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
+  const actionDetails: ActionListApiResponse['data'] = normalizedActionRequests.map((action) => {
     // pick only those responses that match the current action id
     const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
       categorizedResponse.type === 'response'

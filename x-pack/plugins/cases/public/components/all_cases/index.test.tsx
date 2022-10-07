@@ -15,8 +15,7 @@ import {
   noCreateCasesPermissions,
 } from '../../common/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
-import { useGetCasesStatus } from '../../containers/use_get_cases_status';
+import { connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -33,13 +32,12 @@ jest.mock('../../containers/use_get_action_license', () => {
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_cases');
-jest.mock('../../containers/use_get_cases_status');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../api');
 
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
-const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
@@ -49,7 +47,6 @@ describe('AllCases', () => {
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
   const setSelectedCases = jest.fn();
-  const fetchCasesStatus = jest.fn();
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -57,13 +54,6 @@ describe('AllCases', () => {
     setFilters,
     setQueryParams,
     setSelectedCases,
-  };
-
-  const defaultCasesStatus = {
-    ...casesStatus,
-    fetchCasesStatus,
-    isError: false,
-    isLoading: false,
   };
 
   const defaultActionLicense = {
@@ -75,7 +65,6 @@ describe('AllCases', () => {
   beforeAll(() => {
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
-    useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);
 
@@ -142,8 +131,6 @@ describe('AllCases', () => {
   });
 
   it('should render the loading spinner when loading stats', async () => {
-    useGetCasesStatusMock.mockReturnValue({ ...defaultCasesStatus, isLoading: true });
-
     const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {

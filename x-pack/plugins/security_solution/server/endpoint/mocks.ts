@@ -158,6 +158,7 @@ export const createMockEndpointAppContextServiceStartContract =
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
       featureUsageService: createFeatureUsageServiceMock(),
+      experimentalFeatures: createMockConfig().experimentalFeatures,
     };
   };
 

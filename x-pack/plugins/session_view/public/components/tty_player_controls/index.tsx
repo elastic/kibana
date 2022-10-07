@@ -75,7 +75,7 @@ export const TTYPlayerControls = ({
   }, [onSeekLine]);
 
   const seekToEnd = useCallback(() => {
-    onSeekLine(linesLength);
+    onSeekLine(linesLength - 1);
   }, [linesLength, onSeekLine]);
 
   const seekToPrevProcess = useCallback(() => {

@@ -9,10 +9,12 @@ import {
   IngestPutPipelineRequest,
   IngestSimulateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+
 import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
+import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { deleteConnectorById } from '../../lib/connectors/delete_connector';
 
@@ -24,10 +26,13 @@ import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
+import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
+import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
+import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import {
@@ -293,9 +298,15 @@ export function registerIndexRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
-      const pipelines = await getCustomPipelines(indexName, client);
+      const [defaultPipeline, customPipelines] = await Promise.all([
+        getPipeline(DEFAULT_PIPELINE_NAME, client),
+        getCustomPipelines(indexName, client),
+      ]);
       return response.ok({
-        body: pipelines,
+        body: {
+          ...defaultPipeline,
+          ...customPipelines,
+        },
         headers: { 'content-type': 'application/json' },
       });
     })
@@ -360,7 +371,7 @@ export function registerIndexRoutes({
           pipelineName,
           modelId,
           sourceField,
-          destinationField || modelId,
+          destinationField,
           client.asCurrentUser
         );
       } catch (error) {
@@ -368,7 +379,11 @@ export function registerIndexRoutes({
         if ((error as Error).message === ErrorCode.PIPELINE_ALREADY_EXISTS) {
           return createError({
             errorCode: (error as Error).message as ErrorCode,
-            message: 'Pipeline already exists',
+            message: `
+              A pipeline with the name "${getPrefixedInferencePipelineProcessorName(pipelineName)}"
+              already exists. Pipelines names are unique within a deployment. Consider adding the
+              index name for uniqueness.
+            `,
             response,
             statusCode: 409,
           });
@@ -512,6 +527,30 @@ export function registerIndexRoutes({
     })
   );
 
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/errors',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      const errors = await getMlInferenceErrors(indexName, client.asCurrentUser);
+
+      return response.ok({
+        body: {
+          errors,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
   router.put(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
@@ -609,6 +648,28 @@ export function registerIndexRoutes({
         // otherwise, let the default handler wrap it
         throw error;
       }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/history',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      const history = await fetchMlInferencePipelineHistory(client.asCurrentUser, indexName);
+
+      return response.ok({
+        body: history,
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 }

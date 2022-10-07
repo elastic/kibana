@@ -96,18 +96,26 @@ const TopNav = ({
     [doReload]
   );
 
+  const uiStateJSON = useMemo(() => vis.uiState.toJSON(), [vis.uiState]);
   useEffect(() => {
     const asyncGetTriggerContext = async () => {
       if (vis.type.navigateToLens) {
         const triggerConfig = await vis.type.navigateToLens(
-          vis.params,
-          services.data.query.timefilter.timefilter.getAbsoluteTime()
+          vis,
+          services.data.query.timefilter.timefilter
         );
         setEditInLensConfig(triggerConfig);
       }
     };
     asyncGetTriggerContext();
-  }, [services.data.query.timefilter.timefilter, vis.params, vis.type]);
+  }, [
+    services.data.query.timefilter.timefilter,
+    vis,
+    vis.type,
+    vis.params,
+    uiStateJSON?.vis,
+    vis.data.indexPattern,
+  ]);
 
   const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
   const config = useMemo(() => {

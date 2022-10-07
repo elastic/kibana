@@ -11,7 +11,7 @@ import { layerTypes } from '../../../common';
 import { metricLabel, MetricVisualizationState, supportedDataTypes } from './visualization';
 
 const MAX_BUCKETED_COLUMNS = 1;
-const MAX_METRIC_COLUMNS = 1;
+const MAX_METRIC_COLUMNS = 2; // primary and secondary metric
 
 const hasLayerMismatch = (keptLayerIds: string[], table: TableSuggestion) =>
   keptLayerIds.length > 1 || (keptLayerIds.length && table.layerId !== keptLayerIds[0]);

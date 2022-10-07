@@ -62,6 +62,7 @@ export interface ActionAccordionFormProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
+  hideActionHeader?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -85,6 +86,7 @@ export const ActionForm = ({
   actionTypeRegistry,
   recoveryActionGroup,
   isActionGroupDisabledForActionType,
+  hideActionHeader,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -295,15 +297,19 @@ export const ActionForm = ({
     </SectionLoading>
   ) : (
     <>
-      <EuiTitle size="s">
-        <h4>
-          <FormattedMessage
-            defaultMessage="Actions"
-            id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="m" />
+      {!hideActionHeader && (
+        <>
+          <EuiTitle size="s">
+            <h4>
+              <FormattedMessage
+                defaultMessage="Actions"
+                id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {actionTypesIndex &&
         actions.map((actionItem: RuleAction, index: number) => {
           const actionConnector = connectors.find((field) => field.id === actionItem.id);

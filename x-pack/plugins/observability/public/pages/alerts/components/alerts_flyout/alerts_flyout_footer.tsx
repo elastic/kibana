@@ -18,18 +18,12 @@ export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { i
   const { http } = services;
   const prepend = http?.basePath.prepend;
   const getAlertDetailsButton = () => {
-    if (!config.unsafe.alertDetails.enabled || !alert) return <></>;
+    if (!config?.unsafe?.alertDetails.enabled || !alert) return <></>;
     return (
       <EuiFlexItem grow={false}>
         <EuiButton
           href={
-            prepend &&
-            prepend(
-              paths.observability.alertDetails(
-                alert.fields['kibana.alert.uuid'],
-                alert.fields['kibana.alert.rule.uuid']
-              )
-            )
+            prepend && prepend(paths.observability.alertDetails(alert.fields['kibana.alert.uuid']))
           }
           data-test-subj="alertsFlyoutAlertDetailsButton"
           fill

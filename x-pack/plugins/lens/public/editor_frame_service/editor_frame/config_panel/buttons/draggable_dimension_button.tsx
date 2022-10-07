@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useContext, ReactElement } from 'react';
+import { isDraggedField } from '../../../../utils';
 import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 import {
   Datasource,
@@ -14,23 +15,20 @@ import {
   DropType,
   DatasourceLayers,
   IndexPatternMap,
+  DragDropOperation,
+  Visualization,
 } from '../../../../types';
 import {
   getCustomDropTarget,
   getAdditionalClassesOnDroppable,
   getAdditionalClassesOnEnter,
-  getDropProps,
 } from './drop_targets_utils';
 
 export function DraggableDimensionButton({
-  layerId,
-  label,
-  accessorIndex,
-  groupIndex,
-  layerIndex,
-  columnId,
+  order,
   group,
   onDrop,
+  activeVisualization,
   onDragStart,
   onDragEnd,
   children,
@@ -39,100 +37,82 @@ export function DraggableDimensionButton({
   datasourceLayers,
   registerNewButtonRef,
   indexPatterns,
+  target,
 }: {
-  layerId: string;
-  groupIndex: number;
-  layerIndex: number;
+  target: DragDropOperation & {
+    id: string;
+    humanData: {
+      label: string;
+      groupLabel: string;
+      position: number;
+      layerNumber: number;
+    };
+  };
+  order: [2, number, number, number];
   onDrop: (source: DragDropIdentifier, dropTarget: DragDropIdentifier, dropType?: DropType) => void;
   onDragStart: () => void;
   onDragEnd: () => void;
+  activeVisualization: Visualization<unknown, unknown>;
   group: VisualizationDimensionGroupConfig;
-  label: string;
   children: ReactElement;
   layerDatasource?: Datasource<unknown, unknown>;
   datasourceLayers: DatasourceLayers;
   state: unknown;
-  accessorIndex: number;
-  columnId: string;
   registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
   indexPatterns: IndexPatternMap;
 }) {
   const { dragging } = useContext(DragContext);
 
-  const sharedDatasource =
-    !isOperation(dragging) ||
-    datasourceLayers?.[dragging.layerId]?.datasourceId === datasourceLayers?.[layerId]?.datasourceId
-      ? layerDatasource
-      : undefined;
+  let getDropProps;
 
-  const dropProps = getDropProps(
-    {
-      state,
-      source: dragging,
-      target: {
-        layerId,
-        columnId,
-        groupId: group.groupId,
-        filterOperations: group.filterOperations,
-        prioritizedOperation: group.prioritizedOperation,
-      },
-      indexPatterns,
-    },
-    sharedDatasource
-  );
+  if (dragging) {
+    if (!layerDatasource) {
+      getDropProps = activeVisualization.getDropProps;
+    } else if (
+      isDraggedField(dragging) ||
+      (isOperation(dragging) &&
+        layerDatasource &&
+        datasourceLayers?.[dragging.layerId]?.datasourceId ===
+          datasourceLayers?.[target.layerId]?.datasourceId)
+    ) {
+      getDropProps = layerDatasource.getDropProps;
+    }
+  }
 
-  const dropTypes = dropProps?.dropTypes;
-  const nextLabel = dropProps?.nextLabel;
+  const { dropTypes, nextLabel } = getDropProps?.({
+    state,
+    source: dragging,
+    target,
+    indexPatterns,
+  }) || { dropTypes: [], nextLabel: '' };
+
   const canDuplicate = !!(
-    dropTypes &&
-    (dropTypes.includes('replace_duplicate_incompatible') ||
-      dropTypes.includes('replace_duplicate_compatible'))
+    dropTypes.includes('replace_duplicate_incompatible') ||
+    dropTypes.includes('replace_duplicate_compatible')
   );
 
   const canSwap = !!(
-    dropTypes &&
-    (dropTypes.includes('swap_incompatible') || dropTypes.includes('swap_compatible'))
+    dropTypes.includes('swap_incompatible') || dropTypes.includes('swap_compatible')
   );
 
   const canCombine = Boolean(
-    dropTypes &&
-      (dropTypes.includes('combine_compatible') ||
-        dropTypes.includes('field_combine') ||
-        dropTypes.includes('combine_incompatible'))
+    dropTypes.includes('combine_compatible') ||
+      dropTypes.includes('field_combine') ||
+      dropTypes.includes('combine_incompatible')
   );
 
   const value = useMemo(
     () => ({
-      columnId,
-      groupId: group.groupId,
-      layerId,
-      id: columnId,
-      filterOperations: group.filterOperations,
+      ...target,
       humanData: {
+        ...target.humanData,
         canSwap,
         canDuplicate,
         canCombine,
-        label,
-        groupLabel: group.groupLabel,
-        position: accessorIndex + 1,
         nextLabel: nextLabel || '',
-        layerNumber: layerIndex + 1,
       },
     }),
-    [
-      columnId,
-      group.groupId,
-      accessorIndex,
-      layerId,
-      label,
-      group.groupLabel,
-      nextLabel,
-      group.filterOperations,
-      canDuplicate,
-      canSwap,
-      canCombine,
-      layerIndex,
-    ]
+    [target, nextLabel, canDuplicate, canSwap, canCombine]
   );
 
   const reorderableGroup = useMemo(
@@ -144,8 +124,8 @@ export function DraggableDimensionButton({
   );
 
   const registerNewButtonRefMemoized = useCallback(
-    (el) => registerNewButtonRef(columnId, el),
-    [registerNewButtonRef, columnId]
+    (el) => registerNewButtonRef(target.columnId, el),
+    [registerNewButtonRef, target.columnId]
   );
 
   const handleOnDrop = useCallback(
@@ -162,7 +142,7 @@ export function DraggableDimensionButton({
         getCustomDropTarget={getCustomDropTarget}
         getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
-        order={[2, layerIndex, groupIndex, accessorIndex]}
+        order={order}
         draggable
         dragType={isOperation(dragging) ? 'move' : 'copy'}
         dropTypes={dropTypes}

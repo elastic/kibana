@@ -179,9 +179,7 @@ export const loadPrebuiltDetectionRules = () => {
  * load prebuilt rules by clicking button on page header
  */
 export const loadPrebuiltDetectionRulesFromHeaderBtn = () => {
-  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN)
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.exist');
+  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click().should('not.exist');
 };
 
 export const openIntegrationsPopover = () => {
@@ -253,9 +251,37 @@ export const sortByEnabledRules = () => {
   cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
 };
 
+/**
+ * Because the Rule Management page is relatively slow, in order to avoid timeouts and flakiness,
+ * we almost always want to wait until the Rules table is "loaded" before we do anything with it.
+ *
+ * This task should be sufficient for the vast majority of the tests. It waits for the table
+ * to show up on the page, but doesn't wait until it is fully loaded and filled with rows.
+ *
+ * @example
+ * beforeEach(() => {
+ *   visit(DETECTIONS_RULE_MANAGEMENT_URL); // returns on "load" event, still lots of work to do
+ *   waitForRulesTableToShow(); // a lot has done in React and the table shows up on the page
+ * });
+ */
+export const waitForRulesTableToShow = () => {
+  // Wait up to 5 minutes for the table to show up as in CI containers this can be very slow
+  cy.get(RULES_TABLE, { timeout: 300000 }).should('exist');
+};
+
+/**
+ * Because the Rule Management page is relatively slow, in order to avoid timeouts and flakiness,
+ * we almost always want to wait until the Rules table is "loaded" before we do anything with it.
+ *
+ * This task can be needed for some tests that e.g. check the table load/refetch/pagination logic.
+ * It waits for the table's own loading indicator to show up and disappear.
+ *
+ * NOTE: Normally, we should not rely on loading indicators in tests, because due to their
+ * dynamic nature it's possible to introduce race conditions and flakiness.
+ */
 export const waitForRulesTableToBeLoaded = () => {
-  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('exist');
   // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
+  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('exist');
   cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 

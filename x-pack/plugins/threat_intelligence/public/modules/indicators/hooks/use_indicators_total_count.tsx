@@ -12,8 +12,8 @@ import {
   isCompleteResponse,
 } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import type { RawIndicatorsResponse } from './use_indicators';
 import { useSourcererDataView } from './use_sourcerer_data_view';
+import type { RawIndicatorsResponse } from '../services/fetch_indicators';
 
 export const useIndicatorsTotalCount = () => {
   const {

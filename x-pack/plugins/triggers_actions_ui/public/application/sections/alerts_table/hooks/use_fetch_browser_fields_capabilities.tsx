@@ -49,13 +49,7 @@ export const useFetchBrowserFieldCapabilities = ({
   }, [featureIds, http, toasts]);
 
   useEffect(() => {
-    if (featureIds.includes(INVALID_FEATURE_ID)) {
-      setIsLoading(false);
-    }
-  }, [featureIds]);
-
-  useEffect(() => {
-    if (isLoading !== undefined) return;
+    if (isLoading !== undefined || featureIds.includes(INVALID_FEATURE_ID)) return;
 
     setIsLoading(true);
 
@@ -67,7 +61,7 @@ export const useFetchBrowserFieldCapabilities = ({
     };
 
     callApi();
-  }, [getBrowserFieldInfo, isLoading]);
+  }, [getBrowserFieldInfo, isLoading, featureIds]);
 
   return [isLoading, browserFields];
 };

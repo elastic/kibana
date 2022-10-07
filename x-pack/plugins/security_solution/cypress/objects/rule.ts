@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { Throttle } from '@kbn/securitysolution-io-ts-alerting-types';
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 import type { FullResponseSchema } from '../../common/detection_engine/schemas/request';
+import type { Connectors } from './connector';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
@@ -36,6 +38,11 @@ interface Interval {
   type: string;
 }
 
+export interface Actions {
+  throttle: Throttle;
+  connectors: Connectors[];
+}
+
 export type RuleDataSource =
   | { type: 'indexPatterns'; index: string[] }
   | { type: 'dataView'; dataView: string };
@@ -46,20 +53,21 @@ export interface CustomRule {
   description: string;
   dataSource: RuleDataSource;
   interval?: string;
-  severity: string;
-  riskScore: string;
-  tags: string[];
+  severity?: string;
+  riskScore?: string;
+  tags?: string[];
   timelineTemplate?: string;
-  referenceUrls: string[];
-  falsePositivesExamples: string[];
-  mitre: Mitre[];
-  note: string;
-  runsEvery: Interval;
-  lookBack: Interval;
-  timeline: CompleteTimeline;
-  maxSignals: number;
+  referenceUrls?: string[];
+  falsePositivesExamples?: string[];
+  mitre?: Mitre[];
+  note?: string;
+  runsEvery?: Interval;
+  lookBack?: Interval;
+  timeline?: CompleteTimeline;
+  maxSignals?: number;
   buildingBlockType?: string;
   exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
+  actions?: Actions;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -229,6 +237,15 @@ export const getNewRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+});
+
+export const getSimpleCustomQueryRule = (): CustomRule => ({
+  customQuery: 'host.name: *',
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
+  name: 'New Rule Test',
+  description: 'The new rule description.',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
 });
 
 export const getBuildingBlockRule = (): CustomRule => ({
@@ -489,7 +506,7 @@ export const getEditedRule = (): CustomRule => ({
   ...getExistingRule(),
   severity: 'Medium',
   description: 'Edited Rule description',
-  tags: [...getExistingRule().tags, 'edited'],
+  tags: [...(getExistingRule().tags || []), 'edited'],
 });
 
 export const expectedExportedRule = (

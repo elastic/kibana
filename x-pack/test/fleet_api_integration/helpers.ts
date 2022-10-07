@@ -69,6 +69,7 @@ export async function generateAgent(
 
   await es.index({
     index: '.fleet-agents',
+    id,
     body: {
       id,
       active: true,
@@ -79,6 +80,7 @@ export async function generateAgent(
         elastic: {
           agent: {
             version,
+            upgradeable: true,
           },
         },
       },

@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EndpointActionDataParameterTypes } from '../../../../common/endpoint/types';
+import type { ResponseActionParametersWithPidOrEntityId } from '../../../../common/endpoint/types';
 
 export const parsedPidOrEntityIdParameter = (parameters: {
   pid?: string[];
   entityId?: string[];
-}): EndpointActionDataParameterTypes => {
+}): ResponseActionParametersWithPidOrEntityId => {
   if (parameters.pid) {
     return { pid: Number(parameters.pid[0]) };
-  } else if (parameters.entityId) {
-    return { entity_id: parameters.entityId[0] };
   }
 
-  return undefined;
+  return {
+    entity_id: parameters?.entityId?.[0] ?? '',
+  };
 };

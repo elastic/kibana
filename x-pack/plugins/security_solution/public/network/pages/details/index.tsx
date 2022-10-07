@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
+import { buildEsQuery } from '@kbn/es-query';
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../common/store/inputs/constants';
@@ -33,7 +34,6 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { useNetworkDetails, ID } from '../../containers/details';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
-import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
@@ -103,23 +103,34 @@ const NetworkDetailsComponent: React.FC = () => {
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const ip = decodeIpv6(detailName);
 
-  const queryFilters = useMemo(
-    () => [...getNetworkDetailsPageFilter(ip), ...filters],
-    [filters, ip]
-  );
+  const [rawFilteredQuery, kqlError] = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          indexPattern,
+          [query],
+          [...getNetworkDetailsPageFilter(ip), ...filters],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (e) {
+      return [undefined, e];
+    }
+  }, [filters, indexPattern, ip, query, uiSettings]);
 
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: getEsQueryConfig(uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: queryFilters,
+  const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
+  useInvalidFilterQuery({
+    id: ID,
+    filterQuery: stringifiedAdditionalFilters,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
   });
-
-  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [loading, { id, inspect, networkDetails, refetch }] = useNetworkDetails({
     skip: isInitializing,
-    filterQuery,
+    filterQuery: stringifiedAdditionalFilters,
     indexNames: selectedPatterns,
     ip,
   });
@@ -141,8 +152,8 @@ const NetworkDetailsComponent: React.FC = () => {
 
   // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
   const shouldSkip = useMemo(
-    () => isInitializing || filterQuery === undefined,
-    [isInitializing, filterQuery]
+    () => isInitializing || rawFilteredQuery === undefined,
+    [isInitializing, rawFilteredQuery]
   );
 
   const entityFilter = useMemo(
@@ -204,12 +215,17 @@ const NetworkDetailsComponent: React.FC = () => {
               <>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
+                    <AlertsByStatus
+                      signalIndexName={signalIndexName}
+                      entityFilter={entityFilter}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -225,7 +241,7 @@ const NetworkDetailsComponent: React.FC = () => {
               ip={ip}
               endDate={to}
               startDate={from}
-              filterQuery={filterQuery}
+              filterQuery={stringifiedAdditionalFilters}
               indexNames={selectedPatterns}
               skip={shouldSkip}
               setQuery={setQuery}

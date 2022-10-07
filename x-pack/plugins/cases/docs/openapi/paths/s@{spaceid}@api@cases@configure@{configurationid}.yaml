@@ -9,7 +9,6 @@ patch:
     connector before you can use it in your cases. Refer to the add connectors API.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: ../components/parameters/configuration_id.yaml

@@ -237,13 +237,14 @@ export async function fetchCategories(
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function getInfo(name: string, version: string, options: { cache?: boolean } = {}) {
-  const cache = options.cache ?? true;
+export async function getInfo(name: string, version: string) {
   return withPackageSpan('Fetch package info', async () => {
     let packageInfo = getPackageInfo({ name, version });
     if (!packageInfo) {
       packageInfo = await fetchInfo(name, version);
-      if (cache) setPackageInfo({ name, version, packageInfo });
+      // only cache registry pkg info for integration pkgs because
+      // input type packages must get their pkg info from the archive
+      if (packageInfo.type === 'integration') setPackageInfo({ name, version, packageInfo });
     }
     return packageInfo as RegistryPackage;
   });
@@ -324,7 +325,7 @@ export async function fetchArchiveBuffer({
   verificationResult?: PackageVerificationResult;
 }> {
   const logger = appContextService.getLogger();
-  const { download: archivePath } = await getInfo(pkgName, pkgVersion, { cache: false });
+  const { download: archivePath } = await getInfo(pkgName, pkgVersion);
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
   if (shouldVerify) {
@@ -352,9 +353,7 @@ export async function getPackageArchiveSignatureOrUndefined({
   pkgVersion: string;
   logger: Logger;
 }): Promise<string | undefined> {
-  const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion, {
-    cache: false,
-  });
+  const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion);
 
   if (!signaturePath) {
     logger.debug(

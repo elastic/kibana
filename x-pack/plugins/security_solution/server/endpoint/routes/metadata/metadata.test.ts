@@ -285,9 +285,7 @@ describe('test endpoint routes', () => {
                                   bool: {
                                     must_not: {
                                       bool: {
-                                        should: [
-                                          { match: { 'united.agent.upgrade_status': 'completed' } },
-                                        ],
+                                        should: [{ exists: { field: 'united.agent.upgraded_at' } }],
                                         minimum_should_match: 1,
                                       },
                                     },

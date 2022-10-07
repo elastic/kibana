@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import jestExpect from 'expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { readFileSync } from 'fs';
@@ -123,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly set cookie and authenticate user', async () => {
-      const response = await supertest
+      let response = await supertest
         .get('/security/account')
         .ca(CA_CERT)
         .pfx(FIRST_CLIENT_CERT)
@@ -136,29 +137,32 @@ export default function ({ getService }: FtrProviderContext) {
       checkCookieIsSet(sessionCookie);
 
       // Cookie should be accepted.
-      await supertest
+      response = await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .ca(CA_CERT)
         .pfx(FIRST_CLIENT_CERT)
         .set('Cookie', sessionCookie.cookieString())
-        .expect(200, {
-          username: 'first_client',
-          roles: ['kibana_admin'],
-          full_name: null,
-          email: null,
-          enabled: true,
-          metadata: {
-            pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana_system',
-            pki_dn: 'CN=first_client',
-          },
-          authentication_realm: { name: 'pki1', type: 'pki' },
-          lookup_realm: { name: 'pki1', type: 'pki' },
-          authentication_provider: { name: 'pki', type: 'pki' },
-          authentication_type: 'token',
-          elastic_cloud_user: false,
-        });
+        .expect(200);
+
+      jestExpect(response.body).toEqual({
+        username: 'first_client',
+        roles: ['kibana_admin'],
+        full_name: null,
+        email: null,
+        enabled: true,
+        metadata: {
+          pki_delegated_by_realm: 'reserved',
+          pki_delegated_by_user: 'kibana_system',
+          pki_dn: 'CN=first_client',
+        },
+        authentication_realm: { name: 'pki1', type: 'pki' },
+        lookup_realm: { name: 'pki1', type: 'pki' },
+        authentication_provider: { name: 'pki', type: 'pki' },
+        authentication_type: 'token',
+        elastic_cloud_user: false,
+        profile_uid: jestExpect.any(String),
+      });
     });
 
     it('should update session if new certificate is provided', async () => {
@@ -180,23 +184,26 @@ export default function ({ getService }: FtrProviderContext) {
         .pfx(SECOND_CLIENT_CERT)
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
-        .expect(200, {
-          username: 'second_client',
-          roles: [],
-          full_name: null,
-          email: null,
-          enabled: true,
-          metadata: {
-            pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana_system',
-            pki_dn: 'CN=second_client',
-          },
-          authentication_realm: { name: 'pki1', type: 'pki' },
-          lookup_realm: { name: 'pki1', type: 'pki' },
-          authentication_provider: { name: 'pki', type: 'pki' },
-          authentication_type: 'realm',
-          elastic_cloud_user: false,
-        });
+        .expect(200);
+
+      jestExpect(response.body).toEqual({
+        username: 'second_client',
+        roles: [],
+        full_name: null,
+        email: null,
+        enabled: true,
+        metadata: {
+          pki_delegated_by_realm: 'reserved',
+          pki_delegated_by_user: 'kibana_system',
+          pki_dn: 'CN=second_client',
+        },
+        authentication_realm: { name: 'pki1', type: 'pki' },
+        lookup_realm: { name: 'pki1', type: 'pki' },
+        authentication_provider: { name: 'pki', type: 'pki' },
+        authentication_type: 'realm',
+        elastic_cloud_user: false,
+        profile_uid: jestExpect.any(String),
+      });
 
       checkCookieIsSet(parseCookie(response.headers['set-cookie'][0])!);
     });

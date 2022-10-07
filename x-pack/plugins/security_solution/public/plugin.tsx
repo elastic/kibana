@@ -60,6 +60,7 @@ import { ExperimentalFeaturesService } from './common/experimental_features_serv
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
+import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
 import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
@@ -244,6 +245,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         package: 'endpoint',
         view: 'package-policy-create',
         Component: LazyEndpointPolicyCreateExtension,
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-create-multi-step',
+        Component: LazyEndpointPolicyCreateMultiStepExtension,
       });
 
       registerExtension({

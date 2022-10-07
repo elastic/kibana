@@ -9,7 +9,8 @@
     "data",
     "navigation",
     "savedObjects",
-    "unifiedSearch"
+    "unifiedSearch",
+    "inspector"
   ],
   "optionalPlugins": [
     "home",

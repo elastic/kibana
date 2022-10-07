@@ -109,5 +109,9 @@ export type AnyColumnWithReferences =
 
 export type Column = AnyColumnWithReferences | AnyColumnWithSourceField | FiltersColumn;
 
-export type ColumnWithMeta<Col extends Column | {}, Meta extends {} | undefined = undefined> = Col &
-  (Meta extends undefined ? undefined : { meta: Meta });
+export type GenericColumnWithMeta<
+  Col extends Column | {},
+  Meta extends {} | unknown = undefined
+> = Col & (Meta extends undefined ? undefined : { meta: Meta });
+
+export type ColumnWithMeta = GenericColumnWithMeta<Column, unknown>;

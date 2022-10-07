@@ -17,8 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
 
-  // Failing: See https://github.com/elastic/kibana/issues/140547
-  describe.skip('cases deletion sub privilege', () => {
+  describe('cases deletion sub privilege', () => {
     before(async () => {
       await createUsersAndRoles(getService, users, roles);
       await PageObjects.security.forceLogout();
@@ -72,8 +71,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               await cases.casesTable.validateCasesTableHasNthRows(0);
             });
 
-            it(`User ${user.username} can delete a case using the trash icon in the table row`, async () => {
-              await cases.casesTable.deleteFirstListedCase();
+            it(`User ${user.username} can delete a case using the row actions`, async () => {
+              await cases.casesTable.deleteCase(0);
+              await cases.casesTable.waitForTableToFinishLoading();
+              await cases.casesTable.validateCasesTableHasNthRows(1);
             });
           });
         });
@@ -104,10 +105,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           describe('all cases list page', () => {
+            it(`User ${user.username} cannot delete cases using individual row actions`, async () => {
+              await cases.casesTable.openRowActions(0);
+              await testSubjects.missingOrFail('cases-bulk-action-delete');
+            });
+
             it(`User ${user.username} cannot delete cases using bulk actions or individual row trash icon`, async () => {
-              await testSubjects.missingOrFail('case-table-bulk-actions');
-              await testSubjects.missingOrFail('checkboxSelectAll');
-              await testSubjects.missingOrFail('action-delete');
+              await cases.casesTable.selectAllCasesAndOpenBulkActions();
+              await testSubjects.missingOrFail('cases-bulk-action-delete');
             });
           });
         });

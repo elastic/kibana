@@ -25,8 +25,9 @@
     "Elastic",
     "Cloud",
     "AWS",
-    "ML"
+    "ML",
+    "has_guide"
   ],
   "type": "machine_learning",
-  "version": 100
+  "version": 101
 }

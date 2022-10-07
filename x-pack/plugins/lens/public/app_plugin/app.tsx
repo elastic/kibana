@@ -6,7 +6,7 @@
  */
 
 import './app.scss';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -79,6 +79,8 @@ export function App({
     dashboardFeatureFlag,
   } = lensAppServices;
 
+  const saveAndExit = useRef<() => void>();
+
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = useCallback(
     (state: Partial<LensAppState>) => dispatch(setState(state)),
@@ -115,6 +117,7 @@ export function App({
     undefined
   );
   const [isGoBackToVizEditorModalVisible, setIsGoBackToVizEditorModalVisible] = useState(false);
+  const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
   const savedObjectId = (initialInput as LensByReferenceInput)?.savedObjectId;
 
   useEffect(() => {
@@ -261,6 +264,12 @@ export function App({
     initialContext,
   ]);
 
+  const switchDatasource = useCallback(() => {
+    if (saveAndExit && saveAndExit.current) {
+      saveAndExit.current();
+    }
+  }, []);
+
   const runSave = useCallback(
     (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
@@ -274,7 +283,9 @@ export function App({
           persistedDoc,
           onAppLeave,
           redirectTo,
+          switchDatasource,
           originatingApp: incomingState?.originatingApp,
+          textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
           ...lensAppServices,
         },
         saveProps,
@@ -284,6 +295,7 @@ export function App({
           if (newState) {
             dispatchSetState(newState);
             setIsSaveModalVisible(false);
+            setShouldCloseAndSaveTextBasedQuery(false);
           }
         },
         () => {
@@ -293,19 +305,20 @@ export function App({
       );
     },
     [
-      incomingState?.originatingApp,
+      dispatch,
       lastKnownDoc,
-      persistedDoc,
       getIsByValueMode,
       savedObjectsTagging,
       initialInput,
       redirectToOrigin,
+      persistedDoc,
       onAppLeave,
       redirectTo,
+      switchDatasource,
+      incomingState?.originatingApp,
+      shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,
-      dispatch,
-      setIsSaveModalVisible,
     ]
   );
 
@@ -392,6 +405,14 @@ export function App({
     [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
   );
 
+  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {
+    setIsSaveModalVisible(true);
+    setShouldCloseAndSaveTextBasedQuery(true);
+    saveAndExit.current = () => {
+      onSave();
+    };
+  }, []);
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp">
@@ -416,6 +437,7 @@ export function App({
           initialContext={initialContext}
           theme$={theme$}
           indexPatternService={indexPatternService}
+          onTextBasedSavedAndExit={onTextBasedSavedAndExit}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
