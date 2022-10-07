@@ -13,7 +13,7 @@ import { bulkRequestDiagnostics, requestDiagnostics } from './request_diagnostic
 
 describe('requestDiagnostics (singular)', () => {
   it('can request diagnostics for single agent', async () => {
-    const { soClient, esClient, agentInRegularDoc } = createClientMock();
+    const { esClient, agentInRegularDoc } = createClientMock();
     await requestDiagnostics(esClient, agentInRegularDoc._id);
 
     expect(esClient.create).toHaveBeenCalledWith(
