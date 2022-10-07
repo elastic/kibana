@@ -15,6 +15,7 @@ import {
   XYReferenceLineLayerConfig,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { Layer } from '..';
 import { ChartType } from '../..';
 import {
   CategoryAxis,
@@ -96,28 +97,22 @@ function getSeriesType(
   }
 
   // percentage chart should be stacked
-  if (isPercentage || (mode === 'stacked' && seriesType !== SeriesTypes.LINE)) {
-    seriesType = (seriesType + '_stacked') as XYDataLayerConfig['seriesType'];
+  // line stacked should convert to area stacked
+  if (isPercentage || mode === 'stacked') {
+    seriesType = ((seriesType !== SeriesTypes.LINE ? seriesType : SeriesTypes.AREA) +
+      '_stacked') as XYDataLayerConfig['seriesType'];
   }
 
   return seriesType;
 }
 
 function getDataLayers(
-  layers: Array<{
-    indexPatternId: string;
-    layerId: string;
-    columns: Column[];
-    columnOrder: never[];
-    seriesId: string;
-    isReferenceLineLayer: boolean;
-    collapseFn?: string;
-  }>,
+  layers: Layer[],
   series: SeriesParam[],
-  vis: Vis<VisParams>,
-  xColumn?: Column
+  vis: Vis<VisParams>
 ): XYDataLayerConfig[] {
   return layers.map((layer) => {
+    const xColumn = layer.columns.find((c) => c.isBucketed && !c.isSplit);
     const yAccessors = layer.columns.reduce<string[]>((acc, column) => {
       if (!column.isBucketed) {
         acc.push(column.columnId);
@@ -191,15 +186,7 @@ function getReferenceLineLayers(
 }
 
 export const getConfiguration = (
-  layers: Array<{
-    indexPatternId: string;
-    layerId: string;
-    columns: Column[];
-    columnOrder: never[];
-    seriesId: string;
-    isReferenceLineLayer: boolean;
-    collapseFn?: string;
-  }>,
+  layers: Layer[],
   series: SeriesParam[],
   vis: Vis<VisParams>
 ): XYConfiguration => {
@@ -225,8 +212,7 @@ export const getConfiguration = (
       ...getDataLayers(
         layers.filter((l) => !l.isReferenceLineLayer),
         series,
-        vis,
-        xColumn
+        vis
       ),
       ...getReferenceLineLayers(
         layers.filter((l) => l.isReferenceLineLayer),

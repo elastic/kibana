@@ -62,7 +62,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
   }
 
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1 || result.buckets.length > 1) {
+  if (result.metrics.length > 1 || result.buckets.all.length > 1) {
     return null;
   }
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
+import { AggBasedColumn, Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getVisSchemas,
@@ -17,6 +17,16 @@ import { getDataViewsStart } from '../services';
 import { getSeriesParams } from '../utils/get_series_params';
 import { getConfiguration } from './configurations';
 import { ConvertXYToLensVisualization } from './types';
+
+export interface Layer {
+  indexPatternId: string;
+  layerId: string;
+  columns: Column[];
+  columnOrder: never[];
+  seriesId: string;
+  isReferenceLineLayer: boolean;
+  collapseFn?: string;
+}
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {
@@ -96,7 +106,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
 
   const finalSeriesParams = updatedSeries ?? vis.params.seriesParams;
   const visibleSeries = finalSeriesParams.filter(
-    (param) => param.show && visSchemas.metric.some((m) => m.aggId === param.data.id)
+    (param) => param.show && visSchemas.metric.some((m) => m.aggId?.split('.')[0] === param.data.id)
   );
 
   const visibleYAxes = vis.params.valueAxes.filter((axis) =>
@@ -113,11 +123,16 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
 
   const indexPatternId = dataView.id!;
 
-  const layers = visibleSeries.map((s) => {
+  const layers = visibleSeries.reduce<Layer[]>((accLayers, s) => {
     const layerId = uuid();
-    const metrics = result.columns.filter((c) => c.meta.aggId === s.data.id);
-    const buckets = result.columns.filter((c) => {
+    const metrics = result.columns.filter((c) => c.meta.aggId.split('.')[0] === s.data.id);
+    const buckets = result.columns.reduce<AggBasedColumn[]>((acc, c) => {
       if (c.isBucketed) {
+        let bucketColumn = c;
+        // should change column id because each layer should includes its own columns (not use one column id for all layers)
+        if (accLayers.some((value) => value.columns.some((col) => col.columnId === c.columnId))) {
+          bucketColumn = { ...c, columnId: uuid() };
+        }
         if (c.isSplit) {
           // as each sibling pipeline agg can have different custom bucket we should get correct one for layer
           if (
@@ -125,17 +140,22 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
               result.buckets.customBuckets[key].includes(c.columnId)
             )
           ) {
-            return result.buckets.customBuckets[metrics[0].columnId] === c.columnId;
+            if (result.buckets.customBuckets[metrics[0].columnId] === c.columnId) {
+              acc.push(bucketColumn);
+            }
+            return acc;
           }
         }
 
-        return true;
+        acc.push(bucketColumn);
       }
-    });
+
+      return acc;
+    }, []);
     const collapseFn = Object.keys(result.bucketCollapseFn).find((key) =>
       result.bucketCollapseFn[key].includes(result.buckets.customBuckets[metrics[0].columnId])
     );
-    return {
+    accLayers.push({
       indexPatternId,
       layerId,
       columns: [...metrics, ...buckets].map(excludeMetaFromColumn),
@@ -143,8 +163,9 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       seriesId: s.data.id,
       collapseFn,
       isReferenceLineLayer: false,
-    };
-  });
+    });
+    return accLayers;
+  }, []);
 
   if (vis.params.thresholdLine.show) {
     layers.push({
