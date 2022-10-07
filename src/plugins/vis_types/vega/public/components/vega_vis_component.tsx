@@ -15,6 +15,7 @@ import { createVegaVisualization } from '../vega_visualization';
 import { VegaVisualizationDependencies } from '../plugin';
 import { VegaParser } from '../data_model/vega_parser';
 
+import { GlobalVegaVisStyles } from './vega_vis.styles';
 import './vega_vis.scss';
 
 interface VegaVisComponentProps {
@@ -85,12 +86,15 @@ export const VegaVisComponent = ({
   );
 
   return (
-    <EuiResizeObserver onResize={onContainerResize}>
-      {(resizeRef) => (
-        <div className="vgaVis__wrapper" ref={resizeRef}>
-          <div ref={chartDiv} />
-        </div>
-      )}
-    </EuiResizeObserver>
+    <>
+      <GlobalVegaVisStyles />
+      <EuiResizeObserver onResize={onContainerResize}>
+        {(resizeRef) => (
+          <div className="vgaVis__wrapper" ref={resizeRef}>
+            <div ref={chartDiv} />
+          </div>
+        )}
+      </EuiResizeObserver>
+    </>
   );
 };
