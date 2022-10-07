@@ -131,11 +131,11 @@ export class OpenInDiscoverDrilldown
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    const { getLocation } = await getDiscoverHelpersAsync();
-
     if (config.openInNewTab) {
       window.open(await this.getHref(config, context), '_blank');
     } else {
+      const { getLocation } = await getDiscoverHelpersAsync();
+
       const { app, path, state } = await getLocation({
         discover: this.deps.discover,
         dataViews: this.deps.dataViews(),
