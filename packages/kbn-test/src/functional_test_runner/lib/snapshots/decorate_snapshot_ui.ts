@@ -221,7 +221,7 @@ function expectToMatchInlineSnapshot(
 ) {
   const matcher = toMatchInlineSnapshot.bind(snapshotContext as any);
 
-  const result = arguments.length === 2 ? matcher(received) : matcher(received, _actual);
+  const result = matcher(received);
 
   // @ts-expect-error
   if (!result.pass) {
