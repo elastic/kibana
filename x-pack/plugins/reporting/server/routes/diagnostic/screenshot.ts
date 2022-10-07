@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
-import { lastValueFrom } from 'rxjs';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { lastValueFrom } from 'rxjs';
+import { DiagnosticResponse } from '.';
+import { incrementApiUsageCounter } from '..';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { generatePngObservable } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { DiagnosticResponse } from '.';
-import { incrementApiUsageCounter } from '..';
 
 const path = `${API_DIAGNOSE_URL}/screenshot`;
 
@@ -53,48 +53,40 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      return lastValueFrom(
-        generatePngObservable(reporting, logger, {
-          layout,
-          request: req,
-          browserTimezone: 'America/Los_Angeles',
-          urls: [hashUrl],
-        })
-          // Pipe is required to ensure that we can subscribe to it
-          .pipe()
-      )
-        .then((screenshot) => {
-          // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
-          if (screenshot.warnings.length) {
-            return res.ok({
-              body: {
-                success: false,
-                help: [],
-                logs: screenshot.warnings,
-              },
-            });
-          }
-          return res.ok({
-            body: {
-              success: true,
-              help: [],
-              logs: '',
-            } as DiagnosticResponse,
-          });
-        })
-        .catch((error) =>
-          res.ok({
-            body: {
-              success: false,
-              help: [
-                i18n.translate('xpack.reporting.diagnostic.screenshotFailureMessage', {
-                  defaultMessage: `We couldn't screenshot your Kibana install.`,
-                }),
-              ],
-              logs: error.message,
-            } as DiagnosticResponse,
+      let response: DiagnosticResponse = {
+        success: true,
+        help: [],
+        logs: '',
+      };
+      try {
+        const result = await lastValueFrom(
+          generatePngObservable(reporting, logger, {
+            layout,
+            request: req,
+            browserTimezone: 'America/Los_Angeles',
+            urls: [hashUrl],
           })
+            // Pipe is required to ensure that we can subscribe to it
+            .pipe()
         );
+
+        if (result.warnings.length) {
+          response.success = false;
+          response.logs = result.warnings.join('\n');
+        }
+      } catch (err) {
+        response = {
+          success: false,
+          help: [
+            i18n.translate('xpack.reporting.diagnostic.screenshotFailureMessage', {
+              defaultMessage: `We couldn't screenshot your Kibana install.`,
+            }),
+          ],
+          logs: err.message,
+        };
+      }
+
+      return res.ok({ body: response });
     })
   );
 };

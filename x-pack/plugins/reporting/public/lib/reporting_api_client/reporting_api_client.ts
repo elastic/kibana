@@ -41,6 +41,7 @@ export interface DiagnoseResponse {
   help: string[];
   success: boolean;
   logs: string;
+  capture: string;
 }
 
 interface IReportingAPI {
@@ -223,6 +224,7 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public verifyBrowser() {
     return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/browser`, {
+      // FIXME: asSystemRequest should only be for automatically-triggered requests
       asSystemRequest: true,
     });
   }

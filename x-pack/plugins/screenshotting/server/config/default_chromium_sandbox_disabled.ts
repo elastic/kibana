@@ -32,6 +32,7 @@ const distroSupportsUnprivilegedUsernamespaces = (distro: string) => {
   return true;
 };
 
+// FIXME: needs to take cpu architecture into account
 interface OsSummary {
   disableSandbox: boolean;
   os: { os: string; dist?: string; release?: string };
