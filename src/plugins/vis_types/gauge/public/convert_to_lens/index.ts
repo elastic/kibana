@@ -59,7 +59,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     timefilter,
     dataView,
     {
-      splits: ['group'],
+      unsupported: ['group'],
     },
     { dropEmptyRowsInDateHistogram: true, ...percentageModeConfig }
   );
@@ -69,7 +69,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
   }
 
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1 || result.buckets.length) {
+  if (result.metrics.length > 1) {
     return null;
   }
 

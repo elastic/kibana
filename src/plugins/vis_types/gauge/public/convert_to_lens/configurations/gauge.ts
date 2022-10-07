@@ -25,6 +25,7 @@ export const getConfigurationForGauge = (
     maxAccessor: string;
   }
 ): GaugeVisConfiguration => {
+  const showLabels = Boolean(params.gauge.labels.show);
   return {
     layerId,
     layerType: 'data',
@@ -33,8 +34,9 @@ export const getConfigurationForGauge = (
     minAccessor,
     maxAccessor,
     shape: 'horizontalBullet',
-    ticksPosition: 'auto',
-    labelMajorMode: 'auto',
+    ticksPosition: 'bands',
+    labelMajorMode: showLabels ? 'auto' : 'none',
     colorMode: palette ? 'palette' : 'none',
+    labelMinor: showLabels ? params.gauge.style.subText : undefined,
   };
 };
