@@ -80,7 +80,7 @@ export const proxyRequest = ({
     agent,
   });
 
-  req.on('response', (res) => {
+  req.once('response', (res) => {
     // Check if the request is to _mapping endpoint and if so, limit the response to 10MB. This is to
     // protect against large mapping responses that can cause the browser to hang.
     if (isMappingEndpoint(pathname)) {
@@ -100,6 +100,7 @@ export const proxyRequest = ({
 
       const source = res.pipe(limitedResponse);
       source.on('error', (err) => {
+        req.destroy();
         reject(err);
       });
 
