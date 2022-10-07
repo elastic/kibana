@@ -278,6 +278,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
         });
+
+        it('assigns multiple users', async () => {
+          await cases.singleCase.openAssigneesPopover();
+          await cases.common.setSearchTextInAssigneesPopover('case');
+          await cases.common.selectAllRowsInAssigneesPopover();
+
+          await cases.singleCase.closeAssigneesPopover();
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user2');
+        });
       });
 
       describe('logs in with default user and creates case before each', () => {

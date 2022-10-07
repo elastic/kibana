@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const replaceNewLinesWithSpace = (str: string) => str.replace(/\n/g, ' ');
@@ -17,6 +18,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
   const find = getService('find');
   const lensPage = getPageObject('lens');
   const retry = getService('retry');
+  const browser = getService('browser');
 
   return {
     async deleteCase() {
@@ -120,8 +122,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async closeAssigneesPopover() {
-      await testSubjects.click('case-refresh');
-      await header.waitUntilLoadingHasFinished();
+      await browser.pressKeys([Key.ESCAPE]);
     },
   };
 }
