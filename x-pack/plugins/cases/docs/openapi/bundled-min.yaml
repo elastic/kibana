@@ -1088,7 +1088,6 @@ components:
         comments:
           title: Case response properties for comments
           description: An array of comment objects for the case.
-          nullable: true
           type: array
           items:
             discriminator:
