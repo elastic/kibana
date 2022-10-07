@@ -7,4 +7,3 @@
  */
 
 export { getConfigurationForGauge } from './gauge';
-export { getConfigurationForGoal } from './goal';
