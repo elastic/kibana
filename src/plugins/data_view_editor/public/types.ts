@@ -20,10 +20,11 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import type {
   DataView,
-  DataViewsPublicPluginStart,
+  DataViewsServicePublic,
   INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
+import { DataViewEditorService } from './service';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
@@ -33,8 +34,9 @@ export interface DataViewEditorContext {
   notifications: NotificationsStart;
   application: ApplicationStart;
   overlays: OverlayStart;
-  dataViews: DataViewsPublicPluginStart;
+  dataViews: DataViewsServicePublic;
   searchClient: DataPublicPluginStart['search']['search'];
+  dataViewEditorService: DataViewEditorService;
 }
 
 /** @public */
@@ -87,7 +89,7 @@ export interface SetupPlugins {}
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
+  dataViews: DataViewsServicePublic;
 }
 
 export type CloseEditor = () => void;

@@ -6,15 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useRef, useMemo } from 'react';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useEffect, useCallback, useRef } from 'react';
+import {
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiLoadingSpinner,
+  EuiLink,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import {
-  DataViewField,
   DataViewsPublicPluginStart,
   INDEX_PATTERN_TYPE,
   MatchedItem,
@@ -27,11 +33,10 @@ import {
   useForm,
   useFormData,
   useKibana,
-  GetFieldsOptions,
   UseField,
 } from '../shared_imports';
 
-import { ensureMinimumTime, extractTimeFields, getMatchedIndices } from '../lib';
+import { ensureMinimumTime, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
 
 import { removeSpaces } from '../lib';
@@ -42,7 +47,6 @@ import {
   IndexPatternConfig,
   MatchedIndicesSet,
   FormInternal,
-  TimestampOption,
 } from '../types';
 
 import {
@@ -99,7 +103,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   showManagementLink,
 }: Props) => {
   const {
-    services: { application, http, dataViews, uiSettings, overlays },
+    services: { application, dataViews, uiSettings, overlays, dataViewEditorService },
   } = useKibana<DataViewEditorContext>();
 
   const canSave = dataViews.getCanSaveSync();
@@ -127,6 +131,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       if (!isValid) {
         return;
       }
+
+      const rollupIndicesCapabilities = dataViewEditorService.rollupIndicesCapabilities$.getValue();
 
       const indexPatternStub: DataViewSpec = {
         title: removeSpaces(formData.title),
@@ -171,130 +177,57 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
   ] = useFormData<FormInternal>({ form });
 
-  const currentLoadingTimestampFieldsRef = useRef(0);
   const currentLoadingMatchedIndicesRef = useRef(0);
 
-  const isLoadingSources$ = useRef(new BehaviorSubject<boolean>(true));
-  const isLoadingSources = useObservable(isLoadingSources$.current, true);
-
-  const loadingTimestampFields$ = useRef(new BehaviorSubject<boolean>(false));
-  const timestampFieldOptions$ = useRef(new Subject<TimestampOption[]>());
+  const isLoadingSources = useObservable(dataViewEditorService.isLoadingSources$, true);
 
   const loadingMatchedIndices$ = useRef(new BehaviorSubject<boolean>(false));
-  const matchedIndices$ = useRef(new Subject<MatchedIndicesSet>());
 
   const isLoadingDataViewNames$ = useRef(new BehaviorSubject<boolean>(true));
   const existingDataViewNames$ = useRef(new BehaviorSubject<string[]>([]));
   const isLoadingDataViewNames = useObservable(isLoadingDataViewNames$.current, true);
 
-  const rollupIndicesCapabilities$ = useRef(new BehaviorSubject<RollupIndicesCapsResponse>({}));
-  const rollupIndicesCapabilities = useObservable(rollupIndicesCapabilities$.current, {});
+  const rollupIndicesCapabilities = useObservable(
+    dataViewEditorService.rollupIndicesCapabilities$,
+    {}
+  );
 
   const rollupIndex$ = useRef(new BehaviorSubject<string | undefined>(undefined));
 
-  const loadTimestampFields = useCallback(
-    async (index: string) => {
-      const currentLoadingTimestampFieldsIdx = ++currentLoadingTimestampFieldsRef.current;
-      loadingTimestampFields$.current.next(true);
-      const getFieldsOptions: GetFieldsOptions = {
-        pattern: index,
-      };
-      if (type === INDEX_PATTERN_TYPE.ROLLUP) {
-        getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
-        getFieldsOptions.rollupIndex = rollupIndex$.current.getValue();
-      }
-
-      const fields = await ensureMinimumTime(dataViews.getFieldsForWildcard(getFieldsOptions));
-      const timestampOptions = extractTimeFields(fields as DataViewField[], requireTimestampField);
-      if (currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current) {
-        timestampFieldOptions$.current.next(timestampOptions);
-        loadingTimestampFields$.current.next(false);
-      }
-    },
-    [
-      dataViews,
-      requireTimestampField,
-      type,
-      rollupIndex$,
-      loadingTimestampFields$,
-      timestampFieldOptions$,
-    ]
-  );
-
-  const getRollupIndexCaps = useMemo(async () => {
-    let response: RollupIndicesCapsResponse = {};
-    try {
-      response = await http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
-    } catch (e) {
-      // Silently swallow failure responses such as expired trials
-    }
-    rollupIndicesCapabilities$.current.next(response);
-    return response;
-  }, [http]);
-
-  const getIsRollupIndex = useMemo(async () => {
-    const response = await getRollupIndexCaps;
-    return (indexName: string) => getRollupIndices(response).includes(indexName);
-  }, [getRollupIndexCaps]);
-
-  const loadIndices = useCallback(async () => {
-    const isRollupIndex = await getIsRollupIndex;
-    const allSrcs = await dataViews.getIndices({
-      isRollupIndex,
-      pattern: '*',
-      showAllIndices: allowHidden,
-    });
-    const matchedSet = await loadMatchedIndices(title, allowHidden, allSrcs, {
-      isRollupIndex,
-      dataViews,
-    });
-
-    isLoadingSources$.current.next(false);
-    const matchedIndices = getMatchedIndices(
-      allSrcs,
-      matchedSet.partialMatched,
-      matchedSet.exactMatched,
-      allowHidden
-    );
-    matchedIndices$.current.next(matchedIndices);
-  }, [dataViews, allowHidden, isLoadingSources$, matchedIndices$, title, getIsRollupIndex]);
-
-  const loadDataViewNames = useCallback(async () => {
-    const dataViewListItems = await dataViews.getIdsWithTitle(editData ? true : false);
-    const dataViewNames = dataViewListItems.map((item) => item.name || item.title);
-
-    existingDataViewNames$.current.next(
-      editData ? dataViewNames.filter((v) => v !== editData.name) : dataViewNames
-    );
-    isLoadingDataViewNames$.current.next(false);
-  }, [dataViews, editData]);
-
   // initial loading of indicies and data view names
   useEffect(() => {
-    const matchedIndiceSub = matchedIndices$.current.subscribe((matchedIndices) => {
-      if (matchedIndices.exactMatchedIndices.length) {
-        const timeFieldQuery = editData ? editData.title : title;
-        loadTimestampFields(removeSpaces(timeFieldQuery));
-      } else {
-        timestampFieldOptions$.current.next([]);
-      }
+    const matchedIndiceSub = dataViewEditorService.matchedIndices$.subscribe((matchedIndices) => {
+      //
+      const timeFieldQuery = editData ? editData.title : title;
+      dataViewEditorService.loadTimestampFields(
+        removeSpaces(timeFieldQuery),
+        type,
+        requireTimestampField,
+        rollupIndex$.current.getValue()
+      );
     });
 
-    loadIndices();
+    dataViewEditorService.loadIndices(title, allowHidden).then((matchedIndices) => {
+      dataViewEditorService.matchedIndices$.next(matchedIndices);
+    });
+
     // todo is this called when the title changes?
-    loadDataViewNames();
+    dataViewEditorService.loadDataViewNames(title).then((names) => {
+      existingDataViewNames$.current.next(names);
+      isLoadingDataViewNames$.current.next(false);
+    });
 
     return () => {
       matchedIndiceSub.unsubscribe();
     };
-  }, [editData, loadIndices, loadDataViewNames, loadTimestampFields, title, form]);
+  }, [editData, type, title, allowHidden, requireTimestampField, dataViewEditorService]);
 
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
-  // todo only used by title field. why?
+  // used in title field validation
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
-      const isRollupIndex = await getIsRollupIndex;
+      const isRollupIndex = await dataViewEditorService.getIsRollupIndex();
       let newRollupIndexName: string | undefined;
 
       const fetchIndices = async (query: string = '') => {
@@ -328,7 +261,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             rollupIndex$.current.next(undefined);
           }
 
-          matchedIndices$.current.next(matchedIndicesResult);
+          dataViewEditorService.matchedIndices$.next(matchedIndicesResult);
           loadingMatchedIndices$.current.next(false);
         }
 
@@ -341,10 +274,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
       dataViews,
       allowHidden,
       type,
-      getIsRollupIndex,
+      dataViewEditorService,
       rollupIndex$,
       isLoadingSources,
-      matchedIndices$,
       loadingMatchedIndices$,
     ]
   );
@@ -424,7 +356,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
               <TitleField
                 isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
                 refreshMatchedIndices={reloadMatchedIndices}
-                matchedIndices$={matchedIndices$.current}
+                matchedIndices$={dataViewEditorService.matchedIndices$}
                 rollupIndicesCapabilities={rollupIndicesCapabilities}
               />
             </EuiFlexItem>
@@ -433,10 +365,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <TimestampField
-                options$={timestampFieldOptions$.current}
-                isLoadingOptions$={loadingTimestampFields$.current}
+                options$={dataViewEditorService.timestampFieldOptions$}
+                isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
                 isLoadingMatchedIndices$={loadingMatchedIndices$.current}
-                matchedIndices$={matchedIndices$.current}
+                matchedIndices$={dataViewEditorService.matchedIndices$}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -471,7 +403,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             type={type}
             allowHidden={allowHidden}
             title={title}
-            matchedIndices$={matchedIndices$.current}
+            matchedIndices$={dataViewEditorService.matchedIndices$}
           />
         )}
       </FlyoutPanels.Item>
