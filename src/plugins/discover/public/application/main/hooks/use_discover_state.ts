@@ -89,7 +89,9 @@ export function useDiscoverState({
    * or dataView / savedSearch switch
    */
   useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync();
+    const stopSync = stateContainer.appStateContainer.initAndSync(
+      stateContainer.savedSearchContainer.get()
+    );
     return () => stopSync();
   }, [stateContainer]);
 

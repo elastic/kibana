@@ -5,17 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { cloneDeep, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import {
-  AggregateQuery,
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
-  Filter,
-  FilterStateStore,
-  Query,
-} from '@kbn/es-query';
+import { AggregateQuery, COMPARE_ALL_OPTIONS, compareFilters, Filter, Query } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   ReduxLikeStateContainer,
@@ -23,11 +16,9 @@ import {
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 import {
-  connectToQueryState,
   DataPublicPluginStart,
   QueryState,
   SearchSessionInfoProvider,
-  syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { TimeRange } from '@kbn/data-plugin/common';
@@ -44,7 +35,6 @@ import { DataStateContainer, getDataStateContainer } from './discover_data_state
 import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_search_container';
 import { DiscoverServices } from '../../../build_services';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
-import { getValidFilters } from '../../../utils/get_valid_filters';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
@@ -80,10 +70,6 @@ export interface DiscoverStateContainer {
   savedSearchContainer: SavedSearchContainer;
 
   dataStateContainer: DataStateContainer;
-  /**
-   * Initialize state with filters and query,  start state syncing
-   */
-  initializeAndSync: () => () => void;
   /**
    * Set app state to with a partial new app state
    */
@@ -158,7 +144,6 @@ export function getDiscoverStateContainer({
     services,
   });
 
-  const replaceUrlAppState = appStateContainer.replace;
   const setAppState = appStateContainer.update;
 
   const pauseAutoRefreshInterval = async () => {
@@ -172,55 +157,6 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const initializeAndSync = () => {
-    const dataView = savedSearchContainer.get().searchSource.getField('index');
-    const { filterManager, data } = services;
-    if (appStateContainer.getState().index !== dataView?.id) {
-      // used data view is different than the given by url/state which is invalid
-      setState(appStateContainer, { index: dataView?.id });
-    }
-    // sync initial app filters from state to filterManager
-    const filters = appStateContainer.getState().filters;
-    if (filters) {
-      filterManager.setAppFilters(cloneDeep(filters));
-    }
-    const query = appStateContainer.getState().query;
-    if (query) {
-      data.query.queryString.setQuery(query);
-    }
-
-    const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
-      data.query,
-      appStateContainer,
-      {
-        filters: FilterStateStore.APP_STATE,
-        query: true,
-      }
-    );
-
-    // syncs `_g` portion of url with query services
-    const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(data.query, stateStorage);
-
-    // some filters may not be valid for this context, so update
-    // the filter manager with a modified list of valid filters
-    const currentFilters = filterManager.getFilters();
-    const validFilters = getValidFilters(dataView!, currentFilters);
-    if (!isEqual(currentFilters, validFilters)) {
-      filterManager.setFilters(validFilters);
-    }
-
-    const { start, stop } = appStateContainer.syncState();
-
-    replaceUrlAppState({}).then(() => {
-      start();
-    });
-
-    return () => {
-      stopSyncingQueryAppStateWithStateContainer();
-      stopSyncingGlobalStateWithUrl();
-      stop();
-    };
-  };
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
@@ -237,7 +173,6 @@ export function getDiscoverStateContainer({
     savedSearchContainer,
     setAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
-    initializeAndSync,
     actions: {
       onOpenSavedSearch: async (newSavedSearchId: string) => {
         const currentSavedSearch = savedSearchContainer.savedSearch$.getValue();

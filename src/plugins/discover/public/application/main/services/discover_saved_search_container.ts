@@ -40,6 +40,7 @@ export interface SavedSearchContainer {
     params: PersistParams,
     dataView?: DataView
   ) => Promise<{ id: string | undefined } | undefined>;
+  new: () => Promise<SavedSearch>;
 }
 
 export function getSavedSearchContainer({
@@ -98,6 +99,26 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
+  const newSavedSearch = async () => {
+    const dataView = get().searchSource.getField('index');
+    const nextSavedSearch = await getSavedSearch('', {
+      search: services.data.search,
+      savedObjectsClient: services.core.savedObjects.client,
+      spaces: services.spaces,
+      savedObjectsTagging: services.savedObjectsTagging,
+    });
+    nextSavedSearch.searchSource.setField('index', dataView);
+    const newAppState = handleSourceColumnState(
+      getStateDefaults({
+        savedSearch: nextSavedSearch,
+        services,
+      }),
+      services.uiSettings
+    );
+    await appStateContainer.replace(newAppState, false);
+    return nextSavedSearch;
+  };
+
   const persist = async (
     nextSavedSearch: SavedSearch,
     params: PersistParams,
@@ -150,5 +171,6 @@ export function getSavedSearchContainer({
     get,
     update,
     undo,
+    new: newSavedSearch,
   };
 }

@@ -24,7 +24,7 @@ export function useUrl({
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
       if (!search && !hash && pathname === '/') {
-        stateContainer.savedSearchContainer.resetUrl('');
+        stateContainer.savedSearchContainer.new();
       }
     });
     return () => unlistenHistoryBasePath();
