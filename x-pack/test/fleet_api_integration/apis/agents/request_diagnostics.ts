@@ -15,7 +15,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const esClient = getService('es');
 
   describe('fleet_request_diagnostics', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -40,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
     }
 
     it('/agents/{agent_id}/request_diagnostics should work', async () => {
-      const response = await supertest
+      await supertest
         .post(`/api/fleet/agents/agent1/request_diagnostics`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);

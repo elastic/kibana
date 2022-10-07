@@ -95,13 +95,13 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
-      const { headers } = await supertest
+      const { header } = await supertest
         .get(`/api/fleet/agents/files/file1/elastic-agent-diagnostics-2022-10-07T12-00-00Z-00.zip`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(headers['content-type']).to.eql('application/zip');
-      expect(headers['content-disposition']).to.eql(
+      expect(header['content-type']).to.eql('application/zip');
+      expect(header['content-disposition']).to.eql(
         'attachment; filename="elastic-agent-diagnostics-2022-10-07T12-00-00Z-00.zip"'
       );
     });
