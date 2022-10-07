@@ -21,6 +21,7 @@ import { getColumnsFromVis } from './schemas';
 const mockConvertMetricToColumns = jest.fn();
 const mockConvertBucketToColumns = jest.fn();
 const mockGetCutomBucketsFromSiblingAggs = jest.fn();
+const mockGetCustomBucketColumns = jest.fn();
 const mockGetVisSchemas = jest.fn();
 
 const mockGetBucketCollapseFn = jest.fn();
@@ -55,6 +56,7 @@ jest.mock('./utils', () => ({
   getMetricsWithoutDuplicates: jest.fn(() => mockGetMetricsWithoutDuplicates()),
   isValidVis: jest.fn(() => mockIsValidVis()),
   sortColumns: jest.fn(() => mockSortColumns()),
+  getCustomBucketColumns: jest.fn(() => mockGetCustomBucketColumns()),
 }));
 
 describe('getColumnsFromVis', () => {
@@ -73,6 +75,7 @@ describe('getColumnsFromVis', () => {
     jest.clearAllMocks();
     mockGetVisSchemas.mockReturnValue({});
     mockIsValidVis.mockReturnValue(true);
+    mockGetCustomBucketColumns.mockReturnValue({ customBucketColumns: [], customBucketsMap: {} });
   });
 
   test('should return null if vis is not valid', () => {
@@ -107,7 +110,10 @@ describe('getColumnsFromVis', () => {
   test('should return null if one sibling agg was provided and it is not supported', () => {
     const buckets: AggConfig[] = [aggConfig];
     mockGetCutomBucketsFromSiblingAggs.mockReturnValue(buckets);
-    mockConvertBucketToColumns.mockReturnValue(null);
+    mockGetCustomBucketColumns.mockReturnValue({
+      customBucketColumns: [null],
+      customBucketsMap: {},
+    });
     mockGetMetricsWithoutDuplicates.mockReturnValue([{}]);
 
     const result = getColumnsFromVis(vis, dataServiceMock.query.timefilter.timefilter, dataView, {
@@ -120,7 +126,7 @@ describe('getColumnsFromVis', () => {
     expect(mockIsValidVis).toBeCalledTimes(1);
     expect(mockGetCutomBucketsFromSiblingAggs).toBeCalledTimes(1);
     expect(mockGetMetricsWithoutDuplicates).toBeCalledTimes(1);
-    expect(mockConvertBucketToColumns).toBeCalledTimes(1);
+    expect(mockGetCustomBucketColumns).toBeCalledTimes(1);
     expect(mockGetBucketColumns).toBeCalledTimes(0);
   });
 
@@ -240,7 +246,10 @@ describe('getColumnsFromVis', () => {
 
     expect(result).toEqual({
       bucketCollapseFn,
-      buckets: [bucketId],
+      buckets: {
+        all: [bucketId],
+        customBuckets: {},
+      },
       columns: [...metrics, ...buckets],
       columnsWithoutReferenced,
       metrics: [metricId],

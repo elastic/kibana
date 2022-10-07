@@ -104,6 +104,7 @@ describe('getColumnsWithoutReferenced', () => {
 describe('getBucketCollapseFn', () => {
   const metric1: SchemaConfig<METRIC_TYPES.AVG> = {
     accessor: 0,
+    aggId: '1',
     label: '',
     format: {
       id: undefined,
@@ -115,21 +116,25 @@ describe('getBucketCollapseFn', () => {
 
   const metric2: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
     ...metric1,
+    aggId: '2',
     aggType: METRIC_TYPES.AVG_BUCKET,
   };
 
   const metric3: SchemaConfig<METRIC_TYPES.MAX_BUCKET> = {
     ...metric1,
+    aggId: '3',
     aggType: METRIC_TYPES.MAX_BUCKET,
   };
 
   const metric4: SchemaConfig<METRIC_TYPES.MIN_BUCKET> = {
     ...metric1,
+    aggId: '4',
     aggType: METRIC_TYPES.MIN_BUCKET,
   };
 
   const metric5: SchemaConfig<METRIC_TYPES.SUM_BUCKET> = {
     ...metric1,
+    aggId: '5',
     aggType: METRIC_TYPES.SUM_BUCKET,
   };
 
@@ -151,18 +156,54 @@ describe('getBucketCollapseFn', () => {
   test.each<
     [
       string,
-      [Array<SchemaConfig<SupportedAggregation>>, AggBasedColumn[]],
-      Record<string, string | undefined>
+      [
+        Array<SchemaConfig<SupportedAggregation>>,
+        AggBasedColumn[],
+        Record<string, string>,
+        AggBasedColumn[]
+      ],
+      Record<string, string[]>
     ]
   >([
-    ['avg', [[metric1, metric2], [customBucketColum]], { [customBucketColum.columnId]: 'avg' }],
-    ['max', [[metric1, metric3], [customBucketColum]], { [customBucketColum.columnId]: 'max' }],
-    ['min', [[metric1, metric4], [customBucketColum]], { [customBucketColum.columnId]: 'min' }],
-    ['sum', [[metric1, metric5], [customBucketColum]], { [customBucketColum.columnId]: 'sum' }],
     [
-      'undefined if no sibling pipeline agg is provided',
-      [[metric1], [customBucketColum]],
-      { [customBucketColum.columnId]: undefined },
+      'avg',
+      [
+        [metric1, metric2],
+        [customBucketColum],
+        { test: 'bucket-1' },
+        [{ columnId: 'test', meta: { aggId: metric2.aggId } } as AggBasedColumn],
+      ],
+      { sum: [], min: [], max: [], avg: [customBucketColum.columnId] },
+    ],
+    [
+      'max',
+      [
+        [metric1, metric3],
+        [customBucketColum],
+        { test: 'bucket-1' },
+        [{ columnId: 'test', meta: { aggId: metric3.aggId } } as AggBasedColumn],
+      ],
+      { sum: [], min: [], max: [customBucketColum.columnId], avg: [] },
+    ],
+    [
+      'min',
+      [
+        [metric1, metric4],
+        [customBucketColum],
+        { test: 'bucket-1' },
+        [{ columnId: 'test', meta: { aggId: metric4.aggId } } as AggBasedColumn],
+      ],
+      { sum: [], min: [customBucketColum.columnId], max: [], avg: [] },
+    ],
+    [
+      'sum',
+      [
+        [metric1, metric5],
+        [customBucketColum],
+        { test: 'bucket-1' },
+        [{ columnId: 'test', meta: { aggId: metric5.aggId } } as AggBasedColumn],
+      ],
+      { sum: [customBucketColum.columnId], min: [], max: [], avg: [] },
     ],
   ])('should return%s', (_, input, expected) => {
     expect(getBucketCollapseFn(...input)).toEqual(expected);

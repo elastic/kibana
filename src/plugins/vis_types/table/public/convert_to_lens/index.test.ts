@@ -64,7 +64,7 @@ describe('convertToLens', () => {
 
   test('should return null if can not build percentage column', async () => {
     mockGetColumnsFromVis.mockReturnValue({
-      buckets: ['2'],
+      buckets: { all: ['2'] },
       columns: [{ columnId: '2' }, { columnId: '1' }],
       columnsWithoutReferenced: [
         { columnId: '1', meta: { aggId: 'agg-1' } },
@@ -84,7 +84,7 @@ describe('convertToLens', () => {
 
   test('should return correct state for valid vis', async () => {
     mockGetColumnsFromVis.mockReturnValue({
-      buckets: ['2'],
+      buckets: { all: ['2'] },
       columns: [{ columnId: '2' }, { columnId: '1' }],
       columnsWithoutReferenced: [
         { columnId: '1', meta: { aggId: 'agg-1' } },

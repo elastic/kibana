@@ -143,7 +143,7 @@ export const sortColumns = (
 
 export const getColumnIds = (columns: AggBasedColumn[]) => columns.map(({ columnId }) => columnId);
 
-export const getCustomBuckets = (
+export const getCustomBucketColumns = (
   customBucketsWithMetricIds: Array<{
     customBucket: IAggConfig;
     metricIds: string[];
@@ -164,11 +164,11 @@ export const getCustomBuckets = (
     customBucketColumns.push(customBucketColumn);
     if (customBucketColumn) {
       customBucketWithMetricIds.metricIds.forEach((metricAggId) => {
-        const columnId = metricColumns.find(
+        const metricColumnId = metricColumns.find(
           (metricColumn) => metricColumn?.meta.aggId === metricAggId
         )?.columnId;
-        if (columnId) {
-          customBucketsMap[columnId] = customBucketColumn.columnId;
+        if (metricColumnId) {
+          customBucketsMap[metricColumnId] = customBucketColumn.columnId;
         }
       });
     }

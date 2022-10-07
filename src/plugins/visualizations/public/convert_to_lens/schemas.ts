@@ -17,7 +17,7 @@ import { getVisSchemas, Schemas } from '../vis_schemas';
 import {
   getBucketCollapseFn,
   getBucketColumns,
-  getCustomBuckets,
+  getCustomBucketColumns,
   getColumnIds,
   getColumnsWithoutReferenced,
   getMetricsWithoutDuplicates,
@@ -84,7 +84,7 @@ export const getColumnsFromVis = <T>(
   }
   const metrics = metricColumns as AggBasedColumn[];
 
-  const { customBucketColumns, customBucketsMap } = getCustomBuckets(
+  const { customBucketColumns, customBucketsMap } = getCustomBucketColumns(
     customBucketsWithMetricIds,
     metrics,
     dataView,

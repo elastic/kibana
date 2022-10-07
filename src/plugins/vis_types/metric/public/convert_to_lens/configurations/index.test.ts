@@ -66,9 +66,9 @@ describe('getConfiguration', () => {
     expect(
       getConfiguration(layerId, params, {
         metrics: [metric],
-        buckets: [bucket],
+        buckets: { all: [bucket], customBuckets: { metric: bucket } },
         columnsWithoutReferenced: [],
-        bucketCollapseFn: { [metric]: collapseFn },
+        bucketCollapseFn: { [collapseFn]: [bucket] },
       })
     ).toEqual({
       breakdownByAccessor: bucket,
