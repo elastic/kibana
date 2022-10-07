@@ -43,6 +43,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.es-query-SelectOption`);
+    await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
     await indexComboBox.click();
@@ -288,7 +289,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const queryJsonEditor = await testSubjects.find('queryJsonEditor');
       await queryJsonEditor.clearValue();
       // Invalid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":""}}', {
         clearWithKeyboard: true,
       });
       await testSubjects.click('testQuery');
