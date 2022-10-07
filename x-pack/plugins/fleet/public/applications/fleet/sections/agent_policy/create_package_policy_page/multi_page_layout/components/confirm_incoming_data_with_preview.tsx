@@ -27,6 +27,8 @@ import type { SearchHit } from '@kbn/es-types';
 
 import styled from 'styled-components';
 
+import { useStartServices, useIsGuidedOnboardingActive } from '../../../../../../../hooks';
+
 import type { PackageInfo } from '../../../../../../../../common';
 
 import {
@@ -136,8 +138,15 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   );
   const { enrolledAgents, numAgentsWithData } = useGetAgentIncomingData(incomingData, packageInfo);
 
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo?.name);
+  const { guidedOnboarding } = useStartServices();
   if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
     setAgentDataConfirmed(true);
+    if (isGuidedOnboardingActive) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuidedOnboardingForIntegration(
+        packageInfo?.name
+      );
+    }
   }
   if (!agentDataConfirmed) {
     return (
