@@ -20,7 +20,6 @@ import {
 } from '@kbn/data-views-plugin/public';
 
 import {
-  DataView,
   DataViewSpec,
   Form,
   useForm,
@@ -404,10 +403,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <EuiSpacer size="l" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <NameField
-                editData={editData}
-                existingDataViewNames$={existingDataViewNames$.current}
-              />
+              <NameField existingDataViewNames$={existingDataViewNames$.current} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />

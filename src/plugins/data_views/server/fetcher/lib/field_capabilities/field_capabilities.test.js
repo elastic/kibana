@@ -59,10 +59,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
 
       await getFieldCapabilities(args);
       sinon.assert.calledOnce(callFieldCapsApi);
-      sinon.assert.calledWith(callFieldCapsApi, {
-        ...fillUndefinedParams(args),
-        expandWildcards: 'open',
-      });
+      sinon.assert.calledWithExactly(callFieldCapsApi, fillUndefinedParams(args));
     });
   });
 

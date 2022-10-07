@@ -737,7 +737,6 @@ export class AlertsClient {
       pattern: indices,
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
-      showHidden: true,
     });
 
     return fieldDescriptorToBrowserFieldMapper(fields);

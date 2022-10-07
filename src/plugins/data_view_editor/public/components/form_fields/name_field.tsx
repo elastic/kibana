@@ -12,7 +12,6 @@ import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import {
-  DataView,
   UseField,
   ValidationConfig,
   FieldConfig,
@@ -22,7 +21,6 @@ import { IndexPatternConfig } from '../../types';
 import { schema } from '../form_schema';
 
 interface NameFieldProps {
-  editData?: DataView;
   existingDataViewNames$: BehaviorSubject<string[]>;
 }
 
@@ -55,8 +53,7 @@ const getNameConfig = ({ namesNotAllowed }: GetNameConfigArgs): FieldConfig<stri
   };
 };
 
-// todo look at editData
-export const NameField = ({ editData, existingDataViewNames$ }: NameFieldProps) => {
+export const NameField = ({ existingDataViewNames$ }: NameFieldProps) => {
   const namesNotAllowed = useObservable(existingDataViewNames$, []);
   const config = useMemo(
     () =>
