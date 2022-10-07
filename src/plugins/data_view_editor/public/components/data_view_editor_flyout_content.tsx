@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
@@ -137,7 +137,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           params: {
             rollup_index: rollupIndex,
           },
-          aggs: rollupIndicesCapabilities$.current.getValue()[rollupIndex].aggs,
+          aggs: rollupIndicesCapabilities[rollupIndex].aggs,
         };
       }
 
@@ -182,7 +182,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const existingDataViewNames$ = useRef(new BehaviorSubject<string[]>([]));
   const isLoadingDataViewNames = useObservable(isLoadingDataViewNames$.current, true);
 
-  // review rollup observables
   const rollupIndicesCapabilities$ = useRef(new BehaviorSubject<RollupIndicesCapsResponse>({}));
   const rollupIndicesCapabilities = useObservable(rollupIndicesCapabilities$.current, {});
 
@@ -217,18 +216,24 @@ const IndexPatternEditorFlyoutContentComponent = ({
     ]
   );
 
-  const getIsRollupIndex = useCallback(async () => {
+  const getRollupIndexCaps = useMemo(async () => {
     let response: RollupIndicesCapsResponse = {};
     try {
       response = await http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
     } catch (e) {
       // Silently swallow failure responses such as expired trials
     }
-    return (indexName: string) => getRollupIndices(response).includes(indexName);
+    rollupIndicesCapabilities$.current.next(response);
+    return response;
   }, [http]);
 
+  const getIsRollupIndex = useMemo(async () => {
+    const response = await getRollupIndexCaps;
+    return (indexName: string) => getRollupIndices(response).includes(indexName);
+  }, [getRollupIndexCaps]);
+
   const loadIndices = useCallback(async () => {
-    const isRollupIndex = await getIsRollupIndex();
+    const isRollupIndex = await getIsRollupIndex;
     const allSrcs = await dataViews.getIndices({
       isRollupIndex,
       pattern: '*',
@@ -250,16 +255,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     matchedIndices$.current.next(matchedIndices);
   }, [dataViews, allowHidden, isLoadingSources$, matchedIndices$, title, getIsRollupIndex]);
 
-  const loadRollupIndices = useCallback(async () => {
-    try {
-      const response = await http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
-      if (response) {
-        rollupIndicesCapabilities$.current.next(response);
-      }
-    } catch (e) {
-      // Silently swallow failure responses such as expired trials
-    }
-  }, [http]);
   const loadDataViewNames = useCallback(async () => {
     const dataViewListItems = await dataViews.getIdsWithTitle(editData ? true : false);
     const dataViewNames = dataViewListItems.map((item) => item.name || item.title);
@@ -272,27 +267,27 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   useEffect(() => {
     const matchedIndiceSub = matchedIndices$.current.subscribe((matchedIndices) => {
-      if (matchedIndices.exactMatchedIndices.length && !loadingMatchedIndices$.current.getValue()) {
+      if (matchedIndices.exactMatchedIndices.length) {
         const timeFieldQuery = editData ? editData.title : title;
         loadTimestampFields(removeSpaces(timeFieldQuery));
+      } else {
+        timestampFieldOptions$.current.next([]);
       }
     });
 
     loadIndices();
     loadDataViewNames();
-    loadRollupIndices();
 
     return () => {
       matchedIndiceSub.unsubscribe();
     };
-  }, [editData, loadIndices, loadDataViewNames, loadRollupIndices, loadTimestampFields, title]);
+  }, [editData, loadIndices, loadDataViewNames, loadTimestampFields, title, form]);
 
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
-      // is anything making sure this is complete before its used?
-      const isRollupIndex = await getIsRollupIndex();
+      const isRollupIndex = await getIsRollupIndex;
       let newRollupIndexName: string | undefined;
 
       const fetchIndices = async (query: string = '') => {

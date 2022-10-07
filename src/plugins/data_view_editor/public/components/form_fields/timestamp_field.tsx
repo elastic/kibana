@@ -107,8 +107,12 @@ export const TimestampField = ({
 
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
         const isDisabled = !optionsAsComboBoxOptions.length;
+        // if the value isn't in the list then don't use it.
+        const valueInList = !!optionsAsComboBoxOptions.find(
+          (option) => option.value === value.value
+        );
 
-        if (!value && !isDisabled) {
+        if ((!value || !valueInList) && !isDisabled) {
           const val = optionsAsComboBoxOptions.filter((el) => el.value === '@timestamp');
           if (val.length) {
             setValue(val[0]);
@@ -133,7 +137,7 @@ export const TimestampField = ({
                   )}
                   singleSelection={{ asPlainText: true }}
                   options={optionsAsComboBoxOptions}
-                  selectedOptions={value ? [value] : undefined}
+                  selectedOptions={value && valueInList ? [value] : undefined}
                   onChange={(newValue) => {
                     if (newValue.length === 0) {
                       // Don't allow clearing the type. One must always be selected
