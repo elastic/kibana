@@ -56,7 +56,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
 
   // doesn't support more than three split slice levels
   // doesn't support pie without at least one split slice
-  if (result.buckets.length > 3 || !result.buckets.length) {
+  if (result.buckets.all.length > 3 || !result.buckets.all.length) {
     return null;
   }
 

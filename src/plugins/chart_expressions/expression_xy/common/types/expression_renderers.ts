@@ -16,6 +16,7 @@ import { XYProps } from './expression_functions';
 
 export interface XYChartProps {
   args: XYProps;
+  canNavigateToLens: boolean;
 }
 
 export interface XYRender {

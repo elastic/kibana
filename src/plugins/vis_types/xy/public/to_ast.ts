@@ -30,31 +30,14 @@ import {
   ValueAxis,
   Scale,
   ChartMode,
-  InterpolationMode,
   ScaleType,
 } from './types';
 import { ChartType } from '../common';
 import { getSeriesParams } from './utils/get_series_params';
 import { getSafeId } from './utils/accessors';
-
-interface Bounds {
-  min?: string | number;
-  max?: string | number;
-}
+import { Bounds, getCurveType, getMode, getYAxisPosition } from './utils/common';
 
 type YDimension = Omit<Dimension, 'accessor'> & { accessor: string };
-
-const getCurveType = (type?: InterpolationMode) => {
-  switch (type) {
-    case 'cardinal':
-      return 'CURVE_MONOTONE_X';
-    case 'step-after':
-      return 'CURVE_STEP_AFTER';
-    case 'linear':
-    default:
-      return 'LINEAR';
-  }
-};
 
 const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
   const legend = buildExpressionFunction('legendConfig', {
@@ -162,16 +145,6 @@ const prepareLayers = (
   return buildExpression([dataLayer]);
 };
 
-const getMode = (scale: Scale, bounds?: Bounds) => {
-  if (scale.defaultYExtents) {
-    return 'dataBounds';
-  }
-
-  if (scale.setYExtents || bounds) {
-    return 'custom';
-  }
-};
-
 const getLabelArgs = (data: CategoryAxis, isTimeChart?: boolean) => {
   return {
     truncate: data.labels.truncate,
@@ -213,18 +186,6 @@ function getScaleType(
   }
 
   return type;
-}
-
-function getYAxisPosition(position: Position) {
-  if (position === Position.Top) {
-    return Position.Right;
-  }
-
-  if (position === Position.Bottom) {
-    return Position.Left;
-  }
-
-  return position;
 }
 
 function getXAxisPosition(position: Position) {

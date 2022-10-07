@@ -12,7 +12,7 @@ import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position, Fit } from '@elastic/charts';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { defaultCountLabel, LabelRotation } from '@kbn/charts-plugin/public';
 
 import {
@@ -22,13 +22,15 @@ import {
   AxisMode,
   ThresholdLineStyle,
   InterpolationMode,
+  VisParams,
 } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
 import { getVisTypeFromParams } from './get_vis_type_from_params';
+import { convertToLens } from '../convert_to_lens';
 
-export const lineVisTypeDefinition = {
+export const lineVisTypeDefinition: VisTypeDefinition<VisParams> = {
   name: 'line',
   title: i18n.translate('visTypeXy.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
@@ -38,6 +40,12 @@ export const lineVisTypeDefinition = {
   fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+    };
+  },
   updateVisTypeOnParamsChange: getVisTypeFromParams,
   visConfig: {
     defaults: {

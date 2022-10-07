@@ -10,13 +10,14 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
 import { AggBasedColumn, PercentageModeConfig, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
-import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { getCustomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
+import { BucketColumn } from '../../common/convert_to_lens/lib';
 import type { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
 import {
   getBucketCollapseFn,
   getBucketColumns,
+  getCustomBuckets,
   getColumnIds,
   getColumnsWithoutReferenced,
   getMetricsWithoutDuplicates,
@@ -46,6 +47,7 @@ export const getColumnsFromVis = <T>(
   } = {},
   config?: {
     dropEmptyRowsInDateHistogram?: boolean;
+    supportMixedSiblingPipelineAggs?: boolean;
   } & (PercentageModeConfig | void)
 ) => {
   const { dropEmptyRowsInDateHistogram, ...percentageModeConfig } = config ?? {
@@ -56,14 +58,17 @@ export const getColumnsFromVis = <T>(
     timeRange: timefilter.getAbsoluteTime(),
   });
 
-  if (!isValidVis(visSchemas) || !areVisSchemasValid(visSchemas, unsupported)) {
+  if (
+    !isValidVis(visSchemas, config?.supportMixedSiblingPipelineAggs) ||
+    !areVisSchemasValid(visSchemas, unsupported)
+  ) {
     return null;
   }
 
-  const customBuckets = getCustomBucketsFromSiblingAggs(visSchemas.metric);
+  const customBucketsWithMetricIds = getCustomBucketsFromSiblingAggs(visSchemas.metric);
 
   // doesn't support sibbling pipeline aggs with different bucket aggs
-  if (customBuckets.length > 1) {
+  if (!config?.supportMixedSiblingPipelineAggs && customBucketsWithMetricIds.length > 1) {
     return null;
   }
 
@@ -78,18 +83,17 @@ export const getColumnsFromVis = <T>(
     return null;
   }
   const metrics = metricColumns as AggBasedColumn[];
-  const customBucketColumns = [];
 
-  if (customBuckets.length) {
-    const customBucketColumn = convertBucketToColumns(
-      { agg: customBuckets[0], dataView, metricColumns: metrics, aggs },
-      false,
-      dropEmptyRowsInDateHistogram
-    );
-    if (!customBucketColumn) {
-      return null;
-    }
-    customBucketColumns.push(customBucketColumn);
+  const { customBucketColumns, customBucketsMap } = getCustomBuckets(
+    customBucketsWithMetricIds,
+    metrics,
+    dataView,
+    aggs,
+    config?.dropEmptyRowsInDateHistogram
+  );
+
+  if (customBucketColumns.includes(null)) {
+    return null;
   }
 
   const bucketColumns = getBucketColumns(
@@ -117,7 +121,12 @@ export const getColumnsFromVis = <T>(
   }
 
   const columns = sortColumns(
-    [...metrics, ...bucketColumns, ...splitBucketColumns, ...customBucketColumns],
+    [
+      ...metrics,
+      ...bucketColumns,
+      ...splitBucketColumns,
+      ...(customBucketColumns as BucketColumn[]),
+    ],
     visSchemas,
     [...buckets, ...splits],
     metricsWithoutDuplicates
@@ -127,8 +136,16 @@ export const getColumnsFromVis = <T>(
 
   return {
     metrics: getColumnIds(columnsWithoutReferenced.filter((с) => !с.isBucketed)),
-    buckets: getColumnIds(columnsWithoutReferenced.filter((c) => c.isBucketed)),
-    bucketCollapseFn: getBucketCollapseFn(visSchemas.metric, customBucketColumns),
+    buckets: {
+      all: getColumnIds(columnsWithoutReferenced.filter((c) => c.isBucketed)),
+      customBuckets: customBucketsMap,
+    },
+    bucketCollapseFn: getBucketCollapseFn(
+      visSchemas.metric,
+      customBucketColumns as BucketColumn[],
+      customBucketsMap,
+      metrics
+    ),
     columnsWithoutReferenced,
     columns,
   };
