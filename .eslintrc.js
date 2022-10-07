@@ -1406,6 +1406,30 @@ module.exports = {
         ],
       },
     },
+    /**
+     * Allows snake_case variables in the server, because that's how we return API properties
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/naming-convention': [
+          'error',
+          {
+            selector: 'variable',
+            modifiers: ['destructured'],
+            format: null,
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
+          {
+            selector: 'variable',
+            format: ['camelCase', 'UPPER_CASE'],
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
+        ],
+      },
+    },
     {
       // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
