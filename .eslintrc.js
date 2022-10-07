@@ -1415,21 +1415,8 @@ module.exports = {
         '@typescript-eslint/naming-convention': [
           'error',
           {
-            selector: 'default',
-            format: ['camelCase'],
-            leadingUnderscore: 'allow',
-            trailingUnderscore: 'allow',
-          },
-          {
-            selector: 'default',
+            selector: 'variable',
             modifiers: ['destructured'],
-            format: ['camelCase', 'snake_case'],
-            leadingUnderscore: 'allow',
-            trailingUnderscore: 'allow',
-          },
-          {
-            selector: 'default',
-            modifiers: ['requiresQuotes'],
             format: null,
             leadingUnderscore: 'allow',
             trailingUnderscore: 'allow',
@@ -1439,11 +1426,6 @@ module.exports = {
             format: ['camelCase', 'UPPER_CASE'],
             leadingUnderscore: 'allow',
             trailingUnderscore: 'allow',
-          },
-
-          {
-            selector: 'typeLike',
-            format: ['PascalCase'],
           },
         ],
       },
