@@ -246,7 +246,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const secondToast = await toasts.getToastContent(2);
       expect(secondToast).to.equal(
-        `Index references in filters are differ from current data view\nData view id references in some of the applied filters are differ from chosen data view`
+        `Different index references\nData view id references in some of the applied filters differ from the current data view.`
       );
     });
   });
