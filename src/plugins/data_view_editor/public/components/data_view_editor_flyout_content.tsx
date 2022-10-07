@@ -244,7 +244,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       dataViews,
     });
 
-    // todo this should probably go elsewhere. Does identify when sources are loaded - but why?
     isLoadingSources$.current.next(false);
     const matchedIndices = getMatchedIndices(
       allSrcs,
@@ -265,6 +264,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     isLoadingDataViewNames$.current.next(false);
   }, [dataViews, editData]);
 
+  // initial loading of indicies and data view names
   useEffect(() => {
     const matchedIndiceSub = matchedIndices$.current.subscribe((matchedIndices) => {
       if (matchedIndices.exactMatchedIndices.length) {
@@ -276,6 +276,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     });
 
     loadIndices();
+    // todo is this called when the title changes?
     loadDataViewNames();
 
     return () => {
@@ -285,6 +286,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
+  // todo only used by title field. why?
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
       const isRollupIndex = await getIsRollupIndex;
