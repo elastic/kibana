@@ -36,7 +36,7 @@ export type DiscoverTopNavProps = Pick<
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  updateAdHocDataViewId: (dataView: DataView, updateState?: boolean) => Promise<DataView>;
   addAdHocDataView: (dataView: DataView) => void;
   adHocDataViewList: DataView[];
 };

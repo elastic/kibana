@@ -104,7 +104,7 @@ export async function onSaveSearch({
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  updateAdHocDataViewId: (dataView: DataView, updateState?: boolean) => Promise<DataView>;
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {

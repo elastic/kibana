@@ -49,6 +49,7 @@ const RuleAdd = ({
   onSave,
   metadata,
   filteredRuleTypes,
+  beforeSave,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -205,7 +206,8 @@ const RuleAdd = ({
 
   async function onSaveRule(): Promise<Rule | undefined> {
     try {
-      const newRule = await createRule({ http, rule: rule as RuleUpdates });
+      const updatedRule = (await beforeSave?.(rule as Rule)) || rule;
+      const newRule = await createRule({ http, rule: updatedRule as RuleUpdates });
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.ruleAdd.saveSuccessNotificationText', {
           defaultMessage: 'Created rule "{ruleName}"',

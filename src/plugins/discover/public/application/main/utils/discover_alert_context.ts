@@ -12,7 +12,7 @@ import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
 interface DiscoverAlertContext {
   isManagementPage: boolean;
   initialAdHocDataViewList: DataViewListItem[];
-  addAdHocDataView?: (newAdHocDataView: DataView) => void;
+  addAdHocDataView?: (dataView: DataView) => void;
 }
 
 /**

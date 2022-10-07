@@ -49,15 +49,13 @@ export const useAdHocDataViews = ({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = useCallback(
-    async (dataViewToUpdate: DataView) => {
+    async (dataViewToUpdate: DataView, updateState = true) => {
       const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
 
       dataViews.clearInstanceCache(dataViewToUpdate.id);
       setAdHocDataViewList((prev) =>
         prev.filter((d) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id)
       );
-
-      savedSearch.searchSource.setField('index', newDataView);
 
       // update filters references
       const uiActions = await getUiActions();
@@ -69,6 +67,10 @@ export const useAdHocDataViews = ({
         toDataView: newDataView.id,
         usedDataViews: [],
       } as ActionExecutionContext);
+
+      if (updateState) {
+        savedSearch.searchSource.setField('index', newDataView);
+      }
 
       return newDataView;
     },
@@ -102,5 +104,10 @@ export const useAdHocDataViews = ({
     setAdHocDataViewList((prev) => [...prev, newDataView]);
   }, []);
 
-  return { adHocDataViewList, persistDataView, updateAdHocDataViewId, onAddAdHocDataView };
+  return {
+    adHocDataViewList,
+    persistDataView,
+    updateAdHocDataViewId,
+    onAddAdHocDataView,
+  };
 };

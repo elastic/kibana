@@ -100,6 +100,18 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
           defaultMessage: 'Data view is required.',
         })
       );
+    } else if (
+      typeof ruleParams.searchConfiguration.index === 'object' &&
+      !Object.hasOwn(ruleParams.searchConfiguration.index, 'timeFieldName')
+    ) {
+      errors.index.push(
+        i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeBasedDataViewText',
+          {
+            defaultMessage: 'Data view is not time based.',
+          }
+        )
+      );
     }
     return validationResult;
   }

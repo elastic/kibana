@@ -50,7 +50,7 @@ export const getTopNavLinks = ({
   adHocDataViews: DataView[];
   addAdHocDataView: (dataView: DataView) => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  updateAdHocDataViewId: (dataView: DataView, updateState?: boolean) => Promise<DataView>;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -87,6 +87,7 @@ export const getTopNavLinks = ({
         adHocDataViews,
         addAdHocDataView,
         savedQueryId: state.appStateContainer.getState().savedQuery,
+        updateAdHocDataViewId,
       });
     },
     testId: 'discoverAlertsButton',

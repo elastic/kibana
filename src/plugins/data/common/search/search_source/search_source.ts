@@ -916,7 +916,7 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
+  public getSerializedFields(recurse = false, includeFields = true): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
       aggs: searchSourceAggs,
@@ -931,7 +931,9 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toSpec();
+      serializedSearchSourceFields.index = index.isPersisted()
+        ? index.id
+        : index.toSpec(includeFields);
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;

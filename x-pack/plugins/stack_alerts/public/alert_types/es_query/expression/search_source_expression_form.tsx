@@ -19,7 +19,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { CommonAlertParams, EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
-import { useDiscoverAlertServices } from '../util';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
 import { hasExpressionValidationErrors } from '../validation';
@@ -75,7 +74,6 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
 };
 
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
-  const { data } = useDiscoverAlertServices();
   const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
@@ -110,11 +108,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   const onSelectDataView = useCallback(
-    (newDataViewId) =>
-      data.dataViews
-        .get(newDataViewId)
-        .then((newDataView) => dispatch({ type: 'index', payload: newDataView })),
-    [data.dataViews]
+    (newDataView: DataView) => dispatch({ type: 'index', payload: newDataView }),
+    []
   );
 
   const onUpdateFilters = useCallback((newFilters) => {
@@ -228,7 +223,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       <EuiSpacer size="s" />
 
       <DataViewSelectPopover
-        dataViewName={dataView?.getName?.() ?? dataView?.title}
+        dataViewName={dataView?.getName?.()}
         dataViewId={dataView?.id}
         onSelectDataView={onSelectDataView}
       />
