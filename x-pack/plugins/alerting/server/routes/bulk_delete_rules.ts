@@ -27,7 +27,7 @@ export const bulkDeleteRulesRoute = ({ router, licenseState }: RouteOptions) => 
           const rulesClient = (await context.alerting).getRulesClient();
           const { filter, ids } = req.body;
           const result = await rulesClient.bulkDeleteRules({ filter, ids });
-          return res.ok({ body: { result } });
+          return res.ok({ body: result });
         })
       )
     )

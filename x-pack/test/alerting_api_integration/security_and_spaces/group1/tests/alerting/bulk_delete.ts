@@ -27,7 +27,6 @@ export default ({ getService }: FtrProviderContext) => {
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ tags: ['foo'] }))
         .expect(200);
-
       const { body: createdRule2 } = await supertest
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -41,10 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(user.username, user.password);
 
       expect(response.statusCode).to.eql(200);
-      expect(response.body).to.eql({});
-
-      objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
-      objectRemover.add(space.id, createdRule2.id, 'rule', 'alerting');
+      expect(response.body).to.eql({ errors: [], total: 2 });
     });
   });
 };

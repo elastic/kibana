@@ -1811,7 +1811,7 @@ export class RulesClient {
       this.unsecuredSavedObjectsClient
     );
 
-    return { ids, errors, taskIdsToDelete };
+    return { errors, total }; // should total be number of succeed deletions?
   };
 
   private bulkDeleteWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
