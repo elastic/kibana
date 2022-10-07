@@ -26,7 +26,7 @@ post:
          application/json:
           schema:
             $ref: '../components/schemas/case_response_properties.yaml'
-#          examples:
+#         examples:
 #            createCaseResponse:
 #              $ref: '../components/examples/create_case_response.yaml'
   servers:
@@ -74,10 +74,12 @@ patch:
     content:
       application/json:
         schema:
-           $ref: '../components/schemas/update_case_request.yaml'
-        examples:
-          updateCaseRequest:
-            $ref: '../components/examples/update_case_request.yaml'
+          type: array
+          items:
+            $ref: '../components/schemas/update_case_request.yaml'
+#        examples:
+#          updateCaseRequest:
+#            $ref: '../components/examples/update_case_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.

@@ -42,7 +42,7 @@ properties:
   connector:
     title: Case response properties for connectors
     discriminator:
-    propertyName: type
+      propertyName: type
     oneOf:
       - $ref: 'connector_properties_none.yaml'
       - $ref: 'connector_properties_cases_webhook.yaml'
