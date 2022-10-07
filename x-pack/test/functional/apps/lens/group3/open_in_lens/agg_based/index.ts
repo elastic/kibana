@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Agg based Vis to Lens', function () {
     loadTestFile(require.resolve('./pie'));
     loadTestFile(require.resolve('./metric'));
+    loadTestFile(require.resolve('./gauge'));
   });
 }
