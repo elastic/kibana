@@ -282,10 +282,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
       const queryJsonEditor = await testSubjects.find('queryJsonEditor');
       await queryJsonEditor.clearValue();
       // Invalid query
-      await testSubjects.setValue('queryJsonEditor', JSON.stringify({ query: { foo: {} } }), {
+      await testSubjects.setValue('queryJsonEditor', '{ query: { foo: {} } }', {
         clearWithKeyboard: true,
       });
       await testSubjects.click('testQuery');
@@ -299,7 +302,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
-      await testSubjects.setValue('queryJsonEditor', '');
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
       const queryJsonEditor = await testSubjects.find('queryJsonEditor');
       await queryJsonEditor.clearValue();
       // Valid query
