@@ -4,79 +4,50 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+
 import { KueryNode } from '@kbn/es-query';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { SavedObjectsBulkDeleteResponse } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 
 import { retryIfBulkDeleteConflicts } from './retry_if_bulk_delete_conflicts';
 import { RETRY_IF_CONFLICTS_ATTEMPTES } from './wait_before_next_retry';
-import type { BulkEditError } from '../rules_client';
-import type { RawRule } from '../../types';
+import type { BulkDeleteError } from '../rules_client';
 
 const mockFilter: KueryNode = {
   type: 'function',
   value: 'mock',
 };
-const mockOperationName = 'conflict-retryable-operation';
-const mockLogger = loggingSystemMock.create().get();
-const rulesMock = [
-  {
-    attributes: {
-      alertTypeId: 'test.noop',
-      apiKey: 'M0ZMOXJJTUJ5MUVoc3gxWl91cTY6OHdmRm9XYjFSWEdVaWRjcHJ0bDNhQQ==',
-      scheduledTaskId: '952e7030-4567-11ed-a4ec-4b900b904b00',
-    },
-    id: '952e7030-4567-11ed-a4ec-4b900b904b00',
-  },
-  {
-    attributes: {
-      alertTypeId: 'test.noop',
-      apiKey: 'MmxMOXJJTUJ5MUVoc3gxWjl1cWg6TmYyZTRSZ1RUOG1oNnFOdmh3UFlUdw==',
-      scheduledTaskId: '93f26dc0-4567-11ed-a4ec-4b900b904b00',
-    },
-    id: '93f26dc0-4567-11ed-a4ec-4b900b904b00',
-  },
-];
 
+const mockLogger = loggingSystemMock.create().get();
 const mockSuccessfulResult = {
   apiKeysToInvalidate: [] as string[],
-  errors: [] as BulkEditError[],
-  ids: ['93f26dc0-4567-11ed-a4ec-4b900b904b00', '952e7030-4567-11ed-a4ec-4b900b904b00'],
-  result: {
-    statuses: [
-      {
-        id: uuid(),
-        type: '',
-        success: true,
-      },
-      {
-        id: uuid(),
-        type: '',
-        success: true,
-      },
-    ],
-  } as SavedObjectsBulkDeleteResponse,
-  rules: rulesMock as Array<SavedObjectsBulkUpdateObject<RawRule>>,
-  taskIdsToDelete: [],
+  errors: [] as BulkDeleteError[],
+  taskIdsToDelete: [] as string[],
+};
+const error409 = {
+  message: 'some fake message',
+  status: 409,
+  rule: {
+    id: 'fake_rule_id',
+    name: 'fake rule name',
+  },
 };
 
-const OperationSuccessful = async () => mockSuccessfulResult;
-const conflictOperationMock = jest.fn();
-
 const getOperationConflictsTimes = (times: number) => {
-  return () => {
+  return async () => {
     conflictOperationMock();
     times--;
     if (times >= 0) {
       return {
         ...mockSuccessfulResult,
+        errors: [error409],
       };
     }
     return mockSuccessfulResult;
   };
 };
+
+const OperationSuccessful = async () => mockSuccessfulResult;
+const conflictOperationMock = jest.fn();
 
 describe('retryIfBulkEditConflicts', () => {
   beforeEach(() => {
@@ -92,4 +63,38 @@ describe('retryIfBulkEditConflicts', () => {
       taskIdsToDelete: [],
     });
   });
+
+  test('should throw error when operation fails', async () => {
+    await expect(
+      retryIfBulkDeleteConflicts(
+        mockLogger,
+        async () => {
+          throw Error('Test failure');
+        },
+        mockFilter
+      )
+    ).rejects.toThrowError('Test failure');
+  });
+
+  test(`should return conflict errors when number of retries exceeds ${RETRY_IF_CONFLICTS_ATTEMPTES}`, async () => {
+    const result = await retryIfBulkDeleteConflicts(
+      mockLogger,
+      getOperationConflictsTimes(RETRY_IF_CONFLICTS_ATTEMPTES + 1),
+      mockFilter
+    );
+
+    expect(result.errors).toEqual([error409]);
+    expect(mockLogger.warn).toBeCalledWith('Bulk delele rules conflicts, exceeded retries');
+  });
+
+  for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTES; i++) {
+    test(`should work when operation conflicts ${i} times`, async () => {
+      const result = await retryIfBulkDeleteConflicts(
+        mockLogger,
+        getOperationConflictsTimes(i),
+        mockFilter
+      );
+      expect(result).toBe(result);
+    });
+  }
 });

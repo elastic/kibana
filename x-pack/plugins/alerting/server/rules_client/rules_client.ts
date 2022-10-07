@@ -302,6 +302,15 @@ export interface BulkEditError {
   };
 }
 
+export interface BulkDeleteError {
+  message: string;
+  status: number;
+  rule: {
+    id: string;
+    name: string;
+  };
+}
+
 export interface AggregateOptions extends IndexType {
   search?: string;
   defaultSearchOperator?: 'AND' | 'OR';
@@ -1816,10 +1825,10 @@ export class RulesClient {
         }
       );
 
-    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = []; // right type?
     const apiKeysToInvalidate: string[] = [];
     const taskIdsToDelete: string[] = [];
-    const errors: BulkEditError[] = [];
+    const errors: BulkDeleteError[] = [];
     const apiKeyToRuleIdMapping: Record<string, string> = {};
     const taskIdToRuleIdMapping: Record<string, string> = {};
 
@@ -1831,7 +1840,16 @@ export class RulesClient {
             apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
           }
           rules.push(rule);
-
+          if (rule.error) {
+            errors.push({
+              message: rule.error.message ?? 'n/a',
+              status: rule.error.statusCode,
+              rule: {
+                id: rule.id,
+                name: rule.attributes?.name ?? 'n/a',
+              },
+            });
+          }
           if (rule.attributes.scheduledTaskId) {
             taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
           }
@@ -1847,7 +1865,7 @@ export class RulesClient {
         taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
       }
     });
-    return { apiKeysToInvalidate, result, errors, rules, taskIdsToDelete };
+    return { apiKeysToInvalidate, result, errors, taskIdsToDelete };
   };
 
   public async bulkEdit<Params extends RuleTypeParams>(

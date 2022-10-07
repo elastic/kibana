@@ -8,28 +8,23 @@
 import pMap from 'p-map';
 import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
-import { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
-import type { SavedObjectsBulkDeleteResponse } from '@kbn/core-saved-objects-api-server';
+import { Logger } from '@kbn/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { BulkEditError } from '../rules_client';
-import { RawRule } from '../../types';
+import { BulkDeleteError } from '../rules_client';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTES } from './wait_before_next_retry';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;
 
-// TODO: change to Return type and decide if we need errors!
-type BulkDeleteOperation = (filter: KueryNode | null) => Promise<{
+export type BulkDeleteOperation = (filter: KueryNode | null) => Promise<{
   apiKeysToInvalidate: string[];
-  errors: BulkEditError[];
-  result: SavedObjectsBulkDeleteResponse;
-  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  errors: BulkDeleteError[];
   taskIdsToDelete: string[];
 }>;
 
 interface ReturnRetry {
   apiKeysToInvalidate: string[];
-  errors: BulkEditError[];
+  errors: BulkDeleteError[];
   taskIdsToDelete: string[];
 }
 
@@ -53,34 +48,31 @@ export const retryIfBulkDeleteConflicts = async (
   filter: KueryNode | null,
   retries: number = RETRY_IF_CONFLICTS_ATTEMPTES,
   accApiKeysToInvalidate: string[] = [],
-  accErrors: BulkEditError[] = [],
+  accErrors: BulkDeleteError[] = [],
   accTaskIdsToDelete: string[] = []
 ): Promise<ReturnRetry> => {
   try {
     const {
-      apiKeysToInvalidate: localApiKeysToInvalidate,
-      errors: localErrors,
-      result,
-      rules,
-      taskIdsToDelete: localTaskIdsToDelete,
+      apiKeysToInvalidate: currentApiKeysToInvalidate,
+      errors: currentErrors,
+      taskIdsToDelete: currentTaskIdsToDelete,
     } = await bulkDeleteOperation(filter);
 
-    const conflictErrorMap = result.statuses.reduce<Map<string, { message: string }>>(
-      (acc, item) => {
-        if (item.type === 'alert' && item?.error?.statusCode === 409) {
-          // do we need alert check?
-          return acc.set(item.id, { message: item.error.message });
-        }
-        return acc;
-      },
-      new Map()
-    );
+    const apiKeysToInvalidate = [...accApiKeysToInvalidate, ...currentApiKeysToInvalidate];
+    const taskIdsToDelete = [...accTaskIdsToDelete, ...currentTaskIdsToDelete];
+    const errors =
+      retries <= 0
+        ? [...accErrors, ...currentErrors]
+        : [...accErrors, ...currentErrors.filter((error) => error.status !== 409)];
 
-    const apiKeysToInvalidate = [...accApiKeysToInvalidate, ...localApiKeysToInvalidate];
-    const taskIdsToDelete = [...accTaskIdsToDelete, ...localTaskIdsToDelete];
-    const errors = [...accErrors, ...localErrors];
+    const ruleIdsWithConflictError = currentErrors.reduce<string[]>((acc, error) => {
+      if (error.status === 409) {
+        return [...acc, error.rule.id];
+      }
+      return acc;
+    }, []);
 
-    if (conflictErrorMap.size === 0) {
+    if (ruleIdsWithConflictError.length === 0) {
       return {
         apiKeysToInvalidate,
         errors,
@@ -91,26 +83,15 @@ export const retryIfBulkDeleteConflicts = async (
     if (retries <= 0) {
       logger.warn('Bulk delele rules conflicts, exceeded retries');
 
-      const conflictErrors = rules
-        .filter((rule) => conflictErrorMap.has(rule.id))
-        .map((rule) => ({
-          message: conflictErrorMap.get(rule.id)?.message ?? 'n/a',
-          rule: {
-            id: rule.id,
-            name: rule.attributes?.name ?? 'n/a',
-          },
-        }));
-
       return {
         apiKeysToInvalidate,
-        errors: [...errors, ...conflictErrors], // why do we need to add conflictErrors?
+        errors,
         taskIdsToDelete,
       };
     }
 
-    const ids = Array.from(conflictErrorMap.keys());
     logger.debug(
-      `Bulk delele rules conflicts, retrying ..., ${ids.length} saved objects conflicted`
+      `Bulk delele rules conflicts, retrying ..., ${ruleIdsWithConflictError.length} saved objects conflicted`
     );
 
     // delay before retry
@@ -121,7 +102,7 @@ export const retryIfBulkDeleteConflicts = async (
     // That's why we chunk processing ids into pieces by size equals to MaxIdsNumberInRetryFilter
     return (
       await pMap(
-        chunk(ids, MaxIdsNumberInRetryFilter),
+        chunk(ruleIdsWithConflictError, MaxIdsNumberInRetryFilter),
         async (queryIds) =>
           retryIfBulkDeleteConflicts(
             logger,
