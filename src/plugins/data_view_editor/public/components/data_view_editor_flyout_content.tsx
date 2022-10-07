@@ -178,9 +178,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const loadingMatchedIndices$ = useRef(new BehaviorSubject<boolean>(false));
   const matchedIndices$ = useRef(new Subject<MatchedIndicesSet>());
 
-  // probably change to subject - maybe remove?? WARNING WARNING
-  const dataSources$ = useRef(new BehaviorSubject<MatchedItem[]>([]));
-
   const isLoadingDataViewNames$ = useRef(new BehaviorSubject<boolean>(true));
   const existingDataViewNames$ = useRef(new BehaviorSubject<string[]>([]));
   const isLoadingDataViewNames = useObservable(isLoadingDataViewNames$.current, true);
@@ -222,15 +219,25 @@ const IndexPatternEditorFlyoutContentComponent = ({
     ]
   );
 
+  const getIsRollupIndex = useCallback(async () => {
+    let response: RollupIndicesCapsResponse = {};
+    try {
+      response = await http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
+    } catch (e) {
+      // Silently swallow failure responses such as expired trials
+    }
+    return (indexName: string) => getRollupIndices(response).includes(indexName);
+  }, [http]);
+
   const loadIndices = useCallback(async () => {
+    const isRollupIndex = await getIsRollupIndex();
     const allSrcs = await dataViews.getIndices({
-      isRollupIndex: () => false,
+      isRollupIndex,
       pattern: '*',
       showAllIndices: allowHidden,
     });
     const matchedSet = await loadMatchedIndices(title, allowHidden, allSrcs, {
-      // todo
-      isRollupIndex: () => false,
+      isRollupIndex,
       dataViews,
     });
 
@@ -243,7 +250,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       allowHidden
     );
     matchedIndices$.current.next(matchedIndices);
-  }, [dataViews, allowHidden, isLoadingSources$, matchedIndices$, title]);
+  }, [dataViews, allowHidden, isLoadingSources$, matchedIndices$, title, getIsRollupIndex]);
 
   const loadRollupIndices = useCallback(async () => {
     try {
@@ -255,7 +262,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       // Silently swallow failure responses such as expired trials
     }
   }, [http]);
-
   const loadDataViewNames = useCallback(async () => {
     const dataViewListItems = await dataViews.getIdsWithTitle(editData ? true : false);
     const dataViewNames = dataViewListItems.map((item) => item.name || item.title);
@@ -287,8 +293,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
-      const isRollupIndex = (indexName: string) =>
-        getRollupIndices(rollupIndicesCapabilities).includes(indexName);
+      // is anything making sure this is complete before its used?
+      const isRollupIndex = await getIsRollupIndex();
       let newRollupIndexName: string | undefined;
 
       const fetchIndices = async (query: string = '') => {
@@ -296,8 +302,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
         loadingMatchedIndices$.current.next(true);
 
+        const allSrcs = await dataViews.getIndices({
+          isRollupIndex,
+          pattern: '*',
+          showAllIndices: allowHidden,
+        });
+
         const { matchedIndicesResult, exactMatched } = !isLoadingSources
-          ? await loadMatchedIndices(query, allowHidden, dataSources$.current.getValue(), {
+          ? await loadMatchedIndices(query, allowHidden, allSrcs, {
               isRollupIndex,
               dataViews,
             })
@@ -329,9 +341,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       dataViews,
       allowHidden,
       type,
-      rollupIndicesCapabilities,
+      getIsRollupIndex,
       rollupIndex$,
-      dataSources$,
       isLoadingSources,
       matchedIndices$,
       loadingMatchedIndices$,
