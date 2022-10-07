@@ -112,8 +112,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.missingOrFail('confirmRuleCloseModal');
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/126873
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -279,21 +278,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await discardNewRuleCreation();
     });
 
-    it('should successfully test valid es_query alert', async () => {
-      const alertName = generateUniqueKey();
-      await defineEsQueryAlert(alertName);
-
-      // Valid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
-        clearWithKeyboard: true,
-      });
-      await testSubjects.click('testQuery');
-      await testSubjects.existOrFail('testQuerySuccess');
-      await testSubjects.missingOrFail('testQueryError');
-
-      await discardNewRuleCreation();
-    });
-
     it('should show error when es_query is invalid', async () => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
@@ -307,6 +291,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
+      await testSubjects.setValue('queryJsonEditor', '');
+      await discardNewRuleCreation();
+    });
+
+    it('should successfully test valid es_query alert', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
+
+      await testSubjects.setValue('queryJsonEditor', '');
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
+      // Valid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.existOrFail('testQuerySuccess');
+      await testSubjects.missingOrFail('testQueryError');
 
       await discardNewRuleCreation();
     });
