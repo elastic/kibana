@@ -24,6 +24,10 @@ export class UptimePageObject extends FtrService {
       await this.navigation.refreshApp();
     }
   }
+  
+  public async dismissTour() {
+    await this.testSubjects.click('syntheticsManagementTourDismiss');
+  }
 
   public async setDateRange(start: string, end: string) {
     const { start: prevStart, end: prevEnd } = await this.timePicker.getTimeConfig();
