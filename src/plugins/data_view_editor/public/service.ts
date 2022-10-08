@@ -141,16 +141,9 @@ export class DataViewEditorService {
     return matchedIndices;
   };
 
-  loadDataViewNames = async (dataViewName: string) => {
+  loadDataViewNames = async (dataViewName?: string) => {
     const dataViewListItems = await this.dataViews.getIdsWithTitle(dataViewName ? true : false);
     const dataViewNames = dataViewListItems.map((item) => item.name || item.title);
-
-    /*
-    existingDataViewNames$.current.next(
-      dataViewName ? dataViewNames.filter((v) => v !== dataViewName) : dataViewNames
-    );
-    isLoadingDataViewNames$.current.next(false);
-    */
     return dataViewName ? dataViewNames.filter((v) => v !== dataViewName) : dataViewNames;
   };
 
