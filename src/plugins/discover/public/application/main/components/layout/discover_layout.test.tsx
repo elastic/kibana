@@ -199,8 +199,8 @@ async function mountComponent(
     mountOptions
   );
 
-  // DiscoverLayout uses UnifiedHistogramLayout which is
-  // lazy loaded, so we need to wait for it to be loaded
+  // DiscoverMainContent uses UnifiedHistogramLayout which
+  // is lazy loaded, so we need to wait for it to be loaded
   await act(() => setTimeout(0));
 
   return component;

@@ -109,7 +109,7 @@ export const UnifiedHistogramLayout = ({
     return topPanelHeight !== defaultTopPanelHeight && panelsMode === PANELS_MODE.RESIZABLE
       ? () => onTopPanelHeightChange?.(undefined)
       : undefined;
-  }, [onTopPanelHeightChange, panelsMode]);
+  }, [defaultTopPanelHeight, onTopPanelHeightChange, panelsMode, topPanelHeight]);
 
   return (
     <>

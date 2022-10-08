@@ -27,22 +27,6 @@ describe('hits counter', function () {
     };
   });
 
-  // it('HitsCounter renders a button by providing the showResetButton property', () => {
-  //   component = mountWithIntl(<HitsCounter {...props} />);
-  //   expect(findTestSubject(component, 'resetSavedSearch').length).toBe(1);
-  // });
-
-  // it('HitsCounter not renders a button when the showResetButton property is false', () => {
-  //   component = mountWithIntl(<HitsCounter {...props} showResetButton={false} />);
-  //   expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
-  // });
-
-  // it('should reset query', function () {
-  //   component = mountWithIntl(<HitsCounter {...props} />);
-  //   findTestSubject(component, 'resetSavedSearch').simulate('click');
-  //   expect(props.onResetQuery).toHaveBeenCalled();
-  // });
-
   it('expect to render the number of hits', function () {
     component = mountWithIntl(<HitsCounter {...props} />);
     const hits = findTestSubject(component, 'unifiedHistogramQueryHits');

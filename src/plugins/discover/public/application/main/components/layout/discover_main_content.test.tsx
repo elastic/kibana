@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -26,12 +26,10 @@ import { FetchStatus } from '../../../types';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-// import { euiThemeVars } from '@kbn/ui-theme';
+import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { setTimeout } from 'timers/promises';
-// import { ReactWrapper } from 'enzyme';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
@@ -102,11 +100,15 @@ const mountComponent = async ({
   hideChart = false,
   isTimeBased = true,
   storage,
+  savedSearch = savedSearchMock,
+  resetSavedSearch = jest.fn(),
 }: {
   isPlainRecord?: boolean;
   hideChart?: boolean;
   isTimeBased?: boolean;
   storage?: Storage;
+  savedSearch?: SavedSearch;
+  resetSavedSearch?: () => void;
 } = {}) => {
   let services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -155,9 +157,9 @@ const mountComponent = async ({
     isPlainRecord,
     dataView: dataViewMock,
     navigateTo: jest.fn(),
-    resetSavedSearch: jest.fn(),
+    resetSavedSearch,
     setExpandedDoc: jest.fn(),
-    savedSearch: savedSearchMock,
+    savedSearch,
     savedSearchData$,
     savedSearchRefetch$: new Subject(),
     state: { columns: [], hideChart },
@@ -187,95 +189,14 @@ const mountComponent = async ({
     </KibanaContextProvider>
   );
 
-  // useIsWithinBreakpoints triggers state updates which cause act
-  // issues and prevent our resize events from being fired correctly
-  // https://github.com/enzymejs/enzyme/issues/2073
+  // DiscoverMainContent uses UnifiedHistogramLayout which
+  // is lazy loaded, so we need to wait for it to be loaded
   await act(() => setTimeout(0));
 
   return component;
 };
 
-// const setWindowWidth = (component: ReactWrapper, width: string) => {
-//   window.innerWidth = parseInt(width, 10);
-//   act(() => {
-//     window.dispatchEvent(new Event('resize'));
-//   });
-//   component.update();
-// };
-
 describe('Discover main content component', () => {
-  const windowWidth = window.innerWidth;
-
-  beforeEach(() => {
-    window.innerWidth = windowWidth;
-  });
-
-  // describe('PANELS_MODE', () => {
-  //   it('should set the panels mode to PANELS_MODE.RESIZABLE when viewing on medium screens and above', async () => {
-  //     const component = await mountComponent();
-  //     setWindowWidth(component, euiThemeVars.euiBreakpoints.m);
-  //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.RESIZABLE);
-  //   });
-
-  //   it('should set the panels mode to PANELS_MODE.FIXED when viewing on small screens and below', async () => {
-  //     const component = await mountComponent();
-  //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-  //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.FIXED);
-  //   });
-
-  //   it('should set the panels mode to PANELS_MODE.FIXED if hideChart is true', async () => {
-  //     const component = await mountComponent({ hideChart: true });
-  //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.FIXED);
-  //   });
-
-  //   it('should set the panels mode to PANELS_MODE.FIXED if isTimeBased is false', async () => {
-  //     const component = await mountComponent({ isTimeBased: false });
-  //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.FIXED);
-  //   });
-
-  //   it('should set the panels mode to PANELS_MODE.SINGLE if isPlainRecord is true', async () => {
-  //     const component = await mountComponent({ isPlainRecord: true });
-  //     expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.SINGLE);
-  //   });
-
-  //   it('should set a fixed height for Chart when panels mode is PANELS_MODE.FIXED and hideChart is false', async () => {
-  //     const component = await mountComponent();
-  //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-  //     const expectedHeight = component.find(Panels).prop('topPanelHeight');
-  //     expect(component.find(Chart).childAt(0).getDOMNode()).toHaveStyle({
-  //       height: `${expectedHeight}px`,
-  //     });
-  //   });
-
-  //   it('should not set a fixed height for Chart when panels mode is PANELS_MODE.FIXED and hideChart is true', async () => {
-  //     const component = await mountComponent({ hideChart: true });
-  //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-  //     const expectedHeight = component.find(Panels).prop('topPanelHeight');
-  //     expect(component.find(Chart).childAt(0).getDOMNode()).not.toHaveStyle({
-  //       height: `${expectedHeight}px`,
-  //     });
-  //   });
-
-  //   it('should not set a fixed height for Chart when panels mode is PANELS_MODE.FIXED and isTimeBased is false', async () => {
-  //     const component = await mountComponent({ isTimeBased: false });
-  //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-  //     const expectedHeight = component.find(Panels).prop('topPanelHeight');
-  //     expect(component.find(Chart).childAt(0).getDOMNode()).not.toHaveStyle({
-  //       height: `${expectedHeight}px`,
-  //     });
-  //   });
-
-  //   it('should pass undefined for onResetChartHeight to Chart when panels mode is PANELS_MODE.FIXED', async () => {
-  //     const storage = new LocalStorageMock({}) as unknown as Storage;
-  //     const topPanelHeight = 123;
-  //     storage.get = jest.fn().mockImplementation(() => topPanelHeight);
-  //     const component = await mountComponent({ storage });
-  //     expect(component.find(Chart).prop('onResetChartHeight')).toBeDefined();
-  //     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-  //     expect(component.find(Chart).prop('onResetChartHeight')).toBeUndefined();
-  //   });
-  // });
-
   describe('DocumentViewModeToggle', () => {
     it('should show DocumentViewModeToggle when isPlainRecord is false', async () => {
       const component = await mountComponent();
@@ -335,49 +256,26 @@ describe('Discover main content component', () => {
       expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
       expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(newTopPanelHeight);
     });
+  });
 
-    // it('should reset the topPanelHeight to the default when onResetChartHeight is called on Chart', async () => {
-    //   const storage = new LocalStorageMock({}) as unknown as Storage;
-    //   const originalSet = storage.set;
-    //   storage.set = jest.fn().mockImplementation(originalSet);
-    //   const component = await mountComponent({ storage });
-    //   const defaultTopPanelHeight = component.find(UnifiedHistogramLayout).prop('topPanelHeight');
-    //   const newTopPanelHeight = 123;
-    //   expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).not.toBe(
-    //     newTopPanelHeight
-    //   );
-    //   act(() => {
-    //     component.find(UnifiedHistogramLayout).prop('onTopPanelHeightChange')!(newTopPanelHeight);
-    //   });
-    //   component.update();
-    //   expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
-    //   expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(newTopPanelHeight);
-    //   act(() => {
-    //     component.find(UnifiedHistogramLayout).prop('onResetChartHeight')!();
-    //   });
-    //   component.update();
-    //   expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, defaultTopPanelHeight);
-    //   expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(
-    //     defaultTopPanelHeight
-    //   );
-    // });
-
-    it('should pass undefined for onResetChartHeight to DiscoverChart when the chart is the default height', async () => {
+  describe('reset search button', () => {
+    it('renders the button when there is a saved search', async () => {
       const component = await mountComponent();
-      const defaultTopPanelHeight = component.find(UnifiedHistogramLayout).prop('topPanelHeight');
-      const newTopPanelHeight = 123;
-      act(() => {
-        component.find(UnifiedHistogramLayout).prop('onTopPanelHeightChange')!(newTopPanelHeight);
+      expect(findTestSubject(component, 'resetSavedSearch').length).toBe(1);
+    });
+
+    it('does not render the button when there is no saved search', async () => {
+      const component = await mountComponent({
+        savedSearch: { ...savedSearchMock, id: undefined },
       });
-      component.update();
-      expect(component.find(UnifiedHistogramLayout).prop('onResetChartHeight')).toBeDefined();
-      act(() => {
-        component.find(UnifiedHistogramLayout).prop('onTopPanelHeightChange')!(
-          defaultTopPanelHeight
-        );
-      });
-      component.update();
-      expect(component.find(UnifiedHistogramLayout).prop('onResetChartHeight')).toBeUndefined();
+      expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
+    });
+
+    it('should call resetSavedSearch when clicked', async () => {
+      const resetSavedSearch = jest.fn();
+      const component = await mountComponent({ resetSavedSearch });
+      findTestSubject(component, 'resetSavedSearch').simulate('click');
+      expect(resetSavedSearch).toHaveBeenCalled();
     });
   });
 });
