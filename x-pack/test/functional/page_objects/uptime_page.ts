@@ -24,7 +24,7 @@ export class UptimePageObject extends FtrService {
       await this.navigation.refreshApp();
     }
   }
-  
+
   public async dismissTour() {
     await this.testSubjects.click('syntheticsManagementTourDismiss');
   }
