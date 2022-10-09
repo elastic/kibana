@@ -60,7 +60,7 @@ export const updateDataView = async ({
   usageCollection?.incrementCounter({ counterName });
   const dataView = await dataViewsService.get(id);
   const {
-    title,
+    title: indexPattern,
     timeFieldName,
     sourceFilters,
     fieldFormats,
@@ -74,9 +74,9 @@ export const updateDataView = async ({
   let isChanged = false;
   let doRefreshFields = false;
 
-  if (title !== undefined && title !== dataView.getIndexPattern()) {
+  if (indexPattern !== undefined && indexPattern !== dataView.getIndexPattern()) {
     isChanged = true;
-    dataView.setIndexPattern(title);
+    dataView.setIndexPattern(indexPattern);
   }
 
   if (timeFieldName !== undefined && timeFieldName !== dataView.timeFieldName) {
