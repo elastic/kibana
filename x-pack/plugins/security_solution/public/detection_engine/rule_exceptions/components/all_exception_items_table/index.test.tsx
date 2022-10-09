@@ -80,6 +80,7 @@ describe('ExceptionsViewer', () => {
 
     (useFindExceptionListReferences as jest.Mock).mockReturnValue([
       false,
+      false,
       {
         list_id: {
           _version: 'WzEzNjMzLDFd',
@@ -116,6 +117,7 @@ describe('ExceptionsViewer', () => {
           ],
         },
       },
+      jest.fn(),
     ]);
   });
 

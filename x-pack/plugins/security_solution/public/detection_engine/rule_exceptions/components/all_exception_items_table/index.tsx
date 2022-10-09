@@ -15,6 +15,7 @@ import type {
   ExceptionListItemSchema,
   UseExceptionListItemsSuccess,
   Pagination,
+  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 
@@ -183,7 +184,6 @@ const ExceptionsViewerComponent = ({
 
   useEffect(() => {
     if (fetchReferences != null && exceptionListsFormattedForReferenceQuery.length) {
-      console.log('BEING CALLED', { exceptionListsFormattedForReferenceQuery });
       fetchReferences(exceptionListsFormattedForReferenceQuery);
     }
   }, [exceptionListsFormattedForReferenceQuery, fetchReferences]);
@@ -380,7 +380,6 @@ const ExceptionsViewerComponent = ({
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
-      console.log('FETCHING ITEMS');
       handleGetExceptionListItems();
     } else {
       setViewerState('empty');
@@ -388,13 +387,13 @@ const ExceptionsViewerComponent = ({
   }, [exceptionListsToQuery.length, handleGetExceptionListItems, setViewerState]);
 
   const exceptionToEditList = useMemo(
-    () =>
+    (): ExceptionListSchema | null =>
       allReferences != null && exceptionToEdit != null
-        ? allReferences[exceptionToEdit.list_id]
+        ? (allReferences[exceptionToEdit.list_id] as ExceptionListSchema)
         : null,
     [allReferences, exceptionToEdit]
   );
-  console.log({ allReferences, currenFlyout, exceptionToEditList, exceptionToEdit, rule });
+
   return (
     <>
       {currenFlyout === 'editException' &&

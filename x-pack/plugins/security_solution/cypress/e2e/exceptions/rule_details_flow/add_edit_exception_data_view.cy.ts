@@ -156,7 +156,7 @@ describe('Add exception using data views from rule details', () => {
 
     // check that the existing item's field is being populated
     cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(0).should('have.text', ITEM_FIELD);
-    cy.get(VALUES_INPUT).should('have.text', 'bar');
+    cy.get(VALUES_INPUT).should('have.text', 'foo');
 
     // edit conditions
     editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
@@ -169,6 +169,6 @@ describe('Add exception using data views from rule details', () => {
 
     // check that updates stuck
     cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS bar');
+    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
   });
 });

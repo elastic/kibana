@@ -78,9 +78,8 @@ describe('ExceptionsAddToListsTable', () => {
     expect(mockFn).toHaveBeenCalledWith([
       {
         id: '123',
-        list_id: 'my_list_id',
-        namespace_type: 'single',
-        type: ExceptionListTypeEnum.DETECTION,
+        listId: 'my_list_id',
+        namespaceType: 'single',
       },
     ]);
     expect(wrapper.find('[data-test-subj="exceptionItemListsTableLoading"]').exists()).toBeTruthy();

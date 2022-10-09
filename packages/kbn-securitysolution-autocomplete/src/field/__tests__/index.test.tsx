@@ -115,9 +115,9 @@ describe('FieldComponent', () => {
     );
   });
 
-  test('it allows custom user input if "acceptsCustomOptions" is "true"', () => {
+  it('it allows custom user input if "acceptsCustomOptions" is "true"', async () => {
     const mockOnChange = jest.fn();
-    const wrapper = mount(
+    const wrapper = render(
       <FieldComponent
         indexPattern={{
           fields,
@@ -134,19 +134,10 @@ describe('FieldComponent', () => {
       />
     );
 
-    act(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onCreateOption: (a: string) => void;
-        }
-      ).onCreateOption('custom');
-    });
-
-    expect(mockOnChange).toHaveBeenCalledWith([
-      {
-        name: 'custom',
-        type: 'text',
-      },
-    ]);
+    const fieldAutocompleteComboBox = wrapper.getByTestId('comboBoxSearchInput');
+    fireEvent.change(fieldAutocompleteComboBox, { target: { value: 'custom' } });
+    await waitFor(() =>
+      expect(wrapper.getByTestId('fieldAutocompleteComboBox')).toHaveTextContent('custom')
+    );
   });
 });
