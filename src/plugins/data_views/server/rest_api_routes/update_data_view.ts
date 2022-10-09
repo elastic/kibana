@@ -74,9 +74,9 @@ export const updateDataView = async ({
   let isChanged = false;
   let doRefreshFields = false;
 
-  if (title !== undefined && title !== dataView.title) {
+  if (title !== undefined && title !== dataView.getIndexPattern()) {
     isChanged = true;
-    dataView.title = title;
+    dataView.setIndexPattern(title);
   }
 
   if (timeFieldName !== undefined && timeFieldName !== dataView.timeFieldName) {
