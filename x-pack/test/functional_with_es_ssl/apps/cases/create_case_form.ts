@@ -24,7 +24,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const comboBox = getService('comboBox');
     const header = getPageObject('header');
 
-    before(async () => {
+    beforeEach(async () => {
       await cases.navigation.navigateToApp();
     });
 
