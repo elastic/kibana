@@ -12,51 +12,43 @@ import {
   LoggingSystem,
   LoggingConfigType,
 } from '@kbn/core-logging-server-internal';
-import { ConfigService } from './config';
+import { getConfigService } from './config';
 import { config as kibanaConfig, KibanaService } from './kibana';
 import { config as serverConfig, Server } from './server';
 
-export function bootstrap() {
-  const configService = new ConfigService();
+export async function bootstrap() {
+  const loggingSystem = new LoggingSystem();
+  const logger = loggingSystem.asLoggerFactory();
+  const configService = getConfigService({ logger });
 
   const configDescriptors: ServiceConfigDescriptor[] = [loggingConfig, kibanaConfig, serverConfig];
   for (const { path, schema } of configDescriptors) {
     configService.setSchema(path, schema);
   }
 
-  configService
-    .start()
-    .then(async (configStart) => {
-      const loggingSystem = new LoggingSystem();
-      await loggingSystem.upgrade(configStart.atPathSync<LoggingConfigType>('logging'));
-      const logger = loggingSystem.asLoggerFactory();
-      const log = logger.get('root');
+  await configService.validate();
 
-      const server = new Server({ config: configStart, logger });
-      const serverStart = await server.start();
+  await loggingSystem.upgrade(configService.atPathSync<LoggingConfigType>('logging'));
+  const log = logger.get('root');
 
-      const kibanaService = new KibanaService({ config: configStart, logger });
-      await kibanaService.start({ server: serverStart });
+  const server = new Server({ config: configService, logger });
+  const serverStart = await server.start();
 
-      const attemptGracefulShutdown = async (exitCode: number = 0) => {
-        await server.stop();
-        kibanaService.stop();
-        await loggingSystem.stop();
-        configService.stop();
-        process.exit(exitCode);
-      };
+  const kibanaService = new KibanaService({ config: configService, logger });
+  await kibanaService.start({ server: serverStart });
 
-      process.on('unhandledRejection', async (err: Error) => {
-        log.error(err);
-        await attemptGracefulShutdown(1);
-      });
+  const attemptGracefulShutdown = async (exitCode: number = 0) => {
+    await server.stop();
+    kibanaService.stop();
+    await loggingSystem.stop();
+    process.exit(exitCode);
+  };
 
-      process.on('SIGINT', async () => await attemptGracefulShutdown());
-      process.on('SIGTERM', async () => await attemptGracefulShutdown());
-    })
-    .catch((e) => {
-      configService.stop();
-      // eslint-disable-next-line no-console
-      console.error(e);
-    });
+  process.on('unhandledRejection', async (err: Error) => {
+    log.error(err);
+    await attemptGracefulShutdown(1);
+  });
+
+  process.on('SIGINT', async () => await attemptGracefulShutdown());
+  process.on('SIGTERM', async () => await attemptGracefulShutdown());
 }

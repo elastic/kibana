@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ConfigService } from './config_service';
-export type { ConfigStart } from './config_service';
+export { getConfigService } from './config_service';

@@ -37,7 +37,6 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "@npm//@hapi/hapi",
-  "@npm//lodash",
   "@npm//node-fetch",
   "//packages/kbn-config",
   "//packages/kbn-config-mocks",
@@ -50,7 +49,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/lodash",
   "@npm//@types/hapi__hapi",
   "@npm//@types/node-fetch",
   "//packages/core/base/core-base-server-internal:npm_module_types",

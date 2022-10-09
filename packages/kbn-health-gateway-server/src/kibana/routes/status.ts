@@ -8,8 +8,8 @@
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
 import fetch, { Response } from 'node-fetch';
+import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
-import { ConfigStart } from '../../config';
 import type { KibanaConfigType } from '../kibana_config';
 
 const GATEWAY_STATUS_ROUTE = '/api/status';
@@ -17,7 +17,7 @@ const KIBANA_STATUS_ROUTE = '/api/status';
 
 interface StatusRouteDependencies {
   log: Logger;
-  config: ConfigStart;
+  config: IConfigService;
 }
 
 export function createStatusRoute({ config, log }: StatusRouteDependencies) {

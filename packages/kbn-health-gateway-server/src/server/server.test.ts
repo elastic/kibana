@@ -7,17 +7,16 @@
  */
 
 import { hapiStartMock, hapiStopMock, hapiRouteMock } from './server.test.mocks';
+import { configServiceMock, IConfigServiceMock } from '@kbn/config-mocks';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import type { ConfigStart } from '../config';
-import { configServiceMock } from '../config/config_service.mock';
 import { Server } from './server';
 
 describe('Server', () => {
-  let config: jest.Mocked<ConfigStart>;
+  let config: IConfigServiceMock;
   let logger: MockedLogger;
 
   beforeEach(() => {
-    config = configServiceMock.createStartContract();
+    config = configServiceMock.create();
     config.atPathSync.mockReturnValue({ port: 3000, host: 'localhost' });
     logger = loggerMock.create();
   });

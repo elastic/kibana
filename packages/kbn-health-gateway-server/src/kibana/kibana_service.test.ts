@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { configServiceMock, IConfigServiceMock } from '@kbn/config-mocks';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import type { ConfigStart } from '../config';
-import { configServiceMock } from '../config/config_service.mock';
 import type { ServerStart } from '../server';
 import { serverMock } from '../server/server.mock';
 import { KibanaService } from './kibana_service';
 
 describe('KibanaService', () => {
-  let config: ConfigStart;
+  let config: IConfigServiceMock;
   let logger: MockedLogger;
   let server: ServerStart;
 
   beforeEach(() => {
-    config = configServiceMock.createStartContract();
+    config = configServiceMock.create();
     logger = loggerMock.create();
     server = serverMock.createStartContract();
   });

@@ -8,13 +8,13 @@
 
 import { server } from '@hapi/hapi';
 import type { Server as HapiServer, ServerRoute as HapiServerRoute } from '@hapi/hapi';
+import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
-import { ConfigStart } from '../config';
 import type { ServerConfigType } from './server_config';
 
 interface ServerDeps {
   logger: LoggerFactory;
-  config: ConfigStart;
+  config: IConfigService;
 }
 
 type RouteDefinition = HapiServerRoute;
@@ -29,7 +29,7 @@ export interface ServerStart {
  */
 export class Server {
   private readonly log: Logger;
-  private readonly config: ConfigStart;
+  private readonly config: IConfigService;
   private server?: HapiServer;
 
   constructor({ logger, config }: ServerDeps) {

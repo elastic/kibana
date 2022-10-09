@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
-import { ConfigStart } from '../config';
 import { ServerStart } from '../server';
 import { createStatusRoute } from './routes';
 
@@ -17,7 +17,7 @@ interface KibanaServiceStartDependencies {
 
 interface KibanaServiceDependencies {
   logger: LoggerFactory;
-  config: ConfigStart;
+  config: IConfigService;
 }
 
 /**
@@ -25,7 +25,7 @@ interface KibanaServiceDependencies {
  */
 export class KibanaService {
   private readonly log: Logger;
-  private readonly config: ConfigStart;
+  private readonly config: IConfigService;
 
   constructor({ logger, config }: KibanaServiceDependencies) {
     this.log = logger.get('kibana-service');
