@@ -6,18 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { UnifiedHistogramChartData, UnifiedHistogramFetchStatus } from '../types';
 import { Chart } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { HitsCounter } from '../hits_counter';
 
 async function mountComponent({
   noChart,
+  noHits,
+  chartHidden = false,
+  appendHistogram,
   onEditVisualization = jest.fn(),
-}: { noChart?: boolean; onEditVisualization?: null | (() => void) } = {}) {
+}: {
+  noChart?: boolean;
+  noHits?: boolean;
+  chartHidden?: boolean;
+  appendHistogram?: ReactElement;
+  onEditVisualization?: null | (() => void);
+} = {}) {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -64,15 +74,17 @@ async function mountComponent({
 
   const props = {
     services: unifiedHistogramServicesMock,
-    hits: {
-      status: 'complete' as UnifiedHistogramFetchStatus,
-      number: 2,
-    },
+    hits: noHits
+      ? undefined
+      : {
+          status: 'complete' as UnifiedHistogramFetchStatus,
+          number: 2,
+        },
     chart: noChart
       ? undefined
       : {
           status: 'complete' as UnifiedHistogramFetchStatus,
-          hidden: false,
+          hidden: chartHidden,
           timeInterval: 'auto',
           bucketInterval: {
             scaled: true,
@@ -81,6 +93,7 @@ async function mountComponent({
           },
           data: chartData,
         },
+    appendHistogram,
     onEditVisualization: onEditVisualization || undefined,
     onResetChartHeight: jest.fn(),
     onChartHiddenChange: jest.fn(),
@@ -98,14 +111,14 @@ async function mountComponent({
 }
 
 describe('Chart', () => {
-  test('render without timefield', async () => {
+  test('render when chart is undefined', async () => {
     const component = await mountComponent({ noChart: true });
     expect(
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
     ).toBeFalsy();
   });
 
-  test('render with timefield without visualize permissions', async () => {
+  test('render when chart is defined and onEditVisualization is undefined', async () => {
     const component = await mountComponent({ onEditVisualization: null });
     expect(
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
@@ -115,7 +128,7 @@ describe('Chart', () => {
     ).toBeFalsy();
   });
 
-  test('render with timefield with visualize permissions', async () => {
+  test('render when chart is defined and onEditVisualization is defined', async () => {
     const component = await mountComponent();
     expect(
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
@@ -125,7 +138,23 @@ describe('Chart', () => {
     ).toBeTruthy();
   });
 
-  test('triggers ui action on click', async () => {
+  test('render when chart.hidden is true', async () => {
+    const component = await mountComponent({ chartHidden: true });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+    ).toBeTruthy();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeFalsy();
+  });
+
+  test('render when chart.hidden is false', async () => {
+    const component = await mountComponent({ chartHidden: false });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+    ).toBeTruthy();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+  });
+
+  test('triggers onEditVisualization on click', async () => {
     const fn = jest.fn();
     const component = await mountComponent({ onEditVisualization: fn });
     await act(async () => {
@@ -136,5 +165,21 @@ describe('Chart', () => {
     });
 
     expect(fn).toHaveBeenCalled();
+  });
+
+  it('should render HitsCounter when hits is defined', async () => {
+    const component = await mountComponent();
+    expect(component.find(HitsCounter).exists()).toBeTruthy();
+  });
+
+  it('should not render HitsCounter when hits is undefined', async () => {
+    const component = await mountComponent({ noHits: true });
+    expect(component.find(HitsCounter).exists()).toBeFalsy();
+  });
+
+  it('should render the element passed to appendHistogram', async () => {
+    const appendHistogram = <div data-test-subj="appendHistogram" />;
+    const component = await mountComponent({ appendHistogram });
+    expect(component.find('[data-test-subj="appendHistogram"]').exists()).toBeTruthy();
   });
 });

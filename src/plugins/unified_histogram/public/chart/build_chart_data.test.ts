@@ -75,62 +75,33 @@ describe('buildChartData', () => {
     };
   };
 
+  const expectedChartData = {
+    xAxisOrderedValues: [1664996400000, 1664998200000, 1665000000000, 1665001800000, 1665003600000],
+    xAxisFormat: { id: 'date', params: { pattern: 'HH:mm:ss.SSS' } },
+    xAxisLabel: 'timestamp per 0 milliseconds',
+    yAxisFormat: { id: 'number' },
+    ordered: {
+      date: true,
+      interval: 'P0D',
+      intervalESUnit: 'ms',
+      intervalESValue: 0,
+      min: '1991-03-29T08:04:00.694Z',
+      max: '2021-03-29T07:04:00.695Z',
+    },
+    yAxisLabel: 'Count',
+    values: [
+      { x: 1664996400000, y: 6 },
+      { x: 1664998200000, y: 2 },
+      { x: 1665000000000, y: 3 },
+      { x: 1665001800000, y: 8 },
+      { x: 1665003600000, y: 10 },
+    ],
+  };
+
   it('should return the correct data', () => {
-    expect(buildChartData(getOptions())).toMatchInlineSnapshot(`
-      Object {
-        "bucketInterval": "P0D",
-        "chartData": Object {
-          "ordered": Object {
-            "date": true,
-            "interval": "P0D",
-            "intervalESUnit": "ms",
-            "intervalESValue": 0,
-            "max": "2021-03-29T07:04:00.695Z",
-            "min": "1991-03-29T08:04:00.694Z",
-          },
-          "values": Array [
-            Object {
-              "x": 1664996400000,
-              "y": 6,
-            },
-            Object {
-              "x": 1664998200000,
-              "y": 2,
-            },
-            Object {
-              "x": 1665000000000,
-              "y": 3,
-            },
-            Object {
-              "x": 1665001800000,
-              "y": 8,
-            },
-            Object {
-              "x": 1665003600000,
-              "y": 10,
-            },
-          ],
-          "xAxisFormat": Object {
-            "id": "date",
-            "params": Object {
-              "pattern": "HH:mm:ss.SSS",
-            },
-          },
-          "xAxisLabel": "timestamp per 0 milliseconds",
-          "xAxisOrderedValues": Array [
-            1664996400000,
-            1664998200000,
-            1665000000000,
-            1665001800000,
-            1665003600000,
-          ],
-          "yAxisFormat": Object {
-            "id": "number",
-          },
-          "yAxisLabel": "Count",
-        },
-      }
-    `);
+    const { bucketInterval, chartData } = buildChartData(getOptions());
+    expect(bucketInterval!.toString()).toEqual('P0D');
+    expect(JSON.stringify(chartData)).toEqual(JSON.stringify(expectedChartData));
   });
 
   it('should return an empty object if response or timeInterval is undefined', () => {
