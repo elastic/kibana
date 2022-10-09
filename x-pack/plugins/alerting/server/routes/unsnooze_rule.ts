@@ -15,8 +15,10 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
+export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
+
 const bodySchema = schema.object({
-  schedule_ids: schema.maybe(schema.arrayOf(schema.string())),
+  schedule_ids: scheduleIdsSchema,
 });
 
 const rewriteBodyReq: RewriteRequestCase<{ scheduleIds?: string[] }> = ({

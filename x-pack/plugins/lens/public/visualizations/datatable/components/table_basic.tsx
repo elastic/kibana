@@ -452,6 +452,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           alignments,
           minMaxByColumnId,
           getColorForValue: props.paletteService.get(CUSTOM_PALETTE).getColorForValue!,
+          handleFilterClick,
         }}
       >
         <EuiDataGrid

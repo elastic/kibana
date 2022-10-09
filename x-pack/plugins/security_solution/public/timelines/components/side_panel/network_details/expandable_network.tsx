@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { NetworkDetailsLink } from '../../../../common/components/links';
@@ -20,7 +21,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { networkToCriteria } from '../../../../common/components/ml/criteria/network_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useKibana } from '../../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -28,6 +29,7 @@ import { useNetworkDetails } from '../../../../network/containers/details';
 import { networkModel } from '../../../../network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { LandingCards } from '../../../../common/components/landing_cards';
+import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 interface ExpandableNetworkProps {
   expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
@@ -86,7 +88,7 @@ export const ExpandableNetworkDetails = ({
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: fromTo.from,
           to: fromTo.to,
         })
@@ -114,12 +116,14 @@ export const ExpandableNetworkDetails = ({
   });
 
   useInvalidFilterQuery({ id, filterQuery, kqlError, query, startDate: from, endDate: to });
-
+  const { jobIds } = useInstalledSecurityJobsIds();
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(ip, flowTarget),
     startDate: from,
     endDate: to,
     skip: isInitializing,
+    jobIds,
+    aggregationInterval: 'auto',
   });
 
   return indicesExist ? (

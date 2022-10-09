@@ -4,30 +4,56 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useState, useCallback, ChangeEvent, MouseEvent } from 'react';
-import { EuiPanel, EuiRange, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButton,
+  EuiBetaBadge,
+} from '@elastic/eui';
+import useResizeObserver from 'use-resize-observer';
+import { throttle } from 'lodash';
+import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
+import {
+  DEFAULT_TTY_ROWS,
+  DEFAULT_TTY_COLS,
+  DEFAULT_TTY_FONT_SIZE,
+} from '../../../common/constants';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
+import { TTYPlayerControls } from '../tty_player_controls';
+import { BETA, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
-  sessionEntityId: string; // TODO: we should not load by session id, but instead a combo of process.tty.major+minor, session time range, and host.boot_id (see Rabbitholes section of epic).
+  show: boolean;
+  sessionEntityId: string;
   onClose(): void;
   isFullscreen: boolean;
+  onJumpToEvent(event: ProcessEvent): void;
+  autoSeekToEntityId?: string;
 }
 
-const DEFAULT_FONT_SIZE = 11;
-
-export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerDeps) => {
+export const TTYPlayer = ({
+  show,
+  sessionEntityId,
+  onClose,
+  isFullscreen,
+  onJumpToEvent,
+  autoSeekToEntityId,
+}: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});
 
-  const { data, fetchNextPage, hasNextPage } = useFetchIOEvents(sessionEntityId);
-  const lines = useIOLines(data?.pages);
-
-  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+  const { data, fetchNextPage, hasNextPage, isFetching, refetch } =
+    useFetchIOEvents(sessionEntityId);
+  const { lines, processStartMarkers } = useIOLines(data?.pages);
+  const [fontSize, setFontSize] = useState(DEFAULT_TTY_FONT_SIZE);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentAutoSeekEntityId, setCurrentAutoSeekEntityId] = useState('');
 
   const { search, currentLine, seekToLine } = useXtermPlayer({
     ref,
@@ -37,41 +63,111 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
     fontSize,
     hasNextPage,
     fetchNextPage,
+    isFetching,
   });
 
-  const tty = lines?.[currentLine]?.event?.process?.tty;
-  const styles = useStyles(tty);
+  const currentProcessEvent = lines[Math.min(lines.length - 1, currentLine)]?.event;
+  const tty = currentProcessEvent?.process?.tty;
 
-  const onLineChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
-      const line = parseInt((event?.target as HTMLInputElement).value || '0', 10);
+  useEffect(() => {
+    if (show) {
+      // refetch the most recent page when tty player is loaded
+      refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+    }
+  }, [refetch, show]);
+
+  useEffect(() => {
+    if (
+      autoSeekToEntityId &&
+      currentAutoSeekEntityId !== autoSeekToEntityId &&
+      currentProcessEvent?.process?.entity_id !== autoSeekToEntityId
+    ) {
+      const foundMarker = processStartMarkers.find((marker) => {
+        if (marker.event.process?.entity_id === autoSeekToEntityId) {
+          return true;
+        }
+        return false;
+      });
+
+      if (foundMarker) {
+        seekToLine(foundMarker.line);
+        setCurrentAutoSeekEntityId(autoSeekToEntityId);
+      } else {
+        seekToLine(lines.length - 1); // seek to end to force next page to load.
+      }
+    }
+  }, [
+    autoSeekToEntityId,
+    currentAutoSeekEntityId,
+    currentProcessEvent?.process?.entity_id,
+    lines.length,
+    processStartMarkers,
+    seekToLine,
+  ]);
+
+  const validTTY = tty?.rows && tty?.rows > 1 && tty?.rows < 1000;
+  if (tty && !validTTY) {
+    tty.rows = DEFAULT_TTY_ROWS;
+    tty.columns = DEFAULT_TTY_COLS;
+  }
+
+  const styles = useStyles(tty, show);
+
+  const onSeekLine = useMemo(() => {
+    return throttle((line: number) => {
       seekToLine(line);
-      setIsPlaying(false);
-    },
-    [seekToLine]
-  );
+    }, 100);
+  }, [seekToLine]);
 
   const onTogglePlayback = useCallback(() => {
+    // if at the end, seek to beginning
+    if (currentLine >= lines.length - 1) {
+      seekToLine(0);
+    }
     setIsPlaying(!isPlaying);
-  }, [isPlaying]);
+  }, [currentLine, isPlaying, lines.length, seekToLine]);
 
   return (
     <div css={styles.container}>
-      <EuiPanel hasShadow={false} borderRadius="none">
+      <EuiPanel hasShadow={false} borderRadius="none" hasBorder={false} css={styles.header}>
         <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
+          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
-            <TTYSearchBar lines={lines} seekToLine={seekToLine} xTermSearchFn={search} />
+            <TTYSearchBar
+              lines={lines}
+              seekToLine={seekToLine}
+              xTermSearchFn={search}
+              setIsPlaying={setIsPlaying}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              iconType="cross"
-              display="empty"
-              size="m"
-              aria-label="TTY Output Close Button"
-              data-test-subj="sessionView:TTYCloseBtn"
+              isSelected={true}
+              display="fill"
+              isLoading={isFetching}
+              iconType="apmTrace"
               onClick={onClose}
+              size="m"
+              aria-label={TOGGLE_TTY_PLAYER}
+              data-test-subj="sessionView:TTYPlayerClose"
             />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType="refresh" display="empty" size="m" disabled={true} />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType="eye" disabled={true} size="m" />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="list" disabled={true}>
+              {DETAIL_PANEL}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
@@ -80,42 +176,26 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
         <div ref={ref} data-test-subj="sessionView:TTYPlayer" css={styles.terminal} />
       </div>
 
-      {/* the following will be replaced by a new <TTYPlayerControls/> component */}
-      <EuiPanel
-        data-test-subj="sessionView:TTYPlayerControls"
-        hasShadow={false}
-        borderRadius="none"
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType={isPlaying ? 'pause' : 'play'}
-              display="empty"
-              size="m"
-              aria-label="TTY Play Button"
-              onClick={onTogglePlayback}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiRange
-              value={currentLine}
-              min={0}
-              max={Math.max(0, lines.length - 1)}
-              onChange={onLineChange}
-              fullWidth
-              showInput
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TTYTextSizer
-              tty={tty}
-              containerHeight={scrollRef?.current?.offsetHeight || 0}
-              fontSize={fontSize}
-              onFontSizeChanged={setFontSize}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <TTYPlayerControls
+        currentProcessEvent={currentProcessEvent}
+        processStartMarkers={processStartMarkers}
+        isPlaying={isPlaying}
+        currentLine={currentLine}
+        linesLength={lines.length}
+        onSeekLine={onSeekLine}
+        onTogglePlayback={onTogglePlayback}
+        onClose={onClose}
+        onJumpToEvent={onJumpToEvent}
+        textSizer={
+          <TTYTextSizer
+            tty={tty}
+            containerHeight={containerHeight}
+            fontSize={fontSize}
+            onFontSizeChanged={setFontSize}
+            isFullscreen={isFullscreen}
+          />
+        }
+      />
     </div>
   );
 };

@@ -20,9 +20,7 @@ interface SetupParams {
 }
 
 const setup = async ({ useHash = false }: SetupParams = {}) => {
-  const locator = new DiscoverAppLocatorDefinition({
-    useHash,
-  });
+  const locator = new DiscoverAppLocatorDefinition({ useHash });
 
   return {
     locator,
@@ -228,6 +226,18 @@ describe('Discover url generator', () => {
     const { path: legacyParamsPath } = await locator.getLocation({ indexPatternId: dataViewId });
 
     expect(path).toEqual(legacyParamsPath);
+  });
+
+  test('should create data view when dataViewSpec is used', async () => {
+    const dataViewSpecMock = {
+      id: 'mock-id',
+      title: 'mock-title',
+      timeFieldName: 'mock-time-field-name',
+    };
+    const { locator } = await setup();
+    const { state } = await locator.getLocation({ dataViewSpec: dataViewSpecMock });
+
+    expect(state.dataViewSpec).toEqual(dataViewSpecMock);
   });
 
   describe('useHash property', () => {

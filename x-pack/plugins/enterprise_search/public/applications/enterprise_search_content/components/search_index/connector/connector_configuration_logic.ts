@@ -21,7 +21,7 @@ import {
   ConnectorConfigurationApiLogic,
   PostConnectorConfigurationArgs,
   PostConnectorConfigurationResponse,
-} from '../../../api/connector_package/update_connector_configuration_api_logic';
+} from '../../../api/connector/update_connector_configuration_api_logic';
 import {
   FetchIndexApiLogic,
   FetchIndexApiParams,
@@ -89,13 +89,15 @@ export const ConnectorConfigurationLogic = kea<
   }),
   listeners: ({ actions, values }) => ({
     apiError: (error) => flashAPIErrors(error),
-    apiSuccess: () =>
+    apiSuccess: ({ indexName }) => {
       flashSuccessToast(
         i18n.translate(
           'xpack.enterpriseSearch.content.indices.configurationConnector.configuration.successToast.title',
           { defaultMessage: 'Configuration successfully updated' }
         )
-      ),
+      );
+      FetchIndexApiLogic.actions.makeRequest({ indexName });
+    },
     fetchIndexApiSuccess: (index) => {
       if (!values.isEditing && isConnectorIndex(index)) {
         actions.setConfigState(index.connector.configuration);

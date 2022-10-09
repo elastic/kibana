@@ -22,13 +22,6 @@ export const getFetchEventAnnotationsMeta: () => Omit<
     defaultMessage: 'Fetch event annotations',
   }),
   args: {
-    timezone: {
-      aliases: ['tz'],
-      types: ['string'],
-      help: i18n.translate('eventAnnotation.fetchEventAnnotations.timezone.help', {
-        defaultMessage: 'The timezone to use for date operations. Valid IANA format.',
-      }),
-    },
     groups: {
       types: ['event_annotation_group'],
       help: i18n.translate('eventAnnotation.fetchEventAnnotations.args.annotationConfigs', {

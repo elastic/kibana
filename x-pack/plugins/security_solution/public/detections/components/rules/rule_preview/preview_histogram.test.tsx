@@ -30,6 +30,13 @@ const getMockIndexPattern = (): DataViewBase => ({
   title: 'logstash-*',
 });
 
+const getLastMonthTimeframe = () => ({
+  timeframeStart: moment().subtract(1, 'month'),
+  timeframeEnd: moment(),
+  interval: '5m',
+  lookback: '1m',
+});
+
 describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();
 
@@ -63,7 +70,7 @@ describe('PreviewHistogram', () => {
         <TestProviders>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
-            timeFrame="M"
+            timeframeOptions={getLastMonthTimeframe()}
             previewId={'test-preview-id'}
             spaceId={'default'}
             ruleType={'query'}
@@ -94,7 +101,7 @@ describe('PreviewHistogram', () => {
         <TestProviders>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
-            timeFrame="M"
+            timeframeOptions={getLastMonthTimeframe()}
             previewId={'test-preview-id'}
             spaceId={'default'}
             ruleType={'query'}
@@ -146,12 +153,11 @@ describe('PreviewHistogram', () => {
         <TestProviders>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
-            timeFrame="M"
             previewId={'test-preview-id'}
             spaceId={'default'}
             ruleType={'query'}
             indexPattern={getMockIndexPattern()}
-            advancedOptions={{
+            timeframeOptions={{
               timeframeStart: moment(start, format),
               timeframeEnd: moment(end, format),
               interval: '5m',

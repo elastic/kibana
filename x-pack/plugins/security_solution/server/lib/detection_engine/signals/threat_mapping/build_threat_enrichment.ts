@@ -11,7 +11,6 @@ import type { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 import { getThreatList } from './get_threat_list';
 
 export const buildThreatEnrichment = ({
-  exceptionItems,
   ruleExecutionLogger,
   services,
   threatFilters,
@@ -22,6 +21,7 @@ export const buildThreatEnrichment = ({
   pitId,
   reassignPitId,
   listClient,
+  exceptionFilter,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   const getMatchedThreats: GetMatchedThreats = async (ids) => {
     const matchedThreatsFilter = {
@@ -35,7 +35,6 @@ export const buildThreatEnrichment = ({
     };
     const threatResponse = await getThreatList({
       esClient: services.scopedClusterClient.asCurrentUser,
-      exceptionItems,
       index: threatIndex,
       language: threatLanguage,
       perPage: undefined,
@@ -51,6 +50,7 @@ export const buildThreatEnrichment = ({
       reassignPitId,
       runtimeMappings: undefined,
       listClient,
+      exceptionFilter,
     });
 
     return threatResponse.hits.hits;

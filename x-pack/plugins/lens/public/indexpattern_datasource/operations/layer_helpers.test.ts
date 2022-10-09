@@ -102,6 +102,8 @@ const indexPattern = {
   hasRestrictions: false,
   fields: indexPatternFields,
   getFieldByName: getFieldByNameFactory([...indexPatternFields, documentField]),
+  isPersisted: true,
+  spec: {},
 };
 
 describe('state_helpers', () => {
@@ -188,6 +190,7 @@ describe('state_helpers', () => {
             layerId: 'layer',
             dataView: indexPattern,
             filterOperations: () => true,
+            indexPatternId: '1',
           },
           target: {
             columnId: 'copy',
@@ -195,6 +198,7 @@ describe('state_helpers', () => {
             dataView: indexPattern,
             layerId: 'layer',
             filterOperations: () => true,
+            indexPatternId: '1',
           },
           shouldDeleteSource: false,
         }).layer
@@ -1383,6 +1387,7 @@ describe('state_helpers', () => {
     it('should execute adjustments for other columns when creating a reference', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
+        customLabel: true,
         dataType: 'string',
         isBucketed: true,
 
@@ -2819,6 +2824,8 @@ describe('state_helpers', () => {
       hasRestrictions: true,
       getFieldByName: getFieldByNameFactory(fields),
       fields,
+      isPersisted: true,
+      spec: {},
     };
 
     it('should switch index pattern id in layer', () => {

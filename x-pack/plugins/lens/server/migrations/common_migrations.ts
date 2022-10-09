@@ -30,9 +30,12 @@ import {
   LensDocShape810,
   LensDocShape830,
   VisStatePre830,
-  LensDocShape840,
+  XYVisStatePre850,
+  VisState850,
+  LensDocShape850,
 } from './types';
 import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState } from '../../common';
+import { isPartitionShape } from '../../common/visualizations';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -421,20 +424,102 @@ export const commonFixValueLabelsInXY = (
   };
 };
 
+export const commonEnrichAnnotationLayer = (
+  attributes: LensDocShape850<XYVisStatePre850>
+): LensDocShape850<VisState850> => {
+  // Skip the migration heavy part if not XY or it does not contain annotations
+  if (
+    attributes.visualizationType !== 'lnsXY' ||
+    attributes.state.visualization.layers.every((l) => l.layerType !== 'annotations')
+  ) {
+    return attributes as LensDocShape850<VisState850>;
+  }
+  const newAttributes = cloneDeep(attributes);
+  const { visualization } = newAttributes.state;
+  const { layers } = visualization;
+  return {
+    ...newAttributes,
+    state: {
+      ...newAttributes.state,
+      visualization: {
+        ...visualization,
+        layers: layers.map((l) => {
+          if (l.layerType !== 'annotations') {
+            return l;
+          }
+          return {
+            ...l,
+            annotations: l.annotations.map((a) => ({ ...a, type: 'manual' })),
+            ignoreGlobalFilters: true,
+          };
+        }),
+      },
+    },
+  };
+};
+
 export const commonMigrateMetricIds = (
-  attributes: LensDocShape840<unknown>
-): LensDocShape840<unknown> => {
+  attributes: LensDocShape850<unknown>
+): LensDocShape850<unknown> => {
   const typeMappings = {
     lnsMetric: 'lnsLegacyMetric',
     lnsMetricNew: 'lnsMetric',
   } as Record<string, string>;
 
   if (!attributes.visualizationType || !(attributes.visualizationType in typeMappings)) {
-    return attributes as LensDocShape840<unknown>;
+    return attributes as LensDocShape850<unknown>;
   }
 
   const newAttributes = cloneDeep(attributes);
   newAttributes.visualizationType = typeMappings[attributes.visualizationType];
 
   return newAttributes;
+};
+
+export const commonMigratePartitionChartGroups = (
+  attributes: LensDocShape850<{
+    shape: string;
+    layers: Array<{ groups?: string[] }>;
+  }>
+): LensDocShape850<{
+  shape: string;
+  layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
+}> => {
+  if (
+    attributes.state.visualization?.layers &&
+    isPartitionShape(attributes.state.visualization.shape)
+  ) {
+    return {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        visualization: {
+          ...attributes.state.visualization,
+          layers: attributes.state.visualization.layers.map((l) => {
+            const groups = l.groups;
+
+            if (groups) {
+              delete l.groups;
+              if (attributes.state.visualization.shape === 'mosaic') {
+                return {
+                  ...l,
+                  primaryGroups: [groups[0]],
+                  secondaryGroups: groups.length === 2 ? [groups[1]] : undefined,
+                };
+              }
+              return {
+                ...l,
+                primaryGroups: groups,
+              };
+            }
+            return l;
+          }),
+        },
+      },
+    };
+  }
+  return attributes as LensDocShape850<{
+    shape: string;
+    layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
+  }>;
 };

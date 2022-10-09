@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/synthetic-package-map",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

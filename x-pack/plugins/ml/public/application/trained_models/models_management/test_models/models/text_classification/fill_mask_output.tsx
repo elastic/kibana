@@ -20,6 +20,7 @@ const FillMaskOutput: FC<{
   inferrer: FillMaskInference;
 }> = ({ inferrer }) => {
   const result = useObservable(inferrer.inferenceResult$);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const title = useMemo(() => inferrer.predictedValue(), []);
 
   if (!result) {

@@ -26,24 +26,24 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
   }),
   inputTypes: ['null'],
   args: {
+    id: {
+      required: true,
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.id', {
+        defaultMessage: `The id of the annotation`,
+      }),
+    },
     filter: {
       types: ['kibana_query'],
       help: i18n.translate('eventAnnotation.queryAnnotation.args.filter', {
         defaultMessage: `Annotation filter`,
       }),
-      required: true,
     },
     extraFields: {
       multi: true,
       types: ['string'],
       help: i18n.translate('eventAnnotation.queryAnnotation.args.field', {
         defaultMessage: `The extra fields of the annotation`,
-      }),
-    },
-    id: {
-      types: ['string'],
-      help: i18n.translate('eventAnnotation.queryAnnotation.args.id', {
-        defaultMessage: `The id of the annotation`,
       }),
     },
     timeField: {
@@ -102,6 +102,13 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
       help: i18n.translate('eventAnnotation.queryAnnotation.args.isHidden', {
         defaultMessage: `Switch to hide annotation`,
       }),
+    },
+    ignoreGlobalFilters: {
+      types: ['boolean'],
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.ignoreGlobalFilters', {
+        defaultMessage: `Switch to ignore global filters for the annotation`,
+      }),
+      default: true,
     },
   },
   fn: function fn(input: unknown, args: QueryPointEventAnnotationArgs) {

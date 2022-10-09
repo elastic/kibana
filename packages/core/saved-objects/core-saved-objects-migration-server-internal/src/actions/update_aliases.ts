@@ -14,7 +14,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { IndexNotFound } from '.';
+import { DEFAULT_TIMEOUT, IndexNotFound } from '.';
 
 export interface AliasNotFound {
   type: 'alias_not_found_exception';
@@ -35,6 +35,7 @@ export type AliasAction =
 export interface UpdateAliasesParams {
   client: ElasticsearchClient;
   aliasActions: AliasAction[];
+  timeout?: string;
 }
 /**
  * Calls the Update index alias API `_alias` with the provided alias actions.
@@ -43,6 +44,7 @@ export const updateAliases =
   ({
     client,
     aliasActions,
+    timeout = DEFAULT_TIMEOUT,
   }: UpdateAliasesParams): TaskEither.TaskEither<
     IndexNotFound | AliasNotFound | RemoveIndexNotAConcreteIndex | RetryableEsClientError,
     'update_aliases_succeeded'
@@ -50,9 +52,8 @@ export const updateAliases =
   () => {
     return client.indices
       .updateAliases({
-        body: {
-          actions: aliasActions,
-        },
+        actions: aliasActions,
+        timeout,
       })
       .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts

@@ -92,6 +92,7 @@ export const SupportedFieldsMessage: FC<Props> = ({ jobType }) => {
     if (jobType !== undefined) {
       validateFields();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobType]);
 
   if (sourceIndexContainsSupportedFields === true) return null;

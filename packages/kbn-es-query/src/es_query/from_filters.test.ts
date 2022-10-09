@@ -15,6 +15,7 @@ describe('build query', () => {
   const indexPattern: DataViewBase = {
     fields,
     title: 'dataView',
+    id: '1',
   };
 
   describe('buildQueryFromFilters', () => {
@@ -200,6 +201,44 @@ describe('build query', () => {
 
       const result = buildQueryFromFilters(filters, indexPattern, { nestedIgnoreUnmapped: true });
       expect(result.filter).toEqual(expectedESQueries);
+    });
+
+    test('should work with multiple data views', () => {
+      const indexPattern2: DataViewBase = {
+        fields,
+        title: 'dataView',
+        id: '2',
+      };
+
+      const filters = [
+        {
+          query: { query_string: { query: 'foo' } },
+          meta: { index: '1' },
+        },
+        {
+          query: { query_string: { query: 'bar' } },
+          meta: { index: '2' },
+        },
+      ] as Filter[];
+
+      const result = buildQueryFromFilters(filters, [indexPattern, indexPattern2], {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
+
+      expect(result.filter).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "query_string": Object {
+              "query": "foo",
+            },
+          },
+          Object {
+            "query_string": Object {
+              "query": "bar",
+            },
+          },
+        ]
+      `);
     });
   });
 });

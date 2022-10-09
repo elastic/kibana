@@ -16,12 +16,11 @@ import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   isSortableByColumn,
-  computeOrderForMultiplePercentiles,
 } from './helpers';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
-import type { PercentileIndexPatternColumn } from '../percentile';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
+import { MovingAverageIndexPatternColumn } from '../calculations';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -145,6 +144,32 @@ describe('getDisallowedTermsMessage()', () => {
     expect(
       getDisallowedTermsMessage(
         getLayer(getStringBasedOperationColumn(), [getCountOperationColumn({ timeShift: '1w' })]),
+        'col1',
+        indexPattern
+      )
+    ).toBeUndefined();
+  });
+
+  it('should return no error for a single dimension shifted which is wrapped in a referencing column', () => {
+    expect(
+      getDisallowedTermsMessage(
+        getLayer(getStringBasedOperationColumn(), [
+          // count will inherit the shift from the moving average
+          getCountOperationColumn({ timeShift: undefined }),
+          {
+            label: 'Moving average',
+            dataType: 'number',
+            operationType: 'moving_average',
+            isBucketed: false,
+            scale: 'ratio',
+            references: ['col2'],
+            timeShift: '3h',
+            params: {
+              window: 5,
+            },
+            customLabel: true,
+          } as MovingAverageIndexPatternColumn,
+        ]),
         'col1',
         indexPattern
       )
@@ -380,138 +405,6 @@ describe('getDisallowedTermsMessage()', () => {
         },
       })
     );
-  });
-});
-
-describe('computeOrderForMultiplePercentiles()', () => {
-  it('should return null for no percentile orderColumn', () => {
-    expect(
-      computeOrderForMultiplePercentiles(
-        {
-          label: 'Percentile rank (1024.5) of bytes',
-          dataType: 'number',
-          operationType: 'percentile_rank',
-          sourceField: 'bytes',
-          isBucketed: false,
-          scale: 'ratio',
-          params: { value: 1024.5 },
-        } as PercentileRanksIndexPatternColumn,
-        getLayer(getStringBasedOperationColumn(), [
-          {
-            label: 'Percentile rank (1024.5) of bytes',
-            dataType: 'number',
-            operationType: 'percentile_rank',
-            sourceField: 'bytes',
-            isBucketed: false,
-            scale: 'ratio',
-            params: { value: 1024.5 },
-          } as PercentileRanksIndexPatternColumn,
-        ]),
-        ['col1', 'col2']
-      )
-    ).toBeNull();
-  });
-
-  it('should return null for single percentile', () => {
-    expect(
-      computeOrderForMultiplePercentiles(
-        {
-          label: 'Percentile 95 of bytes',
-          dataType: 'number',
-          operationType: 'percentile',
-          sourceField: 'bytes',
-          isBucketed: false,
-          scale: 'ratio',
-          params: { percentile: 95 },
-        } as PercentileIndexPatternColumn,
-        getLayer(getStringBasedOperationColumn(), [
-          {
-            label: 'Percentile 95 of bytes',
-            dataType: 'number',
-            operationType: 'percentile',
-            sourceField: 'bytes',
-            isBucketed: false,
-            scale: 'ratio',
-            params: { percentile: 95 },
-          } as PercentileIndexPatternColumn,
-        ]),
-        ['col1', 'col2']
-      )
-    ).toBeNull();
-  });
-
-  it('should return correct orderBy for multiple percentile on the same field', () => {
-    expect(
-      computeOrderForMultiplePercentiles(
-        {
-          label: 'Percentile 95 of bytes',
-          dataType: 'number',
-          operationType: 'percentile',
-          sourceField: 'bytes',
-          isBucketed: false,
-          scale: 'ratio',
-          params: { percentile: 95 },
-        } as PercentileIndexPatternColumn,
-        getLayer(getStringBasedOperationColumn(), [
-          {
-            label: 'Percentile 95 of bytes',
-            dataType: 'number',
-            operationType: 'percentile',
-            sourceField: 'bytes',
-            isBucketed: false,
-            scale: 'ratio',
-            params: { percentile: 95 },
-          } as PercentileIndexPatternColumn,
-          {
-            label: 'Percentile 65 of bytes',
-            dataType: 'number',
-            operationType: 'percentile',
-            sourceField: 'bytes',
-            isBucketed: false,
-            scale: 'ratio',
-            params: { percentile: 65 },
-          } as PercentileIndexPatternColumn,
-        ]),
-        ['col1', 'col2', 'col3']
-      )
-    ).toBe('1.95');
-  });
-
-  it('should return null for multiple percentile on different field', () => {
-    expect(
-      computeOrderForMultiplePercentiles(
-        {
-          label: 'Percentile 95 of bytes',
-          dataType: 'number',
-          operationType: 'percentile',
-          sourceField: 'bytes',
-          isBucketed: false,
-          scale: 'ratio',
-          params: { percentile: 95 },
-        } as PercentileIndexPatternColumn,
-        getLayer(getStringBasedOperationColumn(), [
-          {
-            label: 'Percentile 95 of bytes',
-            dataType: 'number',
-            operationType: 'percentile',
-            sourceField: 'bytes',
-            isBucketed: false,
-            scale: 'ratio',
-            params: { percentile: 95 },
-          } as PercentileIndexPatternColumn,
-          {
-            label: 'Percentile 65 of geo',
-            dataType: 'number',
-            operationType: 'percentile',
-            sourceField: 'geo',
-            isBucketed: false,
-            scale: 'ratio',
-            params: { percentile: 65 },
-          } as PercentileIndexPatternColumn,
-        ]),
-        ['col1', 'col2', 'col3']
-      )
-    ).toBeNull();
   });
 });
 

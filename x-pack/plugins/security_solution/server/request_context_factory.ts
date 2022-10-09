@@ -61,7 +61,7 @@ export class RequestContextFactory implements IRequestContextFactory {
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
     const { config, core, plugins, endpointAppContextService, ruleExecutionLogService } = options;
-    const { lists, ruleRegistry, security } = plugins;
+    const { lists, ruleRegistry, security, licensing, osquery } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
@@ -79,6 +79,9 @@ export class RequestContextFactory implements IRequestContextFactory {
         (await context.fleet)?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
     }
 
+    const isEndpointRbacEnabled =
+      endpointAppContextService.experimentalFeatures.endpointRbacEnabled;
+
     const coreContext = await context.core;
 
     return {
@@ -92,7 +95,12 @@ export class RequestContextFactory implements IRequestContextFactory {
             endpointAuthz = getEndpointAuthzInitialState();
           } else {
             const userRoles = security?.authc.getCurrentUser(request)?.roles ?? [];
-            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
+            endpointAuthz = calculateEndpointAuthz(
+              licenseService,
+              fleetAuthz,
+              userRoles,
+              isEndpointRbacEnabled
+            );
           }
         }
 
@@ -132,6 +140,11 @@ export class RequestContextFactory implements IRequestContextFactory {
       getScopedFleetServices: memoize((req: KibanaRequest) =>
         endpointAppContextService.getScopedFleetServices(req)
       ),
+
+      getQueryRuleAdditionalOptions: {
+        licensing,
+        osqueryCreateAction: osquery.osqueryCreateAction,
+      },
     };
   }
 }

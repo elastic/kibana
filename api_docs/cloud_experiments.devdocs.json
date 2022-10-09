@@ -1,0 +1,257 @@
+{
+  "id": "cloudExperiments",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "cloudExperiments",
+        "id": "def-common.CloudExperimentsMetric",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudExperimentsMetric",
+        "description": [
+          "\nDefinition of the metric to report back to the A/B testing service to measure the conversions.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "cloudExperiments",
+            "scope": "common",
+            "docId": "kibCloudExperimentsPluginApi",
+            "section": "def-common.CloudExperimentsMetric",
+            "text": "CloudExperimentsMetric"
+          },
+          "<Data>"
+        ],
+        "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudExperiments",
+            "id": "def-common.CloudExperimentsMetric.name",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nThe name of the metric {@link CloudExperimentsMetricNames}"
+            ],
+            "signature": [
+              "never"
+            ],
+            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudExperiments",
+            "id": "def-common.CloudExperimentsMetric.meta",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nAny optional data to enrich the context of the metric. Or if the conversion is based on a non-numeric value."
+            ],
+            "signature": [
+              "Data | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudExperiments",
+            "id": "def-common.CloudExperimentsMetric.value",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "\nThe numeric value of the metric. Bear in mind that they are averaged by the underlying solution.\nTypical values to report here are time-to-action, number of panels in a loaded dashboard, and page load time."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudExperiments",
+        "id": "def-common.CloudExperimentsPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudExperimentsPluginStart",
+        "description": [
+          "\nThe contract of the start lifecycle method\n"
+        ],
+        "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudExperiments",
+            "id": "def-common.CloudExperimentsPluginStart.getVariation",
+            "type": "Function",
+            "tags": [],
+            "label": "getVariation",
+            "description": [
+              "\nFetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`."
+            ],
+            "signature": [
+              "<Data>(featureFlagName: \"security-solutions.add-integrations-url\", defaultValue: Data) => Promise<Data>"
+            ],
+            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "cloudExperiments",
+                "id": "def-common.CloudExperimentsPluginStart.getVariation.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureFlagName",
+                "description": [
+                  "The name of the key to find the config variation. {@link CloudExperimentsFeatureFlagNames }."
+                ],
+                "signature": [
+                  "\"security-solutions.add-integrations-url\""
+                ],
+                "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cloudExperiments",
+                "id": "def-common.CloudExperimentsPluginStart.getVariation.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "defaultValue",
+                "description": [
+                  "The fallback value in case no variation is found."
+                ],
+                "signature": [
+                  "Data"
+                ],
+                "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cloudExperiments",
+            "id": "def-common.CloudExperimentsPluginStart.reportMetric",
+            "type": "Function",
+            "tags": [],
+            "label": "reportMetric",
+            "description": [
+              "\nReport metrics back to the A/B testing service to measure the conversion rate for each variation in the experiment."
+            ],
+            "signature": [
+              "<Data>(metric: ",
+              {
+                "pluginId": "cloudExperiments",
+                "scope": "common",
+                "docId": "kibCloudExperimentsPluginApi",
+                "section": "def-common.CloudExperimentsMetric",
+                "text": "CloudExperimentsMetric"
+              },
+              "<Data>) => void"
+            ],
+            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "cloudExperiments",
+                "id": "def-common.CloudExperimentsPluginStart.reportMetric.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "metric",
+                "description": [
+                  "{@link CloudExperimentsMetric }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "cloudExperiments",
+                    "scope": "common",
+                    "docId": "kibCloudExperimentsPluginApi",
+                    "section": "def-common.CloudExperimentsMetric",
+                    "text": "CloudExperimentsMetric"
+                  },
+                  "<Data>"
+                ],
+                "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "cloudExperiments",
+        "id": "def-common.CloudExperimentsFeatureFlagNames",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudExperimentsFeatureFlagNames",
+        "description": [
+          "\nThe names of the feature flags declared in Kibana.\nValid keys are defined in {@link FEATURE_FLAG_NAMES}. When using a new feature flag, add the name to the list.\n"
+        ],
+        "signature": [
+          "\"security-solutions.add-integrations-url\""
+        ],
+        "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudExperiments",
+        "id": "def-common.CloudExperimentsMetricNames",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudExperimentsMetricNames",
+        "description": [
+          "\nThe names of the metrics declared in Kibana.\nValid keys are defined in {@link METRIC_NAMES}. When reporting a new metric, add the name to the list.\n"
+        ],
+        "signature": [
+          "never"
+        ],
+        "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -117,7 +117,7 @@ export const alertCommentWithIndices: AlertComment = {
   version: 'WzQ3LDFc',
 };
 
-export const hostIsolationComment: () => Comment = () => {
+export const hostIsolationComment = (overrides?: Record<string, unknown>): Comment => {
   return {
     type: CommentType.actions,
     comment: 'I just isolated the host!',
@@ -139,6 +139,7 @@ export const hostIsolationComment: () => Comment = () => {
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
+    ...overrides,
   };
 };
 
@@ -228,7 +229,8 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
-  assignees: [],
+  // damaged_raccoon uid
+  assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
 };
 
 export const caseWithAlerts = {
@@ -397,7 +399,7 @@ const basicAction = {
 
 export const cases: Case[] = [
   basicCase,
-  { ...pushedCase, id: '1', totalComment: 0, comments: [] },
+  { ...pushedCase, id: '1', totalComment: 0, comments: [], status: CaseStatuses['in-progress'] },
   { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
@@ -553,16 +555,15 @@ export const pushedCaseSnake = {
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
 };
 
-export const reporters: string[] = ['alexis', 'kim', 'maria', 'steph'];
-export const respReporters = [
-  { username: 'alexis', full_name: null, email: null },
-  { username: 'kim', full_name: null, email: null },
-  { username: 'maria', full_name: null, email: null },
-  { username: 'steph', full_name: null, email: null },
-];
 export const casesSnake: CasesResponse = [
   basicCaseSnake,
-  { ...pushedCaseSnake, id: '1', totalComment: 0, comments: [] },
+  {
+    ...pushedCaseSnake,
+    id: '1',
+    totalComment: 0,
+    comments: [],
+    status: CaseStatuses['in-progress'],
+  },
   { ...pushedCaseSnake, updated_at: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '3', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '4', totalComment: 0, comments: [] },
@@ -688,6 +689,19 @@ export const getUserAction = (
         payload: { title: 'a title' },
         ...overrides,
       };
+    case ActionTypes.assignees:
+      return {
+        ...commonProperties,
+        type: ActionTypes.assignees,
+        payload: {
+          assignees: [
+            // These values map to uids in x-pack/plugins/cases/public/containers/user_profiles/api.mock.ts
+            { uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' },
+            { uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0' },
+          ],
+        },
+        ...overrides,
+      };
 
     default:
       return {
@@ -772,9 +786,9 @@ export const getAlertUserAction = (): SnakeToCamelCase<
   },
 });
 
-export const getHostIsolationUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getHostIsolationUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'isolate-action-id',
   type: ActionTypes.comment,
@@ -787,6 +801,7 @@ export const getHostIsolationUserAction = (): SnakeToCamelCase<
       owner: SECURITY_SOLUTION_OWNER,
     },
   },
+  ...overrides,
 });
 
 export const caseUserActions: CaseUserActions[] = [

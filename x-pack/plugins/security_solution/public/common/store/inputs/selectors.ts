@@ -25,7 +25,7 @@ const selectSocTrends = (state: State): InputsState['socTrends'] | undefined =>
 
 const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.global.queries.find((q) => q.id === id) || {
-    id: '',
+    id: 'kql',
     inspect: null,
     isInspected: false,
     loading: false,
@@ -36,7 +36,7 @@ const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
 const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.timeline.queries.find((q) => q.id === id) ||
   state.inputs.global.queries.find((q) => q.id === id) || {
-    id: '',
+    id: 'kql',
     inspect: null,
     isInspected: false,
     loading: false,

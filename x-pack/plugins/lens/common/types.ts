@@ -6,12 +6,12 @@
  */
 
 import type { Filter, FilterMeta } from '@kbn/es-query';
-import { Position } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
+import type { Position } from '@elastic/charts';
+import type { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import type { LegendSize } from '@kbn/visualizations-plugin/common';
 import {
   CategoryDisplay,
   layerTypes,
@@ -19,6 +19,8 @@ import {
   NumberDisplay,
   PieChartTypes,
 } from './constants';
+
+export type { OriginalColumn } from './expressions/map_to_columns';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
@@ -63,8 +65,10 @@ export enum EmptySizeRatios {
 }
 
 export interface SharedPieLayerState {
-  groups: string[];
+  primaryGroups: string[];
+  secondaryGroups?: string[];
   metric?: string;
+  collapseFns?: Record<string, string>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;

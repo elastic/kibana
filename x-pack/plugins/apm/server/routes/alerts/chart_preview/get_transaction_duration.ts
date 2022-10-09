@@ -87,7 +87,7 @@ export async function getTransactionDurationChartPreview({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: { size: 0, query, aggs },
+    body: { size: 0, track_total_hits: false, query, aggs },
   };
   const resp = await apmEventClient.search(
     'get_transaction_duration_chart_preview',

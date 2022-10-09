@@ -26,6 +26,8 @@ const createStartContractMock = (): jest.Mocked<SavedObjectsManagementPluginStar
     getRelationships: jest.fn(),
     getSavedObjectLabel: jest.fn(),
     getDefaultTitle: jest.fn(),
+    parseQuery: jest.fn(),
+    getTagFindReferences: jest.fn(),
   };
   return mock;
 };

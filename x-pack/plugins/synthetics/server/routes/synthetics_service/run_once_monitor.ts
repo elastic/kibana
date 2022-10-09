@@ -26,7 +26,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const validationResult = validateMonitor(monitor);
 
-    if (!validationResult.valid) {
+    if (!validationResult.valid || !validationResult.decodedMonitor) {
       const { reason: message, details, payload } = validationResult;
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
@@ -36,7 +36,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     const errors = await syntheticsService.runOnceConfigs([
       formatHeartbeatRequest({
         // making it enabled, even if it's disabled in the UI
-        monitor: { ...monitor, enabled: true },
+        monitor: { ...validationResult.decodedMonitor, enabled: true },
         monitorId,
         runOnce: true,
       }),

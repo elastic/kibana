@@ -7,7 +7,6 @@
 
 import './filters.scss';
 import React, { useState } from 'react';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
@@ -15,12 +14,17 @@ import type { Query } from '@kbn/es-query';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { queryFilterToAst } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import {
+  DragDropBuckets,
+  DraggableBucketContainer,
+  isQueryValid,
+  NewBucketButton,
+} from '../../../../shared_components';
 import { IndexPattern } from '../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
-import { DragDropBuckets, DraggableBucketContainer, NewBucketButton } from '../shared_components';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
@@ -54,29 +58,6 @@ const defaultFilter: Filter = {
   label: '',
 };
 
-export const validateQuery = (input: Query | undefined, indexPattern: IndexPattern) => {
-  let isValid = true;
-  let error: string | undefined;
-
-  try {
-    if (input) {
-      if (input.language === 'kuery') {
-        toElasticsearchQuery(fromKueryExpression(input.query), indexPattern);
-      } else {
-        luceneStringToDsl(input.query);
-      }
-    }
-  } catch (e) {
-    isValid = false;
-    error = e.message;
-  }
-
-  return { isValid, error };
-};
-
-export const isQueryValid = (input: Query, indexPattern: IndexPattern) =>
-  validateQuery(input, indexPattern).isValid;
-
 export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
   operationType: typeof OPERATION_NAME;
   params: {
@@ -84,7 +65,11 @@ export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
   };
 }
 
-export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'none'> = {
+export const filtersOperation: OperationDefinition<
+  FiltersIndexPatternColumn,
+  'none',
+  FiltersIndexPatternColumn['params']
+> = {
   type: OPERATION_NAME,
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
@@ -92,11 +77,11 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   isTransferable: () => true,
 
   getDefaultLabel: () => filtersLabel,
-  buildColumn({ previousColumn }) {
-    let params = { filters: [defaultFilter] };
+  buildColumn({ previousColumn }, columnParams) {
+    let params = { filters: columnParams?.filters ?? [defaultFilter] };
     if (previousColumn?.operationType === 'terms' && 'sourceField' in previousColumn) {
       params = {
-        filters: [
+        filters: columnParams?.filters ?? [
           {
             label: '',
             input: {
@@ -173,6 +158,14 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   },
 
   getMaxPossibleNumValues: (column) => column.params.filters.length,
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.filters.documentation.quick',
+    {
+      defaultMessage: `
+    Divides values into predefined subsets.
+      `,
+    }
+  ),
 };
 
 export const FilterList = ({
@@ -242,13 +235,14 @@ export const FilterList = ({
         droppableId="FILTERS_DROPPABLE_AREA"
         items={localFilters}
       >
-        {localFilters?.map((filter: FilterValue, idx: number) => {
+        {localFilters?.map((filter, idx, arrayRef) => {
           const isInvalid = !isQueryValid(filter.input, indexPattern);
+          const id = filter.id;
 
           return (
             <DraggableBucketContainer
-              id={filter.id}
-              key={filter.id}
+              id={id}
+              key={id}
               idx={idx}
               isInvalid={isInvalid}
               invalidMessage={i18n.translate('xpack.lens.indexPattern.filters.isInvalid', {
@@ -258,7 +252,8 @@ export const FilterList = ({
               removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeFilter', {
                 defaultMessage: 'Remove a filter',
               })}
-              isNotRemovable={localFilters.length === 1}
+              isNotRemovable={arrayRef.length === 1}
+              isNotDraggable={arrayRef.length === 1}
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"

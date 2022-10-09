@@ -26,6 +26,7 @@ export const getPendingActionsSummary = async (
 ): Promise<EndpointPendingActions[]> => {
   const { data: unExpiredActionList } = await getActionList({
     esClient,
+    metadataService,
     unExpiredOnly: true,
     elasticAgentIds: agentIDs,
     pageSize: ACTIONS_SEARCH_PAGE_SIZE,

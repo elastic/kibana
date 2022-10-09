@@ -18,6 +18,7 @@ import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { Warnings } from '@kbn/charts-plugin/public';
 import {
   Adapters,
   AttributeService,
@@ -76,6 +77,7 @@ export interface VisualizeInput extends EmbeddableInput {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
+  timeslice?: [number, number];
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -114,6 +116,7 @@ export class VisualizeEmbeddable
   private expression?: ExpressionAstExpression;
   private vis: Vis;
   private domNode: any;
+  private warningDomNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
@@ -279,8 +282,16 @@ export class VisualizeEmbeddable
     let dirty = false;
 
     // Check if timerange has changed
-    if (!_.isEqual(this.input.timeRange, this.timeRange)) {
-      this.timeRange = _.cloneDeep(this.input.timeRange);
+    const nextTimeRange =
+      this.input.timeslice !== undefined
+        ? {
+            from: new Date(this.input.timeslice[0]).toISOString(),
+            to: new Date(this.input.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : this.input.timeRange;
+    if (!_.isEqual(nextTimeRange, this.timeRange)) {
+      this.timeRange = _.cloneDeep(nextTimeRange);
       dirty = true;
     }
 
@@ -323,6 +334,31 @@ export class VisualizeEmbeddable
     return dirty;
   }
 
+  private handleWarnings() {
+    const warnings: React.ReactNode[] = [];
+    if (this.getInspectorAdapters()?.requests) {
+      this.deps
+        .start()
+        .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
+          if (
+            warning.type === 'shard_failure' &&
+            warning.reason.type === 'unsupported_aggregation_on_downsampled_index'
+          ) {
+            warnings.push(warning.reason.reason || warning.message);
+            return true;
+          }
+          if (this.vis.type.suppressWarnings?.()) {
+            // if the vis type wishes to supress all warnings, return true so the default logic won't pick it up
+            return true;
+          }
+        });
+    }
+
+    if (this.warningDomNode) {
+      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
+    }
+  }
+
   // this is a hack to make editor still work, will be removed once we clean up editor
   // @ts-ignore
   hasInspector = () => Boolean(this.getInspectorAdapters());
@@ -338,6 +374,7 @@ export class VisualizeEmbeddable
   };
 
   onContainerData = () => {
+    this.handleWarnings();
     this.updateOutput({
       ...this.getOutput(),
       loading: false,
@@ -376,6 +413,11 @@ export class VisualizeEmbeddable
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
     domNode.appendChild(div);
+
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'visPanel__warnings';
+    domNode.appendChild(warningDiv);
+    this.warningDomNode = warningDiv;
 
     this.domNode = div;
     super.render(this.domNode);
@@ -523,9 +565,11 @@ export class VisualizeEmbeddable
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
+        disableShardWarnings: true,
       },
       variables: {
         embeddableTitle: this.getTitle(),
+        ...(await this.vis.type.getExpressionVariables?.(this.vis, this.timefilter)),
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,

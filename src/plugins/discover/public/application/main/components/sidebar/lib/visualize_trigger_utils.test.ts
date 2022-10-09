@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { getVisualizeInformation } from './visualize_trigger_utils';
 
@@ -41,6 +41,8 @@ const action: Action = {
   execute: () => Promise.resolve(),
 };
 
+const dataViewMock = { id: '1', toSpec: () => ({}) } as DataView;
+
 describe('visualize_trigger_utils', () => {
   afterEach(() => {
     mockGetActions.mockReset();
@@ -49,7 +51,7 @@ describe('visualize_trigger_utils', () => {
   describe('getVisualizeInformation', () => {
     it('should return for a visualizeable field with an action', async () => {
       mockGetActions.mockResolvedValue([action]);
-      const information = await getVisualizeInformation(field, '1', [], undefined);
+      const information = await getVisualizeInformation(field, dataViewMock, [], undefined);
       expect(information).not.toBeUndefined();
       expect(information?.field).toHaveProperty('name', 'fieldName');
       expect(information?.href).toBeUndefined();
@@ -57,7 +59,7 @@ describe('visualize_trigger_utils', () => {
 
     it('should return field and href from the action', async () => {
       mockGetActions.mockResolvedValue([{ ...action, getHref: () => Promise.resolve('hreflink') }]);
-      const information = await getVisualizeInformation(field, '1', [], undefined);
+      const information = await getVisualizeInformation(field, dataViewMock, [], undefined);
       expect(information).not.toBeUndefined();
       expect(information?.field).toHaveProperty('name', 'fieldName');
       expect(information).toHaveProperty('href', 'hreflink');
@@ -67,7 +69,7 @@ describe('visualize_trigger_utils', () => {
       mockGetActions.mockResolvedValue([]);
       const information = await getVisualizeInformation(
         { ...field, name: 'rootField' } as DataViewField,
-        '1',
+        dataViewMock,
         [],
         [
           { ...field, name: 'multi1' },
@@ -81,7 +83,7 @@ describe('visualize_trigger_utils', () => {
       mockGetActions.mockResolvedValue([action]);
       const information = await getVisualizeInformation(
         { ...field, name: 'rootField' } as DataViewField,
-        '1',
+        dataViewMock,
         [],
         [
           { ...field, name: 'multi1' },
@@ -101,7 +103,7 @@ describe('visualize_trigger_utils', () => {
       });
       const information = await getVisualizeInformation(
         { ...field, name: 'rootField' } as DataViewField,
-        '1',
+        dataViewMock,
         [],
         [
           { ...field, name: 'multi1' },

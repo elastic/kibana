@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { VisualizeInformation } from './lib/visualize_trigger_utils';
@@ -20,19 +20,22 @@ interface DiscoverFieldVisualizeInnerProps {
 
 export const DiscoverFieldVisualizeInner = (props: DiscoverFieldVisualizeInnerProps) => {
   const { field, visualizeInfo, handleVisualizeLinkClick } = props;
+
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiButton
-      fullWidth
-      size="s"
-      href={visualizeInfo.href}
-      onClick={handleVisualizeLinkClick}
-      data-test-subj={`fieldVisualize-${field.name}`}
-    >
-      <FormattedMessage
-        id="discover.fieldChooser.visualizeButton.label"
-        defaultMessage="Visualize"
-      />
-    </EuiButton>
+    <EuiPopoverFooter>
+      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+      <EuiButton
+        fullWidth
+        size="s"
+        href={visualizeInfo.href}
+        onClick={handleVisualizeLinkClick}
+        data-test-subj={`fieldVisualize-${field.name}`}
+      >
+        <FormattedMessage
+          id="discover.fieldChooser.visualizeButton.label"
+          defaultMessage="Visualize"
+        />
+      </EuiButton>
+    </EuiPopoverFooter>
   );
 };

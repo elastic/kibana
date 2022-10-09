@@ -9,7 +9,7 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import { EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiPageTemplate, EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -51,7 +51,12 @@ export const NoDataPage = ({
   );
 
   return (
-    <div className={classNames('kbnNoDataPageContents', className)} data-test-subj="kbnNoDataPage">
+    <EuiPageTemplate.Section
+      alignment="center"
+      grow
+      className={classNames('kbnNoDataPageContents', className)}
+      data-test-subj="kbnNoDataPage"
+    >
       <EuiText textAlign="center">
         <KibanaSolutionAvatar name={solution} iconType={logo || `logo${solution}`} size="xxl" />
         <EuiSpacer size="l" />
@@ -62,6 +67,6 @@ export const NoDataPage = ({
       </EuiText>
       <EuiSpacer size="xxl" />
       <ActionCard {...{ action }} />
-    </div>
+    </EuiPageTemplate.Section>
   );
 };

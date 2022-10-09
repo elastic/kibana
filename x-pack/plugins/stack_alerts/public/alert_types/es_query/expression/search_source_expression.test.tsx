@@ -54,6 +54,7 @@ const defaultSearchSourceExpressionParams: EsQueryAlertParams<SearchType.searchS
     },
     index: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
+  excludeHitsFromPreviousRun: true,
 };
 
 const mockSearchResult = new Subject();
@@ -230,6 +231,10 @@ describe('SearchSourceAlertTypeExpression', () => {
     });
     wrapper = await wrapper.update();
     expect(findTestSubject(wrapper, 'thresholdExpression')).toBeTruthy();
+
+    const excludeHitsCheckbox = findTestSubject(wrapper, 'excludeHitsFromPreviousRunExpression');
+    expect(excludeHitsCheckbox).toBeTruthy();
+    expect(excludeHitsCheckbox.prop('checked')).toBeTruthy();
   });
 
   test('should disable Test Query button if data view is not selected yet', async () => {

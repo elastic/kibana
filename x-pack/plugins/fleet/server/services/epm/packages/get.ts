@@ -23,11 +23,7 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import {
-  IngestManagerError,
-  PackageFailedVerificationError,
-  PackageNotFoundError,
-} from '../../../errors';
+import { FleetError, PackageFailedVerificationError, PackageNotFoundError } from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -129,12 +125,14 @@ export async function getPackageInfo({
   pkgName,
   pkgVersion,
   skipArchive = false,
+  ignoreUnverified = false,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
   /** Avoid loading the registry archive into the cache (only use for performance reasons). Defaults to `false` */
   skipArchive?: boolean;
+  ignoreUnverified?: boolean;
 }): Promise<PackageInfo> {
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
@@ -158,7 +156,9 @@ export async function getPackageInfo({
     ? await Registry.fetchInfo(pkgName, resolvedPkgVersion).catch(() => undefined)
     : undefined;
 
-  if (packageInfo) {
+  // We need to get input only packages from source to get all fields
+  // see https://github.com/elastic/package-registry/issues/864
+  if (packageInfo && packageInfo.type !== 'input') {
     // Fix the paths
     paths =
       packageInfo.assets?.map((path) =>
@@ -170,6 +170,8 @@ export async function getPackageInfo({
       pkgVersion: resolvedPkgVersion,
       savedObjectsClient,
       installedPkg: savedObject?.attributes,
+      getPkgInfoFromArchive: packageInfo?.type === 'input',
+      ignoreUnverified,
     }));
   }
 
@@ -182,6 +184,7 @@ export async function getPackageInfo({
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
     notice: Registry.getNoticePath(paths || []),
+    licensePath: Registry.getLicensePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
   const updated = { ...packageInfo, ...additions };
@@ -238,9 +241,18 @@ export async function getPackageFromSource(options: {
   pkgVersion: string;
   installedPkg?: Installation;
   savedObjectsClient: SavedObjectsClientContract;
+  getPkgInfoFromArchive?: boolean;
+  ignoreUnverified?: boolean;
 }): Promise<PackageResponse> {
   const logger = appContextService.getLogger();
-  const { pkgName, pkgVersion, installedPkg, savedObjectsClient } = options;
+  const {
+    pkgName,
+    pkgVersion,
+    installedPkg,
+    savedObjectsClient,
+    getPkgInfoFromArchive = true,
+    ignoreUnverified = false,
+  } = options;
   let res: GetPackageResponse;
 
   // If the package is installed
@@ -283,11 +295,14 @@ export async function getPackageFromSource(options: {
     }
   } else {
     // else package is not installed or installed and missing from cache and storage and installed from registry
-    res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+    res = await Registry.getRegistryPackage(pkgName, pkgVersion, {
+      getPkgInfoFromArchive,
+      ignoreUnverified,
+    });
     logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion} from registry`);
   }
   if (!res) {
-    throw new IngestManagerError(`package info for ${pkgName}-${pkgVersion} does not exist`);
+    throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
   }
   return {
     paths: res.paths,

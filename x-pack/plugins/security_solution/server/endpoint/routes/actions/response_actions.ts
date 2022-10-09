@@ -40,9 +40,9 @@ import type {
   HostMetadata,
   LogsEndpointAction,
   LogsEndpointActionResponse,
-  ResponseActions,
   ResponseActionParametersWithPidOrEntityId,
 } from '../../../../common/endpoint/types';
+import type { ResponseActions } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -358,7 +358,11 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     }
 
     const body = returnActionIdCommands.includes(command) ? { action: actionID } : {};
-    const data = await getActionDetailsById(esClient, actionID);
+    const data = await getActionDetailsById(
+      esClient,
+      endpointContext.service.getEndpointMetadataService(),
+      actionID
+    );
 
     return res.ok({
       body: {

@@ -111,7 +111,8 @@ export function hasOperationSupportForMultipleFields(
  */
 export function getOperationTypesForField(
   field: IndexPatternField,
-  filterOperations?: (operation: OperationMetadata) => boolean
+  filterOperations?: (operation: OperationMetadata) => boolean,
+  alreadyUsedOperations?: Set<string>
 ): OperationType[] {
   return operationDefinitions
     .filter((operationDefinition) => {
@@ -124,6 +125,15 @@ export function getOperationTypesForField(
         : possibleOperation;
     })
     .sort(getSortScoreByPriorityForField(field))
+    .sort((a, b) => {
+      if (!alreadyUsedOperations) return 0;
+      // if some operations are used already, order them so the unused operations come first
+      const aAlreadyUsed = alreadyUsedOperations.has(a.type);
+      const bAlreadyUsed = alreadyUsedOperations.has(b.type);
+      if (aAlreadyUsed === bAlreadyUsed) return 0;
+      if (aAlreadyUsed) return 1;
+      return -1;
+    })
     .map(({ type }) => type);
 }
 

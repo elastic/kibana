@@ -18,16 +18,13 @@ import {
   getOperationDisplay,
   hasOperationSupportForMultipleFields,
 } from '../../operations';
-import { hasField, isDraggedField } from '../../pure_utils';
+import { isDraggedDataViewField, isOperationFromTheSameGroup } from '../../../utils';
+import { hasField } from '../../pure_utils';
 import { DragContextState } from '../../../drag_drop/providers';
-import { OperationMetadata } from '../../../types';
+import { OperationMetadata, DraggedField } from '../../../types';
 import { getOperationTypesForField } from '../../operations';
 import { GenericIndexPatternColumn } from '../../indexpattern';
-import { IndexPatternPrivateState, DraggedField, DataViewDragDropOperation } from '../../types';
-import {
-  getDropPropsForSameGroup,
-  isOperationFromTheSameGroup,
-} from '../../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import { IndexPatternPrivateState, DataViewDragDropOperation } from '../../types';
 
 interface GetDropPropsArgs {
   state: IndexPatternPrivateState;
@@ -44,12 +41,13 @@ export function getNewOperation(
   field: IndexPatternField | undefined | false,
   filterOperations: (meta: OperationMetadata) => boolean,
   targetColumn?: GenericIndexPatternColumn,
-  prioritizedOperation?: GenericIndexPatternColumn['operationType']
+  prioritizedOperation?: GenericIndexPatternColumn['operationType'],
+  alreadyUsedOperations?: Set<string>
 ) {
   if (!field) {
     return;
   }
-  const newOperations = getOperationTypesForField(field, filterOperations);
+  const newOperations = getOperationTypesForField(field, filterOperations, alreadyUsedOperations);
   if (!newOperations.length) {
     return;
   }
@@ -71,7 +69,9 @@ export function getField(column: GenericIndexPatternColumn | undefined, dataView
   return field;
 }
 
-export function getDropProps(props: GetDropPropsArgs) {
+export function getDropProps(
+  props: GetDropPropsArgs
+): { dropTypes: DropType[]; nextLabel?: string } | undefined {
   const { state, source, target, indexPatterns } = props;
   if (!source) {
     return;
@@ -82,7 +82,7 @@ export function getDropProps(props: GetDropPropsArgs) {
     dataView: indexPatterns[state.layers[target.layerId].indexPatternId],
   };
 
-  if (isDraggedField(source)) {
+  if (isDraggedDataViewField(source)) {
     return getDropPropsForField({ ...props, source, target: targetProps });
   }
 
@@ -97,7 +97,9 @@ export function getDropProps(props: GetDropPropsArgs) {
     }
     if (target.columnId !== source.columnId && targetProps.dataView === sourceProps.dataView) {
       if (isOperationFromTheSameGroup(source, target)) {
-        return getDropPropsForSameGroup(!targetProps.column);
+        return !targetProps.column
+          ? { dropTypes: ['duplicate_compatible'] }
+          : { dropTypes: ['reorder'] };
       }
 
       if (targetProps.filterOperations?.(sourceProps?.column)) {

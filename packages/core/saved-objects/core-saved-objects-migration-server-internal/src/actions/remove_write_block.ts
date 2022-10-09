@@ -13,11 +13,13 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+import { DEFAULT_TIMEOUT } from './constants';
 
 /** @internal */
 export interface RemoveWriteBlockParams {
   client: ElasticsearchClient;
   index: string;
+  timeout?: string;
 }
 
 /**
@@ -27,6 +29,7 @@ export const removeWriteBlock =
   ({
     client,
     index,
+    timeout = DEFAULT_TIMEOUT,
   }: RemoveWriteBlockParams): TaskEither.TaskEither<
     RetryableEsClientError,
     'remove_write_block_succeeded'
@@ -37,11 +40,12 @@ export const removeWriteBlock =
         index,
         // Don't change any existing settings
         preserve_existing: true,
-        body: {
+        settings: {
           blocks: {
             write: false,
           },
         },
+        timeout,
       })
       .then((res) => {
         return res.acknowledged === true

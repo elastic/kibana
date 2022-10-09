@@ -22,6 +22,7 @@ import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
   getPackagePolicyDeleteCallback,
+  getPackagePolicyPostCreateCallback,
 } from '../fleet_integration/fleet_integration';
 import type { ManifestManager } from './services/artifacts';
 import type { ConfigType } from '../config';
@@ -41,6 +42,7 @@ import { registerListsPluginEndpointExtensionPoints } from '../lists_integration
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -66,6 +68,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
   featureUsageService: FeatureUsageService;
+  experimentalFeatures: ExperimentalFeatures;
 };
 
 /**
@@ -120,6 +123,11 @@ export class EndpointAppContextService {
       );
 
       registerIngestCallback(
+        'packagePolicyPostCreate',
+        getPackagePolicyPostCreateCallback(logger, exceptionListsClient)
+      );
+
+      registerIngestCallback(
         'packagePolicyUpdate',
         getPackagePolicyUpdateCallback(
           logger,
@@ -155,8 +163,14 @@ export class EndpointAppContextService {
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.startDependencies?.security.authc.getCurrentUser(request)?.roles ?? [];
+    const isEndpointRbacEnabled = this.experimentalFeatures.endpointRbacEnabled;
 
-    return calculateEndpointAuthz(this.getLicenseService(), fleetAuthz, userRoles);
+    return calculateEndpointAuthz(
+      this.getLicenseService(),
+      fleetAuthz,
+      userRoles,
+      isEndpointRbacEnabled
+    );
   }
 
   public getEndpointMetadataService(): EndpointMetadataService {
@@ -215,5 +229,13 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.featureUsageService;
+  }
+
+  public get experimentalFeatures(): ExperimentalFeatures {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.experimentalFeatures;
   }
 }

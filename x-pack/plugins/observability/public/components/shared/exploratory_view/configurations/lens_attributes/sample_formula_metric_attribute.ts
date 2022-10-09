@@ -174,5 +174,5 @@ export const sampleMetricFormulaAttribute = {
     },
   },
   title: 'Prefilled from exploratory view app',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
 };

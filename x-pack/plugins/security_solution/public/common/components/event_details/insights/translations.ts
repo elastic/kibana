@@ -136,9 +136,9 @@ export const SIMPLE_ALERT_TABLE_LIMITED = i18n.translate(
   }
 );
 
-export const ALERT_UPSELL = i18n.translate(
+export const INSIGHTS_UPSELL = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.insights.alertUpsellTitle',
   {
-    defaultMessage: 'Get more insights with a subscription',
+    defaultMessage: 'Get more insights with a platinum subscription',
   }
 );

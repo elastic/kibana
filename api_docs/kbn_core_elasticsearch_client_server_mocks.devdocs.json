@@ -10,7 +10,46 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
+        "id": "def-server.createAgentStoreMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createAgentStoreMock",
+        "description": [],
+        "signature": [
+          "(agents?: Set<",
+          "NetworkAgent",
+          ">) => ",
+          "AgentStore"
+        ],
+        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/agent_manager.mocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
+            "id": "def-server.createAgentStoreMock.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "agents",
+            "description": [],
+            "signature": [
+              "Set<",
+              "NetworkAgent",
+              ">"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/agent_manager.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -31,6 +70,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -48,6 +88,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -61,6 +102,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -77,6 +119,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -98,6 +141,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -111,6 +155,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -127,6 +172,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -148,6 +194,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -163,6 +210,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -184,6 +232,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -199,6 +248,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -216,6 +266,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -225,7 +276,7 @@
             "label": "asInternalUser",
             "description": [],
             "signature": [
-              "{ get: ",
+              "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -329,7 +380,7 @@
               },
               "<",
               "default",
-              ">; name: string | symbol; index: ",
+              ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1279,7 +1330,8 @@
               "ElasticsearchClient"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -1309,6 +1361,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -1324,6 +1377,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -1333,7 +1387,7 @@
             "label": "asInternalUser",
             "description": [],
             "signature": [
-              "{ get: ",
+              "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1437,7 +1491,7 @@
               },
               "<",
               "default",
-              ">; name: string | symbol; index: ",
+              ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2387,7 +2441,8 @@
               "ElasticsearchClient"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -2397,7 +2452,7 @@
             "label": "asCurrentUser",
             "description": [],
             "signature": [
-              "{ get: ",
+              "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2501,7 +2556,7 @@
               },
               "<",
               "default",
-              ">; name: string | symbol; index: ",
+              ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -3451,7 +3506,8 @@
               "ElasticsearchClient"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3486,6 +3542,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3516,6 +3573,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3526,7 +3584,7 @@
         "label": "ElasticsearchClientMock",
         "description": [],
         "signature": [
-          "{ get: ",
+          "{ name: string | symbol; get: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",
@@ -3630,7 +3688,7 @@
           },
           "<",
           "default",
-          ">; name: string | symbol; index: ",
+          ">; index: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",
@@ -4581,6 +4639,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -4594,6 +4653,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -4614,6 +4674,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -4636,6 +4697,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -4658,6 +4720,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -4680,6 +4743,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -4693,7 +4757,8 @@
                   "Promise<unknown> | undefined"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -4719,6 +4784,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -4732,7 +4798,8 @@
                   "Promise<unknown> | undefined"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -4750,6 +4817,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -4763,7 +4831,8 @@
                   "T"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -4776,7 +4845,8 @@
                   "{ statusCode?: number | undefined; }"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -4789,7 +4859,8 @@
                   "{ [x: string]: string | string[]; }"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -4805,6 +4876,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -4818,7 +4890,8 @@
                   "any"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -4838,6 +4911,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -4859,7 +4933,8 @@
                   " | null; attempts: number; aborted: boolean; sniff?: { hosts: any[]; reason: string; } | undefined; } | undefined; }"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

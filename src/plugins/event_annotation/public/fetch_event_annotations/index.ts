@@ -40,7 +40,7 @@ export function getFetchEventAnnotations({
   return fetchEventAnnotations({
     getStartDependencies: async () => {
       const [
-        ,
+        { uiSettings },
         {
           data: { search, dataViews, nowProvider },
         },
@@ -50,6 +50,7 @@ export function getFetchEventAnnotations({
         searchSource: search.searchSource,
         dataViews,
         getNow: () => nowProvider.get(),
+        uiSettings,
       };
     },
   });

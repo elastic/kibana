@@ -111,6 +111,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         startDate: 'now-10d',
         endDate: 'now',
         data: [response],
+        statuses: undefined,
         userIds: ['elastic'],
         total: 1,
       };

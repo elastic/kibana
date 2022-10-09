@@ -52,4 +52,8 @@ export type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
   SavedObjectsPointInTimeFinderClient,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteStatus,
+  SavedObjectsBulkDeleteResponse,
 } from './src/apis';

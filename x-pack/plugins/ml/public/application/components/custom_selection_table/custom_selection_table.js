@@ -76,11 +76,13 @@ export function CustomSelectionTable({
   useEffect(() => {
     setCurrentItems(items);
     handleQueryChange({ query: query });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   // When changes to selected ids made via badge removal - update selection in the table accordingly
   useEffect(() => {
     setItemIdToSelectedMap(getCurrentlySelectedItemIdsMap());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIds]);
 
   useEffect(() => {
@@ -91,6 +93,7 @@ export function CustomSelectionTable({
       lastItemIndex: tablePager.getLastItemIndex(),
     });
     setPager(tablePager);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentItems]);
 
   function getCurrentlySelectedItemIdsMap() {

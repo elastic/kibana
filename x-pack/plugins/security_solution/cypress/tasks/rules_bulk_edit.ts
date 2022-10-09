@@ -30,8 +30,15 @@ import {
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
   RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
+  RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
   RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR,
+  UPDATE_SCHEDULE_MENU_ITEM,
+  UPDATE_SCHEDULE_INTERVAL_INPUT,
+  UPDATE_SCHEDULE_TIME_UNIT_SELECT,
+  UPDATE_SCHEDULE_LOOKBACK_INPUT,
+  RULES_BULK_EDIT_SCHEDULES_WARNING,
 } from '../screens/rules_bulk_edit';
+import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
 export const clickApplyTimelineTemplatesMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
@@ -51,6 +58,11 @@ export const clickTagsMenuItem = () => {
 export const clickAddTagsMenuItem = () => {
   clickTagsMenuItem();
   cy.get(ADD_TAGS_RULE_BULK_MENU_ITEM).click();
+};
+
+export const clickUpdateScheduleMenuItem = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(UPDATE_SCHEDULE_MENU_ITEM).click().should('not.exist');
 };
 
 export const clickAddIndexPatternsMenuItem = () => {
@@ -148,6 +160,14 @@ export const checkOverwriteIndexPatternsCheckbox = () => {
     .should('be.checked');
 };
 
+export const checkOverwriteDataViewCheckbox = () => {
+  cy.get(RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX)
+    .should('have.text', 'Apply changes to rules configured with data views')
+    .click()
+    .get('input')
+    .should('be.checked');
+};
+
 export const selectTimelineTemplate = (timelineTitle: string) => {
   cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR).click();
   cy.get(TIMELINE_SEARCHBOX).type(`${timelineTitle}{enter}`).should('not.exist');
@@ -165,4 +185,63 @@ export const checkTagsInTagsFilter = (tags: string[]) => {
     .each(($el, index) => {
       cy.wrap($el).should('have.text', tags[index]);
     });
+};
+
+export const typeScheduleInterval = (interval: string) => {
+  cy.get(UPDATE_SCHEDULE_INTERVAL_INPUT)
+    .find('input')
+    .type('{selectAll}')
+    .type(interval.toString())
+    .blur();
+};
+export const typeScheduleLookback = (lookback: string) => {
+  cy.get(UPDATE_SCHEDULE_LOOKBACK_INPUT)
+    .find('input')
+    .type('{selectAll}', { waitForAnimations: true })
+    .type(lookback.toString(), { waitForAnimations: true })
+    .blur();
+};
+
+interface ScheduleFormFields {
+  interval: number;
+  lookback: number;
+}
+
+export const assertDefaultValuesAreAppliedToScheduleFields = ({
+  interval,
+  lookback,
+}: ScheduleFormFields) => {
+  cy.get(UPDATE_SCHEDULE_INTERVAL_INPUT).find('input').should('have.value', interval);
+  cy.get(UPDATE_SCHEDULE_LOOKBACK_INPUT).find('input').should('have.value', lookback);
+};
+
+type TimeUnit = 'Seconds' | 'Minutes' | 'Hours';
+export const setScheduleIntervalTimeUnit = (timeUnit: TimeUnit) => {
+  cy.get(UPDATE_SCHEDULE_INTERVAL_INPUT).within(() => {
+    cy.get(UPDATE_SCHEDULE_TIME_UNIT_SELECT).select(timeUnit);
+  });
+};
+
+export const setScheduleLookbackTimeUnit = (timeUnit: TimeUnit) => {
+  cy.get(UPDATE_SCHEDULE_LOOKBACK_INPUT).within(() => {
+    cy.get(UPDATE_SCHEDULE_TIME_UNIT_SELECT).select(timeUnit);
+  });
+};
+
+export const assertUpdateScheduleWarningExists = (expectedNumberOfNotMLRules: number) => {
+  cy.get(RULES_BULK_EDIT_SCHEDULES_WARNING).should(
+    'have.text',
+    `You're about to apply changes to ${expectedNumberOfNotMLRules} selected rules. The changes you make will overwrite the existing rule schedules and additional look-back time (if any).`
+  );
+};
+interface RuleSchedule {
+  interval: string;
+  lookback: string;
+}
+
+export const assertRuleScheduleValues = ({ interval, lookback }: RuleSchedule) => {
+  cy.get(SCHEDULE_DETAILS).within(() => {
+    cy.get('dd').eq(0).should('contain.text', interval);
+    cy.get('dd').eq(1).should('contain.text', lookback);
+  });
 };

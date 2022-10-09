@@ -168,7 +168,7 @@ export type CommandExecutionComponent<
   /** The arguments that could have been entered by the user */
   TArgs extends SupportedArguments = any,
   /** Internal store for the Command execution */
-  TStore extends object = Record<string, unknown>,
+  TStore extends object = any,
   /** The metadata defined on the Command Definition */
   TMeta = any
 > = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;

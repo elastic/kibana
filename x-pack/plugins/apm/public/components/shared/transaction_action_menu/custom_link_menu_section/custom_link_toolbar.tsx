@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { APMLink } from '../../links/apm/apm_link';
+import { LegacyAPMLink } from '../../links/apm/apm_link';
 
 export function CustomLinkToolbar({
   onClickCreate,
@@ -39,13 +39,13 @@ export function CustomLinkToolbar({
                 defaultMessage: 'Manage custom links',
               })}
             >
-              <APMLink path={`/settings/custom-links`}>
+              <LegacyAPMLink path={`/settings/custom-links`}>
                 <EuiIcon
                   type="gear"
                   color="text"
                   aria-label="Custom links settings page"
                 />
-              </APMLink>
+              </LegacyAPMLink>
             </EuiToolTip>
           </EuiFlexItem>
           {showCreateButton && (

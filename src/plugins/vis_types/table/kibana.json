@@ -6,7 +6,9 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "fieldFormats"
+    "fieldFormats",
+    "dataViews",
+    "usageCollection"
   ],
   "requiredBundles": [
     "data",

@@ -159,8 +159,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   useEffect(() => {
     filterList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQueryText]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
@@ -173,6 +175,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     function updateOnTimerRefresh() {
       getAnalyticsCallback();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [refreshObs]
   );
 
@@ -184,13 +187,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   );
 
   const { onTableChange, pagination, sorting } = useTableSettings<DataFrameAnalyticsListRow>(
-    filteredAnalytics,
+    filteredAnalytics.length,
     pageState,
     updatePageState
   );
 
   const navigateToSourceSelection = useCallback(async () => {
     await navigateToPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {

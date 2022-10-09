@@ -41,7 +41,7 @@ import type {
   AgentClient,
   PackageService,
   PackageClient,
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import {
   HOST_METADATA_GET_ROUTE,
@@ -112,7 +112,7 @@ describe('test endpoint routes', () => {
     startContract = createMockEndpointAppContextServiceStartContract();
 
     (
-      startContract.packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>
+      startContract.packagePolicyService as jest.Mocked<PackagePolicyClient>
     ).list.mockImplementation(() => {
       return Promise.resolve({
         items: [],
@@ -266,13 +266,49 @@ describe('test endpoint routes', () => {
               },
               {
                 bool: {
-                  should: [
+                  filter: [
                     {
                       bool: {
-                        filter: [
+                        should: [
                           {
                             bool: {
-                              should: [{ exists: { field: 'united.agent.upgrade_started_at' } }],
+                              filter: [
+                                {
+                                  bool: {
+                                    should: [
+                                      { exists: { field: 'united.agent.upgrade_started_at' } },
+                                    ],
+                                    minimum_should_match: 1,
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    must_not: {
+                                      bool: {
+                                        should: [{ exists: { field: 'united.agent.upgraded_at' } }],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            bool: {
+                              must_not: {
+                                bool: {
+                                  should: [{ exists: { field: 'united.agent.last_checkin' } }],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [
+                                { exists: { field: 'united.agent.unenrollment_started_at' } },
+                              ],
                               minimum_should_match: 1,
                             },
                           },
@@ -280,28 +316,15 @@ describe('test endpoint routes', () => {
                             bool: {
                               must_not: {
                                 bool: {
-                                  should: [{ exists: { field: 'united.agent.upgraded_at' } }],
+                                  should: [
+                                    { exists: { field: 'united.agent.policy_revision_idx' } },
+                                  ],
                                   minimum_should_match: 1,
                                 },
                               },
                             },
                           },
                         ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must_not: {
-                          bool: {
-                            should: [{ exists: { field: 'united.agent.last_checkin' } }],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [{ exists: { field: 'united.agent.unenrollment_started_at' } }],
                         minimum_should_match: 1,
                       },
                     },
@@ -309,14 +332,97 @@ describe('test endpoint routes', () => {
                       bool: {
                         must_not: {
                           bool: {
-                            should: [{ exists: { field: 'united.agent.policy_revision_idx' } }],
+                            should: [
+                              {
+                                bool: {
+                                  should: [
+                                    { range: { 'united.agent.last_checkin': { lt: 'now-300s' } } },
+                                  ],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                              {
+                                bool: {
+                                  filter: [
+                                    {
+                                      bool: {
+                                        should: [
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  match: {
+                                                    'united.agent.last_checkin_status': 'error',
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  match: {
+                                                    'united.agent.last_checkin_status': 'degraded',
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                        ],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
+                                    {
+                                      bool: {
+                                        must_not: {
+                                          bool: {
+                                            should: [
+                                              {
+                                                bool: {
+                                                  should: [
+                                                    {
+                                                      range: {
+                                                        'united.agent.last_checkin': {
+                                                          lt: 'now-300s',
+                                                        },
+                                                      },
+                                                    },
+                                                  ],
+                                                  minimum_should_match: 1,
+                                                },
+                                              },
+                                              {
+                                                bool: {
+                                                  should: [
+                                                    {
+                                                      exists: {
+                                                        field:
+                                                          'united.agent.unenrollment_started_at',
+                                                      },
+                                                    },
+                                                  ],
+                                                  minimum_should_match: 1,
+                                                },
+                                              },
+                                            ],
+                                            minimum_should_match: 1,
+                                          },
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
                             minimum_should_match: 1,
                           },
                         },
                       },
                     },
                   ],
-                  minimum_should_match: 1,
                 },
               },
               {

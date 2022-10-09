@@ -13,7 +13,8 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('node detail mb', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/142642
+  describe.skip('node detail mb', () => {
     const archive = 'x-pack/test/api_integration/apis/monitoring/es_archives/logstash_8';
     const timeRange = {
       min: '2022-06-17T13:19:00.000Z',

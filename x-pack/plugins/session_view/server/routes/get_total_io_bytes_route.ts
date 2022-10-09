@@ -8,8 +8,8 @@ import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import {
   GET_TOTAL_IO_BYTES_ROUTE,
   PROCESS_EVENTS_INDEX,
-  ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TOTAL_BYTES_CAPTURED_PROPERTY,
+  ENTRY_SESSION_ENTITY_ID_PROPERTY,
 } from '../../common/constants';
 
 export const registerGetTotalIOBytesRoute = (router: IRouter) => {
@@ -51,11 +51,11 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
 
         const agg: any = search.aggregations?.total_bytes_captured;
 
-        return response.ok({ body: agg?.value || 0 });
+        return response.ok({ body: { total: agg?.value || 0 } });
       } catch (err) {
         // unauthorized
-        if (err.meta.statusCode === 403) {
-          return response.ok();
+        if (err?.meta?.statusCode === 403) {
+          return response.ok({ body: { total: 0 } });
         }
 
         return response.badRequest(err.message);

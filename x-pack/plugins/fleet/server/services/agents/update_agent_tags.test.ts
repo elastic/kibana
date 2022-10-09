@@ -8,12 +8,21 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { createClientMock } from './action.mock';
 import { updateAgentTags } from './update_agent_tags';
 
 jest.mock('./filter_hosted_agents', () => ({
   filterHostedPolicies: jest
     .fn()
     .mockImplementation((soClient, givenAgents) => Promise.resolve(givenAgents)),
+}));
+
+const mockRunAsync = jest.fn().mockResolvedValue({});
+jest.mock('./update_agent_tags_action_runner', () => ({
+  ...jest.requireActual('./update_agent_tags_action_runner'),
+  UpdateAgentTagsActionRunner: jest.fn().mockImplementation(() => {
+    return { runActionAsyncWithRetry: mockRunAsync };
+  }),
 }));
 
 describe('update_agent_tags', () => {
@@ -36,6 +45,8 @@ describe('update_agent_tags', () => {
     esClient.bulk.mockResolvedValue({
       items: [],
     } as any);
+
+    mockRunAsync.mockClear();
   });
 
   function expectTagsInEsBulk(tags: string[]) {
@@ -95,6 +106,31 @@ describe('update_agent_tags', () => {
     await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['newName'], []);
 
     expectTagsInEsBulk(['one', 'two', 'three', 'newName']);
+
+    const actionResults = esClient.bulk.mock.calls[1][0] as any;
+    const resultIds = actionResults?.body
+      ?.filter((i: any) => i.agent_id)
+      .map((i: any) => i.agent_id);
+    expect(resultIds).toEqual(['agent1']);
+
+    const action = esClient.create.mock.calls[0][0] as any;
+    expect(action.body.type).toEqual('UPDATE_TAGS');
+  });
+
+  it('should write error action results for hosted agent', async () => {
+    const { esClient: esClientMock, agentInHostedDoc } = createClientMock();
+
+    await updateAgentTags(
+      soClient,
+      esClientMock,
+      { agentIds: [agentInHostedDoc._id] },
+      ['newName'],
+      []
+    );
+
+    const errorResults = esClientMock.bulk.mock.calls[1][0] as any;
+    const errorIds = errorResults?.body?.filter((i: any) => i.agent_id).map((i: any) => i.agent_id);
+    expect(errorIds).toEqual([agentInHostedDoc._id]);
   });
 
   it('should add tag at the end when tagsToRemove not in existing tags', async () => {
@@ -113,5 +149,34 @@ describe('update_agent_tags', () => {
     );
 
     expectTagsInEsBulk(['three', 'newName']);
+  });
+
+  it('should run add tags async when actioning more agents than batch size', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        total: 3,
+        hits: [
+          {
+            _id: 'agent1',
+            _source: {},
+          } as any,
+          {
+            _id: 'agent2',
+            _source: {},
+          } as any,
+          {
+            _id: 'agent3',
+            _source: {},
+          } as any,
+        ],
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {} as any,
+    });
+
+    await updateAgentTags(soClient, esClient, { kuery: '', batchSize: 2 }, ['newName'], []);
+
+    expect(mockRunAsync).toHaveBeenCalled();
   });
 });

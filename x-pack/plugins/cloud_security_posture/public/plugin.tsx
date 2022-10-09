@@ -17,6 +17,7 @@ import type {
   CspClientPluginStartDeps,
 } from './types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import { SetupContext } from './application/setup_context';
 
 const LazyCspEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
 const LazyCspCreatePolicy = lazy(
@@ -42,10 +43,13 @@ export class CspPlugin
       CspClientPluginStartDeps
     >
 {
+  private isCloudEnabled?: boolean;
+
   public setup(
     core: CoreSetup<CspClientPluginStartDeps, CspClientPluginStart>,
     plugins: CspClientPluginSetupDeps
   ): CspClientPluginSetup {
+    this.isCloudEnabled = plugins.cloud.isCloudEnabled;
     // Return methods that should be available to other plugins
     return {};
   }
@@ -74,7 +78,9 @@ export class CspPlugin
         (
           <KibanaContextProvider services={{ ...core, ...plugins }}>
             <RedirectAppLinks coreStart={core}>
-              <CspRouter {...props} />
+              <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
+                <CspRouter {...props} />
+              </SetupContext.Provider>
             </RedirectAppLinks>
           </KibanaContextProvider>
         ),

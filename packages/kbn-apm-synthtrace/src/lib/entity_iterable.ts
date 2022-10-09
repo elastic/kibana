@@ -15,7 +15,7 @@ export interface EntityIterable<TFields extends Fields = ApmFields>
     AsyncIterable<TFields> {
   order(): 'desc' | 'asc';
 
-  ratePerMinute(): number;
+  estimatedRatePerMinute(): number;
 
   toArray(): ApmFields[];
 
@@ -40,7 +40,7 @@ export class EntityArrayIterable<TFields extends Fields = ApmFields>
   }
 
   private readonly _ratePerMinute: number;
-  ratePerMinute() {
+  estimatedRatePerMinute() {
     return this._ratePerMinute;
   }
 

@@ -8,13 +8,20 @@ import mime from 'mime';
 import type { ResponseHeaders } from '@kbn/core/server';
 import type { File } from '../../common/types';
 
-export function getDownloadHeadersForFile(file: File, fileName?: string): ResponseHeaders {
+interface Args {
+  file: File;
+  fileName?: string;
+}
+
+export function getDownloadHeadersForFile({ file, fileName }: Args): ResponseHeaders {
   return {
     'content-type':
       (fileName && mime.getType(fileName)) ?? file.data.mimeType ?? 'application/octet-stream',
     // Note, this name can be overridden by the client if set via a "download" attribute on the HTML tag.
     'content-disposition': `attachment; filename="${fileName || getDownloadedFileName(file)}"`,
     'cache-control': 'max-age=31536000, immutable',
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+    'x-content-type-options': 'nosniff',
   };
 }
 

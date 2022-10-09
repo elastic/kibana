@@ -218,6 +218,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
     setIsTrainingFilter(isTraining);
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(searchQuery)]);
 
   return (

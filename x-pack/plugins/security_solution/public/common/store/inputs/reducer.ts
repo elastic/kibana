@@ -8,7 +8,7 @@
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { socTrendsId } from './constants';
+import { InputsModelId } from './constants';
 import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
   deleteAllQuery,
@@ -55,7 +55,7 @@ export const initialInputsState: InputsState = {
     },
     queries: [],
     policy: getIntervalSettings(false),
-    linkTo: ['timeline'],
+    linkTo: [InputsModelId.timeline],
     query: {
       query: '',
       language: 'kuery',
@@ -70,7 +70,7 @@ export const initialInputsState: InputsState = {
     },
     queries: [],
     policy: getIntervalSettings(false),
-    linkTo: ['global'],
+    linkTo: [InputsModelId.global],
     query: {
       query: '',
       language: 'kuery',
@@ -97,7 +97,7 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
         kind,
         duration,
       },
-      linkTo: ['timeline', ...(socTrendsEnabled ? [socTrendsId] : [])],
+      linkTo: [InputsModelId.timeline, ...(socTrendsEnabled ? [InputsModelId.socTrends] : [])],
       query: {
         query: '',
         language: 'kuery',
@@ -118,7 +118,7 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
         kind,
         duration,
       },
-      linkTo: ['global'],
+      linkTo: [InputsModelId.global],
       query: {
         query: '',
         language: 'kuery',
@@ -130,7 +130,7 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
       ? {
           socTrends: {
             timerange: socTrends,
-            linkTo: ['global'],
+            linkTo: [InputsModelId.global],
             policy: {
               kind,
               duration,
@@ -148,7 +148,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       global: {
         ...state.global,
         // needs to be emptied, but socTrends should remain if defined
-        linkTo: state.global.linkTo.filter((i) => i !== 'timeline'),
+        linkTo: state.global.linkTo.filter((i) => i !== InputsModelId.timeline),
       },
       timeline: {
         ...state.timeline,

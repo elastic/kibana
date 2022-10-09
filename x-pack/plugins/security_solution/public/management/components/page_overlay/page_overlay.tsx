@@ -13,6 +13,7 @@ import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 import {
   FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET,
@@ -22,7 +23,6 @@ import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
   TIMELINE_EUI_THEME_ZINDEX_LEVEL,
 } from '../../../timelines/components/timeline/styles';
-import { useIsMounted } from '../../hooks/use_is_mounted';
 
 const OverlayRootContainer = styled.div`
   border: none;
@@ -246,7 +246,7 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     // Capture the URL `pathname` that the overlay was opened for
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted()) {
         setOpenedOnPathName((prevState) => {
           if (isHidden) {
             return null;
@@ -270,7 +270,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     // If `hideOnUrlPathNameChange` is true, then determine if the pathname changed and if so, call `onHide()`
     useEffect(() => {
       if (
-        isMounted &&
+        isMounted() &&
         onHide &&
         hideOnUrlPathnameChange &&
         !isHidden &&
@@ -283,7 +283,7 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     // Handle adding class names to the `document.body` DOM element
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted()) {
         if (isHidden) {
           unSetDocumentBodyOverlayIsVisible();
           unSetDocumentBodyLock();

@@ -67,6 +67,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
 import { scheduleActionsForAlerts } from './schedule_actions_for_alerts';
+import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -80,6 +81,11 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
     },
   },
 });
+
+interface StackTraceLog {
+  message: ElasticsearchError;
+  stackTrace?: string;
+}
 
 export class TaskRunner<
   Params extends RuleTypeParams,
@@ -113,6 +119,7 @@ export class TaskRunner<
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
+  private stackTraceLog: StackTraceLog | null;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -143,6 +150,7 @@ export class TaskRunner<
     this.alerts = {};
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
+    this.stackTraceLog = null;
   }
 
   private getExecutionHandler(
@@ -317,6 +325,18 @@ export class TaskRunner<
           maxAlerts: this.maxAlerts,
           canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
         });
+
+        const checkHasReachedAlertLimit = () => {
+          const reachedLimit = alertFactory.hasReachedAlertLimit();
+          if (reachedLimit) {
+            this.logger.warn(
+              `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
+            );
+            ruleRunMetricsStore.setHasReachedAlertLimit(true);
+          }
+          return reachedLimit;
+        };
+
         let updatedState: void | Record<string, unknown>;
         try {
           const ctx = {
@@ -341,7 +361,7 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
-                alertFactory,
+                alertFactory: getPublicAlertFactory(alertFactory),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
               },
@@ -374,28 +394,32 @@ export class TaskRunner<
               },
             })
           );
+
+          // Rule type execution has successfully completed
+          // Check that the rule type either never requested the max alerts limit
+          // or requested it and then reported back whether it exceeded the limit
+          // If neither of these apply, this check will throw an error
+          // These errors should show up during rule type development
+          alertFactory.alertLimit.checkLimitUsage();
         } catch (err) {
           // Check if this error is due to reaching the alert limit
-          if (alertFactory.hasReachedAlertLimit()) {
-            this.logger.warn(
-              `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
-            );
-            ruleRunMetricsStore.setHasReachedAlertLimit(true);
-          } else {
+          if (!checkHasReachedAlertLimit()) {
             this.alertingEventLogger.setExecutionFailed(
               `rule execution failure: ${ruleLabel}`,
               err.message
             );
-            this.logger.error(err, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              error: { stack_trace: err.stack },
-            });
+            this.stackTraceLog = {
+              message: err,
+              stackTrace: err.stack,
+            };
             throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
           }
         }
 
-        this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
+        // Check if the rule type has reported that it reached the alert limit
+        checkHasReachedAlertLimit();
 
+        this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
         ruleRunMetricsStore.setSearchMetrics([
           wrappedScopedClusterClient.getMetrics(),
           wrappedSearchSourceClient.getMetrics(),
@@ -717,15 +741,20 @@ export class TaskRunner<
         (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
           transformRunStateToTaskState(ruleRunStateWithMetrics),
         (err: ElasticsearchError) => {
-          const message = `Executing Rule ${spaceId}:${
-            this.ruleType.id
-          }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
+            const message = `Executing Rule ${spaceId}:${
+              this.ruleType.id
+            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
             this.logger.debug(message);
           } else {
+            const error = this.stackTraceLog ? this.stackTraceLog.message : err;
+            const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
+            const message = `Executing Rule ${spaceId}:${
+              this.ruleType.id
+            }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
             this.logger.error(message, {
               tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              error: { stack_trace: err.stack },
+              error: { stack_trace: stack },
             });
           }
           return originalState;

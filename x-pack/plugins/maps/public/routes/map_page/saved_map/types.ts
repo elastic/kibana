@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/data-plugin/common';
+import type { DataViewSpec, Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
@@ -17,6 +17,7 @@ export interface RefreshConfig {
 
 // parsed contents of mapStateJSON
 export interface SerializedMapState {
+  adHocDataViews?: DataViewSpec[];
   zoom: number;
   center: MapCenter;
   timeFilters?: TimeRange;

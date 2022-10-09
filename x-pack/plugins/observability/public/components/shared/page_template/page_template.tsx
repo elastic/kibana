@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
+import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
@@ -30,17 +31,16 @@ export type WrappedPageTemplateProps = Pick<
   | 'children'
   | 'data-test-subj'
   | 'paddingSize'
-  | 'pageBodyProps'
-  | 'pageContentBodyProps'
-  | 'pageContentProps'
   | 'pageHeader'
   | 'restrictWidth'
-  | 'template'
   | 'isEmptyState'
   | 'noDataConfig'
 > & {
   showSolutionNav?: boolean;
   isPageDataLoaded?: boolean;
+  pageSectionProps?: EuiPageSectionProps;
+  bottomBar?: React.ReactNode;
+  bottomBarProps?: _EuiPageBottomBarProps;
 };
 
 export interface ObservabilityPageTemplateDependencies {
@@ -63,6 +63,9 @@ export function ObservabilityPageTemplate({
   showSolutionNav = true,
   isPageDataLoaded = true,
   getPageTemplateServices,
+  bottomBar,
+  bottomBarProps,
+  pageSectionProps,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -159,7 +162,18 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              {children}
+              <KibanaPageTemplate.Section
+                component="div"
+                alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                {...pageSectionProps}
+              >
+                {children}
+              </KibanaPageTemplate.Section>
+              {bottomBar && (
+                <KibanaPageTemplate.BottomBar {...bottomBarProps}>
+                  {bottomBar}
+                </KibanaPageTemplate.BottomBar>
+              )}
             </KibanaPageTemplate>
           );
         }}

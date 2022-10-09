@@ -79,7 +79,12 @@ describe('Reporting server createConfig$', () => {
         "capture": Object {
           "maxAttempts": 1,
         },
-        "csv": Object {},
+        "csv": Object {
+          "scroll": Object {
+            "duration": "30s",
+            "size": 500,
+          },
+        },
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
         "index": ".reporting",
         "kibanaServer": Object {

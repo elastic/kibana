@@ -49,10 +49,13 @@ TYPES_DEPS = [
   "//packages/kbn-plugin-discovery:npm_module_types",
   "//packages/kbn-dev-utils:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-tooling-log:npm_module_types",
   "@npm//ts-morph",
   "@npm//@types/dedent",
   "@npm//@types/jest",
+  "@npm//@types/js-yaml",
   "@npm//@types/node",
+  "@npm//globby",
 ]
 
 jsts_transpiler(

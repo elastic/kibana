@@ -9,13 +9,14 @@ import { get } from 'lodash';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { stringHash } from '@kbn/ml-string-hash';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-import type { ElasticsearchClient, HistogramField, NumericColumnStatsMap } from './types';
+import type { HistogramField, NumericColumnStatsMap } from './types';
 
 const MAX_CHART_COLUMNS = 20;
 

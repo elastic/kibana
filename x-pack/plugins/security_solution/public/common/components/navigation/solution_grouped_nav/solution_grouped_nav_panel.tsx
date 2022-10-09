@@ -20,7 +20,7 @@ import {
   EuiTitle,
   EuiWindowEvent,
   keys,
-  useIsWithinBreakpoints,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { EuiPanelStyled, FlexLink } from './solution_grouped_nav_panel.styles';
@@ -57,7 +57,7 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
   items,
   bottomOffset,
 }) => {
-  const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+  const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
   const panelClasses = classNames('eui-yScroll');
 
   // Only larger breakpoint needs to add bottom offset, other sizes should have full height
@@ -156,7 +156,7 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
 
 const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => (
   <>
-    {items.map(({ id, href, onClick, label, description, isBeta }) => (
+    {items.map(({ id, href, onClick, label, description, isBeta, betaOptions }) => (
       <Fragment key={id}>
         <EuiDescriptionListTitle>
           <FlexLink
@@ -170,7 +170,7 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
             }}
           >
             {label}
-            {isBeta && <NavItemBetaBadge />}
+            {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
           </FlexLink>
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>

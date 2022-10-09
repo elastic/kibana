@@ -14,9 +14,10 @@ import {
   UiActionsStart,
 } from '@kbn/ui-actions-plugin/public';
 import { APP_ID } from '../../common/constants';
+import { IndexPattern } from '../types';
 
 interface Props {
-  indexPatternId: string;
+  indexPattern: IndexPattern;
   fieldName: string;
   uiActions: UiActionsStart;
 }
@@ -26,11 +27,11 @@ export function VisualizeGeoFieldButton(props: Props) {
 
   async function loadHref() {
     const actions = await props.uiActions.getTriggerCompatibleActions(VISUALIZE_GEO_FIELD_TRIGGER, {
-      indexPatternId: props.indexPatternId,
+      dataViewSpec: props.indexPattern.spec,
       fieldName: props.fieldName,
     });
     const triggerOptions = {
-      indexPatternId: props.indexPatternId,
+      dataViewSpec: props.indexPattern.spec,
       fieldName: props.fieldName,
       trigger: visualizeGeoFieldTrigger,
     };
@@ -49,7 +50,7 @@ export function VisualizeGeoFieldButton(props: Props) {
   function onClick(event: MouseEvent) {
     event.preventDefault();
     props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
-      indexPatternId: props.indexPatternId,
+      dataViewSpec: props.indexPattern.spec,
       fieldName: props.fieldName,
       originatingApp: APP_ID,
     });
@@ -59,14 +60,15 @@ export function VisualizeGeoFieldButton(props: Props) {
     <>
       {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
       <EuiButton
+        fullWidth
         onClick={onClick}
         href={href}
         size="s"
         data-test-subj={`lensVisualize-GeoField-${props.fieldName}`}
       >
         <FormattedMessage
-          id="xpack.lens.indexPattern.fieldItem.visualizeGeoFieldLinkText"
-          defaultMessage="Visualize in Maps"
+          id="xpack.lens.indexPattern.fieldItem.visualizeGeoFieldButtonText"
+          defaultMessage="Visualize"
         />
       </EuiButton>
     </>

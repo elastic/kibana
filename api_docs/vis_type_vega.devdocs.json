@@ -24,6 +24,7 @@
       "description": [],
       "path": "src/plugins/vis_types/vega/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -37,6 +38,7 @@
       "description": [],
       "path": "src/plugins/vis_types/vega/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true

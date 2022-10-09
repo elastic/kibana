@@ -20,6 +20,7 @@ const IndexPatternFlyoutContentContainer = ({
   requireTimestampField = false,
   editData,
   allowAdHocDataView,
+  showManagementLink,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications },
@@ -43,11 +44,13 @@ const IndexPatternFlyoutContentContainer = ({
       }
 
       if (saveResponse && !(saveResponse instanceof Error)) {
-        const message = i18n.translate('indexPatternEditor.saved', {
-          defaultMessage: "Saved '{indexPatternName}'",
-          values: { indexPatternName: saveResponse.getName() },
-        });
-        notifications.toasts.addSuccess(message);
+        if (persist) {
+          const message = i18n.translate('indexPatternEditor.saved', {
+            defaultMessage: "Saved '{indexPatternName}'",
+            values: { indexPatternName: saveResponse.getName() },
+          });
+          notifications.toasts.addSuccess(message);
+        }
         await onSave(saveResponse);
       }
     } catch (e) {
@@ -66,6 +69,7 @@ const IndexPatternFlyoutContentContainer = ({
       defaultTypeIsRollup={defaultTypeIsRollup}
       requireTimestampField={requireTimestampField}
       editData={editData}
+      showManagementLink={showManagementLink}
       allowAdHoc={allowAdHocDataView || false}
     />
   );

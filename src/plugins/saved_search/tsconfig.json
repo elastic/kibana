@@ -16,6 +16,7 @@
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" }
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
+    { "path": "../saved_objects_tagging_oss/tsconfig.json" }
   ]
 }

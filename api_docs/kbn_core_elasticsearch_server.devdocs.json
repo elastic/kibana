@@ -23,6 +23,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -35,7 +36,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -48,7 +50,8 @@
               "string[]"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -58,7 +61,8 @@
             "label": "maxSockets",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -68,7 +72,8 @@
             "label": "compression",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -78,7 +83,8 @@
             "label": "sniffOnStart",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -88,7 +94,8 @@
             "label": "sniffOnConnectionFault",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -101,7 +108,8 @@
               "false | moment.Duration"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -114,7 +122,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -127,7 +136,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -140,7 +150,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -153,7 +164,8 @@
               "string[]"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -166,7 +178,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -179,7 +192,8 @@
               "number | moment.Duration | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -192,7 +206,8 @@
               "number | moment.Duration | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -205,7 +220,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -225,7 +241,8 @@
               " | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -239,6 +256,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -251,7 +269,8 @@
               "\"none\" | \"full\" | \"certificate\" | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -264,7 +283,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -277,7 +297,8 @@
               "string[] | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -290,7 +311,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -303,7 +325,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -316,7 +339,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -332,6 +356,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -346,7 +371,8 @@
               "string[]"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -358,7 +384,8 @@
               "\nIndicates whether Elasticsearch configuration includes credentials (`username`, `password` or `serviceAccountToken`)."
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -374,6 +401,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/request_handler_context.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -392,7 +420,8 @@
               }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/request_handler_context.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -406,6 +435,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -420,7 +450,8 @@
               "{ readonly hosts: string[]; readonly credentialsSpecified: boolean; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -451,6 +482,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -466,6 +498,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -490,6 +523,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -507,6 +541,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -530,6 +565,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -549,6 +585,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -578,6 +615,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
             "deprecated": true,
+            "trackAdoption": false,
             "references": []
           }
         ],
@@ -592,6 +630,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -612,7 +651,8 @@
               }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -643,6 +683,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -658,6 +699,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -682,6 +724,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -699,6 +742,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -711,7 +755,8 @@
               "\"none\" | \"full\" | \"certificate\""
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -724,7 +769,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -737,7 +783,8 @@
               "string[] | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -750,7 +797,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -763,7 +811,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -773,7 +822,8 @@
             "label": "alwaysPresentCertificate",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -789,6 +839,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/scopeable_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -803,7 +854,8 @@
               "{ accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; date?: string | string[] | undefined; etag?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; range?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; warning?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/scopeable_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -819,6 +871,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/cluster_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -830,7 +883,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user"
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -948,7 +1001,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -2021,7 +2074,8 @@
               "; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/cluster_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2052,6 +2106,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/cluster_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2071,6 +2126,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/cluster_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2107,6 +2163,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/cluster_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2122,6 +2179,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/cluster_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2137,6 +2195,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2151,7 +2210,8 @@
               "moment.Duration"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2163,7 +2223,8 @@
               "\nWhether to allow kibana to connect to a non-compatible elasticsearch node."
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2175,7 +2236,8 @@
               "\nVersion of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to."
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2187,7 +2249,8 @@
               "\nThe maximum number of sockets that can be used for communications with elasticsearch."
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2199,7 +2262,8 @@
               "\nWhether to use compression for communications with elasticsearch."
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2214,7 +2278,8 @@
               "string[]"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2229,7 +2294,8 @@
               "string[]"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2244,7 +2310,8 @@
               "moment.Duration"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2259,7 +2326,8 @@
               "moment.Duration"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2274,7 +2342,8 @@
               "moment.Duration"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2286,7 +2355,8 @@
               "\nSpecifies whether the client should attempt to detect the rest of the cluster\nwhen it is first instantiated."
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2301,7 +2371,8 @@
               "false | moment.Duration"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2313,7 +2384,8 @@
               "\nSpecifies whether the client should immediately sniff for a more current list\nof nodes when a connection dies."
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2328,7 +2400,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2343,7 +2416,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2358,7 +2432,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2373,7 +2448,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2394,7 +2470,8 @@
               }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2410,6 +2487,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/scoped_cluster_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -2421,7 +2499,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the internal Kibana user."
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -2539,7 +2617,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -3612,7 +3690,8 @@
               "; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/scoped_cluster_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -3624,7 +3703,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the user that initiated the request to the Kibana server."
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -3742,7 +3821,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -4815,7 +4894,8 @@
               "; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/scoped_cluster_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4829,6 +4909,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -4841,7 +4922,8 @@
               "\"notHandled\""
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4855,6 +4937,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -4868,7 +4951,8 @@
               " & { statusCode: 401; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -4882,7 +4966,8 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4896,6 +4981,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -4908,7 +4994,8 @@
               "{ [x: string]: string | string[]; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4939,6 +5026,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -4951,7 +5039,8 @@
               "\"retry\""
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4967,6 +5056,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -4989,6 +5079,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5021,6 +5112,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -5040,6 +5132,7 @@
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5061,7 +5154,7 @@
           "\nClient used to query the elasticsearch cluster.\n"
         ],
         "signature": [
-          "{ get: { <TDocument = unknown>(this: That, params: ",
+          "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
           "GetRequest",
           " | ",
           "GetRequest",
@@ -5179,7 +5272,7 @@
           "default",
           "; security: ",
           "default",
-          "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+          "; index: { <TDocument = unknown>(this: That, params: ",
           "IndexRequest",
           "<TDocument> | ",
           "IndexRequest",
@@ -6253,6 +6346,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6277,6 +6371,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/scopeable_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6319,6 +6414,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6338,7 +6434,8 @@
               }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
@@ -6357,7 +6454,8 @@
               }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6388,6 +6486,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

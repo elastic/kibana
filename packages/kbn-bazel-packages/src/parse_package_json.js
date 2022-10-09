@@ -22,8 +22,12 @@ function isObj(v) {
  * @returns {asserts v is import('./types').ParsedPackageJson}
  */
 function validateParsedPackageJson(v) {
-  if (!isObj(v) || typeof v.name !== 'string') {
-    throw new Error('Expected at least a "name" property');
+  if (!isObj(v)) {
+    throw new Error('Expected package.json to be a JSON object');
+  }
+
+  if (typeof v.name !== 'string') {
+    throw new Error('Expected package.json to have a "name"');
   }
 
   if (v.dependencies && !isObj(v.dependencies)) {
@@ -49,7 +53,7 @@ function validateParsedPackageJson(v) {
 /**
  * Reads a given package.json file from disk and parses it
  * @param {string} path
- * @returns {import('./types').ParsedPackageJson}
+ * @returns {import('./types').ParsedPackageJson | undefined}
  */
 function readPackageJson(path) {
   let pkg;
@@ -57,7 +61,9 @@ function readPackageJson(path) {
     pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));
     validateParsedPackageJson(pkg);
   } catch (error) {
-    throw new Error(`unable to parse package.json at [${path}]: ${error.message}`);
+    if (error.code !== 'ENOENT') {
+      throw new Error(`unable to parse package.json at [${path}]: ${error.message}`);
+    }
   }
   return pkg;
 }

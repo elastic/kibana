@@ -9,19 +9,7 @@ import { DragContextState } from '../drag_drop';
 import { getFieldByNameFactory } from './pure_helpers';
 import type { IndexPattern, IndexPatternField } from '../types';
 
-export const createMockedIndexPatternWithoutType = (
-  typeToFilter: IndexPatternField['type']
-): IndexPattern => {
-  const { fields, ...otherIndexPatternProps } = createMockedIndexPattern();
-  const filteredFields = fields.filter(({ type }) => type !== typeToFilter);
-  return {
-    ...otherIndexPatternProps,
-    fields: filteredFields,
-    getFieldByName: getFieldByNameFactory(filteredFields),
-  };
-};
-
-export const createMockedIndexPattern = (): IndexPattern => {
+export const createMockedIndexPattern = (someProps?: Partial<IndexPattern>): IndexPattern => {
   const fields = [
     {
       name: 'timestamp',
@@ -101,7 +89,9 @@ export const createMockedIndexPattern = (): IndexPattern => {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    spec: undefined,
+    isPersisted: true,
+    spec: {},
+    ...someProps,
   };
 };
 
@@ -141,7 +131,8 @@ export const createMockedRestrictedIndexPattern = () => {
     fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    spec: undefined,
+    isPersisted: true,
+    spec: {},
     typeMeta: {
       params: {
         rollup_index: 'my-fake-index-pattern',
@@ -188,6 +179,18 @@ export const createMockedRestrictedIndexPattern = () => {
         },
       },
     },
+  };
+};
+
+export const createMockedIndexPatternWithoutType = (
+  typeToFilter: IndexPatternField['type']
+): IndexPattern => {
+  const { fields, ...otherIndexPatternProps } = createMockedIndexPattern();
+  const filteredFields = fields.filter(({ type }) => type !== typeToFilter);
+  return {
+    ...otherIndexPatternProps,
+    fields: filteredFields,
+    getFieldByName: getFieldByNameFactory(filteredFields),
   };
 };
 

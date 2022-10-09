@@ -26,7 +26,7 @@ import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { DiscoverServices } from '../build_services';
 
-interface StartServices {
+export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
   isEditable: () => boolean;
 }
@@ -76,6 +76,7 @@ export class SearchEmbeddableFactory
         search: services.data.search,
         savedObjectsClient: services.core.savedObjects.client,
         spaces: services.spaces,
+        savedObjectsTagging: services.savedObjectsTagging,
       });
 
       await throwErrorOnSavedSearchUrlConflict(savedSearch);

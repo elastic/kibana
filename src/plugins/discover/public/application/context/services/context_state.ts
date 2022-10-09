@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
 import { Filter, compareFilters, COMPARE_ALL_OPTIONS, FilterStateStore } from '@kbn/es-query';
@@ -19,6 +19,8 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 
 import { connectToQueryState, DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 
 export interface AppState {
@@ -83,6 +85,11 @@ export interface GetStateParams {
    * data service
    */
   data: DataPublicPluginStart;
+
+  /**
+   * the current data view
+   */
+  dataView: DataView;
 }
 
 export interface GetStateReturn {
@@ -134,6 +141,7 @@ export function getState({
   toasts,
   uiSettings,
   data,
+  dataView,
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
@@ -191,7 +199,9 @@ export function getState({
     globalState: globalStateContainer,
     appState: appStateContainer,
     startSync: () => {
-      data.query.filterManager.setFilters(cloneDeep(getAllFilters()));
+      // some filters may not be valid for this context, so update
+      // the filter manager with a modified list of valid filters
+      data.query.filterManager.setFilters(getValidFilters(dataView, getAllFilters()));
 
       const stopSyncingAppFilters = connectToQueryState(data.query, appStateContainer, {
         filters: FilterStateStore.APP_STATE,

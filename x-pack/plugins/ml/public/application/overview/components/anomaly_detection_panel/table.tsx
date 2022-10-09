@@ -93,19 +93,14 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData, chartsSe
 
         if (!swimLaneData) return null;
 
-        const hasResults = swimLaneData.points.length > 0;
-
-        const noDatWarning = hasResults ? (
-          <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.noAnomaliesFoundMessage"
-            defaultMessage="No anomalies found"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.noResultsFoundMessage"
-            defaultMessage="No results found"
-          />
-        );
+        if (swimLaneData.points.length > 0 && swimLaneData.points.every((v) => v.value === 0)) {
+          return (
+            <FormattedMessage
+              id="xpack.ml.overview.anomalyDetection.noAnomaliesFoundMessage"
+              defaultMessage="No anomalies found"
+            />
+          );
+        }
 
         return (
           <SwimlaneContainer
@@ -118,7 +113,12 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData, chartsSe
             showTimeline={false}
             showYAxis={false}
             showLegend={false}
-            noDataWarning={noDatWarning}
+            noDataWarning={
+              <FormattedMessage
+                id="xpack.ml.overview.anomalyDetection.noResultsFoundMessage"
+                defaultMessage="No results found"
+              />
+            }
             chartsService={chartsService}
           />
         );

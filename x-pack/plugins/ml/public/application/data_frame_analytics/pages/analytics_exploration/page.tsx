@@ -57,6 +57,7 @@ export const Page: FC<{
 
   useEffect(function checkJobs() {
     checkJobsExist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
@@ -70,6 +71,7 @@ export const Page: FC<{
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [analyticsId?.job_id, analyticsId?.model_id]
   );
 

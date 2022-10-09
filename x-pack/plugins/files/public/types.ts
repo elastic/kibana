@@ -24,27 +24,49 @@ import type {
   HttpApiInterfaceEntryDefinition,
 } from '../common/api_routes';
 
-/**
- * @param args - Input to the endpoint which includes body, params and query of the RESTful endpoint.
- */
-type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
+type UnscopedClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
   args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
 ) => Promise<E['output']>;
 
-type ClientMethodOptionalArgsFrom<E extends HttpApiInterfaceEntryDefinition> = (
-  args?: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
+/**
+ * @param args - Input to the endpoint which includes body, params and query of the RESTful endpoint.
+ */
+type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition, ExtraArgs extends {} = {}> = (
+  args: Parameters<UnscopedClientMethodFrom<E>>[0] & { kind: string } & ExtraArgs
 ) => Promise<E['output']>;
+
+interface GlobalEndpoints {
+  /**
+   * Get metrics of file system, like storage usage.
+   *
+   * @param args - Get metrics arguments
+   */
+  getMetrics: () => Promise<FilesMetricsHttpEndpoint['output']>;
+  /**
+   * Download a file, bypassing regular security by way of a
+   * secret share token.
+   *
+   * @param args - Get public download arguments.
+   */
+  publicDownload: UnscopedClientMethodFrom<FilePublicDownloadHttpEndpoint>;
+  /**
+   * Find a set of files given some filters.
+   *
+   * @param args - File filters
+   */
+  find: UnscopedClientMethodFrom<FindFilesHttpEndpoint>;
+}
 
 /**
  * A client that can be used to manage a specific {@link FileKind}.
  */
-export interface FilesClient {
+export interface FilesClient<M = unknown> extends GlobalEndpoints {
   /**
    * Create a new file object with the provided metadata.
    *
    * @param args - create file args
    */
-  create: ClientMethodFrom<CreateFileKindHttpEndpoint>;
+  create: ClientMethodFrom<CreateFileKindHttpEndpoint<M>>;
   /**
    * Delete a file object and all associated share and content objects.
    *
@@ -56,37 +78,49 @@ export interface FilesClient {
    *
    * @param args - get file by ID args
    */
-  getById: ClientMethodFrom<GetByIdFileKindHttpEndpoint>;
+  getById: ClientMethodFrom<GetByIdFileKindHttpEndpoint<M>>;
   /**
    * List all file objects, of a given {@link FileKind}.
    *
    * @param args - list files args
    */
-  list: ClientMethodOptionalArgsFrom<ListFileKindHttpEndpoint>;
-  /**
-   * Find a set of files given some filters.
-   *
-   * @param args - File filters
-   */
-  find: ClientMethodFrom<FindFilesHttpEndpoint>;
+  list: ClientMethodFrom<ListFileKindHttpEndpoint<M>>;
   /**
    * Update a set of of metadata values of the file object.
    *
    * @param args - update file args
    */
-  update: ClientMethodFrom<UpdateFileKindHttpEndpoint>;
+  update: ClientMethodFrom<UpdateFileKindHttpEndpoint<M>>;
   /**
    * Stream the contents of the file to Kibana server for storage.
    *
    * @param args - upload file args
    */
-  upload: ClientMethodFrom<UploadFileKindHttpEndpoint>;
+  upload: (
+    args: UploadFileKindHttpEndpoint['inputs']['params'] &
+      UploadFileKindHttpEndpoint['inputs']['query'] & {
+        /**
+         * Should be blob or ReadableStream of some kind.
+         */
+        body: unknown;
+        kind: string;
+        abortSignal?: AbortSignal;
+        contentType?: string;
+      }
+  ) => Promise<UploadFileKindHttpEndpoint['output']>;
   /**
    * Stream a download of the file object's content.
    *
    * @param args - download file args
    */
   download: ClientMethodFrom<DownloadFileKindHttpEndpoint>;
+  /**
+   * Get a string for downloading a file that can be passed to a button element's
+   * href for download.
+   *
+   * @param args - get download URL args
+   */
+  getDownloadHref: (args: Pick<FileJSON, 'id' | 'fileKind'>) => string;
   /**
    * Share a file by creating a new file share instance.
    *
@@ -115,39 +149,36 @@ export interface FilesClient {
    * @param args - Get file share arguments
    */
   listShares: ClientMethodFrom<FileListSharesHttpEndpoint>;
-  /**
-   * Get metrics of file system, like storage usage.
-   *
-   * @param args - Get metrics arguments
-   */
-  getMetrics: ClientMethodFrom<FilesMetricsHttpEndpoint>;
-  /**
-   * Download a file, bypassing regular security by way of a
-   * secret share token.
-   *
-   * @param args - Get public download arguments.
-   */
-  publicDownload: ClientMethodFrom<FilePublicDownloadHttpEndpoint>;
-
-  /**
-   * Get a string for downloading a file that can be passed to a button element's
-   * href for download.
-   */
-  getDownloadHref: (file: FileJSON) => string;
 }
 
-export type FilesClientResponses = {
-  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient[K]>>;
+export type FilesClientResponses<M = unknown> = {
+  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient<M>[K]>>;
 };
 
 /**
- * A factory for creating a {@link FilesClient}
+ * A files client that is scoped to a specific {@link FileKind}.
+ *
+ * More convenient if you want to re-use the same client for the same file kind
+ * and not specify the kind every time.
+ */
+export type ScopedFilesClient<M = unknown> = {
+  [K in keyof FilesClient]: K extends 'list'
+    ? (arg?: Omit<Parameters<FilesClient<M>[K]>[0], 'kind'>) => ReturnType<FilesClient<M>[K]>
+    : (arg: Omit<Parameters<FilesClient<M>[K]>[0], 'kind'>) => ReturnType<FilesClient<M>[K]>;
+};
+
+/**
+ * A factory for creating a {@link ScopedFilesClient}
  */
 export interface FilesClientFactory {
   /**
-   * Create a {@link FileClient} for a given {@link FileKind}.
+   * Create a files client.
+   */
+  asUnscoped<M = unknown>(): FilesClient<M>;
+  /**
+   * Create a {@link ScopedFileClient} for a given {@link FileKind}.
    *
    * @param fileKind - The {@link FileKind} to create a client for.
    */
-  asScoped(fileKind: string): FilesClient;
+  asScoped<M = unknown>(fileKind: string): ScopedFilesClient<M>;
 }

@@ -34,7 +34,7 @@ export type {
   DataLayerConfig,
   FittingFunction,
   AxisExtentConfig,
-  CollectiveConfig,
+  MergedAnnotation,
   LegendConfigResult,
   AxesSettingsConfig,
   XAxisConfigResult,

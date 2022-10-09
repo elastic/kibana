@@ -27,7 +27,7 @@ This library can currently be used in two ways:
 ```ts
 import { service, timerange, toElasticsearchOutput } from '@kbn/apm-synthtrace';
 
-const instance = service('synth-go', 'production', 'go').instance('instance-a');
+const instance = service({name: 'synth-go', environment: 'production', agentName: 'go'}).instance('instance-a');
 
 const from = new Date('2021-01-01T12:00:00.000Z').getTime();
 const to = new Date('2021-01-01T12:00:00.000Z').getTime();
@@ -37,7 +37,7 @@ const traceEvents = timerange(from, to)
   .rate(10)
   .flatMap((timestamp) =>
     instance
-      .transaction('GET /api/product/list')
+      .transaction({transactionName: 'GET /api/product/list'})
       .timestamp(timestamp)
       .duration(1000)
       .success()
@@ -155,3 +155,19 @@ Note:
 | `--logLevel`      | [enum]    | `info`  | Log level                                                                                               |
 | `--gcpRepository` | [string]  |         | Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format                    |
 | `-p`              | [string]  |         | Specify multiple sets of streamaggregators to be included in the StreamProcessor                        |
+
+## Testing
+
+Run the Jest tests:
+
+```
+node scripts/jest --config ./packages/kbn-apm-synthtrace/jest.config.js
+```
+
+## Typescript
+
+Run the type checker:
+
+```
+node scripts/type_check.js --project packages/kbn-apm-synthtrace/tsconfig.json
+```

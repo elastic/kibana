@@ -15,7 +15,7 @@ import type {
   JiraActionParams,
   WebhookActionParams,
   EmailActionParams,
-} from '@kbn/actions-plugin/server';
+} from '@kbn/stack-connectors-plugin/server/connector_types';
 import { NewAlertParams } from './alerts';
 import { ACTION_GROUP_DEFINITIONS } from '../../../../common/constants/alerts';
 import { MonitorStatusTranslations } from '../../../../common/translations';

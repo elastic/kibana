@@ -6,6 +6,7 @@
  */
 import { fromKueryExpression } from '@kbn/es-query';
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
+import { createHash } from 'crypto';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -14,6 +15,7 @@ import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   SavedServiceGroup,
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+  MAX_NUMBER_OF_SERVICE_GROUPS,
 } from '../../../../common/service_groups';
 import { getKueryFields } from '../../helpers/get_kuery_fields';
 import {
@@ -30,7 +32,7 @@ import {
   HOST_OS_PLATFORM,
   OBSERVER_HOSTNAME,
   PARENT_ID,
-  POD_NAME,
+  KUBERNETES_POD_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
@@ -180,7 +182,7 @@ export const tasks: TelemetryTask[] = [
         SERVICE_VERSION,
         HOST_NAME,
         CONTAINER_ID,
-        POD_NAME,
+        KUBERNETES_POD_NAME,
       ].map((field) => ({ terms: { field, missing_bucket: true } }));
 
       const observerHostname = {
@@ -1133,7 +1135,7 @@ export const tasks: TelemetryTask[] = [
       const response = await savedObjectsClient.find<SavedServiceGroup>({
         type: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 50,
+        perPage: MAX_NUMBER_OF_SERVICE_GROUPS,
         sortField: 'updated_at',
         sortOrder: 'desc',
       });
@@ -1147,6 +1149,7 @@ export const tasks: TelemetryTask[] = [
       return {
         service_groups: {
           kuery_fields: kueryFields,
+          total: response.total ?? 0,
         },
       };
     },
@@ -1206,7 +1209,7 @@ export const tasks: TelemetryTask[] = [
                             field: SERVICE_RUNTIME_VERSION,
                           },
                           {
-                            field: POD_NAME,
+                            field: KUBERNETES_POD_NAME,
                           },
                           {
                             field: CONTAINER_ID,
@@ -1247,11 +1250,15 @@ export const tasks: TelemetryTask[] = [
       });
       const envBuckets = response.aggregations?.environments.buckets ?? [];
       const data: APMPerService[] = envBuckets.flatMap((envBucket) => {
-        const env = envBucket.key;
+        const envHash = createHash('sha256')
+          .update(envBucket.key as string)
+          .digest('hex');
         const serviceBuckets = envBucket.service_names?.buckets ?? [];
         return serviceBuckets.map((serviceBucket) => {
-          const name = serviceBucket.key;
-          const fullServiceName = `${env}~${name}`;
+          const nameHash = createHash('sha256')
+            .update(serviceBucket.key as string)
+            .digest('hex');
+          const fullServiceName = `${nameHash}~${envHash}`;
           return {
             service_id: fullServiceName,
             timed_out: response.timed_out,
@@ -1314,7 +1321,7 @@ export const tasks: TelemetryTask[] = [
             kubernetes: {
               pod: {
                 name: serviceBucket.top_metrics?.top[0].metrics[
-                  POD_NAME
+                  KUBERNETES_POD_NAME
                 ] as string,
               },
             },
