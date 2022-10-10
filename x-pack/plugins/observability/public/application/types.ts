@@ -25,6 +25,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 
 export interface ObservabilityAppServices {
   application: ApplicationStart;
@@ -46,4 +47,5 @@ export interface ObservabilityAppServices {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiSettings: IUiSettingsClient;
   isDev?: boolean;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }

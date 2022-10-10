@@ -32,6 +32,7 @@ import { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
+import { ObservabilityAppServices } from '../../../application/types';
 import { observabilityAppId } from '../../../../common';
 import { tourStepsConfig } from './steps_config';
 
@@ -142,21 +143,6 @@ const getSteps = ({
   });
 };
 
-interface TourState {
-  activeStep: number;
-  isTourActive: boolean;
-}
-
-const getInitialTourStep = ({
-  prevActiveStep,
-}: {
-  prevActiveStep: string | null;
-}): TourState['activeStep'] => {
-  const activeStep = prevActiveStep === null ? 1 : Number(prevActiveStep);
-
-  return activeStep;
-};
-
 export interface ObservabilityTourContextValue {
   endTour: () => void;
   isTourVisible: boolean;
@@ -181,22 +167,19 @@ export function ObservabilityTour({
   prependBasePath?: (imageName: string) => string;
 }) {
   const prevActiveStep = localStorage.getItem(observTourStepStorageKey);
+  const initialActiveStep = prevActiveStep === null ? 1 : Number(prevActiveStep);
 
-  const { services } = useKibana();
+  const { services } = useKibana<ObservabilityAppServices>();
 
   const isGuidedOnboardingActive = useObservable(
     // if guided onboarding is not available, return false
-    services.guidedOnboarding?.guidedOnboardingApi
+    services.guidedOnboarding.guidedOnboardingApi
       ? services.guidedOnboarding.guidedOnboardingApi.isGuideStepActive$(
           'observability',
           'tour_observability'
         )
       : of(false)
   );
-
-  const initialActiveStep = getInitialTourStep({
-    prevActiveStep,
-  });
 
   const [isTourActive, setIsTourActive] = useState(false);
   const [activeStep, setActiveStep] = useState(initialActiveStep);
@@ -211,11 +194,17 @@ export function ObservabilityTour({
     setActiveStep((prevState) => prevState + 1);
   }, []);
 
-  const endTour = useCallback(() => {
-    // Reset tour state
-    setIsTourActive(false);
+  const endTour = useCallback(async () => {
+    // Mark the onboarding guide step as complete
+    if (services.guidedOnboarding.guidedOnboardingApi) {
+      await services.guidedOnboarding.guidedOnboardingApi.completeGuideStep(
+        'observability',
+        'tour_observability'
+      );
+    }
+    // Reset EuiTour step state
     setActiveStep(1);
-  }, []);
+  }, [services.guidedOnboarding?.guidedOnboardingApi]);
 
   /**
    * The tour should only be visible if the following conditions are met:

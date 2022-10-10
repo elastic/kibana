@@ -156,7 +156,7 @@ export class ApiService implements GuidedOnboardingApi {
   /**
    * Marks a guide as inactive
    * This is useful for the dropdown panel, when a user quits a guide
-   * @param {GuideState} guide (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
+   * @param {GuideState} guide the selected guide state
    * @return {Promise} a promise with the updated guide state
    */
   public async deactivateGuide(guide: GuideState): Promise<{ state: GuideState } | undefined> {
