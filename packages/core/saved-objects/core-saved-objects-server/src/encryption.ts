@@ -9,20 +9,20 @@
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 
 /**
- * The CheckAuthorizationParams interface contains settings for checking
- * authorization via the ISavedObjectsSecurityExtension.
+ * The EncryptedObjectDescriptor interface contains settings for describing
+ * an object to be encrypted or decrpyted.
  */
 export interface EncryptedObjectDescriptor {
   /**
-   * A set of types to check.
+   * The Saved Object type
    */
   type: string;
   /**
-   * A set of spaces to check.
+   * The Saved Object ID
    */
   id: string;
   /**
-   * An array of actions to check.
+   * The namespace where the Saved Object resides
    */
   namespace?: string;
 }

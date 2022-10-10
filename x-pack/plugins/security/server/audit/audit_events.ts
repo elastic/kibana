@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AddAuditEventParams as SavedObjectEventParams } from '@kbn/core-saved-objects-server';
 import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from '@kbn/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
@@ -288,14 +289,15 @@ const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
   saved_object_update_objects_spaces: 'change',
 };
 
-export interface SavedObjectEventParams {
-  action: SavedObjectAction;
-  outcome?: EcsEventOutcome;
-  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
-  addToSpaces?: readonly string[];
-  deleteFromSpaces?: readonly string[];
-  error?: Error;
-}
+// This definition comes from '@kbn/core-saved-objects-server' now per Joe's changes and Pierre's migration to packages
+// export interface SavedObjectEventParams {
+//   action: SavedObjectAction;
+//   outcome?: EcsEventOutcome;
+//   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
+//   addToSpaces?: readonly string[];
+//   deleteFromSpaces?: readonly string[];
+//   error?: Error;
+// }
 
 export function savedObjectEvent({
   action,

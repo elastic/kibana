@@ -231,7 +231,7 @@ describe('#updateObjectsSpaces', () => {
     it('returns mix of type errors, mget/bulk cluster errors, and successes', async () => {
       const obj1 = { type: SHAREABLE_HIDDEN_OBJ_TYPE, id: 'id-1' }; // invalid type (Not Found)
       const obj2 = { type: NON_SHAREABLE_OBJ_TYPE, id: 'id-2' }; // non-shareable type (Bad Request)
-      // obj3 below is mocking an example where a SOC wrapper attempted to retrieve it in a pre-flight request but it was not found.
+      // obj3 below is mocking an example where the SOC attempted to retrieve it in a pre-flight request but it was not found.
       // Since it has 'spaces: []', that indicates it should be skipped for cluster calls and just returned as a Not Found error.
       // Realistically this would not be intermingled with other requested objects that do not have 'spaces' arrays, but it's fine for this
       // specific test case.

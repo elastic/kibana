@@ -11,6 +11,9 @@ export type {
   SavedObjectsClientFactoryProvider,
   SavedObjectsRepositoryFactory,
   SavedObjectsClientProviderOptions,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
 } from './src/client_factory';
 export type { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './src/contracts';
 export type {
