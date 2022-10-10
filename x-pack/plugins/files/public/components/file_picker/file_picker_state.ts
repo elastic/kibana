@@ -10,11 +10,9 @@ export class FilePickerState {
   private readonly fileSet = new Set<string>();
 
   private sendNext() {
-    this.size$.next(this.fileSet.size);
     this.fileIds$.next(this.getFileIds());
   }
   public fileIds$ = new BehaviorSubject<string[]>([]);
-  public size$ = new BehaviorSubject<number>(0);
 
   public isEmpty() {
     return this.fileSet.size === 0;
@@ -37,3 +35,7 @@ export class FilePickerState {
     return Array.from(this.fileSet);
   };
 }
+
+export const createFilePickerState = (): FilePickerState => {
+  return new FilePickerState();
+};
