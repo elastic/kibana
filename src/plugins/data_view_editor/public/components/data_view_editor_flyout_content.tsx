@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useContext } from 'react';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -61,6 +61,7 @@ import {
   RollupBetaWarning,
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
+import { DataViewEditorServiceContext } from './data_view_flyout_content_container';
 
 export interface Props {
   /**
@@ -103,8 +104,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
   showManagementLink,
 }: Props) => {
   const {
-    services: { application, dataViews, uiSettings, overlays, dataViewEditorService },
+    services: { application, dataViews, uiSettings, overlays },
   } = useKibana<DataViewEditorContext>();
+
+  const { dataViewEditorService } = useContext(DataViewEditorServiceContext);
 
   const canSave = dataViews.getCanSaveSync();
 
@@ -197,7 +200,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   // initial loading of indicies and data view names
   useEffect(() => {
     const matchedIndiceSub = dataViewEditorService.matchedIndices$.subscribe((matchedIndices) => {
-      //
       const timeFieldQuery = editData ? editData.title : title;
       dataViewEditorService.loadTimestampFields(
         removeSpaces(timeFieldQuery),
@@ -211,7 +213,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       dataViewEditorService.matchedIndices$.next(matchedIndices);
     });
 
-    // todo is this called when the title changes?
     dataViewEditorService.loadDataViewNames(title).then((names) => {
       existingDataViewNames$.current.next(names);
       isLoadingDataViewNames$.current.next(false);

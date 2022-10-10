@@ -24,7 +24,6 @@ import type {
   INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
-import { DataViewEditorService } from './service';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
@@ -36,7 +35,6 @@ export interface DataViewEditorContext {
   overlays: OverlayStart;
   dataViews: DataViewsServicePublic;
   searchClient: DataPublicPluginStart['search']['search'];
-  dataViewEditorService: DataViewEditorService;
 }
 
 /** @public */

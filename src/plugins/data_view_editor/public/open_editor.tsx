@@ -11,7 +11,6 @@ import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataViewEditorService } from './service';
 
 import { createKibanaReactContext, toMountPoint, DataPublicPluginStart } from './shared_imports';
 
@@ -38,7 +37,6 @@ export const getEditorOpener =
         dataViews,
         overlays,
         searchClient,
-        dataViewEditorService: new DataViewEditorService(http, dataViews),
       });
 
     let overlayRef: OverlayRef | null = null;

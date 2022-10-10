@@ -23,7 +23,7 @@ import { GetFieldsOptions } from './shared_imports';
 
 export class DataViewEditorService {
   constructor(private http: HttpSetup, private dataViews: DataViewsServicePublic) {
-    this.getRollupIndexCaps();
+    this.rollupCapsResponse = this.getRollupIndexCaps();
   }
 
   rollupIndicesCapabilities$ = new BehaviorSubject<RollupIndicesCapsResponse>({});
@@ -38,6 +38,8 @@ export class DataViewEditorService {
     partialMatchedIndices: [],
     visibleIndices: [],
   });
+
+  private rollupCapsResponse: Promise<RollupIndicesCapsResponse>;
 
   private currentLoadingTimestampFields = 0;
 
@@ -55,7 +57,7 @@ export class DataViewEditorService {
   private getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
   getIsRollupIndex = async () => {
-    const response = await this.getRollupIndexCaps();
+    const response = await this.rollupCapsResponse;
     return (indexName: string) => this.getRollupIndices(response).includes(indexName);
   };
 
@@ -153,10 +155,11 @@ export class DataViewEditorService {
     requireTimestampField: boolean,
     rollupIndex?: string
   ) => {
-    if (this.matchedIndices$.getValue().exactMatchedIndices.length) {
+    if (this.matchedIndices$.getValue().exactMatchedIndices.length === 0) {
       this.timestampFieldOptions$.next([]);
+      return;
     }
-
+    // console.log('loadTimestampFields', index, type, requireTimestampField, rollupIndex);
     const currentLoadingTimestampFieldsIdx = ++this.currentLoadingTimestampFields;
     this.loadingTimestampFields$.next(true);
     const getFieldsOptions: GetFieldsOptions = {
