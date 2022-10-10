@@ -187,7 +187,6 @@ export class TrustedAppValidator extends BaseValidator {
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
     await this.validateHasWritePrivilege();
-    await this.validateCanManageEndpointArtifacts();
     await this.validateTrustedAppData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
@@ -197,32 +196,26 @@ export class TrustedAppValidator extends BaseValidator {
 
   async validatePreDeleteItem(): Promise<void> {
     await this.validateHasWritePrivilege();
-    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreGetOneItem(): Promise<void> {
     await this.validateHasReadPrivilege();
-    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreMultiListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreExport(): Promise<void> {
-    await this.validateHasReadPrivilege();
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
   }
 
   async validatePreSingleListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreGetListSummary(): Promise<void> {
     await this.validateHasReadPrivilege();
-    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreUpdateItem(
@@ -232,7 +225,6 @@ export class TrustedAppValidator extends BaseValidator {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
     await this.validateHasWritePrivilege();
-    await this.validateCanManageEndpointArtifacts();
     await this.validateTrustedAppData(updatedItem);
 
     try {
