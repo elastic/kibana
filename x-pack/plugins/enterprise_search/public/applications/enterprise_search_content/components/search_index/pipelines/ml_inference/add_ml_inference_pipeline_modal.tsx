@@ -41,6 +41,8 @@ import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
 
+import './add_ml_inference_pipeline_modal.scss';
+
 interface AddMLInferencePipelineModalProps {
   onClose: () => void;
 }
@@ -55,7 +57,7 @@ export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalPr
   }, [indexName]);
 
   return (
-    <EuiModal onClose={onClose} style={{ width: 800 }}>
+    <EuiModal onClose={onClose} className="enterpriseSearchInferencePipelineModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h1>

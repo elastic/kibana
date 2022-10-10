@@ -26,6 +26,8 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { MLInferenceLogic } from './ml_inference_logic';
 
+import './add_ml_inference_pipeline_modal.scss';
+
 export const TestPipeline: React.FC = () => {
   const {
     addInferencePipelineModal: { simulateBody },
@@ -51,7 +53,7 @@ export const TestPipeline: React.FC = () => {
       <EuiFlexItem>
         <EuiResizableContainer
           direction={isSmallerViewport ? 'vertical' : 'horizontal'}
-          style={{ height: 310 }}
+          className="resizableContainer"
         >
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
@@ -73,7 +75,7 @@ export const TestPipeline: React.FC = () => {
               <EuiResizableButton />
 
               <EuiResizablePanel grow hasBorder initialSize={50} paddingSize="xs">
-                <EuiCodeBlock language="json" isCopyable style={{ height: 250 }}>
+                <EuiCodeBlock language="json" isCopyable className="reviewCodeBlock">
                   {simulatePipelineErrors.length > 0
                     ? JSON.stringify(simulatePipelineErrors, null, 2)
                     : JSON.stringify(simulatePipelineResult || '', null, 2)}

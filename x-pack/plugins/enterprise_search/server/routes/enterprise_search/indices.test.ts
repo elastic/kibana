@@ -334,7 +334,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
   });
 
-  describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/_simulate', () => {
+  describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate', () => {
     const pipelineBody = {
       description: 'Some pipeline',
       processors: [
@@ -366,7 +366,7 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter = new MockRouter({
         context,
         method: 'post',
-        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/_simulate',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate',
       });
 
       registerIndexRoutes({

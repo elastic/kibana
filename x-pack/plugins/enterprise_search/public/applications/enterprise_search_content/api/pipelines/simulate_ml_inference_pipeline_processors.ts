@@ -13,16 +13,19 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 
 import { HttpLogic } from '../../../shared/http';
 
+export interface SimulateMlInterfacePipelineArgs {
+  docs: string;
+  indexName: string;
+  pipeline: MlInferencePipeline;
+}
+export type SimulateMlInterfacePipelineResponse = IngestSimulateResponse;
+
 export const simulateMlInferencePipeline = async ({
   docs,
   indexName,
   pipeline,
-}: {
-  docs: string;
-  indexName: string;
-  pipeline: MlInferencePipeline;
-}) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/ml_inference/pipeline_processors/_simulate`;
+}: SimulateMlInterfacePipelineArgs) => {
+  const route = `/internal/enterprise_search/indices/${indexName}/ml_inference/pipeline_processors/simulate`;
 
   return await HttpLogic.values.http.post<IngestSimulateResponse>(route, {
     body: JSON.stringify({
