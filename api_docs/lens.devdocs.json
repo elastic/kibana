@@ -10805,39 +10805,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.isPartitionShape",
-        "type": "Function",
-        "tags": [],
-        "label": "isPartitionShape",
-        "description": [],
-        "signature": [
-          "(shape: string) => boolean"
-        ],
-        "path": "x-pack/plugins/lens/common/visualizations/partition/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.isPartitionShape.$1",
-            "type": "string",
-            "tags": [],
-            "label": "shape",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/lens/common/visualizations/partition/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
