@@ -176,9 +176,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   useEffect(() => {
     if (fromTimelineData.updated) {
-      if (fromTimelineData.index.length > 0) {
-        setFieldValue('index', fromTimelineData.index);
-      }
+      setFieldValue('index', fromTimelineData.index);
       setFieldValue('queryBar', fromTimelineData.queryBar);
     }
   }, [fromTimelineData, setFieldValue]);

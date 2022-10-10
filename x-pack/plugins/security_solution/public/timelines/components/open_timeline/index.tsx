@@ -278,14 +278,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
     const { navigateTo } = useNavigation();
     const onCreateRule: OnCreateRuleFromTimeline = useCallback(
-      (savedObjectId) => {
+      (savedObjectId) =>
         navigateTo({
           deepLinkId: SecurityPageName.rulesCreate,
           path: `?createRuleFromTimelineId=${savedObjectId}`,
-        });
-        // redirect to rules page
-        // set url param with selectedTimeline.savedObjectId
-      },
+        }),
       [navigateTo]
     );
 
