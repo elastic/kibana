@@ -10,7 +10,8 @@ import { getSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import { isEqual } from 'lodash';
+import { differenceWith, isEqual, toPairs } from 'lodash';
+import { addLog } from '../../../utils/addLog';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { AppState, AppStateContainer } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -30,7 +31,11 @@ export interface SavedSearchContainer {
   hasChanged$: BehaviorSubject<boolean>;
   set: (savedSearch: SavedSearch) => SavedSearch;
   get: () => SavedSearch;
-  update: (nextDataView: DataView | undefined, nextState: AppState) => SavedSearch;
+  update: (
+    nextDataView: DataView | undefined,
+    nextState: AppState,
+    resetSavedSearch?: boolean
+  ) => SavedSearch;
   reset: (id: string | undefined) => Promise<SavedSearch>;
   resetUrl: (id: string | SavedSearch) => Promise<SavedSearch>;
   undo: () => void;
@@ -56,6 +61,7 @@ export function getSavedSearchContainer({
   const savedSearch$ = new BehaviorSubject(savedSearch);
   const hasChanged$ = new BehaviorSubject(false);
   const set = (newSavedSearch: SavedSearch) => {
+    addLog('🔎 [savedSearch] set', newSavedSearch);
     hasChanged$.next(false);
     savedSearch$.next(newSavedSearch);
     savedSearchPersisted$.next(newSavedSearch);
@@ -94,12 +100,12 @@ export function getSavedSearchContainer({
       }),
       services.uiSettings
     );
-    // appStateContainer.update(newAppState);
     await appStateContainer.replace(newAppState, false);
     return nextSavedSearch;
   };
 
   const newSavedSearch = async () => {
+    addLog('🔎 [savedSearch] new');
     const dataView = get().searchSource.getField('index');
     const nextSavedSearch = await getSavedSearch('', {
       search: services.data.search,
@@ -116,6 +122,7 @@ export function getSavedSearchContainer({
       services.uiSettings
     );
     await appStateContainer.replace(newAppState, false);
+    set(nextSavedSearch);
     return nextSavedSearch;
   };
 
@@ -142,17 +149,49 @@ export function getSavedSearchContainer({
   };
 
   const isPersisted = () => Boolean(savedSearch$.getValue().id);
-  const update = (nextDataView: DataView | undefined, nextState: AppState) => {
-    const previousDataView = get();
-    const nextSavedSearch = updateSavedSearch({
-      savedSearch: { ...previousDataView },
-      dataView: nextDataView ? nextDataView : previousDataView.searchSource.getField('index')!,
-      state: nextState,
-      services,
-    });
-    hasChanged$.next(!isEqual(savedSearch$.getValue(), nextSavedSearch));
-    savedSearch$.next(nextSavedSearch);
+  const update = (
+    nextDataView: DataView | undefined,
+    nextState: AppState,
+    resetPersisted: boolean = false
+  ) => {
+    addLog('🔎 [savedSearch] update', { nextDataView, nextState, resetPersisted });
 
+    const previousDataView = get();
+    const prevSearchSource = savedSearchPersisted$.getValue().searchSource.getFields();
+    const nextSavedSearch = updateSavedSearch(
+      {
+        savedSearch: { ...previousDataView },
+        dataView: nextDataView ? nextDataView : previousDataView.searchSource.getField('index')!,
+        state: nextState,
+        services,
+      },
+      true
+    );
+    if (resetPersisted) {
+      set(nextSavedSearch);
+    } else {
+      // detect changes do persisted version
+      const prevSavedSearch = savedSearchPersisted$.getValue();
+      const savedSearchDiff = differenceWith(
+        toPairs(prevSavedSearch),
+        toPairs(nextSavedSearch),
+        isEqual
+      );
+      const nextSearchSource = nextSavedSearch.searchSource.getFields();
+      const searchSourceDiff = differenceWith(
+        toPairs(prevSearchSource),
+        toPairs(nextSearchSource),
+        isEqual
+      );
+      const allDiff = [...savedSearchDiff, ...searchSourceDiff];
+      if (allDiff.length) {
+        addLog('🔎 [savedSearch] difference between persisted and changed version', allDiff);
+      }
+
+      const hasChanged = Boolean(allDiff.length);
+      hasChanged$.next(hasChanged);
+      savedSearch$.next(nextSavedSearch);
+    }
     return nextSavedSearch;
   };
   const undo = () => {

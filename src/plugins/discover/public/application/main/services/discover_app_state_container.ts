@@ -27,6 +27,7 @@ import { AppStateUrl, setState } from './discover_state';
 import { DiscoverServices } from '../../../build_services';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
 import { getValidFilters } from '../../../utils/get_valid_filters';
+import { addLog } from '../../../utils/addLog';
 
 export const APP_STATE_URL_KEY = '_a';
 
@@ -38,6 +39,7 @@ export interface AppStateContainer extends ReduxLikeStateContainer<AppState> {
   push: (newPartial: AppState) => Promise<void>;
   reset: (savedSearch: SavedSearch) => void;
   initAndSync: (currentSavedSearch: SavedSearch) => () => void;
+  isEmptyURL: () => boolean;
 }
 
 export const { Provider: AppStateProvider, useSelector: useAppStateSelector } =
@@ -107,10 +109,12 @@ export const getDiscoverAppStateContainer = (
   const initialState = getInitialState(stateStorage, savedSearch, services);
   const appStateContainer = createStateContainer<AppState>(initialState);
   const replaceUrlState = async (newPartial: AppState = {}, merge = true) => {
+    addLog('🔗 [appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
   const pushUrlState = async (newPartial: AppState) => {
+    addLog('🔗 [appState] pushUrlState', { newPartial });
     const state = { ...appStateContainer.getState(), ...newPartial };
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: false });
   };
@@ -118,12 +122,14 @@ export const getDiscoverAppStateContainer = (
   const enhancedAppContainer = {
     ...appStateContainer,
     reset: (nextSavedSearch: SavedSearch) => {
+      addLog('🔗 [appState] reset', nextSavedSearch);
       const resetState = getInitialState(stateStorage, nextSavedSearch, services);
       appStateContainer.set(resetState);
     },
     set: (value: AppState | null) => {
       if (value) {
         previousAppState = { ...appStateContainer.getState() };
+        addLog('🔗 [appState] set', { prev: previousAppState, next: value });
         appStateContainer.set(value);
       }
     },
@@ -132,7 +138,11 @@ export const getDiscoverAppStateContainer = (
     },
     replace: replaceUrlState,
     push: pushUrlState,
+    isEmptyURL: () => {
+      return stateStorage.get(APP_STATE_URL_KEY) === null;
+    },
     update: (newPartial: AppState, replace = false) => {
+      addLog('🔗 [appState] update', { new: newPartial, replace });
       if (replace) {
         return replaceUrlState(newPartial);
       } else {
@@ -149,6 +159,7 @@ export const getDiscoverAppStateContainer = (
     });
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
+    addLog('🔗 [appState] initializeAndSync', currentSavedSearch);
     // searchsource is the source of truth
     const dataView = currentSavedSearch.searchSource.getField('index');
     const filters = currentSavedSearch.searchSource.getField('filter');

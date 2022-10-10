@@ -14,9 +14,8 @@ import {
   AnalyticsNoDataPage,
   AnalyticsNoDataPageKibanaProvider,
 } from '@kbn/shared-ux-page-analytics-no-data';
-import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
+import { addLog } from '../../utils/addLog';
 import { DiscoverStateProvider } from './services/discover_state_react';
-import { loadSavedSearch } from './utils/load_saved_search';
 import { useSingleton } from './hooks/use_singleton';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
@@ -43,7 +42,6 @@ export function DiscoverMainRoute(props: Props) {
   const { isDev } = props;
   const {
     core,
-    chrome,
     data,
     toastNotifications,
     http: { basePath },
@@ -97,25 +95,23 @@ export function DiscoverMainRoute(props: Props) {
 
   const checkDataAndLoadSavedSearch = useCallback(async () => {
     try {
-      const currentSavedSearch = await loadSavedSearch(id, {
-        services,
-        stateContainer,
-        setError,
-        dataViewSpec: props.historyLocationState?.dataViewSpec,
-      });
-      if (currentSavedSearch) {
-        await stateContainer.savedSearchContainer.set(currentSavedSearch);
-        await stateContainer.appStateContainer.reset(currentSavedSearch);
-      }
-      setLoading(false);
-
-      if (currentSavedSearch?.id) {
-        chrome.recentlyAccessed.add(
-          getSavedSearchFullPathUrl(currentSavedSearch.id),
-          currentSavedSearch.title ?? '',
-          currentSavedSearch.id
+      const isNewSavedSearch = !Boolean(id);
+      if (isNewSavedSearch) {
+        addLog('[Main route] load new saved search');
+        await stateContainer.actions.loadNewSavedSearch(
+          props.historyLocationState?.dataViewSpec,
+          setError
+        );
+      } else {
+        addLog('[Main route] load saved search', id);
+        await stateContainer.actions.loadSavedSearch(
+          id,
+          props.historyLocationState?.dataViewSpec,
+          setError
         );
       }
+
+      setLoading(false);
     } catch (e) {
       if (e instanceof DataViewSavedObjectConflictError) {
         setError(e);
@@ -141,14 +137,12 @@ export function DiscoverMainRoute(props: Props) {
     }
   }, [
     basePath,
-    chrome.recentlyAccessed,
     core.application.navigateToApp,
     core.theme,
     history,
     id,
     props.historyLocationState?.dataViewSpec,
-    services,
-    stateContainer,
+    stateContainer.actions,
     toastNotifications,
   ]);
 

@@ -13,21 +13,31 @@ import { AppState } from '../services/discover_app_state_container';
 import { updateSearchSource } from './update_search_source';
 import { DiscoverServices } from '../../../build_services';
 
-export function updateSavedSearch({
-  savedSearch,
-  dataView,
-  state,
-  services,
-}: {
-  savedSearch: SavedSearch;
-  dataView: DataView;
-  state: AppState;
-  services: DiscoverServices;
-}) {
-  updateSearchSource(savedSearch.searchSource, {
+export function updateSavedSearch(
+  {
+    savedSearch,
     dataView,
+    state,
     services,
-  });
+  }: {
+    savedSearch: SavedSearch;
+    dataView: DataView;
+    state: AppState;
+    services: DiscoverServices;
+  },
+  initial: boolean = false
+) {
+  if (!initial) {
+    updateSearchSource(savedSearch.searchSource, {
+      dataView,
+      services,
+    });
+  } else {
+    savedSearch.searchSource
+      .setField('index', dataView)
+      .setField('query', state.query)
+      .setField('filter', state.filters);
+  }
   savedSearch.columns = state.columns || [];
   savedSearch.sort = (state.sort as SortOrder[]) || [];
   if (state.grid) {

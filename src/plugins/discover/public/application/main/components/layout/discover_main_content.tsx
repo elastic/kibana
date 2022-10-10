@@ -20,6 +20,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
+import { CHART_HIDDEN_KEY } from '../chart/discover_chart';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
@@ -100,7 +101,8 @@ export const DiscoverMainContent = ({
     []
   );
 
-  const actualHideChart = hideChart || !isTimeBased;
+  const actualHideChart =
+    hideChart || (hideChart === undefined && storage.get(CHART_HIDDEN_KEY)) || !isTimeBased;
   const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || hideChart;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;

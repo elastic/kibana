@@ -42,7 +42,10 @@ export function HitsCounter({
   savedSearchData$,
 }: HitsCounterProps) {
   const data: DataTotalHitsMsg = useDataState(savedSearchData$);
-  const hasChanged = useObservable(stateContainer.savedSearchContainer.hasChanged$, false);
+  const hasChanged = useObservable(
+    stateContainer.savedSearchContainer.hasChanged$,
+    stateContainer.savedSearchContainer.hasChanged$.getValue()
+  );
 
   const hits = data.result || 0;
   if (!hits && data.fetchStatus === FetchStatus.LOADING) {

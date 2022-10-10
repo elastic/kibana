@@ -21,7 +21,10 @@ import {
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/common';
+import { DataViewSpec, TimeRange } from '@kbn/data-plugin/common';
+import { buildStateSubscribe } from '../hooks/utiles/build_state_subscribe';
+import { loadDataViewBySavedSearch } from '../load_data_view_by_saved_search';
+import { addLog } from '../../../utils/addLog';
 import {
   DiscoverInternalState,
   getInternalStateContainer,
@@ -36,6 +39,7 @@ import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_
 import { DiscoverServices } from '../../../build_services';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { DiscoverSearchSessionManager } from './discover_search_session';
+import { loadSavedSearch } from '../utils/load_saved_search';
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
   /**
@@ -102,6 +106,16 @@ export interface DiscoverStateContainer {
     fetch: (reset?: boolean) => void;
     changeDataView: (id: string) => void;
     changeDataViewId: (id: string) => void;
+    loadSavedSearch: (
+      id: string,
+      dataViewSpec: DataViewSpec | undefined,
+      onError: (e: Error) => void
+    ) => void;
+    loadNewSavedSearch: (
+      dataViewSpec: DataViewSpec | undefined,
+      onError: (e: Error) => void
+    ) => void;
+    initSyncSubscribe: () => () => void;
   };
 }
 
@@ -175,11 +189,15 @@ export function getDiscoverStateContainer({
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     actions: {
       onOpenSavedSearch: async (newSavedSearchId: string) => {
+        addLog('🧭 [discoverState] onOpenSavedSearch', newSavedSearchId);
         const currentSavedSearch = savedSearchContainer.savedSearch$.getValue();
         if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
+          addLog("🧭 [discoverState] onOpenSavedSearch just reset since id didn't change");
           await savedSearchContainer.reset(currentSavedSearch.id);
         } else {
-          await savedSearchContainer.resetUrl(newSavedSearchId);
+          addLog('🧭 [discoverState] onOpenSavedSearch open view URL');
+          // await savedSearchContainer.resetUrl(newSavedSearchId);
+          // dataStateContainer.reset();
           history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
         }
       },
@@ -219,6 +237,71 @@ export function getDiscoverStateContainer({
       },
       changeDataViewId: async (id: string) => {
         await setAppState({ index: id }, true);
+      },
+      loadSavedSearch: async (
+        id: string,
+        dataViewSpec: DataViewSpec | undefined,
+        onError: (e: Error) => void
+      ) => {
+        const currentSavedSearch = await loadSavedSearch(id, {
+          services,
+          appStateContainer,
+          internalStateContainer,
+          setError: onError,
+          dataViewSpec,
+        });
+        if (currentSavedSearch) {
+          await savedSearchContainer.set(currentSavedSearch);
+          await savedSearchContainer.update(
+            currentSavedSearch.searchSource.getField('index'),
+            appStateContainer.getState(),
+            appStateContainer.isEmptyURL()
+          );
+          await appStateContainer.reset(currentSavedSearch);
+          internalStateContainer.transitions.setDataView(
+            currentSavedSearch.searchSource.getField('index')!
+          );
+        }
+        return currentSavedSearch;
+      },
+      loadNewSavedSearch: async (
+        dataViewSpec: DataViewSpec | undefined,
+        onError: (e: Error) => void
+      ) => {
+        const nextSavedSearch = await savedSearchContainer.new();
+        const nextDataView = await loadDataViewBySavedSearch(
+          nextSavedSearch,
+          appStateContainer,
+          internalStateContainer,
+          services,
+          onError,
+          dataViewSpec
+        );
+        if (nextDataView) {
+          nextSavedSearch.searchSource.setField('index', nextDataView);
+          internalStateContainer.transitions.setDataView(nextDataView);
+        }
+        appStateContainer.reset(nextSavedSearch);
+        await savedSearchContainer.update(nextDataView, appStateContainer.getState(), true);
+        return nextSavedSearch;
+      },
+      initSyncSubscribe: () => {
+        const unsubscribeData = dataStateContainer.subscribe();
+        const stopSync = appStateContainer.initAndSync(savedSearchContainer.get());
+        const unsubscribe = appStateContainer.subscribe(
+          buildStateSubscribe({
+            appStateContainer,
+            internalStateContainer,
+            savedSearchContainer,
+            dataStateContainer,
+            services,
+          })
+        );
+        return () => {
+          stopSync();
+          unsubscribe();
+          unsubscribeData();
+        };
       },
     },
   };

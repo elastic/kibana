@@ -50,6 +50,10 @@ export const DiscoverTopNav = ({
     stateContainer.savedSearchContainer.savedSearch$,
     stateContainer.savedSearchContainer.savedSearch$.getValue()
   );
+  const hasChanged = useObservable(
+    stateContainer.savedSearchContainer.hasChanged$,
+    stateContainer.savedSearchContainer.hasChanged$.getValue()
+  );
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
@@ -196,9 +200,17 @@ export const DiscoverTopNav = ({
     },
     [dataView, navigateTo, savedSearch, services, stateContainer, updateAdHocDataViewId]
   );
+  const badges = useMemo(() => {
+    if (hasChanged) {
+      return [{ badgeText: 'Has changed', primary: 'primary' }];
+    }
+
+    return [];
+  }, [hasChanged]);
 
   return (
     <AggregateQueryTopNavMenu
+      badges={badges}
       appName="discover"
       config={topNavMenu}
       indexPatterns={[dataView]}

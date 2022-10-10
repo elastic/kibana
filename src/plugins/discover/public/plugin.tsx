@@ -60,7 +60,7 @@ import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 import { useDiscoverServices } from './hooks/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
-
+// window.ELASTIC_DISCOVER_LOGGER = true;
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
 );

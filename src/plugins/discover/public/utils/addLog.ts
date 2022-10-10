@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-export function addLog(message: string, payload?: unknown) {
+export const addLog = (function () {
   // @ts-expect-error
   if (window.ELASTIC_DISCOVER_LOGGER) {
+    // console.log(message, payload);
     // eslint-disable-next-line no-console
-    console.log(message, payload);
+    return Function.prototype.bind.call(console.log, console);
   }
-}
+  return () => void 0;
+})();

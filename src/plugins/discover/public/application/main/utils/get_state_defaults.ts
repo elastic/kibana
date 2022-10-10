@@ -19,8 +19,6 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
 
-import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
-
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
     return [...savedSearch.columns];
@@ -42,12 +40,11 @@ export function getStateDefaults({
   services: DiscoverServices;
 }) {
   const { searchSource } = savedSearch;
-  const { data, uiSettings, storage } = services;
+  const { data, uiSettings } = services;
   const dataView = searchSource.getField('index');
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const sort = getSortArray(savedSearch.sort ?? [], dataView!);
   const columns = getDefaultColumns(savedSearch, uiSettings);
-  const chartHidden = storage.get(CHART_HIDDEN_KEY);
   const filters = cloneDeep(searchSource.getOwnField('filter')) as AppState['filters'];
 
   const defaultState: AppState = {
@@ -63,7 +60,6 @@ export function getStateDefaults({
     index: dataView?.id,
     interval: 'auto',
     filters,
-    hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
