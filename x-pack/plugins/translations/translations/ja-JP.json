@@ -32612,8 +32612,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeFailed": "ルールスヌーズ設定を変更できません",
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess": "ルールが正常にスヌーズされました",
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.unsnoozeSuccess": "ルールが正常にスヌーズ解除されました",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex": "アクション",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip": "このルールに関連付けられたコネクターの1つを読み込めません。ルールを編集して、新しいコネクターを選択します。",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle": "APIキー所有者",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteAriaLabel": "削除",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteButtonTooltip": "削除",
