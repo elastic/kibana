@@ -8,7 +8,6 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type { FindResult } from '@kbn/alerting-plugin/server';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
@@ -43,38 +42,66 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
 
         const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
         const rulesClient = ctx.alerting.getRulesClient();
+        const listsClient = ctx.securitySolution.getExceptionListClient();
 
-        if (ids.length !== namespaceTypes.length || ids.length !== listIds.length) {
+        if (
+          ids != null &&
+          listIds != null &&
+          (ids.length !== namespaceTypes.length || ids.length !== listIds.length)
+        ) {
           return siemResponse.error({
             body: `"ids", "list_ids" and "namespace_types" need to have the same comma separated number of values. Expected "ids" length: ${ids.length} to equal "namespace_types" length: ${namespaceTypes.length} and "list_ids" length: ${listIds.length}.`,
             statusCode: 400,
           });
         }
 
-        const foundRules: Array<FindResult<RuleParams>> = await Promise.all(
-          ids.map(async (id, index) => {
-            return rulesClient.find({
+        const fetchExact = ids != null && listIds != null;
+
+        const foundExceptionLists = await listsClient?.findExceptionList({
+          filter: fetchExact
+            ? `(${listIds
+                .map((listId) => `exception-list.attributes.list_id:${listId}`)
+                .join(' OR ')})`
+            : undefined,
+          namespaceType: ['agnostic', 'single'],
+          page: 1,
+          perPage: 10000,
+          sortField: undefined,
+          sortOrder: undefined,
+        });
+
+        if (foundExceptionLists == null) {
+          return response.ok({ body: { references: [] } });
+        }
+
+        const references: RuleReferencesSchema[] = await Promise.all(
+          foundExceptionLists.data.map(async (list, index) => {
+            const foundRules = await rulesClient.find<RuleParams>({
               options: {
                 perPage: 10000,
                 filter: enrichFilterWithRuleTypeMapping(null),
                 hasReference: {
-                  id,
+                  id: list.id,
                   type: getSavedObjectType({ namespaceType: namespaceTypes[index] }),
                 },
               },
             });
+
+            const ruleData = foundRules.data.map(({ name, id, params }) => ({
+              name,
+              id,
+              rule_id: params.ruleId,
+              exception_lists: params.exceptionsList,
+            }));
+
+            return {
+              [list.list_id]: {
+                ...list,
+                referenced_rules: ruleData,
+              },
+            };
           })
         );
-
-        const references = foundRules.map<RuleReferencesSchema>(({ data }, index) => {
-          const wantedData = data.map(({ name, id, params }) => ({
-            name,
-            id,
-            rule_id: params.ruleId,
-            exception_lists: params.exceptionsList,
-          }));
-          return { [listIds[index]]: wantedData };
-        });
 
         const [validated, errors] = validate({ references }, rulesReferencedByExceptionListsSchema);
 
