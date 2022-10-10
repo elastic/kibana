@@ -200,6 +200,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             ...(args.bucket ? { bucket: args.bucket } : {}),
           },
         },
+        canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
       },
     };
   },
