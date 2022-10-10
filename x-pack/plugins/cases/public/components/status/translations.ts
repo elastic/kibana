@@ -8,20 +8,8 @@
 import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 
-export const ALL = i18n.translate('xpack.cases.status.all', {
+export const ALL = i18n.translate('casesComponents.status.all', {
   defaultMessage: 'All status',
-});
-
-export const OPEN = i18n.translate('xpack.cases.status.open', {
-  defaultMessage: 'Open',
-});
-
-export const IN_PROGRESS = i18n.translate('xpack.cases.status.inProgress', {
-  defaultMessage: 'In progress',
-});
-
-export const CLOSED = i18n.translate('xpack.cases.status.closed', {
-  defaultMessage: 'Closed',
 });
 
 export const STATUS_ICON_ARIA = i18n.translate('xpack.cases.status.iconAria', {
@@ -39,10 +27,3 @@ export const CASE_IN_PROGRESS = i18n.translate('xpack.cases.caseView.caseInProgr
 export const CASE_CLOSED = i18n.translate('xpack.cases.caseView.caseClosed', {
   defaultMessage: 'Case closed',
 });
-
-export const BULK_ACTION_DELETE_SELECTED = i18n.translate(
-  'xpack.cases.caseTable.bulkActions.deleteSelectedTitle',
-  {
-    defaultMessage: 'Delete selected',
-  }
-);

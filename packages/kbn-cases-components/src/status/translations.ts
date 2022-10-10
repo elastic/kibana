@@ -8,10 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALL = i18n.translate('casesComponents.status.all', {
-  defaultMessage: 'All status',
-});
-
 export const OPEN = i18n.translate('casesComponents.status.open', {
   defaultMessage: 'Open',
 });
