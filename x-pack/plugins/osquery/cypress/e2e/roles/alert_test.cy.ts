@@ -8,7 +8,12 @@
 import { ROLES } from '../../test';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
-import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
+import {
+  checkResults,
+  findAndClickButton,
+  findFormFieldByRowsLabelAndType,
+  submitQuery,
+} from '../../tasks/live_query';
 import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
@@ -18,43 +23,76 @@ describe('Alert_Test', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
   });
-  beforeEach(() => {
-    login(ROLES.alert_test);
-  });
 
   after(() => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
   });
 
-  it('should be able to run live query', () => {
-    const PACK_NAME = 'testpack';
-    const RULE_NAME = 'Test-rule';
-    navigateTo('/app/osquery');
-    preparePack(PACK_NAME);
-    findAndClickButton('Edit');
-    cy.contains(`Edit ${PACK_NAME}`);
-    findFormFieldByRowsLabelAndType(
-      'Scheduled agent policies (optional)',
-      'fleet server {downArrow}{enter}'
-    );
-    findAndClickButton('Update pack');
-    closeModalIfVisible();
-    cy.contains(PACK_NAME);
-    cy.visit('/app/security/rules');
-    cy.contains(RULE_NAME).click();
-    cy.wait(2000);
-    cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
-    cy.getBySel('ruleSwitch').click();
-    cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
-    cy.getBySel('ruleSwitch').click();
-    cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
-    cy.visit('/app/security/alerts');
-    cy.getBySel('expand-event').first().click();
-    cy.getBySel('take-action-dropdown-btn').click();
-    cy.getBySel('osquery-action-item').click();
+  describe('alert_test role', () => {
+    it('should not be able to run live query', () => {
+      login(ROLES.alert_test);
 
-    cy.contains('Run Osquery');
-    cy.contains('Permission denied');
+      const PACK_NAME = 'testpack';
+      const RULE_NAME = 'Test-rule';
+      navigateTo('/app/osquery');
+      preparePack(PACK_NAME);
+      findAndClickButton('Edit');
+      cy.contains(`Edit ${PACK_NAME}`);
+      findFormFieldByRowsLabelAndType(
+        'Scheduled agent policies (optional)',
+        'fleet server {downArrow}{enter}'
+      );
+      findAndClickButton('Update pack');
+      closeModalIfVisible();
+      cy.contains(PACK_NAME);
+      cy.visit('/app/security/rules');
+      cy.contains(RULE_NAME).click();
+      cy.wait(2000);
+      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+      cy.getBySel('ruleSwitch').click();
+      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
+      cy.getBySel('ruleSwitch').click();
+      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+      cy.visit('/app/security/alerts');
+      cy.getBySel('expand-event').first().click();
+      cy.getBySel('take-action-dropdown-btn').click();
+      cy.getBySel('osquery-action-item').click();
+
+      cy.contains('Run Osquery');
+      cy.contains('Permission denied');
+    });
+  });
+
+  describe('t1_analyst role', () => {
+    it('should be able to run rule investigation guide query', () => {
+      login(ROLES.t1_analyst);
+
+      navigateTo('/app/osquery');
+
+      cy.visit('/app/security/alerts');
+      cy.getBySel('expand-event').first().click();
+
+      cy.contains('Get processes').click();
+      submitQuery();
+      checkResults();
+    });
+
+    it('should not be able to run custom query', () => {
+      login(ROLES.t1_analyst);
+
+      navigateTo('/app/osquery');
+
+      cy.visit('/app/security/alerts');
+      cy.getBySel('expand-event').first().click();
+
+      cy.contains('Get processes').click();
+
+      cy.intercept('POST', '/api/osquery/live_queries', (req) => {
+        req.body.query = 'select * from processes limit 10';
+      });
+      submitQuery();
+      cy.contains('Forbidden');
+    });
   });
 });

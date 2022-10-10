@@ -1,5 +1,7 @@
-
+title: Add case comment response properties for alerts
 type: object
+required:
+  - type
 properties:
   alertId:
     type: string
@@ -37,6 +39,8 @@ properties:
   type:
     type: string
     example: alert
+    enum:
+      - alert
   updated_at:
     type: string
     format: date-time

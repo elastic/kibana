@@ -77,13 +77,13 @@ describe('Service overview - header filters', () => {
       cy.visitKibana(serviceOverviewHref);
       cy.contains('opbeans-node');
       cy.url().should('not.include', 'transactionType');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'request'
       );
-      cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
+      cy.getByTestSubj('headerFilterTransactionType').select('Worker');
       cy.url().should('include', 'transactionType=Worker');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'Worker'
       );
@@ -94,7 +94,7 @@ describe('Service overview - header filters', () => {
         cy.intercept('GET', endpoint).as(name);
       });
       cy.visitKibana(serviceOverviewHref);
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'request'
       );
@@ -104,9 +104,9 @@ describe('Service overview - header filters', () => {
         value: 'transactionType=request',
       });
 
-      cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
+      cy.getByTestSubj('headerFilterTransactionType').select('Worker');
       cy.url().should('include', 'transactionType=Worker');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+      cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
         'Worker'
       );
@@ -129,18 +129,12 @@ describe('Service overview - header filters', () => {
         })
       );
       cy.contains('opbeans-java');
-      cy.get('[data-test-subj="headerFilterKuerybar"]').type('transaction.n');
+      cy.getByTestSubj('headerFilterKuerybar').type('transaction.n');
       cy.contains('transaction.name');
-      cy.get('[data-test-subj="suggestionContainer"]')
-        .find('li')
-        .first()
-        .click();
-      cy.get('[data-test-subj="headerFilterKuerybar"]').type(':');
-      cy.get('[data-test-subj="suggestionContainer"]')
-        .find('li')
-        .first()
-        .click();
-      cy.get('[data-test-subj="headerFilterKuerybar"]').type('{enter}');
+      cy.getByTestSubj('suggestionContainer').find('li').first().click();
+      cy.getByTestSubj('headerFilterKuerybar').type(':');
+      cy.getByTestSubj('suggestionContainer').find('li').first().click();
+      cy.getByTestSubj('headerFilterKuerybar').type('{enter}');
       cy.url().should('include', '&kuery=transaction.name');
     });
   });
