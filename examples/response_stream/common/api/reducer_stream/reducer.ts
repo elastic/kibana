@@ -42,6 +42,9 @@ export function reducerStreamReducer(
     return action.reduce(reducerStreamReducer, state);
   }
 
+  // eslint-disable-next-line no-console
+  console.log('action', action);
+
   switch (action.type) {
     case API_ACTION_NAME.UPDATE_PROGRESS:
       return {
