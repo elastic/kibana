@@ -39,8 +39,8 @@ public start(core: CoreStart, startDependencies: AppPluginStartDependencies) {
 }
 ```
 
-### isGuideStepActive$(guideId: GuideId, stepId: GuideStepIds): Observable\<boolean\>
-*Also see `KIBANA_FOLDER/examples/guided_onboarding_example/public/components`.*
+### isGuideStepActive$(guideID: string, stepID: string): Observable\<boolean\>
+*Also see `KIBANA_FOLDER/examples/guided_onboarding_example/public/components/step_one.tsx`.*
 
 The API service exposes an Observable that contains a boolean value for the state of a specific guide step. For example, if your plugin needs to check if the "Add data" step of the Security guide is currently active, you could use the following code snippet. 
 
@@ -62,16 +62,16 @@ useEffect(() => {
 }, [guidedOnboardingApi]);
 ```
 
-### completeGuideStep(guideId: GuideId, stepId: GuideStepIds): Promise\<{ state: GuideState } | undefined\>
+### completeGuideStep(guideID: string, stepID: string): Promise\<{ state: GuidedOnboardingState } | undefined\>
 The API service exposes an async function to mark a guide step as completed. 
 If the specified guide step is not currently active, the function is a noop. The return value is `undefined` in that case, 
-otherwise an updated `GuideState` is returned *(This is WIP and will likely change during the 8.6 dev cycle)*.
+otherwise an updated `GuidedOnboardingState` is returned *(This is WIP and will likely change in the 8.6 dev cycle)*.
 
 ```
 await guidedOnboardingApi?.completeGuideStep('security', 'add_data');
 ```
 
 ## Guides config
-To use the API service, you need to know a guide ID (one of `search`, `observability`, `security`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). Refer to guides config files in the folder `./public/constants/guides_config` for more information. 
+To use the API service, you need to know a guide ID (one of `search`, `observability`, `security`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). Refer to guides config files in the folder `./public/constants` for more information. 
 
 
