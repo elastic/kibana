@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import moment from 'moment';
 import { EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -22,7 +23,7 @@ export const MonitorDetailsLastRun: React.FC = () => {
   const description = pingsLoading ? (
     <EuiLoadingSpinner size="s" />
   ) : latestPing ? (
-    latestPing.timestamp
+    moment(latestPing.timestamp).fromNow()
   ) : (
     '--'
   );
