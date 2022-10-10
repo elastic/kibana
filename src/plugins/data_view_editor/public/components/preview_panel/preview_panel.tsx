@@ -8,10 +8,11 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { StatusMessage } from './status_message';
 import { IndicesList } from './indices_list';
 
-import { INDEX_PATTERN_TYPE, MatchedIndicesSet } from '../../types';
+import { MatchedIndicesSet } from '../../types';
 
 interface Props {
   type: INDEX_PATTERN_TYPE;

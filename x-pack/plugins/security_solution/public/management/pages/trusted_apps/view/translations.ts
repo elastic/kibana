@@ -25,7 +25,7 @@ export const DETAILS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedApps.details.header.description',
   {
     defaultMessage:
-      'Trusted applications improve performance or alleviate conflicts with other applications running on your hosts.',
+      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications may still generate alerts in some cases.',
   }
 );
 

@@ -63,14 +63,13 @@ describe('buckets shared components', () => {
     it('should render invalid component', () => {
       const instance = mount(<DraggableBucketContainer {...defaultProps} isInvalid />);
       const iconProps = instance.find(EuiIcon).first().props();
-      expect(iconProps.color).toEqual('danger');
+      expect(iconProps.color).toEqual('#BD271E');
       expect(iconProps.type).toEqual('alert');
-      expect(iconProps.title).toEqual('invalid');
     });
     it('should call onRemoveClick when remove icon is clicked', () => {
       const instance = mount(<DraggableBucketContainer {...defaultProps} />);
       const removeIcon = instance
-        .find('[data-test-subj="lns-customBucketContainer-remove"]')
+        .find('[data-test-subj="lns-customBucketContainer-remove-0"]')
         .first();
       removeIcon.simulate('click');
       expect(defaultProps.onRemoveClick).toHaveBeenCalled();

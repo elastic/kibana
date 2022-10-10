@@ -65,7 +65,7 @@ export const ConnectorNameAndDescription: React.FC = () => {
                   title: NAME_LABEL,
                 },
                 {
-                  description: description ?? '--',
+                  description: description || '--',
                   title: DESCRIPTION_LABEL,
                 },
               ]}

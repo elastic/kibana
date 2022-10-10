@@ -6,7 +6,7 @@
  */
 
 import type { DataType, IndexPattern, IndexPatternField } from '../types';
-import type { DraggedField, IndexPatternLayer } from './types';
+import type { IndexPatternLayer } from './types';
 import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -52,12 +52,4 @@ export function sortByField<C extends BaseIndexPatternColumn>(columns: C[]) {
     }
     return column1.operationType.localeCompare(column2.operationType);
   });
-}
-
-export function isDraggedField(fieldCandidate: unknown): fieldCandidate is DraggedField {
-  return (
-    typeof fieldCandidate === 'object' &&
-    fieldCandidate !== null &&
-    ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
-  );
 }
