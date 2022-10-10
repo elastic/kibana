@@ -364,6 +364,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    // One of these should fail
     describe('URL state', () => {
       it('should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID', async () => {
         await PageObjects.common.navigateToApp('discover');
