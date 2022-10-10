@@ -6,6 +6,7 @@
  */
 
 import type { ReactNode, FunctionComponent } from 'react';
+import { useMemo } from 'react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 
 import {
@@ -98,19 +99,23 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     ? categories.find((category) => category.id === selectedCategory)?.title
     : undefined;
 
-  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
-  let gridContent: JSX.Element;
-
-  if (isLoading || !localSearchRef.current) {
-    gridContent = <Loading />;
-  } else {
-    const filteredList = searchTerm
+  const filteredList = useMemo(() => {
+    if (isLoading) return [];
+    return searchTerm
       ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
             .map((match) => match[searchIdField])
             .includes(item[searchIdField])
         )
       : list;
+  }, [isLoading, list, localSearchRef, searchTerm]);
+
+  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
+  let gridContent: JSX.Element;
+
+  if (isLoading || !localSearchRef.current) {
+    gridContent = <Loading />;
+  } else {
     gridContent = (
       <GridColumn
         list={filteredList}
