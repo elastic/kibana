@@ -8,13 +8,13 @@
 import uuid from 'uuid';
 import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
 import '../../../../../common/mock/match_media';
-import { goToRuleEditPage, executeRulesBulkAction } from './actions';
+import { goToRuleEditPage, performTrackableBulkAction } from './actions';
 import { getRulesTableActions } from './rules_table_actions';
 import { mockRule } from './__mocks__/mock';
 
 jest.mock('./actions');
 
-const executeRulesBulkActionMock = executeRulesBulkAction as jest.Mock;
+const performTrackableBulkActionMock = performTrackableBulkAction as jest.Mock;
 const goToRuleEditPageMock = goToRuleEditPage as jest.Mock;
 
 describe('getRulesTableActions', () => {
@@ -32,7 +32,7 @@ describe('getRulesTableActions', () => {
   test('duplicate rule onClick should call rule edit after the rule is duplicated', async () => {
     const ruleDuplicate = mockRule('newRule');
     const navigateToApp = jest.fn();
-    executeRulesBulkActionMock.mockImplementation(() =>
+    performTrackableBulkActionMock.mockImplementation(() =>
       Promise.resolve({ attributes: { results: { created: [ruleDuplicate] } } })
     );
 
@@ -49,9 +49,8 @@ describe('getRulesTableActions', () => {
     expect(duplicateRulesActionHandler).toBeDefined();
 
     await duplicateRulesActionHandler!(rule);
-    expect(executeRulesBulkAction).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'duplicate' })
-    );
+
+    expect(performTrackableBulkAction).toHaveBeenCalledWith('duplicate', [rule.id]);
     expect(goToRuleEditPageMock).toHaveBeenCalledWith(ruleDuplicate.id, navigateToApp);
   });
 
@@ -71,12 +70,11 @@ describe('getRulesTableActions', () => {
     expect(deleteRuleActionHandler).toBeDefined();
 
     await deleteRuleActionHandler!(rule);
-    expect(executeRulesBulkAction).toHaveBeenCalledTimes(1);
-    expect(executeRulesBulkAction).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'delete' })
-    );
+
+    expect(performTrackableBulkAction).toHaveBeenCalledTimes(1);
+    expect(performTrackableBulkAction).toHaveBeenCalledWith('delete', [rule.id]);
     expect(invalidateRules).toHaveBeenCalledTimes(1);
-    expect(executeRulesBulkActionMock.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(performTrackableBulkActionMock.mock.invocationCallOrder[0]).toBeLessThan(
       invalidateRules.mock.invocationCallOrder[0]
     );
   });
