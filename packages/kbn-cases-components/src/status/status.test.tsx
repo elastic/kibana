@@ -9,7 +9,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { CaseStatus } from './status';
+import { Status } from './status';
 import { CaseStatuses } from './types';
 import { getStatusConfiguration } from './config';
 
@@ -19,7 +19,7 @@ describe('Stats', () => {
   it.each([[CaseStatuses.open], [CaseStatuses['in-progress']], [CaseStatuses.closed]])(
     'renders correctly with status: %s',
     async (status) => {
-      const res = render(<CaseStatus status={status} />);
+      const res = render(<Status status={status} />);
       const label = statusConfiguration[status].label;
 
       expect(res.getByText(label)).toBeInTheDocument();

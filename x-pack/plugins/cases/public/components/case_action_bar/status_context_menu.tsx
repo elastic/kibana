@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { CaseStatus } from '@kbn/cases-components';
+import { Status } from '@kbn/cases-components';
 import { caseStatuses, CaseStatuses } from '../../../common/api';
 import { StatusPopoverButton } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
@@ -50,7 +50,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
           key={status}
           onClick={() => onContextMenuItemClick(status)}
         >
-          <CaseStatus status={status} />
+          <Status status={status} />
         </EuiContextMenuItem>
       )),
     [currentStatus, onContextMenuItemClick]

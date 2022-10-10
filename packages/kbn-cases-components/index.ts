@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { CaseStatus } from './src/status/status';
+export { Status } from './src/status/status';
 export { CaseStatuses } from './src/status/types';

@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiBadge,
 } from '@elastic/eui';
-import { CaseStatus } from '@kbn/cases-components';
+import { Status } from '@kbn/cases-components';
 import { allCaseStatus, statuses } from '../status';
 import { CaseStatusWithAllStatus, StatusAll } from '../../../common/ui/types';
 
@@ -48,7 +48,7 @@ const StatusFilterComponent: React.FC<Props> = ({
       inputDisplay: (
         <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
           <EuiFlexItem grow={false}>
-            <span>{status === 'all' ? <AllStatusBadge /> : <CaseStatus status={status} />}</span>
+            <span>{status === 'all' ? <AllStatusBadge /> : <Status status={status} />}</span>
           </EuiFlexItem>
           {status !== StatusAll && <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>}
         </EuiFlexGroup>

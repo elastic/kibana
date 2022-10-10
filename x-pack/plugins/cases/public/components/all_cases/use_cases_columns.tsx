@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
-import { CaseStatus } from '@kbn/cases-components';
+import { Status } from '@kbn/cases-components';
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import { Case } from '../../../common/ui/types';
@@ -302,7 +302,7 @@ export const useCasesColumns = ({
           return getEmptyTagValue();
         }
 
-        return <CaseStatus status={theCase.status} />;
+        return <Status status={theCase.status} />;
       },
     },
     {

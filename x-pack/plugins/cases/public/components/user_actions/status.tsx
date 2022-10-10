@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CaseStatus } from '@kbn/cases-components';
+import { Status } from '@kbn/cases-components';
 import { CaseStatuses, StatusUserAction } from '../../../common/api';
 import { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
@@ -29,7 +29,7 @@ const getLabelTitle = (userAction: UserActionResponse<StatusUserAction>) => {
       >
         <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <CaseStatus status={status} />
+          <Status status={status} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

@@ -32,4 +32,4 @@ const CaseStatusComponent: React.FC<Props> = ({ status, dataTestSubj }) => {
 
 CaseStatusComponent.displayName = 'Status';
 
-export const CaseStatus = memo(CaseStatusComponent);
+export const Status = memo(CaseStatusComponent);
