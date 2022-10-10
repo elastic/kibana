@@ -16,6 +16,7 @@ import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 jest.mock('../../../../hooks/use_kibana_services');
+jest.mock('uuid');
 
 const mockDataView = {
   id: 'mock-id',
@@ -44,6 +45,8 @@ describe('VisitorBreakdownChart', () => {
   });
 
   describe('component', () => {
+    const mockUuid = jest.requireMock('uuid');
+    mockUuid.v4 = jest.fn().mockReturnValue('xxxx-xxxxxxxxxxx-xxxx');
     const mockEmbeddableComponent = jest.fn((_) => <></>);
 
     beforeEach(() => {
