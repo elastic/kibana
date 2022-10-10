@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/subscription-tracking",
+  "owner": "@elastic/security-threat-hunting-investigations",
+  "runtimeDeps": [],
+  "typeDeps": [],
+}

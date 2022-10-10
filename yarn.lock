@@ -3937,6 +3937,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/subscription-tracking@link:bazel-bin/packages/kbn-subscription-tracking":
+  version "0.0.0"
+  uid ""
+
 "@kbn/synthetic-package-map@link:bazel-bin/packages/kbn-synthetic-package-map":
   version "0.0.0"
   uid ""
@@ -8151,6 +8155,10 @@
   uid ""
 
 "@types/kbn__storybook@link:bazel-bin/packages/kbn-storybook/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__subscription-tracking@link:bazel-bin/packages/kbn-subscription-tracking/npm_module_types":
   version "0.0.0"
   uid ""
 
