@@ -7199,7 +7199,6 @@
     "xpack.apm.serviceIcons.serviceDetails.service.frameworkLabel": "框架名称",
     "xpack.apm.serviceIcons.serviceDetails.service.runtimeLabel": "运行时名称和版本",
     "xpack.apm.serviceIcons.serviceDetails.service.versionLabel": "服务版本",
-    "xpack.apm.serviceLogs.noInfrastructureMessage": "没有可显示的日志消息。",
     "xpack.apm.serviceMap.anomalyDetectionPopoverDisabled": "通过在 APM 设置中启用异常检测来显示服务运行状况指标。",
     "xpack.apm.serviceMap.anomalyDetectionPopoverLink": "查看异常",
     "xpack.apm.serviceMap.anomalyDetectionPopoverNoData": "在选定时间范围内找不到异常分数。请在 Anomaly Explorer 中查看详情。",
