@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
@@ -75,6 +76,7 @@ import { HeaderPage } from '../../../../../common/components/header_page';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { PreviewFlyout } from '../preview';
+import { useGetSavedQuery } from '../use_get_saved_query';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -97,6 +99,11 @@ const EditRulePageComponent: FC = () => {
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
   const [ruleLoading, rule] = useRule(ruleId);
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
+
+  const { isSavedQueryLoading, savedQueryBar, savedQuery } = useGetSavedQuery(rule?.saved_id, {
+    ruleType: rule?.type,
+    onError: noop,
+  });
 
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,
@@ -195,6 +202,17 @@ const EditRulePageComponent: FC = () => {
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
+  const defineStepDataWithSavedQuery = useMemo(
+    () =>
+      defineStep.data
+        ? {
+            ...defineStep.data,
+            queryBar: savedQueryBar ?? defineStep.data.queryBar,
+          }
+        : defineStep.data,
+    [defineStep.data, savedQueryBar]
+  );
+
   const tabs = useMemo(
     () => [
       {
@@ -205,19 +223,20 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
-              {defineStep.data != null && (
+            <StepPanel loading={loading || isSavedQueryLoading} title={ruleI18n.DEFINITION}>
+              {defineStepDataWithSavedQuery != null && !isSavedQueryLoading && (
                 <StepDefineRule
                   isReadOnlyView={false}
-                  isLoading={isLoading}
+                  isLoading={isLoading || isSavedQueryLoading}
                   isUpdateView
-                  defaultValues={defineStep.data}
+                  defaultValues={defineStepDataWithSavedQuery}
                   setForm={setFormHook}
                   kibanaDataViews={dataViewOptions}
                   indicesConfig={indicesConfig}
                   threatIndicesConfig={threatIndicesConfig}
                   onRuleDataChange={onDataChange}
                   onPreviewDisabledStateChange={setIsPreviewDisabled}
+                  defaultSavedQuery={savedQuery}
                 />
               )}
               <EuiSpacer />
@@ -305,6 +324,8 @@ const EditRulePageComponent: FC = () => {
       loading,
       defineStep.data,
       isLoading,
+      isSavedQueryLoading,
+      defineStepDataWithSavedQuery,
       setFormHook,
       dataViewOptions,
       indicesConfig,
@@ -314,6 +335,7 @@ const EditRulePageComponent: FC = () => {
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
+      savedQuery,
     ]
   );
 

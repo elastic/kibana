@@ -31,6 +31,10 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../../../../../common/hooks/use_app_toasts');
+jest.mock('../use_get_saved_query', () => ({
+  __esModule: true,
+  useGetSavedQuery: jest.fn().mockReturnValue({}),
+}));
 
 describe('EditRulePage', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;

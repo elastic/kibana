@@ -10,7 +10,6 @@ export const REQUEST_NAMES = {
   SECURITY_DASHBOARDS: `${APP_UI_ID} fetch security dashboards`,
   ANOMALIES_TABLE: `${APP_UI_ID} fetch anomalies table data`,
   GET_RISK_SCORE_DEPRECATED: `${APP_UI_ID} fetch is risk score deprecated`,
-  GET_SAVED_QUERY: `${APP_UI_ID} fetch saved query`,
   ENABLE_RISK_SCORE: `${APP_UI_ID} fetch enable risk score`,
   REFRESH_RISK_SCORE: `${APP_UI_ID} fetch refresh risk score`,
   UPGRADE_RISK_SCORE: `${APP_UI_ID} fetch upgrade risk score`,
