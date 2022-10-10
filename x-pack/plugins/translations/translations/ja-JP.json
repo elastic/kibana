@@ -7552,7 +7552,6 @@
     "xpack.apm.serviceIcons.serviceDetails.service.frameworkLabel": "フレームワーク名",
     "xpack.apm.serviceIcons.serviceDetails.service.runtimeLabel": "ランタイム名・バージョン",
     "xpack.apm.serviceIcons.serviceDetails.service.versionLabel": "サービスバージョン",
-    "xpack.apm.serviceLogs.noInfrastructureMessage": "表示するログメッセージがありません。",
     "xpack.apm.serviceMap.anomalyDetectionPopoverDisabled": "APM 設定で異常検知を有効にすると、サービス正常性インジケーターが表示されます。",
     "xpack.apm.serviceMap.anomalyDetectionPopoverLink": "異常を表示",
     "xpack.apm.serviceMap.anomalyDetectionPopoverNoData": "選択した時間範囲で、異常スコアを検出できませんでした。異常エクスプローラーで詳細を確認してください。",
