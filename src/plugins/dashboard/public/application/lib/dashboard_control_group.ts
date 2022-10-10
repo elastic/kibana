@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, skip } from 'rxjs/operators';
 
 import {
   ControlGroupInput,
@@ -140,11 +140,10 @@ export const syncDashboardControlGroup = async ({
       .pipe(
         distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
           compareAllFilters(filtersA, filtersB)
-        )
+        ),
+        skip(1) // skip first filter output because it will have been applied in initialize
       )
-      .subscribe(() => {
-        dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() });
-      })
+      .subscribe(() => dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() }))
   );
 
   subscriptions.add(

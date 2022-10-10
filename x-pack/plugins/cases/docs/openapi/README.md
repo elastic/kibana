@@ -22,8 +22,13 @@ command in the `x-pack/plugins/cases/docs/openapi/` folder:
 
 Then you can generate the `bundled` files by running the following commands:
 
-    ```
-    npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml entrypoint.yaml
-    npx @redocly/openapi-cli bundle --ext json --output bundled.json entrypoint.yaml
-    ```
+  ```
+    npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
+    npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
+  ```
 
+You can run additional linting with the following command:
+
+  ```
+     npx @redocly/cli lint bundled.json
+  ```
