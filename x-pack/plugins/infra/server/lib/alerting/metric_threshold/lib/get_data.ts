@@ -165,7 +165,7 @@ export const getData = async (
         aggregatedValue: aggregatedValueForRate,
         shouldWarn,
         shouldTrigger,
-        additionalContext
+        additionalContext,
       } = aggs.all.buckets.all;
 
       const bucketHits = additionalContext.hits?.hits;
@@ -195,7 +195,7 @@ export const getData = async (
             value,
             warn,
             trigger,
-            ...additionalContextSource
+            ...additionalContextSource,
           },
         };
       }
@@ -204,7 +204,7 @@ export const getData = async (
           value,
           warn: (shouldWarn && shouldWarn.value > 0) || false,
           trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
-          ...additionalContextSource
+          ...additionalContextSource,
         },
       };
     } else {

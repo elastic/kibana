@@ -117,7 +117,7 @@ export const getElasticsearchMetricQuery = (
             ...currentPeriod,
             ...rateAggBucketScript,
             ...bucketSelectorAggregations,
-            ...additionalContextAgg
+            ...additionalContextAgg,
           },
         },
       }
@@ -134,7 +134,7 @@ export const getElasticsearchMetricQuery = (
             ...currentPeriod,
             ...rateAggBucketScript,
             ...bucketSelectorAggregations,
-            ...additionalContextAgg
+            ...additionalContextAgg,
           },
         },
       };

@@ -227,7 +227,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
 
-        const additionalContext = alertResults && alertResults.length > 0 ? alertResults[0][group].context : null;
+        const additionalContext =
+          alertResults && alertResults.length > 0 ? alertResults[0][group].context : null;
 
         const alert = alertFactory(`${group}`, reason);
         scheduledActionsCount++;
