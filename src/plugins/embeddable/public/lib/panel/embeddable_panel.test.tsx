@@ -17,17 +17,17 @@ import { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
-import { createEditModeAction } from '../test_samples/actions';
 import {
-  ContactCardEmbeddableFactory,
-  CONTACT_CARD_EMBEDDABLE,
-} from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
-import {
+  createEditModeAction,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableReactFactory,
+  CONTACT_CARD_EMBEDDABLE,
+  CONTACT_CARD_EMBEDDABLE_REACT,
+  HelloWorldContainer,
+} from '../test_samples';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
@@ -43,12 +43,17 @@ const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
 };
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+const embeddableReactFactory = new ContactCardEmbeddableReactFactory(
+  (() => null) as any,
+  {} as any
+);
 const applicationMock = applicationServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
 
 actionRegistry.set(editModeAction.id, editModeAction);
 triggerRegistry.set(trigger.id, trigger);
 setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
+setup.registerEmbeddableFactory(embeddableReactFactory.type, embeddableReactFactory);
 
 const start = doStart();
 const getEmbeddableFactory = start.getEmbeddableFactory;
@@ -734,4 +739,38 @@ test('Should work in minimal way rendering only the inspector action', async () 
   expect(findTestSubject(component, `embeddablePanelAction-openInspector`).length).toBe(1);
   const action = findTestSubject(component, `embeddablePanelAction-ACTION_CUSTOMIZE_PANEL`);
   expect(action.length).toBe(0);
+});
+
+test('Renders an embeddable returning a React node', async () => {
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE_REACT, {
+    firstName: 'Bran',
+    lastName: 'Stark',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
+        notifications={{} as any}
+        overlays={{} as any}
+        application={applicationMock}
+        SavedObjectFinder={() => null}
+        theme={theme}
+      />
+    </I18nProvider>
+  );
+
+  expect(component.find('.embPanel__titleText').text()).toBe('Hello Bran Stark');
 });

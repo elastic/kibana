@@ -47,7 +47,7 @@ export class ContactCardEmbeddable extends Embeddable<
 
   constructor(
     initialInput: ContactCardEmbeddableInput,
-    private readonly options: ContactCardEmbeddableOptions,
+    protected readonly options: ContactCardEmbeddableOptions,
     parent?: Container
   ) {
     super(

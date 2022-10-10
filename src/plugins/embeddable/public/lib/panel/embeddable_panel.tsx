@@ -8,12 +8,14 @@
 
 import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import classNames from 'classnames';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { isPromise } from '@kbn/std';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { MaybePromise } from '@kbn/utility-types';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 
 import { Start as InspectorStartContract } from '../inspector';
@@ -66,7 +68,7 @@ export interface EmbeddableContainerContext {
 }
 
 interface Props {
-  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;
 
   /**
    * Ordinal number of the embeddable in the container, used as a
@@ -105,6 +107,7 @@ interface State {
   loading?: boolean;
   error?: EmbeddableError;
   destroyError?(): void;
+  node?: ReactNode;
 }
 
 interface InspectorPanelAction {
@@ -304,27 +307,37 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             error={this.state.error}
           />
         )}
-        <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
+        <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs}>
+          {this.state.node}
+        </div>
       </EuiPanel>
     );
   }
 
   public componentDidMount() {
-    if (this.embeddableRoot.current) {
-      this.subscription.add(
-        this.props.embeddable.getOutput$().subscribe(
-          (output: EmbeddableOutput) => {
-            this.setState({
-              error: output.error,
-              loading: output.loading,
-            });
-          },
-          (error) => {
-            this.setState({ error });
-          }
-        )
-      );
-      this.props.embeddable.render(this.embeddableRoot.current);
+    if (!this.embeddableRoot.current) {
+      return;
+    }
+
+    this.subscription.add(
+      this.props.embeddable.getOutput$().subscribe(
+        (output: EmbeddableOutput) => {
+          this.setState({
+            error: output.error,
+            loading: output.loading,
+          });
+        },
+        (error) => {
+          this.setState({ error });
+        }
+      )
+    );
+
+    const node = this.props.embeddable.render(this.embeddableRoot.current) ?? undefined;
+    if (isPromise(node)) {
+      node.then((resolved) => this.setState({ node: resolved }));
+    } else {
+      this.setState({ node });
     }
   }
 

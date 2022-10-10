@@ -23,8 +23,9 @@ function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
 }
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
-> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput>
+  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
+  TNode = void
+> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput, TNode>
 {
   static runtimeId: number = 0;
 

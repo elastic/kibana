@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { connect, Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { Embeddable, IEmbeddable } from '..';
@@ -23,14 +22,13 @@ export class HelloWorldEmbeddable extends Embeddable {
 
   reload() {}
 
-  render(node: HTMLElement) {
-    const App = connect((state: State) => ({ body: state.input.title }))(EuiEmptyPrompt);
+  render() {
+    const HelloWorld = connect((state: State) => ({ body: state.input.title }))(EuiEmptyPrompt);
 
-    render(
+    return (
       <Provider store={this.store}>
-        <App />
-      </Provider>,
-      node
+        <HelloWorld />
+      </Provider>
     );
   }
 

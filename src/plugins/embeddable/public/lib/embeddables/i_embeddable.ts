@@ -33,7 +33,8 @@ export interface EmbeddableOutput {
 
 export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
-  O extends EmbeddableOutput = EmbeddableOutput
+  O extends EmbeddableOutput = EmbeddableOutput,
+  N = unknown
 > {
   /**
    * Is this embeddable an instance of a Container class, can it contain
@@ -173,7 +174,7 @@ export interface IEmbeddable<
    * Renders the embeddable at the given node.
    * @param domNode
    */
-  render(domNode: HTMLElement | Element): void;
+  render(domNode: HTMLElement | Element): N | void;
 
   /**
    * Renders a custom embeddable error at the given node.
