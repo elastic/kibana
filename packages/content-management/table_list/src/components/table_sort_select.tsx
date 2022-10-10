@@ -15,8 +15,6 @@ import {
   Direction,
 } from '@elastic/eui';
 
-import type { UserContentCommonSchema } from '../table_list_view';
-
 type SortItem = EuiSelectableOption & {
   column: SortColumnField;
   direction: Direction;
@@ -24,38 +22,48 @@ type SortItem = EuiSelectableOption & {
 
 export type SortColumnField = 'updatedAt' | 'attributes.title';
 
-interface Props<T> {
+interface Props {
+  hasUpdatedAtMetadata: boolean;
   onChange?: (column: SortColumnField, direction: Direction) => void;
 }
 
-export function TableSortSelect<T extends UserContentCommonSchema>({ onChange }: Props<T>) {
+export function TableSortSelect({ hasUpdatedAtMetadata, onChange }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [options, setOptions] = useState<SortItem[]>([
-    {
-      label: 'Title A-Z',
-      column: 'attributes.title',
-      direction: 'asc',
-      append: <EuiIcon type="sortUp" />,
-    },
-    {
-      label: 'Title Z-A',
-      column: 'attributes.title',
-      direction: 'desc',
-      append: <EuiIcon type="sortDown" />,
-    },
-    {
-      label: 'Recently updated',
-      column: 'updatedAt',
-      direction: 'asc',
-      append: <EuiIcon type="sortUp" />,
-    },
-    {
-      label: 'Least recently updated',
-      column: 'updatedAt',
-      direction: 'desc',
-      append: <EuiIcon type="sortDown" />,
-    },
-  ]);
+  const [options, setOptions] = useState<SortItem[]>(() => {
+    let opts: SortItem[] = [
+      {
+        label: 'Title A-Z',
+        column: 'attributes.title',
+        direction: 'asc',
+        append: <EuiIcon type="sortUp" />,
+      },
+      {
+        label: 'Title Z-A',
+        column: 'attributes.title',
+        direction: 'desc',
+        append: <EuiIcon type="sortDown" />,
+      },
+    ];
+
+    if (hasUpdatedAtMetadata) {
+      opts = opts.concat([
+        {
+          label: 'Recently updated',
+          column: 'updatedAt',
+          direction: 'asc',
+          append: <EuiIcon type="sortUp" />,
+        },
+        {
+          label: 'Least recently updated',
+          column: 'updatedAt',
+          direction: 'desc',
+          append: <EuiIcon type="sortDown" />,
+        },
+      ]);
+    }
+
+    return opts;
+  });
 
   const togglePopOver = () => {
     setIsPopoverOpen((prev) => !prev);

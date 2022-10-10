@@ -81,8 +81,8 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   totalItems: number;
   hasUpdatedAtMetadata: boolean;
   pagination: Pagination;
-  tableSort?: {
-    field: keyof T;
+  tableSort: {
+    field: SortColumnField;
     direction: Direction;
   };
 }
@@ -159,6 +159,10 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       totalItemCount: 0,
       pageSize: initialPageSize,
       pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+    },
+    tableSort: {
+      field: 'attributes.title' as const,
+      direction: 'asc',
     },
   });
 
@@ -481,6 +485,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           isFetchingItems={isFetchingItems}
           searchQuery={searchQuery}
           tableColumns={tableColumns}
+          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
           tableSort={tableSort}
           pagination={pagination}
           selectedIds={selectedIds}

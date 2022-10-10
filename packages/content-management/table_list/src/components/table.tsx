@@ -40,6 +40,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T> {
   isFetchingItems: boolean;
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
+  hasUpdatedAtMetadata: boolean;
   deleteItems: TableListViewProps<T>['deleteItems'];
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
@@ -54,6 +55,7 @@ export function Table<T extends UserContentCommonSchema>({
   pagination,
   tableColumns,
   tableSort,
+  hasUpdatedAtMetadata,
   entityName,
   entityNamePlural,
   deleteItems,
@@ -99,14 +101,16 @@ export function Table<T extends UserContentCommonSchema>({
     const tableSortSelectFilter: SearchFilterConfig = {
       type: 'custom_component',
       component: () => {
-        return <TableSortSelect<T> onChange={onSortChange} />;
+        return (
+          <TableSortSelect hasUpdatedAtMetadata={hasUpdatedAtMetadata} onChange={onSortChange} />
+        );
       },
     };
 
     return getSearchBarFilters
       ? [tableSortSelectFilter, ...getSearchBarFilters()]
       : [tableSortSelectFilter];
-  }, [onSortChange, getSearchBarFilters]);
+  }, [onSortChange, hasUpdatedAtMetadata, getSearchBarFilters]);
 
   const search = useMemo(() => {
     return {
