@@ -10,3 +10,7 @@ export const TIMELINE_SEARCHBOX = '[data-test-subj="timeline-super-select-search
 export const EUI_FILTER_SELECT_ITEM = '.euiFilterSelectItem';
 
 export const EUI_CHECKBOX = '.euiCheckbox__input';
+
+export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
+
+export const COMBO_BOX_SELECTION = '.euiMark';

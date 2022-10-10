@@ -32,6 +32,7 @@ import {
   DETAILS_DESCRIPTION,
   EXCEPTION_ITEM_ACTIONS_BUTTON,
   EDIT_EXCEPTION_BTN,
+  EDIT_RULE_SETTINGS_LINK,
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -165,4 +166,8 @@ export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
   });
+};
+
+export const goToRuleEditSettings = () => {
+  cy.get(EDIT_RULE_SETTINGS_LINK).click();
 };
