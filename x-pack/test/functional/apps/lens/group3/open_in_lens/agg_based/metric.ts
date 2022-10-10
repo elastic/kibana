@@ -45,6 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '14.01K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
+          showingTrendline: false,
         },
       ]);
     });
