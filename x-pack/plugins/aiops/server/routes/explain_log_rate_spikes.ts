@@ -90,6 +90,7 @@ export const defineExplainLogRateSpikesRoute = (
 
       const controller = new AbortController();
 
+      let isRunning = false;
       let loaded = 0;
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
@@ -114,15 +115,19 @@ export const defineExplainLogRateSpikesRoute = (
         true
       );
 
-      function pushPing() {
-        push(pingAction());
+      function pushPingWithTimeout() {
+        setTimeout(() => {
+          if (isRunning) {
+            logger.info('DO THE PING');
+            push(pingAction());
+            pushPingWithTimeout();
+          }
+        }, 1000);
       }
 
-      const pingInterval = setInterval(pushPing, 1000);
-
       function end() {
+        isRunning = false;
         logInfoMessage('Ending analysis.');
-        clearInterval(pingInterval);
         streamEnd();
       }
 
@@ -149,8 +154,10 @@ export const defineExplainLogRateSpikesRoute = (
       }
 
       async function runAnalysis() {
+        isRunning = true;
         logInfoMessage('Reset.');
         push(resetAction());
+        pushPingWithTimeout();
         logInfoMessage('Load field candidates.');
         push(
           updateLoadingStateAction({
@@ -668,8 +675,7 @@ export const defineExplainLogRateSpikesRoute = (
       }
 
       // Do not call this using `await` so it will run asynchronously while we return the stream already.
-      // The timeout is used because the response needs to be passed on to the client before we start pushing to the stream.
-      setTimeout(() => runAnalysis(), 100);
+      runAnalysis();
 
       return response.ok(responseWithHeaders);
     }
