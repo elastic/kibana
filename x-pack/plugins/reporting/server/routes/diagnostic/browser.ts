@@ -66,7 +66,7 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
         const response: DiagnosticResponse = {
           success: boundSuccessfully && !help.length,
           help,
-          logs,
+          logs: [logs],
         };
 
         return res.ok({ body: response });

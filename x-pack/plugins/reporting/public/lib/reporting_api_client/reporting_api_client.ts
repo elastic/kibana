@@ -41,6 +41,7 @@ export interface DiagnoseResponse {
   help: string[];
   success: boolean;
   logs: string;
+  capture: string;
 }
 
 interface IReportingAPI {

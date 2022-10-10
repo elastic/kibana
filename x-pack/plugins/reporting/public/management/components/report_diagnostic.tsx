@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,13 +13,17 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiImage,
   EuiMarkdownFormat,
   EuiSpacer,
   EuiSteps,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ReportingAPIClient, DiagnoseResponse } from '../../lib/reporting_api_client';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useState } from 'react';
+import { DiagnoseResponse, ReportingAPIClient } from '../../lib/reporting_api_client';
 
 interface Props {
   apiClient: ReportingAPIClient;
@@ -43,6 +44,7 @@ interface State {
   logs: string;
   isBusy: boolean;
   success: boolean;
+  capture: string | null;
 }
 
 const initialState: State = {
@@ -53,6 +55,23 @@ const initialState: State = {
   logs: '',
   isBusy: false,
   success: true,
+  capture: null,
+};
+
+const VerificationScreenshot = ({ screenshotBase64 }: { screenshotBase64: string | null }) => {
+  if (screenshotBase64 != null) {
+    return (
+      <EuiImage
+        allowFullScreen
+        size="s"
+        src={`data:image/png;base64,${screenshotBase64}`}
+        alt={i18n.translate('xpack.reporting.listing.diagnosticSuccessScreenshot', {
+          defaultMessage: 'A screenshot of a Kibana test page.',
+        })}
+      />
+    );
+  }
+  return null;
 };
 
 export const ReportDiagnostic = ({ apiClient }: Props) => {
@@ -62,7 +81,8 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       ...state,
       ...s,
     });
-  const { isBusy, screenshotStatus, chromeStatus, isFlyoutVisible, help, logs, success } = state;
+  const { isBusy, screenshotStatus, chromeStatus, isFlyoutVisible, help, logs, success, capture } =
+    state;
 
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });
@@ -75,6 +95,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           help: response.help,
           logs: response.logs,
           success: response.success,
+          capture: response.capture,
           [statusProp]: response.success ? 'complete' : 'danger',
         });
       })
@@ -89,6 +110,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           ],
           logs: `${error.message}`,
           success: false,
+          capture: null,
           [statusProp]: 'danger',
         });
       });
@@ -146,6 +168,8 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
               defaultMessage="Capture screenshot"
             />
           </EuiButton>
+          <EuiSpacer />
+          <VerificationScreenshot screenshotBase64={capture} />
         </Fragment>
       ),
       status: !success && screenshotStatus !== 'complete' ? 'danger' : screenshotStatus,

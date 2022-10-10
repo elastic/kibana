@@ -70,13 +70,11 @@ describe('POST /diagnose/screenshot', () => {
       .post('/api/reporting/diagnose/screenshot')
       .expect(200)
       .then(({ body }) => {
-        expect(body).toMatchInlineSnapshot(`
-          Object {
-            "help": Array [],
-            "logs": "",
-            "success": true,
-          }
-        `);
+        expect(body).toMatchObject({
+          help: [],
+          logs: '',
+          success: true,
+        });
       });
   });
 
@@ -89,15 +87,11 @@ describe('POST /diagnose/screenshot', () => {
       .post('/api/reporting/diagnose/screenshot')
       .expect(200)
       .then(({ body }) => {
-        expect(body).toMatchInlineSnapshot(`
-          Object {
-            "help": Array [],
-            "logs": Array [
-              "Timeout waiting for .dank to load",
-            ],
-            "success": false,
-          }
-        `);
+        expect(body).toMatchObject({
+          help: [],
+          logs: 'Timeout waiting for .dank to load',
+          success: false,
+        });
       });
   });
 
@@ -110,8 +104,11 @@ describe('POST /diagnose/screenshot', () => {
       .post('/api/reporting/diagnose/screenshot')
       .expect(200)
       .then(({ body }) => {
-        expect(body.help).toContain(`We couldn't screenshot your Kibana install.`);
-        expect(body.logs).toContain(`Failure to start chromium!`);
+        expect(body).toMatchObject({
+          help: ["We couldn't screenshot your Kibana install."],
+          logs: 'Failure to start chromium!',
+          success: false,
+        });
       });
   });
 });
