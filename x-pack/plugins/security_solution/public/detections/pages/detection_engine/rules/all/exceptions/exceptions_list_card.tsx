@@ -89,9 +89,9 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                           <EuiFlexItem grow={false}>
                             <EuiText>{'created by: '}</EuiText>
                           </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
+                          <StyledFlexItem grow={false}>
                             <EuiBadge>{exceptionsList.created_by}</EuiBadge>{' '}
-                          </EuiFlexItem>
+                          </StyledFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiFlexItem style={{ flex: '1 1 auto' }}>
@@ -99,9 +99,9 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                           <EuiFlexItem grow={false}>
                             <EuiText>{'created by: '}</EuiText>
                           </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
+                          <StyledFlexItem grow={false}>
                             <EuiBadge>{exceptionsList.created_by}</EuiBadge>{' '}
-                          </EuiFlexItem>
+                          </StyledFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiFlexItem style={{ flex: '1 1 auto' }}>
@@ -109,9 +109,9 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                           <EuiFlexItem grow={false}>
                             <EuiText>{'created on: '}</EuiText>
                           </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
+                          <StyledFlexItem grow={false}>
                             <EuiBadge>{exceptionsList.created_at}</EuiBadge>
-                          </EuiFlexItem>
+                          </StyledFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
                     </EuiFlexGroup>
