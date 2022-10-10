@@ -270,6 +270,7 @@ export function getDiscoverStateContainer({
         dataViewSpec: DataViewSpec | undefined,
         onError: (e: Error) => void
       ) => {
+        addLog('🧭 [discoverState] loadNewSavedSearch');
         const nextSavedSearch = await savedSearchContainer.new();
         await savedSearchContainer.update(
           nextSavedSearch.searchSource.getField('index'),

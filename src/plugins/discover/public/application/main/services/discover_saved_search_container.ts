@@ -121,7 +121,7 @@ export function getSavedSearchContainer({
       }),
       services.uiSettings
     );
-    await appStateContainer.replace(newAppState, false);
+    await appStateContainer.replace(newAppState, !appStateContainer.isEmptyURL());
     set(nextSavedSearch);
     return nextSavedSearch;
   };
@@ -131,6 +131,7 @@ export function getSavedSearchContainer({
     params: PersistParams,
     dataView?: DataView
   ) => {
+    addLog('🔎 [savedSearch] persists', nextSavedSearch);
     try {
       const id = await persistSavedSearch(nextSavedSearch, {
         dataView: dataView ?? nextSavedSearch.searchSource.getField('index')!,
@@ -170,7 +171,7 @@ export function getSavedSearchContainer({
     if (resetPersisted) {
       set(nextSavedSearch);
     } else {
-      // detect changes do persisted version
+      // detect changes to persisted version
       const prevSavedSearch = savedSearchPersisted$.getValue();
       const savedSearchDiff = differenceWith(
         toPairs(prevSavedSearch),
@@ -190,6 +191,7 @@ export function getSavedSearchContainer({
 
       const hasChanged = Boolean(allDiff.length);
       hasChanged$.next(hasChanged);
+      addLog('🔎 [savedSearch] updated savedSearch', nextSavedSearch);
       savedSearch$.next(nextSavedSearch);
     }
     return nextSavedSearch;

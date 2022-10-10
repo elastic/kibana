@@ -45,19 +45,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('hiding the chart persists the setting', async function () {
       await PageObjects.discover.toggleChartVisibility();
       expect(await PageObjects.discover.isChartVisible()).to.be(false);
-
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.header.waitUntilLoadingHasFinished();
-
       expect(await PageObjects.discover.isChartVisible()).to.be(false);
     });
 
-    it('persists hidden chart option on the saved search ', async function () {
+    it('persists hidden chart option on the saved search', async function () {
       const savedSearchTitle = 'chart hidden';
       await PageObjects.discover.saveSearch(savedSearchTitle);
-
       await PageObjects.discover.toggleChartVisibility();
       expect(await PageObjects.discover.isChartVisible()).to.be(true);
 

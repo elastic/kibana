@@ -9,6 +9,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, SortOrder, saveSavedSearch } from '@kbn/saved-search-plugin/public';
+import { addLog } from '../../../utils/addLog';
 import { AppState } from '../services/discover_app_state_container';
 import { updateSearchSource } from './update_search_source';
 import { DiscoverServices } from '../../../build_services';
@@ -27,6 +28,7 @@ export function updateSavedSearch(
   },
   initial: boolean = false
 ) {
+  addLog('💾 [savedSearch] updateSavedSearch', savedSearch, state);
   if (!initial) {
     updateSearchSource(savedSearch.searchSource, {
       dataView,
@@ -97,6 +99,7 @@ export async function persistSavedSearch(
     state: AppState;
   }
 ) {
+  addLog('💾 [savedSearch] persistSavedSearch', savedSearch, state);
   updateSavedSearch({ savedSearch, dataView, state, services });
 
   return await saveSavedSearch(

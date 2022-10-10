@@ -103,7 +103,7 @@ export const DiscoverMainContent = ({
 
   const actualHideChart =
     hideChart || (hideChart === undefined && storage.get(CHART_HIDDEN_KEY)) || !isTimeBased;
-  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || hideChart;
+  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || actualHideChart;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minTopPanelHeight = euiTheme.base * 8;
