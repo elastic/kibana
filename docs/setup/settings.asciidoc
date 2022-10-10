@@ -80,8 +80,17 @@ configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enable
 *Default: `true`*
 
 [[elasticsearch-maxSockets]] `elasticsearch.maxSockets`::
-The maximum number of sockets that can be used for communications with elasticsearch.
+The maximum number of sockets that can be used for communications with {es}.
 *Default: `Infinity`*
+
+
+[[elasticsearch-maxIdleSockets]] `elasticsearch.maxIdleSockets`::
+The maximum number of idle sockets to keep open between {kib} and {es}. If more sockets become idle, they will be closed.
+*Default: `256`*
+
+[[elasticsearch-idleSocketTimeout]] `elasticsearch.idleSocketTimeout`::
+The timeout for idle sockets kept open between {kib} and {es}. If the socket is idle for longer than this timeout, it will be closed. If you have a transparent proxy between {kib} and {es} be sure to set this value lower than or equal to the proxy's timeout.
+*Default: `60s`*
 
 `elasticsearch.customHeaders`::
  | Header names and values to send to {es}. Any custom headers cannot be
