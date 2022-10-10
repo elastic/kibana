@@ -27,7 +27,7 @@ export const UPGRADE_RISK_SCORE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.riskDeprecated.entity.upgradeRiskScoreDescription',
   {
     defaultMessage:
-      'Current data is no longer supported. Please migrate your data and upgrade the module.',
+      'Current data is no longer supported. Please migrate your data and upgrade the module. The data might need an hour to be generated after enabling the module.',
   }
 );
 
