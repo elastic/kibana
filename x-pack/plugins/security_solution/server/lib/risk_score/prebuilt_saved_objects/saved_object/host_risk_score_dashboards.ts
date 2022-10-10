@@ -289,7 +289,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       description: null,
       state: {
         datasourceStates: {
-          formBased: {
+          indexpattern: {
             layers: {
               '2f34d626-d0ee-4ade-9e75-13c480699485': {
                 columnOrder: [
