@@ -34,6 +34,16 @@ describe('FilePickerState', () => {
       expect(filePickerState.getFileIds()).toEqual(['a', 'b']);
     });
   });
+  it('adds files simultaneously as one update', () => {
+    getTestScheduler().run(({ expectObservable, cold, flush }) => {
+      const addFiles$ = cold('--a|').pipe(tap(() => filePickerState.addFile(['1', '2', '3'])));
+      expectObservable(addFiles$).toBe('--a|');
+      expectObservable(filePickerState.fileIds$).toBe('a-b-', { a: [], b: ['1', '2', '3'] });
+      flush();
+      expect(filePickerState.isEmpty()).toBe(false);
+      expect(filePickerState.getFileIds()).toEqual(['1', '2', '3']);
+    });
+  });
   it('updates when files are removed', () => {
     getTestScheduler().run(({ expectObservable, cold, flush }) => {
       const addFiles$ = cold('   --a-b---c|').pipe(tap((id) => filePickerState.addFile(id)));
