@@ -39,8 +39,8 @@ const buildGenericColumn = <T extends 'field' | 'fullReference' = 'field'>(type:
 
 // Mind the OperationMetadata shape here, it is very important for the field suggestions;
 // internally they are serialized and compared as strings
-const numericOperation = () => ({ dataType: 'number', isBucketed: false } as OperationMetadata);
-const stringOperation = () => ({ dataType: 'string', isBucketed: true } as OperationMetadata);
+const numericOperation = (): OperationMetadata => ({ dataType: 'number', isBucketed: false });
+const stringOperation = (): OperationMetadata => ({ dataType: 'string', isBucketed: true });
 
 // Only one of each type is needed
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
