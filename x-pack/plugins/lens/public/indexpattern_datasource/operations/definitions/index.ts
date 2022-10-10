@@ -351,7 +351,7 @@ interface BaseOperationDefinitionProps<
   /**
    * Time range reducable operations can have a reduced time range defined at the dimension level - under the hood this will be translated into a filter on the defined time field
    */
-  canReduceTimeRange?: boolean;
+  canReduceTimeRange?: boolean | { helpMessage: string };
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -457,7 +457,7 @@ interface BaseBuildColumnArgs {
   indexPattern: IndexPattern;
 }
 
-interface OperationParam {
+export interface OperationParam {
   name: string;
   type: string;
   required?: boolean;
@@ -667,7 +667,8 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     arg: BaseBuildColumnArgs & {
       previousColumn?: GenericIndexPatternColumn;
     },
-    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & FilterParams,
+    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] &
+      FilterParams & { reducedTimeRange?: string },
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => ReferenceBasedIndexPatternColumn & C;
   /**

@@ -43,7 +43,10 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     })),
   }),
   max: createOperationDefinitionMock('max'),
-  count: createOperationDefinitionMock('count', { filterable: true, canReduceTimeRange: true }),
+  count: createOperationDefinitionMock('count', {
+    filterable: true,
+    canReduceTimeRange: true,
+  }),
   derivative: createOperationDefinitionMock('derivative', { input: 'fullReference' }),
   moving_average: createOperationDefinitionMock('moving_average', {
     input: 'fullReference',
@@ -785,6 +788,99 @@ describe('formula', () => {
               ...filter,
               query: `(${filter.query}) AND (${innerFilter})`,
             },
+          }),
+        })
+      );
+    });
+
+    it('add the formula reducedTimeRange to supported operations', () => {
+      const reducedTimeRange = '1h';
+      const mergedColumn = { ...currentColumn, reducedTimeRange };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+      const formula = 'moving_average(average(bytes), window=7) + count()';
+
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
+        'col1',
+        {
+          ...mergedColumn,
+          params: {
+            ...mergedColumn.params,
+            formula,
+          },
+        },
+        mergedLayer,
+        {
+          indexPattern,
+          operations: operationDefinitionMap,
+        }
+      );
+
+      // average and math are not filterable in the mocks
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1: expect.objectContaining({
+            label: formula,
+            reducedTimeRange,
+          }),
+          // Moving average column
+          col1X1: expect.not.objectContaining({
+            reducedTimeRange,
+          }),
+          col1X2: expect.objectContaining({
+            operationType: 'count',
+            reducedTimeRange,
+          }),
+        })
+      );
+
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1X0: expect.not.objectContaining({
+            reducedTimeRange,
+          }),
+          col1X3: expect.not.objectContaining({
+            reducedTimeRange,
+          }),
+        })
+      );
+    });
+
+    it('skip formula reducedTimeRange assignment to supported operations with already defined value', () => {
+      const reducedTimeRange = '1h';
+      const mergedColumn = { ...currentColumn, reducedTimeRange };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+      const formula = `moving_average(average(bytes), window=7) + count(reducedTimeRange='1s')`;
+
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
+        'col1',
+        {
+          ...mergedColumn,
+          params: {
+            ...mergedColumn.params,
+            formula,
+          },
+        },
+        mergedLayer,
+        {
+          indexPattern,
+          operations: operationDefinitionMap,
+        }
+      );
+
+      // average and math are not filterable in the mocks
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1: expect.objectContaining({
+            label: formula,
+            reducedTimeRange,
+          }),
+          // Moving average column
+          col1X1: expect.not.objectContaining({
+            reducedTimeRange,
+          }),
+          col1X2: expect.objectContaining({
+            operationType: 'count',
+            reducedTimeRange: '1s',
           }),
         })
       );
