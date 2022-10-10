@@ -23,6 +23,7 @@ import {
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
@@ -34,7 +35,6 @@ import {
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
-import { layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
 import { IndexPatternLayer } from '../..';
@@ -226,7 +226,7 @@ export const getGaugeVisualization = ({
     return (
       state || {
         layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
         palette: mainPalette,
         ticksPosition: 'auto',
@@ -443,7 +443,7 @@ export const getGaugeVisualization = ({
 
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.gauge.addLayer', {
           defaultMessage: 'Visualization',
         }),
