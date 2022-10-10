@@ -46,7 +46,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
   }
 
   const { getColumnsFromVis, getPercentageColumnFormulaColumn } = await convertToLensModule;
-  const result = getColumnsFromVis(
+  const layers = getColumnsFromVis(
     vis,
     timefilter,
     dataView,
@@ -57,9 +57,11 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     { dropEmptyRowsInDateHistogram: true, isPercentageMode: false }
   );
 
-  if (result === null) {
+  if (layers === null) {
     return null;
   }
+
+  const result = layers[0];
 
   if (vis.params.percentageCol) {
     const visSchemas = getVisSchemas(vis, {

@@ -44,15 +44,17 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
   }
 
   const { getColumnsFromVis } = await convertToLensModule;
-  const result = getColumnsFromVis(vis, timefilter, dataView, {
+  const layers = getColumnsFromVis(vis, timefilter, dataView, {
     buckets: [],
     splits: ['segment'],
     unsupported: ['split_row', 'split_column'],
   });
 
-  if (result === null) {
+  if (layers === null) {
     return null;
   }
+
+  const result = layers[0];
 
   // doesn't support more than three split slice levels
   // doesn't support pie without at least one split slice

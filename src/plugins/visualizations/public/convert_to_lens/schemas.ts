@@ -7,7 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
+import { IAggConfig, METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
 import { AggBasedColumn, PercentageModeConfig, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { getCustomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
@@ -32,64 +32,39 @@ const areVisSchemasValid = (visSchemas: Schemas, unsupported: Array<keyof Schema
   return !usedUnsupportedSchemas.length;
 };
 
-export const getColumnsFromVis = <T>(
-  vis: Vis<T>,
-  timefilter: TimefilterContract,
+const createLayer = (
+  visSchemas: Schemas,
+  allMetrics: Array<SchemaConfig<METRIC_TYPES>>,
+  metricsForLayer: Array<SchemaConfig<METRIC_TYPES>>,
+  customBucketsWithMetricIds: Array<{
+    customBucket: IAggConfig;
+    metricIds: string[];
+  }>,
   dataView: DataView,
   {
     splits = [],
     buckets = [],
-    unsupported = [],
   }: {
     splits?: Array<keyof Schemas>;
     buckets?: Array<keyof Schemas>;
-    unsupported?: Array<keyof Schemas>;
   } = {},
-  config?: {
-    dropEmptyRowsInDateHistogram?: boolean;
-    supportMixedSiblingPipelineAggs?: boolean;
-  } & (PercentageModeConfig | void)
+  percentageModeConfig: PercentageModeConfig,
+  dropEmptyRowsInDateHistogram?: boolean
 ) => {
-  const { dropEmptyRowsInDateHistogram, ...percentageModeConfig } = config ?? {
-    isPercentageMode: false,
-  };
-  const visSchemas = getVisSchemas(vis, {
-    timefilter,
-    timeRange: timefilter.getAbsoluteTime(),
-  });
-
-  if (
-    !isValidVis(visSchemas, config?.supportMixedSiblingPipelineAggs) ||
-    !areVisSchemasValid(visSchemas, unsupported)
-  ) {
-    return null;
-  }
-
-  const customBucketsWithMetricIds = getCustomBucketsFromSiblingAggs(visSchemas.metric);
-
-  // doesn't support sibbling pipeline aggs with different bucket aggs
-  if (!config?.supportMixedSiblingPipelineAggs && customBucketsWithMetricIds.length > 1) {
-    return null;
-  }
-
-  const metricsWithoutDuplicates = getMetricsWithoutDuplicates(visSchemas.metric);
-  const aggs = metricsWithoutDuplicates as Array<SchemaConfig<METRIC_TYPES>>;
-
-  const metricColumns = aggs.flatMap((m) =>
-    convertMetricToColumns(m, dataView, aggs, percentageModeConfig)
+  const metricColumns = metricsForLayer.flatMap((m) =>
+    convertMetricToColumns(m, dataView, allMetrics, percentageModeConfig)
   );
-
   if (metricColumns.includes(null)) {
     return null;
   }
-  const metrics = metricColumns as AggBasedColumn[];
+  const metricColumnsWithoutNull = metricColumns as AggBasedColumn[];
 
   const { customBucketColumns, customBucketsMap } = getCustomBucketColumns(
     customBucketsWithMetricIds,
-    metrics,
+    metricColumnsWithoutNull,
     dataView,
-    aggs,
-    config?.dropEmptyRowsInDateHistogram
+    allMetrics,
+    dropEmptyRowsInDateHistogram
   );
 
   if (customBucketColumns.includes(null)) {
@@ -122,14 +97,14 @@ export const getColumnsFromVis = <T>(
 
   const columns = sortColumns(
     [
-      ...metrics,
+      ...metricColumnsWithoutNull,
       ...bucketColumns,
       ...splitBucketColumns,
       ...(customBucketColumns as BucketColumn[]),
     ],
     visSchemas,
     [...buckets, ...splits],
-    metricsWithoutDuplicates
+    metricsForLayer
   );
 
   const columnsWithoutReferenced = getColumnsWithoutReferenced(columns);
@@ -144,9 +119,99 @@ export const getColumnsFromVis = <T>(
       visSchemas.metric,
       customBucketColumns as BucketColumn[],
       customBucketsMap,
-      metrics
+      metricColumnsWithoutNull
     ),
     columnsWithoutReferenced,
     columns,
   };
+};
+
+export const getColumnsFromVis = <T>(
+  vis: Vis<T>,
+  timefilter: TimefilterContract,
+  dataView: DataView,
+  {
+    splits = [],
+    buckets = [],
+    unsupported = [],
+  }: {
+    splits?: Array<keyof Schemas>;
+    buckets?: Array<keyof Schemas>;
+    unsupported?: Array<keyof Schemas>;
+  } = {},
+  config?: {
+    dropEmptyRowsInDateHistogram?: boolean;
+    supportMixedSiblingPipelineAggs?: boolean;
+  } & (PercentageModeConfig | void),
+  series?: Array<{ metrics: string[] }>
+) => {
+  const { dropEmptyRowsInDateHistogram, supportMixedSiblingPipelineAggs, ...percentageModeConfig } =
+    config ?? {
+      isPercentageMode: false,
+    };
+  const visSchemas = getVisSchemas(vis, {
+    timefilter,
+    timeRange: timefilter.getAbsoluteTime(),
+  });
+
+  if (
+    !isValidVis(visSchemas, supportMixedSiblingPipelineAggs) ||
+    !areVisSchemasValid(visSchemas, unsupported)
+  ) {
+    return null;
+  }
+
+  const customBucketsWithMetricIds = getCustomBucketsFromSiblingAggs(visSchemas.metric);
+
+  // doesn't support sibbling pipeline aggs with different bucket aggs
+  if (!supportMixedSiblingPipelineAggs && customBucketsWithMetricIds.length > 1) {
+    return null;
+  }
+
+  const metricsWithoutDuplicates = getMetricsWithoutDuplicates(visSchemas.metric);
+  const aggs = metricsWithoutDuplicates as Array<SchemaConfig<METRIC_TYPES>>;
+  const layers = [];
+
+  if (series && series.length) {
+    for (let i = 0; i < series.length; i++) {
+      const metricAggIds = series[i].metrics;
+      const metrics = aggs.filter(
+        (agg) => agg.aggId && metricAggIds.includes(agg.aggId.split('.')[0])
+      );
+      const customBucketsForLayer = customBucketsWithMetricIds.filter((c) =>
+        c.metricIds.some((m) => metricAggIds.includes(m))
+      );
+      const layer = createLayer(
+        visSchemas,
+        aggs,
+        metrics,
+        customBucketsForLayer,
+        dataView,
+        { splits, buckets },
+        percentageModeConfig,
+        dropEmptyRowsInDateHistogram
+      );
+      if (!layer) {
+        return null;
+      }
+      layers.push(layer);
+    }
+  } else {
+    const layer = createLayer(
+      visSchemas,
+      aggs,
+      aggs,
+      customBucketsWithMetricIds,
+      dataView,
+      { splits, buckets },
+      percentageModeConfig,
+      dropEmptyRowsInDateHistogram
+    );
+    if (!layer) {
+      return null;
+    }
+    layers.push(layer);
+  }
+
+  return layers;
 };

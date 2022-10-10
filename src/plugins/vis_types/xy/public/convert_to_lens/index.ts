@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggBasedColumn, Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
+import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getVisSchemas,
@@ -54,49 +54,10 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     return null;
   }
 
-  const [{ getColumnsFromVis, createStaticValueColumn }, { getConfiguration }] = await Promise.all([
-    convertToLensModule,
-    import('./configurations'),
-  ]);
-  const result = getColumnsFromVis(
-    vis,
-    timefilter,
-    dataView,
-    {
-      buckets: ['segment'],
-      splits: ['group'],
-      unsupported: ['split_row', 'split_column', 'radius'],
-    },
-    {
-      dropEmptyRowsInDateHistogram: true,
-      supportMixedSiblingPipelineAggs: true,
-      isPercentageMode: false,
-    }
-  );
-
-  if (result === null) {
-    return null;
-  }
-
   const visSchemas = getVisSchemas(vis, {
     timefilter,
     timeRange: timefilter.getAbsoluteTime(),
   });
-
-  // doesn't support sibling pipeline aggs and split series together
-  if (visSchemas.group?.length && Object.keys(result.buckets.customBuckets).length) {
-    return null;
-  }
-
-  // doesn't support several metrics with terms split series which uses one of the metrics as order agg
-  if (
-    visSchemas.metric.length > 1 &&
-    result.columns.some(
-      (c) => c.isSplit && 'orderBy' in c.params && c.params.orderBy.type === 'column'
-    )
-  ) {
-    return null;
-  }
 
   const firstValueAxesId = vis.params.valueAxes[0].id;
   const updatedSeries = getSeriesParams(
@@ -110,6 +71,51 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
   const visibleSeries = finalSeriesParams.filter(
     (param) => param.show && visSchemas.metric.some((m) => m.aggId?.split('.')[0] === param.data.id)
   );
+
+  const [{ getColumnsFromVis, createStaticValueColumn }, { getConfiguration }] = await Promise.all([
+    convertToLensModule,
+    import('./configurations'),
+  ]);
+  const dataLayers = getColumnsFromVis(
+    vis,
+    timefilter,
+    dataView,
+    {
+      buckets: ['segment'],
+      splits: ['group'],
+      unsupported: ['split_row', 'split_column', 'radius'],
+    },
+    {
+      dropEmptyRowsInDateHistogram: true,
+      supportMixedSiblingPipelineAggs: true,
+      isPercentageMode: false,
+    },
+    visibleSeries.map((s) => ({ metrics: [s.data.id] }))
+  );
+
+  if (dataLayers === null) {
+    return null;
+  }
+
+  // doesn't support sibling pipeline aggs and split series together
+  if (
+    visSchemas.group?.length &&
+    dataLayers.some((l) => Object.keys(l.buckets.customBuckets).length)
+  ) {
+    return null;
+  }
+
+  // doesn't support several metrics with terms split series which uses one of the metrics as order agg
+  if (
+    visSchemas.metric.length > 1 &&
+    dataLayers.some((l) =>
+      l.columns.some(
+        (c) => c.isSplit && 'orderBy' in c.params && c.params.orderBy.type === 'column'
+      )
+    )
+  ) {
+    return null;
+  }
 
   const visibleYAxes = vis.params.valueAxes.filter((axis) =>
     visibleSeries.some((seriesParam) => seriesParam.valueAxis === axis.id)
@@ -125,44 +131,20 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
 
   const indexPatternId = dataView.id!;
 
-  const layers = visibleSeries.reduce<Layer[]>((accLayers, s) => {
+  const layers = dataLayers.reduce<Layer[]>((accLayers, l) => {
     const layerId = uuid();
-    const metrics = result.columns.filter((c) => c.meta.aggId.split('.')[0] === s.data.id);
-    const buckets = result.columns.reduce<AggBasedColumn[]>((acc, c) => {
-      if (c.isBucketed) {
-        let bucketColumn = c;
-        // should change column id because each layer should includes its own columns (not use one column id for all layers)
-        if (accLayers.some((value) => value.columns.some((col) => col.columnId === c.columnId))) {
-          bucketColumn = { ...c, columnId: uuid() };
-        }
-        if (c.isSplit) {
-          // as each sibling pipeline agg can have different custom bucket we should get correct one for layer
-          if (
-            Object.keys(result.buckets.customBuckets).some((key) =>
-              result.buckets.customBuckets[key].includes(c.columnId)
-            )
-          ) {
-            if (result.buckets.customBuckets[metrics[0].columnId] === c.columnId) {
-              acc.push(bucketColumn);
-            }
-            return acc;
-          }
-        }
-
-        acc.push(bucketColumn);
-      }
-
-      return acc;
-    }, []);
-    const collapseFn = Object.keys(result.bucketCollapseFn).find((key) =>
-      result.bucketCollapseFn[key].includes(result.buckets.customBuckets[metrics[0].columnId])
+    const series = visibleSeries.find((s) =>
+      l.columns.some((c) => c.meta.aggId.split('.')[0] === s.data.id)
+    );
+    const collapseFn = Object.keys(l.bucketCollapseFn).find((key) =>
+      l.bucketCollapseFn[key].includes(l.buckets.customBuckets[l.metrics[0]])
     );
     accLayers.push({
       indexPatternId,
       layerId,
-      columns: [...metrics, ...buckets].map(excludeMetaFromColumn),
+      columns: l.columns.map(excludeMetaFromColumn),
       columnOrder: [],
-      seriesId: s.data.id,
+      seriesId: series?.data.id!,
       collapseFn,
       isReferenceLineLayer: false,
     });

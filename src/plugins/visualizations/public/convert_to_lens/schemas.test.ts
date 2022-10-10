@@ -196,7 +196,7 @@ describe('getColumnsFromVis', () => {
     expect(mockSortColumns).toBeCalledTimes(0);
   });
 
-  test('should return columns', () => {
+  test('should return one layer with columns', () => {
     const buckets: AggConfig[] = [aggConfig];
     const bucketColumns = [
       {
@@ -244,16 +244,18 @@ describe('getColumnsFromVis', () => {
       buckets: [],
     });
 
-    expect(result).toEqual({
-      bucketCollapseFn,
-      buckets: {
-        all: [bucketId],
-        customBuckets: {},
+    expect(result).toEqual([
+      {
+        bucketCollapseFn,
+        buckets: {
+          all: [bucketId],
+          customBuckets: {},
+        },
+        columns: [...metrics, ...buckets],
+        columnsWithoutReferenced,
+        metrics: [metricId],
       },
-      columns: [...metrics, ...buckets],
-      columnsWithoutReferenced,
-      metrics: [metricId],
-    });
+    ]);
     expect(mockGetVisSchemas).toBeCalledTimes(1);
     expect(mockIsValidVis).toBeCalledTimes(1);
     expect(mockGetCutomBucketsFromSiblingAggs).toBeCalledTimes(1);
@@ -262,5 +264,85 @@ describe('getColumnsFromVis', () => {
     expect(mockGetBucketColumns).toBeCalledTimes(2);
     expect(mockSortColumns).toBeCalledTimes(1);
     expect(mockGetColumnsWithoutReferenced).toBeCalledTimes(1);
+  });
+
+  test('should return several layer with columns if series is provided', () => {
+    const buckets: AggConfig[] = [aggConfig];
+    const bucketColumns = [
+      {
+        sourceField: 'some-field',
+        columnId: 'col3',
+        operationType: 'date_histogram',
+        isBucketed: false,
+        isSplit: false,
+        dataType: 'string',
+        params: { interval: '1h' },
+        meta: { aggId: 'agg-id-1' },
+      },
+    ];
+    const mectricAggs = [{ aggId: 'col-id-3' }, { aggId: 'col-id-4' }];
+    const metrics = [
+      {
+        sourceField: 'some-field',
+        columnId: 'col2',
+        operationType: 'max',
+        isBucketed: false,
+        isSplit: false,
+        dataType: 'string',
+        params: {},
+        meta: { aggId: 'col-id-3' },
+      },
+      {
+        sourceField: 'some-field',
+        columnId: 'col3',
+        operationType: 'max',
+        isBucketed: false,
+        isSplit: false,
+        dataType: 'string',
+        params: {},
+        meta: { aggId: 'col-id-4' },
+      },
+    ];
+
+    const columnsWithoutReferenced = ['col2'];
+    const metricId = 'metric1';
+    const bucketId = 'bucket1';
+    const bucketCollapseFn = 'max';
+
+    mockGetCutomBucketsFromSiblingAggs.mockReturnValue([]);
+    mockGetMetricsWithoutDuplicates.mockReturnValue(mectricAggs);
+    mockConvertMetricToColumns.mockReturnValue(metrics);
+    mockConvertBucketToColumns.mockReturnValue(bucketColumns);
+    mockGetBucketColumns.mockReturnValue(bucketColumns);
+    mockGetColumnsWithoutReferenced.mockReturnValue(columnsWithoutReferenced);
+    mockSortColumns.mockReturnValue([...metrics, ...buckets]);
+    mockGetColumnIds.mockReturnValueOnce([metricId]);
+    mockGetColumnIds.mockReturnValueOnce([bucketId]);
+    mockGetColumnIds.mockReturnValueOnce([metricId]);
+    mockGetColumnIds.mockReturnValueOnce([bucketId]);
+    mockGetBucketCollapseFn.mockReturnValueOnce(bucketCollapseFn);
+    mockGetBucketCollapseFn.mockReturnValueOnce(bucketCollapseFn);
+
+    const result = getColumnsFromVis(
+      vis,
+      dataServiceMock.query.timefilter.timefilter,
+      dataView,
+      {
+        splits: [],
+        buckets: [],
+      },
+      undefined,
+      [{ metrics: ['col-id-3'] }, { metrics: ['col-id-4'] }]
+    );
+
+    expect(result?.length).toEqual(2);
+    expect(mockGetVisSchemas).toBeCalledTimes(1);
+    expect(mockIsValidVis).toBeCalledTimes(1);
+    expect(mockGetCutomBucketsFromSiblingAggs).toBeCalledTimes(1);
+    expect(mockGetMetricsWithoutDuplicates).toBeCalledTimes(1);
+    expect(mockConvertMetricToColumns).toBeCalledTimes(2);
+    expect(mockGetBucketColumns).toBeCalledTimes(4);
+    expect(mockSortColumns).toBeCalledTimes(2);
+    expect(mockGetColumnsWithoutReferenced).toBeCalledTimes(2);
   });
 });
