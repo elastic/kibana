@@ -64,6 +64,7 @@ import {
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
@@ -80,6 +81,7 @@ import {
   registerPreconfigurationRoutes,
   registerDownloadSourcesRoutes,
   registerHealthCheckRoutes,
+  registerFleetServerHostRoutes,
 } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
@@ -161,6 +163,7 @@ const allSavedObjectTypes = [
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -399,6 +402,7 @@ export class FleetPlugin
     registerSettingsRoutes(fleetAuthzRouter);
     registerDataStreamRoutes(fleetAuthzRouter);
     registerPreconfigurationRoutes(fleetAuthzRouter);
+    registerFleetServerHostRoutes(fleetAuthzRouter);
     registerDownloadSourcesRoutes(fleetAuthzRouter);
     registerHealthCheckRoutes(fleetAuthzRouter);
 

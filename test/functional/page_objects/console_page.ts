@@ -227,6 +227,19 @@ export class ConsolePageObject extends FtrService {
     return await this.find.existsByCssSelector('.ace_error');
   }
 
+  public async getTokenColor(token: string) {
+    const element = await this.find.byClassName(token);
+    return await element.getComputedStyle('color');
+  }
+
+  public async responseHasDeprecationWarning() {
+    // Retry for a while to allow the deprecation warning to appear
+    return await this.retry.try(async () => {
+      const response = await this.getResponse();
+      return response.trim().startsWith('#!');
+    });
+  }
+
   public async clickFoldWidget() {
     const widget = await this.find.byCssSelector('.ace_fold-widget');
     await widget.click();
@@ -403,5 +416,93 @@ export class ConsolePageObject extends FtrService {
   public async clickAutoIndentButton() {
     const button = await this.testSubjects.find('consoleMenuAutoIndent');
     await button.click();
+  }
+
+  public async getRequestMethod() {
+    const requestEditor = await this.getRequestEditor();
+    const requestMethod = await requestEditor.findByClassName('ace_method');
+    const method = await requestMethod.getVisibleText();
+    return method.trim();
+  }
+
+  public async getRequestPath() {
+    const requestEditor = await this.getRequestEditor();
+    const requestPath = await requestEditor.findAllByCssSelector('.ace_url');
+    const path = [];
+    for (const pathPart of requestPath) {
+      const className = await pathPart.getAttribute('class');
+      if (className.includes('ace_param')) {
+        // This is a parameter, we don't want to include it in the path
+        break;
+      }
+      path.push(await pathPart.getVisibleText());
+    }
+    return path.join('').trim();
+  }
+
+  public async getRequestQueryParams() {
+    const requestEditor = await this.getRequestEditor();
+    const requestQueryParams = await requestEditor.findAllByCssSelector('.ace_url.ace_param');
+
+    if (requestQueryParams.length === 0) {
+      // No query params
+      return;
+    }
+
+    const params = [];
+    for (const param of requestQueryParams) {
+      params.push(await param.getVisibleText());
+    }
+    return params.join('').trim();
+  }
+
+  public async getRequestBody() {
+    let request = await this.getRequest();
+    // Remove new lines at the beginning of the request
+    request = request.replace(/^\n/, '');
+    const method = await this.getRequestMethod();
+    const path = await this.getRequestPath();
+    const query = await this.getRequestQueryParams();
+
+    if (query) {
+      return request.replace(`${method} ${path}?${query}`, '').trim();
+    }
+
+    return request.replace(`${method} ${path}`, '').trim();
+  }
+
+  public async getRequestLineHighlighting() {
+    const requestEditor = await this.getRequestEditor();
+    const requestLine = await requestEditor.findAllByCssSelector('.ace_line > *');
+    const line = [];
+    for (const linePart of requestLine) {
+      line.push(await linePart.getAttribute('class'));
+    }
+    return line.join(' ');
+  }
+
+  public async getRequestMethodColor() {
+    return await this.getTokenColor('ace_method');
+  }
+
+  public async getRequestPathColor() {
+    return await this.getTokenColor('ace_url');
+  }
+
+  public async getRequestQueryColor() {
+    return await this.getTokenColor('ace_param');
+  }
+
+  public async getRequestBodyColor() {
+    return await this.getTokenColor('ace_paren');
+  }
+
+  public async getCommentColor() {
+    return await this.getTokenColor('ace_comment');
+  }
+
+  public async getRequestBodyCount() {
+    const body = await this.getRequestBody();
+    return body.split('\n').length;
   }
 }
