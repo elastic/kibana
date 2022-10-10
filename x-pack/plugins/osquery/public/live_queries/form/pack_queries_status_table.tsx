@@ -353,19 +353,16 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     }
   }, [agentIds?.length, data, getHandleErrorsToggle, itemIdToExpandedRowMap]);
 
-  const queryIds = useMemo(
-    () =>
-      map(data, (query) => ({
-        value: query.action_id || '',
-        field: 'action_id',
-      })),
-    [data]
-  );
+  const queryIds = useMemo(() => map(data, (query) => query.action_id), [data]);
 
   return (
     <>
       {showResultsHeader && (
-        <PackResultsHeader queryIds={queryIds} actionId={actionId} agentIds={agentIds} />
+        <PackResultsHeader
+          queryIds={queryIds as string[]}
+          actionId={actionId}
+          agentIds={agentIds}
+        />
       )}
 
       <StyledEuiBasicTable

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { isArray } from 'lodash';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useKibana } from '../common/lib/kibana';
 
 const TimelineComponent = React.memo((props) => <EuiButtonEmpty {...props} size="xs" />);
@@ -14,39 +15,50 @@ TimelineComponent.displayName = 'TimelineComponent';
 
 export interface AddToTimelineButtonProps {
   field: string;
-  value: string;
+  value: string | string[];
   isIcon?: true;
+  iconProps?: Record<string, string>;
 }
 
 export const SECURITY_APP_NAME = 'Security';
 export const AddToTimelineButton = (props: AddToTimelineButtonProps) => {
   const { timelines, appName } = useKibana().services;
-  const { field, value, isIcon } = props;
+  const { field, value, isIcon, iconProps } = props;
 
-  if (!timelines || appName !== SECURITY_APP_NAME || !value) {
+  const queryIds = isArray(value) ? value : [value];
+  const TimelineIconComponent = useCallback(
+    (timelineComponentProps) => (
+      <EuiButtonIcon iconType={'timelines'} {...timelineComponentProps} size="xs" {...iconProps} />
+    ),
+    [iconProps]
+  );
+
+  if (!timelines || appName !== SECURITY_APP_NAME || !queryIds.length) {
     return null;
   }
 
   const { getAddToTimelineButton } = timelines.getHoverActions();
 
-  const providerA = {
+  const providers = queryIds.map((queryId) => ({
     and: [],
     enabled: true,
     excluded: false,
-    id: value,
+    id: queryId,
     kqlQuery: '',
-    name: value,
+    name: queryId,
     queryMatch: {
       field,
-      value,
+      value: queryId,
       operator: ':' as const,
     },
-  };
+  }));
 
   return getAddToTimelineButton({
-    dataProvider: providerA,
-    field: value,
+    dataProvider: providers,
+    field: queryIds[0],
     ownFocus: false,
-    ...(isIcon ? { showTooltip: true } : { Component: TimelineComponent }),
+    ...(isIcon
+      ? { showTooltip: true, Component: TimelineIconComponent }
+      : { Component: TimelineComponent }),
   });
 };

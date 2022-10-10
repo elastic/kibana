@@ -8,11 +8,12 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 
 interface PackResultsHeadersProps {
   actionId?: string;
-  queryIds: Array<{ value: string; field: string }>;
+  queryIds: string[];
   agentIds?: string[];
 }
 
@@ -27,7 +28,7 @@ const StyledIconsList = styled(EuiFlexItem)`
   padding-left: 10px;
 `;
 
-export const PackResultsHeader = ({ actionId, agentIds }: PackResultsHeadersProps) => {
+export const PackResultsHeader = ({ actionId, agentIds, queryIds }: PackResultsHeadersProps) => {
   const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' }), []);
 
   return (
@@ -47,12 +48,24 @@ export const PackResultsHeader = ({ actionId, agentIds }: PackResultsHeadersProp
         <StyledIconsList grow={false}>
           <span>
             {actionId && (
-              <AddToCaseWrapper
-                actionId={actionId}
-                agentIds={agentIds}
-                isIcon={true}
-                iconProps={iconProps}
-              />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <AddToCaseWrapper
+                    actionId={actionId}
+                    agentIds={agentIds}
+                    isIcon={true}
+                    iconProps={iconProps}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <AddToTimelineButton
+                    field="action_id"
+                    value={queryIds}
+                    isIcon={true}
+                    iconProps={iconProps}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
           </span>
         </StyledIconsList>
