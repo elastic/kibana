@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 
 export type UnifiedAxisExtentConfig = AxisExtentConfig;
