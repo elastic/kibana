@@ -35,7 +35,6 @@ import { PanelContentError } from './panel_content_error';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
-  top: 0.75em;
 `;
 
 const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.nodeDetail.Error', {

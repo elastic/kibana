@@ -25,7 +25,6 @@ interface TransformActionParamsOptions {
   alertInstanceId: string;
   alertActionGroup: string;
   alertActionGroupName: string;
-  alertActionSubgroup?: string;
   actionParams: RuleActionParams;
   alertParams: RuleTypeParams;
   state: AlertInstanceState;
@@ -44,7 +43,6 @@ export function transformActionParams({
   tags,
   alertInstanceId,
   alertActionGroup,
-  alertActionSubgroup,
   alertActionGroupName,
   context,
   actionParams,
@@ -63,7 +61,6 @@ export function transformActionParams({
     alertInstanceId,
     alertActionGroup,
     alertActionGroupName,
-    alertActionSubgroup,
     context,
     date: new Date().toISOString(),
     state,
@@ -80,7 +77,6 @@ export function transformActionParams({
       id: alertInstanceId,
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
-      actionSubgroup: alertActionSubgroup,
     },
   };
   return actionsPlugin.renderActionParameterTemplates(

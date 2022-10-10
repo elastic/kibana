@@ -9,6 +9,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { sortBy } from 'lodash';
 
 import {
+  useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -34,6 +35,7 @@ import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { SpikeAnalysisTable } from './spike_analysis_table';
+import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_provider';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
@@ -64,10 +66,6 @@ interface SpikeAnalysisTableProps {
   groupTableItems: GroupTableItem[];
   dataViewId?: string;
   loading: boolean;
-  onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
-  onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
-  selectedChangePoint?: ChangePoint;
-  onSelectedGroup?: (group: GroupTableItem | null) => void;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -75,10 +73,6 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   groupTableItems,
   dataViewId,
   loading,
-  onPinnedChangePoint,
-  onSelectedChangePoint,
-  selectedChangePoint,
-  onSelectedGroup,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -89,6 +83,10 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   );
 
   const euiTheme = useEuiTheme();
+  const primaryBackgroundColor = useEuiBackgroundColor('primary');
+
+  const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
+    useSpikeAnalysisTableRowContext();
 
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -121,9 +119,6 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <SpikeAnalysisTable
           changePoints={expandedTableItems as ChangePoint[]}
           loading={loading}
-          onPinnedChangePoint={onPinnedChangePoint}
-          onSelectedChangePoint={onSelectedChangePoint}
-          selectedChangePoint={selectedChangePoint}
           dataViewId={dataViewId}
         />
       );
@@ -233,9 +228,26 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnGroup',
       field: 'group',
-      name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel', {
-        defaultMessage: 'Group',
-      }),
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupColumnTooltip',
+            {
+              defaultMessage:
+                'Displays field/value pairs unique to the group. Expand row to see all field/value pairs.',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel"
+              defaultMessage="Group"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (_, { group, repeatedValues }) => {
         const valuesBadges = [];
         for (const fieldName in group) {
@@ -268,7 +280,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 +{Object.keys(repeatedValues).length}{' '}
                 <FormattedMessage
                   id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
-                  defaultMessage="more"
+                  defaultMessage="more field/value pairs also appearing in other groups"
                 />
               </EuiBadge>
               <EuiSpacer size="xs" />
@@ -292,7 +304,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip',
             {
               defaultMessage:
-                'A visual representation of the impact of the field on the message rate difference',
+                'A visual representation of the impact of the group on the message rate difference',
             }
           )}
         >
@@ -366,9 +378,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabelColumnTooltip',
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.impactLabelColumnTooltip',
             {
-              defaultMessage: 'The level of impact of the field on the message rate difference',
+              defaultMessage: 'The level of impact of the group on the message rate difference',
             }
           )}
         >
@@ -458,6 +470,24 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     };
   }, [pageIndex, pageSize, sortField, sortDirection, groupTableItems]);
 
+  const getRowStyle = (group: GroupTableItem) => {
+    if (pinnedGroup && pinnedGroup.id === group.id) {
+      return {
+        backgroundColor: primaryBackgroundColor,
+      };
+    }
+
+    if (selectedGroup && selectedGroup.id === group.id) {
+      return {
+        backgroundColor: euiTheme.euiColorLightestShade,
+      };
+    }
+
+    return {
+      backgroundColor: euiTheme.euiColorEmptyShade,
+    };
+  };
+
   return (
     <EuiBasicTable
       data-test-subj="aiopsSpikeAnalysisGroupsTable"
@@ -473,16 +503,20 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       rowProps={(group) => {
         return {
           'data-test-subj': `aiopsSpikeAnalysisGroupsTableRow row-${group.id}`,
-          onMouseEnter: () => {
-            if (onSelectedGroup) {
-              onSelectedGroup(group);
+          onClick: () => {
+            if (group.id === pinnedGroup?.id) {
+              setPinnedGroup(null);
+            } else {
+              setPinnedGroup(group);
             }
+          },
+          onMouseEnter: () => {
+            setSelectedGroup(group);
           },
           onMouseLeave: () => {
-            if (onSelectedGroup) {
-              onSelectedGroup(null);
-            }
+            setSelectedGroup(null);
           },
+          style: getRowStyle(group),
         };
       }}
     />

@@ -103,13 +103,14 @@ export const rangeOperation: OperationDefinition<
       defaultMessage: 'Missing field',
     }),
   buildColumn({ field }, columnParams) {
+    const type = columnParams?.type ?? MODES.Histogram;
     return {
       label: field.displayName,
-      dataType: 'number', // string for Range
+      dataType: type === MODES.Histogram ? 'number' : 'string', // string for Range
       operationType: 'range',
       sourceField: field.name,
       isBucketed: true,
-      scale: 'interval', // ordinal for Range
+      scale: type === MODES.Histogram ? 'interval' : 'ordinal', // ordinal for Range
       params: {
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
         type: columnParams?.type ?? MODES.Histogram,
@@ -266,4 +267,9 @@ export const rangeOperation: OperationDefinition<
       />
     );
   },
+  quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.ranges.documentation.quick', {
+    defaultMessage: `
+    Buckets values along defined numeric ranges.
+      `,
+  }),
 };

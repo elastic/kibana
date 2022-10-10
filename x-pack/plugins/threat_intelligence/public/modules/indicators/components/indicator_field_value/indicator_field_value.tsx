@@ -10,7 +10,7 @@ import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { DateFormatter } from '../../../../components/date_formatter';
-import { unwrapValue } from '../../lib/unwrap_value';
+import { unwrapValue } from '../../utils/unwrap_value';
 
 export interface IndicatorFieldValueProps {
   /**

@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { TimeDuration } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
 
-export const throttle = t.string;
+export const throttle = t.union([
+  t.literal('no_actions'),
+  t.literal('rule'),
+  TimeDuration({ allowedUnits: ['h', 'd'] }),
+]);
 export type Throttle = t.TypeOf<typeof throttle>;
 
 export const throttleOrNull = t.union([throttle, t.null]);
 export type ThrottleOrNull = t.TypeOf<typeof throttleOrNull>;
-
-export const throttleOrNullOrUndefined = t.union([throttle, t.null, t.undefined]);
-export type ThrottleOrUndefinedOrNull = t.TypeOf<typeof throttleOrNullOrUndefined>;

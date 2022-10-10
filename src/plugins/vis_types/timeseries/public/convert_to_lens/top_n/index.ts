@@ -8,7 +8,7 @@
 
 import uuid from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
@@ -48,7 +48,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       return null;
     }
 
-    const { indexPatternId, indexPattern } = await getDataSourceInfo(
+    const datasourceInfo = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(series.override_index_pattern),
@@ -57,10 +57,17 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       dataViews
     );
 
+    if (!datasourceInfo) {
+      return null;
+    }
+
+    const { indexPatternId, indexPattern } = datasourceInfo;
     const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
 
     // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, reducedTimeRange);
+    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
+      reducedTimeRange,
+    });
     if (!metricsColumns) {
       return null;
     }
@@ -79,11 +86,16 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
     };
   }
 
-  const configLayers = await getLayers(extendedLayers, model, dataViews);
+  const configLayers = await getLayers(extendedLayers, model, dataViews, true);
+  if (configLayers === null) {
+    return null;
+  }
 
+  const layers = Object.values(excludeMetaFromLayers(extendedLayers));
   return {
     type: 'lnsXY',
-    layers: Object.values(excludeMetaFromLayers(extendedLayers)),
+    layers,
     configuration: getConfiguration(model, configLayers),
+    indexPatternIds: getIndexPatternIds(layers),
   };
 };

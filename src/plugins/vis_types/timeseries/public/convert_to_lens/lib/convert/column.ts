@@ -11,7 +11,7 @@ import {
   BaseColumn,
   Operation,
   DataType,
-  ColumnWithMeta as GenericColumnWithMeta,
+  GenericColumnWithMeta,
   FormatParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';

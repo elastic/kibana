@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.rule_id = createRuleBody.rule_id;
         updatedRule.name = 'some other name';
         updatedRule.actions = [action1];
-        updatedRule.throttle = '1m';
+        updatedRule.throttle = '1d';
         delete updatedRule.id;
 
         const { body } = await supertest
@@ -243,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         ];
-        outputRule.throttle = '1m';
+        outputRule.throttle = '1d';
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });

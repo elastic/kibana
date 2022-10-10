@@ -49,7 +49,6 @@ import {
   getFieldsByValidationState,
   isSortableByColumn,
   isPercentileRankSortable,
-  computeOrderForMultiplePercentiles,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -240,6 +239,10 @@ export const termsOperation: OperationDefinition<
         otherBucket: (columnParams?.otherBucket ?? true) && !indexPattern.hasRestrictions,
         missingBucket: columnParams?.missingBucket ?? false,
         parentFormat: columnParams?.parentFormat ?? { id: 'terms' },
+        include: columnParams?.include ?? [],
+        exclude: columnParams?.exclude ?? [],
+        includeIsRegex: columnParams?.includeIsRegex ?? false,
+        excludeIsRegex: columnParams?.excludeIsRegex ?? false,
         secondaryFields: columnParams?.secondaryFields,
       },
     };
@@ -262,7 +265,7 @@ export const termsOperation: OperationDefinition<
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
-    let orderBy: string = '_key';
+    let orderBy = '_key';
 
     if (column.params?.orderBy.type === 'column') {
       const orderColumn = layer.columns[column.params.orderBy.columnId];
@@ -271,14 +274,6 @@ export const termsOperation: OperationDefinition<
       if (!isPercentileRankSortable(orderColumn)) {
         orderBy = '_key';
       }
-
-      const orderByMultiplePercentiles = computeOrderForMultiplePercentiles(
-        orderColumn,
-        layer,
-        orderedColumnIds
-      );
-
-      orderBy = orderByMultiplePercentiles ?? orderBy;
     }
 
     // To get more accurate results, we set shard_size to a minimum of 1000
@@ -562,6 +557,11 @@ export const termsOperation: OperationDefinition<
       </EuiFormRow>
     );
   },
+  quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.terms.documentation.quick', {
+    defaultMessage: `
+The top values of a specified field ranked by the chosen metric.
+      `,
+  }),
   paramEditor: function ParamEditor({
     layer,
     paramEditorUpdater,

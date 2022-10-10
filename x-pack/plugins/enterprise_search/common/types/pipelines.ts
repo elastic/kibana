@@ -5,8 +5,32 @@
  * 2.0.
  */
 
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+
 export interface InferencePipeline {
-  isDeployed: boolean;
+  modelState: TrainedModelState;
+  modelStateReason?: string;
   pipelineName: string;
   types: string[];
+}
+
+export enum TrainedModelState {
+  NotDeployed = '',
+  Starting = 'starting',
+  Stopping = 'stopping',
+  Started = 'started',
+  Failed = 'failed',
+}
+
+export interface MlInferencePipeline extends IngestPipeline {
+  version?: number;
+}
+
+export interface MlInferenceHistoryItem {
+  doc_count: number;
+  pipeline: string;
+}
+
+export interface MlInferenceHistoryResponse {
+  history: MlInferenceHistoryItem[];
 }

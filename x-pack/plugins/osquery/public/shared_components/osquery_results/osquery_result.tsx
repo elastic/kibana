@@ -6,9 +6,10 @@
  */
 
 import { EuiComment, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
+import { AddToCaseWrapper } from '../../cases/add_to_cases';
 import type { OsqueryActionResultsProps } from './types';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { ATTACHED_QUERY } from '../../agents/translations';
@@ -22,7 +23,6 @@ interface OsqueryResultProps extends Omit<OsqueryActionResultsProps, 'alertId'> 
 
 export const OsqueryResult = ({
   actionId,
-  queryId,
   ruleName,
   addToTimeline,
   agentIds,
@@ -30,9 +30,21 @@ export const OsqueryResult = ({
 }: OsqueryResultProps) => {
   const { data } = useLiveQueryDetails({
     actionId,
-    // isLive,
-    // ...(queryId ? { queryIds: [queryId] } : {}),
   });
+
+  const addToCaseButton = useCallback(
+    (payload) => (
+      <AddToCaseWrapper
+        queryId={payload.queryId}
+        actionId={actionId}
+        agentIds={data?.agents}
+        isIcon={payload.isIcon}
+        isDisabled={payload.isDisabled}
+        iconProps={payload.iconProps}
+      />
+    ),
+    [data?.agents, actionId]
+  );
 
   return (
     <div>
@@ -51,6 +63,7 @@ export const OsqueryResult = ({
           expirationDate={data?.expiration}
           agentIds={agentIds}
           addToTimeline={addToTimeline}
+          addToCase={addToCaseButton}
         />
       </EuiComment>
       <EuiSpacer size="s" />

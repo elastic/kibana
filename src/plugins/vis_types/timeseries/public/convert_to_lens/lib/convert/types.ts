@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   Layer as BaseLayer,
   Column as BaseColumn,
-  ColumnWithMeta as GenericColumnWithMeta,
+  GenericColumnWithMeta,
   PercentileColumn as BasePercentileColumn,
   PercentileRanksColumn as BasePercentileRanksColumn,
   FiltersColumn,
@@ -85,7 +85,13 @@ export type MovingAverageColumn = GenericColumnWithMeta<BaseMovingAverageColumn,
 export type FormulaColumn = GenericColumnWithMeta<BaseFormulaColumn, Meta>;
 export type StaticValueColumn = GenericColumnWithMeta<BaseStaticValueColumn, Meta>;
 
-type ColumnsWithoutMeta = FiltersColumn | TermsColumn | DateHistogramColumn;
+export type ColumnsWithoutMeta =
+  | FiltersColumn
+  | TermsColumn
+  | DateHistogramColumn
+  | BaseStaticValueColumn
+  | BaseFormulaColumn;
+
 export type AnyColumnWithReferences = GenericColumnWithMeta<BaseAnyColumnWithReferences, Meta>;
 
 type CommonColumns = Exclude<BaseColumn, ColumnsWithoutMeta>;

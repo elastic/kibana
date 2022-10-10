@@ -7,57 +7,59 @@
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
-const remove = ({ columnIds, index }: { columnIds: string[]; index: number }) => {
-  return [...columnIds.slice(0, index), ...columnIds.slice(index + 1)];
+const remove = ({ columns, index }: { columns: EuiDataGridColumn[]; index: number }) => {
+  return [...columns.slice(0, index), ...columns.slice(index + 1)];
 };
 
 const insert = ({
-  columnId,
-  columnIds,
+  column,
+  columns,
   defaultColumns,
 }: {
-  columnId: string;
-  columnIds: string[];
+  column: EuiDataGridColumn;
+  columns: EuiDataGridColumn[];
   defaultColumns: EuiDataGridColumn[];
 }) => {
   const defaultIndex = defaultColumns.findIndex(
-    (column: EuiDataGridColumn) => column.id === columnId
+    (defaultColumn: EuiDataGridColumn) => defaultColumn.id === column.id
   );
   const isInDefaultConfig = defaultIndex >= 0;
 
   // if the column isn't shown but it's part of the default config
   // insert into the same position as in the default config
   if (isInDefaultConfig) {
-    return [...columnIds.slice(0, defaultIndex), columnId, ...columnIds.slice(defaultIndex)];
+    return [...columns.slice(0, defaultIndex), column, ...columns.slice(defaultIndex)];
   }
 
   // if the column isn't shown and it's not part of the default config
   // push it into the second position. Behaviour copied by t_grid, security
   // does this to insert right after the timestamp column
-  return [columnIds[0], columnId, ...columnIds.slice(1)];
+  return [columns[0], column, ...columns.slice(1)];
 };
 
 /**
- * @param param.columnId id of the column to be removed/inserted
- * @param param.columnIds Current array of columnIds in the grid
- * @param param.defaultColumns Those initial columns set up in the configuration before being modified by the user
- * @returns the new list of columns to be shown
+ * @param param.column column to be removed/inserted
+ * @param param.columns current array of columns in the grid
+ * @param param.defaultColumns Initial columns set up in the configuration before being modified by the user
+ * @returns the new list of columns
  */
 export const toggleColumn = ({
-  columnId,
-  columnIds,
+  column,
+  columns,
   defaultColumns,
 }: {
-  columnId: string;
-  columnIds: string[];
+  column: EuiDataGridColumn;
+  columns: EuiDataGridColumn[];
   defaultColumns: EuiDataGridColumn[];
-}): string[] => {
-  const currentIndex = columnIds.indexOf(columnId);
+}): EuiDataGridColumn[] => {
+  const currentIndex = columns.findIndex(
+    (currentColumn: EuiDataGridColumn) => currentColumn.id === column.id
+  );
   const isVisible = currentIndex >= 0;
 
   if (isVisible) {
-    return remove({ columnIds, index: currentIndex });
+    return remove({ columns, index: currentIndex });
   }
 
-  return insert({ defaultColumns, columnId, columnIds });
+  return insert({ defaultColumns, column, columns });
 };

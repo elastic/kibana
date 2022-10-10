@@ -1529,6 +1529,24 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.DatasourcePublicAPI.isTextBasedLanguage",
+            "type": "Function",
+            "tags": [],
+            "label": "isTextBasedLanguage",
+            "description": [
+              "\nReturns true if this is a text based language datasource"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.DatasourcePublicAPI.getFilters",
             "type": "Function",
             "tags": [],
@@ -4238,6 +4256,53 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.getUsedDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "getUsedDataView",
+            "description": [],
+            "signature": [
+              "((state: T, layerId: string) => string | undefined) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getUsedDataView.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getUsedDataView.$2",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.getUsedDataViews",
             "type": "Function",
             "tags": [],
@@ -4514,7 +4579,15 @@
               },
               " | ",
               "VisualizeEditorContext",
-              " | undefined) => T) | undefined"
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.Configuration",
+                "text": "Configuration"
+              },
+              "> | undefined) => T) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -4568,7 +4641,15 @@
                   },
                   " | ",
                   "VisualizeEditorContext",
-                  " | undefined"
+                  "<",
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.Configuration",
+                    "text": "Configuration"
+                  },
+                  "> | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -4962,11 +5043,82 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.getSupportedActionsForLayer",
+            "type": "Function",
+            "tags": [],
+            "label": "getSupportedActionsForLayer",
+            "description": [
+              "\nreturns a list of custom actions supported by the visualization layer.\nDefault actions like delete/clear are not included in this list and are managed by the editor frame"
+            ],
+            "signature": [
+              "((layerId: string, state: T, setState: ",
+              "StateSetter",
+              "<T, unknown>) => ",
+              "LayerAction",
+              "[]) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getSupportedActionsForLayer.$1",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getSupportedActionsForLayer.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getSupportedActionsForLayer.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "setState",
+                "description": [],
+                "signature": [
+                  "StateSetter",
+                  "<T, unknown>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.getLayerType",
             "type": "Function",
             "tags": [],
             "label": "getLayerType",
-            "description": [],
+            "description": [
+              "returns the type string of the given layer"
+            ],
             "signature": [
               "(layerId: string, state?: T | undefined) => ",
               {
@@ -5456,6 +5608,43 @@
                     "trackAdoption": false
                   }
                 ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getDropProps",
+            "type": "Function",
+            "tags": [],
+            "label": "getDropProps",
+            "description": [],
+            "signature": [
+              "((dropProps: ",
+              "GetDropPropsArgs",
+              "<unknown>) => { dropTypes: ",
+              "DropType",
+              "[]; nextLabel?: string | undefined; } | undefined) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getDropProps.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dropProps",
+                "description": [],
+                "signature": [
+                  "GetDropPropsArgs",
+                  "<unknown>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -6397,7 +6586,7 @@
             "signature": [
               "((props: VisualizationStateFromContextChangeProps) => ",
               "Suggestion",
-              ") | undefined"
+              " | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -10616,39 +10805,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.isPartitionShape",
-        "type": "Function",
-        "tags": [],
-        "label": "isPartitionShape",
-        "description": [],
-        "signature": [
-          "(shape: string) => boolean"
-        ],
-        "path": "x-pack/plugins/lens/common/visualizations/partition/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.isPartitionShape.$1",
-            "type": "string",
-            "tags": [],
-            "label": "shape",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/lens/common/visualizations/partition/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -11349,6 +11505,21 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-common.ENABLE_SQL",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_SQL",
+        "description": [],
+        "signature": [
+          "\"discover:enableSql\""
+        ],
+        "path": "x-pack/plugins/lens/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-common.FormatFactory",
         "type": "Type",
         "tags": [],
@@ -11491,6 +11662,21 @@
           "\"value\" | \"percent\" | \"hidden\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-common.OriginalColumn",
+        "type": "Type",
+        "tags": [],
+        "label": "OriginalColumn",
+        "description": [],
+        "signature": [
+          "{ id: string; label: string; } & ({ operationType: \"date_histogram\"; sourceField: string; } | { operationType: string; sourceField: never; })"
+        ],
+        "path": "x-pack/plugins/lens/common/expressions/map_to_columns/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

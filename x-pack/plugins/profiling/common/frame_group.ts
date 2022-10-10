@@ -9,86 +9,26 @@ import { StackFrameMetadata } from './profiling';
 
 export type FrameGroupID = string;
 
-enum FrameGroupName {
-  EMPTY = 'empty',
-  ELF = 'elf',
-  FULL = 'full',
-}
-
-interface BaseFrameGroup {
-  readonly name: FrameGroupName;
-}
-
-interface EmptyFrameGroup extends BaseFrameGroup {
-  readonly name: FrameGroupName.EMPTY;
-  readonly fileID: StackFrameMetadata['FileID'];
-  readonly addressOrLine: StackFrameMetadata['AddressOrLine'];
-}
-
-interface ElfFrameGroup extends BaseFrameGroup {
-  readonly name: FrameGroupName.ELF;
-  readonly fileID: StackFrameMetadata['FileID'];
-  readonly exeFilename: StackFrameMetadata['ExeFileName'];
-  readonly functionName: StackFrameMetadata['FunctionName'];
-}
-
-interface FullFrameGroup extends BaseFrameGroup {
-  readonly name: FrameGroupName.FULL;
-  readonly exeFilename: StackFrameMetadata['ExeFileName'];
-  readonly functionName: StackFrameMetadata['FunctionName'];
-  readonly sourceFilename: StackFrameMetadata['SourceFilename'];
-}
-
-export type FrameGroup = EmptyFrameGroup | ElfFrameGroup | FullFrameGroup;
-
-// createFrameGroup is the "standard" way of grouping frames, by commonly
+// createFrameGroupID is the "standard" way of grouping frames, by commonly
 // shared group identifiers.
 //
 // For ELF-symbolized frames, group by FunctionName, ExeFileName and FileID.
 // For non-symbolized frames, group by FileID and AddressOrLine.
 // otherwise group by ExeFileName, SourceFilename and FunctionName.
-export function createFrameGroup(
+export function createFrameGroupID(
   fileID: StackFrameMetadata['FileID'],
   addressOrLine: StackFrameMetadata['AddressOrLine'],
   exeFilename: StackFrameMetadata['ExeFileName'],
   sourceFilename: StackFrameMetadata['SourceFilename'],
   functionName: StackFrameMetadata['FunctionName']
-): FrameGroup {
+): FrameGroupID {
   if (functionName === '') {
-    return {
-      name: FrameGroupName.EMPTY,
-      fileID,
-      addressOrLine,
-    } as EmptyFrameGroup;
+    return `empty;${fileID};${addressOrLine}`;
   }
 
   if (sourceFilename === '') {
-    return {
-      name: FrameGroupName.ELF,
-      fileID,
-      exeFilename,
-      functionName,
-    } as ElfFrameGroup;
+    return `elf;${exeFilename};${functionName}`;
   }
 
-  return {
-    name: FrameGroupName.FULL,
-    exeFilename,
-    functionName,
-    sourceFilename,
-  } as FullFrameGroup;
-}
-
-export function createFrameGroupID(frameGroup: FrameGroup): FrameGroupID {
-  switch (frameGroup.name) {
-    case FrameGroupName.EMPTY:
-      return `${frameGroup.name};${frameGroup.fileID};${frameGroup.addressOrLine}`;
-      break;
-    case FrameGroupName.ELF:
-      return `${frameGroup.name};${frameGroup.exeFilename};${frameGroup.functionName}`;
-      break;
-    case FrameGroupName.FULL:
-      return `${frameGroup.name};${frameGroup.exeFilename};${frameGroup.functionName};${frameGroup.sourceFilename}`;
-      break;
-  }
+  return `full;${exeFilename};${functionName};${sourceFilename}`;
 }

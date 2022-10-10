@@ -11,7 +11,6 @@ get:
     information returned by this API is unchanged.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
     - $ref: '../components/parameters/owner.yaml'

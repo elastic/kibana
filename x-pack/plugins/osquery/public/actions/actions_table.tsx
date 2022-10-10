@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -34,7 +35,18 @@ interface ActionTableResultsButtonProps {
 const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
   const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
-  return <EuiButtonIcon iconType="visTable" {...navProps} />;
+  const detailsText = i18n.translate(
+    'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
+    {
+      defaultMessage: 'Details',
+    }
+  );
+
+  return (
+    <EuiToolTip position="top" content={detailsText}>
+      <EuiButtonIcon iconType="visTable" {...navProps} aria-label={detailsText} />
+    </EuiToolTip>
+  );
 };
 
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
@@ -100,7 +112,7 @@ const ActionsTableComponent = () => {
   );
 
   const handlePlayClick = useCallback(
-    (item) => {
+    (item) => () => {
       const packId = item._source.pack_id;
 
       if (packId) {
@@ -138,6 +150,25 @@ const ActionsTableComponent = () => {
       });
     },
     [push]
+  );
+  const renderPlayButton = useCallback(
+    (item, enabled) => {
+      const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
+        defaultMessage: 'Run query',
+      });
+
+      return (
+        <EuiToolTip position="top" content={playText}>
+          <EuiButtonIcon
+            iconType="play"
+            onClick={handlePlayClick(item)}
+            isDisabled={!enabled}
+            aria-label={playText}
+          />
+        </EuiToolTip>
+      );
+    },
+    [handlePlayClick]
   );
 
   const existingPackIds = useMemo(() => map(packsData?.data ?? [], 'id'), [packsData]);
@@ -197,10 +228,8 @@ const ActionsTableComponent = () => {
         }),
         actions: [
           {
-            type: 'icon',
-            icon: 'play',
-            onClick: handlePlayClick,
             available: isPlayButtonAvailable,
+            render: renderPlayButton,
           },
           {
             render: renderActionsColumn,
@@ -209,11 +238,11 @@ const ActionsTableComponent = () => {
       },
     ],
     [
-      handlePlayClick,
       isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,
+      renderPlayButton,
       renderQueryColumn,
       renderTimestampColumn,
     ]

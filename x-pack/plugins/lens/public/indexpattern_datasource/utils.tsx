@@ -44,7 +44,7 @@ import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
-import { getOriginalId } from '../../common/expressions';
+import { getOriginalId } from '../../common/expressions/datatable/transpose_helpers';
 import { isQueryValid } from '../shared_components';
 
 export function isColumnInvalid(
@@ -194,7 +194,7 @@ export function getTSDBRollupWarningMessages(
       ).map((label) =>
         i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
           defaultMessage:
-            '"{label}" does not work for all indices in the selected data view because it\'s using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range.',
+            '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
           values: {
             label,
           },

@@ -166,6 +166,7 @@ export function resolveDataView(
             ownDataViewId: ownDataView.id,
           },
         }),
+        'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
       });
       return ownDataView;
     }
@@ -180,6 +181,7 @@ export function resolveDataView(
           loadedDataViewId: loadedDataView.id,
         },
       }),
+      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
     });
   }
 

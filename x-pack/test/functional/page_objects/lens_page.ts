@@ -290,17 +290,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`lnsFieldListPanelField-${field}`);
     },
 
-    async editField() {
+    async editField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsFieldListPanelEdit');
-        await testSubjects.missingOrFail('lnsFieldListPanelEdit');
+        await testSubjects.click(`fieldPopoverHeader_editField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_editField-${field}`);
       });
     },
 
-    async removeField() {
+    async removeField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsFieldListPanelRemove');
-        await testSubjects.missingOrFail('lnsFieldListPanelRemove');
+        await testSubjects.click(`fieldPopoverHeader_deleteField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_deleteField-${field}`);
       });
     },
 
@@ -880,8 +880,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the index pattern in the data panel
      */
-    async switchDataPanelIndexPattern(dataViewTitle: string) {
-      await PageObjects.unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
+    async switchDataPanelIndexPattern(
+      dataViewTitle: string,
+      transitionFromTextBasedLanguages?: boolean
+    ) {
+      await PageObjects.unifiedSearch.switchDataView(
+        'lns-dataView-switch-link',
+        dataViewTitle,
+        transitionFromTextBasedLanguages
+      );
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -1295,6 +1302,35 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async createAdHocDataView(name: string) {
       await testSubjects.click('lns-dataView-switch-link');
       await PageObjects.unifiedSearch.createNewDataView(name, true);
+    },
+
+    async switchToTextBasedLanguage(language: string) {
+      await testSubjects.click('lns-dataView-switch-link');
+      await PageObjects.unifiedSearch.selectTextBasedLanguage(language);
+    },
+
+    async configureTextBasedLanguagesDimension(opts: {
+      dimension: string;
+      field: string;
+      keepOpen?: boolean;
+      palette?: string;
+    }) {
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(opts.dimension);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+
+      await this.selectOptionFromComboBox('text-based-dimension-field', opts.field);
+
+      if (opts.palette) {
+        await this.setPalette(opts.palette);
+      }
+
+      if (!opts.keepOpen) {
+        await this.closeDimensionEditor();
+      }
     },
 
     /** resets visualization/layer or removes a layer */

@@ -139,6 +139,8 @@ export type {
   ParsedInterval,
   // expressions
   ExecutionContextSearch,
+  ExpressionFunctionKql,
+  ExpressionFunctionLucene,
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
   ExpressionValueSearchContext,

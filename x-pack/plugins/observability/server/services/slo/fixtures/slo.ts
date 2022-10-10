@@ -6,10 +6,15 @@
  */
 
 import uuid from 'uuid';
-import { SLI, SLO } from '../../../types/models';
+import {
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
+  Indicator,
+  SLO,
+} from '../../../types/models';
 import { CreateSLOParams } from '../../../types/rest_specs';
 
-const commonSLO: Omit<CreateSLOParams, 'indicator'> = {
+const defaultSLO: Omit<SLO, 'indicator' | 'id' | 'created_at' | 'updated_at'> = {
   name: 'irrelevant',
   description: 'irrelevant',
   time_window: {
@@ -20,20 +25,29 @@ const commonSLO: Omit<CreateSLOParams, 'indicator'> = {
   objective: {
     target: 0.999,
   },
+  revision: 1,
 };
 
-export const createSLOParams = (indicator: SLI): CreateSLOParams => ({
-  ...commonSLO,
+export const createSLOParams = (indicator: Indicator): CreateSLOParams => ({
+  ...defaultSLO,
   indicator,
 });
 
-export const createSLO = (indicator: SLI): SLO => ({
-  ...commonSLO,
-  id: uuid.v1(),
-  indicator,
-});
+export const createSLO = (indicator: Indicator): SLO => {
+  const now = new Date();
+  return {
+    ...defaultSLO,
+    id: uuid.v1(),
+    indicator,
+    revision: 1,
+    created_at: now,
+    updated_at: now,
+  };
+};
 
-export const createAPMTransactionErrorRateIndicator = (params = {}): SLI => ({
+export const createAPMTransactionErrorRateIndicator = (
+  params: Partial<APMTransactionErrorRateIndicator['params']> = {}
+): Indicator => ({
   type: 'slo.apm.transaction_error_rate',
   params: {
     environment: 'irrelevant',
@@ -45,7 +59,9 @@ export const createAPMTransactionErrorRateIndicator = (params = {}): SLI => ({
   },
 });
 
-export const createAPMTransactionDurationIndicator = (params = {}): SLI => ({
+export const createAPMTransactionDurationIndicator = (
+  params: Partial<APMTransactionDurationIndicator['params']> = {}
+): Indicator => ({
   type: 'slo.apm.transaction_duration',
   params: {
     environment: 'irrelevant',

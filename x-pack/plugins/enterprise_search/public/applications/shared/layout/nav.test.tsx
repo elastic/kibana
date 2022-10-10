@@ -86,7 +86,10 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Search',
       },
     ]);
-    expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(enableBehavioralAnalyticsSection);
+    expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(
+      enableBehavioralAnalyticsSection,
+      false
+    );
   });
 
   it('excludes legacy products when the user has no access to them', () => {

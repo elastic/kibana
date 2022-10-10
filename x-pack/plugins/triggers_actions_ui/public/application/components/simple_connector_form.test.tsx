@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, render, RenderResult } from '@testing-library/react';
-import { FormTestProvider } from './builtin_action_types/test_utils';
+import { FormTestProvider } from './test_utils';
 import {
   ConfigFieldSchema,
   SecretsFieldSchema,

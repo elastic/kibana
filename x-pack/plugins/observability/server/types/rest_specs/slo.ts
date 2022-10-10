@@ -6,19 +6,18 @@
  */
 
 import * as t from 'io-ts';
-import { commonSLOSchema } from '../schema';
-
-const createSLOBodySchema = t.intersection([
-  commonSLOSchema,
-  t.partial({
-    settings: t.partial({
-      destination_index: t.string,
-    }),
-  }),
-]);
+import { dateType, indicatorSchema } from '../schema';
+import { budgetingMethodSchema, objectiveSchema, rollingTimeWindowSchema } from '../schema/slo';
 
 const createSLOParamsSchema = t.type({
-  body: createSLOBodySchema,
+  body: t.type({
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    time_window: rollingTimeWindowSchema,
+    budgeting_method: budgetingMethodSchema,
+    objective: objectiveSchema,
+  }),
 });
 
 const createSLOResponseSchema = t.type({
@@ -31,8 +30,62 @@ const deleteSLOParamsSchema = t.type({
   }),
 });
 
-type CreateSLOParams = t.TypeOf<typeof createSLOBodySchema>;
-type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+const getSLOParamsSchema = t.type({
+  path: t.type({
+    id: t.string,
+  }),
+});
 
-export { createSLOParamsSchema, deleteSLOParamsSchema };
-export type { CreateSLOParams, CreateSLOResponse };
+const getSLOResponseSchema = t.type({
+  id: t.string,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: rollingTimeWindowSchema,
+  budgeting_method: budgetingMethodSchema,
+  objective: objectiveSchema,
+  revision: t.number,
+  created_at: dateType,
+  updated_at: dateType,
+});
+
+const updateSLOParamsSchema = t.type({
+  path: t.type({
+    id: t.string,
+  }),
+  body: t.partial({
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    time_window: rollingTimeWindowSchema,
+    budgeting_method: budgetingMethodSchema,
+    objective: objectiveSchema,
+  }),
+});
+
+const updateSLOResponseSchema = t.type({
+  id: t.string,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: rollingTimeWindowSchema,
+  budgeting_method: budgetingMethodSchema,
+  objective: objectiveSchema,
+  created_at: dateType,
+  updated_at: dateType,
+});
+
+type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
+type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+type GetSLOResponse = t.TypeOf<typeof getSLOResponseSchema>;
+type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
+type UpdateSLOResponse = t.TypeOf<typeof updateSLOResponseSchema>;
+
+export { createSLOParamsSchema, deleteSLOParamsSchema, getSLOParamsSchema, updateSLOParamsSchema };
+export type {
+  CreateSLOParams,
+  CreateSLOResponse,
+  GetSLOResponse,
+  UpdateSLOParams,
+  UpdateSLOResponse,
+};
