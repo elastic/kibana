@@ -283,8 +283,10 @@ export class LayerGroup implements ILayer {
   }
 
   getErrors(): string {
-    // TODO return childLayers.reduce.getErrors()
-    return '';
+    const firstChildWithError = this._children.find((child) => {
+      return child.hasErrors();
+    });
+    return firstChildWithError ? firstChildWithError.getErrors() : '';
   }
 
   async syncData(syncContext: DataRequestContext) {
