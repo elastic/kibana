@@ -72,6 +72,20 @@ describe('GuidedOnboarding ApiService', () => {
     });
   });
 
+  describe('deactivateGuide', () => {
+    it('deactivates an existing guide', async () => {
+      await apiService.deactivateGuide(searchAddDataActiveState);
+
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({
+          ...searchAddDataActiveState,
+          isActive: false,
+        }),
+      });
+    });
+  });
+
   describe('updateGuideState', () => {
     it('sends a request to the put API', async () => {
       const updatedState: GuideState = {

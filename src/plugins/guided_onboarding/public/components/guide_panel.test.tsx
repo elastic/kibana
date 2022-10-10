@@ -228,5 +228,54 @@ describe('Guided setup', () => {
         expect(find('activeStepButtonLabel').text()).toEqual('Continue');
       });
     });
+
+    describe('Quit guide modal', () => {
+      beforeEach(async () => {
+        const { component, find, exists } = testBed;
+
+        await act(async () => {
+          // Enable the "search" guide
+          await apiService.updateGuideState(mockActiveSearchGuideState, true);
+        });
+
+        component.update();
+
+        await act(async () => {
+          find('quitGuideButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(exists('quitGuideModal')).toBe(true);
+      });
+
+      test('quit a guide', async () => {
+        const { component, find, exists } = testBed;
+
+        await act(async () => {
+          find('confirmModalConfirmButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(exists('quitGuideModal')).toBe(false);
+        // For now, the guide button is disabled once a user quits a guide
+        // This behavior will change once https://github.com/elastic/kibana/issues/141129 is implemented
+        expect(exists('disabledGuideButton')).toBe(true);
+      });
+
+      test('cancels out of the quit guide confirmation modal', async () => {
+        const { component, find, exists } = testBed;
+
+        await act(async () => {
+          find('confirmModalCancelButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(exists('quitGuideModal')).toBe(false);
+        expect(exists('guideButton')).toBe(true);
+      });
+    });
   });
 });
