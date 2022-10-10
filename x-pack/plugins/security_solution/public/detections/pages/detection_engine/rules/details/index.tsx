@@ -614,6 +614,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
     return (
       <LinkButton
+        data-test-subj="editRuleSettingsLink"
         onClick={goToEditRule}
         iconType="controlsHorizontal"
         isDisabled={!isExistingRule || !userHasPermissions(canUserCRUD)}
