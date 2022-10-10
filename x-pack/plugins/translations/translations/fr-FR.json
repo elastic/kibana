@@ -7198,7 +7198,6 @@
     "xpack.apm.serviceIcons.serviceDetails.service.frameworkLabel": "Nom du framework",
     "xpack.apm.serviceIcons.serviceDetails.service.runtimeLabel": "Nom et version de l'exécution",
     "xpack.apm.serviceIcons.serviceDetails.service.versionLabel": "Version du service",
-    "xpack.apm.serviceLogs.noInfrastructureMessage": "Il n'y a aucun message de log à afficher.",
     "xpack.apm.serviceMap.anomalyDetectionPopoverDisabled": "Affichez les indicateurs d'intégrité du service en activant la détection des anomalies dans les paramètres APM.",
     "xpack.apm.serviceMap.anomalyDetectionPopoverLink": "Afficher les anomalies",
     "xpack.apm.serviceMap.anomalyDetectionPopoverNoData": "Nous n'avons pas trouvé de score d'anomalie dans la plage temporelle sélectionnée. Consultez les détails dans l'explorateur d'anomalies.",
