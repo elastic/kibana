@@ -6,10 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { hapiStartMock, hapiStopMock, hapiRouteMock } from './server.test.mocks';
+import {
+  createServerMock,
+  getServerOptionsMock,
+  getListenerOptionsMock,
+  hapiStartMock,
+  hapiStopMock,
+  hapiRouteMock,
+} from './server.test.mocks';
 import { configServiceMock, IConfigServiceMock } from '@kbn/config-mocks';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { Server } from './server';
+
+const mockConfig = {
+  port: 3000,
+  host: 'localhost',
+  maxPayload: { getValueInBytes: () => '1048576b' },
+  keepaliveTimeout: 120000,
+  shutdownTimeout: '30s',
+  socketTimeout: 120000,
+};
 
 describe('Server', () => {
   let config: IConfigServiceMock;
@@ -17,7 +33,7 @@ describe('Server', () => {
 
   beforeEach(() => {
     config = configServiceMock.create();
-    config.atPathSync.mockReturnValue({ port: 3000, host: 'localhost' });
+    config.atPathSync.mockReturnValue(mockConfig);
     logger = loggerMock.create();
   });
 
@@ -30,6 +46,19 @@ describe('Server', () => {
       const server = new Server({ config, logger });
       await server.start();
       expect(logger.info).toHaveBeenCalledWith('Server running on http://localhost:3000');
+    });
+
+    test('provides the correct server options', async () => {
+      const server = new Server({ config, logger });
+      await server.start();
+      expect(createServerMock).toHaveBeenCalledTimes(1);
+      expect(getServerOptionsMock).toHaveBeenCalledTimes(1);
+      expect(getServerOptionsMock.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ ...mockConfig })
+      );
+      expect(getListenerOptionsMock.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ ...mockConfig })
+      );
     });
 
     test('starts the Hapi server', async () => {

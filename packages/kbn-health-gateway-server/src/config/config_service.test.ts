@@ -31,9 +31,14 @@ describe('getConfigService', () => {
   });
 
   test('instantiates RawConfigService with the default config path', () => {
+    const oldArgv = process.argv;
+    process.argv = [];
+
     getConfigService({ logger });
     expect(rawConfigServiceMock).toHaveBeenCalledTimes(1);
     expect(rawConfigServiceMock).toHaveBeenCalledWith([DEFAULT_CONFIG_PATH]);
+
+    process.argv = oldArgv;
   });
 
   test('instantiates RawConfigService with a custom config path provided via -c flag', () => {
@@ -61,9 +66,14 @@ describe('getConfigService', () => {
   });
 
   test('creates default env', async () => {
+    const oldArgv = process.argv;
+    process.argv = [];
+
     getConfigService({ logger });
     expect(envCreateDefaultMock).toHaveBeenCalledTimes(1);
     expect(envCreateDefaultMock.mock.calls[0][1].configs).toEqual([DEFAULT_CONFIG_PATH]);
+
+    process.argv = oldArgv;
   });
 
   test('attempts to load the config', () => {

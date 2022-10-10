@@ -42,6 +42,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-config-mocks",
   "//packages/kbn-config-schema",
   "//packages/kbn-logging-mocks",
+  "//packages/kbn-server-http-tools",
   "//packages/kbn-utils",
   "//packages/core/logging/core-logging-server-internal",
 ]
@@ -58,6 +59,7 @@ TYPES_DEPS = [
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-logging-mocks:npm_module_types",
+  "//packages/kbn-server-http-tools:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-utility-types-jest:npm_module_types",

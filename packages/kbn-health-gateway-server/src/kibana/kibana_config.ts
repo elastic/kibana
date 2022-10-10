@@ -14,7 +14,7 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 export type KibanaConfigType = TypeOf<typeof config.schema>;
 
 export const config: ServiceConfigDescriptor = {
-  path: 'kibana',
+  path: 'kibana' as const,
   schema: schema.object({
     hosts: schema.arrayOf(hostURISchema, {
       minSize: 1,

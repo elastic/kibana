@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { server } from '@hapi/hapi';
 import type { Server as HapiServer, ServerRoute as HapiServerRoute } from '@hapi/hapi';
+import { createServer, getServerOptions, getListenerOptions } from '@kbn/server-http-tools';
 import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
+import { ServerConfig } from './server_config';
 import type { ServerConfigType } from './server_config';
 
 interface ServerDeps {
@@ -38,8 +39,8 @@ export class Server {
   }
 
   async start(): Promise<ServerStart> {
-    const { port, host } = this.config.atPathSync<ServerConfigType>('server');
-    this.server = server({ port, host });
+    const serverConfig = new ServerConfig(this.config.atPathSync<ServerConfigType>('server'));
+    this.server = createServer(getServerOptions(serverConfig), getListenerOptions(serverConfig));
 
     await this.server.start();
     this.log.info(`Server running on ${this.server.info.uri}`);
