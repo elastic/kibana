@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
+  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -237,6 +238,7 @@ export const getManagementFilteredLinks = async (
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
+  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
@@ -245,7 +247,8 @@ export const getManagementFilteredLinks = async (
           licenseService,
           fleetAuthz,
           currentUserResponse.roles,
-          isEndpointRbacEnabled
+          isEndpointRbacEnabled,
+          endpointPermissions
         )
       : getEndpointAuthzInitialState();
     if (!privileges.canAccessEndpointManagement) {

@@ -27,6 +27,8 @@ import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import {
   calculateEndpointAuthz,
+  calculatePermissionsFromPrivileges,
+  defaultEndpointPermissions,
   getEndpointAuthzInitialState,
 } from '../common/endpoint/service/authz';
 import { licenseService } from './lib/license';
@@ -79,10 +81,20 @@ export class RequestContextFactory implements IRequestContextFactory {
         (await context.fleet)?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
     }
 
-    const isEndpointRbacEnabled =
-      endpointAppContextService.experimentalFeatures.endpointRbacEnabled;
-
     const coreContext = await context.core;
+
+    let endpointPermissions = defaultEndpointPermissions();
+    if (endpointAppContextService.security) {
+      const checkPrivileges =
+        endpointAppContextService.security.authz.checkPrivilegesDynamicallyWithRequest(request);
+      const { privileges } = await checkPrivileges({
+        kibana: [
+          endpointAppContextService.security.authz.actions.ui.get('siem', 'crud'),
+          endpointAppContextService.security.authz.actions.ui.get('siem', 'show'),
+        ],
+      });
+      endpointPermissions = calculatePermissionsFromPrivileges(privileges.kibana);
+    }
 
     return {
       core: coreContext,
@@ -94,12 +106,15 @@ export class RequestContextFactory implements IRequestContextFactory {
           if (!startPlugins.fleet) {
             endpointAuthz = getEndpointAuthzInitialState();
           } else {
+            const isEndpointRbacEnabled =
+              endpointAppContextService.experimentalFeatures.endpointRbacEnabled;
             const userRoles = security?.authc.getCurrentUser(request)?.roles ?? [];
             endpointAuthz = calculateEndpointAuthz(
               licenseService,
               fleetAuthz,
               userRoles,
-              isEndpointRbacEnabled
+              isEndpointRbacEnabled,
+              endpointPermissions
             );
           }
         }

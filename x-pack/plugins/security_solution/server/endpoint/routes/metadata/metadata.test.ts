@@ -152,7 +152,7 @@ describe('test endpoint routes', () => {
     endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     mockAgentService = startContract.agentService!;
     mockAgentClient = createMockAgentClient();
-    mockAgentService.asScoped = () => mockAgentClient;
+    mockAgentService.asInternalUser = mockAgentClient;
     mockAgentPolicyService = startContract.agentPolicyService!;
 
     registerEndpointRoutes(routerMock, {
@@ -629,6 +629,25 @@ describe('test endpoint routes', () => {
         expect(endpointResultList.pageSize).toEqual(10);
       });
     });
+
+    it('should get forbidden if no security solution access', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith(HOST_METADATA_LIST_ROUTE)
+      )!;
+
+      const contextOverrides = {
+        endpointAuthz: getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }),
+      };
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient, contextOverrides),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockResponse.forbidden).toBeCalled();
+    });
   });
 
   describe('GET endpoint details route', () => {
@@ -794,10 +813,29 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(mockResponse.badRequest).toBeCalled();
     });
+
+    it('should get forbidden if no security solution access', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith(HOST_METADATA_GET_ROUTE)
+      )!;
+
+      const contextOverrides = {
+        endpointAuthz: getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }),
+      };
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient, contextOverrides),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockResponse.forbidden).toBeCalled();
+    });
   });
 
   describe('GET metadata transform stats route', () => {
-    it('should get forbidden if no fleet access', async () => {
+    it('should get forbidden if no security solution access', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
@@ -805,7 +843,7 @@ describe('test endpoint routes', () => {
       )!;
 
       const contextOverrides = {
-        endpointAuthz: getEndpointAuthzInitialStateMock({ canAccessEndpointManagement: false }),
+        endpointAuthz: getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }),
       };
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient, contextOverrides),

@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { getEndpointAuthzInitialState, calculateEndpointAuthz } from './authz';
+export {
+  getEndpointAuthzInitialState,
+  calculateEndpointAuthz,
+  calculatePermissionsFromPrivileges,
+  calculatePermissionsFromCapabilities,
+  defaultEndpointPermissions,
+} from './authz';

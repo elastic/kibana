@@ -57,7 +57,7 @@ export function registerEndpointRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       logger,
       getMetadataListRequestHandler(endpointAppContext, logger)
     )
@@ -70,7 +70,7 @@ export function registerEndpointRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       logger,
       getMetadataRequestHandler(endpointAppContext, logger)
     )
@@ -83,7 +83,7 @@ export function registerEndpointRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       logger,
       getMetadataTransformStatsHandler(logger)
     )

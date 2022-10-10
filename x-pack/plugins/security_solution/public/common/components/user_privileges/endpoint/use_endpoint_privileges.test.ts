@@ -52,6 +52,15 @@ describe('When using useEndpointPrivileges hook', () => {
 
     (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
     useKibanaMock().services.fleet!.authz = createFleetAuthzMock();
+    useKibanaMock().services.application.capabilities = {
+      catalogue: {},
+      management: {},
+      navLinks: {},
+      siem: {
+        crud: true,
+        show: true,
+      },
+    };
 
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
@@ -63,6 +72,7 @@ describe('When using useEndpointPrivileges hook', () => {
   });
 
   afterEach(() => {
+    jest.resetAllMocks();
     unmount();
   });
 

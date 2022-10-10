@@ -196,7 +196,7 @@ describe('Response actions', () => {
         ctx.core.elasticsearch.client.asInternalUser.index.mockResponseImplementation(
           () => withIdxResp
         );
-        ctx.core.elasticsearch.client.asCurrentUser.search.mockResponseImplementation(() => {
+        ctx.core.elasticsearch.client.asInternalUser.search.mockResponseImplementation(() => {
           return {
             body: legacyMetadataSearchResponseMock(searchResponse),
           };
