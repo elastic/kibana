@@ -50,7 +50,7 @@ type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
 
 export interface ExistingFieldsReader {
   hasFieldData: (dataViewId: string, fieldName: string) => boolean;
-  getFieldsExistenceInfo: (dataViewId: string) => ExistingFieldsInfo | undefined;
+  getFieldsExistenceStatus: (dataViewId: string) => ExistenceFetchStatus;
 }
 
 const initialData: ExistingFieldsByDataViewMap = {};
@@ -212,12 +212,19 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
     [existingFieldsByDataViewMap]
   );
 
+  const getFieldsExistenceStatus = useCallback(
+    (dataViewId: string) => {
+      return getFieldsExistenceInfo(dataViewId)?.fetchStatus || ExistenceFetchStatus.unknown;
+    },
+    [getFieldsExistenceInfo]
+  );
+
   return useMemo(
     () => ({
       hasFieldData,
-      getFieldsExistenceInfo,
+      getFieldsExistenceStatus,
     }),
-    [hasFieldData, getFieldsExistenceInfo]
+    [hasFieldData, getFieldsExistenceStatus]
   );
 };
 

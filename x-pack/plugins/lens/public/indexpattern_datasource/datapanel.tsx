@@ -266,9 +266,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     },
     onNoData: showNoDataPopover,
   });
-  const { getFieldsExistenceInfo, hasFieldData } = useExistingFieldsReader();
+  const { getFieldsExistenceStatus, hasFieldData } = useExistingFieldsReader();
   // TODO: add a loading indicator while info is loading
-  const fieldsExistenceInfo = getFieldsExistenceInfo(currentIndexPatternId);
+  const fieldsExistenceStatus = getFieldsExistenceStatus(currentIndexPatternId);
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
@@ -291,8 +291,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
 
   const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
-    const fieldInfoUnavailable =
-      fieldsExistenceInfo?.fetchStatus !== ExistenceFetchStatus.succeeded;
+    const fieldInfoUnavailable = fieldsExistenceStatus !== ExistenceFetchStatus.succeeded;
 
     const containsData = (field: IndexPatternField) => {
       const overallField = currentIndexPattern?.getFieldByName(field.name);
@@ -404,7 +403,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   }, [
     allFields,
     core.uiSettings,
-    fieldsExistenceInfo,
+    fieldsExistenceStatus,
     hasFieldData,
     filters.length,
     currentIndexPatternId,
@@ -692,13 +691,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         <EuiFlexItem>
           <FieldList
             fieldGroups={fieldGroups}
-            hasSyncedExistingFields={
-              fieldsExistenceInfo?.fetchStatus !== ExistenceFetchStatus.unknown
-            }
+            hasSyncedExistingFields={fieldsExistenceStatus !== ExistenceFetchStatus.unknown}
             filter={filter}
             dataViewId={currentIndexPatternId}
-            existenceFetchFailed={fieldsExistenceInfo?.fetchStatus === ExistenceFetchStatus.failed}
-            existenceFetchTimeout={fieldsExistenceInfo?.fetchStatus === ExistenceFetchStatus.failed} // TODO: deprecate?
+            existenceFetchFailed={fieldsExistenceStatus === ExistenceFetchStatus.failed}
+            existenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate?
             existFieldsInIndex={!!allFields.length}
             renderFieldItem={renderFieldItem}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
