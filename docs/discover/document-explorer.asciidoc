@@ -1,9 +1,8 @@
 [[document-explorer]]
 == Explore your documents
 
-Fine tune your explorations by customizing *Discover* to meet your needs.
-Adjust the chart height, modify the table display, and more to bring out the best
-view of your document data.
+Fine tune your explorations by customizing *Discover* to bring out the the best view of your documents.
+Adjust the chart height, modify the document table, and look inside a document.
 
 [role="screenshot"]
 image:images/discover.png[A view of the Discover app]
@@ -28,9 +27,9 @@ The chart size is saved in your browser.
 
 [float]
 [[document-explorer-customize]]
-=== Table display options
+=== Modify the document table
 
-Customize the appearance of the table and its contents by resizing the columns and rows,
+Customize the appearance of the document table and its contents by resizing the columns and rows,
 sorting and modifying the fields, and filtering the documents.
 
 [float]
