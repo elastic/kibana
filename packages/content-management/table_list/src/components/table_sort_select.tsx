@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiSelectable,
   EuiPopover,
@@ -24,6 +25,30 @@ type SortItem = EuiSelectableOption & {
 
 export type SortColumnField = 'updatedAt' | 'attributes.title';
 
+const i18nText = {
+  nameAscSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.nameAscLabel', {
+    defaultMessage: 'Name A-Z',
+  }),
+  nameDescSort: i18n.translate(
+    'contentManagement.tableList.listing.tableSortSelect.nameDescLabel',
+    {
+      defaultMessage: 'Name Z-A',
+    }
+  ),
+  updatedAtAscSort: i18n.translate(
+    'contentManagement.tableList.listing.tableSortSelect.updatedAtAscLabel',
+    {
+      defaultMessage: 'Least recently updated',
+    }
+  ),
+  updatedAtDescSort: i18n.translate(
+    'contentManagement.tableList.listing.tableSortSelect.updatedAtDescLabel',
+    {
+      defaultMessage: 'Recently updated',
+    }
+  ),
+};
+
 interface Props {
   hasUpdatedAtMetadata: boolean;
   tableSort: State['tableSort'];
@@ -35,13 +60,13 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
   const [options, setOptions] = useState<SortItem[]>(() => {
     let opts: SortItem[] = [
       {
-        label: 'Title A-Z',
+        label: i18nText.nameAscSort,
         column: 'attributes.title',
         direction: 'asc',
         append: <EuiIcon type="sortUp" />,
       },
       {
-        label: 'Title Z-A',
+        label: i18nText.nameDescSort,
         column: 'attributes.title',
         direction: 'desc',
         append: <EuiIcon type="sortDown" />,
@@ -51,16 +76,16 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
     if (hasUpdatedAtMetadata) {
       opts = opts.concat([
         {
-          label: 'Least recently updated',
-          column: 'updatedAt',
-          direction: 'asc',
-          append: <EuiIcon type="sortUp" />,
-        },
-        {
-          label: 'Recently updated',
+          label: i18nText.updatedAtDescSort,
           column: 'updatedAt',
           direction: 'desc',
           append: <EuiIcon type="sortDown" />,
+        },
+        {
+          label: i18nText.updatedAtAscSort,
+          column: 'updatedAt',
+          direction: 'asc',
+          append: <EuiIcon type="sortUp" />,
         },
       ]);
     }
@@ -86,9 +111,9 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
   const onSelectChange = (updatedOptions: SortItem[]) => {
     setOptions(updatedOptions);
 
-    if (onChange) {
-      const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
-      onChange(selectedOption!.column, selectedOption!.direction);
+    const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
+    if (selectedOption && onChange) {
+      onChange(selectedOption.column, selectedOption.direction);
     }
   };
 
