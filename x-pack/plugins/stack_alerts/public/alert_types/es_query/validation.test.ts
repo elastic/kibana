@@ -158,6 +158,20 @@ describe('expression params validation', () => {
     );
   });
 
+  test('if size property is 0 should not return error message', () => {
+    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
+      size: 0,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+    };
+    expect(validateExpression(initialParams).errors.size.length).toBe(0);
+  });
+
   test('if size property is > 10000 should return proper error message', () => {
     const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
       index: ['test'],
