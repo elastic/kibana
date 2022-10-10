@@ -117,7 +117,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
           } catch (e) {
             logger.error(e);
           }
-        }, Math.floor(Math.random() * maxTimeoutMs));
+        }, Math.floor(Math.random() * 10)); // maxTimeoutMs));
       }
 
       // do not call this using `await` so it will run asynchronously while we return the stream already.
