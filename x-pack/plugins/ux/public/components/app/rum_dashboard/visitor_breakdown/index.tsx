@@ -40,6 +40,12 @@ const EuiLoadingEmbeddable = styled(EuiFlexGroup)`
   }
 `;
 
+const vistorBreakdownFilter = {
+  filterNames: uxLocalUIFilterNames.filter((name) =>
+    ['browser', 'browserExcluded', 'os', 'osExcluded'].includes(name)
+  ),
+};
+
 const getInvertedFilterName = (filter: UxLocalUIFilterName, negate: boolean) =>
   negate ? filter : getExcludedName(filter);
 
@@ -48,11 +54,7 @@ export function VisitorBreakdown() {
   const { start, end, searchTerm } = urlParams;
   const { dataView } = useDataView();
 
-  const { filters, setFilterValue } = useLocalUIFilters({
-    filterNames: uxLocalUIFilterNames.filter((name) =>
-      ['browser', 'browserExcluded', 'os', 'osExcluded'].includes(name)
-    ),
-  });
+  const { filters, setFilterValue } = useLocalUIFilters(vistorBreakdownFilter);
 
   const onFilter = useCallback(
     (metric: VisitorBreakdownMetric, event: any) => {
