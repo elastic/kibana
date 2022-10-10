@@ -17,8 +17,6 @@ export type MarkdownProps = Partial<
    * This was previous the MarkdownSimple component
    */
   readOnly: boolean;
-  /** @link src/plugins/vis_type_markdown/public/markdown_vis_controller.tsx */
-  openLinksInNewTab?: boolean;
   markdownContent?: string;
   ariaLabelContent?: string;
   /** Eui allows the height of the markdown component to be set */
@@ -29,7 +27,6 @@ export type MarkdownProps = Partial<
 export const Markdown = ({
   ariaLabelContent,
   readOnly,
-  openLinksInNewTab,
   markdownContent,
   placeholder = '',
   height = 'full',

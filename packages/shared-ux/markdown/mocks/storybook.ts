@@ -13,7 +13,6 @@ type PropArguments = Pick<
   MarkdownProps,
   | 'readOnly'
   | 'placeholder'
-  | 'openLinksInNewTab'
   | 'markdownContent'
   | 'height'
   | 'ariaLabelContent'
@@ -41,10 +40,6 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
         type: 'text',
       },
       defaultValue: '',
-    },
-    openLinksInNewTab: {
-      control: 'boolean',
-      defaultValue: true,
     },
     markdownContent: {
       control: {
@@ -75,7 +70,6 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
     return {
       readOnly: this.getArgumentValue('readOnly', params),
       placeholder: this.getArgumentValue('placeholder', params),
-      openLinksInNewTab: this.getArgumentValue('openLinksInNewTab', params),
       markdownContent: this.getArgumentValue('markdownContent', params),
       height: this.getArgumentValue('height', params),
       ariaLabelContent: this.getArgumentValue('ariaLabelContent', params),
