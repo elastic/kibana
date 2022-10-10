@@ -8,16 +8,16 @@
 
 import { fields } from '../filters/stubs';
 import { DataViewBase } from './types';
-import { handleOrFilter } from './handle_or_filter';
+import { handleCombinedFilter } from './handle_combined_filter';
 import {
   buildExistsFilter,
-  buildOrFilter,
+  buildCombinedFilter,
   buildPhraseFilter,
   buildPhrasesFilter,
   buildRangeFilter,
 } from '../filters';
 
-describe('#handleOrFilter', function () {
+describe('#handleCombinedFilter', function () {
   const indexPattern: DataViewBase = {
     id: 'logstash-*',
     fields,
@@ -31,8 +31,8 @@ describe('#handleOrFilter', function () {
   };
 
   it('Handles an empty list of filters', () => {
-    const filter = buildOrFilter([]);
-    const result = handleOrFilter(filter);
+    const filter = buildCombinedFilter([]);
+    const result = handleCombinedFilter(filter);
     expect(result.query).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
@@ -49,8 +49,8 @@ describe('#handleOrFilter', function () {
       buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
       buildExistsFilter(getField('machine.os'), indexPattern),
     ];
-    const filter = buildOrFilter(filters);
-    const result = handleOrFilter(filter);
+    const filter = buildCombinedFilter(filters);
+    const result = handleCombinedFilter(filter);
     expect(result.query).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
@@ -114,8 +114,8 @@ describe('#handleOrFilter', function () {
         buildExistsFilter(getField('machine.os'), indexPattern),
       ],
     ];
-    const filter = buildOrFilter(filters);
-    const result = handleOrFilter(filter);
+    const filter = buildCombinedFilter(filters);
+    const result = handleCombinedFilter(filter);
     expect(result.query).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
@@ -162,19 +162,19 @@ describe('#handleOrFilter', function () {
     `);
   });
 
-  it('Handles nested OR filters', () => {
-    const nestedOrFilter = buildOrFilter([
+  it('Handles nested COMBINED filters', () => {
+    const nestedCombinedFilter = buildCombinedFilter([
       buildPhraseFilter(getField('machine.os'), 'value', indexPattern),
       buildPhraseFilter(getField('extension'), 'value', indexPattern),
     ]);
     const filters = [
       buildPhraseFilter(getField('extension'), 'value2', indexPattern),
-      nestedOrFilter,
+      nestedCombinedFilter,
       buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
       buildExistsFilter(getField('machine.os.raw'), indexPattern),
     ];
-    const filter = buildOrFilter(filters);
-    const result = handleOrFilter(filter);
+    const filter = buildCombinedFilter(filters);
+    const result = handleCombinedFilter(filter);
     expect(result.query).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
@@ -283,8 +283,8 @@ describe('#handleOrFilter', function () {
       buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
       buildExistsFilter(getField('machine.os'), indexPattern),
     ];
-    const filter = buildOrFilter(filters);
-    const result = handleOrFilter(filter);
+    const filter = buildCombinedFilter(filters);
+    const result = handleCombinedFilter(filter);
     expect(result.query).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
@@ -366,8 +366,8 @@ describe('#handleOrFilter', function () {
       [disabledFilter, buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern)],
       buildExistsFilter(getField('machine.os'), indexPattern),
     ];
-    const filter = buildOrFilter(filters);
-    const result = handleOrFilter(filter);
+    const filter = buildCombinedFilter(filters);
+    const result = handleCombinedFilter(filter);
     expect(result.query).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
@@ -428,7 +428,7 @@ describe('#handleOrFilter', function () {
       [
         buildPhrasesFilter(getField('extension'), ['tar', 'gz'], indexPattern),
         buildPhraseFilter(getField('ssl'), false, indexPattern),
-        buildOrFilter([
+        buildCombinedFilter([
           buildPhraseFilter(getField('extension'), 'value', indexPattern),
           buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
         ]),
@@ -436,8 +436,8 @@ describe('#handleOrFilter', function () {
       ],
       buildPhrasesFilter(getField('machine.os.keyword'), ['foo', 'bar'], indexPattern),
     ];
-    const filter = buildOrFilter(filters);
-    const result = handleOrFilter(filter);
+    const filter = buildCombinedFilter(filters);
+    const result = handleCombinedFilter(filter);
     expect(result.query).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
@@ -554,8 +554,8 @@ describe('#handleOrFilter', function () {
       buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
       buildExistsFilter(getField('machine.os'), indexPattern),
     ];
-    const filter = buildOrFilter(filters);
-    const { query, ...rest } = handleOrFilter(filter);
+    const filter = buildCombinedFilter(filters);
+    const { query, ...rest } = handleCombinedFilter(filter);
     expect(rest).toMatchInlineSnapshot(`
       Object {
         "$state": Object {
@@ -602,7 +602,7 @@ describe('#handleOrFilter', function () {
               },
             },
           ],
-          "type": "OR",
+          "type": "combined",
         },
       }
     `);
