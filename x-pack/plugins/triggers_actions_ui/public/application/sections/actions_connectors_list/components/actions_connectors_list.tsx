@@ -88,6 +88,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     actionTypeRegistry,
     setBreadcrumbs,
     chrome,
+    docLinks,
   } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canExecute = hasExecuteActionsCapability(capabilities);
@@ -454,24 +455,35 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
             defaultMessage: 'Connect third-party software with your alerting data.',
           })}
-          rightSideItems={
-            canSave
-              ? [
-                  <EuiButton
-                    data-test-subj="createActionButton"
-                    key="create-action"
-                    fill
-                    onClick={() => setAddFlyoutVisibility(true)}
-                    iconType="plusInCircle"
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-                      defaultMessage="Create connector"
-                    />
-                  </EuiButton>,
-                ]
-              : []
-          }
+          rightSideItems={(canSave
+            ? [
+                <EuiButton
+                  data-test-subj="createActionButton"
+                  key="create-action"
+                  fill
+                  onClick={() => setAddFlyoutVisibility(true)}
+                  iconType="plusInCircle"
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
+                    defaultMessage="Create connector"
+                  />
+                </EuiButton>,
+              ]
+            : []
+          ).concat([
+            <EuiButtonEmpty
+              data-test-subj="documentationButton"
+              key="documentation-button"
+              href={docLinks.links.alerting.connectors}
+              iconType="help"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.actionsConnectorsList.documentationButtonLabel"
+                defaultMessage="Documentation"
+              />
+            </EuiButtonEmpty>,
+          ])}
         />
       )}
       <EuiPageTemplate.Section
@@ -531,7 +543,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           canSave &&
           !isLoadingActions &&
           !isLoadingActionTypes && (
-            <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
+            <EmptyConnectorsPrompt
+              onCTAClicked={() => setAddFlyoutVisibility(true)}
+              docLinks={docLinks}
+            />
           )}
         {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
         {addFlyoutVisible ? (

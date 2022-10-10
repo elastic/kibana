@@ -7,10 +7,24 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { EuiButton, EuiPageTemplate, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiPageTemplate,
+  EuiIcon,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import './empty_connectors_prompt.scss';
 
-export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
+export const EmptyConnectorsPrompt = ({
+  onCTAClicked,
+  docLinks,
+}: {
+  onCTAClicked: () => void;
+  docLinks: DocLinksStart;
+}) => (
   <EuiPageTemplate.EmptyPrompt
     data-test-subj="createFirstConnectorEmptyPrompt"
     title={
@@ -38,19 +52,34 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
       </p>
     }
     actions={
-      <EuiButton
-        data-test-subj="createFirstActionButton"
-        key="create-action"
-        fill
-        iconType="plusInCircle"
-        iconSide="left"
-        onClick={onCTAClicked}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorButtonLabel"
-          defaultMessage="Create connector"
-        />
-      </EuiButton>
+      <>
+        <EuiButton
+          data-test-subj="createFirstActionButton"
+          key="create-action"
+          fill
+          iconType="plusInCircle"
+          iconSide="left"
+          onClick={onCTAClicked}
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorButtonLabel"
+            defaultMessage="Create connector"
+          />
+        </EuiButton>
+        <br />
+        <EuiButtonEmpty
+          data-test-subj="documentationButton"
+          key="documentation-button"
+          target="_blank"
+          href={docLinks.links.alerting.connectors}
+          iconType="help"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionsConnectorsList.documentationButtonLabel"
+            defaultMessage="Documentation"
+          />
+        </EuiButtonEmpty>
+      </>
     }
   />
 );
