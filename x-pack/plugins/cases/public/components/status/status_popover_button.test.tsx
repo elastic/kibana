@@ -9,13 +9,13 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { CaseStatuses } from '../../../common/api';
-import { Status } from './status';
+import { StatusPopoverButton } from './status_popover_button';
 
-describe('Stats', () => {
+describe('StatusPopoverButton', () => {
   const onClick = jest.fn();
 
-  it('it renders', async () => {
-    const wrapper = mount(<Status type={CaseStatuses.open} withArrow={false} onClick={onClick} />);
+  it('renders', async () => {
+    const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
     expect(wrapper.find(`[data-test-subj="status-badge-open"]`).exists()).toBeTruthy();
     expect(
@@ -24,15 +24,15 @@ describe('Stats', () => {
   });
 
   it('it renders with arrow', async () => {
-    const wrapper = mount(<Status type={CaseStatuses.open} withArrow={true} onClick={onClick} />);
+    const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
     expect(
       wrapper.find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`).exists()
     ).toBeTruthy();
   });
 
-  it('it renders with the pop over enabled by default', async () => {
-    const wrapper = mount(<Status type={CaseStatuses.open} withArrow={true} onClick={onClick} />);
+  it('renders with the pop over enabled by default', async () => {
+    const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
     expect(
       wrapper
@@ -44,7 +44,7 @@ describe('Stats', () => {
 
   it('renders without the arrow and is not clickable when initialized disabled', async () => {
     const wrapper = mount(
-      <Status disabled={true} type={CaseStatuses.open} withArrow={true} onClick={onClick} />
+      <StatusPopoverButton disabled={true} status={CaseStatuses.open} onClick={onClick} />
     );
 
     expect(
@@ -52,8 +52,8 @@ describe('Stats', () => {
     ).toBeFalsy();
   });
 
-  it('it calls onClick when pressing the badge', async () => {
-    const wrapper = mount(<Status type={CaseStatuses.open} withArrow={true} onClick={onClick} />);
+  it('calls onClick when pressing the badge', async () => {
+    const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
     wrapper.find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`).simulate('click');
     expect(onClick).toHaveBeenCalled();
@@ -61,9 +61,7 @@ describe('Stats', () => {
 
   describe('Colors', () => {
     it('shows the correct color when status is open', async () => {
-      const wrapper = mount(
-        <Status type={CaseStatuses.open} withArrow={false} onClick={onClick} />
-      );
+      const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
       expect(wrapper.find(`[data-test-subj="status-badge-open"]`).first().prop('color')).toBe(
         'primary'
@@ -72,7 +70,7 @@ describe('Stats', () => {
 
     it('shows the correct color when status is in-progress', async () => {
       const wrapper = mount(
-        <Status type={CaseStatuses['in-progress']} withArrow={false} onClick={onClick} />
+        <StatusPopoverButton status={CaseStatuses['in-progress']} onClick={onClick} />
       );
 
       expect(
@@ -81,9 +79,7 @@ describe('Stats', () => {
     });
 
     it('shows the correct color when status is closed', async () => {
-      const wrapper = mount(
-        <Status type={CaseStatuses.closed} withArrow={false} onClick={onClick} />
-      );
+      const wrapper = mount(<StatusPopoverButton status={CaseStatuses.closed} onClick={onClick} />);
 
       expect(wrapper.find(`[data-test-subj="status-badge-closed"]`).first().prop('color')).toBe(
         'default'

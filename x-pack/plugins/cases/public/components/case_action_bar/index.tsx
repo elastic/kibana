@@ -107,7 +107,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                   <EuiDescriptionListDescription>
                     <StatusContextMenu
                       currentStatus={caseData.status}
-                      disabled={!permissions.update || isLoading}
+                      disabled={!permissions.update}
                       onStatusChanged={onStatusChanged}
                     />
                   </EuiDescriptionListDescription>

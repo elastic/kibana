@@ -7,8 +7,9 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { CaseStatus } from '@kbn/cases-components';
 import { caseStatuses, CaseStatuses } from '../../../common/api';
-import { Status } from '../status';
+import { StatusPopoverButton } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
 
 interface Props {
@@ -26,7 +27,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const popOverButton = useMemo(
-    () => <Status disabled={disabled} type={currentStatus} withArrow onClick={openPopover} />,
+    () => <StatusPopoverButton disabled={disabled} status={currentStatus} onClick={openPopover} />,
     [disabled, currentStatus, openPopover]
   );
 
@@ -49,7 +50,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
           key={status}
           onClick={() => onContextMenuItemClick(status)}
         >
-          <Status type={status} />
+          <CaseStatus status={status} />
         </EuiContextMenuItem>
       )),
     [currentStatus, onContextMenuItemClick]
@@ -69,6 +70,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
     </EuiPopover>
   );
 };
+
 StatusContextMenuComponent.displayName = 'StatusContextMenu';
 
 export const StatusContextMenu = memo(StatusContextMenuComponent);
